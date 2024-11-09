@@ -1,7 +1,6 @@
 import Featured from '@/components/netflix/featured/featured';
 import List from '@/components/netflix/list/list';
 import Navbar from '@/components/netflix/navbar/navbar';
-import { tData } from '@/lib/data';
 
 const getDetailData = async (id: string) => {
   const res = await fetch(`http://localhost:3000/api/userData?query=${id}`);
