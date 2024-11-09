@@ -1,6 +1,7 @@
 import type { Metadata } from 'next';
 import './globals.css';
 import { AntdRegistry } from '@ant-design/nextjs-registry';
+import Link from 'next/link';
 
 export const metadata: Metadata = {
   title: 'Create Next App',
