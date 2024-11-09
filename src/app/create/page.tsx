@@ -238,6 +238,7 @@ const CreatePage = () => {
               name={'images'}
               label="Collection of Images (up to 12 photos)">
               <Upload
+                multiple={true}
                 listType="picture-card"
                 fileList={fileList}
                 beforeUpload={beforeUpload}
