@@ -1,6 +1,6 @@
 'use client';
 import NavigationBar from '@/components/ui/navbar';
-import { Button, Form, Image, Input, message, Modal, Upload } from 'antd';
+import { Button, Form, Image, Input, message, Modal, Spin, Upload } from 'antd';
 import TextArea from 'antd/es/input/TextArea';
 import { useState } from 'react';
 import type { GetProp, UploadFile, UploadProps } from 'antd';
@@ -170,9 +170,27 @@ const CreatePage = () => {
                 Open now
               </Button>
             </Link>
+            <Button
+              onClick={() => {
+                navigator.clipboard.writeText(
+                  window.location.origin + '/' + modalState.data
+                );
+                message.success('Copied!');
+              }}
+              size="large"
+              type="primary"
+              className="!bg-black !text-[14px]">
+              Copy Link
+            </Button>
           </div>
         </div>
       </Modal>
+
+      <Spin
+        spinning={loading}
+        fullscreen
+        indicator={<LoadingOutlined spin />}
+      />
 
       <div className="flex flex-col items-center justify-center min-h-screen py-[30px]">
         <div className="w-full max-w-[90%] md:max-w-[60%] lg:max-w-[50%]">
