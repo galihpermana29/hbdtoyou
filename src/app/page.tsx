@@ -29,9 +29,14 @@ export default function Home() {
                 Create
               </Button>
             </Link>
-            <Button size="large" className="!border-black">
-              Support
-            </Button>
+            <Link
+              href={'https://saweria.co/galihpermana29'}
+              target="_blank"
+              className="cursor-pointer">
+              <Button size="large" className="!border-black">
+                Support
+              </Button>
+            </Link>
           </div>
         </div>
         <div className="mx-auto flex items-center justify-center px-[20px]">

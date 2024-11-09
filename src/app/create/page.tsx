@@ -234,7 +234,9 @@ const CreatePage = () => {
                 placeholder="This is how me express love. In the meantime you will understand how my brain works. lorem ipsum"
               />
             </Form.Item>
-            <Form.Item name={'images'} label="Collapse Images">
+            <Form.Item
+              name={'images'}
+              label="Collection of Images (up to 12 photos)">
               <Upload
                 listType="picture-card"
                 fileList={fileList}
@@ -270,7 +272,7 @@ const CreatePage = () => {
               <Input
                 size="large"
                 placeholder="galih-permana"
-                addonBefore="hbdtoyou.co/"
+                addonBefore="hbdtoyou.live/"
               />
             </Form.Item>
             <div className="flex justify-end ">
