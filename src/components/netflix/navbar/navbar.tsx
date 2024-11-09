@@ -3,7 +3,7 @@
 import { ArrowDropDown, Notifications, Search } from '@mui/icons-material';
 
 import { useEffect, useState } from 'react';
-import widya from '@/assets/widya/2.jpg';
+import widya from '@/assets/widya/after/2.jpg';
 import Image from 'next/image';
 import { useRouter } from 'next/navigation';
 

@@ -1,9 +1,20 @@
 import Featured from '@/components/netflix/featured/featured';
 import List from '@/components/netflix/list/list';
 import Navbar from '@/components/netflix/navbar/navbar';
+import { headers } from 'next/headers';
 
 const getDetailData = async (id: string) => {
-  const res = await fetch(`http://localhost:3000/api/userData?query=${id}`);
+  const headersList = headers();
+  const protocol = headersList.get('x-forwarded-proto') || 'https';
+  const host =
+    headersList.get('x-forwarded-host') ||
+    headersList.get('host') ||
+    'beta.popstarz.ai';
+
+  const domain = `${protocol}://${host}`;
+  console.log(domain); // Logs the full domain, including protocol.
+
+  const res = await fetch(`${domain}/api/userData?query=${id}`);
   const data = await res.json();
 
   return data;
