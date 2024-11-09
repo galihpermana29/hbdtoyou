@@ -1,12 +1,13 @@
 'use client';
 import NavigationBar from '@/components/ui/navbar';
-import { Button, Form, Image, Input, message, Upload } from 'antd';
+import { Button, Form, Image, Input, message, Modal, Upload } from 'antd';
 import TextArea from 'antd/es/input/TextArea';
 import { useState } from 'react';
 import type { GetProp, UploadFile, UploadProps } from 'antd';
 import { LoadingOutlined, PlusOutlined } from '@ant-design/icons';
 import { v4 as uuidv4 } from 'uuid';
 import { useForm } from 'antd/es/form/Form';
+import Link from 'next/link';
 type FileType = Parameters<GetProp<UploadProps, 'beforeUpload'>>[0];
 
 const getBase64 = async (img: FileType, callback: (url: string) => void) => {
@@ -41,7 +42,10 @@ const CreatePage = () => {
   const [previewOpen, setPreviewOpen] = useState(false);
   const [previewImage, setPreviewImage] = useState('');
   const [fileList, setFileList] = useState<UploadFile[]>([]);
-
+  const [modalState, setModalState] = useState({
+    visible: false,
+    data: '',
+  });
   const [form] = useForm();
   const handleChangeJumbotron: UploadProps['onChange'] = (info) => {
     if (info.file.status === 'uploading') {
@@ -122,13 +126,18 @@ const CreatePage = () => {
             if (res.ok) {
               message.success('Successfully created!');
               form.resetFields();
-              setTimeout(() => {
-                window.open(window.location.origin + '/' + id, '_blank');
-              }, 1000);
+              setModalState({
+                visible: true,
+                data: id,
+              });
+              // setTimeout(() => {
+              //   window.open(window.location.origin + '/' + id, '_blank');
+              // }, 1000);
             }
           })
           .catch((err) => {
             console.error(err);
+            message.error('Something went wrong!');
           })
           .finally(() => {
             setLoading(false);
@@ -140,6 +149,30 @@ const CreatePage = () => {
   return (
     <div>
       <NavigationBar />
+      <Modal
+        title="Successfully created"
+        open={modalState.visible}
+        footer={null}>
+        <div>
+          <h1 className="text-[20px] font-bold">
+            Your own Netflix clone is ready!
+          </h1>
+          <p>
+            You can share your own version of Netflix with your friends or
+            someone you love.
+          </p>
+          <div className="flex items-center gap-[12px] mt-[12px]">
+            <Link href={`/${modalState.data}`} className="cursor-pointer">
+              <Button
+                size="large"
+                type="primary"
+                className="!bg-black !text-[14px]">
+                Open now
+              </Button>
+            </Link>
+          </div>
+        </div>
+      </Modal>
 
       <div className="flex flex-col items-center justify-center min-h-screen py-[30px]">
         <div className="w-full max-w-[90%] md:max-w-[60%] lg:max-w-[50%]">
