@@ -70,8 +70,11 @@ const CreatePage = () => {
     setPreviewOpen(true);
   };
 
-  const handleChange: UploadProps['onChange'] = ({ fileList: newFileList }) =>
-    setFileList(newFileList);
+  const handleChange: UploadProps['onChange'] = ({ fileList: newFileList }) => {
+    if (beforeUpload(newFileList[0].originFileObj as FileType)) {
+      setFileList(newFileList);
+    }
+  };
 
   const validateSlug = (x: any, value: any) => {
     // Allows letters, numbers, and hyphens (no spaces or other special characters)
@@ -212,6 +215,7 @@ const CreatePage = () => {
               name={'jumbotronImage'}
               label="Jumbotron Image">
               <Upload
+                accept=".jpg, .jpeg, .png"
                 name="avatar"
                 listType="picture-card"
                 className="avatar-uploader"
@@ -256,6 +260,7 @@ const CreatePage = () => {
               name={'images'}
               label="Collection of Images (up to 12 photos)">
               <Upload
+                accept=".jpg, .jpeg, .png"
                 multiple={true}
                 maxCount={12}
                 listType="picture-card"
