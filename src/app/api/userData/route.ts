@@ -12,13 +12,12 @@ export async function GET(req: any, res: any) {
   const objectData = JSON.parse(jsonData as any);
 
   if (query) {
+    console.log(objectData.data.length, 'objectData.data length');
     const filteredData = objectData.data.find(
       (data: any) => data.forName === query
     );
-    console.log(filteredData, 'filteredData');
     return Response.json({ data: filteredData });
   }
-  console.log('kesini?');
   return Response.json({ data: objectData.data });
 }
 
@@ -39,7 +38,7 @@ export async function POST(req: any, res: any) {
   });
 
   const updatedData = JSON.stringify(objectData);
-  console.log(resBody);
+  console.log(objectData.data.length, 'length of data');
   // Write the updated data to the JSON file
   await fsPromises.writeFile(dataFilePath, updatedData);
 

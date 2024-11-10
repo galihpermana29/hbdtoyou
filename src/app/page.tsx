@@ -3,9 +3,30 @@ import jumbotronImage from '@/assets/homepage.png';
 import Image from 'next/image';
 import { Button } from 'antd';
 import Link from 'next/link';
+
+import Script from 'next/script';
+
+const GA_MEASUREMENT_ID = 'G-X4G9RCBNQH'; // Your Google Analytics ID
+
 export default function Home() {
   return (
     <div>
+      <Script
+        strategy="afterInteractive"
+        src={`https://www.googletagmanager.com/gtag/js?id=${GA_MEASUREMENT_ID}`}
+      />
+      <Script
+        strategy="afterInteractive"
+        id="google-analytics"
+        dangerouslySetInnerHTML={{
+          __html: `
+            window.dataLayer = window.dataLayer || [];
+            function gtag(){dataLayer.push(arguments);}
+            gtag('js', new Date());
+            gtag('config', '${GA_MEASUREMENT_ID}');
+          `,
+        }}
+      />
       <div className="fixed top-0 left-0 w-full z-10 ">
         <NavigationBar />
       </div>

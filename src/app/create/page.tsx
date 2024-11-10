@@ -164,6 +164,16 @@ const CreatePage = () => {
             You can share your own version of Netflix with your friends or
             someone you love.
           </p>
+          <br />
+          <p>
+            Support the creator by follow instagram{' '}
+            <Link
+              href={'https://www.instagram.com/galjhpermana/'}
+              target="_blank">
+              @galjhpermana
+            </Link>{' '}
+            or buy me a coffee on saweria
+          </p>
           <div className="flex items-center gap-[12px] mt-[12px]">
             <Link href={`/${modalState.data}`} className="cursor-pointer">
               <Button
