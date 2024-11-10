@@ -153,6 +153,12 @@ const CreatePage = () => {
     <div>
       <NavigationBar />
       <Modal
+        onCancel={() =>
+          setModalState({
+            visible: false,
+            data: '',
+          })
+        }
         title="Successfully created"
         open={modalState.visible}
         footer={null}>
@@ -268,17 +274,17 @@ const CreatePage = () => {
             </Form.Item>
             <Form.Item
               name={'images'}
-              label="Collection of Images (up to 12 photos)">
+              label="Collection of Images (up to 10 photos)">
               <Upload
                 accept=".jpg, .jpeg, .png"
                 multiple={true}
-                maxCount={12}
+                maxCount={10}
                 listType="picture-card"
                 fileList={fileList}
                 beforeUpload={beforeUpload}
                 onPreview={handlePreview}
                 onChange={handleChange}>
-                {fileList.length >= 12 ? null : uploadButton}
+                {fileList.length >= 10 ? null : uploadButton}
               </Upload>
               {previewImage && (
                 <Image

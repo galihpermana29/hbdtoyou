@@ -36,10 +36,10 @@ const RootUserPage = async ({ params }: any) => {
         subTitle={data.data.subTitle}
         modalContent={data.data.modalContent}
       />
-      <List title={'Upcoming Movies'} tData={data.data.images.slice(0, 6)} />
+      <List title={'Upcoming Movies'} tData={data.data.images.slice(0, 5)} />
       <List
         title={'Box Office Top Movies'}
-        tData={data.data.images.slice(6, 12)}
+        tData={data.data.images.slice(5, 10)}
       />
     </div>
   );

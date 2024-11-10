@@ -55,7 +55,7 @@ export default function Home() {
               target="_blank"
               className="cursor-pointer">
               <Button size="large" className="!border-black">
-                Support
+                Saweria for Server
               </Button>
             </Link>
           </div>
