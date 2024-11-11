@@ -4,7 +4,7 @@ export async function POST(req: any, res: any) {
   cloudinary.config({
     cloud_name: 'dxuumohme',
     api_key: '886125678413288',
-    api_secret: 'YfxzRyGWAfTbYgvo4s2_3NBWLUc',
+    api_secret: process.env.NEXT_PUBLIC_CLOUDINARY_API_SECRET,
   });
 
   const resBody = await req.json();
