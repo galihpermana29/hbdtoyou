@@ -36,6 +36,23 @@ const beforeUpload = (file: FileType) => {
   return isJpgOrPng && isLt2M;
 };
 
+const uploadImage = async (base64: string) => {
+  const data = await fetch('/api/upload', {
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/json',
+    },
+    body: JSON.stringify({ image: base64 }),
+  });
+
+  if (data.ok) {
+    const dx = await data.json();
+    return dx.data;
+  } else {
+    throw new Error('Error');
+  }
+};
+
 const CreatePage = () => {
   const [loading, setLoading] = useState(false);
   const [imageUrl, setImageUrl] = useState<string>();
@@ -100,51 +117,66 @@ const CreatePage = () => {
     await getBase64(
       jumbotronImage.file.originFileObj as FileType,
       async (url) => {
-        if (fileList.length === 0) {
-          return message.error('Please upload at least one image!');
-        }
-        setLoading(true);
-        const multipleImagesPromis = fileList.map((file) =>
-          getBase64Multiple(file.originFileObj as FileType)
-        );
-        const multipleImages = await Promise.all(multipleImagesPromis);
+        try {
+          if (fileList.length === 0) {
+            return message.error('Please upload at least one image!');
+          }
 
-        const id = forName + '-' + uuidv4();
-        const payload = {
-          jumbotronImage: url,
-          title,
-          subTitle,
-          modalContent,
-          forName: id,
-          images: multipleImages,
-        };
-        fetch('/api/userData', {
-          method: 'POST',
-          headers: {
-            'Content-Type': 'application/json',
-          },
-          body: JSON.stringify(payload),
-        })
-          .then((res) => {
-            if (res.ok) {
-              message.success('Successfully created!');
-              form.resetFields();
-              setModalState({
-                visible: true,
-                data: id,
-              });
-              // setTimeout(() => {
-              //   window.open(window.location.origin + '/' + id, '_blank');
-              // }, 1000);
-            }
-          })
-          .catch((err) => {
-            console.error(err);
-            message.error('Something went wrong!');
-          })
-          .finally(() => {
-            setLoading(false);
+          setLoading(true);
+          const jumbotronURL = await uploadImage(url);
+
+          const multipleImagesPromise = fileList.map((file) =>
+            getBase64Multiple(file.originFileObj as FileType)
+          );
+
+          const multipleImages = await Promise.all(multipleImagesPromise);
+          const imagesPromise = multipleImages.map((dx) => {
+            return uploadImage(dx);
           });
+
+          try {
+            const imagesURL = await Promise.all(imagesPromise);
+
+            const id = forName + '-' + uuidv4();
+            const payload = {
+              jumbotronImage: jumbotronURL,
+              title,
+              subTitle,
+              modalContent,
+              forName: id,
+              images: imagesURL,
+            };
+
+            fetch('/api/userData', {
+              method: 'POST',
+              headers: {
+                'Content-Type': 'application/json',
+              },
+              body: JSON.stringify(payload),
+            })
+              .then((res) => {
+                if (res.ok) {
+                  message.success('Successfully created!');
+                  form.resetFields();
+                  setModalState({
+                    visible: true,
+                    data: id,
+                  });
+                }
+              })
+              .catch((err) => {
+                console.error(err);
+                message.error('Something went wrong!');
+              })
+              .finally(() => {
+                setLoading(false);
+              });
+          } catch {
+            message.error('Error uploading image');
+          }
+        } catch {
+          message.error('Error uploading image');
+        }
       }
     );
   };
