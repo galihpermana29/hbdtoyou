@@ -36,7 +36,7 @@ const NavigationBar = () => {
         open={modalState.visible}
         footer={null}>
         <div>
-          <h1 className="text-[20px] font-bold">Galih's here!</h1>
+          <h1 className="text-[20px] font-bold">Galih`s here!</h1>
           <p>
             Due to large traffic from you guys, I have to clear the databases
             temporarily so the server can be used by other people. Yuk, bantu
