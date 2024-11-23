@@ -9,13 +9,12 @@ export async function POST(req: any, res: any) {
 
   const resBody = await req.json();
   const { image } = resBody;
-  // console.log(image, 'imageee');
   const data = await cloudinary.uploader.upload(
     image,
     {
       use_filename: true,
-      width: 500,
-      height: 300,
+      width: 1000,
+      height: 900,
       crop: 'limit',
     },
     (error: any) => {

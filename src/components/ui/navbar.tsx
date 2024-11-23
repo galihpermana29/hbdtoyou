@@ -1,6 +1,6 @@
 'use client';
 
-import { Button, Modal } from 'antd';
+import { Button, Modal, Tag, Tooltip } from 'antd';
 import Link from 'next/link';
 import { useEffect, useState } from 'react';
 
@@ -12,12 +12,15 @@ const NavigationBar = () => {
 
   useEffect(() => {
     if (typeof window !== 'undefined') {
-      setTimeout(() => {
-        setModalState({
-          visible: true,
-          data: '',
-        });
-      }, 1000);
+      const modalState = localStorage.getItem('modalState');
+      if (!modalState) {
+        setTimeout(() => {
+          setModalState({
+            visible: true,
+            data: '',
+          });
+        }, 1000);
+      }
     }
   }, []);
 
@@ -26,12 +29,14 @@ const NavigationBar = () => {
       suppressHydrationWarning
       className="flex item justify-between border-b-[1px] py-[20px] px-[40px] bg-white">
       <Modal
-        onCancel={() =>
+        onCancel={() => {
           setModalState({
             visible: false,
             data: '',
-          })
-        }
+          });
+
+          localStorage.setItem('modalState', 'close');
+        }}
         title="Hello!"
         open={modalState.visible}
         footer={null}>
@@ -73,8 +78,12 @@ const NavigationBar = () => {
       </Link>
       <div className="flex items-center gap-[8px] md:gap-[24px] text-[14px]">
         <Link href={'/example'}>Example</Link>
+        <Link href={'/browse'}>Browse</Link>
         <Link href={'/create'}>Create</Link>
-        <Link href={'/contact'}>Contact</Link>
+        <Tooltip placement="topLeft" title={'Premium'}>
+          <div className="cursor-pointer">More Templates</div>
+        </Tooltip>
+        {/* <Link href={'/contact'}>Contact</Link> */}
       </div>
     </div>
   );

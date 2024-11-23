@@ -12,9 +12,10 @@ const getDetailData = async (id: string) => {
     'beta.popstarz.ai';
 
   const domain = `${protocol}://${host}`;
-  console.log(domain); // Logs the full domain, including protocol.
 
-  const res = await fetch(`${domain}/api/userData?query=${id}`);
+  const res = await fetch(`${domain}/api/userData?query=${id}`, {
+    next: { revalidate: 240 },
+  });
   const data = await res.json();
 
   return data;

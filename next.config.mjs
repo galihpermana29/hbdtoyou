@@ -16,6 +16,9 @@ const nextConfig = {
       },
     ],
   },
+  logging: {
+    fetches: true,
+  },
 };
 
 export default nextConfig;
