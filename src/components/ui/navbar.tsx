@@ -77,7 +77,9 @@ const NavigationBar = () => {
         HBDTY
       </Link>
       <div className="flex items-center gap-[8px] md:gap-[24px] text-[14px]">
-        <Link href={'/example'}>Example</Link>
+        <Link href={'/example'} className="hidden md:block">
+          Example
+        </Link>
         <Link href={'/browse'}>Browse</Link>
         <Link href={'/create'}>Create</Link>
         <Tooltip placement="topLeft" title={'Premium'}>
