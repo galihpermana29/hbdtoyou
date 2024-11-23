@@ -38,7 +38,7 @@ const TopTenPage = async () => {
       <div className="mt-[100px]">
         <div className="flex justify-center items-center">
           <h1 className="text-center my-[50px] text-[30px] font-bold max-w-[400px]">
-            We're getting randomly 10 data for you
+            We are getting randomly 10 data for you
           </h1>
         </div>
         <div className="flex justify-center items-center">
