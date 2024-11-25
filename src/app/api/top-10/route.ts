@@ -30,7 +30,7 @@ export async function GET(req: Request) {
         },
 
         // Random sampling
-        { $sample: { size: 10 } },
+        { $sample: { size: 12 } },
 
         {
           $project: {
@@ -42,16 +42,6 @@ export async function GET(req: Request) {
         },
       ])
       .toArray();
-
-    // Method 2: Alternative approach with additional options
-    // const randomEntries = await collection.aggregate([
-    //   { $sample: { size: 10 } },
-    //   { $project: {
-    //     title: 1,
-    //     description: 1,
-    //     // Add other fields you want to include
-    //   }}
-    // ]).toArray();
 
     return Response.json({
       success: true,
@@ -69,8 +59,5 @@ export async function GET(req: Request) {
       },
       { status: 500 }
     );
-  } finally {
-    // Ensure connection is closed
-    await client.close();
   }
 }

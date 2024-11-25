@@ -8,6 +8,7 @@ import { LoadingOutlined, PlusOutlined } from '@ant-design/icons';
 import { v4 as uuidv4 } from 'uuid';
 import { useForm } from 'antd/es/form/Form';
 import Link from 'next/link';
+import { revalidateRandom } from '@/lib/revalidate';
 type FileType = Parameters<GetProp<UploadProps, 'beforeUpload'>>[0];
 
 const getBase64 = async (img: FileType, callback: (url: string) => void) => {
@@ -169,6 +170,7 @@ const CreatePage = () => {
                 message.error('Something went wrong!');
               })
               .finally(() => {
+                revalidateRandom();
                 setLoading(false);
               });
           } catch {

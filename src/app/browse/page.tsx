@@ -16,7 +16,7 @@ const getTop10 = async () => {
   const domain = `${protocol}://${host}`;
 
   const res = await fetch(`${domain}/api/top-10`, {
-    next: { revalidate: 3600 },
+    next: { revalidate: 3600, tags: ['random'] },
   });
 
   if (res.ok) {
@@ -38,7 +38,7 @@ const TopTenPage = async () => {
       <div className="mt-[100px]">
         <div className="flex justify-center items-center">
           <h1 className="text-center my-[50px] text-[30px] font-bold max-w-[400px]">
-            We are getting randomly 10 data for you
+            We are getting randomly 12 data for you
           </h1>
         </div>
         <div className="flex justify-center items-center">

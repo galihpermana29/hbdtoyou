@@ -19,11 +19,9 @@ export async function POST(req: any, res: any) {
     },
     (error: any) => {
       if (error) {
-        console.log(error);
         return Response.error();
       }
     }
   );
-  console.log(data.rul, 'apaa?');
   return Response.json({ data: data.url });
 }
