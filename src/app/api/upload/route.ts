@@ -13,8 +13,8 @@ export async function POST(req: any, res: any) {
     image,
     {
       use_filename: true,
-      width: 1000,
-      height: 900,
+      width: 1200,
+      height: 1000,
       crop: 'limit',
     },
     (error: any) => {
