@@ -37,7 +37,7 @@ const beforeUpload = (file: FileType) => {
   return isJpgOrPng && isLt2M;
 };
 
-const uploadImage = async (base64: string) => {
+export const uploadImage = async (base64: string) => {
   const data = await fetch('/api/upload', {
     method: 'POST',
     headers: {

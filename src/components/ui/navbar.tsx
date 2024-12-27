@@ -74,7 +74,7 @@ const NavigationBar = () => {
         </div>
       </Modal>
       <Link href={'/'} className="font-bold">
-        HBDTY
+        <span className="young-serif-regular text-[22px]">Memoify</span>
       </Link>
       <div className="flex items-center gap-[8px] md:gap-[24px] text-[14px]">
         <Link href={'/example'} className="hidden md:block">
