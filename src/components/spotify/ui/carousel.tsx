@@ -7,7 +7,7 @@ import useEmblaCarousel, {
 import { ArrowLeft, ArrowRight } from 'lucide-react';
 
 import { cn } from '@/lib/utils';
-import { Button } from '@/components/ui/button';
+import { Button } from '@/components/spotify/ui/button';
 
 type CarouselApi = UseEmblaCarouselType[1];
 type UseCarouselParameters = Parameters<typeof useEmblaCarousel>;
@@ -132,16 +132,14 @@ const Carousel = React.forwardRef<
           scrollNext,
           canScrollPrev,
           canScrollNext,
-        }}
-      >
+        }}>
         <div
           ref={ref}
           onKeyDownCapture={handleKeyDown}
           className={cn('relative', className)}
           role="region"
           aria-roledescription="carousel"
-          {...props}
-        >
+          {...props}>
           {children}
         </div>
       </CarouselContext.Provider>
@@ -214,8 +212,7 @@ const CarouselPrevious = React.forwardRef<
       )}
       disabled={!canScrollPrev}
       onClick={scrollPrev}
-      {...props}
-    >
+      {...props}>
       <ArrowLeft className="h-4 w-4" />
       <span className="sr-only">Previous slide</span>
     </Button>
@@ -243,8 +240,7 @@ const CarouselNext = React.forwardRef<
       )}
       disabled={!canScrollNext}
       onClick={scrollNext}
-      {...props}
-    >
+      {...props}>
       <ArrowRight className="h-4 w-4" />
       <span className="sr-only">Next slide</span>
     </Button>

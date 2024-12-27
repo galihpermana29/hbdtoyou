@@ -13,7 +13,7 @@ import {
 } from 'react-hook-form';
 
 import { cn } from '@/lib/utils';
-import { Label } from '@/components/ui/label';
+import { Label } from '@/components/disney+/ui/label';
 
 const Form = FormProvider;
 
@@ -159,8 +159,7 @@ const FormMessage = React.forwardRef<
       ref={ref}
       id={formMessageId}
       className={cn('text-sm font-medium text-destructive', className)}
-      {...props}
-    >
+      {...props}>
       {body}
     </p>
   );
