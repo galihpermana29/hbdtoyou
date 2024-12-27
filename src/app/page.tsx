@@ -60,7 +60,7 @@ export default function Home() {
               <Button
                 size="large"
                 className="w-[200px] !rounded-[50px] !text-black !border-[1px] !border-black">
-                What's new?
+                What is new?
               </Button>
             </Link>
           </div>
