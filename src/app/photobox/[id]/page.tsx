@@ -4,8 +4,25 @@ import PictureInFrame from '@/components/photobox/PictureFrame/PictureFrame';
 import Cameragram from '@/components/photobox/Cameragram/Cameragram';
 import { useParams, useRouter } from 'next/navigation';
 import { frameData } from '@/lib/frameData';
-import { uploadImage } from '@/app/create/page';
+
 import { Spin } from 'antd';
+
+const uploadImage = async (base64: string) => {
+  const data = await fetch('/api/upload', {
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/json',
+    },
+    body: JSON.stringify({ image: base64 }),
+  });
+
+  if (data.ok) {
+    const dx = await data.json();
+    return dx.data;
+  } else {
+    throw new Error('Error');
+  }
+};
 
 const PhotoboxPage = () => {
   const [photos, setPhotos] = useState<any[]>([]);
