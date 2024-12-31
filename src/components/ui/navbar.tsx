@@ -170,7 +170,9 @@ const NavigationBar = () => {
           </div>
         )}
         <Link href={'/create'}>Create</Link>
-        <Link href={'/templates'} className="hidden md:block">
+        <Link
+          href={'/templates'}
+          className={`${session.accessToken ? 'block' : 'hidden md:block'} `}>
           See Templates
         </Link>
 
