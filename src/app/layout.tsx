@@ -5,8 +5,9 @@ import { getSession } from '@/store/get-set-session';
 import SessionProvider from './session-provider';
 
 export const metadata: Metadata = {
-  title: 'HBDTY',
-  description: 'HBDTY is a Netflix clone, to celebrate anything in your lifes',
+  title: 'Memoify',
+  description:
+    'With memoify create custom websites inspired by your favorite platforms like Netflix, Spotify, or YouTube. Add personal touches and let your memories shine!',
 };
 
 export default async function RootLayout({
