@@ -43,7 +43,7 @@ const PricingCard = ({
       <div className="flex flex-col h-full">
         <div>
           <h3 className="text-xl sm:text-2xl font-bold">{title}</h3>
-          <PriceDisplay amount={price} />
+          <PriceDisplay amount={price} period=" " />
           <p className="mt-4 text-sm sm:text-base text-muted-foreground">
             {description}
           </p>
