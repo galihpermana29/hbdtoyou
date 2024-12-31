@@ -2,6 +2,7 @@
 import NavigationBar from '@/components/ui/navbar';
 import { Button } from 'antd';
 import Image from 'next/image';
+import Link from 'next/link';
 import { useSearchParams } from 'next/navigation';
 
 const FinishPage = () => {
@@ -50,12 +51,14 @@ const FinishPage = () => {
               size="large">
               Download
             </Button>
-            <Button
-              type="primary"
-              className="!bg-red-800 !text-[14px]"
-              size="large">
-              Download for instagram story
-            </Button>
+            <Link href={'/'}>
+              <Button
+                type="primary"
+                className="!bg-red-800 !text-[14px] !text-white"
+                size="large">
+                Back to Hom
+              </Button>
+            </Link>
           </div>
         </div>
       </div>

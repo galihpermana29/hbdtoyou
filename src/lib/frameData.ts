@@ -18,7 +18,7 @@ export const frameData = [
   {
     id: 5,
     assets: frame5,
-    premium: true,
+    premium: false,
   },
   {
     id: 6,

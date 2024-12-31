@@ -2,36 +2,23 @@
 
 import PlaylistRow from './playlist-row';
 
-const playlists = [
-  {
-    title: 'Liked Songs',
-    subtitle: 'Playlist',
-    image:
-      'https://res.cloudinary.com/dxuumohme/image/upload/v1735231561/gemsi8y1c20pwhdespcf.jpg',
-  },
-  {
-    title: 'Daily Mix 1',
-    subtitle: 'Peterpan, Sheila On 7',
-    image:
-      'https://res.cloudinary.com/dxuumohme/image/upload/v1735231561/gemsi8y1c20pwhdespcf.jpg',
-  },
-  {
-    title: 'This Is Guyon Waton',
-    subtitle: 'Playlist • Guyon Waton',
-    image:
-      'https://res.cloudinary.com/dxuumohme/image/upload/v1735231561/gemsi8y1c20pwhdespcf.jpg',
-  },
-  {
-    title: 'NIKI',
-    subtitle: 'Artist',
-    image:
-      'https://res.cloudinary.com/dxuumohme/image/upload/v1735231561/gemsi8y1c20pwhdespcf.jpg',
-  },
+export const playlists = [
+  '5Y35SjAfXjjG0sFQ3KOxmm',
+  '3JeDm203MFpRlzSFaoNEv2',
+  '7qiZfU4dY1lWllzX7mPBI3',
+  '2CFpkbOfYe23ZoMfufNKVB',
+  '7qiZfU4dY1lWllzX7mPBI3',
+  '2CFpkbOfYe23ZoMfufNKVB',
 ];
 
-export default function PlaylistSection() {
+export default function PlaylistSection({
+  songsForYou,
+}: {
+  songsForYou?: any[];
+}) {
+  const data = songsForYou ? songsForYou : playlists;
   return (
-    <section className="mb-6 mt-6">
+    <section className="mb-6 mt-6 mx-3">
       <div className="flex items-center gap-4 mb-4">
         <button className="px-3 py-1 text-sm font-medium text-white bg-[#282828] rounded-full hover:bg-[#3e3e3e] transition">
           All
@@ -45,7 +32,7 @@ export default function PlaylistSection() {
       </div>
       <div>
         <div className="flex flex-wrap gap-4 min-w-min pb-4">
-          {playlists.map((playlist, index) => (
+          {data.map((playlist, index) => (
             <PlaylistRow key={index} playlist={playlist} />
           ))}
         </div>

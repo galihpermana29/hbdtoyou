@@ -1,7 +1,7 @@
-"use client";
+'use client';
 
-import { Volume2, Maximize2, LayoutList } from "lucide-react";
-import { Slider } from "../ui/slider";
+import { Volume2, Maximize2, LayoutList } from 'lucide-react';
+import { Slider } from '../ui/slider';
 
 export default function PlayerVolume() {
   return (
@@ -12,7 +12,7 @@ export default function PlayerVolume() {
       <button className="hidden sm:block text-neutral-400 hover:text-white transition">
         <Volume2 className="h-5 w-5" />
       </button>
-      <Slider 
+      <Slider
         defaultValue={[100]}
         max={100}
         step={1}

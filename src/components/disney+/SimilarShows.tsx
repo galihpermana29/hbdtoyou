@@ -15,15 +15,40 @@ const similarShows = [
     image:
       'https://res.cloudinary.com/dxuumohme/image/upload/v1735327153/ovks2ojj7kksl8k9mdrx.jpg',
   },
+  {
+    id: 3,
+    title: 'Shop for Killers',
+    image:
+      'https://res.cloudinary.com/dxuumohme/image/upload/v1735327153/ovks2ojj7kksl8k9mdrx.jpg',
+  },
+  {
+    id: 21,
+    title: 'Shop for Killers',
+    image:
+      'https://res.cloudinary.com/dxuumohme/image/upload/v1735327153/ovks2ojj7kksl8k9mdrx.jpg',
+  },
+  {
+    id: 22,
+    title: 'Shop for Killers',
+    image:
+      'https://res.cloudinary.com/dxuumohme/image/upload/v1735327153/ovks2ojj7kksl8k9mdrx.jpg',
+  },
   // Add more shows as needed
 ];
 
-export default function SimilarShows() {
+export default function SimilarShows({ data }: { data?: string[] }) {
+  const dx = data
+    ? data.map((dy, idx) => ({
+        id: idx,
+        image: dy,
+        title: 'Show ' + (idx + 1),
+      }))
+    : similarShows;
   return (
     <div className="mt-12">
       <h2 className="text-xl font-bold mb-6">More Like This</h2>
       <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-4">
-        {similarShows.map((show) => (
+        {dx.map((show) => (
           <div
             key={show.id}
             className="relative aspect-[2/3] rounded-lg overflow-hidden group">

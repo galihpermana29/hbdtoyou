@@ -1,187 +1,49 @@
 'use client';
 import NavigationBar from '@/components/ui/navbar';
-import { Button, Form, Image, Input, message, Modal, Spin, Upload } from 'antd';
-import TextArea from 'antd/es/input/TextArea';
-import { useState } from 'react';
-import type { GetProp, UploadFile, UploadProps } from 'antd';
-import { LoadingOutlined, PlusOutlined } from '@ant-design/icons';
-import { v4 as uuidv4 } from 'uuid';
+import { Button, message, Modal, Spin } from 'antd';
+import { useEffect, useState } from 'react';
+import { LoadingOutlined } from '@ant-design/icons';
 import { useForm } from 'antd/es/form/Form';
 import Link from 'next/link';
-import { revalidateRandom } from '@/lib/revalidate';
-type FileType = Parameters<GetProp<UploadProps, 'beforeUpload'>>[0];
-
-const getBase64 = async (img: FileType, callback: (url: string) => void) => {
-  const reader = new FileReader();
-  reader.addEventListener('load', () => callback(reader.result as string));
-  reader.readAsDataURL(img);
-};
-
-const getBase64Multiple = (file: FileType): Promise<string> =>
-  new Promise((resolve, reject) => {
-    const reader = new FileReader();
-    reader.readAsDataURL(file);
-    reader.onload = () => resolve(reader.result as string);
-    reader.onerror = (error) => reject(error);
-  });
-
-const beforeUpload = (file: FileType) => {
-  const isJpgOrPng = file.type === 'image/jpeg' || file.type === 'image/png';
-  if (!isJpgOrPng) {
-    message.error('You can only upload JPG/PNG file!');
-  }
-  const isLt2M = file.size / 1024 / 1024 < 1;
-  if (!isLt2M) {
-    message.error('Image must smaller than 1MB!');
-  }
-  return isJpgOrPng && isLt2M;
-};
-
-const uploadImage = async (base64: string) => {
-  const data = await fetch('/api/upload', {
-    method: 'POST',
-    headers: {
-      'Content-Type': 'application/json',
-    },
-    body: JSON.stringify({ image: base64 }),
-  });
-
-  if (data.ok) {
-    const dx = await data.json();
-    return dx.data;
-  } else {
-    throw new Error('Error');
-  }
-};
+import NetflixForm from '@/components/forms/netflix-form';
+import { getAllTemplates } from '@/action/user-api';
+import { IAllTemplateResponse } from '@/action/interfaces';
+import SpotifyForm from '@/components/forms/spotify-form';
+import { useMemoifyProfile, useMemoifySession } from '../session-provider';
+import { signIn } from 'next-auth/react';
+import DisneyForm from '@/components/forms/disney-form';
 
 const CreatePage = () => {
   const [loading, setLoading] = useState(false);
-  const [imageUrl, setImageUrl] = useState<string>();
-  const [previewOpen, setPreviewOpen] = useState(false);
-  const [previewImage, setPreviewImage] = useState('');
-  const [fileList, setFileList] = useState<UploadFile[]>([]);
+  const [selectedTemplate, setSelectedTemplate] = useState<{
+    id: string;
+    route: string;
+  } | null>(null);
+  const [templates, setTemplates] = useState<IAllTemplateResponse[] | null>(
+    null
+  );
+
   const [modalState, setModalState] = useState({
     visible: false,
     data: '',
   });
   const [form] = useForm();
-  const handleChangeJumbotron: UploadProps['onChange'] = (info) => {
-    if (info.file.status === 'uploading') {
-      setLoading(true);
-      return;
-    }
-    if (info.file.status === 'done') {
-      // Get this url from response in real world.
-      getBase64(info.file.originFileObj as FileType, (url) => {
-        setLoading(false);
-        setImageUrl(url);
-      });
-    }
-  };
 
-  const handlePreview = async (file: UploadFile) => {
-    if (!file.url && !file.preview) {
-      file.preview = await getBase64Multiple(file.originFileObj as FileType);
-    }
+  const session = useMemoifySession();
+  const profile = useMemoifyProfile();
 
-    setPreviewImage(file.url || (file.preview as string));
-    setPreviewOpen(true);
-  };
-
-  const handleChange: UploadProps['onChange'] = ({ fileList: newFileList }) => {
-    if (beforeUpload(newFileList[0].originFileObj as FileType)) {
-      setFileList(newFileList);
+  const handleGetTemplates = async () => {
+    const data = await getAllTemplates();
+    if (data.success) {
+      setTemplates(data.data);
+    } else {
+      message.error(data.message);
     }
   };
 
-  const validateSlug = (x: any, value: any) => {
-    // Allows letters, numbers, and hyphens (no spaces or other special characters)
-    const regex = /^[a-zA-Z0-9-]+$/;
-    if (!value || regex.test(value)) {
-      return Promise.resolve();
-    }
-    return Promise.reject(
-      new Error('Slug can only contain letters, numbers, and hyphens.')
-    );
-  };
-
-  const uploadButton = (
-    <button style={{ border: 0, background: 'none' }} type="button">
-      {loading ? <LoadingOutlined /> : <PlusOutlined />}
-      <div style={{ marginTop: 8 }}>Upload</div>
-    </button>
-  );
-
-  const handleSubmit = async (val: any) => {
-    const { jumbotronImage, title, subTitle, modalContent, forName } = val;
-
-    await getBase64(
-      jumbotronImage.file.originFileObj as FileType,
-      async (url) => {
-        try {
-          if (fileList.length === 0) {
-            return message.error('Please upload at least one image!');
-          }
-
-          setLoading(true);
-          const jumbotronURL = await uploadImage(url);
-
-          const multipleImagesPromise = fileList.map((file) =>
-            getBase64Multiple(file.originFileObj as FileType)
-          );
-
-          const multipleImages = await Promise.all(multipleImagesPromise);
-          const imagesPromise = multipleImages.map((dx) => {
-            return uploadImage(dx);
-          });
-
-          try {
-            const imagesURL = await Promise.all(imagesPromise);
-
-            const id = forName + '-' + uuidv4();
-            const payload = {
-              jumbotronImage: jumbotronURL,
-              title,
-              subTitle,
-              modalContent,
-              forName: id,
-              images: imagesURL,
-            };
-
-            fetch('/api/userData', {
-              method: 'POST',
-              headers: {
-                'Content-Type': 'application/json',
-              },
-              body: JSON.stringify(payload),
-            })
-              .then((res) => {
-                if (res.ok) {
-                  message.success('Successfully created!');
-                  form.resetFields();
-                  setModalState({
-                    visible: true,
-                    data: id,
-                  });
-                }
-              })
-              .catch((err) => {
-                console.error(err);
-                message.error('Something went wrong!');
-              })
-              .finally(() => {
-                revalidateRandom();
-                setLoading(false);
-              });
-          } catch {
-            message.error('Error uploading image');
-          }
-        } catch {
-          message.error('Error uploading image');
-        }
-      }
-    );
-  };
+  useEffect(() => {
+    handleGetTemplates();
+  }, []);
 
   return (
     <div>
@@ -197,22 +59,18 @@ const CreatePage = () => {
         open={modalState.visible}
         footer={null}>
         <div>
-          <h1 className="text-[20px] font-bold">
-            Your own Netflix clone is ready!
-          </h1>
+          <h1 className="text-[20px] font-bold">Your own website is ready!</h1>
           <p>
-            You can share your own version of Netflix with your friends or
+            You can share your own version of memoify with your friends or
             someone you love.
           </p>
-          <br />
-          <p>
+          <p className="mt-2">
             Support the creator by follow instagram{' '}
             <Link
               href={'https://www.instagram.com/galjhpermana/'}
               target="_blank">
               @galjhpermana
             </Link>{' '}
-            or buy me a coffee on saweria
           </p>
           <div className="flex items-center gap-[12px] mt-[12px]">
             <Link href={`/${modalState.data}`} className="cursor-pointer">
@@ -245,122 +103,91 @@ const CreatePage = () => {
         indicator={<LoadingOutlined spin />}
       />
 
-      <div className="flex flex-col items-center justify-center min-h-screen py-[30px]">
+      <div className="flex flex-col items-center justify-start min-h-screen py-[30px]">
         <div className="w-full max-w-[90%] md:max-w-[60%] lg:max-w-[50%]">
-          <h1 className="text-[35px] font-bold mb-[20px]">
-            Fill the form and create yours
-          </h1>
-          <Form
-            disabled={loading}
-            form={form}
-            layout="vertical"
-            onFinish={(val) => handleSubmit(val)}>
-            <Form.Item
-              rules={[
-                {
-                  required: true,
-                  message: 'Please input image!',
-                },
-              ]}
-              name={'jumbotronImage'}
-              label="Jumbotron Image">
-              <Upload
-                accept=".jpg, .jpeg, .png"
-                name="avatar"
-                listType="picture-card"
-                className="avatar-uploader"
-                showUploadList={false}
-                beforeUpload={beforeUpload}
-                onChange={handleChangeJumbotron}>
-                {imageUrl ? (
-                  <img src={imageUrl} alt="avatar" style={{ width: '100%' }} />
-                ) : (
-                  uploadButton
-                )}
-              </Upload>
-            </Form.Item>
-            <Form.Item
-              rules={[{ required: true, message: 'Please input title!' }]}
-              name={'title'}
-              label="Title">
-              <Input size="large" placeholder="Happy birthday to my cats" />
-            </Form.Item>
-            <Form.Item
-              rules={[{ required: true, message: 'Please input subtitle!' }]}
-              name={'subTitle'}
-              label="Sub Title">
-              <TextArea
-                size="large"
-                placeholder="This is how me express love. In the meantime you will understand how my brain works. lorem ipsum"
-              />
-            </Form.Item>
-
-            <Form.Item
-              rules={[
-                { required: true, message: 'Please input modal content!' },
-              ]}
-              name={'modalContent'}
-              label="Modal Content">
-              <TextArea
-                size="large"
-                placeholder="This is how me express love. In the meantime you will understand how my brain works. lorem ipsum"
-              />
-            </Form.Item>
-            <Form.Item
-              name={'images'}
-              label="Collection of Images (up to 10 photos)">
-              <Upload
-                accept=".jpg, .jpeg, .png"
-                multiple={true}
-                maxCount={10}
-                listType="picture-card"
-                fileList={fileList}
-                beforeUpload={beforeUpload}
-                onPreview={handlePreview}
-                onChange={handleChange}>
-                {fileList.length >= 10 ? null : uploadButton}
-              </Upload>
-              {previewImage && (
-                <Image
-                  wrapperStyle={{ display: 'none' }}
-                  preview={{
-                    visible: previewOpen,
-                    onVisibleChange: (visible) => setPreviewOpen(visible),
-                    afterOpenChange: (visible) =>
-                      !visible && setPreviewImage(''),
-                  }}
-                  src={previewImage}
+          {selectedTemplate ? (
+            <>
+              <h1 className="text-[35px] font-bold ">
+                Fill the form and create yours
+              </h1>
+              {profile && (
+                <p className="mb-[20px]">
+                  Oh, you are in{' '}
+                  <span className="font-bold">{profile?.type}</span> plan
+                </p>
+              )}
+              {selectedTemplate.route.includes('netflixv1') && (
+                <NetflixForm
+                  selectedTemplate={selectedTemplate}
+                  loading={loading}
+                  setLoading={setLoading}
+                  modalState={modalState}
+                  setModalState={setModalState}
                 />
               )}
-            </Form.Item>
 
-            <Form.Item
-              rules={[
-                {
-                  required: true,
-                  message: 'Please input your name!',
-                },
-                { validator: validateSlug },
-              ]}
-              name={'forName'}
-              label="Name For">
-              <Input
-                size="large"
-                placeholder="galih-permana"
-                addonBefore="hbdtoyou.live/"
-              />
-            </Form.Item>
-            <div className="flex justify-end ">
-              <Button
-                className="!bg-black"
-                loading={loading}
-                type="primary"
-                htmlType="submit"
-                size="large">
-                Create
-              </Button>
-            </div>
-          </Form>
+              {selectedTemplate.route.includes('spotifyv1') && (
+                <SpotifyForm
+                  selectedTemplate={selectedTemplate}
+                  loading={loading}
+                  setLoading={setLoading}
+                  modalState={modalState}
+                  setModalState={setModalState}
+                />
+              )}
+
+              {selectedTemplate.route.includes('disney+v1') && (
+                <DisneyForm
+                  selectedTemplate={selectedTemplate}
+                  loading={loading}
+                  setLoading={setLoading}
+                  modalState={modalState}
+                  setModalState={setModalState}
+                />
+              )}
+            </>
+          ) : (
+            <>
+              <h1 className="text-[35px] font-bold mb-[20px]">
+                Select a template
+              </h1>
+              <div className="grid-cols-1 md:grid-cols-2 lg:grid-cols-3 grid gap-[10px]  justify-items-center">
+                {templates
+                  ? templates?.map((show, idx) => (
+                      <div
+                        key={idx}
+                        onClick={() => {
+                          if (session?.accessToken) {
+                            if (show.label === 'free') {
+                              setSelectedTemplate({
+                                id: show.id,
+                                route: show.name.split('-')[1].split(' ')[1],
+                              });
+                            } else {
+                              message.error('Coming Soon!');
+                            }
+                          } else {
+                            signIn('google');
+                          }
+                        }}>
+                        <div className="bg-[#181818] p-3 md:p-4 rounded-lg hover:bg-[#282828] transition cursor-pointer group max-w-[400px] ">
+                          <div className="mb-4 relative">
+                            <img
+                              src={show.thumbnail_uri}
+                              alt={show.name}
+                              className="w-full aspect-video object-cover rounded-md"
+                            />
+                          </div>
+                          <h3 className="font-semibold text-white mb-1 line-clamp-1">
+                            {show.name?.split('-')[0]}
+                          </h3>
+                        </div>
+                      </div>
+                    ))
+                  : 'No templates'}
+              </div>
+            </>
+          )}
         </div>
       </div>
     </div>

@@ -36,12 +36,12 @@ export default function Home() {
 
       <div className="mt-[50px]">
         <div className="min-h-[50vh] flex items-center flex-col justify-center text-center">
-          <h1 className="text-[25px] md:text-[40px] font-[600] md:max-w-[50%] px-[20px]">
+          <h1 className="text-[20px] md:text-[30px] lg:text-[40px] font-[600] md:max-w-[50%] px-[20px]">
             Make every <span className="underline">celebration</span>{' '}
             unforgettable with{' '}
             <span className="young-serif-regular">Memoify</span>
           </h1>
-          <div className="mt-[12px] text-[14px] md:text-[16px] md:max-w-[40%] text-gray-600 px-[20px]">
+          <div className="mt-[12px] text-[12px] lg:text-[16px] md:max-w-[40%] text-gray-600 px-[20px]">
             Create custom websites inspired by your favorite platforms like
             Netflix, Spotify, or YouTube. Add personal touches and let your
             memories shine!
@@ -67,7 +67,10 @@ export default function Home() {
         </div>
         <div className="mx-auto flex items-center justify-center px-[20px]">
           <div className="max-w-[900px]">
-            <Carousel autoplay autoplaySpeed={2000}>
+            <Carousel
+              autoplay
+              autoplaySpeed={2000}
+              className="!w-[350px] md:!w-[800px]">
               <Image
                 src={jumbotronImage}
                 alt="jumbotron"
@@ -105,14 +108,14 @@ export default function Home() {
           </div>
 
           <div className="flex items-center justify-center gap-[12px] mt-[20px]">
-            {/* <Link href={'/photobox'} className="cursor-pointer"> */}
-            <Button
-              size="large"
-              type="primary"
-              className="!bg-black w-[200px] !rounded-[50px]">
-              Coming Very Soon
-            </Button>
-            {/* </Link> */}
+            <Link href={'/photobox'} className="cursor-pointer">
+              <Button
+                size="large"
+                type="primary"
+                className="!bg-black w-[200px] !rounded-[50px]">
+                Try Now!
+              </Button>
+            </Link>
           </div>
         </div>
         <div className="mx-auto flex items-center justify-center p-[20px]">

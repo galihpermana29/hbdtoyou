@@ -29,11 +29,23 @@ const episodes = [
   // Add more episodes as needed
 ];
 
-export default function EpisodeList() {
+export default function EpisodeList({ data }: { data?: any[] }) {
+  const dx = data
+    ? data.map((dy, idx) => ({
+        id: idx,
+        title: dy.title,
+        episode: 'S1 E' + (idx + 1),
+        date: '14 Aug 2024',
+        duration: '41m',
+        description: dy.desc,
+        thumbnail: dy.imageUrl,
+      }))
+    : episodes;
+
   return (
     <div className="space-y-6">
       <h2 className="text-xl font-bold mb-4">Season 1</h2>
-      {episodes.map((episode) => (
+      {dx.map((episode) => (
         <div
           key={episode.id}
           className="flex flex-col md:flex-row gap-4 bg-[#232631] rounded-lg overflow-hidden hover:bg-[#2A2E3A] transition-colors">

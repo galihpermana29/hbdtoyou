@@ -1,3 +1,4 @@
+import { getDetailContent } from '@/action/user-api';
 import Featured from '@/components/netflix/featured/featured';
 import List from '@/components/netflix/list/list';
 import Navbar from '@/components/netflix/navbar/navbar';
@@ -21,26 +22,39 @@ const getDetailData = async (id: string) => {
   return data;
 };
 
+const getDetailDataNew = async (id: string) => {
+  const res = await getDetailContent(id);
+  return res;
+};
+
 const RootUserPage = async ({ params }: any) => {
   const { id } = params;
 
-  const data = await getDetailData(id);
+  const data = await getDetailDataNew(id);
   if (!data.data) {
     return <div>No data</div>;
   }
+
+  const parsedData = JSON.parse(data.data.detail_content_json_text);
+  const totalItems = parsedData?.images.length || 0; // Get the total number of items
+  const midIndex = Math.ceil(totalItems / 2); // Calculate the middle index
+
   return (
     <div className="bg-black overflow-x-hidden">
-      <Navbar jumbotronImage={data.data.jumbotronImage} />
+      <Navbar jumbotronImage={parsedData?.jumbotronImage} />
       <Featured
-        jumbotronImage={data.data.jumbotronImage}
-        title={data.data.title}
-        subTitle={data.data.subTitle}
-        modalContent={data.data.modalContent}
+        jumbotronImage={parsedData?.jumbotronImage}
+        title={parsedData?.title}
+        subTitle={parsedData?.subTitle}
+        modalContent={parsedData?.modalContent}
       />
-      <List title={'Upcoming Movies'} tData={data.data.images.slice(0, 5)} />
+      <List
+        title={'Upcoming Movies'}
+        tData={parsedData?.images.slice(0, midIndex)} // First half
+      />
       <List
         title={'Box Office Top Movies'}
-        tData={data.data.images.slice(5, 10)}
+        tData={parsedData?.images.slice(midIndex)} // Second half
       />
     </div>
   );

@@ -23,9 +23,6 @@ export default function Home() {
           <div className="max-w-7xl mx-auto">
             <div className="flex flex-col gap-4">
               <h1 className="text-4xl md:text-6xl font-bold">
-                <span className="text-2xl md:text-3xl block mb-2">
-                  2024 • 1 Season • 2 Languages • 15+
-                </span>
                 Para Pengejar Sidang Skripsi
               </h1>
               <p className="text-gray-300 max-w-2xl">
