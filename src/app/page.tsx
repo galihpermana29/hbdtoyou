@@ -8,6 +8,7 @@ import { Button, Carousel } from 'antd';
 import Link from 'next/link';
 
 import Script from 'next/script';
+import PricingCard from '@/components/ui/pricing/pricing-card';
 
 const GA_MEASUREMENT_ID = 'G-X4G9RCBNQH'; // Your Google Analytics ID
 
@@ -33,7 +34,6 @@ export default function Home() {
       <div className="fixed top-0 left-0 w-full z-10 ">
         <NavigationBar />
       </div>
-
       <div className="mt-[50px]">
         <div className="min-h-[50vh] flex items-center flex-col justify-center text-center">
           <h1 className="text-[20px] md:text-[30px] lg:text-[40px] font-[600] md:max-w-[50%] px-[20px]">
@@ -93,7 +93,6 @@ export default function Home() {
           </div>
         </div>
       </div>
-
       <div
         className="mt-[50px] flex flex-col md:flex-row bg-[#dfd2c4] justify-between"
         id="photobox">
@@ -129,6 +128,47 @@ export default function Home() {
           </div>
         </div>
       </div>
+      <section className="w-full py-12 sm:py-16 bg-background">
+        <div className="container mx-auto px-4 sm:px-6">
+          <div className="text-center mb-8 sm:mb-12">
+            <h2 className="text-3xl sm:text-4xl font-bold mb-3 sm:mb-4">
+              Join with Memoify
+            </h2>
+            <p className="text-base sm:text-lg text-muted-foreground">
+              Choose the plan that is right for you
+            </p>
+          </div>
+
+          <div className="grid sm:grid-cols-2 gap-6 sm:gap-8 max-w-5xl mx-auto">
+            <PricingCard
+              title="Free"
+              price="IDR 0K"
+              description="Perfect for getting started with basic features"
+              features={[
+                'Limited image storage',
+                'Limited songs library',
+                'Basic image upload size',
+              ]}
+              buttonText="Get Started"
+              buttonVariant="outline"
+            />
+
+            <PricingCard
+              title="Premium"
+              price="IDR 15K"
+              description="All the features you need for professional use"
+              features={[
+                'Unlimited image storage',
+                'Unlimited songs library',
+                'Unlimited upload size',
+                '6 premium feature quotas',
+              ]}
+              popular={true}
+              buttonText="Upgrade to Premium"
+            />
+          </div>
+        </div>
+      </section>
     </div>
   );
 }

@@ -29,14 +29,16 @@ const NavigationBar = () => {
       key: '1',
       label: userProfile ? userProfile.fullname : 'Account',
     },
-    {
-      key: '4',
-      label: (
-        <p onClick={() => setModalUpgradePlan({ visible: true, data: '' })}>
-          Upgrade Plan
-        </p>
-      ),
-    },
+    userProfile?.type !== 'pending'
+      ? {
+          key: '4',
+          label: (
+            <p onClick={() => setModalUpgradePlan({ visible: true, data: '' })}>
+              Upgrade Plan
+            </p>
+          ),
+        }
+      : null,
     {
       key: '3',
       label: (
@@ -151,9 +153,22 @@ const NavigationBar = () => {
         <Link href={'/photobox'} className="hidden md:block">
           Photobox
         </Link>
-        <Link href={'/browse'} className="hidden md:block">
+        {/* <Link href={'/browse'} className="hidden md:block">
           Browse
-        </Link>
+        </Link> */}
+        {userProfile?.type !== 'pending' && (
+          <div
+            className="hidden md:block hover:underline cursor-pointer"
+            onClick={() => {
+              if (session?.accessToken) {
+                setModalUpgradePlan({ visible: true, data: '' });
+              } else {
+                signIn('google');
+              }
+            }}>
+            Upgrade Plan
+          </div>
+        )}
         <Link href={'/create'}>Create</Link>
         <Link href={'/templates'} className="hidden md:block">
           See Templates

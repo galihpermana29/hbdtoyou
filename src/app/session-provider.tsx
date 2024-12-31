@@ -1,11 +1,12 @@
 'use client';
 
 import { IProfileResponse } from '@/action/interfaces';
-import { getUserProfile } from '@/action/user-api';
+import { getUserProfile, submitPaymentProof } from '@/action/user-api';
+import { uploadImage } from '@/components/forms/disney-form';
 import { beforeUpload } from '@/components/forms/netflix-form';
 import { SessionData } from '@/store/iron-session';
 import { PlusOneOutlined } from '@mui/icons-material';
-import { Button, Form, Modal, Upload } from 'antd';
+import { Button, Form, message, Modal, Upload } from 'antd';
 import React, { createContext, useContext, useEffect, useState } from 'react';
 
 // Define the context type
@@ -41,6 +42,8 @@ const SessionProvider = ({
   const [form] = Form.useForm();
   const [imageUrl, setImageUrl] = useState<string | null>(null);
 
+  const [loading, setLoading] = useState(false);
+
   const handleImageUpload = (info: any) => {
     if (info.file.status === 'done' || info.file.originFileObj) {
       const reader = new FileReader();
@@ -59,6 +62,38 @@ const SessionProvider = ({
       reader.readAsDataURL(info.file.originFileObj);
     }
   };
+
+  const handleSubmitPayment = async (value: any) => {
+    try {
+      setLoading(true);
+      const paymentProofUri = await uploadImage(value.receipt.imageUrl);
+      if (paymentProofUri) {
+        const payload = {
+          content_id: '',
+          amount: 0,
+          proof_payment_url: paymentProofUri,
+        };
+
+        const res = await submitPaymentProof(payload);
+        if (res.success) {
+          message.success('Successfully submitted payment proof!');
+        } else {
+          message.error('Something went wrong!');
+        }
+      }
+    } catch {
+      message.error('Error uploading image');
+    }
+    setLoading(false);
+    setModalState({
+      visible: false,
+      data: '',
+    });
+    setTimeout(() => {
+      window.location.reload();
+    }, 1000);
+  };
+
   useEffect(() => {
     if (parsedSession.accessToken) {
       const handleGetProfile = async () => {
@@ -108,9 +143,10 @@ const SessionProvider = ({
             <p>3. You will get 5 quotas to use Memoify in premium mode</p>
           </div>
           <Form
+            disabled={loading}
             form={form}
             layout="vertical"
-            onFinish={(val) => console.log(val)}>
+            onFinish={(val) => handleSubmitPayment(val)}>
             <Form.Item name={'receipt'} className="!mt-[10px]">
               <Upload
                 accept=".jpg, .jpeg, .png"
@@ -140,7 +176,7 @@ const SessionProvider = ({
               </Upload>
             </Form.Item>
             <div className="flex justify-end">
-              <Button type="primary" htmlType="submit">
+              <Button type="primary" htmlType="submit" loading={loading}>
                 Submit
               </Button>
             </div>

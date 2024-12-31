@@ -35,3 +35,20 @@ export interface IDetailContentResponse {
   detail_content_json_text: string;
   status: string;
 }
+
+export interface IPaymentPayload {
+  content_id: string;
+  amount: number;
+  proof_payment_url: string;
+}
+
+export interface IAllPaymentResponse {
+  id: string;
+  user_id: string;
+  user_name: string;
+  user_type: string;
+  user_quota: number;
+  proof_payment_url: string;
+  date: string;
+  status: string;
+}
