@@ -3,7 +3,7 @@ import './globals.css';
 import { AntdRegistry } from '@ant-design/nextjs-registry';
 import { getSession } from '@/store/get-set-session';
 import SessionProvider from './session-provider';
-
+import { Analytics } from '@vercel/analytics/react';
 export const metadata: Metadata = {
   title: 'Memoify',
   description:
@@ -20,6 +20,7 @@ export default async function RootLayout({
     <html lang="en">
       <body>
         <AntdRegistry>
+          <Analytics />
           <SessionProvider session={JSON.stringify(session)}>
             {children}
           </SessionProvider>
