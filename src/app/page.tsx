@@ -2,6 +2,8 @@ import NavigationBar from '@/components/ui/navbar';
 import jumbotronImage from '@/assets/homepage.png';
 import jumbotronImage2 from '@/assets/jumbotron2.png';
 import jumbotronImage3 from '@/assets/jumbotron3.png';
+import jumbotronImage4 from '@/assets/jumbotron4.png';
+import jumbotronImage5 from '@/assets/jumbotron5.png';
 import photoboxImage from '@/assets/photobox-home.jpg';
 import Image from 'next/image';
 import { Button, Carousel } from 'antd';
@@ -73,6 +75,18 @@ export default function Home() {
               className="!w-[350px] md:!w-[800px]">
               <Image
                 src={jumbotronImage}
+                alt="jumbotron"
+                width={1000}
+                height={1000}
+              />
+              <Image
+                src={jumbotronImage4}
+                alt="jumbotron"
+                width={1000}
+                height={1000}
+              />
+              <Image
+                src={jumbotronImage5}
                 alt="jumbotron"
                 width={1000}
                 height={1000}

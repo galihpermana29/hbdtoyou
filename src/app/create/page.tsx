@@ -12,6 +12,8 @@ import SpotifyForm from '@/components/forms/spotify-form';
 import { useMemoifyProfile, useMemoifySession } from '../session-provider';
 import { signIn } from 'next-auth/react';
 import DisneyForm from '@/components/forms/disney-form';
+import Newspaperv1Form from '@/components/forms/newspaperv1-form';
+import Newspaperv3Form from '@/components/forms/newspaperv3-form';
 
 const CreatePage = () => {
   const [loading, setLoading] = useState(false);
@@ -138,6 +140,26 @@ const CreatePage = () => {
 
               {selectedTemplate.route.includes('disney+v1') && (
                 <DisneyForm
+                  selectedTemplate={selectedTemplate}
+                  loading={loading}
+                  setLoading={setLoading}
+                  modalState={modalState}
+                  setModalState={setModalState}
+                />
+              )}
+
+              {selectedTemplate.route.includes('newspaperv1') && (
+                <Newspaperv1Form
+                  selectedTemplate={selectedTemplate}
+                  loading={loading}
+                  setLoading={setLoading}
+                  modalState={modalState}
+                  setModalState={setModalState}
+                />
+              )}
+
+              {selectedTemplate.route.includes('newspaperv3') && (
+                <Newspaperv3Form
                   selectedTemplate={selectedTemplate}
                   loading={loading}
                   setLoading={setLoading}

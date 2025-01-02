@@ -64,7 +64,7 @@ export async function getAllTemplates(): Promise<
       'X-UserID': session.userId!,
       Authorization: `Bearer ${session.accessToken}`,
     },
-    next: { revalidate: 600 },
+    next: { revalidate: 30 },
   });
 
   if (!res.ok) {
