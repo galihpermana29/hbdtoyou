@@ -185,11 +185,9 @@ const CreatePage = () => {
                                 .split('-')[1]
                                 .split(' ')[1];
                               if (
-                                [
-                                  'newspaperv1',
-                                  'newspaperv2',
-                                  'newspaperv3',
-                                ].includes(routePath)
+                                ['newspaperv1', 'newspaperv2'].includes(
+                                  routePath
+                                )
                               ) {
                                 if (
                                   ['pending', 'premium'].includes(

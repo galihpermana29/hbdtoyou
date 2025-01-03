@@ -4,6 +4,7 @@ import jumbotronImage2 from '@/assets/jumbotron2.png';
 import jumbotronImage3 from '@/assets/jumbotron3.png';
 import jumbotronImage4 from '@/assets/jumbotron4.png';
 import jumbotronImage5 from '@/assets/jumbotron5.png';
+import jumbotronImage6 from '@/assets/jumbotron6.png';
 import photoboxImage from '@/assets/photobox-home.jpg';
 import Image from 'next/image';
 import { Button, Carousel } from 'antd';
@@ -78,30 +79,43 @@ export default function Home() {
                 alt="jumbotron"
                 width={1000}
                 height={1000}
+                priority
               />
               <Image
-                src={jumbotronImage4}
+                src={jumbotronImage6}
                 alt="jumbotron"
                 width={1000}
                 height={1000}
+                priority
+              />
+
+              <Image
+                src={jumbotronImage2}
+                alt="jumbotron"
+                width={1000}
+                height={1000}
+                priority
               />
               <Image
                 src={jumbotronImage5}
                 alt="jumbotron"
                 width={1000}
                 height={1000}
+                priority
+              />
+              <Image
+                src={jumbotronImage4}
+                alt="jumbotron"
+                width={1000}
+                height={1000}
+                priority
               />
               <Image
                 src={jumbotronImage3}
                 alt="jumbotron"
                 width={1000}
                 height={1000}
-              />
-              <Image
-                src={jumbotronImage2}
-                alt="jumbotron"
-                width={1000}
-                height={1000}
+                priority
               />
             </Carousel>
           </div>
@@ -169,7 +183,7 @@ export default function Home() {
 
             <PricingCard
               title="Premium"
-              price="IDR 15K"
+              price="IDR 10K"
               description="All the features you need for professional use"
               features={[
                 'Unlimited image storage',
