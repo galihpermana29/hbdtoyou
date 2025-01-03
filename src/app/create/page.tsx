@@ -181,6 +181,30 @@ const CreatePage = () => {
                         onClick={() => {
                           if (session?.accessToken) {
                             if (show.label === 'free') {
+                              const routePath = show.name
+                                .split('-')[1]
+                                .split(' ')[1];
+                              if (
+                                [
+                                  'newspaperv1',
+                                  'newspaperv2',
+                                  'newspaperv3',
+                                ].includes(routePath)
+                              ) {
+                                if (
+                                  ['pending', 'premium'].includes(
+                                    profile?.type as any
+                                  )
+                                ) {
+                                  setSelectedTemplate({
+                                    id: show.id,
+                                    route: routePath,
+                                  });
+                                  return;
+                                } else {
+                                  return message.info('Premium plan required');
+                                }
+                              }
                               setSelectedTemplate({
                                 id: show.id,
                                 route: show.name.split('-')[1].split(' ')[1],
