@@ -37,7 +37,7 @@ export function WeddingDetails() {
 
       <div>
         <p className={`${playfair.className} text-xl italic`}>
-          "We would love to celebrate our love with you"
+          We would love to celebrate our love with you
         </p>
       </div>
     </div>
