@@ -1,5 +1,16 @@
 'use client';
-import { Button, Form, Image, Input, message, Upload } from 'antd';
+import {
+  Badge,
+  Button,
+  Col,
+  Form,
+  Image,
+  Input,
+  message,
+  Row,
+  Select,
+  Upload,
+} from 'antd';
 import TextArea from 'antd/es/input/TextArea';
 import { useState } from 'react';
 import type { GetProp, UploadFile, UploadProps } from 'antd';
@@ -9,11 +20,12 @@ import {
   PlusOutlined,
 } from '@ant-design/icons';
 import { v4 as uuidv4 } from 'uuid';
-import { useForm } from 'antd/es/form/Form';
+import { useForm, useWatch } from 'antd/es/form/Form';
 import { revalidateRandom } from '@/lib/revalidate';
 import { useMemoifyProfile } from '@/app/session-provider';
 import { createContent } from '@/action/user-api';
 import { beforeUpload, getBase64, getBase64Multiple } from './netflix-form';
+import { v3Songs } from '@/lib/songs';
 type FileType = Parameters<GetProp<UploadProps, 'beforeUpload'>>[0];
 
 export const uploadImage = async (base64: string) => {
@@ -65,6 +77,9 @@ const Newspaperv3Form = ({
   const profile = useMemoifyProfile();
 
   const [form] = useForm();
+
+  const selectedSongs = useWatch('song', form);
+
   const handleChangeJumbotron: UploadProps['onChange'] = (info) => {
     if (info.file.status === 'uploading') {
       setLoading(true);
@@ -118,7 +133,7 @@ const Newspaperv3Form = ({
   );
 
   const handleSubmit = async (val: any) => {
-    const { jumbotronImage, desc1, desc2, desc3 } = val;
+    const { jumbotronImage, desc1, notableLyrics } = val;
     await getBase64(
       jumbotronImage.file.originFileObj as FileType,
       async (url) => {
@@ -130,8 +145,8 @@ const Newspaperv3Form = ({
             const json_text = {
               jumbotronImage: jumbotronURL,
               desc1,
-              desc2,
-              desc3,
+              notableLyrics,
+              id: selectedSongs ?? '0W5o1Kxw1VlohSajPqeBMF',
             };
 
             const payload = {
@@ -205,24 +220,85 @@ const Newspaperv3Form = ({
           </Upload>
         </Form.Item>
 
-        <Form.Item name={'desc1'} label="Desc 1" initialValue={null}>
-          <TextArea
+        <Form.Item
+          name={'song'}
+          label="Song"
+          initialValue={'0W5o1Kxw1VlohSajPqeBMF'}
+          rules={[
+            {
+              required: true,
+              message: 'Please select a song!',
+            },
+          ]}>
+          <Select
+            onChange={(value) => {
+              form.setFieldValue(
+                'desc1',
+                v3Songs.find((dx) => dx.id === value)?.lyrics
+              );
+
+              form.setFieldValue(
+                'notableLyrics',
+                v3Songs.find((dx) => dx.id === value)?.notableLyrics
+              );
+            }}
+            options={v3Songs.map((dx) => ({
+              label: (
+                <div className="flex gap-[8px] items-center">
+                  <p>{`${dx.singer} - ${dx.title}`} </p>
+                  <Badge
+                    color={dx.isPremium ? 'red' : 'blue'}
+                    count={dx.isPremium ? 'Premium' : 'Free'}
+                  />
+                </div>
+              ),
+              value: dx.id,
+              disabled: profile ? (profile?.quota > 0 ? false : true) : false,
+            }))}
+            placeholder="Select a song"
             size="large"
-            placeholder="This is how me express love. In the meantime you will understand how my brain works. lorem ipsum"
           />
         </Form.Item>
 
-        <Form.Item name={'desc2'} label="Desc 2" initialValue={null}>
-          <TextArea
+        <div className="max-w-[400px] my-[12px]">
+          <iframe
+            src={`https://open.spotify.com/embed/track/${selectedSongs}`}
+            height={80}
+            className="w-full"></iframe>
+        </div>
+
+        <Form.Item
+          initialValue={
+            v3Songs.find((dx) => dx.id === '0W5o1Kxw1VlohSajPqeBMF')
+              ?.notableLyrics
+          }
+          rules={[
+            {
+              required: true,
+              message: 'Please input notable lyrics!',
+            },
+          ]}
+          name={'notableLyrics'}
+          label="Notable Lyrics">
+          <Input
+            placeholder="Lyrics or anything you want to say"
             size="large"
-            placeholder="This is how me express love. In the meantime you will understand how my brain works. lorem ipsum"
           />
         </Form.Item>
-
-        <Form.Item name={'desc3'} label="Desc 3" initialValue={null}>
+        <Form.Item
+          rules={[
+            {
+              required: true,
+              message: 'Please input description',
+            },
+          ]}
+          name={'desc1'}
+          label="Desc 1"
+          initialValue={null}>
           <TextArea
+            className="!h-[500px]"
             size="large"
-            placeholder="This is how me express love. In the meantime you will understand how my brain works. lorem ipsum"
+            placeholder="If you're not putting any content, it will be default value to its song lyrics"
           />
         </Form.Item>
 

@@ -16,7 +16,6 @@ export default async function HomePage({ params }: any) {
     return <div>No data</div>;
   }
   const parsedData = JSON.parse(data.data.detail_content_json_text);
-
   return (
     <div className="h-screen bg-black">
       <div className="flex h-[calc(100%-96px)] gap-[20px]">

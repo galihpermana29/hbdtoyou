@@ -8,6 +8,8 @@ import { SessionData } from '@/store/iron-session';
 import { PlusOneOutlined } from '@mui/icons-material';
 import { Button, Form, message, Modal, Upload } from 'antd';
 import React, { createContext, useContext, useEffect, useState } from 'react';
+import { Footer } from '@/components/ui/footer';
+import { usePathname } from 'next/navigation';
 
 // Define the context type
 interface SessionContextType {
@@ -41,7 +43,7 @@ const SessionProvider = ({
   });
   const [form] = Form.useForm();
   const [imageUrl, setImageUrl] = useState<string | null>(null);
-
+  const pathname = usePathname();
   const [loading, setLoading] = useState(false);
 
   const handleImageUpload = (info: any) => {
@@ -129,7 +131,7 @@ const SessionProvider = ({
         <div>
           <h1 className="text-[16px] font-bold">How to Upgrade Plan?</h1>
           <div className="mt-2">
-            <p>1. Transfer IDR 15K to one of this bank account</p>
+            <p>1. Transfer IDR 10K to one of this bank account</p>
             <div className="ml-2">
               <p>089621490655 - GOPAY [GALIH PERMANA]</p>
               <p>3151609374 - BCA [GALIH PERMANA]</p>
@@ -184,6 +186,8 @@ const SessionProvider = ({
         </div>
       </Modal>
       {children}
+
+      {!pathname.includes('/spotify') && <Footer />}
     </SessionContext.Provider>
   );
 };

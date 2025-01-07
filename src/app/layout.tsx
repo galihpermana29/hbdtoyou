@@ -4,7 +4,6 @@ import { AntdRegistry } from '@ant-design/nextjs-registry';
 import { getSession } from '@/store/get-set-session';
 import SessionProvider from './session-provider';
 import { Analytics } from '@vercel/analytics/react';
-import { Footer } from '@/components/ui/footer';
 export const metadata: Metadata = {
   title: 'Memoify',
   description:
@@ -24,7 +23,6 @@ export default async function RootLayout({
           <Analytics />
           <SessionProvider session={JSON.stringify(session)}>
             {children}
-            <Footer />
           </SessionProvider>
         </AntdRegistry>
       </body>
