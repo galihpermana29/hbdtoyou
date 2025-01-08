@@ -253,7 +253,13 @@ const Newspaperv3Form = ({
                 </div>
               ),
               value: dx.id,
-              disabled: profile ? (profile?.quota > 0 ? false : true) : false,
+              disabled: dx.isPremium
+                ? profile
+                  ? profile.quota > 0
+                    ? false
+                    : true
+                  : false
+                : false,
             }))}
             placeholder="Select a song"
             size="large"

@@ -4,6 +4,7 @@ import { AntdRegistry } from '@ant-design/nextjs-registry';
 import { getSession } from '@/store/get-set-session';
 import SessionProvider from './session-provider';
 import { Analytics } from '@vercel/analytics/react';
+
 export const metadata: Metadata = {
   title: 'Memoify',
   description:

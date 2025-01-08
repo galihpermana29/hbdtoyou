@@ -66,14 +66,14 @@ const CreatePage = () => {
             You can share your own version of memoify with your friends or
             someone you love.
           </p>
-          <p className="mt-2">
+          {/* <p className="mt-2">
             Support the creator by follow instagram{' '}
             <Link
               href={'https://www.instagram.com/galjhpermana/'}
               target="_blank">
               @galjhpermana
             </Link>{' '}
-          </p>
+          </p> */}
           <div className="flex items-center gap-[12px] mt-[12px]">
             <Link href={`/${modalState.data}`} className="cursor-pointer">
               <Button

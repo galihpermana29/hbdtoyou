@@ -12,6 +12,8 @@ import Link from 'next/link';
 
 import Script from 'next/script';
 import PricingCard from '@/components/ui/pricing/pricing-card';
+import Counter from '@/components/ui/counter';
+import PricingWrapper from '@/components/ui/pricing/pricing-wrapper';
 
 const GA_MEASUREMENT_ID = 'G-X4G9RCBNQH'; // Your Google Analytics ID
 
@@ -121,6 +123,47 @@ export default function Home() {
           </div>
         </div>
       </div>
+      <section className="mb-[50px]">
+        <main className="min-h-screen bg-white flex flex-col justify-center p-[20px] md:px-[40px]">
+          <div className="w-full flex flex-col justify-center items-center text-center mb-16">
+            <h1 className="text-3xl md:text-5xl font-semibold mb-4 max-w-2xl">
+              Oh, take a look at how much users{' '}
+              <span className="text-red-500 font-bold italic">love us</span>
+            </h1>
+            <p className="text-gray-600 text-[16px] md:text-xl max-w-3xl">
+              Create marketing assets in seconds with this Figma library. No
+              need to hire a designer. Keep your costs low while maintaining
+              high-quality designs.
+            </p>
+          </div>
+
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-8 w-full">
+            <div className="text-center">
+              <Counter endValue={2000} />
+              <h2 className="text-xl font-bold mt-4 mb-2">User has joined</h2>
+              <p className="text-gray-600">
+                Simply they've joined our platform.
+              </p>
+            </div>
+
+            <div className="text-center">
+              <Counter endValue={129} />
+              <h2 className="text-xl font-bold mt-4 mb-2">User premium</h2>
+              <p className="text-gray-600">
+                They feel useful and want to keep.
+              </p>
+            </div>
+
+            <div className="text-center">
+              <Counter endValue={7} />
+              <h2 className="text-xl font-bold mt-4 mb-2">Templates</h2>
+              <p className="text-gray-600">
+                Capture and share your moment with ours.
+              </p>
+            </div>
+          </div>
+        </main>
+      </section>
       <div
         className="mt-[50px] flex flex-col md:flex-row bg-[#dfd2c4] justify-between"
         id="photobox">
@@ -156,7 +199,8 @@ export default function Home() {
           </div>
         </div>
       </div>
-      <section className="w-full py-12 sm:py-16 bg-background">
+      <PricingWrapper />
+      {/* <section className="w-full py-12 sm:py-16 bg-background">
         <div className="container mx-auto px-4 sm:px-6">
           <div className="text-center mb-8 sm:mb-12">
             <h2 className="text-3xl sm:text-4xl font-bold mb-3 sm:mb-4">
@@ -182,6 +226,9 @@ export default function Home() {
             />
 
             <PricingCard
+            onClickButton={() => {
+            
+            }}
               title="Premium"
               price="IDR 10K"
               description="All the features you need for professional use"
@@ -196,7 +243,7 @@ export default function Home() {
             />
           </div>
         </div>
-      </section>
+      </section> */}
     </div>
   );
 }

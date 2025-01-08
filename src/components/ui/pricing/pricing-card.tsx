@@ -1,5 +1,6 @@
 'use client';
 
+import { Badge } from 'antd';
 import { Button } from './button';
 import { Card } from './card';
 import { FeatureItem } from './feature-item';
@@ -43,7 +44,10 @@ const PricingCard = ({
       <div className="flex flex-col h-full">
         <div>
           <h3 className="text-xl sm:text-2xl font-bold">{title}</h3>
-          <PriceDisplay amount={price} period=" " />
+          <div className="flex gap-[8px] items-center">
+            <PriceDisplay amount={price} period=" " />
+            {popular && <Badge count="50% OFF" />}
+          </div>
           <p className="mt-4 text-sm sm:text-base text-muted-foreground">
             {description}
           </p>
@@ -55,12 +59,12 @@ const PricingCard = ({
           ))}
         </div>
 
-        {/* <Button
+        <Button
           className="mt-6 sm:mt-8 w-full"
           variant={buttonVariant}
           onClick={onClickButton}>
           {buttonText}
-        </Button> */}
+        </Button>
       </div>
     </div>
   </Card>

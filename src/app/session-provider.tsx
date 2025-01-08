@@ -142,7 +142,7 @@ const SessionProvider = ({
             <p className="my-1">
               3. Memoify admin will verify your payment and upgrade your plan
             </p>
-            <p>3. You will get 5 quotas to use Memoify in premium mode</p>
+            <p>3. Your account will be on premium mode</p>
           </div>
           <Form
             disabled={loading}
