@@ -105,7 +105,16 @@ const DisneyForm = ({
   };
 
   const handleChange: UploadProps['onChange'] = ({ fileList: newFileList }) => {
-    if (beforeUpload(newFileList[0].originFileObj as FileType)) {
+    if (
+      beforeUpload(
+        newFileList[0].originFileObj as FileType,
+        profile
+          ? ['premium', 'pending'].includes(profile.type as any)
+            ? 'premium'
+            : 'free'
+          : 'free'
+      )
+    ) {
       setFileList(newFileList);
     }
   };
@@ -411,16 +420,16 @@ const DisneyForm = ({
             maxCount={profile?.type === 'free' ? 5 : 15}
             listType="picture-card"
             fileList={fileList}
-            beforeUpload={(file) =>
-              beforeUpload(
-                file,
-                profile
-                  ? ['premium', 'pending'].includes(profile.type as any)
-                    ? 'premium'
-                    : 'free'
-                  : 'free'
-              )
-            }
+            // beforeUpload={(file) =>
+            //   beforeUpload(
+            //     file,
+            //     profile
+            //       ? ['premium', 'pending'].includes(profile.type as any)
+            //         ? 'premium'
+            //         : 'free'
+            //       : 'free'
+            //   )
+            // }
             onPreview={handlePreview}
             onChange={handleChange}>
             {fileList.length >= 10 ? null : uploadButton}

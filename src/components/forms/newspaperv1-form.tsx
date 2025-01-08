@@ -95,21 +95,6 @@ const Newspaperv1Form = ({
     }
   };
 
-  const handlePreview = async (file: UploadFile) => {
-    if (!file.url && !file.preview) {
-      file.preview = await getBase64Multiple(file.originFileObj as FileType);
-    }
-
-    setPreviewImage(file.url || (file.preview as string));
-    setPreviewOpen(true);
-  };
-
-  const handleChange: UploadProps['onChange'] = ({ fileList: newFileList }) => {
-    if (beforeUpload(newFileList[0].originFileObj as FileType)) {
-      setFileList(newFileList);
-    }
-  };
-
   const uploadButton = (
     <button style={{ border: 0, background: 'none' }} type="button">
       {loading ? <LoadingOutlined /> : <PlusOutlined />}
@@ -119,7 +104,6 @@ const Newspaperv1Form = ({
 
   const handleSubmit = async (val: any) => {
     const { jumbotronImage, title, subTitle, modalContent, stories } = val;
-    console.log(val, 'val?');
     await getBase64(
       jumbotronImage.file.originFileObj as FileType,
       async (url) => {

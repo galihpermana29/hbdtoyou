@@ -47,11 +47,15 @@ export const beforeUpload = (
   if (!isJpgOrPng) {
     message.error('You can only upload JPG/PNG file!');
   }
-
-  const sizing = type === 'free' ? 1 : 3;
+  console.log(file.size / 1024 / 1024, '???', type);
+  const sizing = type === 'free' ? 1 : 5;
   const isLt2M = file.size / 1024 / 1024 < sizing;
   if (!isLt2M) {
-    message.error('Free account can only upload image below 1MB!');
+    if (type === 'free') {
+      message.error('Free account can only upload image below 1MB!');
+    } else {
+      message.error('Maximum image size is 5MB!');
+    }
   }
   return isJpgOrPng && isLt2M;
 };
@@ -129,7 +133,16 @@ const NetflixForm = ({
   };
 
   const handleChange: UploadProps['onChange'] = ({ fileList: newFileList }) => {
-    if (beforeUpload(newFileList[0].originFileObj as FileType)) {
+    if (
+      beforeUpload(
+        newFileList[0].originFileObj as FileType,
+        profile
+          ? ['premium', 'pending'].includes(profile.type as any)
+            ? 'premium'
+            : 'free'
+          : 'free'
+      )
+    ) {
       setFileList(newFileList);
     }
   };
@@ -316,16 +329,16 @@ const NetflixForm = ({
             maxCount={profile?.type === 'free' ? 10 : 20}
             listType="picture-card"
             fileList={fileList}
-            beforeUpload={(file) =>
-              beforeUpload(
-                file,
-                profile
-                  ? ['premium', 'pending'].includes(profile.type as any)
-                    ? 'premium'
-                    : 'free'
-                  : 'free'
-              )
-            }
+            // beforeUpload={(file) =>
+            //   beforeUpload(
+            //     file,
+            //     profile
+            //       ? ['premium', 'pending'].includes(profile.type as any)
+            //         ? 'premium'
+            //         : 'free'
+            //       : 'free'
+            //   )
+            // }
             onPreview={handlePreview}
             onChange={handleChange}>
             {fileList.length >= 10 ? null : uploadButton}
