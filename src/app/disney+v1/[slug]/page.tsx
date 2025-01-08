@@ -12,9 +12,9 @@ const getDetailDataNew = async (id: string) => {
 };
 
 export default async function DynamicDisneyPage({ params }: { params: any }) {
-  const { id } = params;
+  const { slug } = params;
 
-  const data = await getDetailDataNew(id);
+  const data = await getDetailDataNew(slug);
   if (!data.data) {
     return <div>No data</div>;
   }
