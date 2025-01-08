@@ -142,7 +142,7 @@ export default function Home() {
               <Counter endValue={2000} />
               <h2 className="text-xl font-bold mt-4 mb-2">User has joined</h2>
               <p className="text-gray-600">
-                Simply they've joined our platform.
+                Simply they have joined our platform.
               </p>
             </div>
 
