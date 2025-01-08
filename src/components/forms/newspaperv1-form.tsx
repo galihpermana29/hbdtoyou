@@ -146,7 +146,6 @@ const Newspaperv1Form = ({
               message.error('Something went wrong!');
             }
 
-            revalidateRandom();
             setLoading(false);
           } catch {
             message.error('Error uploading image');
@@ -154,6 +153,7 @@ const Newspaperv1Form = ({
         } catch {
           message.error('Error uploading image');
         }
+        setLoading(false);
       }
     );
   };

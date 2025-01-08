@@ -206,7 +206,6 @@ const NetflixForm = ({
               message.error('Something went wrong!');
             }
 
-            revalidateRandom();
             setLoading(false);
             // fetch('/api/userData', {
             //   method: 'POST',
@@ -239,6 +238,7 @@ const NetflixForm = ({
         } catch {
           message.error('Error uploading image');
         }
+        setLoading(false);
       }
     );
   };

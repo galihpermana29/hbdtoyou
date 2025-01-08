@@ -116,11 +116,11 @@ const SpotifyForm = ({
         message.error('Something went wrong!');
       }
 
-      revalidateRandom();
       setLoading(false);
     } catch {
       message.error('Error uploading image');
     }
+    setLoading(false);
   };
 
   useEffect(() => {
