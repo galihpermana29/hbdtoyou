@@ -11,7 +11,7 @@ const getDetailDataNew = async (id: string) => {
   return res;
 };
 
-export default async function Home({ params }: { params: any }) {
+export default async function DynamicDisneyPage({ params }: { params: any }) {
   const { id } = params;
 
   const data = await getDetailDataNew(id);

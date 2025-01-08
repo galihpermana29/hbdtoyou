@@ -7,7 +7,7 @@ import SimilarShows from '../../components/disney+/SimilarShows';
 import TrailerSection from '../../components/disney+/TrailerSection';
 import { Button } from '../../components/disney+/ui/button';
 
-export default function Home() {
+export default function DisneyPage() {
   return (
     <main className="min-h-screen bg-[#1A1D29] text-white">
       {/* Hero Section */}
