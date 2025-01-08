@@ -48,13 +48,13 @@ export const beforeUpload = (
     message.error('You can only upload JPG/PNG file!');
   }
   console.log(file.size / 1024 / 1024, '???', type);
-  const sizing = type === 'free' ? 1 : 5;
+  const sizing = type === 'free' ? 1 : 10;
   const isLt2M = file.size / 1024 / 1024 < sizing;
   if (!isLt2M) {
     if (type === 'free') {
       message.error('Free account can only upload image below 1MB!');
     } else {
-      message.error('Maximum image size is 5MB!');
+      message.error('Maximum image size is 10MB!');
     }
   }
   return isJpgOrPng && isLt2M;
