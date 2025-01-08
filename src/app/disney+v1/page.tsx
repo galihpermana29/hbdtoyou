@@ -1,5 +1,3 @@
-'use client';
-
 import { Play, Plus } from 'lucide-react';
 import Image from 'next/image';
 import EpisodeList from '../../components/disney+/EpisodeList';
