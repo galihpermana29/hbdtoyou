@@ -27,8 +27,9 @@ const getTop10 = async () => {
   return [];
 };
 
+const dx: any[] = [];
 const TopTenPage = async () => {
-  const dx = await getTop10();
+  // const dx = await getTop10();
   return (
     <div>
       <div className="fixed top-0 left-0 w-full z-10 ">

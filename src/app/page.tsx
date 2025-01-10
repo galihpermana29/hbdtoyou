@@ -131,9 +131,9 @@ export default function Home() {
               <span className="text-red-500 font-bold italic">love us</span>
             </h1>
             <p className="text-gray-600 text-[16px] md:text-xl max-w-3xl">
-              Create marketing assets in seconds with this Figma library. No
-              need to hire a designer. Keep your costs low while maintaining
-              high-quality designs.
+              We glad that we receive decent amount of user feedback. We are
+              constantly working to improve our product and services to meet
+              your needs.
             </p>
           </div>
 
