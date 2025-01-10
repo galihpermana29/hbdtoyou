@@ -8,11 +8,11 @@ const RootExamplePage = () => {
       <Navbar />
       <Featured />
       <List
-        title={'Widya Before Meet Me'}
+        title={'You Before Meet Me'}
         tData={[null, null, null, null, null, null, null]}
       />
       <List
-        title={'Widya After Meet Me'}
+        title={'You After Meet Me'}
         tData={[null, null, null, null, null, null, null]}
       />
     </div>
