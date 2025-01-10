@@ -12,7 +12,7 @@ export default function TrailerSection({ data }: { data?: string }) {
           src={
             data
               ? data
-              : 'https://res.cloudinary.com/dxuumohme/image/upload/v1735327153/ovks2ojj7kksl8k9mdrx.jpg'
+              : 'https://res.cloudinary.com/dxuumohme/image/upload/v1736524123/nzdbzleig7ssk6sf7ch5.jpg'
           }
           alt="The Jumbotron"
           fill

@@ -14,7 +14,12 @@ import { signIn } from 'next-auth/react';
 import DisneyForm from '@/components/forms/disney-form';
 import Newspaperv1Form from '@/components/forms/newspaperv1-form';
 import Newspaperv3Form from '@/components/forms/newspaperv3-form';
-
+const PREMIUM_TEMPLATES = [
+  'newspaperv1',
+  'newspaperv2',
+  'disneyplusv1',
+  'netflixv1',
+];
 const CreatePage = () => {
   const [loading, setLoading] = useState(false);
   const [selectedTemplate, setSelectedTemplate] = useState<{
@@ -184,11 +189,7 @@ const CreatePage = () => {
                               const routePath = show.name
                                 .split('-')[1]
                                 .split(' ')[1];
-                              if (
-                                ['newspaperv1', 'newspaperv2'].includes(
-                                  routePath
-                                )
-                              ) {
+                              if (PREMIUM_TEMPLATES.includes(routePath)) {
                                 if (
                                   ['pending', 'premium'].includes(
                                     profile?.type as any

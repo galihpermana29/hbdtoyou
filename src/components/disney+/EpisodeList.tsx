@@ -6,25 +6,25 @@ import { Play } from 'lucide-react';
 const episodes = [
   {
     id: 1,
-    title: 'Episode 1: Jadi mahasiswa baru',
+    title: 'Episode 1:',
     episode: 'S1 E1',
     date: '14 Aug 2024',
     duration: '41m',
     description:
       'lorem ipsum dolor sit amet consectetur adipisicing elit. Voluptate, quia.',
     thumbnail:
-      'https://res.cloudinary.com/dxuumohme/image/upload/v1735327153/fe7jd3ngffjhkrkrb90e.jpg',
+      'https://res.cloudinary.com/dxuumohme/image/upload/v1736524166/zs1dfqmiui2oqnd2hi5a.jpg',
   },
   {
     id: 2,
-    title: 'Episode 2: MBKM moment',
+    title: 'Episode 2:',
     episode: 'S1 E2',
     date: '14 Aug 2024',
     duration: '36m',
     description:
       'Lim Sang receives an order to eliminate Miyong and his men who were involved in the assault.',
     thumbnail:
-      'https://res.cloudinary.com/dxuumohme/image/upload/v1735327153/l5yvcs5gd1kwvxfnnhzs.jpg',
+      'https://res.cloudinary.com/dxuumohme/image/upload/v1736524137/hinwkuumdhkwghn0o6gj.jpg',
   },
   // Add more episodes as needed
 ];

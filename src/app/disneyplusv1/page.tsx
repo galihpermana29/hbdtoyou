@@ -11,7 +11,7 @@ export default function DisneyPage() {
       {/* Hero Section */}
       <div className="relative h-[80vh] w-full">
         <Image
-          src="https://res.cloudinary.com/dxuumohme/image/upload/v1735327059/s6s3nrvpvueyhkhavfy9.jpg"
+          src="https://res.cloudinary.com/dxuumohme/image/upload/v1736524166/veevebpg774vy4n326su.jpg"
           alt="The Tyrant Hero"
           fill
           className="object-cover brightness-50"
@@ -21,12 +21,11 @@ export default function DisneyPage() {
           <div className="max-w-7xl mx-auto">
             <div className="flex flex-col gap-4">
               <h1 className="text-4xl md:text-6xl font-bold">
-                Para Pengejar Sidang Skripsi
+                Tunggu Aku di Bandung
               </h1>
               <p className="text-gray-300 max-w-2xl">
-                Lorem, ipsum dolor sit amet consectetur adipisicing elit.
-                Pariatur repellendus, ipsam tempora quasi incidunt velit maiores
-                enim reiciendis nostrum numquam.
+                Dan bila akupun rindu, pada nyamannya pelukmu, pada hangatnya
+                tawamu
               </p>
               <div className="flex flex-wrap gap-4 mt-4">
                 <Button className="bg-white text-black hover:bg-gray-200 gap-2">

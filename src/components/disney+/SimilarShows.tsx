@@ -7,31 +7,31 @@ const similarShows = [
     id: 1,
     title: 'The Fiery Fist II',
     image:
-      'https://res.cloudinary.com/dxuumohme/image/upload/v1735327153/fe7jd3ngffjhkrkrb90e.jpg',
+      'https://res.cloudinary.com/dxuumohme/image/upload/v1736524133/jqvhwsg2jeztjznxwbph.jpg',
   },
   {
     id: 2,
     title: 'Shop for Killers',
     image:
-      'https://res.cloudinary.com/dxuumohme/image/upload/v1735327153/ovks2ojj7kksl8k9mdrx.jpg',
+      'https://res.cloudinary.com/dxuumohme/image/upload/v1736524123/nzdbzleig7ssk6sf7ch5.jpg',
   },
   {
     id: 3,
     title: 'Shop for Killers',
     image:
-      'https://res.cloudinary.com/dxuumohme/image/upload/v1735327153/ovks2ojj7kksl8k9mdrx.jpg',
+      'https://res.cloudinary.com/dxuumohme/image/upload/v1736524116/wexe6mglvlsfzyji0fq4.jpg',
   },
   {
     id: 21,
     title: 'Shop for Killers',
     image:
-      'https://res.cloudinary.com/dxuumohme/image/upload/v1735327153/ovks2ojj7kksl8k9mdrx.jpg',
+      'https://res.cloudinary.com/dxuumohme/image/upload/v1736524119/lji4u4epdrf0nr1vbq4x.jpg',
   },
   {
     id: 22,
     title: 'Shop for Killers',
     image:
-      'https://res.cloudinary.com/dxuumohme/image/upload/v1735327153/ovks2ojj7kksl8k9mdrx.jpg',
+      'https://res.cloudinary.com/dxuumohme/image/upload/v1736524120/xvpfzciuktzzjcpnicjt.jpg',
   },
   // Add more shows as needed
 ];
