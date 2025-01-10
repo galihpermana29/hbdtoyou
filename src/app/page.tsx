@@ -77,6 +77,13 @@ export default function Home() {
               autoplaySpeed={2000}
               className="!w-[350px] md:!w-[800px]">
               <Image
+                src={jumbotronImage3}
+                alt="jumbotron"
+                width={1000}
+                height={1000}
+                priority
+              />
+              <Image
                 src={jumbotronImage}
                 alt="jumbotron"
                 width={1000}
@@ -107,13 +114,6 @@ export default function Home() {
               />
               <Image
                 src={jumbotronImage4}
-                alt="jumbotron"
-                width={1000}
-                height={1000}
-                priority
-              />
-              <Image
-                src={jumbotronImage3}
                 alt="jumbotron"
                 width={1000}
                 height={1000}
