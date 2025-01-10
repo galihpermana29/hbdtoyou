@@ -18,7 +18,7 @@ const PREMIUM_TEMPLATES = [
   'newspaperv1',
   'newspaperv2',
   'disneyplusv1',
-  'netflixv1',
+  'spotifyv1',
 ];
 const CreatePage = () => {
   const [loading, setLoading] = useState(false);
