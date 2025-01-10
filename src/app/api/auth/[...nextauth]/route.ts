@@ -38,7 +38,7 @@ const handler = NextAuth({
       if (account) {
         const { id_token } = account;
         const oAuthResult = await loginOAuth({ token_email: id_token! });
-
+        console.log(oAuthResult, '?');
         if (oAuthResult.data) {
           const spotifySession = await getSpotifyAccessToken();
           const newSession = {

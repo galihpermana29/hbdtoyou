@@ -138,7 +138,7 @@ const CreatePage = () => {
                 />
               )}
 
-              {selectedTemplate.route.includes('disney+v1') && (
+              {selectedTemplate.route.includes('disneyplusv1') && (
                 <DisneyForm
                   selectedTemplate={selectedTemplate}
                   loading={loading}
