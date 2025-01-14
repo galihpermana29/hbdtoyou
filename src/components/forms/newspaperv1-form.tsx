@@ -16,23 +16,6 @@ import { createContent } from '@/action/user-api';
 import { beforeUpload, getBase64, getBase64Multiple } from './netflix-form';
 type FileType = Parameters<GetProp<UploadProps, 'beforeUpload'>>[0];
 
-export const uploadImage = async (base64: string) => {
-  const data = await fetch('/api/upload', {
-    method: 'POST',
-    headers: {
-      'Content-Type': 'application/json',
-    },
-    body: JSON.stringify({ image: base64 }),
-  });
-
-  if (data.ok) {
-    const dx = await data.json();
-    return dx.data;
-  } else {
-    throw new Error('Error');
-  }
-};
-
 const Newspaperv1Form = ({
   loading,
   setLoading,
@@ -58,41 +41,31 @@ const Newspaperv1Form = ({
   };
 }) => {
   const [imageUrl, setImageUrl] = useState<string>();
-  const [previewOpen, setPreviewOpen] = useState(false);
-  const [previewImage, setPreviewImage] = useState('');
-  const [fileList, setFileList] = useState<UploadFile[]>([]);
+  const [uploadLoading, setUploadLoading] = useState(false);
 
   const profile = useMemoifyProfile();
 
   const [form] = useForm();
-  const handleChangeJumbotron: UploadProps['onChange'] = (info) => {
-    if (info.file.status === 'uploading') {
-      setLoading(true);
-      return;
-    }
-    if (info.file.status === 'done') {
-      // Get this url from response in real world.
-      getBase64(info.file.originFileObj as FileType, (url) => {
-        setLoading(false);
-        setImageUrl(url);
-      });
-    }
+
+  const handleSetStoryImageURI = (
+    payload: { uri: string; uid: string },
+    formName: string,
+    fieldIndex?: number
+  ) => {
+    const currentValues = form.getFieldValue('stories') || [];
+    currentValues[fieldIndex!] = {
+      ...currentValues[fieldIndex!],
+      imageUrl: payload.uri,
+    };
+    form.setFieldsValue({ stories: currentValues });
   };
 
-  const handleImageUpload = (info: any, fieldIndex: number) => {
-    if (info.file.status === 'done' || info.file.originFileObj) {
-      const reader = new FileReader();
-      reader.onload = () => {
-        // Update the form field directly
-        const currentValues = form.getFieldValue('stories') || [];
-        currentValues[fieldIndex] = {
-          ...currentValues[fieldIndex],
-          imageUrl: reader.result as string,
-        };
-        form.setFieldsValue({ stories: currentValues });
-      };
-      reader.readAsDataURL(info.file.originFileObj);
-    }
+  const handleSetJumbotronImageURI = (
+    payload: { uri: string; uid: string },
+    formName: string
+  ) => {
+    form.setFieldValue(formName, payload);
+    setImageUrl(payload.uri);
   };
 
   const uploadButton = (
@@ -103,53 +76,41 @@ const Newspaperv1Form = ({
   );
 
   const handleSubmit = async (val: any) => {
-    const { jumbotronImage, title, subTitle, modalContent, stories } = val;
+    const { jumbotronImage, title, subTitle, stories } = val;
+    setLoading(true);
+
+    const json_text = {
+      jumbotronImage: jumbotronImage?.uri,
+      title,
+      subTitle,
+      stories: stories,
+    };
+
+    const payload = {
+      template_id: selectedTemplate.id,
+      detail_content_json_text: JSON.stringify(json_text),
+    };
+
+    const res = await createContent(payload);
+    if (res.success) {
+      const userLink = selectedTemplate.route + '/' + res.data;
+      message.success('Successfully created!');
+      form.resetFields();
+      setModalState({
+        visible: true,
+        data: userLink as string,
+      });
+    } else {
+      message.error('Something went wrong!');
+    }
+
+    setLoading(false);
+
+    return;
     await getBase64(
       jumbotronImage.file.originFileObj as FileType,
       async (url) => {
         try {
-          setLoading(true);
-          const jumbotronURL = await uploadImage(url);
-
-          const multipleEpisodePromises = stories.map((dx: any) =>
-            uploadImage(dx.imageUrl)
-          );
-
-          try {
-            const episodesURL = await Promise.all(multipleEpisodePromises);
-            const json_text = {
-              jumbotronImage: jumbotronURL,
-              title,
-              subTitle,
-              stories: stories.map((dx: any, idx: number) => ({
-                imageUrl: episodesURL[idx],
-                title: dx.title,
-                desc: dx.desc,
-              })),
-            };
-
-            const payload = {
-              template_id: selectedTemplate.id,
-              detail_content_json_text: JSON.stringify(json_text),
-            };
-
-            const res = await createContent(payload);
-            if (res.success) {
-              const userLink = selectedTemplate.route + '/' + res.data;
-              message.success('Successfully created!');
-              form.resetFields();
-              setModalState({
-                visible: true,
-                data: userLink as string,
-              });
-            } else {
-              message.error('Something went wrong!');
-            }
-
-            setLoading(false);
-          } catch {
-            message.error('Error uploading image');
-          }
         } catch {
           message.error('Error uploading image');
         }
@@ -180,17 +141,20 @@ const Newspaperv1Form = ({
             listType="picture-card"
             className="avatar-uploader"
             showUploadList={false}
-            beforeUpload={(file) =>
-              beforeUpload(
+            beforeUpload={async (file) => {
+              setUploadLoading(true);
+              await beforeUpload(
                 file,
                 profile
                   ? ['premium', 'pending'].includes(profile.type as any)
                     ? 'premium'
                     : 'free'
-                  : 'free'
-              )
-            }
-            onChange={handleChangeJumbotron}>
+                  : 'free',
+                handleSetJumbotronImageURI,
+                'jumbotronImage'
+              );
+              setUploadLoading(false);
+            }}>
             {imageUrl ? (
               <img src={imageUrl} alt="avatar" style={{ width: '100%' }} />
             ) : (
@@ -253,10 +217,14 @@ const Newspaperv1Form = ({
                                   )
                                   ? 'premium'
                                   : 'free'
-                                : 'free'
+                                : 'free',
+                              handleSetStoryImageURI,
+                              'stories',
+                              index
                             )
                           }
-                          onChange={(info) => handleImageUpload(info, index)}>
+                          // onChange={(info) => handleImageUpload(info, index)}
+                        >
                           {form.getFieldValue('stories')?.[index]?.imageUrl ? (
                             <img
                               src={
@@ -348,7 +316,7 @@ const Newspaperv1Form = ({
         <div className="flex justify-end ">
           <Button
             className="!bg-black"
-            loading={loading}
+            loading={loading || uploadLoading}
             type="primary"
             htmlType="submit"
             size="large">

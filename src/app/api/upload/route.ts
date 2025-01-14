@@ -8,11 +8,14 @@ export async function POST(req: any, res: any) {
   });
 
   const resBody = await req.json();
-  const { image } = resBody;
+  const { image, type } = resBody;
   const data = await cloudinary.uploader.upload(
     image,
     {
       use_filename: true,
+      ...(type === 'free'
+        ? { aspect_ratio: '1.5', width: 500, crop: 'crop' }
+        : null),
     },
     (error: any) => {
       if (error) {

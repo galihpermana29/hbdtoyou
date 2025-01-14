@@ -9,7 +9,7 @@ import { useForm } from 'antd/es/form/Form';
 import { revalidateRandom } from '@/lib/revalidate';
 import { useMemoifyProfile } from '@/app/session-provider';
 import { createContent } from '@/action/user-api';
-type FileType = Parameters<GetProp<UploadProps, 'beforeUpload'>>[0];
+export type FileType = Parameters<GetProp<UploadProps, 'beforeUpload'>>[0];
 
 export const validateSlug = (x: any, value: any) => {
   // Allows letters, numbers, and hyphens (no spaces or other special characters)
@@ -39,15 +39,21 @@ export const getBase64Multiple = (file: FileType): Promise<string> =>
     reader.onerror = (error) => reject(error);
   });
 
-export const beforeUpload = (
+export const beforeUpload = async (
   file: FileType,
-  type: 'premium' | 'free' = 'free'
+  type: 'premium' | 'free' = 'free',
+  setFormValues?: (
+    { uri, uid }: { uri: string; uid: string },
+    formName: string,
+    index?: number
+  ) => void,
+  formName?: string,
+  index?: number
 ) => {
   const isJpgOrPng = file.type === 'image/jpeg' || file.type === 'image/png';
   if (!isJpgOrPng) {
     message.error('You can only upload JPG/PNG file!');
   }
-  console.log(file.size / 1024 / 1024, '???', type);
   const sizing = type === 'free' ? 1 : 10;
   const isLt2M = file.size / 1024 / 1024 < sizing;
   if (!isLt2M) {
@@ -56,17 +62,44 @@ export const beforeUpload = (
     } else {
       message.error('Maximum image size is 10MB!');
     }
+  } else {
+    const reader = new FileReader();
+    reader.onload = async () => {
+      if (type === 'free') {
+        message.loading('Compressing image, please wait');
+      } else {
+        message.loading('Uploading image, please wait');
+      }
+      const jumbotronURL = await uploadImage(reader.result as string, type);
+      if (setFormValues) {
+        {
+          setFormValues(
+            {
+              uri: jumbotronURL,
+              uid: file.uid,
+            },
+            formName!,
+            index
+          );
+        }
+      }
+
+      message.success('Image uploaded!');
+    };
+
+    reader.readAsDataURL(file as FileType);
   }
+
   return isJpgOrPng && isLt2M;
 };
 
-export const uploadImage = async (base64: string) => {
+export const uploadImage = async (base64: string, type: 'free' | 'premium') => {
   const data = await fetch('/api/upload', {
     method: 'POST',
     headers: {
       'Content-Type': 'application/json',
     },
-    body: JSON.stringify({ image: base64 }),
+    body: JSON.stringify({ image: base64, type }),
   });
 
   if (data.ok) {
@@ -102,49 +135,36 @@ const NetflixForm = ({
   };
 }) => {
   const [imageUrl, setImageUrl] = useState<string>();
-  const [previewOpen, setPreviewOpen] = useState(false);
-  const [previewImage, setPreviewImage] = useState('');
-  const [fileList, setFileList] = useState<UploadFile[]>([]);
+  const [uploadLoading, setUploadLoading] = useState(false);
+  const [collectionOfImages, setCollectionOfImages] = useState<
+    { uid: string; uri: string }[]
+  >([]);
 
   const profile = useMemoifyProfile();
 
   const [form] = useForm();
-  const handleChangeJumbotron: UploadProps['onChange'] = (info) => {
-    if (info.file.status === 'uploading') {
-      setLoading(true);
-      return;
-    }
-    if (info.file.status === 'done') {
-      // Get this url from response in real world.
-      getBase64(info.file.originFileObj as FileType, (url) => {
-        setLoading(false);
-        setImageUrl(url);
-      });
-    }
+
+  const handleSetCollectionImagesURI = (
+    payload: { uri: string; uid: string },
+    formName: string
+  ) => {
+    const newImages = collectionOfImages;
+    newImages.push(payload);
+    setCollectionOfImages(newImages);
   };
 
-  const handlePreview = async (file: UploadFile) => {
-    if (!file.url && !file.preview) {
-      file.preview = await getBase64Multiple(file.originFileObj as FileType);
-    }
-
-    setPreviewImage(file.url || (file.preview as string));
-    setPreviewOpen(true);
+  const handleRemoveCollectionImage = (uid: string) => {
+    setCollectionOfImages(
+      collectionOfImages.filter((item) => item.uid !== uid)
+    );
   };
 
-  const handleChange: UploadProps['onChange'] = ({ fileList: newFileList }) => {
-    if (
-      beforeUpload(
-        newFileList[0].originFileObj as FileType,
-        profile
-          ? ['premium', 'pending'].includes(profile.type as any)
-            ? 'premium'
-            : 'free'
-          : 'free'
-      )
-    ) {
-      setFileList(newFileList);
-    }
+  const handleSetJumbotronImageURI = (
+    payload: { uri: string; uid: string },
+    formName: string
+  ) => {
+    form.setFieldValue(formName, payload);
+    setImageUrl(payload.uri);
   };
 
   const uploadButton = (
@@ -155,92 +175,38 @@ const NetflixForm = ({
   );
 
   const handleSubmit = async (val: any) => {
-    const { jumbotronImage, title, subTitle, modalContent, forName } = val;
+    const { jumbotronImage, title, subTitle, modalContent } = val;
 
-    await getBase64(
-      jumbotronImage.file.originFileObj as FileType,
-      async (url) => {
-        try {
-          if (fileList.length === 0) {
-            return message.error('Please upload at least one image!');
-          }
+    const json_text = {
+      jumbotronImage: jumbotronImage?.uri,
+      title,
+      subTitle,
+      modalContent,
+      images:
+        collectionOfImages.length > 0
+          ? collectionOfImages.map((dx) => dx.uri)
+          : null,
+    };
 
-          setLoading(true);
-          const jumbotronURL = await uploadImage(url);
+    const payload = {
+      template_id: selectedTemplate.id,
+      detail_content_json_text: JSON.stringify(json_text),
+    };
 
-          const multipleImagesPromise = fileList.map((file) =>
-            getBase64Multiple(file.originFileObj as FileType)
-          );
+    const res = await createContent(payload);
+    if (res.success) {
+      const userLink = selectedTemplate.route + '/' + res.data;
+      message.success('Successfully created!');
+      form.resetFields();
+      setModalState({
+        visible: true,
+        data: userLink as string,
+      });
+    } else {
+      message.error(`Something went wrong!, ${res.message}`);
+    }
 
-          const multipleImages = await Promise.all(multipleImagesPromise);
-          const imagesPromise = multipleImages.map((dx) => {
-            return uploadImage(dx);
-          });
-
-          try {
-            const imagesURL = await Promise.all(imagesPromise);
-
-            const json_text = {
-              jumbotronImage: jumbotronURL,
-              title,
-              subTitle,
-              modalContent,
-              images: imagesURL,
-            };
-
-            const payload = {
-              template_id: selectedTemplate.id,
-              detail_content_json_text: JSON.stringify(json_text),
-            };
-
-            const res = await createContent(payload);
-            if (res.success) {
-              const userLink = selectedTemplate.route + '/' + res.data;
-              message.success('Successfully created!');
-              form.resetFields();
-              setModalState({
-                visible: true,
-                data: userLink as string,
-              });
-            } else {
-              message.error('Something went wrong!');
-            }
-
-            setLoading(false);
-            // fetch('/api/userData', {
-            //   method: 'POST',
-            //   headers: {
-            //     'Content-Type': 'application/json',
-            //   },
-            //   body: JSON.stringify(payload),
-            // })
-            //   .then((res) => {
-            //     if (res.ok) {
-            //       message.success('Successfully created!');
-            //       form.resetFields();
-            //       setModalState({
-            //         visible: true,
-            //         data: id,
-            //       });
-            //     }
-            //   })
-            //   .catch((err) => {
-            //     console.error(err);
-            //     message.error('Something went wrong!');
-            //   })
-            //   .finally(() => {
-            //     revalidateRandom();
-            //     setLoading(false);
-            //   });
-          } catch {
-            message.error('Error uploading image');
-          }
-        } catch {
-          message.error('Error uploading image');
-        }
-        setLoading(false);
-      }
-    );
+    return;
   };
 
   return (
@@ -265,17 +231,20 @@ const NetflixForm = ({
             listType="picture-card"
             className="avatar-uploader"
             showUploadList={false}
-            beforeUpload={(file) =>
-              beforeUpload(
+            beforeUpload={async (file) => {
+              setUploadLoading(true);
+              await beforeUpload(
                 file,
                 profile
                   ? ['premium', 'pending'].includes(profile.type as any)
                     ? 'premium'
                     : 'free'
-                  : 'free'
-              )
-            }
-            onChange={handleChangeJumbotron}>
+                  : 'free',
+                handleSetJumbotronImageURI,
+                'jumbotronImage'
+              );
+              setUploadLoading(false);
+            }}>
             {imageUrl ? (
               <img src={imageUrl} alt="avatar" style={{ width: '100%' }} />
             ) : (
@@ -309,6 +278,9 @@ const NetflixForm = ({
           />
         </Form.Item>
         <Form.Item
+          rules={[
+            { required: true, message: 'Please upload atleast 1 content' },
+          ]}
           name={'images'}
           label={
             <div className="mt-[10px] mb-[5px]">
@@ -328,32 +300,27 @@ const NetflixForm = ({
             multiple={true}
             maxCount={profile?.type === 'free' ? 10 : 20}
             listType="picture-card"
-            fileList={fileList}
-            // beforeUpload={(file) =>
-            //   beforeUpload(
-            //     file,
-            //     profile
-            //       ? ['premium', 'pending'].includes(profile.type as any)
-            //         ? 'premium'
-            //         : 'free'
-            //       : 'free'
-            //   )
-            // }
-            onPreview={handlePreview}
-            onChange={handleChange}>
-            {fileList.length >= 10 ? null : uploadButton}
+            onRemove={(file) => handleRemoveCollectionImage(file.uid)}
+            beforeUpload={async (file) => {
+              setUploadLoading(true);
+              beforeUpload(
+                file as FileType,
+                profile
+                  ? ['premium', 'pending'].includes(profile.type as any)
+                    ? 'premium'
+                    : 'free'
+                  : 'free',
+                handleSetCollectionImagesURI,
+                'images'
+              );
+              setUploadLoading(false);
+            }}>
+            {collectionOfImages.length >= 10 && profile?.type === 'free'
+              ? null
+              : collectionOfImages.length >= 20 && profile?.type !== 'free'
+              ? null
+              : uploadButton}
           </Upload>
-          {previewImage && (
-            <Image
-              wrapperStyle={{ display: 'none' }}
-              preview={{
-                visible: previewOpen,
-                onVisibleChange: (visible) => setPreviewOpen(visible),
-                afterOpenChange: (visible) => !visible && setPreviewImage(''),
-              }}
-              src={previewImage}
-            />
-          )}
         </Form.Item>
 
         {/* <Form.Item
@@ -375,7 +342,7 @@ const NetflixForm = ({
         <div className="flex justify-end ">
           <Button
             className="!bg-black"
-            loading={loading}
+            loading={loading || uploadLoading}
             type="primary"
             htmlType="submit"
             size="large">

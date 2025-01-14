@@ -2,10 +2,19 @@
 
 import React, { useEffect, useState } from 'react';
 import { Form, Input, Button, Upload, message, Space, Select } from 'antd';
-import { PlusOutlined, MinusCircleOutlined } from '@ant-design/icons';
+import {
+  PlusOutlined,
+  MinusCircleOutlined,
+  LoadingOutlined,
+} from '@ant-design/icons';
 import { searchSpotifySong } from '@/action/spotify-api';
 import { useDebounce } from 'use-debounce';
-import { beforeUpload, uploadImage, validateSlug } from './netflix-form';
+import {
+  beforeUpload,
+  FileType,
+  uploadImage,
+  validateSlug,
+} from './netflix-form';
 import { useMemoifyProfile } from '@/app/session-provider';
 import { createContent } from '@/action/user-api';
 import { revalidateRandom } from '@/lib/revalidate';
@@ -63,63 +72,66 @@ const SpotifyForm = ({
   const [searchedOptions, setSearchedOptions] = useState<OptionSpotifyTrack[]>(
     []
   );
+  const [uploadLoading, setUploadLoading] = useState(false);
+  const [collectionOfImages, setCollectionOfImages] = useState<
+    { uid: string; uri: string }[]
+  >([]);
   const [value] = useDebounce(searchedSong, 1000);
 
   const profile = useMemoifyProfile();
 
-  const handleImageUpload = (info: any, fieldIndex: number) => {
-    if (info.file.status === 'done' || info.file.originFileObj) {
-      const reader = new FileReader();
-      reader.onload = () => {
-        // Update the form field directly
-        const currentValues = form.getFieldValue('momentOfYou') || [];
-        currentValues[fieldIndex] = {
-          ...currentValues[fieldIndex],
-          imageUrl: reader.result as string,
-        };
-        form.setFieldsValue({ momentOfYou: currentValues });
-      };
-      reader.readAsDataURL(info.file.originFileObj);
-    }
+  const handleSetCollectionImagesURI = (
+    payload: { uri: string; uid: string },
+    formName: string
+  ) => {
+    const newImages = collectionOfImages;
+    newImages.push(payload);
+    setCollectionOfImages(newImages);
   };
 
+  const handleRemoveCollectionImage = (uid: string) => {
+    setCollectionOfImages(
+      collectionOfImages.filter((item) => item.uid !== uid)
+    );
+  };
+
+  const uploadButton = (
+    <button style={{ border: 0, background: 'none' }} type="button">
+      {loading ? <LoadingOutlined /> : <PlusOutlined />}
+      <div style={{ marginTop: 8 }}>Upload</div>
+    </button>
+  );
+
   const onFinish = async (values: any) => {
-    const imagesPromise = values.momentOfYou.map((dx: any) => {
-      return uploadImage(dx.imageUrl);
-    });
-
     setLoading(true);
-    try {
-      const imagesURL = await Promise.all(imagesPromise);
-      const json_text = {
-        ourSongs: values.ourSongs || [],
-        songsForYou: values.songsForYou || [],
-        momentOfYou: imagesURL,
-        modalContent: values.modalContent,
-      };
+    const json_text = {
+      ourSongs: values.ourSongs || [],
+      songsForYou: values.songsForYou || [],
+      momentOfYou:
+        collectionOfImages.length > 0
+          ? collectionOfImages.map((dx) => dx.uri)
+          : null,
+      modalContent: values.modalContent,
+    };
 
-      const payload = {
-        template_id: selectedTemplate.id,
-        detail_content_json_text: JSON.stringify(json_text),
-      };
+    const payload = {
+      template_id: selectedTemplate.id,
+      detail_content_json_text: JSON.stringify(json_text),
+    };
 
-      const res = await createContent(payload);
-      if (res.success) {
-        const userLink = selectedTemplate.route + '/' + res.data;
-        message.success('Successfully created!');
-        form.resetFields();
-        setModalState({
-          visible: true,
-          data: userLink as string,
-        });
-      } else {
-        message.error('Something went wrong!');
-      }
-
-      setLoading(false);
-    } catch {
-      message.error('Error uploading image');
+    const res = await createContent(payload);
+    if (res.success) {
+      const userLink = selectedTemplate.route + '/' + res.data;
+      message.success('Successfully created!');
+      form.resetFields();
+      setModalState({
+        visible: true,
+        data: userLink as string,
+      });
+    } else {
+      message.error('Something went wrong!');
     }
+
     setLoading(false);
   };
 
@@ -138,7 +150,7 @@ const SpotifyForm = ({
         initialValues={{
           ourSongs: [],
           songsForYou: [],
-          momentOfYou: [''],
+          momentOfYou: [],
         }}>
         {/* Dynamic Form List for Our Songs */}
         <Form.List name="ourSongs">
@@ -301,7 +313,54 @@ const SpotifyForm = ({
         </Form.List>
 
         {/* Dynamic Form List for Moment of You */}
-        <Form.List name="momentOfYou">
+        <Form.Item
+          rules={[
+            { required: true, message: 'Please upload atleast 1 content' },
+          ]}
+          name={'momentOfYou'}
+          label={
+            <div className="mt-[10px] mb-[5px]">
+              <h3 className="text-[15px] font-semibold">Moments</h3>
+
+              <p className="text-[13px] text-gray-600 max-w-[400px]">
+                Upload a moment that you want to share with your partner, image
+                of memorable moment or anything
+              </p>
+            </div>
+          }>
+          <Upload
+            accept=".jpg, .jpeg, .png"
+            multiple={true}
+            maxCount={profile?.type === 'free' ? 5 : 20}
+            listType="picture-card"
+            onRemove={(file) => handleRemoveCollectionImage(file.uid)}
+            beforeUpload={async (file) => {
+              setUploadLoading(true);
+              beforeUpload(
+                file as FileType,
+                profile
+                  ? ['premium', 'pending'].includes(profile.type as any)
+                    ? 'premium'
+                    : 'free'
+                  : 'free',
+                handleSetCollectionImagesURI,
+                'momentOfYou'
+              );
+              setUploadLoading(false);
+            }}>
+            {collectionOfImages.length >= 5 && profile?.type === 'free'
+              ? null
+              : collectionOfImages.length >= 20 && profile?.type !== 'free'
+              ? null
+              : uploadButton}
+          </Upload>
+        </Form.Item>
+        <p className="text-[13px] text-gray-600 max-w-[400px]">
+          Account with <span className="font-bold">free</span> plan can only add
+          5 images. To add up to 20 images, upgrade to{' '}
+          <span className="font-bold">premium</span> plan.
+        </p>
+        {/* <Form.List name="momentOfYou">
           {(fields, { add, remove }) => (
             <>
               <div className="mt-[10px] mb-[5px]">
@@ -410,7 +469,7 @@ const SpotifyForm = ({
               </p>
             </>
           )}
-        </Form.List>
+        </Form.List> */}
         <Form.Item
           className="!mt-[10px]"
           rules={[{ required: true, message: 'Please input modal content!' }]}
@@ -444,7 +503,7 @@ const SpotifyForm = ({
         <div className="flex justify-end ">
           <Button
             className="!bg-black"
-            // loading={loading}
+            loading={loading || uploadLoading}
             type="primary"
             htmlType="submit"
             size="large">

@@ -2,8 +2,7 @@
 
 import { IProfileResponse } from '@/action/interfaces';
 import { getUserProfile, submitPaymentProof } from '@/action/user-api';
-import { uploadImage } from '@/components/forms/disney-form';
-import { beforeUpload } from '@/components/forms/netflix-form';
+import { beforeUpload, uploadImage } from '@/components/forms/netflix-form';
 import { SessionData } from '@/store/iron-session';
 import { PlusOneOutlined } from '@mui/icons-material';
 import { Button, Form, message, Modal, Upload } from 'antd';
@@ -68,7 +67,10 @@ const SessionProvider = ({
   const handleSubmitPayment = async (value: any) => {
     try {
       setLoading(true);
-      const paymentProofUri = await uploadImage(value.receipt.imageUrl);
+      const paymentProofUri = await uploadImage(
+        value.receipt.imageUrl,
+        'premium'
+      );
       if (paymentProofUri) {
         const payload = {
           content_id: '',

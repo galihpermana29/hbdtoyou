@@ -14,12 +14,9 @@ import { signIn } from 'next-auth/react';
 import DisneyForm from '@/components/forms/disney-form';
 import Newspaperv1Form from '@/components/forms/newspaperv1-form';
 import Newspaperv3Form from '@/components/forms/newspaperv3-form';
-const PREMIUM_TEMPLATES = [
-  'newspaperv1',
-  'newspaperv2',
-  'disneyplusv1',
-  'spotifyv1',
-];
+
+const PREMIUM_TEMPLATES = ['newspaperv2', 'disneyplusv1'];
+
 const CreatePage = () => {
   const [loading, setLoading] = useState(false);
   const [selectedTemplate, setSelectedTemplate] = useState<{

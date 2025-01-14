@@ -28,23 +28,6 @@ import { beforeUpload, getBase64, getBase64Multiple } from './netflix-form';
 import { v3Songs } from '@/lib/songs';
 type FileType = Parameters<GetProp<UploadProps, 'beforeUpload'>>[0];
 
-export const uploadImage = async (base64: string) => {
-  const data = await fetch('/api/upload', {
-    method: 'POST',
-    headers: {
-      'Content-Type': 'application/json',
-    },
-    body: JSON.stringify({ image: base64 }),
-  });
-
-  if (data.ok) {
-    const dx = await data.json();
-    return dx.data;
-  } else {
-    throw new Error('Error');
-  }
-};
-
 const Newspaperv3Form = ({
   loading,
   setLoading,
@@ -70,59 +53,18 @@ const Newspaperv3Form = ({
   };
 }) => {
   const [imageUrl, setImageUrl] = useState<string>();
-  const [previewOpen, setPreviewOpen] = useState(false);
-  const [previewImage, setPreviewImage] = useState('');
-  const [fileList, setFileList] = useState<UploadFile[]>([]);
 
   const profile = useMemoifyProfile();
-
+  const [uploadLoading, setUploadLoading] = useState(false);
   const [form] = useForm();
-
   const selectedSongs = useWatch('song', form);
 
-  const handleChangeJumbotron: UploadProps['onChange'] = (info) => {
-    if (info.file.status === 'uploading') {
-      setLoading(true);
-      return;
-    }
-    if (info.file.status === 'done') {
-      // Get this url from response in real world.
-      getBase64(info.file.originFileObj as FileType, (url) => {
-        setLoading(false);
-        setImageUrl(url);
-      });
-    }
-  };
-
-  const handleImageUpload = (info: any, fieldIndex: number) => {
-    if (info.file.status === 'done' || info.file.originFileObj) {
-      const reader = new FileReader();
-      reader.onload = () => {
-        // Update the form field directly
-        const currentValues = form.getFieldValue('stories') || [];
-        currentValues[fieldIndex] = {
-          ...currentValues[fieldIndex],
-          imageUrl: reader.result as string,
-        };
-        form.setFieldsValue({ stories: currentValues });
-      };
-      reader.readAsDataURL(info.file.originFileObj);
-    }
-  };
-
-  const handlePreview = async (file: UploadFile) => {
-    if (!file.url && !file.preview) {
-      file.preview = await getBase64Multiple(file.originFileObj as FileType);
-    }
-
-    setPreviewImage(file.url || (file.preview as string));
-    setPreviewOpen(true);
-  };
-
-  const handleChange: UploadProps['onChange'] = ({ fileList: newFileList }) => {
-    if (beforeUpload(newFileList[0].originFileObj as FileType)) {
-      setFileList(newFileList);
-    }
+  const handleSetJumbotronImageURI = (
+    payload: { uri: string; uid: string },
+    formName: string
+  ) => {
+    form.setFieldValue(formName, payload);
+    setImageUrl(payload.uri);
   };
 
   const uploadButton = (
@@ -134,49 +76,33 @@ const Newspaperv3Form = ({
 
   const handleSubmit = async (val: any) => {
     const { jumbotronImage, desc1, notableLyrics } = val;
-    await getBase64(
-      jumbotronImage.file.originFileObj as FileType,
-      async (url) => {
-        try {
-          setLoading(true);
-          const jumbotronURL = await uploadImage(url);
 
-          try {
-            const json_text = {
-              jumbotronImage: jumbotronURL,
-              desc1,
-              notableLyrics,
-              id: selectedSongs ?? '0W5o1Kxw1VlohSajPqeBMF',
-            };
+    const json_text = {
+      jumbotronImage: jumbotronImage?.uri,
+      desc1,
+      notableLyrics,
+      id: selectedSongs ?? '0W5o1Kxw1VlohSajPqeBMF',
+    };
 
-            const payload = {
-              template_id: selectedTemplate.id,
-              detail_content_json_text: JSON.stringify(json_text),
-            };
+    const payload = {
+      template_id: selectedTemplate.id,
+      detail_content_json_text: JSON.stringify(json_text),
+    };
 
-            const res = await createContent(payload);
-            if (res.success) {
-              const userLink = selectedTemplate.route + '/' + res.data;
-              message.success('Successfully created!');
-              form.resetFields();
-              setModalState({
-                visible: true,
-                data: userLink as string,
-              });
-            } else {
-              message.error('Something went wrong!');
-            }
+    const res = await createContent(payload);
+    if (res.success) {
+      const userLink = selectedTemplate.route + '/' + res.data;
+      message.success('Successfully created!');
+      form.resetFields();
+      setModalState({
+        visible: true,
+        data: userLink as string,
+      });
+    } else {
+      message.error('Something went wrong!');
+    }
 
-            setLoading(false);
-          } catch {
-            message.error('Error uploading image');
-          }
-        } catch {
-          message.error('Error uploading image');
-        }
-        setLoading(false);
-      }
-    );
+    setLoading(false);
   };
 
   return (
@@ -201,17 +127,20 @@ const Newspaperv3Form = ({
             listType="picture-card"
             className="avatar-uploader"
             showUploadList={false}
-            beforeUpload={(file) =>
-              beforeUpload(
+            beforeUpload={async (file) => {
+              setUploadLoading(true);
+              await beforeUpload(
                 file,
                 profile
                   ? ['premium', 'pending'].includes(profile.type as any)
                     ? 'premium'
                     : 'free'
-                  : 'free'
-              )
-            }
-            onChange={handleChangeJumbotron}>
+                  : 'free',
+                handleSetJumbotronImageURI,
+                'jumbotronImage'
+              );
+              setUploadLoading(false);
+            }}>
             {imageUrl ? (
               <img src={imageUrl} alt="avatar" style={{ width: '100%' }} />
             ) : (
@@ -304,7 +233,7 @@ const Newspaperv3Form = ({
           <TextArea
             className="!h-[500px]"
             size="large"
-            placeholder="If you're not putting any content, it will be default value to its song lyrics"
+            placeholder="You can write anything in here"
           />
         </Form.Item>
 

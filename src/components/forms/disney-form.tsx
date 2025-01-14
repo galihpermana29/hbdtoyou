@@ -8,30 +8,11 @@ import {
   MinusCircleOutlined,
   PlusOutlined,
 } from '@ant-design/icons';
-import { v4 as uuidv4 } from 'uuid';
 import { useForm } from 'antd/es/form/Form';
-import { revalidateRandom } from '@/lib/revalidate';
 import { useMemoifyProfile } from '@/app/session-provider';
 import { createContent } from '@/action/user-api';
 import { beforeUpload, getBase64, getBase64Multiple } from './netflix-form';
 type FileType = Parameters<GetProp<UploadProps, 'beforeUpload'>>[0];
-
-export const uploadImage = async (base64: string) => {
-  const data = await fetch('/api/upload', {
-    method: 'POST',
-    headers: {
-      'Content-Type': 'application/json',
-    },
-    body: JSON.stringify({ image: base64 }),
-  });
-
-  if (data.ok) {
-    const dx = await data.json();
-    return dx.data;
-  } else {
-    throw new Error('Error');
-  }
-};
 
 const DisneyForm = ({
   loading,
@@ -58,65 +39,49 @@ const DisneyForm = ({
   };
 }) => {
   const [imageUrl, setImageUrl] = useState<string>();
-  const [previewOpen, setPreviewOpen] = useState(false);
-  const [previewImage, setPreviewImage] = useState('');
-  const [fileList, setFileList] = useState<UploadFile[]>([]);
 
+  const [uploadLoading, setUploadLoading] = useState(false);
+  const [collectionOfImages, setCollectionOfImages] = useState<
+    { uid: string; uri: string }[]
+  >([]);
   const profile = useMemoifyProfile();
 
   const [form] = useForm();
-  const handleChangeJumbotron: UploadProps['onChange'] = (info) => {
-    if (info.file.status === 'uploading') {
-      setLoading(true);
-      return;
-    }
-    if (info.file.status === 'done') {
-      // Get this url from response in real world.
-      getBase64(info.file.originFileObj as FileType, (url) => {
-        setLoading(false);
-        setImageUrl(url);
-      });
-    }
+
+  const handleSetCollectionImagesURI = (
+    payload: { uri: string; uid: string },
+    formName: string
+  ) => {
+    const newImages = collectionOfImages;
+    newImages.push(payload);
+    setCollectionOfImages(newImages);
   };
 
-  const handleImageUpload = (info: any, fieldIndex: number) => {
-    if (info.file.status === 'done' || info.file.originFileObj) {
-      const reader = new FileReader();
-      reader.onload = () => {
-        // Update the form field directly
-        const currentValues = form.getFieldValue('episodes') || [];
-        currentValues[fieldIndex] = {
-          ...currentValues[fieldIndex],
-          imageUrl: reader.result as string,
-        };
-        form.setFieldsValue({ episodes: currentValues });
-      };
-      reader.readAsDataURL(info.file.originFileObj);
-    }
+  const handleRemoveCollectionImage = (uid: string) => {
+    setCollectionOfImages(
+      collectionOfImages.filter((item) => item.uid !== uid)
+    );
   };
 
-  const handlePreview = async (file: UploadFile) => {
-    if (!file.url && !file.preview) {
-      file.preview = await getBase64Multiple(file.originFileObj as FileType);
-    }
-
-    setPreviewImage(file.url || (file.preview as string));
-    setPreviewOpen(true);
+  const handleSetStoryImageURI = (
+    payload: { uri: string; uid: string },
+    formName: string,
+    fieldIndex?: number
+  ) => {
+    const currentValues = form.getFieldValue(formName) || [];
+    currentValues[fieldIndex!] = {
+      ...currentValues[fieldIndex!],
+      imageUrl: payload.uri,
+    };
+    form.setFieldsValue({ [formName]: currentValues });
   };
 
-  const handleChange: UploadProps['onChange'] = ({ fileList: newFileList }) => {
-    if (
-      beforeUpload(
-        newFileList[0].originFileObj as FileType,
-        profile
-          ? ['premium', 'pending'].includes(profile.type as any)
-            ? 'premium'
-            : 'free'
-          : 'free'
-      )
-    ) {
-      setFileList(newFileList);
-    }
+  const handleSetJumbotronImageURI = (
+    payload: { uri: string; uid: string },
+    formName: string
+  ) => {
+    form.setFieldValue(formName, payload);
+    setImageUrl(payload.uri);
   };
 
   const uploadButton = (
@@ -127,78 +92,38 @@ const DisneyForm = ({
   );
 
   const handleSubmit = async (val: any) => {
-    console.log(val, 'values', fileList);
+    console.log(val, 'values', collectionOfImages, 'ppp');
     const { jumbotronImage, title, subTitle, modalContent, episodes } = val;
 
-    await getBase64(
-      jumbotronImage.file.originFileObj as FileType,
-      async (url) => {
-        try {
-          if (fileList.length === 0) {
-            return message.error('Please upload at least one image!');
-          }
+    const json_text = {
+      jumbotronImage: jumbotronImage?.uri,
+      title,
+      subTitle,
+      modalContent,
+      images:
+        collectionOfImages.length > 0
+          ? collectionOfImages.map((dx) => dx.uri)
+          : null,
+      episodes: episodes,
+    };
 
-          setLoading(true);
-          const jumbotronURL = await uploadImage(url);
+    const payload = {
+      template_id: selectedTemplate.id,
+      detail_content_json_text: JSON.stringify(json_text),
+    };
 
-          const multipleImagesPromise = fileList.map((file) =>
-            getBase64Multiple(file.originFileObj as FileType)
-          );
-
-          const multipleImages = await Promise.all(multipleImagesPromise);
-          const imagesPromise = multipleImages.map((dx) => {
-            return uploadImage(dx);
-          });
-
-          const multipleEpisodePromises = episodes.map((dx: any) =>
-            uploadImage(dx.imageUrl)
-          );
-
-          try {
-            const imagesURL = await Promise.all(imagesPromise);
-            const episodesURL = await Promise.all(multipleEpisodePromises);
-            const json_text = {
-              jumbotronImage: jumbotronURL,
-              title,
-              subTitle,
-              modalContent,
-              images: imagesURL,
-              episodes: episodes.map((dx: any, idx: number) => ({
-                imageUrl: episodesURL[idx],
-                title: dx.title,
-                desc: dx.desc,
-              })),
-            };
-
-            const payload = {
-              template_id: selectedTemplate.id,
-              detail_content_json_text: JSON.stringify(json_text),
-            };
-
-            console.log(payload, 'payload', json_text);
-            const res = await createContent(payload);
-            if (res.success) {
-              const userLink = selectedTemplate.route + '/' + res.data;
-              message.success('Successfully created!');
-              form.resetFields();
-              setModalState({
-                visible: true,
-                data: userLink as string,
-              });
-            } else {
-              message.error('Something went wrong!');
-            }
-
-            setLoading(false);
-          } catch {
-            message.error('Error uploading image');
-          }
-        } catch {
-          message.error('Error uploading image');
-        }
-        setLoading(false);
-      }
-    );
+    const res = await createContent(payload);
+    if (res.success) {
+      const userLink = selectedTemplate.route + '/' + res.data;
+      message.success('Successfully created!');
+      form.resetFields();
+      setModalState({
+        visible: true,
+        data: userLink as string,
+      });
+    } else {
+      message.error(res.message);
+    }
   };
 
   return (
@@ -223,17 +148,20 @@ const DisneyForm = ({
             listType="picture-card"
             className="avatar-uploader"
             showUploadList={false}
-            beforeUpload={(file) =>
-              beforeUpload(
+            beforeUpload={async (file) => {
+              setUploadLoading(true);
+              await beforeUpload(
                 file,
                 profile
                   ? ['premium', 'pending'].includes(profile.type as any)
                     ? 'premium'
                     : 'free'
-                  : 'free'
-              )
-            }
-            onChange={handleChangeJumbotron}>
+                  : 'free',
+                handleSetJumbotronImageURI,
+                'jumbotronImage'
+              );
+              setUploadLoading(true);
+            }}>
             {imageUrl ? (
               <img src={imageUrl} alt="avatar" style={{ width: '100%' }} />
             ) : (
@@ -287,8 +215,9 @@ const DisneyForm = ({
                           listType="picture-card"
                           className="avatar-uploader"
                           showUploadList={false}
-                          beforeUpload={(file) =>
-                            beforeUpload(
+                          beforeUpload={async (file) => {
+                            setUploadLoading(true);
+                            await beforeUpload(
                               file,
                               profile
                                 ? ['premium', 'pending'].includes(
@@ -296,10 +225,13 @@ const DisneyForm = ({
                                   )
                                   ? 'premium'
                                   : 'free'
-                                : 'free'
-                            )
-                          }
-                          onChange={(info) => handleImageUpload(info, index)}>
+                                : 'free',
+                              handleSetStoryImageURI,
+                              'episodes',
+                              index
+                            );
+                            setUploadLoading(false);
+                          }}>
                           {form.getFieldValue('episodes')?.[index]?.imageUrl ? (
                             <img
                               src={
@@ -419,6 +351,33 @@ const DisneyForm = ({
             multiple={true}
             maxCount={profile?.type === 'free' ? 5 : 15}
             listType="picture-card"
+            onRemove={(file) => handleRemoveCollectionImage(file.uid)}
+            beforeUpload={async (file) => {
+              setUploadLoading(true);
+              await beforeUpload(
+                file as FileType,
+                profile
+                  ? ['premium', 'pending'].includes(profile.type as any)
+                    ? 'premium'
+                    : 'free'
+                  : 'free',
+                handleSetCollectionImagesURI,
+                'images'
+              );
+              setUploadLoading(false);
+            }}>
+            {collectionOfImages.length >= 5 && profile?.type === 'free'
+              ? null
+              : collectionOfImages.length >= 15 && profile?.type !== 'free'
+              ? null
+              : uploadButton}
+          </Upload>
+
+          {/* <Upload
+            accept=".jpg, .jpeg, .png"
+            multiple={true}
+            maxCount={profile?.type === 'free' ? 5 : 15}
+            listType="picture-card"
             fileList={fileList}
             // beforeUpload={(file) =>
             //   beforeUpload(
@@ -444,13 +403,13 @@ const DisneyForm = ({
               }}
               src={previewImage}
             />
-          )}
+          )} */}
         </Form.Item>
 
         <div className="flex justify-end ">
           <Button
             className="!bg-black"
-            loading={loading}
+            loading={loading || uploadLoading}
             type="primary"
             htmlType="submit"
             size="large">
