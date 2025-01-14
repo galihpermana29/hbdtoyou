@@ -5,6 +5,7 @@ import jumbotronImage3 from '@/assets/jumbotron3.png';
 import jumbotronImage4 from '@/assets/jumbotron4.png';
 import jumbotronImage5 from '@/assets/jumbotron5.png';
 import jumbotronImage6 from '@/assets/jumbotron6.png';
+import jumbotronImage7 from '@/assets/jumbotron7.png';
 import photoboxImage from '@/assets/photobox-home.jpg';
 import Image from 'next/image';
 import { Button, Carousel } from 'antd';
@@ -76,6 +77,13 @@ export default function Home() {
               autoplay
               autoplaySpeed={2000}
               className="!w-[350px] md:!w-[800px]">
+              <Image
+                src={jumbotronImage7}
+                alt="jumbotron"
+                width={1000}
+                height={1000}
+                priority
+              />
               <Image
                 src={jumbotronImage3}
                 alt="jumbotron"

@@ -16,6 +16,7 @@ import Newspaperv1Form from '@/components/forms/newspaperv1-form';
 import Newspaperv3Form from '@/components/forms/newspaperv3-form';
 
 const PREMIUM_TEMPLATES = ['newspaperv2', 'disneyplusv1'];
+const EXCLUDE_TEMPLATES = ['graduationv1'];
 
 const CreatePage = () => {
   const [loading, setLoading] = useState(false);
@@ -186,6 +187,9 @@ const CreatePage = () => {
                               const routePath = show.name
                                 .split('-')[1]
                                 .split(' ')[1];
+                              if (EXCLUDE_TEMPLATES.includes(routePath)) {
+                                return message.info('It is coming soon!');
+                              }
                               if (PREMIUM_TEMPLATES.includes(routePath)) {
                                 if (
                                   ['pending', 'premium'].includes(
