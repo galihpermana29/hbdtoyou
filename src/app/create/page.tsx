@@ -16,7 +16,7 @@ import Newspaperv1Form from '@/components/forms/newspaperv1-form';
 import Newspaperv3Form from '@/components/forms/newspaperv3-form';
 
 const PREMIUM_TEMPLATES = ['newspaperv2', 'disneyplusv1'];
-const EXCLUDE_TEMPLATES = ['graduationv1'];
+const EXCLUDE_TEMPLATES = ['graduationv1', 'graduationv2'];
 
 const CreatePage = () => {
   const [loading, setLoading] = useState(false);
