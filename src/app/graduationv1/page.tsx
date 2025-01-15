@@ -2,7 +2,7 @@
 
 import Image from 'next/image';
 
-export const projects = [
+const projects = [
   {
     id: '100100',
     title: '100100',

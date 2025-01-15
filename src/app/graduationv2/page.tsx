@@ -1,9 +1,60 @@
 'use client';
 
 import { Camera } from 'lucide-react';
-import { projects } from '../graduationv1/page';
 
 const heightClasses = ['h-[300px]', 'h-[700px]'];
+
+const projects = [
+  {
+    id: '100100',
+    title: '100100',
+    image:
+      'https://res.cloudinary.com/dxuumohme/image/upload/v1736878627/bubjbkztn7xfrxmusjtp.jpg',
+  },
+  {
+    id: 'spyder23',
+    title: 'SPYDER 23',
+    image:
+      'https://res.cloudinary.com/dxuumohme/image/upload/v1736880564/zm9qkwdjbbnugbohko9x.jpg',
+  },
+  {
+    id: 'demoda',
+    title: 'DEMODA',
+    image:
+      'https://res.cloudinary.com/dxuumohme/image/upload/v1736880576/kdf19qhcabj6gnaoxx7s.jpg',
+  },
+  {
+    id: 'crisp',
+    title: 'CRISP',
+    image:
+      'https://res.cloudinary.com/dxuumohme/image/upload/v1736880581/ajhrmyr1qz4n1u1fscha.jpg',
+  },
+  {
+    id: 'bacon',
+    title: 'BACON & PEPPR',
+    image:
+      'https://res.cloudinary.com/dxuumohme/image/upload/v1736880586/mwnbkxb11oo2ew2squ1z.jpg',
+  },
+  {
+    id: 'office',
+    title: 'OFFICE',
+    image:
+      'https://res.cloudinary.com/dxuumohme/image/upload/v1736880592/sc6uynh62vjcvquu1dur.jpg',
+  },
+  {
+    id: 'chance',
+    title: 'CHANCE',
+    image:
+      'https://res.cloudinary.com/dxuumohme/image/upload/v1736880662/pm1dz6f6cq1ttk8b1vjh.jpg',
+  },
+  {
+    id: 'percent',
+    title: '20 PERCENT',
+    image:
+      'https://res.cloudinary.com/dxuumohme/image/upload/v1736880667/jzdtgs5klr20uyyngxae.jpg',
+  },
+];
+
 const totalItems = projects.length || 0; // Get the total number of items
 const midIndex = Math.ceil(totalItems / 2); // Calculate the middle index
 
