@@ -92,7 +92,6 @@ const DisneyForm = ({
   );
 
   const handleSubmit = async (val: any) => {
-    console.log(val, 'values', collectionOfImages, 'ppp');
     const { jumbotronImage, title, subTitle, modalContent, episodes } = val;
 
     const json_text = {

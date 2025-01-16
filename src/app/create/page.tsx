@@ -3,7 +3,6 @@ import NavigationBar from '@/components/ui/navbar';
 import { Button, message, Modal, Spin } from 'antd';
 import { useEffect, useState } from 'react';
 import { LoadingOutlined } from '@ant-design/icons';
-import { useForm } from 'antd/es/form/Form';
 import Link from 'next/link';
 import NetflixForm from '@/components/forms/netflix-form';
 import { getAllTemplates } from '@/action/user-api';
@@ -14,9 +13,11 @@ import { signIn } from 'next-auth/react';
 import DisneyForm from '@/components/forms/disney-form';
 import Newspaperv1Form from '@/components/forms/newspaperv1-form';
 import Newspaperv3Form from '@/components/forms/newspaperv3-form';
+import GraduationV1Form from '@/components/forms/graduationv1-form';
+import GraduationV2Form from '@/components/forms/graduationv2-form';
 
 const PREMIUM_TEMPLATES = ['newspaperv2', 'disneyplusv1'];
-const EXCLUDE_TEMPLATES = ['graduationv1', 'graduationv2'];
+const EXCLUDE_TEMPLATES: string[] = [];
 
 const CreatePage = () => {
   const [loading, setLoading] = useState(false);
@@ -32,7 +33,6 @@ const CreatePage = () => {
     visible: false,
     data: '',
   });
-  const [form] = useForm();
 
   const session = useMemoifySession();
   const profile = useMemoifyProfile();
@@ -69,14 +69,6 @@ const CreatePage = () => {
             You can share your own version of memoify with your friends or
             someone you love.
           </p>
-          {/* <p className="mt-2">
-            Support the creator by follow instagram{' '}
-            <Link
-              href={'https://www.instagram.com/galjhpermana/'}
-              target="_blank">
-              @galjhpermana
-            </Link>{' '}
-          </p> */}
           <div className="flex items-center gap-[12px] mt-[12px]">
             <Link href={`/${modalState.data}`} className="cursor-pointer">
               <Button
@@ -163,6 +155,26 @@ const CreatePage = () => {
 
               {selectedTemplate.route.includes('newspaperv3') && (
                 <Newspaperv3Form
+                  selectedTemplate={selectedTemplate}
+                  loading={loading}
+                  setLoading={setLoading}
+                  modalState={modalState}
+                  setModalState={setModalState}
+                />
+              )}
+
+              {selectedTemplate.route.includes('graduationv1') && (
+                <GraduationV1Form
+                  selectedTemplate={selectedTemplate}
+                  loading={loading}
+                  setLoading={setLoading}
+                  modalState={modalState}
+                  setModalState={setModalState}
+                />
+              )}
+
+              {selectedTemplate.route.includes('graduationv2') && (
+                <GraduationV2Form
                   selectedTemplate={selectedTemplate}
                   loading={loading}
                   setLoading={setLoading}

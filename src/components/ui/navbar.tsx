@@ -12,6 +12,7 @@ import {
 import { getUserProfile } from '@/action/user-api';
 import { IProfileResponse } from '@/action/interfaces';
 import { removeSession } from '@/store/get-set-session';
+import Image from 'next/image';
 
 const NavigationBar = () => {
   const [userProfile, setUserProfile] = useState<IProfileResponse | null>(null);
@@ -83,8 +84,17 @@ const NavigationBar = () => {
       suppressHydrationWarning
       className="flex item justify-between border-b-[1px] py-[20px] px-[12px] md:px-[40px] bg-white">
       <Link href={'/'} className="font-bold">
-        <span className="young-serif-regular text-[22px]">Memoify</span>
+        <Image
+          src={
+            'https://res.cloudinary.com/dxuumohme/image/upload/v1737048992/vz6tqrzgcht45fstloxc.png'
+          }
+          alt="asd"
+          width={40}
+          height={40}
+          priority
+        />
       </Link>
+
       <div className="flex items-center gap-[8px] md:gap-[24px] text-[14px]">
         <Link href={'/photobox'} className="hidden md:block">
           Photobox
@@ -106,9 +116,7 @@ const NavigationBar = () => {
           </div>
         )}
         <Link href={'/create'}>Create</Link>
-        <Link
-          href={'/templates'}
-          className={`${session.accessToken ? 'block' : 'hidden md:block'} `}>
+        <Link href={'/templates'} className={`block`}>
           See Templates
         </Link>
 
@@ -118,7 +126,11 @@ const NavigationBar = () => {
             size="large"
             className="!bg-black !text-white !rounded-[50px]"
             onClick={() => signIn('google')}>
-            Continue with <Google />
+            <div className=" items-center gap-2 hidden md:flex">
+              <p>Continue with</p>
+              <Google />
+            </div>
+            <p className="block md:hidden">Login</p>
           </Button>
         )}
 

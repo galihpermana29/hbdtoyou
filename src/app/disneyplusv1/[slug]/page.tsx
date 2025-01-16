@@ -20,7 +20,6 @@ export default async function DynamicDisneyPage({ params }: { params: any }) {
   }
 
   const parsedData = JSON.parse(data.data.detail_content_json_text);
-  console.log(parsedData, 'parsedData');
 
   return (
     <main className="min-h-screen bg-[#1A1D29] text-white">
