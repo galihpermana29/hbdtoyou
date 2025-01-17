@@ -9,6 +9,7 @@ import { useForm } from 'antd/es/form/Form';
 import { revalidateRandom } from '@/lib/revalidate';
 import { useMemoifyProfile } from '@/app/session-provider';
 import { createContent } from '@/action/user-api';
+import { uploadImageClientSide } from '@/lib/upload';
 export type FileType = Parameters<GetProp<UploadProps, 'beforeUpload'>>[0];
 
 export const validateSlug = (x: any, value: any) => {
@@ -63,49 +64,35 @@ export const beforeUpload = async (
       message.error('Maximum image size is 10MB!');
     }
   } else {
-    const reader = new FileReader();
-    reader.onload = async () => {
-      if (type === 'free') {
-        message.loading('Compressing image, please wait');
-      } else {
-        message.loading('Uploading image, please wait');
+    message.loading(
+      `${type === 'free' ? 'Compressing Image' : 'Uploading Image'}`
+    );
+    const jumbotronURL = await uploadImage(file, type);
+    if (setFormValues) {
+      {
+        setFormValues(
+          {
+            uri: jumbotronURL,
+            uid: file.uid,
+          },
+          formName!,
+          index
+        );
       }
-      const jumbotronURL = await uploadImage(reader.result as string, type);
-      if (setFormValues) {
-        {
-          setFormValues(
-            {
-              uri: jumbotronURL,
-              uid: file.uid,
-            },
-            formName!,
-            index
-          );
-        }
-      }
+    }
 
-      message.success('Image uploaded!');
-    };
-
-    reader.readAsDataURL(file as FileType);
+    message.success('Image uploaded!');
   }
 
   return isJpgOrPng && isLt2M;
 };
 
-export const uploadImage = async (base64: string, type: 'free' | 'premium') => {
-  const data = await fetch('/api/upload', {
-    method: 'POST',
-    headers: {
-      'Content-Type': 'application/json',
-    },
-    body: JSON.stringify({ image: base64, type }),
-  });
-
-  if (data.ok) {
-    const dx = await data.json();
-    return dx.data;
+export const uploadImage = async (base64: File, type: 'free' | 'premium') => {
+  const data = await uploadImageClientSide(base64, type);
+  if (data.success) {
+    return data.data;
   } else {
+    message.error(data.message);
     throw new Error('Error');
   }
 };
@@ -303,7 +290,7 @@ const NetflixForm = ({
             onRemove={(file) => handleRemoveCollectionImage(file.uid)}
             beforeUpload={async (file) => {
               setUploadLoading(true);
-              beforeUpload(
+              await beforeUpload(
                 file as FileType,
                 profile
                   ? ['premium', 'pending'].includes(profile.type as any)

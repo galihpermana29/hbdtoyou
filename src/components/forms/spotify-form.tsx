@@ -336,7 +336,7 @@ const SpotifyForm = ({
             onRemove={(file) => handleRemoveCollectionImage(file.uid)}
             beforeUpload={async (file) => {
               setUploadLoading(true);
-              beforeUpload(
+              await beforeUpload(
                 file as FileType,
                 profile
                   ? ['premium', 'pending'].includes(profile.type as any)

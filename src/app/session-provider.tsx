@@ -21,6 +21,10 @@ interface SessionContextType {
     };
     setModalState: React.Dispatch<React.SetStateAction<any>>;
   };
+  uploadStateLoading: {
+    setUploadStateLoading: React.Dispatch<React.SetStateAction<boolean>>;
+    uploadStateLoading: boolean;
+  };
 }
 
 // Create a default empty context
@@ -44,6 +48,8 @@ const SessionProvider = ({
   const [imageUrl, setImageUrl] = useState<string | null>(null);
   const pathname = usePathname();
   const [loading, setLoading] = useState(false);
+
+  const [uploadStateLoading, setUploadStateLoading] = useState(false);
 
   const handleImageUpload = (info: any) => {
     if (info.file.status === 'done' || info.file.originFileObj) {
@@ -118,6 +124,10 @@ const SessionProvider = ({
         upgradeModal: {
           modalState,
           setModalState,
+        },
+        uploadStateLoading: {
+          setUploadStateLoading,
+          uploadStateLoading,
         },
       }}>
       <Modal
@@ -219,6 +229,14 @@ export const useMemoifyUpgradePlan = () => {
     throw new Error('useSession must be used within a SessionProvider');
   }
   return context.upgradeModal;
+};
+
+export const useMemoifyUploadLoading = () => {
+  const context = useContext(SessionContext);
+  if (!context) {
+    throw new Error('useSession must be used within a SessionProvider');
+  }
+  return context.uploadStateLoading;
 };
 
 export default SessionProvider;
