@@ -6,9 +6,11 @@ import {
   IAllTemplateResponse,
   IContentPayload,
   IDetailContentResponse,
+  IGetDetailPayment,
   IOAuthResponse,
   IPaymentPayload,
   IProfileResponse,
+  IQRISPaymentResponse,
 } from './interfaces';
 
 export interface IOAuthPayload {
@@ -256,6 +258,69 @@ export async function approveRejectProof(
       Authorization: `Bearer ${session.accessToken}`,
     },
     body: JSON.stringify(payload),
+  });
+
+  if (!res.ok) {
+    return {
+      success: false,
+      message: res.statusText,
+      data: null,
+    };
+  }
+
+  const data = await res.json();
+
+  return {
+    success: true,
+    message: data.message,
+    data: data.data,
+  };
+}
+
+export async function generateQRIS(): Promise<
+  IGlobalResponse<null | IQRISPaymentResponse>
+> {
+  const session = await getSession();
+  const res = await fetch(baseUri?.replace('v1', 'v2') + `/payments`, {
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/json',
+      'X-Source': 'web',
+      'X-UserID': session.userId!,
+      Authorization: `Bearer ${session.accessToken}`,
+    },
+    // body: JSON.stringify(payload),
+  });
+
+  if (!res.ok) {
+    return {
+      success: false,
+      message: res.statusText,
+      data: null,
+    };
+  }
+
+  const data = await res.json();
+
+  return {
+    success: true,
+    message: data.message,
+    data: data.data,
+  };
+}
+
+export async function getDetailPayment(
+  id: string
+): Promise<IGlobalResponse<null | IGetDetailPayment>> {
+  const session = await getSession();
+  const res = await fetch(baseUri + `/payments/${id}`, {
+    method: 'GET',
+    headers: {
+      'Content-Type': 'application/json',
+      'X-Source': 'web',
+      'X-UserID': session.userId!,
+      Authorization: `Bearer ${session.accessToken}`,
+    },
   });
 
   if (!res.ok) {

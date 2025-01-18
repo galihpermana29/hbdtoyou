@@ -13,6 +13,7 @@ import { getUserProfile } from '@/action/user-api';
 import { IProfileResponse } from '@/action/interfaces';
 import { removeSession } from '@/store/get-set-session';
 import Image from 'next/image';
+import { useRouter } from 'next/navigation';
 
 const NavigationBar = () => {
   const [userProfile, setUserProfile] = useState<IProfileResponse | null>(null);
@@ -20,6 +21,7 @@ const NavigationBar = () => {
   const session = useMemoifySession();
   const { setModalState: setModalUpgradePlan } = useMemoifyUpgradePlan();
 
+  const router = useRouter();
   const items = [
     {
       key: '1',
@@ -29,7 +31,10 @@ const NavigationBar = () => {
       ? {
           key: '4',
           label: (
-            <p onClick={() => setModalUpgradePlan({ visible: true, data: '' })}>
+            <p
+              onClick={() => router.push('/payment-qris')}
+              // onClick={() => setModalUpgradePlan({ visible: true, data: '' })}
+            >
               Upgrade Plan
             </p>
           ),
@@ -45,7 +50,7 @@ const NavigationBar = () => {
     },
     {
       key: '6',
-      label: userProfile ? `Quota: ${userProfile?.quota}` : '0',
+      label: userProfile ? `Credit: ${userProfile?.quota}` : '0',
     },
     {
       key: '5',
@@ -106,11 +111,12 @@ const NavigationBar = () => {
           <div
             className="hidden md:block hover:underline cursor-pointer"
             onClick={() => {
-              if (session?.accessToken) {
-                setModalUpgradePlan({ visible: true, data: '' });
-              } else {
-                signIn('google');
-              }
+              // if (session?.accessToken) {
+              //   setModalUpgradePlan({ visible: true, data: '' });
+              // } else {
+              //   signIn('google');
+              // }
+              router.push('/payment-qris');
             }}>
             Upgrade Plan
           </div>

@@ -1,9 +1,13 @@
 'use client';
-import { useMemoifyUpgradePlan } from '@/app/session-provider';
+import { useMemoifySession } from '@/app/session-provider';
 import PricingCard from './pricing-card';
+import { useRouter } from 'next/navigation';
+import { signIn } from 'next-auth/react';
 
 const PricingWrapper = () => {
-  const { setModalState: setModalUpgradePlan } = useMemoifyUpgradePlan();
+  // const { setModalState: setModalUpgradePlan } = useMemoifyUpgradePlan();
+  const router = useRouter();
+  const session = useMemoifySession();
 
   return (
     <section className="w-full py-12 sm:py-16 bg-background">
@@ -33,10 +37,14 @@ const PricingWrapper = () => {
 
           <PricingCard
             onClickButton={() => {
-              setModalUpgradePlan({ visible: true, data: '' });
+              if (session?.accessToken) {
+                router.push('/payment-qris');
+              } else {
+                signIn('google');
+              }
             }}
             title="Premium"
-            price="IDR 10K"
+            price="IDR 11K"
             description="All the features you need for professional use"
             features={[
               'Unlimited image storage',
@@ -44,7 +52,7 @@ const PricingWrapper = () => {
               'Unlimited upload size',
               'Unlimited access to templates',
               'Unlimited photobox frames',
-              '6 premium feature quotas',
+              '6 credit to use templates',
             ]}
             popular={true}
             buttonText="Upgrade to Premium"
