@@ -9,7 +9,7 @@ export default function DisneyPage() {
   return (
     <main className="min-h-screen bg-[#1A1D29] text-white">
       {/* Hero Section */}
-      <div className="relative h-[80vh] w-full">
+      <div className="relative h-[100vh] w-full">
         <Image
           src="https://res.cloudinary.com/dxuumohme/image/upload/v1736524166/veevebpg774vy4n326su.jpg"
           alt="The Tyrant Hero"
@@ -33,10 +33,10 @@ export default function DisneyPage() {
                   Watch First Episode
                   <span className="text-sm ml-2">S1 E1</span>
                 </Button>
-                <Button variant="outline" className="gap-2 text-black">
+                {/* <Button variant="outline" className="gap-2 text-black">
                   <Plus className="h-5 w-5" />
                   Add to Watchlist
-                </Button>
+                </Button> */}
               </div>
               <div className="flex gap-4 mt-4">
                 <span className="px-3 py-1 bg-gray-800 rounded-full">

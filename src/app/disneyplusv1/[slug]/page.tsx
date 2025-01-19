@@ -24,7 +24,7 @@ export default async function DynamicDisneyPage({ params }: { params: any }) {
   return (
     <main className="min-h-screen bg-[#1A1D29] text-white">
       {/* Hero Section */}
-      <div className="relative h-[80vh] w-full">
+      <div className="relative h-[100vh] w-full">
         <Image
           src={
             parsedData
@@ -56,10 +56,10 @@ export default async function DynamicDisneyPage({ params }: { params: any }) {
                   Watch First Episode
                   <span className="text-sm ml-2">S1 E1</span>
                 </Button>
-                <Button variant="outline" className="gap-2 text-black hidden">
+                {/* <Button variant="outline" className="gap-2 text-black hidden">
                   <Plus className="h-5 w-5" />
                   Add to Watchlist
-                </Button>
+                </Button> */}
               </div>
               <div className="md:flex gap-4 mt-4 hidden ">
                 <span className="px-3 py-1 bg-gray-800 rounded-full">
