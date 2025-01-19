@@ -64,24 +64,51 @@ export const beforeUpload = async (
       message.error('Maximum image size is 10MB!');
     }
   } else {
-    message.loading(
-      `${type === 'free' ? 'Compressing Image' : 'Uploading Image'}`
-    );
-    const jumbotronURL = await uploadImage(file, type);
-    if (setFormValues) {
-      {
-        setFormValues(
-          {
-            uri: jumbotronURL,
-            uid: file.uid,
-          },
-          formName!,
-          index
-        );
+    const reader = new FileReader();
+    reader.onload = async () => {
+      if (type === 'free') {
+        message.loading('Compressing image, please wait');
+      } else {
+        message.loading('Uploading image, please wait');
       }
-    }
 
-    message.success('Image uploaded!');
+      const jumbotronURL = await uploadImage(file, type);
+      if (setFormValues) {
+        {
+          setFormValues(
+            {
+              uri: jumbotronURL,
+              uid: file.uid,
+            },
+            formName!,
+            index
+          );
+        }
+      }
+
+      message.success('Image uploaded!');
+    };
+    reader.readAsDataURL(file as FileType);
+
+    // message.loading(
+    //   `${type === 'free' ? 'Compressing Image' : 'Uploading Image'}`
+    // );
+    // const jumbotronURL = await uploadImage(file, type);
+    // console.log(jumbotronURL, '?', setFormValues, '?>>> before upload');
+    // if (setFormValues) {
+    //   {
+    //     setFormValues(
+    //       {
+    //         uri: jumbotronURL,
+    //         uid: file.uid,
+    //       },
+    //       formName!,
+    //       index
+    //     );
+    //   }
+    // }
+
+    // message.success('Image uploaded!');
   }
 
   return isJpgOrPng && isLt2M;
@@ -277,7 +304,7 @@ const NetflixForm = ({
 
               <p className="text-[13px] text-gray-600 max-w-[400px]">
                 Account with <span className="font-bold">free</span> plan can
-                only add 10 images. To add up to 20 images, upgrade to{' '}
+                only add 5 images. To add up to 20 images, upgrade to{' '}
                 <span className="font-bold">premium</span> plan.
               </p>
             </div>
@@ -285,7 +312,7 @@ const NetflixForm = ({
           <Upload
             accept=".jpg, .jpeg, .png"
             multiple={true}
-            maxCount={profile?.type === 'free' ? 10 : 20}
+            maxCount={profile?.type === 'free' ? 5 : 20}
             listType="picture-card"
             onRemove={(file) => handleRemoveCollectionImage(file.uid)}
             beforeUpload={async (file) => {
