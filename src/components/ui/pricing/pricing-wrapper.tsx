@@ -48,7 +48,7 @@ const PricingWrapper = () => {
               }
             }}
             title="Premium"
-            price="IDR 11K"
+            price="IDR 10K"
             description="All the features you need for professional use"
             features={[
               'Unlimited image storage',
