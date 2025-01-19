@@ -1,11 +1,14 @@
 'use client';
-import { useMemoifySession } from '@/app/session-provider';
+import {
+  useMemoifySession,
+  useMemoifyUpgradePlan,
+} from '@/app/session-provider';
 import PricingCard from './pricing-card';
 import { useRouter } from 'next/navigation';
 import { signIn } from 'next-auth/react';
 
 const PricingWrapper = () => {
-  // const { setModalState: setModalUpgradePlan } = useMemoifyUpgradePlan();
+  const { setModalState: setModalUpgradePlan } = useMemoifyUpgradePlan();
   const router = useRouter();
   const session = useMemoifySession();
 
@@ -38,7 +41,8 @@ const PricingWrapper = () => {
           <PricingCard
             onClickButton={() => {
               if (session?.accessToken) {
-                router.push('/payment-qris');
+                // router.push('/payment-qris');
+                setModalUpgradePlan({ visible: true, data: '' });
               } else {
                 signIn('google');
               }
