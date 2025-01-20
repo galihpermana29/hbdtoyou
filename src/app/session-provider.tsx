@@ -199,7 +199,9 @@ const SessionProvider = ({
       </Modal>
       {children}
 
-      {!pathname.includes('/spotify') && <Footer />}
+      {!pathname.includes('/spotify') && !pathname.includes('/magazinev1') && (
+        <Footer />
+      )}
     </SessionContext.Provider>
   );
 };
