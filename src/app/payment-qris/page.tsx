@@ -103,7 +103,8 @@ const PaymentQRIS = () => {
                 <span className="font-bold">unlimited upload size</span>,{' '}
                 <span className="font-bold">unlimited access to templates</span>
                 ,<span className="font-bold">unlimited photobox frames</span>,{' '}
-                <span className="font-bold">6 credit to use templates</span>
+                <span className="font-bold">6 credit to use templates</span>{' '}
+                with only <span className="font-bold"> IDR 11.000</span>
               </p>
 
               {!qrisData && (

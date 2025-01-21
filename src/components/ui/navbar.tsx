@@ -32,8 +32,9 @@ const NavigationBar = () => {
           key: '4',
           label: (
             <p
-              // onClick={() => router.push('/payment-qris')}
-              onClick={() => setModalUpgradePlan({ visible: true, data: '' })}>
+              onClick={() => router.push('/payment-qris')}
+              // onClick={() => setModalUpgradePlan({ visible: true, data: '' })}
+            >
               Upgrade Plan
             </p>
           ),
@@ -111,11 +112,11 @@ const NavigationBar = () => {
             className="hidden md:block hover:underline cursor-pointer"
             onClick={() => {
               if (session?.accessToken) {
-                setModalUpgradePlan({ visible: true, data: '' });
+                // setModalUpgradePlan({ visible: true, data: '' });
+                router.push('/payment-qris');
               } else {
                 signIn('google');
               }
-              // router.push('/payment-qris');
             }}>
             Upgrade Plan
           </div>

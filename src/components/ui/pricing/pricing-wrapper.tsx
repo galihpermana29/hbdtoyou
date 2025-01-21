@@ -41,14 +41,14 @@ const PricingWrapper = () => {
           <PricingCard
             onClickButton={() => {
               if (session?.accessToken) {
-                // router.push('/payment-qris');
-                setModalUpgradePlan({ visible: true, data: '' });
+                router.push('/payment-qris');
+                // setModalUpgradePlan({ visible: true, data: '' });
               } else {
                 signIn('google');
               }
             }}
             title="Premium"
-            price="IDR 10K"
+            price="IDR 11K"
             description="All the features you need for professional use"
             features={[
               'Unlimited image storage',
