@@ -195,14 +195,12 @@ const CreatePage = () => {
                         key={idx}
                         onClick={() => {
                           if (session?.accessToken) {
-                            if (show.label === 'free') {
+                            if (show.label !== 'pending') {
                               const routePath = show.name
                                 .split('-')[1]
                                 .split(' ')[1];
-                              if (EXCLUDE_TEMPLATES.includes(routePath)) {
-                                return message.info('It is coming soon!');
-                              }
-                              if (PREMIUM_TEMPLATES.includes(routePath)) {
+
+                              if (show.label === 'premium') {
                                 if (
                                   ['pending', 'premium'].includes(
                                     profile?.type as any

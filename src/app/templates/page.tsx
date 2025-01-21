@@ -40,7 +40,7 @@ const MoreTemplatesPage = async () => {
           <div className="grid-cols-1 md:grid-cols-2 lg:grid-cols-3 grid gap-[10px]  justify-items-center lg:max-w-[90%]">
             {data
               ? data.data?.map((show, idx) =>
-                  show.label === 'free' ? (
+                  show.label !== 'pending' ? (
                     <Link
                       key={idx}
                       // split netflix - netflixv1
