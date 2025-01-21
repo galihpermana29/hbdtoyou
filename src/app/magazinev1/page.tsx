@@ -6,6 +6,7 @@ import Image from 'next/image';
 import DragElements from '@/components/fancy/drag-elements';
 import { useMediaQuery } from '@mui/material';
 import dynamic from 'next/dynamic';
+import unoLogo from '@/assets/uno-logo.png';
 const Typewriter = dynamic(() => import('@/components/fancy/typewriter'), {
   ssr: false,
 });
@@ -27,16 +28,17 @@ const randomInt = (min: number, max: number) => {
 const DragElementsDemo: React.FC = () => {
   const isSmallDevice = useMediaQuery('only screen and (max-width : 768px)');
   return (
-    <div className="w-full flex  justify-between h-screen relative bg-[#000] overflow-hidden">
-      <div className="w-full h-full md:text-4xl lg:text-5xl xl:text-6xl sm:text-3xl text-3xl flex flex-col items-start justify-start bg-black text-foreground dark:text-muted font-normal overflow-hidden p-8 md:p-16 md:pt-48 absolute">
+    <div className="w-full flex  justify-between h-screen relative bg-[#181818] overflow-hidden">
+      <div className="w-full h-full md:text-4xl lg:text-5xl xl:text-6xl sm:text-3xl text-3xl flex flex-col items-start justify-start text-foreground dark:text-muted font-normal overflow-hidden p-8 md:p-24 md:pt-48 absolute">
         <iframe
-          src={`https://open.spotify.com/embed/track/${'4s5B70nF4StXSaCwP6C0AU'}`}
+          allow="autoplay; clipboard-write; encrypted-media; fullscreen; picture-in-picture"
+          loading="lazy"
+          src={`https://open.spotify.com/embed/track/${'1CVUWAC845LKEDHH0l8XG2'}`}
           height={80}
           className="max-w-[370px] mb-[20px] relative z-[999999]"></iframe>
         <p
           className="whitespace-pre-wrap max-w-[500px]"
           suppressHydrationWarning>
-          {/* <span>{"We're born 🌞 to "}</span> */}
           <Typewriter
             text={[
               'All of this photo is our moments.',
@@ -53,16 +55,10 @@ const DragElementsDemo: React.FC = () => {
           />
         </p>
       </div>
-      {/* <h1 className="absolute text-xl md:text-4xl md:ml-36 top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 text-center text-muted-foreground uppercase w-full">
-        all of our
-        <span className="font-bold text-foreground dark:text-muted">
-          {' '}
-          memories.{' '}
-        </span>
-      </h1> */}
+
       <DragElements
         dragMomentum={true}
-        className=" flex justify-end items-end pr-8 pb-8">
+        className="flex justify-end items-end pr-16 pb-24">
         {urls.map((url, index) => {
           const rotation = randomInt(-12, 12);
           const width = isSmallDevice
@@ -75,9 +71,10 @@ const DragElementsDemo: React.FC = () => {
           return (
             <div
               key={index}
-              className={`flex items-start justify-center bg-white shadow-2xl p-2`}
+              className={`flex items-start justify-center bg-[#fff] shadow-2xl p-2 relative`}
               style={{
                 transform: `rotate(${rotation}deg)`,
+
                 width: `${width}px`,
                 height: `${height}px`,
               }}>
@@ -85,7 +82,7 @@ const DragElementsDemo: React.FC = () => {
                 className={`relative overflow-hidden`}
                 style={{
                   width: `${width - 4}px`,
-                  height: `${height - 30}px`,
+                  height: `${height - 60}px`,
                 }}>
                 <Image
                   src={url}
@@ -95,6 +92,13 @@ const DragElementsDemo: React.FC = () => {
                   draggable={false}
                 />
               </div>
+              <Image
+                src={unoLogo}
+                width={2560}
+                height={1795}
+                alt={`Analog photo ${index + 1}`}
+                className="max-w-[30%] absolute bottom-0"
+              />
             </div>
           );
         })}

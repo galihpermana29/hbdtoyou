@@ -34,6 +34,7 @@ const fetchSearch = async (
 ) => {
   const res = await searchSpotifySong(query);
   if (res.success) {
+    console.log(res.data, '>?');
     const options = res.data.tracks.items.map((item: any) => ({
       id: item.id,
       songName: item.name,
