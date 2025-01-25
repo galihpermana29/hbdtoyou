@@ -28,13 +28,12 @@ export interface OptionSpotifyTrack {
   value: string;
 }
 
-const fetchSearch = async (
+export const fetchSearch = async (
   query: string,
   callback: (options: any[]) => void
 ) => {
   const res = await searchSpotifySong(query);
   if (res.success) {
-    console.log(res.data, '>?');
     const options = res.data.tracks.items.map((item: any) => ({
       id: item.id,
       songName: item.name,

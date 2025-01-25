@@ -15,6 +15,7 @@ import Newspaperv1Form from '@/components/forms/newspaperv1-form';
 import Newspaperv3Form from '@/components/forms/newspaperv3-form';
 import GraduationV1Form from '@/components/forms/graduationv1-form';
 import GraduationV2Form from '@/components/forms/graduationv2-form';
+import MagazineV1Form from '@/components/forms/magazinev1-form';
 
 const PREMIUM_TEMPLATES = ['newspaperv2', 'disneyplusv1'];
 const EXCLUDE_TEMPLATES: string[] = [];
@@ -101,7 +102,7 @@ const CreatePage = () => {
       />
 
       <div className="flex flex-col items-center justify-start min-h-screen py-[30px]">
-        <div className="w-full max-w-[90%] md:max-w-[60%] lg:max-w-[50%]">
+        <div className="w-full max-w-[90%] md:max-w-[80%] lg:max-w-[80%]">
           {selectedTemplate ? (
             <>
               <h1 className="text-[35px] font-bold ">
@@ -182,12 +183,23 @@ const CreatePage = () => {
                   setModalState={setModalState}
                 />
               )}
+
+              {selectedTemplate.route.includes('magazinev1') && (
+                <MagazineV1Form
+                  selectedTemplate={selectedTemplate!}
+                  loading={loading}
+                  setLoading={setLoading}
+                  modalState={modalState}
+                  setModalState={setModalState}
+                />
+              )}
             </>
           ) : (
             <>
               <h1 className="text-[35px] font-bold mb-[20px]">
                 Select a template
               </h1>
+
               <div className="grid-cols-1 md:grid-cols-2 lg:grid-cols-3 grid gap-[10px]  justify-items-center">
                 {templates
                   ? templates?.map((show, idx) => (

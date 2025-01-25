@@ -337,22 +337,6 @@ const NetflixForm = ({
           </Upload>
         </Form.Item>
 
-        {/* <Form.Item
-          rules={[
-            {
-              required: true,
-              message: 'Please input your name!',
-            },
-            { validator: validateSlug },
-          ]}
-          name={'forName'}
-          label="Name For">
-          <Input
-            size="large"
-            placeholder="galih-permana"
-            addonBefore="hbdtoyou.live/"
-          />
-        </Form.Item> */}
         <div className="flex justify-end ">
           <Button
             className="!bg-black"

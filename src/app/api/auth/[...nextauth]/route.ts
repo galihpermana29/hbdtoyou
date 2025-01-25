@@ -19,6 +19,11 @@ const handler = NextAuth({
       },
     }),
   ],
+
+  session: {
+    maxAge: 3 * 60 * 60, // 4 hours
+  },
+
   callbacks: {
     async redirect({ baseUrl }) {
       return baseUrl;
@@ -38,7 +43,7 @@ const handler = NextAuth({
       if (account) {
         const { id_token } = account;
         const oAuthResult = await loginOAuth({ token_email: id_token! });
-        console.log(oAuthResult, '?');
+
         if (oAuthResult.data) {
           const spotifySession = await getSpotifyAccessToken();
           const newSession = {
@@ -54,7 +59,7 @@ const handler = NextAuth({
             fullName: oAuthResult.data.fullname,
             accessToken: oAuthResult.data.token,
           };
-
+          console.log(newSession, '??????');
           await setSession(newSession);
         }
       }

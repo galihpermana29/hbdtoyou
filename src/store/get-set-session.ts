@@ -33,7 +33,6 @@ export async function setSession(newSessionData: SessionData) {
     }
   });
 
-  console.log(session, '?????');
   await session.save();
 }
 

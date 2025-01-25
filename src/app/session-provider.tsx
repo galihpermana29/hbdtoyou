@@ -9,6 +9,9 @@ import { Button, Form, message, Modal, Upload } from 'antd';
 import React, { createContext, useContext, useEffect, useState } from 'react';
 import { Footer } from '@/components/ui/footer';
 import { usePathname } from 'next/navigation';
+import dayjs from 'dayjs';
+import { getSpotifyAccessToken } from '@/action/spotify-api';
+import { setSessionSpecific } from '@/store/get-set-session';
 
 // Define the context type
 interface SessionContextType {
@@ -116,6 +119,30 @@ const SessionProvider = ({
       handleGetProfile();
     }
   }, []);
+
+  useEffect(() => {
+    if (parsedSession.accessToken) {
+      const interval = setInterval(async () => {
+        const spotifySession = await getSpotifyAccessToken();
+        const newSession = {
+          spotify: {
+            accessToken: spotifySession.data.access_token,
+            refreshToken: '',
+            expiresIn: dayjs()
+              .add(spotifySession.data.expires_in, 'seconds')
+              .format('YYYY-MM-DD HH:mm:ss'),
+          },
+        };
+
+        await setSessionSpecific(newSession.spotify, 'spotify');
+      }, 1000 * 60 * 30);
+
+      return () => {
+        clearInterval(interval);
+      };
+    }
+  }, []);
+
   return (
     <SessionContext.Provider
       value={{
