@@ -11,9 +11,12 @@ export default function Counter({ endValue }: CounterProps) {
 
   useEffect(() => {
     if (count < endValue) {
-      const timer = setTimeout(() => {
-        setCount((prev) => Math.min(prev + 1, endValue));
-      }, 20);
+      const timer = setTimeout(
+        () => {
+          setCount((prev) => Math.min(prev + 1, endValue));
+        },
+        endValue > 300 ? 2 : 8
+      );
       return () => clearTimeout(timer);
     }
   }, [count, endValue]);

@@ -14,10 +14,11 @@ import { IProfileResponse } from '@/action/interfaces';
 import { removeSession } from '@/store/get-set-session';
 import Image from 'next/image';
 import { useRouter } from 'next/navigation';
+import { Menu } from 'lucide-react';
 
 const NavigationBar = () => {
   const [userProfile, setUserProfile] = useState<IProfileResponse | null>(null);
-
+  const [sidebar, setSidebar] = useState<boolean>(false);
   const session = useMemoifySession();
   const { setModalState: setModalUpgradePlan } = useMemoifyUpgradePlan();
 
@@ -104,25 +105,27 @@ const NavigationBar = () => {
         <Link href={'/photobox'} className="hidden md:block">
           Photobox
         </Link>
-        {/* <Link href={'/browse'} className="hidden md:block">
-          Browse
-        </Link> */}
+
         {userProfile?.type !== 'pending' && (
           <div
             className="hidden md:block hover:underline cursor-pointer"
             onClick={() => {
               if (session?.accessToken) {
-                // setModalUpgradePlan({ visible: true, data: '' });
                 router.push('/payment-qris');
               } else {
                 signIn('google');
               }
             }}>
-            Upgrade Plan
+            Upgrade
           </div>
         )}
-        <Link href={'/create'}>Create</Link>
-        <Link href={'/templates'} className={`block`}>
+        <Link href={'/create'} className="hidden md:block">
+          Create
+        </Link>
+        <Link href={'/inspiration'} className="hidden md:block">
+          Inspiration
+        </Link>
+        <Link href={'/templates'} className={`hidden md:block`}>
           See Templates
         </Link>
 
@@ -139,11 +142,47 @@ const NavigationBar = () => {
             <p className="block md:hidden">Login</p>
           </Button>
         )}
+        <Menu
+          className="cursor-pointer md:hidden"
+          onClick={() => {
+            setSidebar(!sidebar);
+          }}
+        />
 
         {session.accessToken && (
           <Dropdown menu={{ items }}>
             <Avatar>{userProfile?.fullname.charAt(0)}</Avatar>
           </Dropdown>
+        )}
+        {sidebar && (
+          <div className="fixed left-[55%] bottom-0 top-[83px] right-0 bg-white shadow-lg">
+            <div className="flex flex-col h-full justify-start gap-[20px] items-start py-[20px] px-[20px]">
+              <Link href={'/photobox'} className="block">
+                Photobox
+              </Link>
+              {userProfile?.type !== 'pending' && (
+                <div
+                  className="md:block hover:underline cursor-pointer"
+                  onClick={() => {
+                    if (session?.accessToken) {
+                      router.push('/payment-qris');
+                    } else {
+                      signIn('google');
+                    }
+                  }}>
+                  Upgrade
+                </div>
+              )}
+              <Link href={'/create'}>Create</Link>
+              <Link href={'/inspiration'}>Inspiration</Link>
+              <Link href={'/templates'} className={`hidden md:block`}>
+                See Templates
+              </Link>
+              <Link href={'/templates'} className={`block md:hidden`}>
+                Templates
+              </Link>
+            </div>
+          </div>
         )}
       </div>
     </div>

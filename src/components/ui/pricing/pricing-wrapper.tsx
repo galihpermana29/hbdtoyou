@@ -26,6 +26,9 @@ const PricingWrapper = () => {
 
         <div className="grid sm:grid-cols-2 gap-6 sm:gap-8 max-w-5xl mx-auto">
           <PricingCard
+            onClickButton={() => {
+              router.push('/templates');
+            }}
             title="Free"
             price="IDR 0K"
             description="Perfect for getting started with basic features"
@@ -34,7 +37,7 @@ const PricingWrapper = () => {
               'Limited songs library',
               'Basic image upload size',
             ]}
-            buttonText="Get Started"
+            buttonText="Try Free Account"
             buttonVariant="outline"
           />
 
@@ -42,7 +45,6 @@ const PricingWrapper = () => {
             onClickButton={() => {
               if (session?.accessToken) {
                 router.push('/payment-qris');
-                // setModalUpgradePlan({ visible: true, data: '' });
               } else {
                 signIn('google');
               }
@@ -59,7 +61,7 @@ const PricingWrapper = () => {
               '6 credit to use templates',
             ]}
             popular={true}
-            buttonText="Upgrade to Premium"
+            buttonText="Get Premium"
           />
         </div>
       </div>

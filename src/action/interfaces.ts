@@ -12,6 +12,23 @@ export interface IAllTemplateResponse {
   thumbnail_uri: string;
 }
 
+export interface ILatestContentResponse {
+  contents: IContent[];
+  total_content: number;
+  total_registered: number;
+}
+
+export interface IContent {
+  id: string;
+  user_id: string;
+  user_name: string;
+  template_id: string;
+  template_name: string;
+  template_label: string;
+  detail_content_json_text: string;
+  status: string;
+}
+
 export interface IProfileResponse {
   id: string;
   fullname: string;

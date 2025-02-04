@@ -1,7 +1,6 @@
 'use client';
 
-import { Badge } from 'antd';
-import { Button } from './button';
+import { Badge, Button } from 'antd';
 import { Card } from './card';
 import { FeatureItem } from './feature-item';
 import { PriceDisplay } from './price-display';
@@ -46,7 +45,11 @@ const PricingCard = ({
           <h3 className="text-xl sm:text-2xl font-bold">{title}</h3>
           <div className="flex gap-[8px] items-center">
             <PriceDisplay amount={price} period=" " />
-            {popular && <Badge count="50% OFF" />}
+            {popular && (
+              <span className="bg-red-500 text-primary-foreground px-3 py-1 text-xs sm:text-sm rounded-full">
+                50% OFF
+              </span>
+            )}
           </div>
           <p className="mt-4 text-sm sm:text-base text-muted-foreground">
             {description}
@@ -58,13 +61,19 @@ const PricingCard = ({
             <FeatureItem key={index} text={feature} />
           ))}
         </div>
-
-        <Button
-          className="mt-6 sm:mt-8 w-full"
-          variant={buttonVariant}
-          onClick={onClickButton}>
-          {buttonText}
-        </Button>
+        <div>
+          <Button
+            onClick={onClickButton}
+            size="large"
+            type="primary"
+            className={` w-[100%] !rounded-[50px] mt-[20px] ${
+              buttonVariant === 'outline'
+                ? '!bg-white !border-[1px] !border-black !text-black'
+                : '!bg-black'
+            }`}>
+            {buttonText}
+          </Button>
+        </div>
       </div>
     </div>
   </Card>

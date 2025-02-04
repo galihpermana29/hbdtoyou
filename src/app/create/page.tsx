@@ -102,7 +102,7 @@ const CreatePage = () => {
       />
 
       <div className="flex flex-col items-center justify-start min-h-screen py-[30px]">
-        <div className="w-full max-w-[90%] md:max-w-[80%] lg:max-w-[80%]">
+        <div className="w-full max-w-[90%] md:max-w-[80%] lg:max-w-[65%]">
           {selectedTemplate ? (
             <>
               <h1 className="text-[35px] font-bold ">

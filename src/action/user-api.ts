@@ -7,6 +7,7 @@ import {
   IContentPayload,
   IDetailContentResponse,
   IGetDetailPayment,
+  ILatestContentResponse,
   IOAuthResponse,
   IPaymentPayload,
   IProfileResponse,
@@ -314,6 +315,37 @@ export async function getDetailPayment(
 ): Promise<IGlobalResponse<null | IGetDetailPayment>> {
   const session = await getSession();
   const res = await fetch(baseUri + `/payments/${id}`, {
+    method: 'GET',
+    headers: {
+      'Content-Type': 'application/json',
+      'X-Source': 'web',
+      'X-UserID': session.userId!,
+      Authorization: `Bearer ${session.accessToken}`,
+    },
+  });
+
+  if (!res.ok) {
+    return {
+      success: false,
+      message: res.statusText,
+      data: null,
+    };
+  }
+
+  const data = await res.json();
+
+  return {
+    success: true,
+    message: data.message,
+    data: data.data,
+  };
+}
+
+export async function getLatestInspiration(): Promise<
+  IGlobalResponse<null | ILatestContentResponse>
+> {
+  const session = await getSession();
+  const res = await fetch(baseUri + `/contents/latest`, {
     method: 'GET',
     headers: {
       'Content-Type': 'application/json',

@@ -36,7 +36,6 @@ export default async function Home({ params }: { params: any }) {
 
   const contents = splitTextIntoColumns(parsedData.desc1);
   const defaultContents = splitTextIntoColumns(selectedSongs!.lyrics);
-  console.log(contents, '?dddd');
   return (
     <main className="min-h-screen bg-white p-4 md:p-8 lg:p-12">
       <div className="max-w-4xl mx-auto border border-black">
