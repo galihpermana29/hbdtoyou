@@ -36,8 +36,10 @@ const RootUserPage = async ({ params }: any) => {
   }
 
   const parsedData = JSON.parse(data.data.detail_content_json_text);
-  const totalItems = parsedData?.images.length || 0; // Get the total number of items
+  const totalItems = parsedData?.images?.length || 0; // Get the total number of items
   const midIndex = Math.ceil(totalItems / 2); // Calculate the middle index
+
+  if (!totalItems) return <div className="min-h-screen">No data</div>;
 
   return (
     <div className="bg-black overflow-x-hidden">
@@ -50,11 +52,11 @@ const RootUserPage = async ({ params }: any) => {
       />
       <List
         title={'Upcoming Movies'}
-        tData={parsedData?.images.slice(0, midIndex)} // First half
+        tData={parsedData?.images?.slice(0, midIndex)} // First half
       />
       <List
         title={'Box Office Top Movies'}
-        tData={parsedData?.images.slice(midIndex)} // Second half
+        tData={parsedData?.images?.slice(midIndex)} // Second half
       />
     </div>
   );
