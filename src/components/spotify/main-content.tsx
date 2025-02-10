@@ -58,9 +58,13 @@ const playlists = [
 export default function MainContent({
   momentOfYou,
   songsForYou,
+  ref2,
+  ref3,
 }: {
   momentOfYou?: any[];
   songsForYou?: any[];
+  ref2?: any;
+  ref3?: any;
 }) {
   const data = momentOfYou
     ? momentOfYou.map((dx: any, idx) => ({
@@ -72,11 +76,13 @@ export default function MainContent({
 
   return (
     <div>
-      <PlaylistSection songsForYou={songsForYou} />
+      <div ref={ref2}>
+        <PlaylistSection songsForYou={songsForYou} />
+      </div>
       <div className="p-4 md:p-6 bg-gradient-to-b from-[#1e1e1e] to-[#121212] rounded-[8px]">
         <section className="mb-8">
           <div className="flex items-center justify-between mb-4">
-            <h2 className="text-xl md:text-2xl font-bold text-white">
+            <h2 className="text-xl md:text-2xl font-bold text-white" ref={ref3}>
               Moment of You
             </h2>
             <button className="text-sm font-semibold text-neutral-400 hover:text-white transition flex items-center gap-1">

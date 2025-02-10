@@ -10,10 +10,10 @@ export default function PlayerTrackInfo({ imageUri }: { imageUri?: string }) {
             : 'https://res.cloudinary.com/dxuumohme/image/upload/v1735231561/gemsi8y1c20pwhdespcf.jpg'
         }
         alt="Now playing"
-        className="h-10 w-10 md:h-14 md:w-14 rounded object-cover"
+        className="h-9 w-9 md:h-14 md:w-14 rounded object-cover"
       />
       <div className="xs:block">
-        <h4 className="text-sm font-semibold text-white">Play this song</h4>
+        <h4 className="text-xs font-semibold text-white">Now Playing</h4>
         <p className="text-xs text-neutral-400">By Me</p>
       </div>
     </div>

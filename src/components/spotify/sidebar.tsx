@@ -1,12 +1,30 @@
 'use client';
 
 import { Home, Search, Library, Plus, Heart, Menu } from 'lucide-react';
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import { cn } from '@/lib/utils';
 import { playlists } from './playlist-section';
+import { useRouter, useSearchParams } from 'next/navigation';
 
-export default function Sidebar({ ourSongs }: { ourSongs?: any[] }) {
-  const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
+export default function Sidebar({
+  ourSongs,
+  ref1,
+}: {
+  ourSongs?: any[];
+  ref1?: any;
+}) {
+  const queryURL = useSearchParams();
+  const isTutorial = queryURL.get('isTutorial');
+  const steps = queryURL.get('steps');
+  const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(
+    isTutorial === 'true'
+  );
+
+  useEffect(() => {
+    if (Number(steps) > 0) {
+      setIsMobileMenuOpen(false);
+    }
+  }, [steps]);
 
   return (
     <>
@@ -52,9 +70,12 @@ export default function Sidebar({ ourSongs }: { ourSongs?: any[] }) {
 
             <div className="space-y-4">
               <div className="bg-[#242424] p-4 rounded-lg hover:bg-[#2a2a2a] transition cursor-pointer">
-                <h3 className="font-bold text-white mb-1">Our Songs</h3>
+                <h3 className="font-bold text-white mb-1" ref={ref1}>
+                  Our Songs
+                </h3>
                 <p className="text-sm text-neutral-400">Playlist • 123 songs</p>
               </div>
+
               <div className="max-h-[48vh] overflow-y-auto flex flex-col gap-[8px]">
                 {ourSongs
                   ? ourSongs.map((dx: any) => (

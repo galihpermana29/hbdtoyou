@@ -10,9 +10,10 @@ import ListItem from './listitem';
 interface ListProps {
   title: string;
   tData: any;
+  ref5?: any;
 }
 
-export default function List({ title, tData }: ListProps) {
+export default function List({ title, tData, ref5 }: ListProps) {
   const [isMoved, setIsMoved] = useState(false);
   const [slideNumber, setSlideNumber] = useState(0);
   const listRef = useRef<HTMLDivElement>(null);
@@ -33,7 +34,7 @@ export default function List({ title, tData }: ListProps) {
   };
 
   return (
-    <div className="w-full py-[30px] bg-black">
+    <div className="w-full py-[30px] bg-black" ref={ref5}>
       <span className="text-white text-lg font-medium ml-12 mb-12 block">
         {title}
       </span>

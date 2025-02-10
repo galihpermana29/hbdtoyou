@@ -19,6 +19,7 @@ import { useMemoifyProfile } from '@/app/session-provider';
 import { createContent } from '@/action/user-api';
 import { revalidateRandom } from '@/lib/revalidate';
 import TextArea from 'antd/es/input/TextArea';
+import { useRouter } from 'next/navigation';
 
 export interface OptionSpotifyTrack {
   id: string;
@@ -79,6 +80,7 @@ const SpotifyForm = ({
   const [value] = useDebounce(searchedSong, 1000);
 
   const profile = useMemoifyProfile();
+  const router = useRouter();
 
   const handleSetCollectionImagesURI = (
     payload: { uri: string; uid: string },
@@ -143,6 +145,15 @@ const SpotifyForm = ({
 
   return (
     <div>
+      <Button
+        className="!bg-black !rounded-full mb-[20px]"
+        type="primary"
+        onClick={() => {
+          router.replace('/spotifyv1?isTutorial=true');
+        }}
+        size="large">
+        See tutorial
+      </Button>
       <Form
         form={form}
         layout="vertical"

@@ -6,9 +6,9 @@ export const playlists = [
   '5Y35SjAfXjjG0sFQ3KOxmm',
   '3JeDm203MFpRlzSFaoNEv2',
   '7qiZfU4dY1lWllzX7mPBI3',
-  '2CFpkbOfYe23ZoMfufNKVB',
-  '7qiZfU4dY1lWllzX7mPBI3',
-  '2CFpkbOfYe23ZoMfufNKVB',
+  // '2CFpkbOfYe23ZoMfufNKVB',
+  // '7qiZfU4dY1lWllzX7mPBI3',
+  // '2CFpkbOfYe23ZoMfufNKVB',
 ];
 
 export default function PlaylistSection({

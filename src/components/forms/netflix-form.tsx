@@ -10,6 +10,7 @@ import { revalidateRandom } from '@/lib/revalidate';
 import { useMemoifyProfile } from '@/app/session-provider';
 import { createContent } from '@/action/user-api';
 import { uploadImageClientSide } from '@/lib/upload';
+import { useRouter } from 'next/navigation';
 export type FileType = Parameters<GetProp<UploadProps, 'beforeUpload'>>[0];
 
 export const validateSlug = (x: any, value: any) => {
@@ -89,26 +90,6 @@ export const beforeUpload = async (
       message.success('Image uploaded!');
     };
     reader.readAsDataURL(file as FileType);
-
-    // message.loading(
-    //   `${type === 'free' ? 'Compressing Image' : 'Uploading Image'}`
-    // );
-    // const jumbotronURL = await uploadImage(file, type);
-    // console.log(jumbotronURL, '?', setFormValues, '?>>> before upload');
-    // if (setFormValues) {
-    //   {
-    //     setFormValues(
-    //       {
-    //         uri: jumbotronURL,
-    //         uid: file.uid,
-    //       },
-    //       formName!,
-    //       index
-    //     );
-    //   }
-    // }
-
-    // message.success('Image uploaded!');
   }
 
   return isJpgOrPng && isLt2M;
@@ -157,6 +138,8 @@ const NetflixForm = ({
   const profile = useMemoifyProfile();
 
   const [form] = useForm();
+
+  const router = useRouter();
 
   const handleSetCollectionImagesURI = (
     payload: { uri: string; uid: string },
@@ -225,6 +208,15 @@ const NetflixForm = ({
 
   return (
     <div>
+      <Button
+        className="!bg-black !rounded-full mb-[20px]"
+        type="primary"
+        onClick={() => {
+          router.replace('/netflixv1?isTutorial=true');
+        }}
+        size="large">
+        See tutorial
+      </Button>
       <Form
         disabled={loading}
         form={form}
@@ -339,7 +331,7 @@ const NetflixForm = ({
 
         <div className="flex justify-end ">
           <Button
-            className="!bg-black"
+            className="!bg-black !rounded-full"
             loading={loading || uploadLoading}
             type="primary"
             htmlType="submit"
