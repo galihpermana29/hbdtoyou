@@ -1,7 +1,16 @@
 'use client';
 
 import React, { useEffect, useState } from 'react';
-import { Form, Input, Button, Upload, message, Space, Select } from 'antd';
+import {
+  Form,
+  Input,
+  Button,
+  Upload,
+  message,
+  Space,
+  Select,
+  Switch,
+} from 'antd';
 import {
   PlusOutlined,
   MinusCircleOutlined,
@@ -114,6 +123,7 @@ const SpotifyForm = ({
           ? collectionOfImages.map((dx) => dx.uri)
           : null,
       modalContent: values.modalContent,
+      isPublic: values.isPublic,
     };
 
     const payload = {
@@ -493,22 +503,23 @@ const SpotifyForm = ({
           The more photos you add, the creation process will take longer.
         </p>
 
-        {/* <Form.Item
-          rules={[
-            {
-              required: true,
-              message: 'Please input your name!',
-            },
-            { validator: validateSlug },
-          ]}
-          name={'forName'}
-          label="Name For">
-          <Input
-            size="large"
-            placeholder="galih-permana"
-            addonBefore="hbdtoyou.live/"
-          />
-        </Form.Item> */}
+        <Form.Item
+          name={'isPublic'}
+          label={
+            <div className="mt-[10px] mb-[5px]">
+              <h3 className="text-[15px] font-semibold">
+                Show on Inspiration Page
+              </h3>
+
+              <p className="text-[13px] text-gray-600 max-w-[400px]">
+                By default your website will be shown on the Inspiration page.
+                You can change this option to hide it.
+              </p>
+            </div>
+          }
+          initialValue={true}>
+          <Switch />
+        </Form.Item>
 
         {/* Submit Button */}
         <div className="flex justify-end ">

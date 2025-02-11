@@ -1,5 +1,5 @@
 'use client';
-import { Button, Form, Input, message, Upload } from 'antd';
+import { Button, Form, Input, message, Switch, Upload } from 'antd';
 import { useState } from 'react';
 import type { GetProp, UploadProps } from 'antd';
 import { LoadingOutlined, PlusOutlined } from '@ant-design/icons';
@@ -64,7 +64,7 @@ const GraduationV1Form = ({
   );
 
   const handleSubmit = async (val: any) => {
-    const { university, faculty, major, yearOfGraduation } = val;
+    const { university, faculty, major, yearOfGraduation, isPublic } = val;
 
     const json_text = {
       university,
@@ -75,6 +75,7 @@ const GraduationV1Form = ({
         collectionOfImages.length > 0
           ? collectionOfImages.map((dx) => dx.uri)
           : null,
+      isPublic,
     };
 
     const payload = {
@@ -174,7 +175,23 @@ const GraduationV1Form = ({
               : uploadButton}
           </Upload>
         </Form.Item>
+        <Form.Item
+          name={'isPublic'}
+          label={
+            <div className="mt-[10px] mb-[5px]">
+              <h3 className="text-[15px] font-semibold">
+                Show on Inspiration Page
+              </h3>
 
+              <p className="text-[13px] text-gray-600 max-w-[400px]">
+                By default your website will be shown on the Inspiration page.
+                You can change this option to hide it.
+              </p>
+            </div>
+          }
+          initialValue={true}>
+          <Switch />
+        </Form.Item>
         <div className="flex justify-end ">
           <Button
             className="!bg-black"

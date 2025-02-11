@@ -9,6 +9,7 @@ import {
   message,
   Row,
   Select,
+  Switch,
   Upload,
 } from 'antd';
 import TextArea from 'antd/es/input/TextArea';
@@ -96,7 +97,7 @@ const MagazineV1Form = ({
   );
 
   const handleSubmit = async (val: any) => {
-    const { jumbotronImage, desc, notableLyrics } = val;
+    const { desc, isPublic } = val;
 
     const json_text = {
       momentOfYou:
@@ -105,6 +106,7 @@ const MagazineV1Form = ({
           : null,
       desc,
       id: selectedSongs ?? '0W5o1Kxw1VlohSajPqeBMF',
+      isPublic,
     };
 
     const payload = {
@@ -264,6 +266,24 @@ const MagazineV1Form = ({
           1 images. To add up to 20 images, upgrade to{' '}
           <span className="font-bold">premium</span> plan.
         </p>
+
+        <Form.Item
+          name={'isPublic'}
+          label={
+            <div className="mt-[10px] mb-[5px]">
+              <h3 className="text-[15px] font-semibold">
+                Show on Inspiration Page
+              </h3>
+
+              <p className="text-[13px] text-gray-600 max-w-[400px]">
+                By default your website will be shown on the Inspiration page.
+                You can change this option to hide it.
+              </p>
+            </div>
+          }
+          initialValue={true}>
+          <Switch />
+        </Form.Item>
 
         <div className="flex justify-end ">
           <Button

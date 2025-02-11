@@ -1,5 +1,5 @@
 'use client';
-import { Button, Form, Image, Input, message, Upload } from 'antd';
+import { Button, Form, Image, Input, message, Switch, Upload } from 'antd';
 import TextArea from 'antd/es/input/TextArea';
 import { useState } from 'react';
 import type { GetProp, UploadFile, UploadProps } from 'antd';
@@ -76,7 +76,7 @@ const Newspaperv1Form = ({
   );
 
   const handleSubmit = async (val: any) => {
-    const { jumbotronImage, title, subTitle, stories } = val;
+    const { jumbotronImage, title, subTitle, stories, isPublic } = val;
     setLoading(true);
 
     const json_text = {
@@ -84,6 +84,7 @@ const Newspaperv1Form = ({
       title,
       subTitle,
       stories: stories,
+      isPublic,
     };
 
     const payload = {
@@ -312,7 +313,23 @@ const Newspaperv1Form = ({
             </>
           )}
         </Form.List>
+        <Form.Item
+          name={'isPublic'}
+          label={
+            <div className="mt-[10px] mb-[5px]">
+              <h3 className="text-[15px] font-semibold">
+                Show on Inspiration Page
+              </h3>
 
+              <p className="text-[13px] text-gray-600 max-w-[400px]">
+                By default your website will be shown on the Inspiration page.
+                You can change this option to hide it.
+              </p>
+            </div>
+          }
+          initialValue={true}>
+          <Switch />
+        </Form.Item>
         <div className="flex justify-end ">
           <Button
             className="!bg-black"

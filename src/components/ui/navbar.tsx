@@ -155,7 +155,7 @@ const NavigationBar = () => {
           </Dropdown>
         )}
         {sidebar && (
-          <div className="fixed left-[55%] bottom-0 top-[83px] right-0 bg-white shadow-lg">
+          <div className="fixed z-[9999] left-[55%] bottom-0 top-[83px] right-0 bg-white shadow-lg">
             <div className="flex flex-col h-full justify-start gap-[20px] items-start py-[20px] px-[20px]">
               <Link href={'/photobox'} className="block">
                 Photobox

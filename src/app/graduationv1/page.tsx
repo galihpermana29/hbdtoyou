@@ -1,3 +1,7 @@
+'use client';
+
+import { Dropdown } from 'antd';
+import { Ellipsis } from 'lucide-react';
 import Image from 'next/image';
 
 const projects = [
@@ -52,12 +56,30 @@ const projects = [
 ];
 
 export default function GraduationV1Page() {
+  async function downloadImage(url: string, filename: string) {
+    const response = await fetch(url);
+    const blob = await response.blob();
+    const link = document.createElement('a');
+
+    link.href = URL.createObjectURL(blob);
+    link.download = filename;
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
+
+    URL.revokeObjectURL(link.href); // Clean up memory
+  }
+
+  function getFilenameFromUrl(url: string) {
+    return url.substring(url.lastIndexOf('/') + 1);
+  }
+
   return (
     <main className="min-h-screen bg-black text-white">
       <nav className="flex justify-between items-center p-4 md:p-6">
         <div className="flex space-x-4 md:space-x-6">
           <a href="#works" className="hover:text-gray-300 text-sm md:text-base">
-            xx STUDIO
+            ALF STUDIO
           </a>
           <a
             target="_blank"
@@ -99,12 +121,35 @@ export default function GraduationV1Page() {
               className="object-cover transition-transform duration-700 ease-in-out group-hover:scale-105"
               sizes="(max-width: 768px) 100vw, 50vw"
             />
-            <div className="absolute inset-0 bg-gradient-to-b from-transparent to-black/70 opacity-0 group-hover:opacity-100 transition-opacity duration-500" />
-            <div className="absolute bottom-0 left-0 p-4 transform translate-y-4 group-hover:translate-y-0 transition-transform duration-500 ease-out">
-              <h3 className="text-sm font-medium uppercase tracking-wider">
-                {project.title}
-              </h3>
+            <div className="absolute top-[12px] right-[20px] z-[30]">
+              <Dropdown
+                menu={{
+                  items: [
+                    {
+                      key: '1',
+                      label: 'Download',
+                      onClick: () => {
+                        downloadImage(
+                          project.image,
+                          getFilenameFromUrl(project.image)
+                        );
+                      },
+                    },
+                    {
+                      key: '2',
+                      label: 'Open in New Tab',
+                      onClick: () => {
+                        window.open(project.image, '_blank');
+                      },
+                    },
+                  ],
+                }}>
+                <a onClick={(e) => e.preventDefault()}>
+                  <Ellipsis size={26} />
+                </a>
+              </Dropdown>
             </div>
+            <div className="absolute inset-0 bg-gradient-to-b from-transparent to-black/70 opacity-0 group-hover:opacity-100 transition-opacity duration-500" />
           </div>
         ))}
       </div>
