@@ -47,7 +47,7 @@ const InspirationPage = async () => {
                       return jsonContent.jumbotronImage;
                     }
                   };
-
+                  if (show.user_name === 'Ghina Rhoudotul Jannah') return;
                   if (!handleJumbotron()) return;
 
                   return (
