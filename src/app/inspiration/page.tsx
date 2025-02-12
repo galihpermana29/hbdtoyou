@@ -12,6 +12,7 @@ const getData = async () => {
 const InspirationPage = async () => {
   const data: null | ILatestContentResponse =
     (await getData()) as ILatestContentResponse;
+
   return (
     <div>
       <NavigationBar />
@@ -20,7 +21,7 @@ const InspirationPage = async () => {
           Inspiration from Others
         </h1>
         <div className="mx-auto flex justify-center items-center">
-          <div className="grid-cols-1 md:grid-cols-2 lg:grid-cols-3 grid gap-[10px]  justify-items-center lg:max-w-[90%]">
+          <div className="grid-cols-2 md:grid-cols-3 lg:grid-cols-5 grid gap-[10px]  justify-items-center lg:max-w-[90%]">
             {data
               ? data?.contents?.map((show, idx) => {
                   const jsonContent = JSON.parse(show.detail_content_json_text);
@@ -48,7 +49,6 @@ const InspirationPage = async () => {
                     }
                   };
 
-                  if (show.user_name === 'Ghina Rhoudotul Jannah') return;
                   if (!handleJumbotron()) return;
 
                   if (
@@ -62,20 +62,21 @@ const InspirationPage = async () => {
 
                   return (
                     <Link
+                      target="_blank"
                       key={idx}
                       href={`/${
                         show.template_name.split('-')[1].split(' ')[1]
                       }/${show.id}`}>
-                      <div className="bg-[#181818] p-3 md:p-4 rounded-lg hover:bg-[#282828] transition cursor-pointer group max-w-[400px] ">
-                        <div className="mb-4 relative">
+                      <div className="bg-[#181818] p-3 rounded-lg hover:bg-[#282828] transition cursor-pointer group max-w-[400px] ">
+                        <div className="mb-2 relative">
                           <img
                             src={handleJumbotron()}
                             alt={jsonContent.title}
                             className="w-full aspect-video object-cover rounded-md"
                           />
                         </div>
-                        <h3 className="font-semibold text-white mb-1 line-clamp-1">
-                          {show.template_name.split('-')[0]}
+                        <h3 className="font-semibold text-white line-clamp-1 text-[13px]">
+                          {show.template_name.split('-')[0]} - {show?.user_name}
                         </h3>
                       </div>
                     </Link>

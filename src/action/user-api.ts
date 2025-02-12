@@ -353,6 +353,9 @@ export async function getLatestInspiration(): Promise<
       'X-UserID': session.userId!,
       Authorization: `Bearer ${session.accessToken}`,
     },
+    next: {
+      revalidate: 60,
+    },
   });
 
   if (!res.ok) {

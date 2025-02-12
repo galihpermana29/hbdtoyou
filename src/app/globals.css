@@ -2,6 +2,36 @@
 @import url('https://fonts.googleapis.com/css2?family=Young+Serif&display=swap');
 @import url('https://fonts.googleapis.com/css2?family=PT+Serif:ital,wght@0,400;0,700;1,400;1,700&display=swap');
 
+
+@font-face {
+  font-family: 'Formula1 Display';
+  src: url('/font/Formula1-Display-Bold.woff2') format('woff2'),
+      url('/font/Formula1-Display-Bold.woff') format('woff');
+  font-weight: 500;
+  font-style: normal;
+  font-display: swap;
+}
+
+@font-face {
+  font-family: 'Formula1 Display';
+  src: url('/font/Formula1-Display-Regular.woff2') format('woff2'),
+      url('/font/Formula1-Display-Regular.woff') format('woff');
+  font-weight: normal;
+  font-style: normal;
+  font-display: swap;
+}
+
+@font-face {
+  font-family: 'Formula1 Display Wide';
+  src: url('/font/Formula1-Display-Wide.woff2') format('woff2'),
+      url('/font/Formula1-Display-Wide.woff') format('woff');
+  font-weight: 500;
+  font-style: normal;
+  font-display: swap;
+}
+
+
+
 *{
   font-family: "Plus Jakarta Sans", serif;
   font-optical-sizing: auto;
@@ -26,6 +56,19 @@
   font-family: "PT Serif", serif;
   font-weight: 400;
   font-style: normal;
+}
+
+.f1-font{
+  font-family: 'Formula1 Display';
+}
+
+.f1-font-wide{
+  font-family: 'Formula1 Display Wide';
+}
+
+.f1-font-bold{
+  font-family: 'Formula1 Display';
+  font-weight: bold;
 }
 
 @tailwind base;
@@ -93,4 +136,9 @@
   body {
     @apply bg-background text-foreground;
   }
+
+
 }
+
+
+
