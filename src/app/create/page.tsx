@@ -16,6 +16,7 @@ import Newspaperv3Form from '@/components/forms/newspaperv3-form';
 import GraduationV1Form from '@/components/forms/graduationv1-form';
 import GraduationV2Form from '@/components/forms/graduationv2-form';
 import MagazineV1Form from '@/components/forms/magazinev1-form';
+import Formula1Form from '@/components/forms/f1historyv1-form';
 
 const PREMIUM_TEMPLATES = ['newspaperv2', 'disneyplusv1'];
 const EXCLUDE_TEMPLATES: string[] = [];
@@ -193,6 +194,16 @@ const CreatePage = () => {
                   setModalState={setModalState}
                 />
               )}
+
+              {selectedTemplate.route.includes('f1historyv1') && (
+                <Formula1Form
+                  selectedTemplate={selectedTemplate!}
+                  loading={loading}
+                  setLoading={setLoading}
+                  modalState={modalState}
+                  setModalState={setModalState}
+                />
+              )}
             </>
           ) : (
             <>
@@ -243,7 +254,7 @@ const CreatePage = () => {
                             <img
                               src={show.thumbnail_uri}
                               alt={show.name}
-                              className="w-full aspect-video object-cover rounded-md"
+                              className="w-full aspect-video object-cover object-top rounded-md"
                             />
                           </div>
                           <h3 className="font-semibold text-white mb-1 line-clamp-1">

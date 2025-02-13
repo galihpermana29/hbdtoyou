@@ -28,7 +28,7 @@
     "@radix-ui/react-slider": "^1.2.2",
     "@uidotdev/usehooks": "^2.4.1",
     "@vercel/analytics": "^1.4.1",
-    "antd": "^5.20.4",
+    "antd": "^5.0.4",
     "axios": "^1.7.9",
     "class-variance-authority": "^0.7.0",
     "cloudinary": "^2.5.1",

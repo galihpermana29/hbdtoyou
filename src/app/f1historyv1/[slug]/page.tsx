@@ -1,8 +1,26 @@
+import { getDetailContent } from '@/action/user-api';
+import f1Teams from '@/lib/f1Data';
 import { Carousel } from 'antd';
 import { ArrowDownRight, MoveDownRight } from 'lucide-react';
 import Image from 'next/image';
 
-const F1Historyv1Page = () => {
+const getDetailDataNew = async (id: string) => {
+  const res = await getDetailContent(id);
+  return res;
+};
+
+const F1Historyv1Page = async ({ params }: { params: any }) => {
+  const { slug } = params;
+
+  const data = await getDetailDataNew(slug);
+  if (!data.data) {
+    return <div>No data</div>;
+  }
+
+  const parsedData = JSON.parse(data.data.detail_content_json_text);
+
+  console.log(parsedData, '?');
+
   return (
     <div className="bg-[#F6F4F0] pb-[50px]">
       <nav className="h-[58px]  flex justify-between px-[5%] md:px-[10%]  bg-white items-center">
@@ -66,16 +84,18 @@ const F1Historyv1Page = () => {
         <h1 className="f1-font text-[14px] text-white uppercase">Driver</h1>
         <h1 className="f1-font text-[14px] text-white uppercase">Teams</h1>
       </nav>
-      <h1 className="mt-[50px] mb-[12px] f1-font text-[30px] text-black px-[5%] md:px-[10%]">
-        Our Valentine Gift
+      <h1 className="mt-[50px] mb-[12px] f1-font text-[18px] md:text-[30px] text-black px-[5%] md:px-[10%]">
+        {parsedData?.title ?? 'Our Valentine Gift'}
       </h1>
       <div className="bg-white mx-[5%] md:mx-[10%] px-[20px] pb-[20px]">
         <div className="min-h-screen flex flex-col-reverse md:flex-row justify-between gap-[30px]">
           <div>
-            <div className="flex gap-[20px] justify-center items-center mt-[30px] md:p-[20px]">
+            <div className="flex gap-[10px] justify-center items-center mt-[30px] md:p-[20px]">
               <Image
                 src={
-                  'https://res.cloudinary.com/dxuumohme/image/upload/v1739463133/images-api/Ferrari/nvua0wzcrnhoi51yjvfs.avif'
+                  f1Teams.find((dx) => dx.teamName === parsedData?.teamName)
+                    ?.logo ??
+                  'https://res.cloudinary.com/dxuumohme/image/upload/v1739376662/images-api/pct0bkdcsx0yvgyewksl.png'
                 }
                 alt="f1-logo"
                 width={252}
@@ -104,39 +124,39 @@ const F1Historyv1Page = () => {
               <h1 className="f1-font-bold text-[14px] text-black">
                 Team Description
               </h1>
-              <p className=" f1-font text-[12px]">
-                Since our journey began in 2019, our love story has been an
+              <p className=" f1-font text-[12px] mt-[10px]">
+                {parsedData?.teamDescription ??
+                  `Since our journey began in 2019, our love story has been an
                 incredible ride. Through ups and downs, laughter and tears, we
                 ve built something truly special. Every moment together is a
                 podium finish, and every challenge we face makes us stronger.
                 From silly jokes to heartfelt conversations, we continue to race
-                forward, hand in hand, towards a lifetime of happiness.
+                forward, hand in hand, towards a lifetime of happiness.`}
               </p>
             </div>
-
             <div className="flex flex-col gap-3">
               {[
-                { label: 'Team Name', value: 'Ferrari Kuda Jingkrak' },
-                { label: 'Base', value: 'Depok' },
+                { label: 'Team Name', value: parsedData?.teamName ?? '-' },
+                { label: 'Base', value: parsedData?.teamBase ?? '-' },
                 {
                   label: 'Who is Falling in Love First',
-                  value: 'Leclerc',
+                  value: parsedData?.fallingFirst ?? '-',
                 },
                 {
                   label: 'Who is The Most Jealous',
-                  value: 'Celine',
+                  value: parsedData?.mostJealous ?? '-',
                 },
                 {
                   label: 'Who is The Most Funny',
-                  value: 'Leclerc',
+                  value: parsedData?.mostFunny ?? '-',
                 },
                 {
                   label: 'Who is The Most Romantic',
-                  value: 'Leclerc',
+                  value: parsedData?.mostRomantic ?? '-',
                 },
                 {
                   label: 'Team First Date',
-                  value: '29 March 2019',
+                  value: parsedData?.teamFirstDate ?? '-',
                 },
               ].map((item, index) => (
                 <div key={index} className="grid grid-cols-2 gap-5">
@@ -154,7 +174,7 @@ const F1Historyv1Page = () => {
             <div>
               <div className="h-[292px] w-[292px] overflow-hidden">
                 <Image
-                  src="https://res.cloudinary.com/dxuumohme/image/upload/v1739463134/images-api/Ferrari/wl59cqou7gmngxebrhev.avif"
+                  src={parsedData?.driver1 ?? f1Teams[0].drivers[0].image}
                   alt="driver-1"
                   width={292}
                   className="object-cover"
@@ -162,19 +182,21 @@ const F1Historyv1Page = () => {
                 />
               </div>
               <div>
-                <h1 className="f1-font-bold text-[36px] text-black">26</h1>
+                <h1 className="f1-font-bold text-[36px] text-black">
+                  {parsedData?.firstDriverNumber ?? '0'}
+                </h1>
                 <h1 className="f1-font text-[16px] text-black mt-[12px]">
-                  Galih Putra
+                  {parsedData?.firstDriverName ?? 'First Driver'}
                 </h1>
                 <h1 className="f1-font-bold text-[12px] text-[#68686F]">
-                  Galih & Caca Racing Team
+                  {parsedData?.teamName ?? 'Team Name'}
                 </h1>
               </div>
             </div>
             <div>
-              <div className="h-[292px] w-[292px] overflow-hidden">
+              <div className="h-[292px] w-[292px]  overflow-hidden">
                 <Image
-                  src="https://res.cloudinary.com/dxuumohme/image/upload/v1739380083/images-api/exdybuaeubkmlwsoxqxl.png"
+                  src={parsedData?.driver2 ?? f1Teams[0].drivers[1].image}
                   alt="driver-2"
                   width={292}
                   className="object-cover"
@@ -182,31 +204,32 @@ const F1Historyv1Page = () => {
                 />
               </div>
               <div>
-                <h1 className="f1-font-bold text-[36px] text-black">6</h1>
+                <h1 className="f1-font-bold text-[36px] text-black">
+                  {parsedData?.secondDriverNumber ?? '0'}
+                </h1>
                 <h1 className="f1-font text-[16px] text-black mt-[12px]">
-                  Celine Salsabila
+                  {parsedData?.secondDriverName ?? 'Second Driver'}
                 </h1>
                 <h1 className="f1-font-bold text-[12px] text-[#68686F]">
-                  Galih & Caca Racing Team
+                  {parsedData?.teamName ?? 'Team Name'}
                 </h1>
               </div>
             </div>
           </div>
         </div>
         <div className="mt-[20px]">
-          <Carousel>
-            <div>
-              <div className="aspect-video">
+          <Carousel autoplay>
+            {parsedData?.images?.map((dx: any) => (
+              <div className="aspect-video" key={dx}>
                 <Image
-                  className="object-cover"
-                  src={
-                    'https://res.cloudinary.com/dxuumohme/image/upload/v1739383207/images-api/xl6ml0bm6tdgulnpjw3o.png'
-                  }
+                  className="object-cover w-full"
+                  src={dx}
                   alt="lando"
-                  fill
+                  width={500}
+                  height={500}
                 />
               </div>
-            </div>
+            ))}
           </Carousel>
         </div>
         <div className="bg-[#E10500] h-[20px] w-full"></div>
@@ -216,42 +239,26 @@ const F1Historyv1Page = () => {
               In Profile
             </h1>
             <p className="mt-[12px] f1-font text-[14px] text-black">
-              Since our journey began in 2019, our love story has been an
-              incredible ride. Through ups and downs, laughter and tears, we ve
-              built something truly special. Every moment together is a podium
-              finish, and every challenge we face makes us stronger. From silly
-              jokes to heartfelt conversations, we continue to race forward,
-              hand in hand, towards a lifetime of happiness.
-            </p>
-          </div>
-          <div className="mt-[30px]">
-            <h1 className="mt-[12px] f1-font text-[28px] text-black">2024</h1>
-            <p className="mt-[12px] f1-font text-[14px] text-black">
-              This year marks another lap in our love story. More memories, more
-              laughter, and more dreams to achieve together. The best is yet to
-              come!
+              {parsedData?.teamDescription ??
+                `Since our journey began in 2019, our love story has been an
+                incredible ride. Through ups and downs, laughter and tears, we
+                ve built something truly special. Every moment together is a
+                podium finish, and every challenge we face makes us stronger.
+                From silly jokes to heartfelt conversations, we continue to race
+                forward, hand in hand, towards a lifetime of happiness.`}
             </p>
           </div>
           <div>
-            <h1 className="mt-[12px] f1-font text-[28px] text-black">2023</h1>
-            <p className="mt-[12px] f1-font text-[14px] text-black">
-              Our bond grew stronger as we explored new places, celebrated
-              milestones, and supported each other through every twist and turn.
-            </p>
-          </div>
-          <div>
-            <h1 className="mt-[12px] f1-font text-[28px] text-black">2022</h1>
-            <p className="mt-[12px] f1-font text-[14px] text-black">
-              Another year filled with joy and adventures. We learned more about
-              each other and found new ways to cherish our time together.
-            </p>
-          </div>
-          <div>
-            <h1 className="mt-[12px] f1-font text-[28px] text-black">2021</h1>
-            <p className="mt-[12px] f1-font text-[14px] text-black">
-              The beginning of something beautiful. From the first I love you to
-              endless inside jokes, our story started with magic and excitement.
-            </p>
+            {parsedData?.episodes?.map((dx: any) => (
+              <div key={dx}>
+                <h1 className="mt-[12px] f1-font text-[28px] text-black">
+                  {dx.year}
+                </h1>
+                <p className="mt-[12px] f1-font text-[14px] text-black">
+                  {dx.desc}
+                </p>
+              </div>
+            ))}
           </div>
         </div>
       </div>

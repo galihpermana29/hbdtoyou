@@ -322,13 +322,13 @@ const Newspaperv1Form = ({
               </h3>
 
               <p className="text-[13px] text-gray-600 max-w-[400px]">
-                By default your website will be shown on the Inspiration page.
-                You can change this option to hide it.
+                In free plan your website will be shown on the Inspiration page.
+                You can change this option to hide it on premium plan.
               </p>
             </div>
           }
           initialValue={true}>
-          <Switch />
+          <Switch disabled={profile?.type === 'free'} />
         </Form.Item>
         <div className="flex justify-end ">
           <Button

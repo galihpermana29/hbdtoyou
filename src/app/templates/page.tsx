@@ -68,7 +68,7 @@ const MoreTemplatesPage = async () => {
                           <img
                             src={show.thumbnail_uri}
                             alt={show.name}
-                            className="w-full aspect-video object-cover rounded-md"
+                            className="w-full aspect-video object-cover rounded-md object-top"
                           />
                         </div>
                         <h3 className="font-semibold text-white mb-1 line-clamp-1">
