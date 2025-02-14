@@ -19,8 +19,6 @@ const F1Historyv1Page = async ({ params }: { params: any }) => {
 
   const parsedData = JSON.parse(data.data.detail_content_json_text);
 
-  console.log(parsedData, '?');
-
   return (
     <div className="bg-[#F6F4F0] pb-[50px]">
       <nav className="h-[58px]  flex justify-between px-[5%] md:px-[10%]  bg-white items-center">
@@ -124,7 +122,7 @@ const F1Historyv1Page = async ({ params }: { params: any }) => {
               <h1 className="f1-font-bold text-[14px] text-black">
                 Team Description
               </h1>
-              <p className=" f1-font text-[12px] mt-[10px]">
+              <p className=" f1-font text-[12px] mt-[10px] max-w-[600px]">
                 {parsedData?.teamDescription ??
                   `Since our journey began in 2019, our love story has been an
                 incredible ride. Through ups and downs, laughter and tears, we
@@ -172,13 +170,11 @@ const F1Historyv1Page = async ({ params }: { params: any }) => {
           </div>
           <div className="flex flex-col  items-center lg:items-start lg:flex-row gap-[12px] mt-[20px] lg:mt-0">
             <div>
-              <div className="h-[292px] w-[292px] overflow-hidden">
-                <Image
+              <div className="aspect-square overflow-hidden">
+                <img
                   src={parsedData?.driver1 ?? f1Teams[0].drivers[0].image}
                   alt="driver-1"
-                  width={292}
-                  className="object-cover"
-                  height={388}
+                  className="object-cover aspect-square max-w-[300px]"
                 />
               </div>
               <div>
@@ -194,13 +190,11 @@ const F1Historyv1Page = async ({ params }: { params: any }) => {
               </div>
             </div>
             <div>
-              <div className="h-[292px] w-[292px]  overflow-hidden">
-                <Image
+              <div className="aspect-square  overflow-hidden">
+                <img
                   src={parsedData?.driver2 ?? f1Teams[0].drivers[1].image}
                   alt="driver-2"
-                  width={292}
-                  className="object-cover"
-                  height={388}
+                  className="object-cover aspect-square max-w-[300px]"
                 />
               </div>
               <div>
@@ -220,13 +214,13 @@ const F1Historyv1Page = async ({ params }: { params: any }) => {
         <div className="mt-[20px]">
           <Carousel autoplay>
             {parsedData?.images?.map((dx: any) => (
-              <div className="aspect-video" key={dx}>
-                <Image
-                  className="object-cover w-full"
+              <div
+                className="aspect-video overflow-hidden flex justify-center items-center"
+                key={dx}>
+                <img
+                  className="object-cover object-center w-full aspect-video"
                   src={dx}
                   alt="lando"
-                  width={500}
-                  height={500}
                 />
               </div>
             ))}
