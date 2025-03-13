@@ -1,4 +1,5 @@
 import { getAllTemplates } from '@/action/user-api';
+import NewTemplates from '@/components/newlanding/NewTemplates';
 import NavigationBar from '@/components/ui/navbar';
 import Link from 'next/link';
 
@@ -28,10 +29,10 @@ const templates = [
 
 const MoreTemplatesPage = async () => {
   const data = await getAllTemplates();
-
   return (
     <div className="">
-      <NavigationBar />
+      <NewTemplates data={data.success ? data.data : []} />
+      {/* <NavigationBar />
       <div className="py-[30px] px-[13px] lg:px-[40px]">
         <h1 className="text-center font-bold text-[22px] lg:text-[30px] mb-[30px]">
           Try More Templates
@@ -81,7 +82,7 @@ const MoreTemplatesPage = async () => {
               : 'No data'}
           </div>
         </div>
-      </div>
+      </div> */}
     </div>
   );
 };

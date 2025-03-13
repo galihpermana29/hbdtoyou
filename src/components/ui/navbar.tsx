@@ -86,104 +86,106 @@ const NavigationBar = () => {
   }, [session]);
 
   return (
-    <div
-      suppressHydrationWarning
-      className="flex item justify-between border-b-[1px] py-[20px] px-[12px] md:px-[40px] bg-white">
-      <Link href={'/'} className="font-bold">
-        <Image
-          src={
-            'https://res.cloudinary.com/dxuumohme/image/upload/v1737048992/vz6tqrzgcht45fstloxc.png'
-          }
-          alt="asd"
-          width={40}
-          height={40}
-          priority
-        />
-      </Link>
-
-      <div className="flex items-center gap-[8px] md:gap-[24px] text-[14px]">
-        <Link href={'/photobox'} className="hidden md:block">
-          Photobox
-        </Link>
-
-        {userProfile?.type !== 'pending' && (
-          <div
-            className="hidden md:block hover:underline cursor-pointer"
-            onClick={() => {
-              if (session?.accessToken) {
-                router.push('/payment-qris');
-              } else {
-                signIn('google');
+    <div className="border-b-[1px] bg-white">
+      <div
+        suppressHydrationWarning
+        className="flex item justify-between  py-[20px] max-w-6xl 2xl:max-w-7xl px-[20px] mx-auto  ">
+        <div className="flex items-center gap-[8px] md:gap-[24px] text-[14px]">
+          <Link href={'/'} className="font-bold">
+            <Image
+              src={
+                'https://res.cloudinary.com/dxuumohme/image/upload/v1737048992/vz6tqrzgcht45fstloxc.png'
               }
-            }}>
-            Upgrade
-          </div>
-        )}
-        <Link href={'/create'} className="hidden md:block">
-          Create
-        </Link>
-        <Link href={'/inspiration'} className="hidden md:block">
-          Inspiration
-        </Link>
-        <Link href={'/templates'} className={`hidden md:block`}>
-          See Templates
-        </Link>
+              alt="asd"
+              width={40}
+              height={40}
+              priority
+            />
+          </Link>
+          <Link href={'/photobox'} className="hidden md:block">
+            Photobox
+          </Link>
 
-        {!session.accessToken && (
-          <Button
-            type="primary"
-            size="large"
-            className="!bg-black !text-white !rounded-[50px]"
-            onClick={() => signIn('google')}>
-            <div className=" items-center gap-2 hidden md:flex">
-              <p>Continue with</p>
-              <Google />
+          {userProfile?.type !== 'pending' && (
+            <div
+              className="hidden md:block hover:underline cursor-pointer"
+              onClick={() => {
+                if (session?.accessToken) {
+                  router.push('/payment-qris');
+                } else {
+                  signIn('google');
+                }
+              }}>
+              Upgrade
             </div>
-            <p className="block md:hidden">Login</p>
-          </Button>
-        )}
-        <Menu
-          className="cursor-pointer md:hidden"
-          onClick={() => {
-            setSidebar(!sidebar);
-          }}
-        />
+          )}
+          <Link href={'/create'} className="hidden md:block">
+            Create
+          </Link>
+          <Link href={'/inspiration'} className="hidden md:block">
+            Inspiration
+          </Link>
+          <Link href={'/templates'} className={`hidden md:block`}>
+            See Templates
+          </Link>
 
-        {session.accessToken && (
-          <Dropdown menu={{ items }}>
-            <Avatar>{userProfile?.fullname.charAt(0)}</Avatar>
-          </Dropdown>
-        )}
-        {sidebar && (
-          <div className="fixed z-[9999] left-[55%] bottom-0 top-[83px] right-0 bg-white shadow-lg">
-            <div className="flex flex-col h-full justify-start gap-[20px] items-start py-[20px] px-[20px]">
-              <Link href={'/photobox'} className="block">
-                Photobox
-              </Link>
-              {userProfile?.type !== 'pending' && (
-                <div
-                  className="md:block hover:underline cursor-pointer"
-                  onClick={() => {
-                    if (session?.accessToken) {
-                      router.push('/payment-qris');
-                    } else {
-                      signIn('google');
-                    }
-                  }}>
-                  Upgrade
-                </div>
-              )}
-              <Link href={'/create'}>Create</Link>
-              <Link href={'/inspiration'}>Inspiration</Link>
-              <Link href={'/templates'} className={`hidden md:block`}>
-                See Templates
-              </Link>
-              <Link href={'/templates'} className={`block md:hidden`}>
-                Templates
-              </Link>
+          {session.accessToken && (
+            <Dropdown menu={{ items }}>
+              <Avatar>{userProfile?.fullname.charAt(0)}</Avatar>
+            </Dropdown>
+          )}
+          {sidebar && (
+            <div className="fixed z-[9999] left-[55%] bottom-0 top-[83px] right-0 bg-white shadow-lg">
+              <div className="flex flex-col h-full justify-start gap-[20px] items-start py-[20px] px-[20px]">
+                <Link href={'/photobox'} className="block">
+                  Photobox
+                </Link>
+                {userProfile?.type !== 'pending' && (
+                  <div
+                    className="md:block hover:underline cursor-pointer"
+                    onClick={() => {
+                      if (session?.accessToken) {
+                        router.push('/payment-qris');
+                      } else {
+                        signIn('google');
+                      }
+                    }}>
+                    Upgrade
+                  </div>
+                )}
+                <Link href={'/create'}>Create</Link>
+                <Link href={'/inspiration'}>Inspiration</Link>
+                <Link href={'/templates'} className={`hidden md:block`}>
+                  See Templates
+                </Link>
+                <Link href={'/templates'} className={`block md:hidden`}>
+                  Templates
+                </Link>
+              </div>
             </div>
-          </div>
-        )}
+          )}
+        </div>
+        <div className="flex gap-4 items-center">
+          {!session.accessToken && (
+            <Button
+              type="primary"
+              size="large"
+              className="!bg-[#E34013] !text-white !rounded-[8px]"
+              onClick={() => signIn('google')}>
+              <div className=" items-center gap-2 hidden md:flex">
+                <p>Continue with</p>
+                <Google />
+              </div>
+              <p className="block md:hidden">Login</p>
+            </Button>
+          )}
+          <Menu
+            className="cursor-pointer md:hidden"
+            onClick={() => {
+              setSidebar(!sidebar);
+            }}
+          />
+        </div>
       </div>
     </div>
   );
