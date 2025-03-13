@@ -20,7 +20,7 @@ export async function uploadImageClientSide(
   // formData.append('upload_preset', uploadPreset);
   formData.append('timestamp', timestamp.toString());
   formData.append('signature', data.signature);
-  formData.append('api_key', '886125678413288'); // Public API key is safe to expose
+  formData.append('api_key', '221841315742512'); // Public API key is safe to expose
 
   // Add transformation options to formData
   if (type === 'free') {
@@ -30,7 +30,7 @@ export async function uploadImageClientSide(
   }
 
   const response = await fetch(
-    `https://api.cloudinary.com/v1_1/dxuumohme/image/upload`,
+    `https://api.cloudinary.com/v1_1/ddlus5qur/image/upload`,
     {
       method: 'POST',
       body: formData,
