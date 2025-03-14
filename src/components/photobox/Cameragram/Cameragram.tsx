@@ -4,6 +4,8 @@ import { useCallback, useRef, useState } from 'react';
 
 const videoConstraints = {
   facingMode: 'user',
+  width: 195, // Use a 3:4 aspect ratio resolution
+  height: 258,
 };
 
 const cropBase64 = (
@@ -55,6 +57,31 @@ const cropBase64 = (
   });
 };
 
+const resizeBase64 = (
+  base64: string,
+  targetWidth: number,
+  targetHeight: number
+): Promise<string> => {
+  return new Promise((resolve) => {
+    const img = new Image();
+    img.src = base64;
+
+    img.onload = () => {
+      const tempCanvas = document.createElement('canvas');
+      const tempCtx = tempCanvas.getContext('2d');
+
+      if (!tempCtx) return;
+
+      tempCanvas.width = targetWidth;
+      tempCanvas.height = targetHeight;
+
+      tempCtx.drawImage(img, 0, 0, targetWidth, targetHeight);
+
+      resolve(tempCanvas.toDataURL('image/jpeg'));
+    };
+  });
+};
+
 const Cameragram = ({
   setPhotos,
   photos,
@@ -73,16 +100,19 @@ const Cameragram = ({
         const imageSrc = (webcamRef.current as any).getScreenshot({
           // width: 1386,
           // height: 1038,
-          width: 2772,
-          height: 2076,
+          // width: 2772,
+          // height: 2076,
+          width: 195,
+          height: 258,
         });
 
         if (imageSrc) {
           const imgw = 1170;
           const imgh = 1548;
           // Crop the captured Base64 image (center crop to 195x258)
-          const croppedImage = await cropBase64(imageSrc, imgw, imgh, 1.3);
-
+          // const croppedImage = await cropBase64(imageSrc, imgw, imgh, 1.3);
+          // const croppedImage = await resizeBase64(imageSrc, 195, 258);
+          const croppedImage = imageSrc;
           if (action === 'retake' && photos.length > 0) {
             // Replace the last photo with the new cropped image
             const updatedPhotos = [...photos];
@@ -133,8 +163,9 @@ const Cameragram = ({
   return (
     <>
       <Webcam
+        mirrored={true}
         audio={false}
-        width={'100%'}
+        width={300}
         ref={webcamRef}
         screenshotFormat="image/jpeg"
         videoConstraints={videoConstraints}
