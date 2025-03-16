@@ -27,6 +27,7 @@ import { removeSession } from '@/store/get-set-session';
 import Image from 'next/image';
 import { useRouter } from 'next/navigation';
 import {
+  BadgeDollarSign,
   Book,
   House,
   LogOut,
@@ -88,31 +89,24 @@ const NavigationBar = () => {
       key: '11',
       label: (
         <div>
-          <h1 className="text-[14px] font-[500] text-[#344054] my-[5px]">
-            Settings
-          </h1>
+          <h1 className="text-[14px] font-[500] text-[#344054]">Settings</h1>
         </div>
       ),
       icon: <Settings size={18} className="text-[#667085]" />,
     },
-
     {
       key: '4',
       label: <p onClick={() => router.push('/payment-qris')}>Upgrade Plan</p>,
       icon: <Zap size={18} className="text-[#667085]" />,
     },
-    // {
-    //   key: '3',
-    //   label: (
-    //     <p className="capitalize">
-    //       {userProfile ? `Plan: ${userProfile?.type}` : 'Free'}
-    //     </p>
-    //   ),
-    // },
-    // {
-    //   key: '6',
-    //   label: userProfile ? `Credit: ${userProfile?.quota}` : '0',
-    // },
+    {
+      key: '6',
+      label: userProfile ? `${userProfile?.quota} Credit` : '0',
+      icon: <BadgeDollarSign size={18} className="text-[#667085]" />,
+      style: {
+        cursor: 'default',
+      },
+    },
     {
       type: 'divider',
     },

@@ -1,6 +1,7 @@
 import Webcam from 'react-webcam';
 import { Button } from 'antd';
 import { useCallback, useRef, useState } from 'react';
+import { useMemoifySession } from '@/app/session-provider';
 
 const videoConstraints = {
   facingMode: 'user',
@@ -93,6 +94,7 @@ const Cameragram = ({
 }) => {
   const webcamRef = useRef(null);
   const [countdown, setCountdown] = useState<number | null>(null);
+  const session = useMemoifySession();
 
   const capture = useCallback(
     async (action: 'retake' | 'capture') => {
@@ -165,8 +167,8 @@ const Cameragram = ({
       <Webcam
         mirrored={true}
         audio={false}
-        width={300}
         ref={webcamRef}
+        width={195 * 1.5}
         screenshotFormat="image/jpeg"
         videoConstraints={videoConstraints}
       />
@@ -178,32 +180,41 @@ const Cameragram = ({
           </div>
         )}
       </div>
-      <div className="flex gap-[12px]">
-        {photos.length === 4 && (
-          <Button
-            size="large"
-            onClick={() => handleDownload()}
-            className="mt-[20px]">
-            Save
-          </Button>
-        )}
-        {photos?.length < 4 && (
-          <Button
-            onClick={() => handleCaptureClick('capture')}
-            size="large"
-            className="mt-[20px] !bg-red-600 !text-white">
-            Capture
-          </Button>
-        )}
-        {photos?.length > 0 && (
-          <Button
-            size="large"
-            onClick={() => handleCaptureClick('retake')}
-            className="mt-[20px] !bg-yellow-500">
-            Retake
-          </Button>
-        )}
-      </div>
+      {session?.accessToken ? (
+        <div className="flex gap-[12px]">
+          {photos.length === 4 && (
+            <Button
+              size="large"
+              onClick={() => handleDownload()}
+              className="mt-[20px]">
+              Save
+            </Button>
+          )}
+          {photos?.length < 4 && (
+            <Button
+              onClick={() => handleCaptureClick('capture')}
+              size="large"
+              className="mt-[20px] !bg-red-600 !text-white">
+              Capture
+            </Button>
+          )}
+          {photos?.length > 0 && (
+            <Button
+              size="large"
+              onClick={() => handleCaptureClick('retake')}
+              className="mt-[20px] !bg-yellow-500">
+              Retake
+            </Button>
+          )}
+        </div>
+      ) : (
+        <Button
+          className="!bg-[#E34013] !text-white !rounded-[8px] !text-[16px] !font-[600] !h-[40px] mt-[20px]"
+          type="primary"
+          size="large">
+          Continue with Google
+        </Button>
+      )}
     </>
   );
 };
