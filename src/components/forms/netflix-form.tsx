@@ -1,5 +1,5 @@
 'use client';
-import { Button, Form, Image, Input, message, Upload } from 'antd';
+import { Button, Divider, Form, Image, Input, message, Upload } from 'antd';
 import TextArea from 'antd/es/input/TextArea';
 import { useState } from 'react';
 import { GetProp, Switch, UploadFile, UploadProps } from 'antd';
@@ -44,6 +44,7 @@ export const getBase64Multiple = (file: FileType): Promise<string> =>
 export const beforeUpload = async (
   file: FileType,
   type: 'premium' | 'free' = 'free',
+  openNotification: (progress: number, key: any) => void,
   setFormValues?: (
     { uri, uid }: { uri: string; uid: string },
     formName: string,
@@ -67,13 +68,12 @@ export const beforeUpload = async (
   } else {
     const reader = new FileReader();
     reader.onload = async () => {
-      if (type === 'free') {
-        message.loading('Compressing image, please wait');
-      } else {
-        message.loading('Uploading image, please wait');
-      }
-
-      const jumbotronURL = await uploadImage(file, type);
+      // if (type === 'free') {
+      //   message.loading('Compressing image, please wait');
+      // } else {
+      //   message.loading('Uploading image, please wait');
+      // }
+      const jumbotronURL = await uploadImage(file, type, openNotification);
       if (setFormValues) {
         {
           setFormValues(
@@ -95,8 +95,14 @@ export const beforeUpload = async (
   return isJpgOrPng && isLt2M;
 };
 
-export const uploadImage = async (base64: File, type: 'free' | 'premium') => {
-  const data = await uploadImageClientSide(base64, type);
+export const uploadImage = async (
+  base64: File,
+  type: 'free' | 'premium',
+  openNotification: (progress: number, key: any) => void
+) => {
+  const key = uuidv4();
+
+  const data = await uploadImageClientSide(base64, type, openNotification, key);
   if (data.success) {
     return data.data;
   } else {
@@ -111,6 +117,8 @@ const NetflixForm = ({
   modalState,
   setModalState,
   selectedTemplate,
+  openNotification,
+  handleCompleteCreation,
 }: {
   loading: boolean;
   setLoading: React.Dispatch<React.SetStateAction<boolean>>;
@@ -128,6 +136,8 @@ const NetflixForm = ({
     id: string;
     route: string;
   };
+  openNotification: (progress: number, key: any) => void;
+  handleCompleteCreation: () => void;
 }) => {
   const [imageUrl, setImageUrl] = useState<string>();
   const [uploadLoading, setUploadLoading] = useState(false);
@@ -189,6 +199,8 @@ const NetflixForm = ({
     const payload = {
       template_id: selectedTemplate.id,
       detail_content_json_text: JSON.stringify(json_text),
+      title: val?.title2 ? val?.title2 : '',
+      caption: val?.caption,
     };
 
     const res = await createContent(payload);
@@ -200,6 +212,7 @@ const NetflixForm = ({
         visible: true,
         data: userLink as string,
       });
+      handleCompleteCreation();
     } else {
       message.error(`Something went wrong!, ${res.message}`);
     }
@@ -247,6 +260,7 @@ const NetflixForm = ({
                     ? 'premium'
                     : 'free'
                   : 'free',
+                openNotification,
                 handleSetJumbotronImageURI,
                 'jumbotronImage'
               );
@@ -317,6 +331,7 @@ const NetflixForm = ({
                     ? 'premium'
                     : 'free'
                   : 'free',
+                openNotification,
                 handleSetCollectionImagesURI,
                 'images'
               );
@@ -345,6 +360,21 @@ const NetflixForm = ({
           }
           initialValue={true}>
           <Switch disabled={profile?.type === 'free'} />
+        </Form.Item>
+        <Divider />
+        <Form.Item
+          rules={[{ required: true, message: 'Please input title!' }]}
+          name={'title2'}
+          className="!my-[10px]"
+          label="Inspiration title">
+          <Input size="large" placeholder="Your inspiration title" />
+        </Form.Item>
+        <Form.Item
+          rules={[{ required: true, message: 'Please input caption!' }]}
+          name={'caption'}
+          className="!my-[10px]"
+          label="Inspiration caption">
+          <TextArea size="large" placeholder="Your inspiration caption" />
         </Form.Item>
 
         <div className="flex justify-end ">

@@ -3,6 +3,7 @@ import {
   Badge,
   Button,
   Col,
+  Divider,
   Form,
   Image,
   Input,
@@ -35,6 +36,8 @@ const Newspaperv3Form = ({
   modalState,
   setModalState,
   selectedTemplate,
+  openNotification,
+  handleCompleteCreation,
 }: {
   loading: boolean;
   setLoading: React.Dispatch<React.SetStateAction<boolean>>;
@@ -52,6 +55,8 @@ const Newspaperv3Form = ({
     id: string;
     route: string;
   };
+  openNotification: (progress: number, key: any) => void;
+  handleCompleteCreation: () => void;
 }) => {
   const [imageUrl, setImageUrl] = useState<string>();
 
@@ -89,6 +94,8 @@ const Newspaperv3Form = ({
     const payload = {
       template_id: selectedTemplate.id,
       detail_content_json_text: JSON.stringify(json_text),
+      title: val?.title2 ? val?.title2 : '',
+      caption: val?.caption ? val?.caption : '',
     };
 
     const res = await createContent(payload);
@@ -100,6 +107,7 @@ const Newspaperv3Form = ({
         visible: true,
         data: userLink as string,
       });
+      handleCompleteCreation();
     } else {
       message.error('Something went wrong!');
     }
@@ -138,6 +146,7 @@ const Newspaperv3Form = ({
                     ? 'premium'
                     : 'free'
                   : 'free',
+                openNotification,
                 handleSetJumbotronImageURI,
                 'jumbotronImage'
               );
@@ -254,6 +263,22 @@ const Newspaperv3Form = ({
           }
           initialValue={true}>
           <Switch disabled={profile?.type === 'free'} />
+        </Form.Item>
+
+        <Divider />
+        <Form.Item
+          rules={[{ required: true, message: 'Please input title!' }]}
+          name={'title2'}
+          className="!my-[10px]"
+          label="Inspiration title">
+          <Input size="large" placeholder="Your inspiration title" />
+        </Form.Item>
+        <Form.Item
+          rules={[{ required: true, message: 'Please input caption!' }]}
+          name={'caption'}
+          className="!my-[10px]"
+          label="Inspiration caption">
+          <TextArea size="large" placeholder="Your inspiration caption" />
         </Form.Item>
         <div className="flex justify-end ">
           <Button

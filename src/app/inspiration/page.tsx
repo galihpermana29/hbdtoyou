@@ -1,5 +1,6 @@
 import { ILatestContentResponse } from '@/action/interfaces';
 import { getLatestInspiration } from '@/action/user-api';
+import NewInspirationPage from '@/components/newlanding/NewInspiration';
 import NavigationBar from '@/components/ui/navbar';
 import Link from 'next/link';
 
@@ -16,7 +17,8 @@ const InspirationPage = async () => {
   return (
     <div>
       <NavigationBar />
-      <div className="py-[30px] px-[13px] lg:px-[40px]">
+      <NewInspirationPage />
+      {/* <div className="py-[30px] px-[13px] lg:px-[40px]">
         <h1 className="text-center font-bold text-[22px] lg:text-[30px] mb-[30px]">
           Inspiration from Others
         </h1>
@@ -85,7 +87,7 @@ const InspirationPage = async () => {
               : 'No data'}
           </div>
         </div>
-      </div>
+      </div> */}
     </div>
   );
 };

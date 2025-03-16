@@ -1,3 +1,4 @@
+import { initPhotos } from '@/lib/frameData';
 import React, { useEffect, useRef, useState } from 'react';
 
 type Photo = {
@@ -34,6 +35,7 @@ const PictureInFrame: React.FC<PictureInFrameProps> = ({
   });
 
   useEffect(() => {
+    const usedPhotos = photos.length === 0 ? initPhotos : photos;
     const { width, height } = canvasSize;
     const canvas = canvasRef.current;
 
@@ -47,7 +49,7 @@ const PictureInFrame: React.FC<PictureInFrameProps> = ({
     canvas.height = height;
 
     // Scale images and frame based on the scaling factor
-    const promises = photos.map(
+    const promises = usedPhotos.map(
       ({ src, x, y, width: imgWidth, height: imgHeight }) => {
         return new Promise<void>((resolve) => {
           const photoImg = new Image();
@@ -71,7 +73,10 @@ const PictureInFrame: React.FC<PictureInFrameProps> = ({
         });
       }
     );
+
     Promise.all(promises).then(() => {
+      if (!frameSrc) return;
+
       const frameImg = new Image();
       frameImg.src = frameSrc.src;
 
@@ -86,7 +91,7 @@ const PictureInFrame: React.FC<PictureInFrameProps> = ({
   }, [frameSrc, photos, canvasSize, scaleFactor]);
 
   return (
-    <canvas className="block m-auto border-2 max-w-[480px]" ref={canvasRef} />
+    <canvas className="block m-auto w-full max-w-[400px]" ref={canvasRef} />
   );
 };
 

@@ -1,7 +1,19 @@
 'use client';
 
 import { Google } from '@mui/icons-material';
-import { Avatar, Button, Dropdown, message, Modal, Tag, Tooltip } from 'antd';
+import {
+  Avatar,
+  Badge,
+  Button,
+  Cascader,
+  Divider,
+  Dropdown,
+  MenuProps,
+  message,
+  Modal,
+  Tag,
+  Tooltip,
+} from 'antd';
 import Link from 'next/link';
 import { useEffect, useState } from 'react';
 import { signIn, signOut } from 'next-auth/react';
@@ -14,7 +26,18 @@ import { IProfileResponse } from '@/action/interfaces';
 import { removeSession } from '@/store/get-set-session';
 import Image from 'next/image';
 import { useRouter } from 'next/navigation';
-import { Menu } from 'lucide-react';
+import {
+  Book,
+  House,
+  LogOut,
+  Menu,
+  Settings,
+  Sparkles,
+  Zap,
+} from 'lucide-react';
+import jumbotron from '@/assets/fitur-1-image.png';
+
+import './stlye.css';
 
 const NavigationBar = () => {
   const [userProfile, setUserProfile] = useState<IProfileResponse | null>(null);
@@ -23,41 +46,81 @@ const NavigationBar = () => {
   const { setModalState: setModalUpgradePlan } = useMemoifyUpgradePlan();
 
   const router = useRouter();
-  const items = [
+  const items: MenuProps['items'] = [
     {
       key: '1',
-      label: userProfile ? userProfile.fullname : 'Account',
-    },
-    userProfile?.type !== 'pending'
-      ? {
-          key: '4',
-          label: (
-            <p
-              onClick={() => router.push('/payment-qris')}
-              // onClick={() => setModalUpgradePlan({ visible: true, data: '' })}
-            >
-              Upgrade Plan
-            </p>
-          ),
-        }
-      : null,
-    {
-      key: '3',
       label: (
-        <p className="capitalize">
-          {userProfile ? `Plan: ${userProfile?.type}` : 'Free'}
-        </p>
+        <div className="flex items-center gap-[8px]">
+          <Avatar size={40}>{userProfile?.fullname.charAt(0)}</Avatar>
+          <div>
+            <h1 className="text-[14px] font-[600] text-[#344054] capitalize">
+              {userProfile ? userProfile.fullname?.toLowerCase() : ''}
+            </h1>
+            <p className="text-[14px] font-[400] text-[#475467]">
+              {userProfile ? userProfile.email : ''}
+            </p>
+          </div>
+        </div>
       ),
     },
     {
-      key: '6',
-      label: userProfile ? `Credit: ${userProfile?.quota}` : '0',
+      type: 'divider',
+    },
+
+    {
+      key: '10',
+      label: (
+        <div className="flex items-center gap-2">
+          <h1 className="text-[14px] font-[500] text-[#344054] my-[5px]">
+            Dashboard
+          </h1>
+          <Tag color="orange" className="!text-[12px]">
+            Soon
+          </Tag>
+        </div>
+      ),
+      icon: <House size={18} className="text-[#667085]" />,
+    },
+    {
+      type: 'divider',
+    },
+    {
+      key: '11',
+      label: (
+        <div>
+          <h1 className="text-[14px] font-[500] text-[#344054] my-[5px]">
+            Settings
+          </h1>
+        </div>
+      ),
+      icon: <Settings size={18} className="text-[#667085]" />,
+    },
+
+    {
+      key: '4',
+      label: <p onClick={() => router.push('/payment-qris')}>Upgrade Plan</p>,
+      icon: <Zap size={18} className="text-[#667085]" />,
+    },
+    // {
+    //   key: '3',
+    //   label: (
+    //     <p className="capitalize">
+    //       {userProfile ? `Plan: ${userProfile?.type}` : 'Free'}
+    //     </p>
+    //   ),
+    // },
+    // {
+    //   key: '6',
+    //   label: userProfile ? `Credit: ${userProfile?.quota}` : '0',
+    // },
+    {
+      type: 'divider',
     },
     {
       key: '5',
       label: (
         <p
-          className="text-red-500"
+          className="text-red-500 my-[5px]"
           onClick={async () => {
             await removeSession();
             setTimeout(() => {
@@ -66,6 +129,112 @@ const NavigationBar = () => {
           }}>
           Logout
         </p>
+      ),
+      icon: <LogOut size={18} className="text-red-500" />,
+    },
+  ];
+
+  const options = [
+    {
+      value: 'gift',
+      label: (
+        <div
+          className="flex items-start gap-2"
+          onClick={() => router.push('/templates')}>
+          <Book size={18} className="text-[#E34013] mt-[10px]" />
+          <div>
+            <h1 className="text-[16px] font-[600] text-[#101828] text-ellipsis">
+              Website Gift
+            </h1>
+            <p className="text-[14px] font-[400] text-[#7B7B7B] mt-[5px]">
+              Create custom websites inspired <br /> by your favorite platforms
+              like Netflix, Spotify
+            </p>
+          </div>
+        </div>
+      ),
+
+      children: [
+        {
+          value: '',
+          label: (
+            <div className="min-h-[400px]">
+              <Image
+                className="max-w-[240px]"
+                src={jumbotron}
+                alt="jumbotron"
+                width={240}
+                height={136}
+              />
+              <div className="mt-[20px]">
+                <h1 className="text-[16px] font-[600] text-[#101828] text-ellipsis">
+                  We`ve just released an update!
+                </h1>
+                <p className="text-[14px] font-[400] text-[#7B7B7B] mt-[5px]">
+                  Check out the our new template <br /> called “Formula 1 Sites”
+                </p>
+              </div>
+            </div>
+          ),
+        },
+      ],
+    },
+    {
+      value: 'photobox',
+      label: (
+        <div
+          className="flex items-start gap-2"
+          onClick={() => router.push('/photobox')}>
+          <Sparkles size={18} className="text-[#E34013] mt-[10px]" />
+          <div>
+            <h1 className="text-[16px] font-[600] text-[#101828] text-ellipsis">
+              Photobox
+            </h1>
+            <p className="text-[14px] font-[400] text-[#7B7B7B] mt-[5px]">
+              Make every picture a keepsake <br /> with Memoify’s Photobox!
+            </p>
+          </div>
+        </div>
+      ),
+    },
+  ];
+
+  const options2 = [
+    {
+      value: 'gift',
+      label: (
+        <div
+          className="flex items-start gap-2"
+          onClick={() => router.push('/templates')}>
+          <Book size={18} className="text-[#E34013] mt-[10px]" />
+          <div>
+            <h1 className="text-[14px] font-[600] text-[#101828] text-ellipsis">
+              Website Gift
+            </h1>
+            <p className="text-[12px] font-[400] text-[#7B7B7B] mt-[2px]">
+              Create custom websites <br /> inspired by your favorite <br />{' '}
+              platforms like Netflix, Spotify
+            </p>
+          </div>
+        </div>
+      ),
+    },
+    {
+      value: 'photobox',
+      label: (
+        <div
+          className="flex items-start gap-2"
+          onClick={() => router.push('/photobox')}>
+          <Sparkles size={18} className="text-[#E34013] mt-[10px]" />
+          <div>
+            <h1 className="text-[14px] font-[600] text-[#101828] text-ellipsis">
+              Photobox
+            </h1>
+            <p className="text-[12px] font-[400] text-[#7B7B7B] mt-[2px]">
+              Make every picture a keepsake <br /> with Memoify’s Photobox!
+            </p>
+          </div>
+        </div>
       ),
     },
   ];
@@ -86,104 +255,154 @@ const NavigationBar = () => {
   }, [session]);
 
   return (
-    <div
-      suppressHydrationWarning
-      className="flex item justify-between border-b-[1px] py-[20px] px-[12px] md:px-[40px] bg-white">
-      <Link href={'/'} className="font-bold">
-        <Image
-          src={
-            'https://res.cloudinary.com/dxuumohme/image/upload/v1737048992/vz6tqrzgcht45fstloxc.png'
-          }
-          alt="asd"
-          width={40}
-          height={40}
-          priority
-        />
-      </Link>
-
-      <div className="flex items-center gap-[8px] md:gap-[24px] text-[14px]">
-        <Link href={'/photobox'} className="hidden md:block">
-          Photobox
-        </Link>
-
-        {userProfile?.type !== 'pending' && (
-          <div
-            className="hidden md:block hover:underline cursor-pointer"
-            onClick={() => {
-              if (session?.accessToken) {
-                router.push('/payment-qris');
-              } else {
-                signIn('google');
+    <div className="border-b-[1px] bg-white">
+      <div
+        suppressHydrationWarning
+        className="flex item justify-between  py-[20px] max-w-6xl 2xl:max-w-7xl px-[20px] mx-auto  ">
+        <div className="flex items-center gap-[8px] md:gap-[24px] text-[14px]">
+          {/* {userProfile?.type !== 'pending' && (
+            <div
+              className="hidden md:block hover:underline cursor-pointer"
+              onClick={() => {
+                if (session?.accessToken) {
+                  router.push('/payment-qris');
+                } else {
+                  signIn('google');
+                }
+              }}>
+              Upgrade
+            </div>
+          )} */}
+          {/* <Link href={'/create'} className="hidden md:block">
+            Create
+          </Link> */}
+          <Link href={'/'} className="font-bold">
+            <Image
+              src={
+                'https://res.cloudinary.com/dxuumohme/image/upload/v1737048992/vz6tqrzgcht45fstloxc.png'
               }
-            }}>
-            Upgrade
-          </div>
-        )}
-        <Link href={'/create'} className="hidden md:block">
-          Create
-        </Link>
-        <Link href={'/inspiration'} className="hidden md:block">
-          Inspiration
-        </Link>
-        <Link href={'/templates'} className={`hidden md:block`}>
-          See Templates
-        </Link>
+              alt="asd"
+              width={40}
+              height={40}
+              priority
+            />
+          </Link>
+          <Link
+            href={'/'}
+            className="hidden md:block text-[16px] text-[#7B7B7B] font-[500]">
+            Home
+          </Link>
 
-        {!session.accessToken && (
-          <Button
-            type="primary"
-            size="large"
-            className="!bg-black !text-white !rounded-[50px]"
-            onClick={() => signIn('google')}>
-            <div className=" items-center gap-2 hidden md:flex">
-              <p>Continue with</p>
-              <Google />
-            </div>
-            <p className="block md:hidden">Login</p>
-          </Button>
-        )}
-        <Menu
-          className="cursor-pointer md:hidden"
-          onClick={() => {
-            setSidebar(!sidebar);
-          }}
-        />
+          <Link
+            href={'/inspiration'}
+            className="hidden md:block text-[16px] text-[#7B7B7B] font-[500]">
+            Inspiration
+          </Link>
+          <Link
+            href={'/payment-qris'}
+            className={`hidden md:block text-[16px] text-[#7B7B7B] font-[500]`}>
+            Upgrade Plan
+          </Link>
+          <Cascader
+            className="custom-cascader"
+            expandTrigger="hover"
+            options={options}>
+            <a className="hidden md:block text-[16px] text-[#7B7B7B] font-[500] cursor-pointer">
+              Features
+            </a>
+          </Cascader>
+          <Link
+            href={'/contact'}
+            className={`hidden md:block text-[16px] text-[#7B7B7B] font-[500]`}>
+            Contact
+          </Link>
 
-        {session.accessToken && (
-          <Dropdown menu={{ items }}>
-            <Avatar>{userProfile?.fullname.charAt(0)}</Avatar>
-          </Dropdown>
-        )}
-        {sidebar && (
-          <div className="fixed z-[9999] left-[55%] bottom-0 top-[83px] right-0 bg-white shadow-lg">
-            <div className="flex flex-col h-full justify-start gap-[20px] items-start py-[20px] px-[20px]">
-              <Link href={'/photobox'} className="block">
-                Photobox
-              </Link>
-              {userProfile?.type !== 'pending' && (
-                <div
-                  className="md:block hover:underline cursor-pointer"
-                  onClick={() => {
-                    if (session?.accessToken) {
-                      router.push('/payment-qris');
-                    } else {
-                      signIn('google');
-                    }
-                  }}>
-                  Upgrade
-                </div>
-              )}
-              <Link href={'/create'}>Create</Link>
-              <Link href={'/inspiration'}>Inspiration</Link>
-              <Link href={'/templates'} className={`hidden md:block`}>
-                See Templates
-              </Link>
-              <Link href={'/templates'} className={`block md:hidden`}>
-                Templates
-              </Link>
+          {sidebar && (
+            <div className="fixed z-[9999] left-[55%] bottom-0 top-[83px] right-0 bg-white shadow-lg">
+              <div className="flex flex-col h-full justify-start gap-[20px] items-start py-[20px] px-[20px]">
+                {userProfile?.type !== 'pending' && (
+                  <div
+                    className="md:block text-[16px] text-[#7B7B7B] font-[500] cursor-pointer"
+                    onClick={() => {
+                      if (session?.accessToken) {
+                        router.push('/payment-qris');
+                      } else {
+                        signIn('google');
+                      }
+                    }}>
+                    Upgrade
+                  </div>
+                )}
+                <Link
+                  href={'/'}
+                  className="md:block text-[16px] text-[#7B7B7B] font-[500]">
+                  Home
+                </Link>
+
+                <Link
+                  href={'/inspiration'}
+                  className="md:block text-[16px] text-[#7B7B7B] font-[500]">
+                  Inspiration
+                </Link>
+                <Link
+                  href={'/payment-qris'}
+                  className={`md:block text-[16px] text-[#7B7B7B] font-[500]`}>
+                  Upgrade Plan
+                </Link>
+                <Cascader
+                  placement="topRight"
+                  expandTrigger="hover"
+                  options={options2}>
+                  <a className="md:block text-[16px] text-[#7B7B7B] font-[500] cursor-pointer">
+                    Features
+                  </a>
+                </Cascader>
+                <Link
+                  href={'/contact'}
+                  className={`md:block text-[16px] text-[#7B7B7B] font-[500]`}>
+                  Contact
+                </Link>
+              </div>
             </div>
-          </div>
-        )}
+          )}
+        </div>
+        <div className="flex gap-4 items-center">
+          {session.accessToken && (
+            <Button
+              icon={<Zap size={18} className="text-[#E34013]" />}
+              type="primary"
+              size="large"
+              className="!border-[#E34013] !text-[#E34013] !bg-white !font-[500] !text-[14px] !rounded-[8px] !hidden !md:block"
+              onClick={() => router.push('/payment-qris')}>
+              <p>Upgrade to Premium</p>
+            </Button>
+          )}
+          {session.accessToken && (
+            <Dropdown menu={{ items }}>
+              <Avatar size={40}>{userProfile?.fullname.charAt(0)}</Avatar>
+            </Dropdown>
+          )}
+
+          {!session.accessToken && (
+            <Button
+              type="primary"
+              size="large"
+              className="!bg-[#E34013] !text-white !rounded-[8px]"
+              onClick={() => signIn('google')}>
+              <div className=" items-center gap-2 hidden md:flex">
+                <p>Continue with</p>
+                <Google />
+              </div>
+              <p className="block md:hidden">Login</p>
+            </Button>
+          )}
+          <Menu
+            className="cursor-pointer md:hidden"
+            onClick={() => {
+              setSidebar(!sidebar);
+            }}
+          />
+        </div>
       </div>
     </div>
   );

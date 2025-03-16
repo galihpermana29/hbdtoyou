@@ -1,0 +1,14 @@
+.custom-steps .ant-steps-item-container .ant-steps-item-content{
+  padding: 16px 24px; 
+}
+.custom-steps .ant-steps-item-finish>.ant-steps-item-container>.ant-steps-item-tail::after{
+  background-color:#E34013 !important;
+  width: 3px !important;
+}
+
+.ant-steps.custom-steps .ant-steps-item-finish .ant-steps-item-icon >.ant-steps-icon .ant-steps-icon-dot{
+  background-color: #E34013 !important;
+}
+.ant-steps.custom-steps  .ant-steps-item-process .ant-steps-item-icon >.ant-steps-icon .ant-steps-icon-dot{
+  background: #e5e5e5eb !important;
+}
