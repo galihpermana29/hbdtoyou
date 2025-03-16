@@ -72,7 +72,9 @@ const CardTemplate = ({
         className={clsx(
           DataToCardColor[data.name.split('-')[1].split(' ')[1]]?.color,
           'p-[24px] transition cursor-pointer group h-[330px] flex flex-col justify-between',
-          type === 'preview' ? 'w-[400px]' : 'w-full max-w-[400px]'
+          type === 'preview'
+            ? 'w-[350px] md:w-[400px]'
+            : 'w-full max-w-[350px] md:max-w-[400px]'
         )}>
         <div className="flex items-center justify-between">
           {DataToCardColor[data.name.split('-')[1].split(' ')[1]]?.logo && (
