@@ -24,7 +24,7 @@ const FinishPage = () => {
     <div>
       <NavigationBar />
 
-      <div className="bg-slate-100 min-h-[80vh] m-[30px] rounded-[20px] p-[30px] flex items-center justify-center gap-[50px]">
+      <div className="bg-slate-100 min-h-[80vh] m-[30px] rounded-[20px] p-[30px] flex items-center justify-center gap-[50px] mx-auto max-w-6xl 2xl:max-w-7xl">
         <div className="max-w-[400px]">
           <Image src={url as string} alt="" width={864} height={1296} />
         </div>
@@ -56,7 +56,7 @@ const FinishPage = () => {
                 type="primary"
                 className="!bg-red-800 !text-[14px] !text-white"
                 size="large">
-                Back to Hom
+                Back to Home
               </Button>
             </Link>
           </div>

@@ -33,13 +33,17 @@ import mockup2 from '@/assets/mockup2.png';
 import mockup3 from '@/assets/mockup3.png';
 import mockIlustrasi from '@/assets/mock-illustrasi.png';
 import mockPhotobox from '@/assets/mock-photobox.png';
+import { useRouter } from 'next/navigation';
+import { useMemoifySession } from '@/app/session-provider';
+import { signIn } from 'next-auth/react';
 
 const { Footer } = Layout;
 const { Title, Text, Paragraph } = Typography;
 
 export default function NewLandingPage() {
   const [email, setEmail] = useState('');
-
+  const router = useRouter();
+  const session = useMemoifySession();
   return (
     <div className="min-h-screen">
       <div className="fixed top-0 left-0 w-full z-10 ">
@@ -50,7 +54,12 @@ export default function NewLandingPage() {
       <div className="mt-[81px]">
         <div className=" py-[30px] md:py-0 flex flex-col-reverse md:flex-row justify-between items-center mx-auto max-w-6xl 2xl:max-w-7xl px-[20px] min-h-screen">
           <div className="max-w-[600px] mr-[20px] flex-1 mt-[20px] md:mt-0">
-            <Text>• New templates are being added daily</Text>
+            <div className="flex gap-[5px] border-[1px] border-[#D0D5DD] rounded-[6px] max-w-max p-[5px] text-[14px] text-[#1B1B1B] font-[500]">
+              <p className="border-[1px] border-[#D0D5DD] rounded-[6px]">
+                • New template is airing now!
+              </p>{' '}
+              <span>Try it now!</span>
+            </div>
             <p className="mt-[16px] font-[700] text-[35px] md:text-[50px] lg:text-[60px] leading-[1.2]">
               Unforgettable celebration with Memoify
             </p>
@@ -60,17 +69,24 @@ export default function NewLandingPage() {
               Memoify.
             </p>
             <Space size="middle">
-              <Button
-                className="!bg-[#E34013] !text-white !rounded-[8px] !text-[16px] !font-[600] !h-[60px] !w-[150px]"
-                type="primary"
-                size="large">
-                Get Started
-              </Button>
-              <Button
-                size="large"
-                className="!border-[1px] !border-[#E34013] !text-[#E34013] !font-[600] !h-[60px] !w-[150px]">
-                What is new?
-              </Button>
+              <Link
+                prefetch={true}
+                href={'/templates'}
+                className="cursor-pointer">
+                <Button
+                  className="!bg-[#E34013] !text-white !rounded-[8px] !text-[16px] !font-[600] !h-[60px] !w-[150px]"
+                  type="primary"
+                  size="large">
+                  Get Started
+                </Button>
+              </Link>
+              <Link prefetch={true} href={'/photobox'}>
+                <Button
+                  size="large"
+                  className="!border-[1px] !border-[#E34013] !text-[#E34013] !font-[600] !h-[60px] !w-[150px]">
+                  What is new?
+                </Button>
+              </Link>
             </Space>
           </div>
           <div className="flex-1 min-w-[350px] flex justify-center items-center">
@@ -111,16 +127,18 @@ export default function NewLandingPage() {
                 Capture moments in style, with our homies Photobox
               </p>
               <p className="text-[#7b7b7b] text-[16px] md:text-[20px] font-[400] mt-[20px]">
-                Make every picture a keepsake with Memoify's Photobox! Designed
+                Make every picture a keepsake with Memoify`s Photobox! Designed
                 to add a touch of nostalgia and personality to your memories.
               </p>
-              <Button
-                iconPosition="end"
-                size="large"
-                icon={<ArrowUpRight size={17} />}
-                className="!border-[1px] !bg-[#E34013] !text-[#fff] !font-[600] mt-[40px] !h-[44px] !w-[150px]">
-                Try it now
-              </Button>
+              <Link href={'/photobox'} prefetch={true}>
+                <Button
+                  iconPosition="end"
+                  size="large"
+                  icon={<ArrowUpRight size={17} />}
+                  className="!border-[1px] !bg-[#E34013] !text-[#fff] !font-[600] mt-[40px] !h-[44px] !w-[150px]">
+                  Try it now
+                </Button>
+              </Link>
             </div>
             <div className="flex-1 w-full">
               <Image
@@ -142,7 +160,7 @@ export default function NewLandingPage() {
             <p className="text-[#7b7b7b] text-[16px] md:text-[20px] font-[400] mt-[20px]">
               Personalize your memories like never before. lets you create
               stunning, interactive web inspired by your favorite
-              platforms—whether it's Netflix, Spotify, etc.
+              platforms—whether it`s Netflix, Spotify, etc.
             </p>
           </div>
 
@@ -157,7 +175,7 @@ export default function NewLandingPage() {
                   digital space to celebrate and cherish special memories.
                 </p>
                 <Link
-                  href={'/create'}
+                  href={'/templates'}
                   className="text-[#E34013] font-[700] text-[16px] flex items-center gap-2 underline">
                   Custom your Netflix site <ArrowRight size={17} />
                 </Link>
@@ -171,7 +189,7 @@ export default function NewLandingPage() {
                   interactive photobox feature to create lasting memories.
                 </p>
                 <Link
-                  href={'/create'}
+                  href={'/photobox'}
                   className="text-[#E34013] font-[700] text-[16px] flex items-center gap-2 underline">
                   Capture your memories now <ArrowRight size={17} />
                 </Link>
@@ -184,11 +202,17 @@ export default function NewLandingPage() {
                   Be part of a growing community that enjoys exclusive features,
                   unlimited templates, and a seamless memory-sharing experience.
                 </p>
-                <Link
-                  href={'/create'}
-                  className="text-[#E34013] font-[700] text-[16px] flex items-center gap-2 underline">
+                <p
+                  onClick={() => {
+                    if (session?.accessToken) {
+                      router.push('/payment-qris');
+                    } else {
+                      signIn('google');
+                    }
+                  }}
+                  className="text-[#E34013] font-[700] cursor-pointer text-[16px] flex items-center gap-2 underline">
                   Join premium now! <ArrowRight size={17} />
-                </Link>
+                </p>
               </div>
             </div>
             <div className="flex-1 w-full">
@@ -323,7 +347,7 @@ export default function NewLandingPage() {
                       iconPosition="end"
                       size="large"
                       className="!border-[1px] !h-[48px] !bg-[#E34013] !text-[#fff] !font-[400] mt-[40px] !w-[90%] !text-[16px]">
-                      Sign in with Google
+                      {session?.accessToken ? 'Try now' : 'Sign in with Google'}
                     </Button>
                   </div>
                 </Card>
@@ -332,7 +356,7 @@ export default function NewLandingPage() {
                 <Card className="h-full flex flex-col justify-between">
                   <div style={{ textAlign: 'center', marginBottom: '24px' }}>
                     <h1 className="text-[#1B1B1B] font-[700] text-[36px]">
-                      Rp. 11.000,-
+                      Rp. 15.000,-
                     </h1>
                     <p className="mt-[16px] text-[20px] font-[600]">
                       Premium Plan
@@ -364,6 +388,13 @@ export default function NewLandingPage() {
 
                   <div className="flex justify-center items-end">
                     <Button
+                      onClick={() => {
+                        if (session?.accessToken) {
+                          router.push('/payment-qris');
+                        } else {
+                          signIn('google');
+                        }
+                      }}
                       iconPosition="end"
                       size="large"
                       className="!border-[1px] !h-[48px] !bg-[#E34013] !text-[#fff] !font-[400] mt-[40px] !w-[90%] !text-[16px]">
@@ -406,12 +437,19 @@ export default function NewLandingPage() {
                   />
 
                   <div className="flex justify-center items-end">
-                    <Button
-                      iconPosition="end"
-                      size="large"
-                      className="!border-[1px] !h-[48px] !border-[#E34013] !text-[#E34013] !font-[400] mt-[40px] !w-[90%] !text-[16px]">
-                      Chat our sales
-                    </Button>
+                    <Link
+                      target="_blank"
+                      className="w-full"
+                      href={
+                        'https://api.whatsapp.com/send/?phone=62895383233303&text=hello&type=phone_number&app_absent=0'
+                      }>
+                      <Button
+                        iconPosition="end"
+                        size="large"
+                        className="!border-[1px] !h-[48px] !border-[#E34013] !text-[#E34013] !font-[400] mt-[40px] !w-[90%] !text-[16px]">
+                        Chat our sales
+                      </Button>
+                    </Link>
                   </div>
                 </Card>
               </Col>
@@ -467,7 +505,7 @@ export default function NewLandingPage() {
           <div className="mx-auto max-w-6xl 2xl:max-w-7xl px-[20px] py-[90px] text-center">
             <div className="max-w-[768px] mx-auto">
               <p className="text-[36px] font-[600] text-[#1B1B1B]">
-                We'll send you a new template update
+                We`ll send you a new template update
               </p>
               <p className="mb-[24px] text-[20px] font-[400] text-[#7B7B7B]">
                 No spam. Just the latest releases and new template, interesting

@@ -159,7 +159,7 @@ const NewInspirationPage = () => {
               data?.length > 0 &&
               paginatedData?.data?.map((show, idx) => {
                 return (
-                  <div>
+                  <div key={idx}>
                     <InspirationCard key={idx} data={show} />
                     <Divider />
                   </div>

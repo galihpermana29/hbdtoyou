@@ -21,6 +21,10 @@ import CardTemplate from './card-template/CardTemplate';
 
 import './style.css';
 import { useEffect, useState } from 'react';
+import Link from 'next/link';
+import { useMemoifySession } from '@/app/session-provider';
+import { useRouter } from 'next/navigation';
+import { signIn } from 'next-auth/react';
 
 const StepsCustom = [
   {
@@ -66,6 +70,9 @@ const StepsCustom = [
 
 const NewTemplates = ({ data }: { data: IAllTemplateResponse[] }) => {
   const [current, setCurrent] = useState(0);
+
+  const session = useMemoifySession();
+  const router = useRouter();
 
   useEffect(() => {
     const int = setInterval(() => {
@@ -116,17 +123,26 @@ const NewTemplates = ({ data }: { data: IAllTemplateResponse[] }) => {
             <div className="max-w-[600px] flex-1 mt-[20px] md:mt-0 mx-auto">
               <div className="flex flex-col gap-[20px] md:flex-row items-center">
                 <Button
+                  onClick={() => {
+                    if (session?.accessToken) {
+                      router.push('/create');
+                    } else {
+                      signIn('google');
+                    }
+                  }}
                   className="!bg-[#E34013] !text-white !rounded-[8px] !text-[16px] !font-[600] !h-[48px] md:!h-[60px] !w-[250px]"
                   type="primary"
                   size="large">
-                  Create your site
+                  Create yours
                 </Button>
-                <Button
-                  icon={<CirclePlay />}
-                  size="large"
-                  className="!border-[1px] !border-[#E34013] !text-[#E34013] !font-[600] !h-[48px] md:!h-[60px] !w-[250px]">
-                  What demo video
-                </Button>
+                <a href="#demos">
+                  <Button
+                    icon={<CirclePlay />}
+                    size="large"
+                    className="!border-[1px] !border-[#E34013] !text-[#E34013] !font-[600] !h-[48px] md:!h-[60px] !w-[250px]">
+                    Watch demo
+                  </Button>
+                </a>
               </div>
             </div>
           </div>
@@ -153,13 +169,22 @@ const NewTemplates = ({ data }: { data: IAllTemplateResponse[] }) => {
             </p>
           </div>
           <Space size="middle">
+            <Link href={'/inspiration'} prefetch={true}>
+              <Button
+                className="!bg-[#E34013] !text-white !rounded-[8px] !text-[16px] !font-[600] !h-[48px] !w-[170px]"
+                type="primary"
+                size="large">
+                See Inspirations
+              </Button>
+            </Link>
             <Button
-              className="!bg-[#E34013] !text-white !rounded-[8px] !text-[16px] !font-[600] !h-[48px] !w-[170px]"
-              type="primary"
-              size="large">
-              See Inspirations
-            </Button>
-            <Button
+              onClick={() => {
+                if (session?.accessToken) {
+                  router.push('/create');
+                } else {
+                  signIn('google');
+                }
+              }}
               size="large"
               className="!border-[1px] !border-[#E34013] !text-[#E34013] !font-[600] !h-[48px] !w-[170px]">
               Create Now
@@ -172,7 +197,7 @@ const NewTemplates = ({ data }: { data: IAllTemplateResponse[] }) => {
               position: 'relative',
             }}>
             <Carousel
-              additionalTransfrom={0}
+              // additionalTransfrom={0}
               arrows={false}
               autoPlaySpeed={3000}
               centerMode={false}
@@ -188,11 +213,11 @@ const NewTemplates = ({ data }: { data: IAllTemplateResponse[] }) => {
               dotListClass=""
               draggable
               focusOnSelect={false}
-              infinite={false}
+              infinite={true}
               itemClass="max-w-max"
               keyBoardControl
               minimumTouchDrag={80}
-              pauseOnHover
+              // pauseOnHover
               renderArrowsWhenDisabled={false}
               renderButtonGroupOutside
               renderDotsOutside={false}
@@ -203,7 +228,7 @@ const NewTemplates = ({ data }: { data: IAllTemplateResponse[] }) => {
                     min: 1024,
                   },
                   items: 3,
-                  partialVisibilityGutter: 10,
+                  // partialVisibilityGutter: 10,
                 },
                 mobile: {
                   breakpoint: {
@@ -211,7 +236,6 @@ const NewTemplates = ({ data }: { data: IAllTemplateResponse[] }) => {
                     min: 0,
                   },
                   items: 1,
-                  partialVisibilityGutter: 30,
                 },
                 tablet: {
                   breakpoint: {
@@ -219,7 +243,7 @@ const NewTemplates = ({ data }: { data: IAllTemplateResponse[] }) => {
                     min: 768,
                   },
                   items: 2,
-                  partialVisibilityGutter: 30,
+                  // partialVisibilityGutter: 30,
                 },
               }}
               rewind={false}
@@ -238,7 +262,7 @@ const NewTemplates = ({ data }: { data: IAllTemplateResponse[] }) => {
           </div>
         </div>
       </div>
-      <div className="mx-auto max-w-6xl 2xl:max-w-7xl px-[20px] min-h-screen">
+      <div className="mx-auto max-w-6xl 2xl:max-w-7xl px-[20px] min-h-screen mt-[90px]">
         <div className="max-w-[768px]">
           <h1 className="text-[#1B1B1B] font-[600] text-[30px] md:text-[36px]">
             Many special features to make your gift more special
@@ -279,7 +303,7 @@ const NewTemplates = ({ data }: { data: IAllTemplateResponse[] }) => {
                   Unlock All the features you need create beautiful custom pages
                 </p>
                 <h1 className="text-[#1B1B1B] font-[700] text-[30px] mt-[12px]">
-                  Rp. 11.000,-
+                  Rp. 15.000,-
                 </h1>
               </div>
               <List
@@ -304,10 +328,17 @@ const NewTemplates = ({ data }: { data: IAllTemplateResponse[] }) => {
 
               <div className="flex justify-center items-end">
                 <Button
+                  onClick={() => {
+                    if (session?.accessToken) {
+                      router.push('/payment-qris');
+                    } else {
+                      signIn('google');
+                    }
+                  }}
                   iconPosition="end"
                   size="large"
                   className="!border-[1px] !h-[48px] !border-[#E34013] !text-[#E34013] !font-[400] mt-[40px] !w-[90%] !text-[16px]">
-                  Chat our sales
+                  Start Premium
                 </Button>
               </div>
             </Card>
@@ -344,12 +375,20 @@ const NewTemplates = ({ data }: { data: IAllTemplateResponse[] }) => {
               />
 
               <div className="flex justify-center items-end">
-                <Button
-                  iconPosition="end"
-                  size="large"
-                  className="!border-[1px] !h-[48px] !border-[#E34013] !text-[#E34013] !font-[400] mt-[40px] !w-[90%] !text-[16px]">
-                  Chat our sales
-                </Button>
+                <Link
+                  href={
+                    'https://api.whatsapp.com/send/?phone=62895383233303&text=hello&type=phone_number&app_absent=0'
+                  }
+                  className="w-full"
+                  target="_blank"
+                  prefetch={true}>
+                  <Button
+                    iconPosition="end"
+                    size="large"
+                    className="!border-[1px] !h-[48px] !border-[#E34013] !text-[#E34013] !font-[400] mt-[40px] !w-[90%] !text-[16px]">
+                    Chat our sales
+                  </Button>
+                </Link>
               </div>
             </Card>
           </div>
@@ -361,7 +400,7 @@ const NewTemplates = ({ data }: { data: IAllTemplateResponse[] }) => {
         <div className="mx-auto max-w-6xl 2xl:max-w-7xl px-[20px] py-[90px] text-center">
           <div className="max-w-[768px] mx-auto">
             <p className="text-[36px] font-[600] text-[#1B1B1B]">
-              We'll send you a new template update
+              We`ll send you a new template update
             </p>
             <p className="mb-[24px] text-[20px] font-[400] text-[#7B7B7B]">
               No spam. Just the latest releases and new template, interesting

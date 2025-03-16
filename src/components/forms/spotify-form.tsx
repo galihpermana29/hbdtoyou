@@ -10,6 +10,7 @@ import {
   Space,
   Select,
   Switch,
+  Divider,
 } from 'antd';
 import {
   PlusOutlined,
@@ -59,6 +60,8 @@ const SpotifyForm = ({
   modalState,
   setModalState,
   selectedTemplate,
+  openNotification,
+  handleCompleteCreation,
 }: {
   loading: boolean;
   setLoading: React.Dispatch<React.SetStateAction<boolean>>;
@@ -76,6 +79,8 @@ const SpotifyForm = ({
     id: string;
     route: string;
   };
+  openNotification: (progress: number, key: any) => void;
+  handleCompleteCreation: () => void;
 }) => {
   const [form] = Form.useForm();
   const [searchedSong, setSearchedSong] = useState('');
@@ -129,6 +134,8 @@ const SpotifyForm = ({
     const payload = {
       template_id: selectedTemplate.id,
       detail_content_json_text: JSON.stringify(json_text),
+      title: values?.title2 ? values?.title2 : '',
+      caption: values?.caption ? values?.caption : '',
     };
 
     const res = await createContent(payload);
@@ -140,6 +147,7 @@ const SpotifyForm = ({
         visible: true,
         data: userLink as string,
       });
+      handleCompleteCreation();
     } else {
       message.error('Something went wrong!');
     }
@@ -364,6 +372,7 @@ const SpotifyForm = ({
                     ? 'premium'
                     : 'free'
                   : 'free',
+                openNotification,
                 handleSetCollectionImagesURI,
                 'momentOfYou'
               );
@@ -519,6 +528,21 @@ const SpotifyForm = ({
           }
           initialValue={true}>
           <Switch disabled={profile?.type === 'free'} />
+        </Form.Item>
+        <Divider />
+        <Form.Item
+          rules={[{ required: true, message: 'Please input title!' }]}
+          name={'title2'}
+          className="!my-[10px]"
+          label="Inspiration title">
+          <Input size="large" placeholder="Your inspiration title" />
+        </Form.Item>
+        <Form.Item
+          rules={[{ required: true, message: 'Please input caption!' }]}
+          name={'caption'}
+          className="!my-[10px]"
+          label="Inspiration caption">
+          <TextArea size="large" placeholder="Your inspiration caption" />
         </Form.Item>
 
         {/* Submit Button */}

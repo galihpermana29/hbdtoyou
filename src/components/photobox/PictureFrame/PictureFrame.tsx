@@ -1,4 +1,4 @@
-import { initPhotos } from '@/app/photobox/[id]/page';
+import { initPhotos } from '@/lib/frameData';
 import React, { useEffect, useRef, useState } from 'react';
 
 type Photo = {

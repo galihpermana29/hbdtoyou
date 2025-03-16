@@ -1,5 +1,5 @@
 'use client';
-import { Button, Form, Input, message, Switch, Upload } from 'antd';
+import { Button, Divider, Form, Input, message, Switch, Upload } from 'antd';
 import { useState } from 'react';
 import type { GetProp, UploadProps } from 'antd';
 import { LoadingOutlined, PlusOutlined } from '@ant-design/icons';
@@ -7,6 +7,7 @@ import { useForm } from 'antd/es/form/Form';
 import { useMemoifyProfile } from '@/app/session-provider';
 import { createContent } from '@/action/user-api';
 import { beforeUpload } from './netflix-form';
+import TextArea from 'antd/es/input/TextArea';
 type FileType = Parameters<GetProp<UploadProps, 'beforeUpload'>>[0];
 
 const GraduationV2Form = ({
@@ -15,6 +16,8 @@ const GraduationV2Form = ({
   modalState,
   setModalState,
   selectedTemplate,
+  openNotification,
+  handleCompleteCreation,
 }: {
   loading: boolean;
   setLoading: React.Dispatch<React.SetStateAction<boolean>>;
@@ -32,6 +35,8 @@ const GraduationV2Form = ({
     id: string;
     route: string;
   };
+  openNotification: (progress: number, key: any) => void;
+  handleCompleteCreation: () => void;
 }) => {
   const [uploadLoading, setUploadLoading] = useState(false);
   const [collectionOfImages, setCollectionOfImages] = useState<
@@ -83,6 +88,8 @@ const GraduationV2Form = ({
     const payload = {
       template_id: selectedTemplate.id,
       detail_content_json_text: JSON.stringify(json_text),
+      title: val?.title2 ? val?.title2 : '',
+      caption: val?.caption ? val?.caption : '',
     };
 
     const res = await createContent(payload);
@@ -94,6 +101,7 @@ const GraduationV2Form = ({
         visible: true,
         data: userLink as string,
       });
+      handleCompleteCreation();
     } else {
       message.error(res.message);
     }
@@ -171,6 +179,7 @@ const GraduationV2Form = ({
                     ? 'premium'
                     : 'free'
                   : 'free',
+                openNotification,
                 handleSetCollectionImagesURI,
                 'images'
               );
@@ -199,6 +208,21 @@ const GraduationV2Form = ({
           }
           initialValue={true}>
           <Switch disabled={profile?.type === 'free'} />
+        </Form.Item>
+        <Divider />
+        <Form.Item
+          rules={[{ required: true, message: 'Please input title!' }]}
+          name={'title2'}
+          className="!my-[10px]"
+          label="Inspiration title">
+          <Input size="large" placeholder="Your inspiration title" />
+        </Form.Item>
+        <Form.Item
+          rules={[{ required: true, message: 'Please input caption!' }]}
+          name={'caption'}
+          className="!my-[10px]"
+          label="Inspiration caption">
+          <TextArea size="large" placeholder="Your inspiration caption" />
         </Form.Item>
         <div className="flex justify-end ">
           <Button

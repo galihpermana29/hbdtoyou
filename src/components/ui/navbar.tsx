@@ -203,7 +203,9 @@ const NavigationBar = () => {
     {
       value: 'gift',
       label: (
-        <div className="flex items-start gap-2">
+        <div
+          className="flex items-start gap-2"
+          onClick={() => router.push('/templates')}>
           <Book size={18} className="text-[#E34013] mt-[10px]" />
           <div>
             <h1 className="text-[14px] font-[600] text-[#101828] text-ellipsis">
@@ -216,14 +218,13 @@ const NavigationBar = () => {
           </div>
         </div>
       ),
-      onClick: () => {
-        router.push('/templates');
-      },
     },
     {
       value: 'photobox',
       label: (
-        <div className="flex items-start gap-2">
+        <div
+          className="flex items-start gap-2"
+          onClick={() => router.push('/photobox')}>
           <Sparkles size={18} className="text-[#E34013] mt-[10px]" />
           <div>
             <h1 className="text-[14px] font-[600] text-[#101828] text-ellipsis">
@@ -235,9 +236,6 @@ const NavigationBar = () => {
           </div>
         </div>
       ),
-      onClick: () => {
-        router.push('/photobox');
-      },
     },
   ];
 
@@ -303,14 +301,14 @@ const NavigationBar = () => {
           <Link
             href={'/payment-qris'}
             className={`hidden md:block text-[16px] text-[#7B7B7B] font-[500]`}>
-            Pricing
+            Upgrade Plan
           </Link>
           <Cascader
             className="custom-cascader"
             expandTrigger="hover"
             options={options}>
             <a className="hidden md:block text-[16px] text-[#7B7B7B] font-[500] cursor-pointer">
-              Feature
+              Features
             </a>
           </Cascader>
           <Link
@@ -349,14 +347,14 @@ const NavigationBar = () => {
                 <Link
                   href={'/payment-qris'}
                   className={`md:block text-[16px] text-[#7B7B7B] font-[500]`}>
-                  Pricing
+                  Upgrade Plan
                 </Link>
                 <Cascader
                   placement="topRight"
                   expandTrigger="hover"
                   options={options2}>
                   <a className="md:block text-[16px] text-[#7B7B7B] font-[500] cursor-pointer">
-                    Feature
+                    Features
                   </a>
                 </Cascader>
                 <Link

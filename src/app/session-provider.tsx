@@ -73,39 +73,39 @@ const SessionProvider = ({
     }
   };
 
-  const handleSubmitPayment = async (value: any) => {
-    try {
-      setLoading(true);
-      const paymentProofUri = await uploadImage(
-        value.receipt.imageUrl,
-        'premium'
-      );
-      if (paymentProofUri) {
-        const payload = {
-          content_id: '',
-          amount: 0,
-          proof_payment_url: paymentProofUri,
-        };
+  // const handleSubmitPayment = async (value: any) => {
+  //   try {
+  //     setLoading(true);
+  //     const paymentProofUri = await uploadImage(
+  //       value.receipt.imageUrl,
+  //       'premium'
+  //     );
+  //     if (paymentProofUri) {
+  //       const payload = {
+  //         content_id: '',
+  //         amount: 0,
+  //         proof_payment_url: paymentProofUri,
+  //       };
 
-        const res = await submitPaymentProof(payload);
-        if (res.success) {
-          message.success('Successfully submitted payment proof!');
-        } else {
-          message.error('Something went wrong!');
-        }
-      }
-    } catch {
-      message.error('Error uploading image');
-    }
-    setLoading(false);
-    setModalState({
-      visible: false,
-      data: '',
-    });
-    setTimeout(() => {
-      window.location.reload();
-    }, 1000);
-  };
+  //       const res = await submitPaymentProof(payload);
+  //       if (res.success) {
+  //         message.success('Successfully submitted payment proof!');
+  //       } else {
+  //         message.error('Something went wrong!');
+  //       }
+  //     }
+  //   } catch {
+  //     message.error('Error uploading image');
+  //   }
+  //   setLoading(false);
+  //   setModalState({
+  //     visible: false,
+  //     data: '',
+  //   });
+  //   setTimeout(() => {
+  //     window.location.reload();
+  //   }, 1000);
+  // };
 
   useEffect(() => {
     if (parsedSession.accessToken) {
@@ -187,7 +187,8 @@ const SessionProvider = ({
             disabled={loading}
             form={form}
             layout="vertical"
-            onFinish={(val) => handleSubmitPayment(val)}>
+            // onFinish={(val) => handleSubmitPayment(val)}
+          >
             <Form.Item name={'receipt'} className="!mt-[10px]">
               <Upload
                 accept=".jpg, .jpeg, .png"
@@ -197,7 +198,8 @@ const SessionProvider = ({
                 className="avatar-uploader"
                 showUploadList={false}
                 onChange={(info) => handleImageUpload(info)}
-                beforeUpload={(file) => beforeUpload(file)}>
+                // beforeUpload={(file) => beforeUpload(file)}
+              >
                 {imageUrl ? (
                   <img
                     src={imageUrl}

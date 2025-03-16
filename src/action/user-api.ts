@@ -374,3 +374,37 @@ export async function getLatestInspiration(): Promise<
     data: data.data,
   };
 }
+
+export async function submitFeedback(payload: {
+  email: string;
+  type: string;
+  message: string;
+}): Promise<IGlobalResponse<null | string>> {
+  const session = await getSession();
+  const res = await fetch(baseUri + `/feedbacks`, {
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/json',
+      'X-Source': 'web',
+      'X-UserID': session.userId!,
+      Authorization: `Bearer ${session.accessToken}`,
+    },
+    body: JSON.stringify(payload),
+  });
+
+  if (!res.ok) {
+    return {
+      success: false,
+      message: res.statusText,
+      data: null,
+    };
+  }
+
+  const data = await res.json();
+
+  return {
+    success: true,
+    message: data.message,
+    data: data.data,
+  };
+}

@@ -59,13 +59,20 @@ export const DataToCardColor = {
   },
 };
 
-const CardTemplate = ({ data }: { data: IAllTemplateResponse }) => {
+const CardTemplate = ({
+  data,
+  type = 'preview',
+}: {
+  data: IAllTemplateResponse;
+  type?: 'creation' | 'preview';
+}) => {
   return (
     <div>
       <div
         className={clsx(
           DataToCardColor[data.name.split('-')[1].split(' ')[1]]?.color,
-          'p-[24px] transition cursor-pointer group max-w-[400px] h-[330px] flex flex-col justify-between'
+          'p-[24px] transition cursor-pointer group h-[330px] flex flex-col justify-between',
+          type === 'preview' ? 'w-[400px]' : 'w-full max-w-[400px]'
         )}>
         <div className="flex items-center justify-between">
           {DataToCardColor[data.name.split('-')[1].split(' ')[1]]?.logo && (
@@ -79,17 +86,23 @@ const CardTemplate = ({ data }: { data: IAllTemplateResponse }) => {
             />
           )}
           <div className="flex items-center gap-2">
-            <Link
-              // split netflix - netflixv1
-              href={`/${data.name.split('-')[1].split(' ')[1]}`}>
-              <h1
-                className={clsx(
-                  'text-[18px] font-[600]',
-                  DataToCardColor[data.name.split('-')[1].split(' ')[1]]?.text
-                )}>
-                See Preview
-              </h1>
-            </Link>
+            <div
+              onClick={(e) => {
+                e.stopPropagation();
+              }}>
+              <Link
+                target="_blank"
+                // split netflix - netflixv1
+                href={`/${data.name.split('-')[1].split(' ')[1]}`}>
+                <h1
+                  className={clsx(
+                    'text-[18px] font-[600] hover:underline',
+                    DataToCardColor[data.name.split('-')[1].split(' ')[1]]?.text
+                  )}>
+                  See Preview
+                </h1>
+              </Link>
+            </div>
 
             <ArrowRight
               size={24}
