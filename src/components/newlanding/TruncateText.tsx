@@ -22,7 +22,7 @@ const TruncateText: React.FC<TruncateTextProps> = ({
         <button
           onClick={toggleExpanded}
           className="text-[#E34013] hover:underline">
-          {isExpanded ? 'See Less' : 'See More'}
+          {isExpanded ? 'see less' : 'see more'}
         </button>
       )}
     </div>

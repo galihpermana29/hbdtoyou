@@ -7,6 +7,8 @@ import { useRef, useState } from 'react';
 import Modal from './modal';
 import { Tour, TourProps } from 'antd';
 import { usePathname, useRouter, useSearchParams } from 'next/navigation';
+import TruncateText from '@/components/newlanding/TruncateText';
+import { addLineBreaksEveryThreeSentences } from '@/lib/utils';
 
 export default function Featured({
   title,
@@ -119,10 +121,12 @@ export default function Featured({
           </div>
           <div className="mt-5">
             <div className="text-base space-y-4">
-              <p>
-                {modalContent ??
-                  'Hi Widya, I`ve been thinking about what to write for your birthday, and there are a few things I want to share with you. Even though we`ve only known each other for a couple of weeks, it feels like much longer because we talk so much—every night, every day. The more we talk, the more I find myself getting deeply interested in you.'}
-              </p>
+              <p
+                dangerouslySetInnerHTML={{
+                  __html: modalContent
+                    ? addLineBreaksEveryThreeSentences(modalContent)
+                    : 'Hi Widya, I`ve been thinking about what to write for your birthday, and there are a few things I want to share with you. Even though we`ve only known each other for a couple of weeks, it feels like much longer because we talk so much—every night, every day. The more we talk, the more I find myself getting deeply interested in you.',
+                }}></p>
             </div>
           </div>
         </div>
@@ -140,13 +144,22 @@ export default function Featured({
         <h1 className="md:text-5xl text-[30px] font-bold" ref={ref2}>
           {title ?? 'Happy Birthday!'}
         </h1>
-        <p className="md:text-lg text-[15px]" ref={ref3}>
-          {subTitle ??
-            'This is how Galih express love. In the meantime you will understand how my brain works. As you see this, Galih wants to say Happy Birthday to his Girlfriend.'}
+        <div className="md:text-lg text-[15px]" ref={ref3}>
+          {subTitle ? (
+            <TruncateText showSeeMore={true} text={subTitle} maxLength={130} />
+          ) : (
+            <TruncateText
+              showSeeMore={true}
+              text={
+                'This is how Galih express love. In the meantime you will understand how my brain works. As you see this, Galih wants to say Happy Birthday to his Girlfriend.'
+              }
+              maxLength={130}
+            />
+          )}
           <br />
           <br />
           Click Play to see the details.
-        </p>
+        </div>
         <div className="flex space-x-4">
           <button
             ref={ref4}

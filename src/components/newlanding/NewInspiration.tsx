@@ -1,19 +1,25 @@
 'use client';
 import { getLatestInspiration } from '@/action/user-api';
-import { Divider, Input, message, Pagination, Spin } from 'antd';
+import { Divider, Input, message, Pagination, Select, Spin } from 'antd';
 
 import { useEffect, useState } from 'react';
 import { InspirationCard } from './InspirationCard';
 
 import { LoadingOutlined } from '@ant-design/icons';
+import { IAllTemplateResponse } from '@/action/interfaces';
 
 function capitalizeFirstLetter(val: string) {
   if (!val) return;
   return String(val).charAt(0).toUpperCase() + String(val).slice(1);
 }
 
-const PAGE_SIZE = 5;
-const NewInspirationPage = () => {
+const PAGE_SIZE = 10;
+
+const NewInspirationPage = ({
+  templates,
+}: {
+  templates: IAllTemplateResponse[];
+}) => {
   const [data, setData] = useState<any[] | undefined>([]);
 
   const [loading, setLoading] = useState<boolean>(false);
@@ -28,6 +34,12 @@ const NewInspirationPage = () => {
   });
 
   const [search, setSearch] = useState<string | null>('');
+  const [activeType, setActiveType] = useState<string | null>('all');
+
+  const templatesOptions = templates?.map((dx) => ({
+    value: dx.id,
+    label: dx.name?.split('-')[0],
+  }));
 
   const handlePaginationChange = (page: number) => {
     setPaginatedData({
@@ -106,16 +118,22 @@ const NewInspirationPage = () => {
     setLoading(false);
   };
 
-  const handleSearchByTitle = (title: string) => {
+  const handleSearchByTitle = (title: string, activeType: string) => {
     const filteredData = data?.filter((item) =>
       item.title.toLowerCase().includes(title.toLowerCase())
     );
+
+    const finalFilteredData =
+      activeType === 'all'
+        ? filteredData
+        : filteredData?.filter((item) => item.template_id === activeType);
+
     //set to pagination
     setPaginatedData({
       page: 1,
       pageSize: PAGE_SIZE,
-      data: filteredData ? filteredData.slice(0, PAGE_SIZE) : [],
-      total: filteredData ? filteredData.length : 0,
+      data: finalFilteredData ? finalFilteredData.slice(0, PAGE_SIZE) : [],
+      total: finalFilteredData ? finalFilteredData.length : 0,
     });
   };
 
@@ -124,10 +142,10 @@ const NewInspirationPage = () => {
   }, []);
 
   useEffect(() => {
-    if (search) {
-      handleSearchByTitle(search);
+    if (search || activeType) {
+      handleSearchByTitle(search, activeType);
     }
-  }, [search]);
+  }, [search, activeType]);
 
   return (
     <div className="mx-auto max-w-6xl 2xl:max-w-7xl px-[20px] min-h-screen my-[40px]">
@@ -138,11 +156,20 @@ const NewInspirationPage = () => {
             Inspiration from other that maybe make you interested
           </p>
         </div>
-        <Input
-          onChange={(e) => handleSearch(e)}
-          placeholder="Search inspirations"
-          className="max-w-[300px] mt-[12px] md:mt-0 !h-[44px]"
-        />
+        <div className="flex gap-3 w-full md:w-[50%]">
+          <Input
+            onChange={(e) => handleSearch(e)}
+            placeholder="Search inspirations"
+            className="max-w-[400px] mt-[12px] md:mt-0 !h-[44px] w-full"
+          />
+          <Select
+            onChange={(e) => setActiveType(e)}
+            defaultValue={'all'}
+            placeholder="Select a template"
+            options={[{ value: 'all', label: 'All' }, ...templatesOptions]}
+            className="max-w-[150px] mt-[12px] md:mt-0 !h-[44px] w-full"
+          />
+        </div>
       </div>
       {loading ? (
         <div className="min-h-screen flex justify-center items-center">

@@ -65,7 +65,6 @@ const SessionProvider = ({
           imageUrl: reader.result as string,
         };
         setImageUrl(reader.result as string);
-        console.log(currentValues, '?');
 
         form.setFieldsValue({ receipt: currentValues });
       };

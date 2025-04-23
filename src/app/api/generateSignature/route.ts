@@ -17,10 +17,8 @@ export async function POST(req: any, res: any) {
       process.env.NEXT_PUBLIC_CLOUDINARY_API_SECRET!
     );
   } catch (error) {
-    console.log(error, '>>>');
     return Response.error();
   }
 
-  console.log(signature, '>>??');
   return Response.json({ signature });
 }

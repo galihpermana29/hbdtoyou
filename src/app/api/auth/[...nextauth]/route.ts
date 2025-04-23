@@ -59,7 +59,6 @@ const handler = NextAuth({
             fullName: oAuthResult.data.fullname,
             accessToken: oAuthResult.data.token,
           };
-          console.log(newSession, '??????');
           await setSession(newSession);
         }
       }

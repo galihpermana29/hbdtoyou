@@ -20,11 +20,11 @@ export const InspirationCard = ({ data }: { data: any }) => {
         <div className="flex-1">
           <div className="flex justify-between items-center">
             <h1 className="text-[14px] text-[#475467] font-[400]">
-              Monday - 12 Feb 2025
+              {data?.create_date}
             </h1>
-            <div>
+            {/* <div>
               <EllipsisVertical size={20} />
-            </div>
+            </div> */}
           </div>
           <div className="mb-[24px] mt-[16px]">
             <h1 className="text-[20px] text-[#1B1B1B] font-[600] capitalize">
@@ -52,12 +52,11 @@ export const InspirationCard = ({ data }: { data: any }) => {
               </Link>
             </div>
           </div>
-          <div className="flex  justify-between gap-3 mt-[30px]">
-            {/* <div className="flex gap-3">
-              <Heart size={20} className="text-red-500" />
-              <h1 className="text-black text-[14px] font-[400]">120 likes</h1>
-            </div> */}
+          <div className="flex gap-1 mt-[30px]">
             <Tag color="cyan">{data?.type}</Tag>
+            <Tag color="blue" className="capitalize">
+              {data?.template_label}
+            </Tag>
           </div>
         </div>
       </div>
