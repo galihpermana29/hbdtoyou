@@ -16,7 +16,7 @@ import NetflixForm from '@/components/forms/netflix-form';
 import { getAllTemplates } from '@/action/user-api';
 import { IAllTemplateResponse } from '@/action/interfaces';
 import SpotifyForm from '@/components/forms/spotify-form';
-import { useMemoifyProfile, useMemoifySession } from '../session-provider';
+import { useMemoifyProfile, useMemoifySession } from '../../session-provider';
 import { signIn } from 'next-auth/react';
 import DisneyForm from '@/components/forms/disney-form';
 import Newspaperv1Form from '@/components/forms/newspaperv1-form';

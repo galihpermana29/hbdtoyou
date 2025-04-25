@@ -10,7 +10,7 @@ import { useEffect, useState } from 'react';
 import qrisImage from '@/assets/qris-logo.png';
 import CountdownTimer from '@/components/ui/countdown';
 import { useRouter, useSearchParams } from 'next/navigation';
-import { useMemoifySession } from '../session-provider';
+import { useMemoifySession } from '../../session-provider';
 import emptyState from '@/assets/empty.png';
 function isValidUUIDv4(uuid: string): boolean {
   const uuidv4Regex =

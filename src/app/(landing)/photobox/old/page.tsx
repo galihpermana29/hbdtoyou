@@ -10,7 +10,7 @@ import { v4 as uuidv4 } from 'uuid';
 import {
   useMemoifyProfile,
   useMemoifyUpgradePlan,
-} from '../../session-provider';
+} from '../../../session-provider';
 import { signIn } from 'next-auth/react';
 
 const Photobox = () => {
