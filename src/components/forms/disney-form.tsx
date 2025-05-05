@@ -184,7 +184,7 @@ const DisneyForm = ({
                 handleSetJumbotronImageURI,
                 'jumbotronImage'
               );
-              setUploadLoading(true);
+              setUploadLoading(false);
             }}>
             {imageUrl ? (
               <img src={imageUrl} alt="avatar" style={{ width: '100%' }} />
