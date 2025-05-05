@@ -25,8 +25,16 @@ export interface IContent {
   template_id: string;
   template_name: string;
   template_label: string;
+  template_type: string;
   detail_content_json_text: string;
   status: string;
+  title: string;
+  caption: string;
+  create_date: string;
+  jumbotronImage?: string;
+  link?: string;
+  desc?: string;
+  type?: string;
 }
 
 export interface IProfileResponse {
@@ -51,6 +59,8 @@ export interface IDetailContentResponse {
   template_label: string;
   detail_content_json_text: string;
   status: string;
+  caption?: string;
+  title?: string;
 }
 
 export interface IPaymentPayload {
@@ -90,4 +100,13 @@ export interface IGetDetailPayment {
   proof_payment_url: string;
   date: string;
   status: string;
+}
+
+export interface IContentStats {
+  contents: {
+    total_registered_user: number;
+    total_premium_user: number;
+    total_gift_content: number;
+    total_photo_box_content: number;
+  };
 }

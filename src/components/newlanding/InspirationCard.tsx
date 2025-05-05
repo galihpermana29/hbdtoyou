@@ -11,7 +11,11 @@ export const InspirationCard = ({ data }: { data: any }) => {
         <div className="w-full md:w-[40%]">
           <Image
             className="aspect-video object-cover object-center rounded-md"
-            src={data?.jumbotronImage}
+            src={
+              typeof data?.jumbotronImage === 'string'
+                ? data?.jumbotronImage
+                : 'https://res.cloudinary.com/ddlus5qur/image/upload/v1746085724/phu2rbi6fqnp71hytjex.jpg'
+            }
             alt="jumbotron"
             width={700}
             height={300}

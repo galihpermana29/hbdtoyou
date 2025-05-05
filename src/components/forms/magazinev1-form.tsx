@@ -25,12 +25,14 @@ import { v4 as uuidv4 } from 'uuid';
 import { useForm, useWatch } from 'antd/es/form/Form';
 import { revalidateRandom } from '@/lib/revalidate';
 import { useMemoifyProfile } from '@/app/session-provider';
-import { createContent } from '@/action/user-api';
+import { createContent, editContent } from '@/action/user-api';
 import { beforeUpload, getBase64, getBase64Multiple } from './netflix-form';
 import { v3Songs } from '@/lib/songs';
 import { fetchSearch, OptionSpotifyTrack } from './spotify-form';
 import { useDebounce } from 'use-debounce';
 import Typewriter from '../fancy/typewriter';
+import { IDetailContentResponse } from '@/action/interfaces';
+import { parsingImageFromJSON } from '@/lib/utils';
 type FileType = Parameters<GetProp<UploadProps, 'beforeUpload'>>[0];
 
 const MagazineV1Form = ({
@@ -41,6 +43,7 @@ const MagazineV1Form = ({
   selectedTemplate,
   openNotification,
   handleCompleteCreation,
+  editData,
 }: {
   loading: boolean;
   setLoading: React.Dispatch<React.SetStateAction<boolean>>;
@@ -60,6 +63,7 @@ const MagazineV1Form = ({
   };
   openNotification: (progress: number, key: any) => void;
   handleCompleteCreation: () => void;
+  editData?: IDetailContentResponse;
 }) => {
   const [imageUrl, setImageUrl] = useState<string>();
 
@@ -83,15 +87,16 @@ const MagazineV1Form = ({
     payload: { uri: string; uid: string },
     formName: string
   ) => {
-    const newImages = collectionOfImages;
-    newImages.push(payload);
+    const newImages = [...collectionOfImages, { ...payload, url: payload.uri }];
+
+    form.setFieldValue(formName, newImages); // ✅ Set the full array
     setCollectionOfImages(newImages);
   };
 
   const handleRemoveCollectionImage = (uid: string) => {
-    setCollectionOfImages(
-      collectionOfImages.filter((item) => item.uid !== uid)
-    );
+    const images = collectionOfImages.filter((item) => item.uid !== uid);
+    form.setFieldValue('momentOfYou', images?.length > 0 ? images : undefined);
+    setCollectionOfImages(images?.length > 0 ? images : []);
   };
 
   const uploadButton = (
@@ -121,10 +126,15 @@ const MagazineV1Form = ({
       caption: val?.caption ? val?.caption : '',
     };
 
-    const res = await createContent(payload);
+    const res = editData
+      ? await editContent(payload, editData.id)
+      : await createContent(payload);
+
     if (res.success) {
       const userLink = selectedTemplate.route + '/' + res.data;
-      message.success('Successfully created!');
+      message.success(
+        editData ? 'Successfully posted!' : 'Successfully created!'
+      );
       form.resetFields();
       setModalState({
         visible: true,
@@ -143,6 +153,30 @@ const MagazineV1Form = ({
       fetchSearch(value, setSearchedOptions);
     }
   }, [value]);
+
+  useEffect(() => {
+    if (editData) {
+      const jsonContent = JSON.parse(editData.detail_content_json_text);
+
+      const jumbotronImage = parsingImageFromJSON(jsonContent, 'jumbotron');
+      const images = parsingImageFromJSON(
+        jsonContent,
+        'collection-images',
+        'momentOfYou'
+      );
+
+      setImageUrl(jsonContent.jumbotronImage);
+      setCollectionOfImages(images);
+
+      form.setFieldsValue({
+        ...jsonContent,
+        jumbotronImage,
+        momentOfYou: images,
+        title2: editData.title,
+        caption: editData.caption,
+      });
+    }
+  }, [editData]);
   return (
     <div>
       <Form
@@ -228,6 +262,11 @@ const MagazineV1Form = ({
           />
         </Form.Item>
         <Form.Item
+          getValueFromEvent={(e) => {
+            // return just the fileList (or your custom format if needed)
+            if (Array.isArray(e)) return e;
+            return e?.fileList;
+          }}
           rules={[
             { required: true, message: 'Please upload atleast 1 content' },
           ]}
@@ -247,6 +286,9 @@ const MagazineV1Form = ({
             multiple={true}
             maxCount={profile?.type === 'free' ? 1 : 20}
             listType="picture-card"
+            fileList={
+              collectionOfImages.length > 0 ? (collectionOfImages as any) : []
+            }
             onRemove={(file) => handleRemoveCollectionImage(file.uid)}
             beforeUpload={async (file) => {
               setUploadLoading(true);
@@ -317,7 +359,7 @@ const MagazineV1Form = ({
             type="primary"
             htmlType="submit"
             size="large">
-            Create
+            {editData ? 'Edit & Publish' : 'Create'}
           </Button>
         </div>
       </Form>

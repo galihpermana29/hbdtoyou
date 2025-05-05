@@ -1,16 +1,18 @@
 'use client';
 import { Button, Divider, Form, Image, Input, message, Upload } from 'antd';
 import TextArea from 'antd/es/input/TextArea';
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import { GetProp, Switch, UploadFile, UploadProps } from 'antd';
 import { LoadingOutlined, PlusOutlined } from '@ant-design/icons';
 import { v4 as uuidv4 } from 'uuid';
 import { useForm } from 'antd/es/form/Form';
 import { revalidateRandom } from '@/lib/revalidate';
 import { useMemoifyProfile } from '@/app/session-provider';
-import { createContent } from '@/action/user-api';
+import { createContent, editContent } from '@/action/user-api';
 import { uploadImageClientSide } from '@/lib/upload';
 import { useRouter } from 'next/navigation';
+import { IDetailContentResponse } from '@/action/interfaces';
+import { getBase64FromUrl, parsingImageFromJSON } from '@/lib/utils';
 export type FileType = Parameters<GetProp<UploadProps, 'beforeUpload'>>[0];
 
 export const validateSlug = (x: any, value: any) => {
@@ -68,11 +70,6 @@ export const beforeUpload = async (
   } else {
     const reader = new FileReader();
     reader.onload = async () => {
-      // if (type === 'free') {
-      //   message.loading('Compressing image, please wait');
-      // } else {
-      //   message.loading('Uploading image, please wait');
-      // }
       const jumbotronURL = await uploadImage(file, type, openNotification);
       if (setFormValues) {
         {
@@ -119,6 +116,7 @@ const NetflixForm = ({
   selectedTemplate,
   openNotification,
   handleCompleteCreation,
+  editData,
 }: {
   loading: boolean;
   setLoading: React.Dispatch<React.SetStateAction<boolean>>;
@@ -138,11 +136,12 @@ const NetflixForm = ({
   };
   openNotification: (progress: number, key: any) => void;
   handleCompleteCreation: () => void;
+  editData?: IDetailContentResponse;
 }) => {
   const [imageUrl, setImageUrl] = useState<string>();
   const [uploadLoading, setUploadLoading] = useState(false);
   const [collectionOfImages, setCollectionOfImages] = useState<
-    { uid: string; uri: string }[]
+    { uid: string; uri: string; url?: string }[]
   >([]);
 
   const profile = useMemoifyProfile();
@@ -155,15 +154,16 @@ const NetflixForm = ({
     payload: { uri: string; uid: string },
     formName: string
   ) => {
-    const newImages = collectionOfImages;
-    newImages.push(payload);
+    const newImages = [...collectionOfImages, { ...payload, url: payload.uri }];
+
+    form.setFieldValue(formName, newImages); // ✅ Set the full array
     setCollectionOfImages(newImages);
   };
 
   const handleRemoveCollectionImage = (uid: string) => {
-    setCollectionOfImages(
-      collectionOfImages.filter((item) => item.uid !== uid)
-    );
+    const images = collectionOfImages.filter((item) => item.uid !== uid);
+    form.setFieldValue('images', images?.length > 0 ? images : undefined);
+    setCollectionOfImages(images?.length > 0 ? images : []);
   };
 
   const handleSetJumbotronImageURI = (
@@ -203,10 +203,15 @@ const NetflixForm = ({
       caption: val?.caption,
     };
 
-    const res = await createContent(payload);
+    const res = editData
+      ? await editContent(payload, editData.id)
+      : await createContent(payload);
+
     if (res.success) {
       const userLink = selectedTemplate.route + '/' + res.data;
-      message.success('Successfully created!');
+      message.success(
+        editData ? 'Successfully posted!' : 'Successfully created!'
+      );
       form.resetFields();
       setModalState({
         visible: true,
@@ -219,6 +224,30 @@ const NetflixForm = ({
 
     return;
   };
+
+  useEffect(() => {
+    if (editData) {
+      const jsonContent = JSON.parse(editData.detail_content_json_text);
+
+      const jumbotronImage = parsingImageFromJSON(jsonContent, 'jumbotron');
+      const images = parsingImageFromJSON(
+        jsonContent,
+        'collection-images',
+        'images'
+      );
+
+      setImageUrl(jsonContent.jumbotronImage);
+      setCollectionOfImages(images);
+
+      form.setFieldsValue({
+        ...jsonContent,
+        jumbotronImage,
+        images,
+        title2: editData.title,
+        caption: editData.caption,
+      });
+    }
+  }, [editData]);
 
   return (
     <div>
@@ -299,6 +328,11 @@ const NetflixForm = ({
           />
         </Form.Item>
         <Form.Item
+          getValueFromEvent={(e) => {
+            // return just the fileList (or your custom format if needed)
+            if (Array.isArray(e)) return e;
+            return e?.fileList;
+          }}
           rules={[
             { required: true, message: 'Please upload atleast 1 content' },
           ]}
@@ -321,6 +355,9 @@ const NetflixForm = ({
             multiple={true}
             maxCount={profile?.type === 'free' ? 5 : 20}
             listType="picture-card"
+            fileList={
+              collectionOfImages.length > 0 ? (collectionOfImages as any) : []
+            }
             onRemove={(file) => handleRemoveCollectionImage(file.uid)}
             beforeUpload={async (file) => {
               setUploadLoading(true);
@@ -384,7 +421,7 @@ const NetflixForm = ({
             type="primary"
             htmlType="submit"
             size="large">
-            Create
+            {editData ? 'Edit & Publish' : 'Create'}
           </Button>
         </div>
       </Form>

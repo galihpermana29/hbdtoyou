@@ -7,11 +7,7 @@ import { InspirationCard } from './InspirationCard';
 
 import { LoadingOutlined } from '@ant-design/icons';
 import { IAllTemplateResponse } from '@/action/interfaces';
-
-function capitalizeFirstLetter(val: string) {
-  if (!val) return;
-  return String(val).charAt(0).toUpperCase() + String(val).slice(1);
-}
+import { capitalizeFirstLetter, mapContentToCard } from '@/lib/utils';
 
 const PAGE_SIZE = 10;
 
@@ -58,52 +54,9 @@ const NewInspirationPage = ({
     setLoading(true);
     const data = await getLatestInspiration();
     if (data.success) {
-      const mappedData = data.data?.contents
-        ?.map((show) => {
-          const jsonContent = JSON.parse(show.detail_content_json_text);
-          const handleJumbotron = () => {
-            if (
-              show.template_name.includes('magazinev1') ||
-              show.template_name.includes('spotifyv1') ||
-              show.template_name.includes('magazinev1')
-            ) {
-              return Array.isArray(jsonContent.momentOfYou)
-                ? jsonContent.momentOfYou.length > 0
-                  ? jsonContent.momentOfYou[0]
-                  : null
-                : null;
-            }
-
-            if (
-              show.template_name.includes('netflixv1') ||
-              show.template_name.includes('disneyplusv1') ||
-              show.template_name.includes('newspaperv3') ||
-              show.template_name.includes('newspaperv1')
-            ) {
-              return jsonContent.jumbotronImage;
-            }
-          };
-
-          if (!handleJumbotron()) return;
-
-          if (
-            Object.prototype.hasOwnProperty.call(jsonContent, 'isPublic') &&
-            jsonContent?.isPublic === false
-          )
-            return;
-
-          return {
-            ...show,
-            jumbotronImage: handleJumbotron(),
-            title: capitalizeFirstLetter(jsonContent.title?.toLowerCase()),
-            link: `/${show.template_name.split('-')[1].split(' ')[1]}/${
-              show.id
-            }`,
-            desc: jsonContent?.subTitle,
-            type: show.template_name.split('-')[0],
-          };
-        })
-        .filter((show) => show && show?.jumbotronImage && show?.title);
+      const mappedData = mapContentToCard(data.data?.contents).filter(
+        (show) => show && show?.jumbotronImage && show?.title
+      );
 
       setData(mappedData ? mappedData : []);
       setPaginatedData({

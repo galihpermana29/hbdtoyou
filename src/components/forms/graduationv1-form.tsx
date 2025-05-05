@@ -1,13 +1,15 @@
 'use client';
 import { Button, Divider, Form, Input, message, Switch, Upload } from 'antd';
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import type { GetProp, UploadProps } from 'antd';
 import { LoadingOutlined, PlusOutlined } from '@ant-design/icons';
 import { useForm } from 'antd/es/form/Form';
 import { useMemoifyProfile } from '@/app/session-provider';
-import { createContent } from '@/action/user-api';
+import { createContent, editContent } from '@/action/user-api';
 import { beforeUpload } from './netflix-form';
 import TextArea from 'antd/es/input/TextArea';
+import { parsingImageFromJSON } from '@/lib/utils';
+import { IDetailContentResponse } from '@/action/interfaces';
 type FileType = Parameters<GetProp<UploadProps, 'beforeUpload'>>[0];
 
 const GraduationV1Form = ({
@@ -18,6 +20,7 @@ const GraduationV1Form = ({
   selectedTemplate,
   openNotification,
   handleCompleteCreation,
+  editData,
 }: {
   loading: boolean;
   setLoading: React.Dispatch<React.SetStateAction<boolean>>;
@@ -37,6 +40,7 @@ const GraduationV1Form = ({
   };
   openNotification: (progress: number, key: any) => void;
   handleCompleteCreation: () => void;
+  editData?: IDetailContentResponse;
 }) => {
   const [uploadLoading, setUploadLoading] = useState(false);
   const [collectionOfImages, setCollectionOfImages] = useState<
@@ -50,15 +54,16 @@ const GraduationV1Form = ({
     payload: { uri: string; uid: string },
     formName: string
   ) => {
-    const newImages = collectionOfImages;
-    newImages.push(payload);
+    const newImages = [...collectionOfImages, { ...payload, url: payload.uri }];
+
+    form.setFieldValue(formName, newImages); // ✅ Set the full array
     setCollectionOfImages(newImages);
   };
 
   const handleRemoveCollectionImage = (uid: string) => {
-    setCollectionOfImages(
-      collectionOfImages.filter((item) => item.uid !== uid)
-    );
+    const images = collectionOfImages.filter((item) => item.uid !== uid);
+    form.setFieldValue('images', images?.length > 0 ? images : undefined);
+    setCollectionOfImages(images?.length > 0 ? images : []);
   };
 
   const uploadButton = (
@@ -90,10 +95,14 @@ const GraduationV1Form = ({
       caption: val?.caption ? val?.caption : '',
     };
 
-    const res = await createContent(payload);
+    const res = editData
+      ? await editContent(payload, editData.id)
+      : await createContent(payload);
     if (res.success) {
       const userLink = selectedTemplate.route + '/' + res.data;
-      message.success('Successfully created!');
+      message.success(
+        editData ? 'Successfully posted!' : 'Successfully created!'
+      );
       form.resetFields();
       setModalState({
         visible: true,
@@ -104,6 +113,27 @@ const GraduationV1Form = ({
       message.error(res.message);
     }
   };
+
+  useEffect(() => {
+    if (editData) {
+      const jsonContent = JSON.parse(editData.detail_content_json_text);
+
+      const images = parsingImageFromJSON(
+        jsonContent,
+        'collection-images',
+        'images'
+      );
+
+      setCollectionOfImages(images);
+
+      form.setFieldsValue({
+        ...jsonContent,
+        images,
+        title2: editData.title,
+        caption: editData.caption,
+      });
+    }
+  }, [editData]);
 
   return (
     <div>
@@ -142,6 +172,11 @@ const GraduationV1Form = ({
           />
         </Form.Item>
         <Form.Item
+          getValueFromEvent={(e) => {
+            // return just the fileList (or your custom format if needed)
+            if (Array.isArray(e)) return e;
+            return e?.fileList;
+          }}
           name={'images'}
           label={
             <div className="mt-[10px] mb-[5px]">
@@ -162,6 +197,9 @@ const GraduationV1Form = ({
             maxCount={profile?.type === 'free' ? 5 : 15}
             listType="picture-card"
             onRemove={(file) => handleRemoveCollectionImage(file.uid)}
+            fileList={
+              collectionOfImages.length > 0 ? (collectionOfImages as any) : []
+            }
             beforeUpload={async (file) => {
               setUploadLoading(true);
               await beforeUpload(
@@ -223,7 +261,7 @@ const GraduationV1Form = ({
             type="primary"
             htmlType="submit"
             size="large">
-            Create
+            {editData ? 'Edit & Publish' : 'Create'}
           </Button>
         </div>
       </Form>

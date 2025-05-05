@@ -1,6 +1,6 @@
 'use client';
 import { Button, Divider, Form, Input, message, Switch, Upload } from 'antd';
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import type { GetProp, UploadProps } from 'antd';
 import { LoadingOutlined, PlusOutlined } from '@ant-design/icons';
 import { useForm } from 'antd/es/form/Form';
@@ -8,6 +8,8 @@ import { useMemoifyProfile } from '@/app/session-provider';
 import { createContent } from '@/action/user-api';
 import { beforeUpload } from './netflix-form';
 import TextArea from 'antd/es/input/TextArea';
+import { parsingImageFromJSON } from '@/lib/utils';
+import { IDetailContentResponse } from '@/action/interfaces';
 type FileType = Parameters<GetProp<UploadProps, 'beforeUpload'>>[0];
 
 const GraduationV2Form = ({
@@ -18,6 +20,7 @@ const GraduationV2Form = ({
   selectedTemplate,
   openNotification,
   handleCompleteCreation,
+  editData,
 }: {
   loading: boolean;
   setLoading: React.Dispatch<React.SetStateAction<boolean>>;
@@ -37,6 +40,7 @@ const GraduationV2Form = ({
   };
   openNotification: (progress: number, key: any) => void;
   handleCompleteCreation: () => void;
+  editData?: IDetailContentResponse;
 }) => {
   const [uploadLoading, setUploadLoading] = useState(false);
   const [collectionOfImages, setCollectionOfImages] = useState<
@@ -50,15 +54,16 @@ const GraduationV2Form = ({
     payload: { uri: string; uid: string },
     formName: string
   ) => {
-    const newImages = collectionOfImages;
-    newImages.push(payload);
+    const newImages = [...collectionOfImages, { ...payload, url: payload.uri }];
+
+    form.setFieldValue(formName, newImages); // ✅ Set the full array
     setCollectionOfImages(newImages);
   };
 
   const handleRemoveCollectionImage = (uid: string) => {
-    setCollectionOfImages(
-      collectionOfImages.filter((item) => item.uid !== uid)
-    );
+    const images = collectionOfImages.filter((item) => item.uid !== uid);
+    form.setFieldValue('images', images?.length > 0 ? images : undefined);
+    setCollectionOfImages(images?.length > 0 ? images : []);
   };
 
   const uploadButton = (
@@ -107,6 +112,27 @@ const GraduationV2Form = ({
     }
   };
 
+  useEffect(() => {
+    if (editData) {
+      const jsonContent = JSON.parse(editData.detail_content_json_text);
+
+      const images = parsingImageFromJSON(
+        jsonContent,
+        'collection-images',
+        'images'
+      );
+
+      setCollectionOfImages(images);
+
+      form.setFieldsValue({
+        ...jsonContent,
+        images,
+        title2: editData.title,
+        caption: editData.caption,
+      });
+    }
+  }, [editData]);
+
   return (
     <div>
       <Form
@@ -150,6 +176,11 @@ const GraduationV2Form = ({
           />
         </Form.Item>
         <Form.Item
+          getValueFromEvent={(e) => {
+            // return just the fileList (or your custom format if needed)
+            if (Array.isArray(e)) return e;
+            return e?.fileList;
+          }}
           name={'images'}
           label={
             <div className="mt-[10px] mb-[5px]">
@@ -169,6 +200,9 @@ const GraduationV2Form = ({
             multiple={true}
             maxCount={profile?.type === 'free' ? 5 : 15}
             listType="picture-card"
+            fileList={
+              collectionOfImages.length > 0 ? (collectionOfImages as any) : []
+            }
             onRemove={(file) => handleRemoveCollectionImage(file.uid)}
             beforeUpload={async (file) => {
               setUploadLoading(true);
@@ -231,7 +265,7 @@ const GraduationV2Form = ({
             type="primary"
             htmlType="submit"
             size="large">
-            Create
+            {editData ? 'Edit & Publish' : 'Create'}
           </Button>
         </div>
       </Form>

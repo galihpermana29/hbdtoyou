@@ -27,6 +27,8 @@ import MagazineV1Form from '@/components/forms/magazinev1-form';
 import Formula1Form from '@/components/forms/f1historyv1-form';
 import CardTemplate from '@/components/newlanding/card-template/CardTemplate';
 import { ArrowLeft } from 'lucide-react';
+import useCreateContent from './usecase/useCreateContent';
+import { templateNameToRoute } from '@/lib/utils';
 
 const PREMIUM_TEMPLATES = ['newspaperv2', 'disneyplusv1'];
 const EXCLUDE_TEMPLATES: string[] = [];
@@ -71,48 +73,25 @@ const StepsCustom = [
 ];
 
 const CreatePage = () => {
-  const [loading, setLoading] = useState(false);
-  const [current, setCurrent] = useState(0);
+  const {
+    loading,
+    current,
+    selectedTemplate,
+    modalState,
+    setModalState,
+    session,
+    profile,
+    contextHolder,
+    openNotification,
+    handleCompleteCreation,
+    setLoading,
+    setSelectedTemplate,
+    setCurrent,
+  } = useCreateContent();
 
-  const [selectedTemplate, setSelectedTemplate] = useState<{
-    id: string;
-    route: string;
-  } | null>(null);
   const [templates, setTemplates] = useState<IAllTemplateResponse[] | null>(
     null
   );
-
-  const [modalState, setModalState] = useState({
-    visible: false,
-    data: '',
-  });
-
-  const session = useMemoifySession();
-  const profile = useMemoifyProfile();
-
-  const [api, contextHolder] = notification.useNotification();
-
-  const openNotification = (progress: number = 0, key: any) => {
-    api.open({
-      message: (
-        <p className="text-[14px] text-black font-[600]">
-          {progress < 100 ? `Uploading ${progress}%` : 'Uploading completed'}
-        </p>
-      ),
-      description: (
-        <div>
-          <Progress percent={progress} />
-        </div>
-      ),
-      duration: 2000,
-      key: key,
-    });
-  };
-
-  const handleCompleteCreation = () => {
-    setSelectedTemplate(null);
-    setCurrent(2);
-  };
 
   const handleGetTemplates = async () => {
     const data = await getAllTemplates();
@@ -130,46 +109,7 @@ const CreatePage = () => {
   return (
     <div>
       <NavigationBar />
-      {/* <Modal
-        onCancel={() =>
-          setModalState({
-            visible: false,
-            data: '',
-          })
-        }
-        title="Successfully created"
-        open={modalState.visible}
-        footer={null}>
-        <div>
-          <h1 className="text-[20px] font-bold">Your own website is ready!</h1>
-          <p>
-            You can share your own version of memoify with your friends or
-            someone you love.
-          </p>
-          <div className="flex items-center gap-[12px] mt-[12px]">
-            <Link href={`/${modalState.data}`} className="cursor-pointer">
-              <Button
-                size="large"
-                type="primary"
-                className="!bg-black !text-[14px]">
-                Open now
-              </Button>
-            </Link>
-            <Button
-              onClick={() => {
-                navigator.clipboard.writeText(
-                  window.location.origin + '/' + modalState.data
-                );
-                message.success('Copied!');
-              }}
-              size="large"
-              type="primary"
-              className="!bg-black !text-[14px]">
-              Copy Link
-            </Button>
-          </div>
-        </div>
-      </Modal> */}
+
       {contextHolder}
       <Spin
         spinning={loading}
@@ -379,9 +319,9 @@ const CreatePage = () => {
 
                             if (session?.accessToken) {
                               if (show.label !== 'pending') {
-                                const routePath = show.name
-                                  .split('-')[1]
-                                  .split(' ')[1];
+                                const routePath = templateNameToRoute(
+                                  show.name
+                                );
 
                                 if (show.label === 'premium') {
                                   if (

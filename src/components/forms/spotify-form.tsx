@@ -26,10 +26,12 @@ import {
   validateSlug,
 } from './netflix-form';
 import { useMemoifyProfile } from '@/app/session-provider';
-import { createContent } from '@/action/user-api';
+import { createContent, editContent } from '@/action/user-api';
 import { revalidateRandom } from '@/lib/revalidate';
 import TextArea from 'antd/es/input/TextArea';
 import { useRouter } from 'next/navigation';
+import { IDetailContentResponse } from '@/action/interfaces';
+import { parsingImageFromJSON } from '@/lib/utils';
 
 export interface OptionSpotifyTrack {
   id: string;
@@ -62,6 +64,7 @@ const SpotifyForm = ({
   selectedTemplate,
   openNotification,
   handleCompleteCreation,
+  editData,
 }: {
   loading: boolean;
   setLoading: React.Dispatch<React.SetStateAction<boolean>>;
@@ -81,6 +84,7 @@ const SpotifyForm = ({
   };
   openNotification: (progress: number, key: any) => void;
   handleCompleteCreation: () => void;
+  editData?: IDetailContentResponse;
 }) => {
   const [form] = Form.useForm();
   const [searchedSong, setSearchedSong] = useState('');
@@ -100,15 +104,16 @@ const SpotifyForm = ({
     payload: { uri: string; uid: string },
     formName: string
   ) => {
-    const newImages = collectionOfImages;
-    newImages.push(payload);
+    const newImages = [...collectionOfImages, { ...payload, url: payload.uri }];
+
+    form.setFieldValue(formName, newImages); // ✅ Set the full array
     setCollectionOfImages(newImages);
   };
 
   const handleRemoveCollectionImage = (uid: string) => {
-    setCollectionOfImages(
-      collectionOfImages.filter((item) => item.uid !== uid)
-    );
+    const images = collectionOfImages.filter((item) => item.uid !== uid);
+    form.setFieldValue('momentOfYou', images?.length > 0 ? images : undefined);
+    setCollectionOfImages(images?.length > 0 ? images : []);
   };
 
   const uploadButton = (
@@ -138,10 +143,14 @@ const SpotifyForm = ({
       caption: values?.caption ? values?.caption : '',
     };
 
-    const res = await createContent(payload);
+    const res = editData
+      ? await editContent(payload, editData.id)
+      : await createContent(payload);
     if (res.success) {
       const userLink = selectedTemplate.route + '/' + res.data;
-      message.success('Successfully created!');
+      message.success(
+        editData ? 'Successfully posted!' : 'Successfully created!'
+      );
       form.resetFields();
       setModalState({
         visible: true,
@@ -160,6 +169,29 @@ const SpotifyForm = ({
       fetchSearch(value, setSearchedOptions);
     }
   }, [value]);
+
+  useEffect(() => {
+    if (editData) {
+      const jsonContent = JSON.parse(editData.detail_content_json_text);
+
+      const images = parsingImageFromJSON(
+        jsonContent,
+        'collection-images',
+        'momentOfYou'
+      );
+      console.log(jsonContent, '?', images);
+      setCollectionOfImages(images);
+
+      form.setFieldsValue({
+        ...jsonContent,
+        ourSongs: [],
+        songsForYou: [],
+        momentOfYou: images,
+        title2: editData.title,
+        caption: editData.caption,
+      });
+    }
+  }, [editData]);
 
   return (
     <div>
@@ -343,6 +375,11 @@ const SpotifyForm = ({
 
         {/* Dynamic Form List for Moment of You */}
         <Form.Item
+          getValueFromEvent={(e) => {
+            // return just the fileList (or your custom format if needed)
+            if (Array.isArray(e)) return e;
+            return e?.fileList;
+          }}
           rules={[
             { required: true, message: 'Please upload atleast 1 content' },
           ]}
@@ -363,6 +400,9 @@ const SpotifyForm = ({
             maxCount={profile?.type === 'free' ? 5 : 20}
             listType="picture-card"
             onRemove={(file) => handleRemoveCollectionImage(file.uid)}
+            fileList={
+              collectionOfImages?.length > 0 ? (collectionOfImages as any) : []
+            }
             beforeUpload={async (file) => {
               setUploadLoading(true);
               await beforeUpload(
@@ -553,7 +593,7 @@ const SpotifyForm = ({
             type="primary"
             htmlType="submit"
             size="large">
-            Create
+            {editData ? 'Edit & Publish' : 'Create'}
           </Button>
         </div>
       </Form>

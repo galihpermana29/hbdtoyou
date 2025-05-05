@@ -10,7 +10,7 @@ import {
   Upload,
 } from 'antd';
 import TextArea from 'antd/es/input/TextArea';
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import type { GetProp, UploadFile, UploadProps } from 'antd';
 import {
   LoadingOutlined,
@@ -19,8 +19,10 @@ import {
 } from '@ant-design/icons';
 import { useForm } from 'antd/es/form/Form';
 import { useMemoifyProfile } from '@/app/session-provider';
-import { createContent } from '@/action/user-api';
+import { createContent, editContent } from '@/action/user-api';
 import { beforeUpload, getBase64, getBase64Multiple } from './netflix-form';
+import { IDetailContentResponse } from '@/action/interfaces';
+import { parsingImageFromJSON } from '@/lib/utils';
 type FileType = Parameters<GetProp<UploadProps, 'beforeUpload'>>[0];
 
 const DisneyForm = ({
@@ -31,6 +33,7 @@ const DisneyForm = ({
   selectedTemplate,
   openNotification,
   handleCompleteCreation,
+  editData,
 }: {
   loading: boolean;
   setLoading: React.Dispatch<React.SetStateAction<boolean>>;
@@ -50,6 +53,7 @@ const DisneyForm = ({
   };
   openNotification: (progress: number, key: any) => void;
   handleCompleteCreation: () => void;
+  editData?: IDetailContentResponse;
 }) => {
   const [imageUrl, setImageUrl] = useState<string>();
 
@@ -65,15 +69,16 @@ const DisneyForm = ({
     payload: { uri: string; uid: string },
     formName: string
   ) => {
-    const newImages = collectionOfImages;
-    newImages.push(payload);
+    const newImages = [...collectionOfImages, { ...payload, url: payload.uri }];
+
+    form.setFieldValue(formName, newImages); // ✅ Set the full array
     setCollectionOfImages(newImages);
   };
 
   const handleRemoveCollectionImage = (uid: string) => {
-    setCollectionOfImages(
-      collectionOfImages.filter((item) => item.uid !== uid)
-    );
+    const images = collectionOfImages.filter((item) => item.uid !== uid);
+    form.setFieldValue('images', images?.length > 0 ? images : undefined);
+    setCollectionOfImages(images?.length > 0 ? images : []);
   };
 
   const handleSetStoryImageURI = (
@@ -134,10 +139,14 @@ const DisneyForm = ({
       caption: val?.caption ? val?.caption : '',
     };
 
-    const res = await createContent(payload);
+    const res = editData
+      ? await editContent(payload, editData.id)
+      : await createContent(payload);
     if (res.success) {
       const userLink = selectedTemplate.route + '/' + res.data;
-      message.success('Successfully created!');
+      message.success(
+        editData ? 'Successfully posted!' : 'Successfully created!'
+      );
       form.resetFields();
       setModalState({
         visible: true,
@@ -148,6 +157,30 @@ const DisneyForm = ({
       message.error(res.message);
     }
   };
+
+  useEffect(() => {
+    if (editData) {
+      const jsonContent = JSON.parse(editData.detail_content_json_text);
+
+      const jumbotronImage = parsingImageFromJSON(jsonContent, 'jumbotron');
+      const images = parsingImageFromJSON(
+        jsonContent,
+        'collection-images',
+        'images'
+      );
+
+      setImageUrl(jsonContent.jumbotronImage);
+      setCollectionOfImages(images);
+
+      form.setFieldsValue({
+        ...jsonContent,
+        jumbotronImage,
+        images,
+        title2: editData.title,
+        caption: editData.caption,
+      });
+    }
+  }, [editData]);
 
   return (
     <div>
@@ -184,7 +217,7 @@ const DisneyForm = ({
                 handleSetJumbotronImageURI,
                 'jumbotronImage'
               );
-              setUploadLoading(true);
+              setUploadLoading(false);
             }}>
             {imageUrl ? (
               <img src={imageUrl} alt="avatar" style={{ width: '100%' }} />
@@ -357,6 +390,11 @@ const DisneyForm = ({
           />
         </Form.Item>
         <Form.Item
+          getValueFromEvent={(e) => {
+            // return just the fileList (or your custom format if needed)
+            if (Array.isArray(e)) return e;
+            return e?.fileList;
+          }}
           name={'images'}
           label={
             <div className="mt-[10px] mb-[5px]">
@@ -376,6 +414,9 @@ const DisneyForm = ({
             multiple={true}
             maxCount={profile?.type === 'free' ? 5 : 15}
             listType="picture-card"
+            fileList={
+              collectionOfImages.length > 0 ? (collectionOfImages as any) : []
+            }
             onRemove={(file) => handleRemoveCollectionImage(file.uid)}
             beforeUpload={async (file) => {
               setUploadLoading(true);
@@ -471,7 +512,7 @@ const DisneyForm = ({
             type="primary"
             htmlType="submit"
             size="large">
-            Create
+            {editData ? 'Edit & Publish' : 'Create'}
           </Button>
         </div>
       </Form>
