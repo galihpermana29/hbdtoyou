@@ -5,11 +5,16 @@ import { mapContentToCard } from '@/lib/utils';
 import { getSession } from '@/store/get-set-session';
 import { CreditCard, UserRoundPlus, Users } from 'lucide-react';
 import DashboardContentContainer from './view/container/DashboardContentContainer';
+import CardClient from './view/container/CardClient';
 
 const DashboardPage = async () => {
   const session = await getSession();
 
-  const data = await getContentByUserId(session?.userId as string);
+  //check if it's admin email memoify.live@gmail.com
+  const isAdmin = session?.email === 'memoify.live@gmail.com';
+  const data = await getContentByUserId(
+    isAdmin ? null : (session?.userId as string)
+  );
   const mappedData = data.success
     ? mapContentToCard(data.data).filter(
         (show) => show && show?.jumbotronImage && show?.title
@@ -65,17 +70,7 @@ const DashboardPage = async () => {
                   : '0'}
               </h1>
             </div>
-            <div className="p-[20px] max-h-max  border-[1px] border-[#EAECF0] rounded-[12px]">
-              <div className="flex items-center gap-[12px] mb-[20px]">
-                <div className="w-[48px] h-[48px] rounded-[12px] border-[1px] border-[#EAECF0] flex justify-center items-center">
-                  <CreditCard />
-                </div>
-                <h1 className="text-[#1B1B1B] font-[600] text-[16px]">
-                  Credit remaining
-                </h1>
-              </div>
-              <h1 className="text-[#1B1B1B] font-[600] text-[36px]">328</h1>
-            </div>
+            <CardClient />
           </div>
         </div>
 
@@ -91,15 +86,6 @@ const DashboardPage = async () => {
 
         {/* card */}
         <DashboardContentContainer data={mappedData} />
-        {/* <div className="md:mt-[30px] py-[30px] md:py-0 mx-auto max-w-6xl 2xl:max-w-7xl px-[20px] grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-[20px]">
-          {mappedData.map((dx, idx) => {
-            return (
-              <div key={idx} className="w-full flex justify-center">
-                <CustomCard content={dx} />
-              </div>
-            );
-          })}
-        </div> */}
       </div>
     </div>
   );

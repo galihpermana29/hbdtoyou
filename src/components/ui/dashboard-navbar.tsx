@@ -9,7 +9,7 @@ const DashboardNavbar = () => {
           className="text-[#182230] font-[600] text-[16px] hover:bg-[#F9FAFB] rounded-[8px] py-[8px] px-[12px]">
           Dashboard
         </Link>
-        <Link
+        {/* <Link
           href={'/profile'}
           className="text-[#182230] font-[600] text-[16px] hover:bg-[#F9FAFB] rounded-[8px] py-[8px] px-[12px]">
           Profile Settings
@@ -18,7 +18,7 @@ const DashboardNavbar = () => {
           href={'/profile'}
           className="text-[#182230] font-[600] text-[16px] hover:bg-[#F9FAFB] rounded-[8px] py-[8px] px-[12px]">
           Invite Friends
-        </Link>
+        </Link> */}
       </div>
     </div>
   );

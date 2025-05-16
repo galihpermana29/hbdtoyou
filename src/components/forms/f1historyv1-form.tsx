@@ -24,9 +24,15 @@ import {
 import { useForm } from 'antd/es/form/Form';
 import { useMemoifyProfile } from '@/app/session-provider';
 import { createContent } from '@/action/user-api';
-import { beforeUpload, getBase64, getBase64Multiple } from './netflix-form';
+import { beforeUpload } from './netflix-form';
 import f1Teams from '@/lib/f1Data';
 import dayjs from 'dayjs';
+import { useDispatch, useSelector } from 'react-redux';
+import { RootState } from '@/lib/store';
+import {
+  removeCollectionOfImages,
+  setCollectionOfImages,
+} from '@/lib/uploadSlice';
 type FileType = Parameters<GetProp<UploadProps, 'beforeUpload'>>[0];
 
 const Formula1Form = ({
@@ -47,7 +53,8 @@ const Formula1Form = ({
   setModalState: React.Dispatch<
     React.SetStateAction<{
       visible: boolean;
-      data: string;
+      data: any;
+      type?: any;
     }>
   >;
   selectedTemplate: {
@@ -69,40 +76,29 @@ const Formula1Form = ({
   const [driver2Image, setDriver2Image] = useState<string>();
 
   const [uploadLoading, setUploadLoading] = useState(false);
-  const [collectionOfImages, setCollectionOfImages] = useState<
-    { uid: string; uri: string }[]
-  >([]);
 
   const profile = useMemoifyProfile();
 
   const [form] = useForm();
 
+  const collectionOfImages = useSelector(
+    (state: RootState) => state.uploadSlice.collectionOfImages
+  );
+
+  const dispatch = useDispatch();
+
   const handleSetCollectionImagesURI = (
     payload: { uri: string; uid: string },
     formName: string
   ) => {
-    const newImages = collectionOfImages;
-    newImages.push(payload);
-    setCollectionOfImages(newImages);
+    dispatch(setCollectionOfImages([{ ...payload, url: payload.uri }]));
+    form.setFieldValue(formName, collectionOfImages); // ✅ Set the full array
   };
 
   const handleRemoveCollectionImage = (uid: string) => {
-    setCollectionOfImages(
-      collectionOfImages.filter((item) => item.uid !== uid)
-    );
-  };
-
-  const handleSetStoryImageURI = (
-    payload: { uri: string; uid: string },
-    formName: string,
-    fieldIndex?: number
-  ) => {
-    const currentValues = form.getFieldValue(formName) || [];
-    currentValues[fieldIndex!] = {
-      ...currentValues[fieldIndex!],
-      imageUrl: payload.uri,
-    };
-    form.setFieldsValue({ [formName]: currentValues });
+    dispatch(removeCollectionOfImages(uid));
+    const images = collectionOfImages.filter((item) => item.uid !== uid);
+    form.setFieldValue('images', images?.length > 0 ? images : undefined);
   };
 
   const handleSetDriver1ImageURI = (

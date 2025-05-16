@@ -1,6 +1,8 @@
 import { useMemoifyProfile, useMemoifySession } from '@/app/session-provider';
+import { reset } from '@/lib/uploadSlice';
 import { notification, Progress } from 'antd';
 import { useState } from 'react';
+import { useDispatch } from 'react-redux';
 
 const useCreateContent = () => {
   const [loading, setLoading] = useState(false);
@@ -11,10 +13,17 @@ const useCreateContent = () => {
     route: string;
   } | null>(null);
 
-  const [modalState, setModalState] = useState({
+  const [modalState, setModalState] = useState<{
+    visible: boolean;
+    data: any;
+    type?: any;
+  }>({
     visible: false,
     data: '',
+    type: '',
   });
+
+  const dispatch = useDispatch();
 
   const session = useMemoifySession();
   const profile = useMemoifyProfile();
@@ -41,6 +50,9 @@ const useCreateContent = () => {
   const handleCompleteCreation = () => {
     setSelectedTemplate(null);
     setCurrent(2);
+
+    //rest
+    dispatch(reset());
   };
 
   return {

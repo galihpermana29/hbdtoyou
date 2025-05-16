@@ -1,5 +1,15 @@
 'use client';
-import { Button, Divider, Form, Image, Input, message, Upload } from 'antd';
+import {
+  Button,
+  Divider,
+  Form,
+  Image,
+  Input,
+  message,
+  Modal,
+  Tooltip,
+  Upload,
+} from 'antd';
 import TextArea from 'antd/es/input/TextArea';
 import { useEffect, useState } from 'react';
 import { GetProp, Switch, UploadFile, UploadProps } from 'antd';
@@ -13,6 +23,14 @@ import { uploadImageClientSide } from '@/lib/upload';
 import { useRouter } from 'next/navigation';
 import { IDetailContentResponse } from '@/action/interfaces';
 import { getBase64FromUrl, parsingImageFromJSON } from '@/lib/utils';
+import FinalModal from './final-modal';
+import dayjs from 'dayjs';
+import { useDispatch, useSelector } from 'react-redux';
+import { RootState } from '@/lib/store';
+import {
+  removeCollectionOfImages,
+  setCollectionOfImages,
+} from '@/lib/uploadSlice';
 export type FileType = Parameters<GetProp<UploadProps, 'beforeUpload'>>[0];
 
 export const validateSlug = (x: any, value: any) => {
@@ -127,7 +145,8 @@ const NetflixForm = ({
   setModalState: React.Dispatch<
     React.SetStateAction<{
       visible: boolean;
-      data: string;
+      data: any;
+      type?: any;
     }>
   >;
   selectedTemplate: {
@@ -140,9 +159,12 @@ const NetflixForm = ({
 }) => {
   const [imageUrl, setImageUrl] = useState<string>();
   const [uploadLoading, setUploadLoading] = useState(false);
-  const [collectionOfImages, setCollectionOfImages] = useState<
-    { uid: string; uri: string; url?: string }[]
-  >([]);
+
+  const collectionOfImages = useSelector(
+    (state: RootState) => state.uploadSlice.collectionOfImages
+  );
+
+  const dispatch = useDispatch();
 
   const profile = useMemoifyProfile();
 
@@ -154,16 +176,14 @@ const NetflixForm = ({
     payload: { uri: string; uid: string },
     formName: string
   ) => {
-    const newImages = [...collectionOfImages, { ...payload, url: payload.uri }];
-
-    form.setFieldValue(formName, newImages); // ✅ Set the full array
-    setCollectionOfImages(newImages);
+    dispatch(setCollectionOfImages([{ ...payload, url: payload.uri }]));
+    form.setFieldValue(formName, collectionOfImages); // ✅ Set the full array
   };
 
   const handleRemoveCollectionImage = (uid: string) => {
+    dispatch(removeCollectionOfImages(uid));
     const images = collectionOfImages.filter((item) => item.uid !== uid);
     form.setFieldValue('images', images?.length > 0 ? images : undefined);
-    setCollectionOfImages(images?.length > 0 ? images : []);
   };
 
   const handleSetJumbotronImageURI = (
@@ -181,7 +201,10 @@ const NetflixForm = ({
     </button>
   );
 
-  const handleSubmit = async (val: any) => {
+  const handleSubmit = async (
+    val: any,
+    status: 'draft' | 'published' = 'published'
+  ) => {
     const { jumbotronImage, title, subTitle, modalContent, isPublic } = val;
 
     const json_text = {
@@ -201,6 +224,13 @@ const NetflixForm = ({
       detail_content_json_text: JSON.stringify(json_text),
       title: val?.title2 ? val?.title2 : '',
       caption: val?.caption,
+
+      date_scheduled: val?.date_scheduled
+        ? dayjs(val?.date_scheduled).format('DD/MM/YYYY h:mm A Z')
+        : null,
+      dest_email: val?.dest_email,
+      is_scheduled: val?.is_scheduled,
+      status,
     };
 
     const res = editData
@@ -209,15 +239,20 @@ const NetflixForm = ({
 
     if (res.success) {
       const userLink = selectedTemplate.route + '/' + res.data;
-      message.success(
-        editData ? 'Successfully posted!' : 'Successfully created!'
-      );
       form.resetFields();
-      setModalState({
-        visible: true,
-        data: userLink as string,
-      });
-      handleCompleteCreation();
+      if (status === 'draft') {
+        // window.open(userLink as string, '_blank');
+        router.push('/preview?link=' + userLink);
+      } else {
+        setModalState({
+          visible: true,
+          data: userLink as string,
+        });
+        message.success(
+          editData ? 'Successfully posted!' : 'Successfully created!'
+        );
+        handleCompleteCreation();
+      }
     } else {
       message.error(`Something went wrong!, ${res.message}`);
     }
@@ -237,7 +272,7 @@ const NetflixForm = ({
       );
 
       setImageUrl(jsonContent.jumbotronImage);
-      setCollectionOfImages(images);
+      dispatch(setCollectionOfImages(images));
 
       form.setFieldsValue({
         ...jsonContent,
@@ -251,6 +286,19 @@ const NetflixForm = ({
 
   return (
     <div>
+      <Modal
+        centered={true}
+        title="Add-Ons"
+        footer={null}
+        open={modalState.visible}
+        onCancel={() => setModalState({ visible: false, data: '' })}
+        onClose={() => setModalState({ visible: false, data: '' })}>
+        <FinalModal
+          profile={profile}
+          onSubmit={handleSubmit}
+          preFormValue={modalState?.data}
+        />
+      </Modal>
       <Button
         className="!bg-black !rounded-full mb-[20px]"
         type="primary"
@@ -264,7 +312,8 @@ const NetflixForm = ({
         disabled={loading}
         form={form}
         layout="vertical"
-        onFinish={(val) => handleSubmit(val)}>
+        // onFinish={(val) => handleSubmit(val)}
+      >
         <Form.Item
           rules={[
             {
@@ -381,41 +430,54 @@ const NetflixForm = ({
               : uploadButton}
           </Upload>
         </Form.Item>
-        <Form.Item
-          name={'isPublic'}
-          label={
-            <div className="mt-[10px] mb-[5px]">
-              <h3 className="text-[15px] font-semibold">
-                Show on Inspiration Page
-              </h3>
 
-              <p className="text-[13px] text-gray-600 max-w-[400px]">
-                In free plan your website will be shown on the Inspiration page.
-                You can change this option to hide it on premium plan.
-              </p>
-            </div>
-          }
-          initialValue={true}>
-          <Switch disabled={profile?.type === 'free'} />
-        </Form.Item>
-        <Divider />
-        <Form.Item
-          rules={[{ required: true, message: 'Please input title!' }]}
-          name={'title2'}
-          className="!my-[10px]"
-          label="Inspiration title">
-          <Input size="large" placeholder="Your inspiration title" />
-        </Form.Item>
-        <Form.Item
-          rules={[{ required: true, message: 'Please input caption!' }]}
-          name={'caption'}
-          className="!my-[10px]"
-          label="Inspiration caption">
-          <TextArea size="large" placeholder="Your inspiration caption" />
-        </Form.Item>
-
-        <div className="flex justify-end ">
+        <div className="flex justify-end gap-2">
+          <Tooltip
+            title={
+              profile?.type === 'free'
+                ? 'To save as draft and see preview, please join premium plan'
+                : ''
+            }
+            placement="top">
+            <Button
+              disabled={profile?.type === 'free'}
+              onClick={() => {
+                form
+                  .validateFields()
+                  .then(() => {
+                    handleSubmit(form.getFieldsValue(), 'draft');
+                  })
+                  .catch((info) => {
+                    form.scrollToField(Object.keys(info?.values)[0], {
+                      behavior: 'smooth',
+                    });
+                  });
+              }}
+              className="!bg-white !text-black !border-[1px] !border-black !rounded-full"
+              loading={loading || uploadLoading}
+              type="primary"
+              htmlType="submit"
+              size="large">
+              {'Save Draft & See Preview'}
+            </Button>
+          </Tooltip>
           <Button
+            onClick={() => {
+              form
+                .validateFields()
+                .then(() => {
+                  setModalState({
+                    visible: true,
+                    data: form.getFieldsValue(),
+                    type: 'finish',
+                  });
+                })
+                .catch((info) => {
+                  form.scrollToField(Object.keys(info?.values)[0], {
+                    behavior: 'smooth',
+                  });
+                });
+            }}
             className="!bg-black !rounded-full"
             loading={loading || uploadLoading}
             type="primary"

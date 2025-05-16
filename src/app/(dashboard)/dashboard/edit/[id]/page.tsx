@@ -41,13 +41,16 @@ const EditContentDashboardPage = () => {
   const { id } = useParams();
   const templateName = useSearchParams().get('templateName');
   const templateId = useSearchParams().get('templateId');
+
   const getDetailContentById = async (id: string) => {
+    setLoading(true);
     const res = await getDetailContent(id);
     if (res.success) {
       setDetailContent(res.data);
     } else {
       message.error(res.message);
     }
+    setLoading(false);
   };
 
   useEffect(() => {
@@ -74,7 +77,7 @@ const EditContentDashboardPage = () => {
       </div>
       <div className="flex flex-col items-center justify-start min-h-screen py-[30px] mb-[50px] !pt-[180px]">
         <div className="mx-auto max-w-6xl 2xl:max-w-7xl px-[20px] flex-1 w-full">
-          {selectedTemplate && (
+          {selectedTemplate ? (
             <div className="w-full">
               {selectedTemplate.route.includes('netflixv1') && (
                 <NetflixForm
@@ -192,55 +195,55 @@ const EditContentDashboardPage = () => {
                 />
               )}
             </div>
-          )}
-
-          {modalState?.data && (
-            <div className="flex flex-col md:flex-row items-center gap-[20px]">
-              <div className="shadow-lg w-full rounded-md">
-                <iframe
-                  src={window?.location.origin + '/' + modalState?.data}
-                  className="aspect-video object-cover rounded-md w-full"
-                />
-              </div>
-              <div className="w-[70%]">
-                <div className="max-w-[400px]">
-                  <h1 className="text-[#1B1B1B] font-[600] text-[30px] md:text-[36px]">
-                    Your site is ready!
-                  </h1>
-                  <p className="text-[#7B7B7B] text-[14px] md:text-[18px] font-[400]">
-                    You can share your own version of website with your friends
-                    or someone you love. Thank you for using Memoify. Feel free
-                    to tag and follow us on instagram @memoify.live
-                  </p>
+          ) : (
+            modalState?.data && (
+              <div className="flex flex-col md:flex-row items-center gap-[20px]">
+                <div className="shadow-lg w-full rounded-md">
+                  <iframe
+                    src={window?.location.origin + '/' + modalState?.data}
+                    className="aspect-video object-cover rounded-md w-full"
+                  />
                 </div>
-                <div className="flex mt-[20px] gap-4">
-                  <Button
-                    onClick={() => {
-                      navigator.clipboard.writeText(
-                        window?.location.origin + '/' + modalState.data
-                      );
-                      message.success('Copied!');
-                    }}
-                    className="!bg-[#E34013] !text-white !rounded-[8px] !text-[16px] !font-[600] !h-[48px] !w-[170px]"
-                    type="primary"
-                    size="large">
-                    Copy link
-                  </Button>
-                  <Link
-                    target="_blank"
-                    href={`/${modalState.data}`}
-                    className="cursor-pointer">
-                    {' '}
+                <div className="w-full md:w-[70%]">
+                  <div className="max-w-[400px]">
+                    <h1 className="text-[#1B1B1B] font-[600] text-[30px] md:text-[36px]">
+                      Your site is ready!
+                    </h1>
+                    <p className="text-[#7B7B7B] text-[14px] md:text-[18px] font-[400]">
+                      You can share your own version of website with your
+                      friends or someone you love. Thank you for using Memoify.
+                      Feel free to tag and follow us on instagram @memoify.live
+                    </p>
+                  </div>
+                  <div className="flex mt-[20px] gap-4">
                     <Button
-                      className="!bg-[#fff] !text-[#E34013] !border-[1px] !border-[#E34013] !rounded-[8px] !text-[16px] !font-[600] !h-[48px] !w-[170px]"
+                      onClick={() => {
+                        navigator.clipboard.writeText(
+                          window?.location.origin + '/' + modalState.data
+                        );
+                        message.success('Copied!');
+                      }}
+                      className="!bg-[#E34013] !text-white !rounded-[8px] !text-[16px] !font-[600] !h-[48px] !w-[170px]"
                       type="primary"
                       size="large">
-                      Open in new tab
+                      Copy link
                     </Button>
-                  </Link>
+                    <Link
+                      target="_blank"
+                      href={`/${modalState.data}`}
+                      className="cursor-pointer">
+                      {' '}
+                      <Button
+                        className="!bg-[#fff] !text-[#E34013] !border-[1px] !border-[#E34013] !rounded-[8px] !text-[16px] !font-[600] !h-[48px] !w-[170px]"
+                        type="primary"
+                        size="large">
+                        Open in new tab
+                      </Button>
+                    </Link>
+                  </div>
                 </div>
               </div>
-            </div>
+            )
           )}
         </div>
       </div>

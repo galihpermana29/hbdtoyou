@@ -75,12 +75,12 @@ const NavigationBar = () => {
           <h1 className="text-[14px] font-[500] text-[#344054] my-[5px]">
             Dashboard
           </h1>
-          <Tag color="orange" className="!text-[12px]">
-            Soon
-          </Tag>
         </div>
       ),
       icon: <House size={18} className="text-[#667085]" />,
+      onClick: () => {
+        router.push('/dashboard');
+      },
     },
     {
       type: 'divider',
@@ -254,22 +254,6 @@ const NavigationBar = () => {
         suppressHydrationWarning
         className="flex item justify-between  py-[20px] max-w-6xl 2xl:max-w-7xl px-[20px] mx-auto  ">
         <div className="flex items-center gap-[8px] md:gap-[24px] text-[14px]">
-          {/* {userProfile?.type !== 'pending' && (
-            <div
-              className="hidden md:block hover:underline cursor-pointer"
-              onClick={() => {
-                if (session?.accessToken) {
-                  router.push('/payment-qris');
-                } else {
-                  signIn('google');
-                }
-              }}>
-              Upgrade
-            </div>
-          )} */}
-          {/* <Link href={'/create'} className="hidden md:block">
-            Create
-          </Link> */}
           <Link href={'/'} className="font-bold">
             <Image
               src={

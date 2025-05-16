@@ -35,6 +35,9 @@ export interface IContent {
   link?: string;
   desc?: string;
   type?: string;
+  is_scheduled: boolean;
+  date_scheduled: string;
+  dest_email: string;
 }
 
 export interface IProfileResponse {

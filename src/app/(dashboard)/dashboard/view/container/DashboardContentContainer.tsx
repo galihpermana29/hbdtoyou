@@ -7,6 +7,8 @@ import { SquarePen, Trash, Trash2 } from 'lucide-react';
 import Image from 'next/image';
 import { useRouter } from 'next/navigation';
 import { useState } from 'react';
+import DetailContentModal from './DetailContentModal';
+import { useMemoifyProfile } from '@/app/session-provider';
 
 const DashboardContentContainer = ({ data }: { data: IContent[] }) => {
   const [modalType, setModalType] = useState<{
@@ -19,6 +21,8 @@ const DashboardContentContainer = ({ data }: { data: IContent[] }) => {
   const [loading, setLoading] = useState(false);
 
   const router = useRouter();
+
+  const profile = useMemoifyProfile();
 
   const handleDeleteContent = async (contentId: string) => {
     setLoading(true);
@@ -63,18 +67,25 @@ const DashboardContentContainer = ({ data }: { data: IContent[] }) => {
         </div>
         <div className="my-[24px] flex items-center justify-between">
           <Tag color="red" className="capitalize">
-            {content?.template_name.split('-')[0]}
+            {content?.template_name.split('-')[0].replace('v1', '')}
           </Tag>
-          <Tag color="blue" className="capitalize">
+          <Tag
+            color={content?.status === 'draft' ? 'yellow' : 'blue'}
+            className="capitalize">
             {content?.status}
           </Tag>
         </div>
+
         <h1 className="text-[#475467] font-[400] text-[16px] my-[24px]">
           {content?.title}
         </h1>
         {content.status === 'draft' ? (
           <div className="flex justify-end gap-2 mt-[14px]">
             <Button
+              disabled={
+                content?.template_name.split('-')[0] === 'formula1' ||
+                profile?.type === 'free'
+              }
               onClick={() => {
                 router.push(
                   `/dashboard/edit/${
@@ -85,8 +96,8 @@ const DashboardContentContainer = ({ data }: { data: IContent[] }) => {
                 );
               }}
               iconPosition="end"
-              icon={<SquarePen size={18} />}
-              className="!bg-[#E34013] !text-white !rounded-[8px] !text-[16px] !font-[600] !h-[40px] "
+              icon={<SquarePen size={16} />}
+              className="!bg-[#E34013] !text-white !rounded-[8px] !text-[14px] !font-[600] !h-[38px] "
               type="primary"
               size="large">
               Edit
@@ -101,8 +112,8 @@ const DashboardContentContainer = ({ data }: { data: IContent[] }) => {
                 });
               }}
               iconPosition="end"
-              icon={<Trash size={18} />}
-              className="!bg-[#fff] !text-[#E34013] !border-[1px] !border-[#E34013] !rounded-[8px] !text-[16px] !font-[600] !h-[40px] "
+              icon={<Trash size={16} />}
+              className="!bg-[#fff] !text-[#E34013] !border-[1px] !border-[#E34013] !rounded-[8px] !text-[14px] !font-[600] !h-[38px] "
               type="primary"
               size="large">
               Delete
@@ -111,10 +122,17 @@ const DashboardContentContainer = ({ data }: { data: IContent[] }) => {
         ) : (
           <div className="flex justify-end gap-2 mt-[14px]">
             <Button
-              onClick={() => {}}
+              onClick={() => {
+                setModalType({
+                  type: 'detail',
+                  open: true,
+                  title: '',
+                  data: content,
+                });
+              }}
               iconPosition="end"
-              icon={<SquarePen size={18} />}
-              className="!bg-[#E34013] !text-white !rounded-[8px] !text-[16px] !font-[600] !h-[40px] "
+              icon={<SquarePen size={16} />}
+              className="!bg-[#E34013] !text-white !rounded-[8px] !text-[14px] !font-[600] !h-[38px] "
               type="primary"
               size="large">
               Detail
@@ -129,8 +147,8 @@ const DashboardContentContainer = ({ data }: { data: IContent[] }) => {
                 });
               }}
               iconPosition="end"
-              icon={<Trash size={18} />}
-              className="!bg-[#fff] !text-[#E34013] !border-[1px] !border-[#E34013] !rounded-[8px] !text-[16px] !font-[600] !h-[40px] "
+              icon={<Trash size={16} />}
+              className="!bg-[#fff] !text-[#E34013] !border-[1px] !border-[#E34013] !rounded-[8px] !text-[14px] !font-[600] !h-[38px] "
               type="primary"
               size="large">
               Delete
@@ -161,7 +179,7 @@ const DashboardContentContainer = ({ data }: { data: IContent[] }) => {
               });
             }}
             iconPosition="end"
-            className="!bg-[#E34013] !text-white !rounded-[8px] !text-[16px] !font-[600] !h-[40px] !w-full"
+            className="!bg-[#E34013] !text-white !rounded-[8px] !text-[14px] !font-[600] !h-[38px] !w-full"
             type="primary"
             size="large">
             Cancel
@@ -172,7 +190,7 @@ const DashboardContentContainer = ({ data }: { data: IContent[] }) => {
               await handleDeleteContent(modalType?.data?.id);
             }}
             iconPosition="end"
-            className="!bg-[#fff] !text-[#E34013] !border-[1px] !border-[#E34013] !rounded-[8px] !text-[16px] !font-[600] !h-[40px] !w-full"
+            className="!bg-[#fff] !text-[#E34013] !border-[1px] !border-[#E34013] !rounded-[8px] !text-[14px] !font-[600] !h-[38px] !w-full"
             type="primary"
             size="large">
             Delete
@@ -180,26 +198,48 @@ const DashboardContentContainer = ({ data }: { data: IContent[] }) => {
         </div>
       </div>
     ),
+    detail: <DetailContentModal content={modalType?.data} />,
   };
 
   return (
     <div>
       <Modal
-        width={modalType?.type === 'delete' ? 400 : 500}
+        width={modalType?.type === 'delete' ? 400 : 700}
         open={modalType.open}
         onCancel={() => setModalType({ type: '', open: false, title: '' })}
         title={modalType.title}
         footer={null}>
         {ModalContent[modalType?.type]}
       </Modal>
-      <div className="md:mt-[30px] py-[30px] md:py-0 mx-auto max-w-6xl 2xl:max-w-7xl px-[20px] grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-[20px]">
-        {data.map((dx, idx) => {
-          return (
-            <div key={idx} className="w-full flex justify-center">
-              <CustomCard content={dx} />
-            </div>
-          );
-        })}
+      <div className="md:mt-[30px] py-[30px] md:py-0 mx-auto max-w-6xl 2xl:max-w-7xl px-[20px]">
+        {data.length > 0 ? (
+          <div className=" grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-[20px]">
+            {data.map((dx, idx) => {
+              return (
+                <div key={idx} className="w-full flex justify-center">
+                  <CustomCard content={dx} />
+                </div>
+              );
+            })}
+          </div>
+        ) : (
+          <div className="h-[80vh] w-full  flex flex-col items-center justify-center">
+            <p className="text-[#475467] font-[400] text-[16px]">
+              Ooops, you do not have any content yet.
+            </p>
+            <Button
+              onClick={() => {
+                router.push('/dashboard/create');
+              }}
+              iconPosition="end"
+              icon={<SquarePen size={16} />}
+              className="!bg-[#E34013] !text-white !rounded-[8px] !text-[14px] !font-[600] !h-[38px] mt-[24px]"
+              type="primary"
+              size="large">
+              Create
+            </Button>
+          </div>
+        )}
       </div>
     </div>
   );

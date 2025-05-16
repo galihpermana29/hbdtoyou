@@ -1,5 +1,15 @@
 'use client';
-import { Button, Divider, Form, Input, message, Switch, Upload } from 'antd';
+import {
+  Button,
+  Divider,
+  Form,
+  Input,
+  message,
+  Modal,
+  Switch,
+  Tooltip,
+  Upload,
+} from 'antd';
 import { useEffect, useState } from 'react';
 import type { GetProp, UploadProps } from 'antd';
 import { LoadingOutlined, PlusOutlined } from '@ant-design/icons';
@@ -7,9 +17,17 @@ import { useForm } from 'antd/es/form/Form';
 import { useMemoifyProfile } from '@/app/session-provider';
 import { createContent, editContent } from '@/action/user-api';
 import { beforeUpload } from './netflix-form';
-import TextArea from 'antd/es/input/TextArea';
 import { parsingImageFromJSON } from '@/lib/utils';
 import { IDetailContentResponse } from '@/action/interfaces';
+import FinalModal from './final-modal';
+import dayjs from 'dayjs';
+import { useDispatch, useSelector } from 'react-redux';
+import { RootState } from '@/lib/store';
+import {
+  removeCollectionOfImages,
+  setCollectionOfImages,
+} from '@/lib/uploadSlice';
+import { useRouter } from 'next/navigation';
 type FileType = Parameters<GetProp<UploadProps, 'beforeUpload'>>[0];
 
 const GraduationV1Form = ({
@@ -31,7 +49,8 @@ const GraduationV1Form = ({
   setModalState: React.Dispatch<
     React.SetStateAction<{
       visible: boolean;
-      data: string;
+      data: any;
+      type?: any;
     }>
   >;
   selectedTemplate: {
@@ -43,27 +62,30 @@ const GraduationV1Form = ({
   editData?: IDetailContentResponse;
 }) => {
   const [uploadLoading, setUploadLoading] = useState(false);
-  const [collectionOfImages, setCollectionOfImages] = useState<
-    { uid: string; uri: string }[]
-  >([]);
+
   const profile = useMemoifyProfile();
 
   const [form] = useForm();
+  const router = useRouter();
+
+  const collectionOfImages = useSelector(
+    (state: RootState) => state.uploadSlice.collectionOfImages
+  );
+
+  const dispatch = useDispatch();
 
   const handleSetCollectionImagesURI = (
     payload: { uri: string; uid: string },
     formName: string
   ) => {
-    const newImages = [...collectionOfImages, { ...payload, url: payload.uri }];
-
-    form.setFieldValue(formName, newImages); // ✅ Set the full array
-    setCollectionOfImages(newImages);
+    dispatch(setCollectionOfImages([{ ...payload, url: payload.uri }]));
+    form.setFieldValue(formName, collectionOfImages); // ✅ Set the full array
   };
 
   const handleRemoveCollectionImage = (uid: string) => {
+    dispatch(removeCollectionOfImages(uid));
     const images = collectionOfImages.filter((item) => item.uid !== uid);
     form.setFieldValue('images', images?.length > 0 ? images : undefined);
-    setCollectionOfImages(images?.length > 0 ? images : []);
   };
 
   const uploadButton = (
@@ -73,7 +95,10 @@ const GraduationV1Form = ({
     </button>
   );
 
-  const handleSubmit = async (val: any) => {
+  const handleSubmit = async (
+    val: any,
+    status: 'draft' | 'published' = 'published'
+  ) => {
     const { university, faculty, major, yearOfGraduation, isPublic } = val;
 
     const json_text = {
@@ -93,6 +118,13 @@ const GraduationV1Form = ({
       detail_content_json_text: JSON.stringify(json_text),
       title: val?.title2 ? val?.title2 : '',
       caption: val?.caption ? val?.caption : '',
+
+      date_scheduled: val?.date_scheduled
+        ? dayjs(val?.date_scheduled).format('DD/MM/YYYY h:mm A Z')
+        : null,
+      dest_email: val?.dest_email,
+      is_scheduled: val?.is_scheduled,
+      status,
     };
 
     const res = editData
@@ -100,15 +132,20 @@ const GraduationV1Form = ({
       : await createContent(payload);
     if (res.success) {
       const userLink = selectedTemplate.route + '/' + res.data;
-      message.success(
-        editData ? 'Successfully posted!' : 'Successfully created!'
-      );
       form.resetFields();
-      setModalState({
-        visible: true,
-        data: userLink as string,
-      });
-      handleCompleteCreation();
+      if (status === 'draft') {
+        // window.open(userLink as string, '_blank');
+        router.push('/dashboard');
+      } else {
+        setModalState({
+          visible: true,
+          data: userLink as string,
+        });
+        message.success(
+          editData ? 'Successfully posted!' : 'Successfully created!'
+        );
+        handleCompleteCreation();
+      }
     } else {
       message.error(res.message);
     }
@@ -124,7 +161,7 @@ const GraduationV1Form = ({
         'images'
       );
 
-      setCollectionOfImages(images);
+      dispatch(setCollectionOfImages(images));
 
       form.setFieldsValue({
         ...jsonContent,
@@ -137,6 +174,19 @@ const GraduationV1Form = ({
 
   return (
     <div>
+      <Modal
+        centered={true}
+        title="Add-Ons"
+        footer={null}
+        open={modalState.visible}
+        onCancel={() => setModalState({ visible: false, data: '' })}
+        onClose={() => setModalState({ visible: false, data: '' })}>
+        <FinalModal
+          profile={profile}
+          onSubmit={handleSubmit}
+          preFormValue={modalState?.data}
+        />
+      </Modal>
       <Form
         disabled={loading}
         form={form}
@@ -198,7 +248,11 @@ const GraduationV1Form = ({
             listType="picture-card"
             onRemove={(file) => handleRemoveCollectionImage(file.uid)}
             fileList={
-              collectionOfImages.length > 0 ? (collectionOfImages as any) : []
+              editData
+                ? collectionOfImages.length > 0
+                  ? (collectionOfImages as any)
+                  : []
+                : undefined
             }
             beforeUpload={async (file) => {
               setUploadLoading(true);
@@ -222,41 +276,52 @@ const GraduationV1Form = ({
               : uploadButton}
           </Upload>
         </Form.Item>
-        <Form.Item
-          name={'isPublic'}
-          label={
-            <div className="mt-[10px] mb-[5px]">
-              <h3 className="text-[15px] font-semibold">
-                Show on Inspiration Page
-              </h3>
 
-              <p className="text-[13px] text-gray-600 max-w-[400px]">
-                In free plan your website will be shown on the Inspiration page.
-                You can change this option to hide it on premium plan.
-              </p>
-            </div>
-          }
-          initialValue={true}>
-          <Switch disabled={profile?.type === 'free'} />
-        </Form.Item>
-        <Divider />
-        <Form.Item
-          rules={[{ required: true, message: 'Please input title!' }]}
-          name={'title2'}
-          className="!my-[10px]"
-          label="Inspiration title">
-          <Input size="large" placeholder="Your inspiration title" />
-        </Form.Item>
-        <Form.Item
-          rules={[{ required: true, message: 'Please input caption!' }]}
-          name={'caption'}
-          className="!my-[10px]"
-          label="Inspiration caption">
-          <TextArea size="large" placeholder="Your inspiration caption" />
-        </Form.Item>
-        <div className="flex justify-end ">
+        <div className="flex justify-end gap-2">
+          <Tooltip 
+            title={profile?.type === 'free' ? 'To save as draft and see preview, please join premium plan' : ''}
+            placement="top"
+          >
+            <Button
+              disabled={profile?.type === 'free'}
+              onClick={() => {
+                form
+                  .validateFields()
+                  .then(() => {
+                    handleSubmit(form.getFieldsValue(), 'draft');
+                  })
+                  .catch((info) => {
+                    form.scrollToField(Object.keys(info?.values)[0], {
+                      behavior: 'smooth',
+                    });
+                  });
+              }}
+              className="!bg-white !text-black !border-[1px] !border-black !rounded-full"
+              loading={loading || uploadLoading}
+              type="primary"
+              htmlType="submit"
+              size="large">
+              {'Save Draft & See Preview'}
+            </Button>
+          </Tooltip>
           <Button
-            className="!bg-black"
+            onClick={() => {
+              form
+                .validateFields()
+                .then(() => {
+                  setModalState({
+                    visible: true,
+                    data: form.getFieldsValue(),
+                    type: 'finish',
+                  });
+                })
+                .catch((info) => {
+                  form.scrollToField(Object.keys(info?.values)[0], {
+                    behavior: 'smooth',
+                  });
+                });
+            }}
+            className="!bg-black !rounded-full"
             loading={loading || uploadLoading}
             type="primary"
             htmlType="submit"

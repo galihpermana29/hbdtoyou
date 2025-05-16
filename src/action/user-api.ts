@@ -89,6 +89,68 @@ export async function getAllTemplates(): Promise<
   };
 }
 
+export async function getPopularTemplates(): Promise<
+  IGlobalResponse<null | IAllTemplateResponse[]>
+> {
+  const session = await getSession();
+  const res = await fetch(baseUri + `/templates?category=popular`, {
+    method: 'GET',
+    headers: {
+      'Content-Type': 'application/json',
+      'X-Source': 'web',
+      'X-UserID': session.userId!,
+      Authorization: `Bearer ${session.accessToken}`,
+    },
+  });
+
+  if (!res.ok) {
+    return {
+      success: false,
+      message: res.statusText,
+      data: null,
+    };
+  }
+
+  const data = await res.json();
+
+  return {
+    success: true,
+    message: data.message,
+    data: data.data,
+  };
+}
+
+export async function getOriginalTemplates(): Promise<
+  IGlobalResponse<null | IAllTemplateResponse[]>
+> {
+  const session = await getSession();
+  const res = await fetch(baseUri + `/templates?category=original`, {
+    method: 'GET',
+    headers: {
+      'Content-Type': 'application/json',
+      'X-Source': 'web',
+      'X-UserID': session.userId!,
+      Authorization: `Bearer ${session.accessToken}`,
+    },
+  });
+
+  if (!res.ok) {
+    return {
+      success: false,
+      message: res.statusText,
+      data: null,
+    };
+  }
+
+  const data = await res.json();
+
+  return {
+    success: true,
+    message: data.message,
+    data: data.data,
+  };
+}
+
 export async function getUserProfile(): Promise<
   IGlobalResponse<null | IProfileResponse>
 > {
@@ -419,19 +481,22 @@ export async function getContentByUserId(
   userId: string
 ): Promise<IGlobalResponse<null | IContent[]>> {
   const session = await getSession();
-  const res = await fetch(baseUri + `/contents?user_id=${userId}`, {
-    method: 'GET',
-    headers: {
-      'Content-Type': 'application/json',
-      'X-Source': 'web',
-      'X-UserID': session.userId!,
-      Authorization: `Bearer ${session.accessToken}`,
-    },
-    next: {
-      revalidate: 60,
-      tags: ['dashboard-content'],
-    },
-  });
+  const res = await fetch(
+    baseUri + `${userId ? `/contents?user_id=${userId}` : `/contents`}`,
+    {
+      method: 'GET',
+      headers: {
+        'Content-Type': 'application/json',
+        'X-Source': 'web',
+        'X-UserID': session.userId!,
+        Authorization: `Bearer ${session.accessToken}`,
+      },
+      next: {
+        revalidate: 60,
+        tags: ['dashboard-content'],
+      },
+    }
+  );
 
   if (!res.ok) {
     return {
