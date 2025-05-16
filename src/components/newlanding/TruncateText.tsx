@@ -17,8 +17,8 @@ const TruncateText: React.FC<TruncateTextProps> = ({
 
   return (
     <div>
-      {isExpanded ? text : `${text.slice(0, maxLength)}... `}
-      {text.length > maxLength && showSeeMore && (
+      {isExpanded ? text : `${text?.slice(0, maxLength)}... `}
+      {text?.length > maxLength && showSeeMore && (
         <button
           onClick={toggleExpanded}
           className="text-[#E34013] hover:underline">

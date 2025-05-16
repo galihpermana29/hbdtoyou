@@ -13,10 +13,14 @@ import { useEffect, useState } from 'react';
 import { LoadingOutlined } from '@ant-design/icons';
 import Link from 'next/link';
 import NetflixForm from '@/components/forms/netflix-form';
-import { getAllTemplates } from '@/action/user-api';
+import {
+  getAllTemplates,
+  getOriginalTemplates,
+  getPopularTemplates,
+} from '@/action/user-api';
 import { IAllTemplateResponse } from '@/action/interfaces';
 import SpotifyForm from '@/components/forms/spotify-form';
-import { useMemoifyProfile, useMemoifySession } from '../session-provider';
+import { useMemoifyProfile, useMemoifySession } from '../../session-provider';
 import { signIn } from 'next-auth/react';
 import DisneyForm from '@/components/forms/disney-form';
 import Newspaperv1Form from '@/components/forms/newspaperv1-form';
@@ -27,9 +31,9 @@ import MagazineV1Form from '@/components/forms/magazinev1-form';
 import Formula1Form from '@/components/forms/f1historyv1-form';
 import CardTemplate from '@/components/newlanding/card-template/CardTemplate';
 import { ArrowLeft } from 'lucide-react';
-
-const PREMIUM_TEMPLATES = ['newspaperv2', 'disneyplusv1'];
-const EXCLUDE_TEMPLATES: string[] = [];
+import useCreateContent from './usecase/useCreateContent';
+import { templateNameToRoute } from '@/lib/utils';
+import { TemplateGridSection } from './view/presentation/CreateTemplateSection';
 
 const StepsCustom = [
   {
@@ -71,56 +75,62 @@ const StepsCustom = [
 ];
 
 const CreatePage = () => {
-  const [loading, setLoading] = useState(false);
-  const [current, setCurrent] = useState(0);
+  const {
+    loading,
+    current,
+    selectedTemplate,
+    modalState,
+    setModalState,
+    session,
+    profile,
+    contextHolder,
+    openNotification,
+    handleCompleteCreation,
+    setLoading,
+    setSelectedTemplate,
+    setCurrent,
+  } = useCreateContent();
 
-  const [selectedTemplate, setSelectedTemplate] = useState<{
-    id: string;
-    route: string;
-  } | null>(null);
   const [templates, setTemplates] = useState<IAllTemplateResponse[] | null>(
     null
   );
 
-  const [modalState, setModalState] = useState({
-    visible: false,
-    data: '',
-  });
-
-  const session = useMemoifySession();
-  const profile = useMemoifyProfile();
-
-  const [api, contextHolder] = notification.useNotification();
-
-  const openNotification = (progress: number = 0, key: any) => {
-    api.open({
-      message: (
-        <p className="text-[14px] text-black font-[600]">
-          {progress < 100 ? `Uploading ${progress}%` : 'Uploading completed'}
-        </p>
-      ),
-      description: (
-        <div>
-          <Progress percent={progress} />
-        </div>
-      ),
-      duration: 2000,
-      key: key,
-    });
-  };
-
-  const handleCompleteCreation = () => {
-    setSelectedTemplate(null);
-    setCurrent(2);
-  };
+  const [popularTemplates, setPopularTemplates] = useState<
+    IAllTemplateResponse[] | null
+  >(null);
 
   const handleGetTemplates = async () => {
-    const data = await getAllTemplates();
+    const data = await getOriginalTemplates();
     if (data.success) {
       setTemplates(data.data);
+      const dx = await getPopularTemplates();
+      if (dx.success) {
+        setPopularTemplates(dx.data);
+      } else {
+        message.error(dx.message);
+      }
     } else {
       message.error(data.message);
     }
+  };
+
+  const handleTemplateClick = (template: any) => {
+    if (!session?.accessToken) return signIn('google');
+
+    if (template.label === 'pending') {
+      return message.error('Coming Soon!');
+    }
+
+    const routePath = templateNameToRoute(template.name);
+
+    if (template.label === 'premium') {
+      if (!['pending', 'premium'].includes(profile?.type as any)) {
+        return message.info('Premium plan required');
+      }
+    }
+
+    setSelectedTemplate({ id: template.id, route: routePath });
+    setCurrent(1);
   };
 
   useEffect(() => {
@@ -130,46 +140,7 @@ const CreatePage = () => {
   return (
     <div>
       <NavigationBar />
-      {/* <Modal
-        onCancel={() =>
-          setModalState({
-            visible: false,
-            data: '',
-          })
-        }
-        title="Successfully created"
-        open={modalState.visible}
-        footer={null}>
-        <div>
-          <h1 className="text-[20px] font-bold">Your own website is ready!</h1>
-          <p>
-            You can share your own version of memoify with your friends or
-            someone you love.
-          </p>
-          <div className="flex items-center gap-[12px] mt-[12px]">
-            <Link href={`/${modalState.data}`} className="cursor-pointer">
-              <Button
-                size="large"
-                type="primary"
-                className="!bg-black !text-[14px]">
-                Open now
-              </Button>
-            </Link>
-            <Button
-              onClick={() => {
-                navigator.clipboard.writeText(
-                  window.location.origin + '/' + modalState.data
-                );
-                message.success('Copied!');
-              }}
-              size="large"
-              type="primary"
-              className="!bg-black !text-[14px]">
-              Copy Link
-            </Button>
-          </div>
-        </div>
-      </Modal> */}
+
       {contextHolder}
       <Spin
         spinning={loading}
@@ -368,56 +339,133 @@ const CreatePage = () => {
                   </div>
                 </div>
               ) : (
-                <div className="grid-cols-1 md:grid-cols-2 lg:grid-cols-3 grid gap-[10px]  justify-items-center">
-                  {templates
-                    ? templates?.map((show, idx) => (
-                        <div
-                          key={idx}
-                          onClick={(e) => {
-                            e.preventDefault();
-                            e.stopPropagation();
+                <div>
+                  <div>
+                    <TemplateGridSection
+                      title="Popular Template"
+                      templates={popularTemplates}
+                      onTemplateClick={handleTemplateClick}
+                    />
 
-                            if (session?.accessToken) {
-                              if (show.label !== 'pending') {
-                                const routePath = show.name
-                                  .split('-')[1]
-                                  .split(' ')[1];
-
-                                if (show.label === 'premium') {
-                                  if (
-                                    ['pending', 'premium'].includes(
-                                      profile?.type as any
-                                    )
-                                  ) {
-                                    setSelectedTemplate({
-                                      id: show.id,
-                                      route: routePath,
-                                    });
-                                    setCurrent(1);
-                                    return;
-                                  } else {
-                                    return message.info(
-                                      'Premium plan required'
-                                    );
-                                  }
-                                }
-                                setCurrent(1);
-                                setSelectedTemplate({
-                                  id: show.id,
-                                  route: routePath,
-                                });
-                              } else {
-                                message.error('Coming Soon!');
-                              }
-                            } else {
-                              signIn('google');
-                            }
-                          }}>
-                          <CardTemplate data={show} type="creation" />
-                        </div>
-                      ))
-                    : 'No templates'}
+                    <TemplateGridSection
+                      title="Original Template"
+                      templates={templates}
+                      onTemplateClick={handleTemplateClick}
+                    />
+                  </div>
                 </div>
+                // <div>
+                //   <div>
+                //     <h1 className="text-[#1B1B1B] font-[600] text-[22px] mb-[12px]">
+                //       Popular Template
+                //     </h1>
+                //     <div className="grid-cols-1 md:grid-cols-2 lg:grid-cols-3 grid gap-[10px]  justify-items-center">
+                //       {popularTemplates
+                //         ? popularTemplates?.map((show, idx) => (
+                //             <div
+                //               key={idx}
+                //               onClick={(e) => {
+                //                 e.preventDefault();
+                //                 e.stopPropagation();
+
+                //                 if (session?.accessToken) {
+                //                   if (show.label !== 'pending') {
+                //                     const routePath = templateNameToRoute(
+                //                       show.name
+                //                     );
+
+                //                     if (show.label === 'premium') {
+                //                       if (
+                //                         ['pending', 'premium'].includes(
+                //                           profile?.type as any
+                //                         )
+                //                       ) {
+                //                         setSelectedTemplate({
+                //                           id: show.id,
+                //                           route: routePath,
+                //                         });
+                //                         setCurrent(1);
+                //                         return;
+                //                       } else {
+                //                         return message.info(
+                //                           'Premium plan required'
+                //                         );
+                //                       }
+                //                     }
+                //                     setCurrent(1);
+                //                     setSelectedTemplate({
+                //                       id: show.id,
+                //                       route: routePath,
+                //                     });
+                //                   } else {
+                //                     message.error('Coming Soon!');
+                //                   }
+                //                 } else {
+                //                   signIn('google');
+                //                 }
+                //               }}>
+                //               <CardTemplate data={show} type="creation" />
+                //             </div>
+                //           ))
+                //         : 'No templates'}
+                //     </div>
+                //   </div>
+                //   <div className="mt-[40px]">
+                //     <h1 className="text-[#1B1B1B] font-[600] text-[22px] mb-[12px]">
+                //       Original Template
+                //     </h1>
+                //     <div className="grid-cols-1 md:grid-cols-2 lg:grid-cols-3 grid gap-[10px]  justify-items-center">
+                //       {templates
+                //         ? templates?.map((show, idx) => (
+                //             <div
+                //               key={idx}
+                //               onClick={(e) => {
+                //                 e.preventDefault();
+                //                 e.stopPropagation();
+
+                //                 if (session?.accessToken) {
+                //                   if (show.label !== 'pending') {
+                //                     const routePath = templateNameToRoute(
+                //                       show.name
+                //                     );
+
+                //                     if (show.label === 'premium') {
+                //                       if (
+                //                         ['pending', 'premium'].includes(
+                //                           profile?.type as any
+                //                         )
+                //                       ) {
+                //                         setSelectedTemplate({
+                //                           id: show.id,
+                //                           route: routePath,
+                //                         });
+                //                         setCurrent(1);
+                //                         return;
+                //                       } else {
+                //                         return message.info(
+                //                           'Premium plan required'
+                //                         );
+                //                       }
+                //                     }
+                //                     setCurrent(1);
+                //                     setSelectedTemplate({
+                //                       id: show.id,
+                //                       route: routePath,
+                //                     });
+                //                   } else {
+                //                     message.error('Coming Soon!');
+                //                   }
+                //                 } else {
+                //                   signIn('google');
+                //                 }
+                //               }}>
+                //               <CardTemplate data={show} type="creation" />
+                //             </div>
+                //           ))
+                //         : 'No templates'}
+                //     </div>
+                //   </div>
+                // </div>
               )}
             </>
           )}

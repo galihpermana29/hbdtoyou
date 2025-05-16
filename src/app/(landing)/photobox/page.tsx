@@ -12,7 +12,7 @@ import NavigationBar from '@/components/ui/navbar';
 import { uploadImageClientSide } from '@/lib/upload';
 
 import { v4 as uuidv4 } from 'uuid';
-import { useMemoifySession } from '../session-provider';
+import { useMemoifySession } from '../../session-provider';
 
 const uploadImage = async (base64: string) => {
   const data = await fetch('/api/upload', {

@@ -4,7 +4,9 @@ import { getSession } from '@/store/get-set-session';
 import {
   IAllPaymentResponse,
   IAllTemplateResponse,
+  IContent,
   IContentPayload,
+  IContentStats,
   IDetailContentResponse,
   IGetDetailPayment,
   ILatestContentResponse,
@@ -13,6 +15,7 @@ import {
   IProfileResponse,
   IQRISPaymentResponse,
 } from './interfaces';
+import { revalidateTag } from 'next/cache';
 
 export interface IOAuthPayload {
   token_email: string;
@@ -60,6 +63,68 @@ export async function getAllTemplates(): Promise<
 > {
   const session = await getSession();
   const res = await fetch(baseUri + `/templates`, {
+    method: 'GET',
+    headers: {
+      'Content-Type': 'application/json',
+      'X-Source': 'web',
+      'X-UserID': session.userId!,
+      Authorization: `Bearer ${session.accessToken}`,
+    },
+  });
+
+  if (!res.ok) {
+    return {
+      success: false,
+      message: res.statusText,
+      data: null,
+    };
+  }
+
+  const data = await res.json();
+
+  return {
+    success: true,
+    message: data.message,
+    data: data.data,
+  };
+}
+
+export async function getPopularTemplates(): Promise<
+  IGlobalResponse<null | IAllTemplateResponse[]>
+> {
+  const session = await getSession();
+  const res = await fetch(baseUri + `/templates?category=popular`, {
+    method: 'GET',
+    headers: {
+      'Content-Type': 'application/json',
+      'X-Source': 'web',
+      'X-UserID': session.userId!,
+      Authorization: `Bearer ${session.accessToken}`,
+    },
+  });
+
+  if (!res.ok) {
+    return {
+      success: false,
+      message: res.statusText,
+      data: null,
+    };
+  }
+
+  const data = await res.json();
+
+  return {
+    success: true,
+    message: data.message,
+    data: data.data,
+  };
+}
+
+export async function getOriginalTemplates(): Promise<
+  IGlobalResponse<null | IAllTemplateResponse[]>
+> {
+  const session = await getSession();
+  const res = await fetch(baseUri + `/templates?category=original`, {
     method: 'GET',
     headers: {
       'Content-Type': 'application/json',
@@ -139,6 +204,43 @@ export async function createContent(
       data: null,
     };
   }
+
+  revalidateTag('dashboard-content');
+
+  const data = await res.json();
+
+  return {
+    success: true,
+    message: data.message,
+    data: data.data,
+  };
+}
+
+export async function editContent(
+  payload: IContentPayload,
+  contentId: string
+): Promise<IGlobalResponse<null | string>> {
+  const session = await getSession();
+  const res = await fetch(baseUri + `/contents/${contentId}`, {
+    method: 'PATCH',
+    headers: {
+      'Content-Type': 'application/json',
+      'X-Source': 'web',
+      'X-UserID': session.userId!,
+      Authorization: `Bearer ${session.accessToken}`,
+    },
+    body: JSON.stringify(payload),
+  });
+
+  if (!res.ok) {
+    return {
+      success: false,
+      message: res.statusText,
+      data: null,
+    };
+  }
+
+  revalidateTag('dashboard-content');
 
   const data = await res.json();
 
@@ -375,6 +477,44 @@ export async function getLatestInspiration(): Promise<
   };
 }
 
+export async function getContentByUserId(
+  userId: string
+): Promise<IGlobalResponse<null | IContent[]>> {
+  const session = await getSession();
+  const res = await fetch(
+    baseUri + `${userId ? `/contents?user_id=${userId}` : `/contents`}`,
+    {
+      method: 'GET',
+      headers: {
+        'Content-Type': 'application/json',
+        'X-Source': 'web',
+        'X-UserID': session.userId!,
+        Authorization: `Bearer ${session.accessToken}`,
+      },
+      next: {
+        revalidate: 60,
+        tags: ['dashboard-content'],
+      },
+    }
+  );
+
+  if (!res.ok) {
+    return {
+      success: false,
+      message: res.statusText,
+      data: null,
+    };
+  }
+
+  const data = await res.json();
+
+  return {
+    success: true,
+    message: data.message,
+    data: data.data,
+  };
+}
+
 export async function submitFeedback(payload: {
   email: string;
   type: string;
@@ -399,6 +539,74 @@ export async function submitFeedback(payload: {
       data: null,
     };
   }
+
+  const data = await res.json();
+
+  return {
+    success: true,
+    message: data.message,
+    data: data.data,
+  };
+}
+
+export async function getContentStatsByUserId(): Promise<
+  IGlobalResponse<null | IContentStats>
+> {
+  const session = await getSession();
+  const res = await fetch(baseUri + `/contents/stats`, {
+    method: 'GET',
+    headers: {
+      'Content-Type': 'application/json',
+      'X-Source': 'web',
+      'X-UserID': session.userId!,
+      Authorization: `Bearer ${session.accessToken}`,
+    },
+    next: {
+      revalidate: 60,
+      tags: ['dashboard-content'],
+    },
+  });
+
+  if (!res.ok) {
+    return {
+      success: false,
+      message: res.statusText,
+      data: null,
+    };
+  }
+
+  const data = await res.json();
+
+  return {
+    success: true,
+    message: data.message,
+    data: data.data,
+  };
+}
+
+export async function deleteContentById(
+  contentId: string
+): Promise<IGlobalResponse<null | IContentStats>> {
+  const session = await getSession();
+  const res = await fetch(baseUri + `/contents/${contentId}`, {
+    method: 'DELETE',
+    headers: {
+      'Content-Type': 'application/json',
+      'X-Source': 'web',
+      'X-UserID': session.userId!,
+      Authorization: `Bearer ${session.accessToken}`,
+    },
+  });
+
+  if (!res.ok) {
+    return {
+      success: false,
+      message: res.statusText,
+      data: null,
+    };
+  }
+
+  revalidateTag('dashboard-content');
 
   const data = await res.json();
 

@@ -70,17 +70,17 @@ const CardTemplate = ({
     <div>
       <div
         className={clsx(
-          DataToCardColor[data.name.split('-')[1].split(' ')[1]]?.color,
+          DataToCardColor[data.name.split('-')[1]?.split(' ')[1]]?.color,
           'p-[24px] transition cursor-pointer group h-[330px] flex flex-col justify-between',
           type === 'preview'
             ? 'w-[350px] md:w-[400px]'
             : 'w-full max-w-[350px] md:max-w-[400px]'
         )}>
         <div className="flex items-center justify-between">
-          {DataToCardColor[data.name.split('-')[1].split(' ')[1]]?.logo && (
+          {DataToCardColor[data.name.split('-')[1]?.split(' ')[1]]?.logo && (
             <Image
               src={
-                DataToCardColor[data.name.split('-')[1].split(' ')[1]]
+                DataToCardColor[data.name.split('-')[1]?.split(' ')[1]]
                   ?.logo as string
               }
               alt={data.name}
@@ -95,11 +95,12 @@ const CardTemplate = ({
               <Link
                 target="_blank"
                 // split netflix - netflixv1
-                href={`/${data.name.split('-')[1].split(' ')[1]}`}>
+                href={`/${data.name.split('-')[1]?.split(' ')[1]}`}>
                 <h1
                   className={clsx(
                     'text-[18px] font-[600] hover:underline',
-                    DataToCardColor[data.name.split('-')[1].split(' ')[1]]?.text
+                    DataToCardColor[data.name.split('-')[1]?.split(' ')[1]]
+                      ?.text
                   )}>
                   See Preview
                 </h1>
@@ -109,7 +110,7 @@ const CardTemplate = ({
             <ArrowRight
               size={24}
               className={clsx(
-                DataToCardColor[data.name.split('-')[1].split(' ')[1]]?.text
+                DataToCardColor[data.name.split('-')[1]?.split(' ')[1]]?.text
               )}
             />
           </div>
