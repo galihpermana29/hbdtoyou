@@ -3,8 +3,7 @@
 import { IProfileResponse } from '@/action/interfaces';
 import { getUserProfile } from '@/action/user-api';
 import { SessionData } from '@/store/iron-session';
-import { PlusOneOutlined } from '@mui/icons-material';
-import { Button, Form, Modal, Upload, Typography, Space, Image } from 'antd';
+import { Button, Form, Modal, Space, Image } from 'antd';
 import React, { createContext, useContext, useEffect, useState } from 'react';
 import { Footer } from '@/components/ui/footer';
 import { usePathname } from 'next/navigation';
@@ -85,10 +84,8 @@ const SessionProvider = ({
     visible: false,
     data: '',
   });
-  const [form] = Form.useForm();
-  const [imageUrl, setImageUrl] = useState<string | null>(null);
+
   const pathname = usePathname();
-  const [loading, setLoading] = useState(false);
 
   const [uploadStateLoading, setUploadStateLoading] = useState(false);
 
@@ -142,20 +139,13 @@ const SessionProvider = ({
 
   // Show ads modal every 2 minutes
   useEffect(() => {
-    // Show first ad after page load
-    const initialTimeout = setTimeout(() => {
-      setCurrentAdContent(selectRandomContent());
-      setAdsModalVisible(true);
-    }, 10000); // Show first ad after 5 seconds
-
     // Set up interval for subsequent ads
     const interval = setInterval(() => {
       setCurrentAdContent(selectRandomContent());
       setAdsModalVisible(true);
-    }, 1000 * 60 * 5); // show ads every 2 mins
+    }, 1000 * 60 * 5); // show ads every 5 mins
 
     return () => {
-      clearTimeout(initialTimeout);
       clearInterval(interval);
     };
   }, []);

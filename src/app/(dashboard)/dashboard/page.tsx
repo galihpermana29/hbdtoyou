@@ -40,7 +40,7 @@ const DashboardPage = async () => {
         {/* content */}
         <div className="md:mt-[40px] py-[30px] md:py-0 mx-auto max-w-6xl 2xl:max-w-7xl px-[20px]">
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-[20px]">
-            <div className="p-[20px] max-h-max border-[1px] border-[#EAECF0] rounded-[12px]">
+            {/* <div className="p-[20px] max-h-max border-[1px] border-[#EAECF0] rounded-[12px]">
               <div className="flex items-center gap-[12px] mb-[20px]">
                 <div className="w-[48px] h-[48px] rounded-[12px] border-[1px] border-[#EAECF0] flex justify-center items-center">
                   <UserRoundPlus />
@@ -54,8 +54,8 @@ const DashboardPage = async () => {
                   ? dataStats?.data?.contents?.total_gift_content
                   : '0'}
               </h1>
-            </div>
-            <div className="p-[20px] max-h-max  border-[1px] border-[#EAECF0] rounded-[12px]">
+            </div> */}
+            {/* <div className="p-[20px] max-h-max  border-[1px] border-[#EAECF0] rounded-[12px]">
               <div className="flex items-center gap-[12px] mb-[20px]">
                 <div className="w-[48px] h-[48px] rounded-[12px] border-[1px] border-[#EAECF0] flex justify-center items-center">
                   <Users />
@@ -69,8 +69,42 @@ const DashboardPage = async () => {
                   ? dataStats?.data?.contents?.total_photo_box_content
                   : '0'}
               </h1>
-            </div>
-            <CardClient />
+            </div> */}
+            <CardClient
+              icon={<UserRoundPlus />}
+              title="Memories Created"
+              stats={
+                dataStats?.success
+                  ? dataStats?.data?.contents?.total_gift_content
+                  : 0
+              }
+            />
+            <CardClient
+              icon={<Users />}
+              title="Photobox Taken"
+              stats={
+                dataStats?.success
+                  ? dataStats?.data?.contents?.total_photo_box_content
+                  : 0
+              }
+            />
+            {isAdmin ? (
+              <CardClient
+                icon={<CreditCard />}
+                title="Registered Users"
+                stats={
+                  dataStats?.success
+                    ? dataStats?.data?.contents?.total_registered_user
+                    : 0
+                }
+              />
+            ) : (
+              <CardClient
+                icon={<CreditCard />}
+                title="Credit Remaining"
+                stats={0}
+              />
+            )}
           </div>
         </div>
 

@@ -72,7 +72,9 @@ export function mapContentToCard(contents: IContent[]) {
     return {
       ...show,
       jumbotronImage: handleJumbotron(),
-      title: Object.prototype.hasOwnProperty.call(jsonContent, 'title')
+      title: show?.title
+        ? show.title
+        : Object.prototype.hasOwnProperty.call(jsonContent, 'title')
         ? capitalizeFirstLetter(jsonContent.title?.toLowerCase())
         : Object.prototype.hasOwnProperty.call(jsonContent, 'modalContent')
         ? capitalizeFirstLetter(jsonContent.modalContent?.toLowerCase())?.slice(
@@ -81,7 +83,9 @@ export function mapContentToCard(contents: IContent[]) {
           )
         : 'A title',
       link: `/${show.template_name.split('-')[1].split(' ')[1]}/${show.id}`,
-      desc: jsonContent?.subTitle || 'A description',
+      desc: show?.caption
+        ? show?.caption
+        : jsonContent?.subTitle || 'A description',
       type: show.template_name.split('-')[0],
     };
   });

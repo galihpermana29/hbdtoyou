@@ -86,15 +86,6 @@ const NavigationBar = () => {
       type: 'divider',
     },
     {
-      key: '11',
-      label: (
-        <div>
-          <h1 className="text-[14px] font-[500] text-[#344054]">Settings</h1>
-        </div>
-      ),
-      icon: <Settings size={18} className="text-[#667085]" />,
-    },
-    {
       key: '4',
       label: <p onClick={() => router.push('/payment-qris')}>Upgrade Plan</p>,
       icon: <Zap size={18} className="text-[#667085]" />,
