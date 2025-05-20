@@ -120,7 +120,6 @@ const SpotifyForm = ({
     formName: string
   ) => {
     dispatch(setCollectionOfImages([{ ...payload, url: payload.uri }]));
-    form.setFieldValue(formName, collectionOfImages); // ✅ Set the full array
   };
 
   const handleRemoveCollectionImage = (uid: string) => {
@@ -173,8 +172,7 @@ const SpotifyForm = ({
       const userLink = selectedTemplate.route + '/' + res.data;
       form.resetFields();
       if (status === 'draft') {
-        // window.open(userLink as string, '_blank');
-        router.push('/dashboard');
+        router.push('/preview?link=' + userLink);
       } else {
         setModalState({
           visible: true,
@@ -488,10 +486,13 @@ const SpotifyForm = ({
         </p>
 
         <div className="flex justify-end gap-2">
-          <Tooltip 
-            title={profile?.type === 'free' ? 'To save as draft and see preview, please join premium plan' : ''}
-            placement="top"
-          >
+          <Tooltip
+            title={
+              profile?.type === 'free'
+                ? 'To save as draft and see preview, please join premium plan'
+                : ''
+            }
+            placement="top">
             <Button
               disabled={profile?.type === 'free'}
               onClick={() => {

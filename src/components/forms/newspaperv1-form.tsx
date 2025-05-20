@@ -135,8 +135,7 @@ const Newspaperv1Form = ({
       const userLink = selectedTemplate.route + '/' + res.data;
       form.resetFields();
       if (status === 'draft') {
-        // window.open(userLink as string, '_blank');
-        router.push('/dashboard');
+        router.push('/preview?link=' + userLink);
       } else {
         setModalState({
           visible: true,

@@ -48,7 +48,7 @@ const FinalModal = ({
             </p>
           </div>
         }
-        initialValue={true}>
+        initialValue={profile?.type === 'free' ? true : false}>
         <Switch disabled={profile?.type === 'free'} />
       </Form.Item>
 
@@ -87,7 +87,7 @@ const FinalModal = ({
             </p>
           </div>
         }
-        initialValue={true}>
+        initialValue={profile?.type === 'free' ? false : true}>
         <Switch disabled={profile?.type === 'free'} />
       </Form.Item>
       {isScheduled && (

@@ -102,7 +102,6 @@ const MagazineV1Form = ({
     formName: string
   ) => {
     dispatch(setCollectionOfImages([{ ...payload, url: payload.uri }]));
-    form.setFieldValue(formName, collectionOfImages); // ✅ Set the full array
   };
 
   const handleRemoveCollectionImage = (uid: string) => {
@@ -156,8 +155,7 @@ const MagazineV1Form = ({
       const userLink = selectedTemplate.route + '/' + res.data;
       form.resetFields();
       if (status === 'draft') {
-        // window.open(userLink as string, '_blank');
-        router.push('/dashboard');
+        router.push('/preview?link=' + userLink);
       } else {
         setModalState({
           visible: true,

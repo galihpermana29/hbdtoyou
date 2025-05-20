@@ -177,7 +177,6 @@ const NetflixForm = ({
     formName: string
   ) => {
     dispatch(setCollectionOfImages([{ ...payload, url: payload.uri }]));
-    form.setFieldValue(formName, collectionOfImages); // ✅ Set the full array
   };
 
   const handleRemoveCollectionImage = (uid: string) => {
