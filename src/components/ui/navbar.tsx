@@ -29,6 +29,7 @@ import { useRouter } from 'next/navigation';
 import {
   BadgeDollarSign,
   Book,
+  BookA,
   House,
   LogOut,
   Menu,
@@ -176,7 +177,25 @@ const NavigationBar = () => {
               Photobox
             </h1>
             <p className="text-[14px] font-[400] text-[#7B7B7B] mt-[5px]">
-              Make every picture a keepsake <br /> with Memoify’s Photobox!
+              Make every picture a keepsake <br /> with Memoify`s Photobox!
+            </p>
+          </div>
+        </div>
+      ),
+    },
+    {
+      value: 'ejournal',
+      label: (
+        <div
+          className="flex items-start gap-2"
+          onClick={() => router.push('/ejournal')}>
+          <BookA size={18} className="text-[#E34013] mt-[10px]" />
+          <div>
+            <h1 className="text-[16px] font-[600] text-[#101828] text-ellipsis">
+              Personal Journal
+            </h1>
+            <p className="text-[14px] font-[400] text-[#7B7B7B] mt-[5px]">
+              Create your personal journal <br /> to capture your life`s moments
             </p>
           </div>
         </div>
@@ -216,7 +235,25 @@ const NavigationBar = () => {
               Photobox
             </h1>
             <p className="text-[12px] font-[400] text-[#7B7B7B] mt-[2px]">
-              Make every picture a keepsake <br /> with Memoify’s Photobox!
+              Make every picture a keepsake <br /> with Memoify`s Photobox!
+            </p>
+          </div>
+        </div>
+      ),
+    },
+    {
+      value: 'ejournal',
+      label: (
+        <div
+          className="flex items-start gap-2"
+          onClick={() => router.push('/ejournal')}>
+          <BookA size={18} className="text-[#E34013] mt-[10px]" />
+          <div>
+            <h1 className="text-[14px] font-[600] text-[#101828] text-ellipsis">
+              Personal Journal
+            </h1>
+            <p className="text-[12px] font-[400] text-[#7B7B7B] mt-[5px]">
+              Create your personal journal <br /> to capture your life`s moments
             </p>
           </div>
         </div>
