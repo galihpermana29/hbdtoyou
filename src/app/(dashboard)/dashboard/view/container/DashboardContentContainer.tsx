@@ -1,16 +1,21 @@
 'use client';
 import { IContent } from '@/action/interfaces';
 import { deleteContentById } from '@/action/user-api';
-import { templateNameToRoute } from '@/lib/utils';
 import { Button, message, Modal, Tag } from 'antd';
 import { SquarePen, Trash, Trash2 } from 'lucide-react';
-import Image from 'next/image';
 import { useRouter } from 'next/navigation';
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import DetailContentModal from './DetailContentModal';
 import { useMemoifyProfile } from '@/app/session-provider';
+import dynamic from 'next/dynamic';
 
+// lazy import
+const DashboardCard = dynamic(() => import('../presentation/DashboardCard'));
+const initSliced = 10;
 const DashboardContentContainer = ({ data }: { data: IContent[] }) => {
+  // create load more state
+  const [currentData, setCurrentData] = useState<IContent[]>([]);
+  // state
   const [modalType, setModalType] = useState<{
     type: string;
     open: boolean;
@@ -47,116 +52,6 @@ const DashboardContentContainer = ({ data }: { data: IContent[] }) => {
       data: null,
     });
     setLoading(false);
-  };
-
-  const CustomCard = ({ content }: { content: IContent }) => {
-    return (
-      <div className="min-w-[320px] max-w-[400px] border-[1px] p-[15px] border-[#EAECF0] rounded-[6px]">
-        <div className="w-full h-[190px] overflow-hidden object-cover object-center">
-          <Image
-            width={1000}
-            height={500}
-            className="object-cover object-center"
-            alt="image"
-            src={
-              typeof content?.jumbotronImage === 'string'
-                ? content?.jumbotronImage
-                : 'https://res.cloudinary.com/ddlus5qur/image/upload/v1746085724/phu2rbi6fqnp71hytjex.jpg'
-            }
-          />
-        </div>
-        <div className="my-[24px] flex items-center justify-between">
-          <Tag color="red" className="capitalize">
-            {content?.template_name.split('-')[0].replace('v1', '')}
-          </Tag>
-          <Tag
-            color={content?.status === 'draft' ? 'yellow' : 'blue'}
-            className="capitalize">
-            {content?.status}
-          </Tag>
-        </div>
-
-        <h1 className="text-[#475467] font-[400] text-[16px] my-[24px]">
-          {content?.title}
-        </h1>
-        {content.status === 'draft' ? (
-          <div className="flex justify-end gap-2 mt-[14px]">
-            <Button
-              disabled={
-                content?.template_name.split('-')[0] === 'formula1' ||
-                profile?.type === 'free'
-              }
-              onClick={() => {
-                router.push(
-                  `/dashboard/edit/${
-                    content?.id
-                  }?templateName=${templateNameToRoute(
-                    content?.template_name
-                  )}&templateId=${content?.template_id}`
-                );
-              }}
-              iconPosition="end"
-              icon={<SquarePen size={16} />}
-              className="!bg-[#E34013] !text-white !rounded-[8px] !text-[14px] !font-[600] !h-[38px] "
-              type="primary"
-              size="large">
-              Edit
-            </Button>{' '}
-            <Button
-              onClick={() => {
-                setModalType({
-                  type: 'delete',
-                  open: true,
-                  title: '',
-                  data: { id: content.id },
-                });
-              }}
-              iconPosition="end"
-              icon={<Trash size={16} />}
-              className="!bg-[#fff] !text-[#E34013] !border-[1px] !border-[#E34013] !rounded-[8px] !text-[14px] !font-[600] !h-[38px] "
-              type="primary"
-              size="large">
-              Delete
-            </Button>
-          </div>
-        ) : (
-          <div className="flex justify-end gap-2 mt-[14px]">
-            <Button
-              onClick={() => {
-                setModalType({
-                  type: 'detail',
-                  open: true,
-                  title: '',
-                  data: content,
-                });
-              }}
-              iconPosition="end"
-              icon={<SquarePen size={16} />}
-              className="!bg-[#E34013] !text-white !rounded-[8px] !text-[14px] !font-[600] !h-[38px] "
-              type="primary"
-              size="large">
-              Detail
-            </Button>{' '}
-            <Button
-              onClick={() => {
-                setModalType({
-                  type: 'delete',
-                  open: true,
-                  title: '',
-                  data: { id: content.id },
-                });
-              }}
-              iconPosition="end"
-              icon={<Trash size={16} />}
-              className="!bg-[#fff] !text-[#E34013] !border-[1px] !border-[#E34013] !rounded-[8px] !text-[14px] !font-[600] !h-[38px] "
-              type="primary"
-              size="large">
-              Delete
-            </Button>
-          </div>
-        )}
-      </div>
-    );
   };
 
   const ModalContent = {
@@ -201,6 +96,12 @@ const DashboardContentContainer = ({ data }: { data: IContent[] }) => {
     detail: <DetailContentModal content={modalType?.data} />,
   };
 
+  useEffect(() => {
+    if (data.length > 0) {
+      setCurrentData(data.slice(0, initSliced));
+    }
+  }, [data]);
+
   return (
     <div>
       <Modal
@@ -212,16 +113,39 @@ const DashboardContentContainer = ({ data }: { data: IContent[] }) => {
         {ModalContent[modalType?.type]}
       </Modal>
       <div className="md:mt-[30px] py-[30px] md:py-0 mx-auto max-w-6xl 2xl:max-w-7xl px-[20px]">
-        {data.length > 0 ? (
-          <div className=" grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-[20px]">
-            {data.map((dx, idx) => {
-              return (
-                <div key={idx} className="w-full flex justify-center">
-                  <CustomCard content={dx} />
-                </div>
-              );
-            })}
-          </div>
+        {currentData.length > 0 ? (
+          <>
+            <div className=" grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-[20px]">
+              {currentData.map((dx, idx) => {
+                return (
+                  <div key={idx} className="w-full flex justify-center">
+                    <DashboardCard content={dx} setModalType={setModalType} />
+                  </div>
+                );
+              })}
+            </div>
+
+            {currentData.length < data.length && (
+              <Button
+                onClick={() => {
+                  if (currentData.length >= data.length) return;
+                  const newData = [
+                    ...currentData,
+                    ...data.slice(
+                      currentData.length,
+                      currentData.length + initSliced
+                    ),
+                  ];
+                  setCurrentData(newData);
+                }}
+                iconPosition="end"
+                className="!bg-[#E34013] !text-white !rounded-[8px] !text-[14px] !font-[600] !h-[38px] mt-[24px]"
+                type="primary"
+                size="large">
+                Load More
+              </Button>
+            )}
+          </>
         ) : (
           <div className="h-[80vh] w-full  flex flex-col items-center justify-center">
             <p className="text-[#475467] font-[400] text-[16px]">

@@ -10,7 +10,7 @@ export interface JournalEntry {
   preamble: string;
   introduction: string;
   isPublic: boolean;
-  language: string;
+  language?: string;
   secondaryLanguage?: string;
 }
 

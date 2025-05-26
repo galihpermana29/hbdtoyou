@@ -1,28 +1,16 @@
 'use client';
-import {
-  Button,
-  Divider,
-  Form,
-  Image,
-  Input,
-  message,
-  Modal,
-  Tooltip,
-  Upload,
-} from 'antd';
+import { Button, Form, Input, message, Modal, Tooltip, Upload } from 'antd';
 import TextArea from 'antd/es/input/TextArea';
 import { useEffect, useState } from 'react';
-import { GetProp, Switch, UploadFile, UploadProps } from 'antd';
+import { GetProp, UploadProps } from 'antd';
 import { LoadingOutlined, PlusOutlined } from '@ant-design/icons';
 import { v4 as uuidv4 } from 'uuid';
 import { useForm } from 'antd/es/form/Form';
-import { revalidateRandom } from '@/lib/revalidate';
-import { useMemoifyProfile } from '@/app/session-provider';
 import { createContent, editContent } from '@/action/user-api';
-import { uploadImageClientSide } from '@/lib/upload';
+import { uploadImageClientSide, uploadImageWithApi } from '@/lib/upload';
 import { useRouter } from 'next/navigation';
 import { IDetailContentResponse } from '@/action/interfaces';
-import { getBase64FromUrl, parsingImageFromJSON } from '@/lib/utils';
+import { parsingImageFromJSON } from '@/lib/utils';
 import FinalModal from './final-modal';
 import dayjs from 'dayjs';
 import { useDispatch, useSelector } from 'react-redux';
@@ -31,6 +19,7 @@ import {
   removeCollectionOfImages,
   setCollectionOfImages,
 } from '@/lib/uploadSlice';
+import { useMemoifyProfile } from '@/app/session-provider';
 export type FileType = Parameters<GetProp<UploadProps, 'beforeUpload'>>[0];
 
 export const validateSlug = (x: any, value: any) => {
@@ -88,12 +77,17 @@ export const beforeUpload = async (
   } else {
     const reader = new FileReader();
     reader.onload = async () => {
-      const jumbotronURL = await uploadImage(file, type, openNotification);
+      const formData = new FormData();
+      formData.append('file', file);
+      const key = uuidv4();
+
+      const dx = await uploadImageWithApi(formData, openNotification, key);
+
       if (setFormValues) {
         {
           setFormValues(
             {
-              uri: jumbotronURL,
+              uri: dx.data.data,
               uid: file.uid,
             },
             formName!,

@@ -40,36 +40,6 @@ const DashboardPage = async () => {
         {/* content */}
         <div className="md:mt-[40px] py-[30px] md:py-0 mx-auto max-w-6xl 2xl:max-w-7xl px-[20px]">
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-[20px]">
-            {/* <div className="p-[20px] max-h-max border-[1px] border-[#EAECF0] rounded-[12px]">
-              <div className="flex items-center gap-[12px] mb-[20px]">
-                <div className="w-[48px] h-[48px] rounded-[12px] border-[1px] border-[#EAECF0] flex justify-center items-center">
-                  <UserRoundPlus />
-                </div>
-                <h1 className="text-[#1B1B1B] font-[600] text-[16px]">
-                  Memories created
-                </h1>
-              </div>
-              <h1 className="text-[#1B1B1B] font-[600] text-[36px]">
-                {dataStats?.success
-                  ? dataStats?.data?.contents?.total_gift_content
-                  : '0'}
-              </h1>
-            </div> */}
-            {/* <div className="p-[20px] max-h-max  border-[1px] border-[#EAECF0] rounded-[12px]">
-              <div className="flex items-center gap-[12px] mb-[20px]">
-                <div className="w-[48px] h-[48px] rounded-[12px] border-[1px] border-[#EAECF0] flex justify-center items-center">
-                  <Users />
-                </div>
-                <h1 className="text-[#1B1B1B] font-[600] text-[16px]">
-                  Photobox taken
-                </h1>
-              </div>
-              <h1 className="text-[#1B1B1B] font-[600] text-[36px]">
-                {dataStats?.success
-                  ? dataStats?.data?.contents?.total_photo_box_content
-                  : '0'}
-              </h1>
-            </div> */}
             <CardClient
               icon={<UserRoundPlus />}
               title="Memories Created"
