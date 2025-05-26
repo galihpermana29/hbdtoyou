@@ -7,14 +7,13 @@ import JournalLayout from '../view/JournalLayout';
 import NavigationBar from '@/components/ui/navbar';
 import { Form, Input, Select, Button, Space } from 'antd';
 // ES6
-import ReactQuill from 'react-quill';
-import 'react-quill/dist/quill.snow.css';
+// import ReactQuill from 'react-quill';
+// import 'react-quill/dist/quill.snow.css';
+
 const NewEntryPage: React.FC = () => {
   const [form] = Form.useForm();
 
   const handleSubmit = (values: any) => {
-    console.log(values, 'values');
-    return;
     const newEntry: JournalEntry = {
       id: '1',
       title: values.title,
@@ -32,7 +31,7 @@ const NewEntryPage: React.FC = () => {
       isPublic: true,
     };
 
-    console.log('Form submitted:', newEntry);
+    // console.log('Form submitted:', newEntry);
     // addEntry(newEntry);
     // navigate(`/entry/${newEntry.id}`);
   };
@@ -79,7 +78,7 @@ const NewEntryPage: React.FC = () => {
                     { required: true, message: 'Please enter an abstract' },
                   ]}
                   className="mb-6">
-                  <ReactQuill
+                  {/* <ReactQuill
                     modules={{
                       toolbar: [
                         ['bold', 'italic', 'underline', 'strike'],
@@ -89,7 +88,7 @@ const NewEntryPage: React.FC = () => {
                     }}
                     theme="snow"
                     placeholder="Write your abstract text here. This section will be displayed in one columns."
-                  />
+                  /> */}
                 </Form.Item>
 
                 <Form.Item
@@ -99,7 +98,7 @@ const NewEntryPage: React.FC = () => {
                     { required: true, message: 'Please enter an abstract' },
                   ]}
                   className="mb-6">
-                  <ReactQuill
+                  {/* <ReactQuill
                     modules={{
                       toolbar: [
                         ['bold', 'italic', 'underline', 'strike'],
@@ -109,7 +108,7 @@ const NewEntryPage: React.FC = () => {
                     }}
                     theme="snow"
                     placeholder="Write your abstract text here. This section will be displayed in one columns."
-                  />
+                  /> */}
                 </Form.Item>
 
                 <Form.Item
@@ -130,7 +129,7 @@ const NewEntryPage: React.FC = () => {
                     { required: true, message: 'Please enter a preamble' },
                   ]}
                   className="mb-6">
-                  <ReactQuill
+                  {/* <ReactQuill
                     modules={{
                       toolbar: [
                         ['bold', 'italic', 'underline', 'strike'],
@@ -140,7 +139,7 @@ const NewEntryPage: React.FC = () => {
                     }}
                     theme="snow"
                     placeholder="Write your preamble text here. This section will be displayed in one columns."
-                  />
+                  /> */}
                 </Form.Item>
 
                 <Form.Item
@@ -150,7 +149,7 @@ const NewEntryPage: React.FC = () => {
                     { required: true, message: 'Please enter an introduction' },
                   ]}
                   className="mb-6">
-                  <ReactQuill
+                  {/* <ReactQuill
                     modules={{
                       toolbar: [
                         ['bold', 'italic', 'underline', 'strike'],
@@ -160,7 +159,7 @@ const NewEntryPage: React.FC = () => {
                     }}
                     theme="snow"
                     placeholder="Write your introduction text here. This section will be displayed in two columns."
-                  />
+                  /> */}
                 </Form.Item>
 
                 <div className="flex justify-end">
