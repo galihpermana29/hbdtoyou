@@ -8,6 +8,7 @@ import newspaperv3 from '@/assets/templates/newspaperv3.png';
 import magazine from '@/assets/templates/magazine.png';
 import formula1 from '@/assets/templates/formula1.png';
 import graduation from '@/assets/templates/graduation.png';
+import journal from '@/assets/templates/scopus.png';
 import clsx from 'clsx';
 import Image from 'next/image';
 import { ArrowRight } from 'lucide-react';
@@ -56,6 +57,11 @@ export const DataToCardColor = {
     color: 'bg-[#E4E4E433]',
     logo: graduation,
     text: 'text-[#9a9a9a]',
+  },
+  journal: {
+    color: 'bg-[#fff]',
+    logo: journal,
+    text: 'text-[#000]',
   },
 };
 

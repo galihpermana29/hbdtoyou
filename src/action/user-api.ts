@@ -478,7 +478,7 @@ export async function getLatestInspiration(): Promise<
 }
 
 export async function getContentByUserId(
-  userId: string
+  userId?: string
 ): Promise<IGlobalResponse<null | IContent[]>> {
   const session = await getSession();
   const res = await fetch(

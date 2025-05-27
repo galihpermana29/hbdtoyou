@@ -1,39 +1,63 @@
 'use client';
 
-import React, { useState } from 'react';
+import React from 'react';
 import { motion } from 'framer-motion';
 import { JournalEntry } from '../models/data';
 import JournalLayout from '../view/JournalLayout';
 import NavigationBar from '@/components/ui/navbar';
-import { Form, Input, Select, Button, Space } from 'antd';
-// ES6
-// import ReactQuill from 'react-quill';
-// import 'react-quill/dist/quill.snow.css';
+import { Form, Input, Button, Select, message } from 'antd';
+import dynamic from 'next/dynamic';
+
+// Dynamically import ReactQuill with SSR disabled
+const ReactQuill = dynamic(() => import('react-quill'), {
+  ssr: false, // This disables server-side rendering for this component
+  loading: () => <p>Loading editor...</p>,
+});
+
+import 'react-quill/dist/quill.snow.css';
+import { createContent } from '@/action/user-api';
+import { useRouter } from 'next/navigation';
 
 const NewEntryPage: React.FC = () => {
   const [form] = Form.useForm();
 
-  const handleSubmit = (values: any) => {
-    const newEntry: JournalEntry = {
-      id: '1',
+  const router = useRouter();
+  const handleSubmit = async (values: any) => {
+    // 2d4df00e-e773-4391-ad6a-1b6d688950ff
+
+    const json_text = {
       title: values.title,
       author: values.author,
       date: new Date().toISOString().split('T')[0],
       volume: `Volume 1`,
       abstract: values.abstract,
       abstractSecondary: values.abstractSecondary || undefined,
-      keywords: values.keywords
-        .split(',')
-        .map((k: string) => k.trim())
-        .filter((k: string) => k),
+      keywords: values.keywords,
       preamble: values.preamble,
       introduction: values.introduction,
       isPublic: true,
     };
 
-    // console.log('Form submitted:', newEntry);
-    // addEntry(newEntry);
-    // navigate(`/entry/${newEntry.id}`);
+    const payload = {
+      template_id: '2d4df00e-e773-4391-ad6a-1b6d688950ff',
+      detail_content_json_text: JSON.stringify(json_text),
+      title: values.title,
+      caption: values.abstract,
+
+      date_scheduled: null,
+      dest_email: null,
+      is_scheduled: false,
+      status: 'published',
+    };
+
+    const res = await createContent(payload);
+
+    if (res.success) {
+      message.success('Journal created successfully');
+      router.push(`/journal`);
+    } else {
+      message.error(res.message);
+    }
   };
 
   return (
@@ -78,7 +102,7 @@ const NewEntryPage: React.FC = () => {
                     { required: true, message: 'Please enter an abstract' },
                   ]}
                   className="mb-6">
-                  {/* <ReactQuill
+                  <ReactQuill
                     modules={{
                       toolbar: [
                         ['bold', 'italic', 'underline', 'strike'],
@@ -88,7 +112,7 @@ const NewEntryPage: React.FC = () => {
                     }}
                     theme="snow"
                     placeholder="Write your abstract text here. This section will be displayed in one columns."
-                  /> */}
+                  />
                 </Form.Item>
 
                 <Form.Item
@@ -98,7 +122,7 @@ const NewEntryPage: React.FC = () => {
                     { required: true, message: 'Please enter an abstract' },
                   ]}
                   className="mb-6">
-                  {/* <ReactQuill
+                  <ReactQuill
                     modules={{
                       toolbar: [
                         ['bold', 'italic', 'underline', 'strike'],
@@ -108,7 +132,7 @@ const NewEntryPage: React.FC = () => {
                     }}
                     theme="snow"
                     placeholder="Write your abstract text here. This section will be displayed in one columns."
-                  /> */}
+                  />
                 </Form.Item>
 
                 <Form.Item
@@ -116,7 +140,8 @@ const NewEntryPage: React.FC = () => {
                   name="keywords"
                   rules={[{ required: true, message: 'Please enter keywords' }]}
                   className="mb-6">
-                  <Input
+                  <Select
+                    mode="tags"
                     className="rounded-sm"
                     placeholder="e.g., reflection, growth, learning"
                   />
@@ -129,7 +154,7 @@ const NewEntryPage: React.FC = () => {
                     { required: true, message: 'Please enter a preamble' },
                   ]}
                   className="mb-6">
-                  {/* <ReactQuill
+                  <ReactQuill
                     modules={{
                       toolbar: [
                         ['bold', 'italic', 'underline', 'strike'],
@@ -139,7 +164,7 @@ const NewEntryPage: React.FC = () => {
                     }}
                     theme="snow"
                     placeholder="Write your preamble text here. This section will be displayed in one columns."
-                  /> */}
+                  />
                 </Form.Item>
 
                 <Form.Item
@@ -149,7 +174,7 @@ const NewEntryPage: React.FC = () => {
                     { required: true, message: 'Please enter an introduction' },
                   ]}
                   className="mb-6">
-                  {/* <ReactQuill
+                  <ReactQuill
                     modules={{
                       toolbar: [
                         ['bold', 'italic', 'underline', 'strike'],
@@ -159,7 +184,7 @@ const NewEntryPage: React.FC = () => {
                     }}
                     theme="snow"
                     placeholder="Write your introduction text here. This section will be displayed in two columns."
-                  /> */}
+                  />
                 </Form.Item>
 
                 <div className="flex justify-end">

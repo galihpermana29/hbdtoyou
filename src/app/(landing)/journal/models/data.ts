@@ -4,6 +4,7 @@ export interface JournalEntry {
   author: string;
   date: string;
   volume: string;
+
   abstract: string;
   abstractSecondary?: string;
   keywords: string[];

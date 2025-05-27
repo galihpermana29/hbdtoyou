@@ -184,11 +184,11 @@ const NavigationBar = () => {
       ),
     },
     {
-      value: 'ejournal',
+      value: 'journal',
       label: (
         <div
           className="flex items-start gap-2"
-          onClick={() => router.push('/ejournal')}>
+          onClick={() => router.push('/journal')}>
           <BookA size={18} className="text-[#E34013] mt-[10px]" />
           <div>
             <h1 className="text-[16px] font-[600] text-[#101828] text-ellipsis">
@@ -242,11 +242,11 @@ const NavigationBar = () => {
       ),
     },
     {
-      value: 'ejournal',
+      value: 'journal',
       label: (
         <div
           className="flex items-start gap-2"
-          onClick={() => router.push('/ejournal')}>
+          onClick={() => router.push('/journal')}>
           <BookA size={18} className="text-[#E34013] mt-[10px]" />
           <div>
             <h1 className="text-[14px] font-[600] text-[#101828] text-ellipsis">

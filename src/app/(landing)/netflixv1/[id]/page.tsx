@@ -4,24 +4,6 @@ import List from '@/components/netflix/list/list';
 import Navbar from '@/components/netflix/navbar/navbar';
 import { headers } from 'next/headers';
 
-const getDetailData = async (id: string) => {
-  const headersList = headers();
-  const protocol = headersList.get('x-forwarded-proto') || 'https';
-  const host =
-    headersList.get('x-forwarded-host') ||
-    headersList.get('host') ||
-    'beta.popstarz.ai';
-
-  const domain = `${protocol}://${host}`;
-
-  const res = await fetch(`${domain}/api/userData?query=${id}`, {
-    next: { revalidate: 240 },
-  });
-  const data = await res.json();
-
-  return data;
-};
-
 const getDetailDataNew = async (id: string) => {
   const res = await getDetailContent(id);
   return res;
