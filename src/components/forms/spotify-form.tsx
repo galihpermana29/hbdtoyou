@@ -435,7 +435,7 @@ const SpotifyForm = ({
           <Upload
             accept=".jpg, .jpeg, .png"
             multiple={true}
-            maxCount={profile?.type === 'free' ? 5 : 20}
+            maxCount={profile?.type === 'free' ? 2 : 20}
             listType="picture-card"
             onRemove={(file) => handleRemoveCollectionImage(file.uid)}
             fileList={
@@ -460,7 +460,7 @@ const SpotifyForm = ({
               );
               setUploadLoading(false);
             }}>
-            {collectionOfImages.length >= 5 && profile?.type === 'free'
+            {collectionOfImages.length >= 2 && profile?.type === 'free'
               ? null
               : collectionOfImages.length >= 20 && profile?.type !== 'free'
               ? null
@@ -469,7 +469,7 @@ const SpotifyForm = ({
         </Form.Item>
         <p className="text-[13px] text-gray-600 max-w-[400px]">
           Account with <span className="font-bold">free</span> plan can only add
-          5 images. To add up to 20 images, upgrade to{' '}
+          2 images. To add up to 20 images, upgrade to{' '}
           <span className="font-bold">premium</span> plan.
         </p>
 
