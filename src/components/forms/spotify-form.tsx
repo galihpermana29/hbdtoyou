@@ -435,7 +435,7 @@ const SpotifyForm = ({
           <Upload
             accept=".jpg, .jpeg, .png"
             multiple={true}
-            maxCount={profile?.type === 'free' ? 2 : 20}
+            maxCount={profile?.type === 'free' ? 1 : 20}
             listType="picture-card"
             onRemove={(file) => handleRemoveCollectionImage(file.uid)}
             fileList={
@@ -445,8 +445,18 @@ const SpotifyForm = ({
                   : []
                 : undefined
             }
-            beforeUpload={async (file) => {
+            beforeUpload={async (file, fileList) => {
+              // add validation
+              if (fileList.length > (profile?.type === 'free' ? 1 : 20)) {
+                message.error(
+                  `You can only upload ${
+                    profile?.type === 'free' ? 1 : 20
+                  } images`
+                );
+                return Upload.LIST_IGNORE;
+              }
               setUploadLoading(true);
+
               await beforeUpload(
                 file as FileType,
                 profile
@@ -460,7 +470,7 @@ const SpotifyForm = ({
               );
               setUploadLoading(false);
             }}>
-            {collectionOfImages.length >= 2 && profile?.type === 'free'
+            {collectionOfImages.length >= 1 && profile?.type === 'free'
               ? null
               : collectionOfImages.length >= 20 && profile?.type !== 'free'
               ? null

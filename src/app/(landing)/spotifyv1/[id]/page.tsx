@@ -15,6 +15,7 @@ export default async function HomePage({ params }: any) {
   if (!data.data) {
     return <div>No data</div>;
   }
+
   const parsedData = JSON.parse(data.data.detail_content_json_text);
   return (
     <div className="h-screen bg-black">
