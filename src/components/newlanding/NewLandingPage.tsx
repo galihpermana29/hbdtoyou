@@ -331,6 +331,7 @@ export default function NewLandingPage() {
                       'Limited image storage',
                       'Limited image library',
                       'Basic image resolution',
+                      'Watermark',
                     ]}
                     renderItem={(item) => (
                       <List.Item>
@@ -375,6 +376,7 @@ export default function NewLandingPage() {
                       'Unlimited upload size',
                       'Unlimited photobox frames',
                       '6 credit to use templates',
+                      'No Watermark',
                     ]}
                     renderItem={(item) => (
                       <List.Item>
@@ -407,7 +409,7 @@ export default function NewLandingPage() {
                 <Card className="h-full flex flex-col justify-between">
                   <div style={{ textAlign: 'center', marginBottom: '24px' }}>
                     <h1 className="text-[#1B1B1B] font-[700] text-[36px]">
-                      Rp. 35.000,-
+                      Rp. 100.000,-
                     </h1>
                     <p className="mt-[16px] text-[20px] font-[600]">
                       Business Plan
@@ -425,6 +427,7 @@ export default function NewLandingPage() {
                       'Unlimited photo storage',
                       '24 Customer support',
                       'Unlimited credit per month',
+                      'No Watermark',
                     ]}
                     renderItem={(item) => (
                       <List.Item>
@@ -446,7 +449,7 @@ export default function NewLandingPage() {
                       <Button
                         iconPosition="end"
                         size="large"
-                        className="!border-[1px] !h-[48px] !border-[#E34013] !text-[#E34013] !font-[400] mt-[40px] !w-[90%] !text-[16px]">
+                        className="!border-[1px] !h-[48px] !border-[#E34013] !text-[#E34013] !font-[400] mt-[40px] !w-[100%] !text-[16px]">
                         Chat our sales
                       </Button>
                     </Link>

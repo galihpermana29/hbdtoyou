@@ -58,6 +58,7 @@ export interface IDetailContentResponse {
   user_id: string;
   user_name: string;
   template_id: string;
+  user_type: string;
   template_name: string;
   template_label: string;
   detail_content_json_text: string;

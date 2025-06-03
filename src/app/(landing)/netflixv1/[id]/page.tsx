@@ -2,6 +2,7 @@ import { getDetailContent } from '@/action/user-api';
 import Featured from '@/components/netflix/featured/featured';
 import List from '@/components/netflix/list/list';
 import Navbar from '@/components/netflix/navbar/navbar';
+import { Watermark } from 'antd';
 import { headers } from 'next/headers';
 
 const getDetailDataNew = async (id: string) => {
@@ -24,23 +25,28 @@ const RootUserPage = async ({ params }: any) => {
   if (!totalItems) return <div className="min-h-screen">No data</div>;
 
   return (
-    <div className="bg-black overflow-x-hidden">
-      <Navbar jumbotronImage={parsedData?.jumbotronImage} />
-      <Featured
-        jumbotronImage={parsedData?.jumbotronImage}
-        title={parsedData?.title}
-        subTitle={parsedData?.subTitle}
-        modalContent={parsedData?.modalContent}
-      />
-      <List
-        title={'Upcoming Movies'}
-        tData={parsedData?.images?.slice(0, midIndex)} // First half
-      />
-      <List
-        title={'Box Office Top Movies'}
-        tData={parsedData?.images?.slice(midIndex)} // Second half
-      />
-    </div>
+    <Watermark
+      zIndex={99}
+      font={{ color: 'rgba(227, 64, 19, 0.08)', fontSize: 50 }}
+      content={data.data.user_type === 'free' ? 'memoify.live' : ''}>
+      <div className="bg-black overflow-x-hidden">
+        <Navbar jumbotronImage={parsedData?.jumbotronImage} />
+        <Featured
+          jumbotronImage={parsedData?.jumbotronImage}
+          title={parsedData?.title}
+          subTitle={parsedData?.subTitle}
+          modalContent={parsedData?.modalContent}
+        />
+        <List
+          title={'Upcoming Movies'}
+          tData={parsedData?.images?.slice(0, midIndex)} // First half
+        />
+        <List
+          title={'Box Office Top Movies'}
+          tData={parsedData?.images?.slice(midIndex)} // Second half
+        />
+      </div>
+    </Watermark>
   );
 };
 
