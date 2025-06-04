@@ -27,7 +27,7 @@ const RootUserPage = async ({ params }: any) => {
   return (
     <Watermark
       zIndex={99}
-      font={{ color: 'rgba(227, 64, 19, 0.08)', fontSize: 50 }}
+      font={{ color: 'rgba(227, 64, 19, 0.19)', fontSize: 50 }}
       content={data.data.user_type === 'free' ? 'memoify.live' : ''}>
       <div className="bg-black overflow-x-hidden">
         <Navbar jumbotronImage={parsedData?.jumbotronImage} />

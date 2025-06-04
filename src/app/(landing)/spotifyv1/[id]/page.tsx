@@ -21,7 +21,7 @@ export default async function HomePage({ params }: any) {
   return (
     <Watermark
       zIndex={99}
-      font={{ color: 'rgba(227, 64, 19, 0.08)', fontSize: 50 }}
+      font={{ color: 'rgba(227, 64, 19, 0.19)', fontSize: 50 }}
       content={data.data.user_type === 'free' ? 'memoify.live' : ''}>
       <div className="h-screen bg-black">
         <div className="flex h-[calc(100%-96px)] gap-[20px]">

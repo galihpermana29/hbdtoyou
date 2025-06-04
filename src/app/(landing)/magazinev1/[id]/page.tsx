@@ -59,7 +59,7 @@ export default async function MagazineDetailV1({ params }: { params: any }) {
   return (
     <Watermark
       zIndex={9999999}
-      font={{ color: 'rgba(227, 64, 19, 0.08)', fontSize: 50 }}
+      font={{ color: 'rgba(227, 64, 19, 0.19)', fontSize: 50 }}
       content={data.data.user_type === 'free' ? 'memoify.live' : ''}>
       <div className="w-full flex  justify-between h-screen relative bg-[#181818] overflow-hidden">
         <div className="w-full h-full md:text-4xl lg:text-5xl xl:text-6xl sm:text-3xl text-3xl flex flex-col items-start justify-start text-foreground dark:text-muted font-normal overflow-hidden p-8 md:p-24 md:pt-48 absolute">
