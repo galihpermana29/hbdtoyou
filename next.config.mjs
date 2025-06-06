@@ -21,6 +21,10 @@ const nextConfig = {
       fullUrl: true,
     },
   },
+
+  images: {
+    unoptimized: true,
+  },
 };
 
 export default nextConfig;
