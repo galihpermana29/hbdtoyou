@@ -47,27 +47,50 @@ interface AdContent {
   ctaText: string;
   ctaLink: string;
   image?: string;
+  type: 'text' | 'image';
 }
 
 // Array of promotional content
 const promotionalContent: AdContent[] = [
+  // {
+  //   id: 1,
+  //   title: 'Dashboard Features for Premium Users',
+  //   description:
+  //     'Memoify has released a new dashboard feature where premium users can edit or delete their content with ease. Upgrade to premium to access these powerful management tools!',
+  //   ctaText: 'Check My Dashboard',
+  //   ctaLink: '/dashboard',
+  //   image: '/dashboard-feature.png', // Optional: you can add images if you have them
+  //   type: 'text',
+  // },
+  // {
+  //   id: 2,
+  //   title: 'Scheduled Email Gifts',
+  //   description:
+  //     'Memoify now offers auto-send gift via email! Set up a scheduled gift which will be sent to any email address at your chosen date and time. Perfect for birthdays and special occasions.',
+  //   ctaText: 'Try It Now',
+  //   ctaLink: '/create',
+  //   image: '/email-gift.png', // Optional: you can add images if you have them
+  //   type: 'text',
+  // },
   {
-    id: 1,
-    title: 'Dashboard Features for Premium Users',
-    description:
-      'Memoify has released a new dashboard feature where premium users can edit or delete their content with ease. Upgrade to premium to access these powerful management tools!',
-    ctaText: 'Check My Dashboard',
-    ctaLink: '/dashboard',
-    image: '/dashboard-feature.png', // Optional: you can add images if you have them
+    id: 3,
+    title: '',
+    description: '',
+    ctaText: '',
+    ctaLink: '/payment-qris',
+    image:
+      'https://res.cloudinary.com/dqipjpy1w/image/upload/v1749574325/fojp7ewowrwy1ck5j14j.png',
+    type: 'image',
   },
   {
-    id: 2,
-    title: 'Scheduled Email Gifts',
-    description:
-      'Memoify now offers auto-send gift via email! Set up a scheduled gift which will be sent to any email address at your chosen date and time. Perfect for birthdays and special occasions.',
-    ctaText: 'Try It Now',
-    ctaLink: '/create',
-    image: '/email-gift.png', // Optional: you can add images if you have them
+    id: 4,
+    title: '',
+    description: '',
+    ctaText: '',
+    ctaLink: '/payment-qris',
+    image:
+      'https://res.cloudinary.com/dqipjpy1w/image/upload/v1749574325/ylmpofrfxs25uczb8f4k.png',
+    type: 'image',
   },
 ];
 
@@ -143,7 +166,7 @@ const SessionProvider = ({
     const interval = setInterval(() => {
       setCurrentAdContent(selectRandomContent());
       setAdsModalVisible(true);
-    }, 1000 * 60 * 5); // show ads every 5 mins
+    }, 1000 * 60 * 0.5); // show ads every 5 mins
 
     return () => {
       clearInterval(interval);
@@ -174,35 +197,56 @@ const SessionProvider = ({
         open={adsModalVisible}
         onCancel={() => setAdsModalVisible(false)}
         footer={null}
-        width={500}
+        width={currentAdContent?.type === 'image' ? 600 : 500}
         centered
-        title={currentAdContent?.title}
-        bodyStyle={{ padding: '24px' }}>
-        <Space direction="vertical" size="middle" style={{ width: '100%' }}>
-          <p className="text-[16px] text-center">
-            {currentAdContent?.description}
-          </p>
-          <div style={{ textAlign: 'center', marginTop: '16px' }}>
-            {userProfile?.email && (
-              <Button
-                type="primary"
-                size="large"
-                onClick={() => {
-                  window.location.href = currentAdContent?.ctaLink || '/';
-                  setAdsModalVisible(false);
-                }}
-                style={{
-                  backgroundColor: '#E34013',
-                  borderColor: '#E34013',
-                  borderRadius: '8px',
-                  height: '40px',
-                  fontWeight: 600,
-                }}>
-                {currentAdContent?.ctaText}
-              </Button>
-            )}
+        title={
+          currentAdContent?.type === 'image' ? null : currentAdContent?.title
+        }
+        className={currentAdContent?.type === 'image' ? 'image-ad' : 'text-ad'}
+        closable={true}>
+        {currentAdContent?.type === 'image' ? (
+          // Image-only content (Spotify-like banner ad)
+          <div
+            className="cursor-pointer"
+            onClick={() => {
+              window.location.href = currentAdContent?.ctaLink || '/';
+              setAdsModalVisible(false);
+            }}>
+            <Image
+              src={currentAdContent?.image || ''}
+              alt="Promotional Banner"
+              preview={false}
+              style={{ width: '100%', borderRadius: '8px' }}
+            />
           </div>
-        </Space>
+        ) : (
+          // Text content with description
+          <Space direction="vertical" size="middle" style={{ width: '100%' }}>
+            <p className="text-[16px] text-center">
+              {currentAdContent?.description}
+            </p>
+            <div style={{ textAlign: 'center', marginTop: '16px' }}>
+              {userProfile?.email && (
+                <Button
+                  type="primary"
+                  size="large"
+                  onClick={() => {
+                    window.location.href = currentAdContent?.ctaLink || '/';
+                    setAdsModalVisible(false);
+                  }}
+                  style={{
+                    backgroundColor: '#E34013',
+                    borderColor: '#E34013',
+                    borderRadius: '8px',
+                    height: '40px',
+                    fontWeight: 600,
+                  }}>
+                  {currentAdContent?.ctaText}
+                </Button>
+              )}
+            </div>
+          </Space>
+        )}
       </Modal>
 
       <Provider store={store}>{children}</Provider>
