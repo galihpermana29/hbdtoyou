@@ -67,6 +67,29 @@ const PaymentQRIS = () => {
     }
   }, [id]);
 
+  // Countdown effect when payment is verified
+  useEffect(() => {
+    if (paymentStats?.status === 'done') {
+      let countdown = 3;
+      const countdownElement = document.getElementById('countdown');
+      
+      const timer = setInterval(() => {
+        countdown -= 1;
+        if (countdownElement) {
+          countdownElement.textContent = countdown.toString();
+        }
+        
+        if (countdown <= 0) {
+          clearInterval(timer);
+          // Use window.location.href for full page reload
+          window.location.href = '/dashboard';
+        }
+      }, 1000);
+      
+      return () => clearInterval(timer);
+    }
+  }, [paymentStats?.status]);
+
   if (!session?.accessToken) {
     return (
       <div>
@@ -175,12 +198,15 @@ const PaymentQRIS = () => {
                 unlimited upload size, unlimited access to templates, unlimited
                 photobox frames, and 6 credit to use templates.
               </p>
+              <p className="mt-3 font-semibold text-[#E34013]">
+                Redirecting to dashboard in <span id="countdown">3</span> seconds...
+              </p>
               <Button
-                onClick={() => router.push('/')}
+                onClick={() => window.location.href = '/dashboard'}
                 loading={loading}
                 type="primary"
                 className="!bg-[#E34013] mt-[20px] !text-white !rounded-[8px] !text-[16px] !font-[600] !h-[40px] !w-[170px]">
-                Back to Home
+                Go to Dashboard
               </Button>
             </div>
           )}
