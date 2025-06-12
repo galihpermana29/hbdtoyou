@@ -166,7 +166,7 @@ const SessionProvider = ({
     const interval = setInterval(() => {
       setCurrentAdContent(selectRandomContent());
       setAdsModalVisible(true);
-    }, 1000 * 60 * 0.5); // show ads every 5 mins
+    }, 1000 * 60 * 2);
 
     return () => {
       clearInterval(interval);
