@@ -14,6 +14,7 @@ import { downloadCanvasAsImage } from './utils/scrapbookUtils';
 
 interface CoverBookProps {
   userImage?: string;
+  canvasRef?: React.RefObject<HTMLCanvasElement>;
 }
 
 interface FramePosition {
@@ -24,8 +25,10 @@ interface FramePosition {
 
 type FrameIndex = 0 | 1; // 0 = left, 1 = right
 
-const CoverBook = ({ userImage }: CoverBookProps) => {
-  const canvasRef = useRef<HTMLCanvasElement>(null);
+const CoverBook = ({ userImage, canvasRef: externalCanvasRef }: CoverBookProps) => {
+  // Use external ref if provided, otherwise create a local one
+  const localCanvasRef = useRef<HTMLCanvasElement>(null);
+  const canvasRef = externalCanvasRef || localCanvasRef;
   const [frameImage, setFrameImage] = useState<HTMLImageElement | null>(null);
 
   // Track two separate images for each frame

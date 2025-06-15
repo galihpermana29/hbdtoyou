@@ -1,6 +1,7 @@
 'use client';
 import { getLatestInspiration } from '@/action/user-api';
-import { Divider, Input, message, Pagination, Select, Spin } from 'antd';
+import { Input, message, Select, Spin } from 'antd';
+import Masonry from 'react-masonry-css';
 
 import { useEffect, useState } from 'react';
 import { InspirationCard } from './InspirationCard';
@@ -9,7 +10,16 @@ import { LoadingOutlined } from '@ant-design/icons';
 import { IAllTemplateResponse } from '@/action/interfaces';
 import { capitalizeFirstLetter, mapContentToCard } from '@/lib/utils';
 
-const PAGE_SIZE = 10;
+// Breakpoint object for responsive columns
+const breakpointColumnsObj = {
+  default: 5, // Default number of columns for very large screens
+  1600: 4, // 4 columns at 1600px width
+  1280: 3, // 3 columns at 1280px width
+  1024: 3, // 3 columns at 1024px width
+  768: 2, // 2 columns at 768px width
+  640: 2, // 2 columns at 640px width and below
+  480: 2, // 1 column for very small mobile screens
+};
 
 const NewInspirationPage = ({
   templates,
@@ -19,15 +29,7 @@ const NewInspirationPage = ({
   const [data, setData] = useState<any[] | undefined>([]);
 
   const [loading, setLoading] = useState<boolean>(false);
-  const [paginatedData, setPaginatedData] = useState<
-    | { page: number; pageSize: number; data: any[] | undefined; total: number }
-    | undefined
-  >({
-    page: 1,
-    pageSize: PAGE_SIZE,
-    data: [],
-    total: 0,
-  });
+  const [filteredData, setFilteredData] = useState<any[] | undefined>([]);
 
   const [search, setSearch] = useState<string | null>('');
   const [activeType, setActiveType] = useState<string | null>('all');
@@ -36,15 +38,6 @@ const NewInspirationPage = ({
     value: dx.id,
     label: dx.name?.split('-')[0],
   }));
-
-  const handlePaginationChange = (page: number) => {
-    setPaginatedData({
-      page,
-      pageSize: PAGE_SIZE,
-      data: data!.slice((page - 1) * PAGE_SIZE, page * PAGE_SIZE),
-      total: data!.length,
-    });
-  };
 
   const handleSearch = (e: any) => {
     setSearch(e.target.value);
@@ -59,12 +52,7 @@ const NewInspirationPage = ({
       );
 
       setData(mappedData ? mappedData : []);
-      setPaginatedData({
-        page: 1,
-        pageSize: PAGE_SIZE,
-        data: mappedData ? mappedData.slice(0, PAGE_SIZE) : [],
-        total: mappedData ? mappedData.length : 0,
-      });
+      setFilteredData(mappedData ? mappedData : []);
     } else {
       message.error('Something went wrong');
     }
@@ -72,22 +60,16 @@ const NewInspirationPage = ({
   };
 
   const handleSearchByTitle = (title: string, activeType: string) => {
-    const filteredData = data?.filter((item) =>
+    const filtered = data?.filter((item) =>
       item.title.toLowerCase().includes(title.toLowerCase())
     );
 
-    const finalFilteredData =
+    const finalFiltered =
       activeType === 'all'
-        ? filteredData
-        : filteredData?.filter((item) => item.template_id === activeType);
+        ? filtered
+        : filtered?.filter((item) => item.template_id === activeType);
 
-    //set to pagination
-    setPaginatedData({
-      page: 1,
-      pageSize: PAGE_SIZE,
-      data: finalFilteredData ? finalFilteredData.slice(0, PAGE_SIZE) : [],
-      total: finalFilteredData ? finalFilteredData.length : 0,
-    });
+    setFilteredData(finalFiltered || []);
   };
 
   useEffect(() => {
@@ -134,25 +116,23 @@ const NewInspirationPage = ({
         </div>
       ) : (
         <>
-          <div className="flex flex-col mt-[50px]">
-            {data &&
-              data?.length > 0 &&
-              paginatedData?.data?.map((show, idx) => {
-                return (
-                  <div key={idx}>
-                    <InspirationCard key={idx} data={show} />
-                    <Divider />
+          <div className="mt-[50px]">
+            <Masonry
+              breakpointCols={breakpointColumnsObj}
+              className="my-masonry-grid"
+              columnClassName="my-masonry-grid_column">
+              {filteredData && filteredData.length > 0 ? (
+                filteredData.map((show, idx) => (
+                  <div key={idx} className="mb-6">
+                    <InspirationCard data={show} />
                   </div>
-                );
-              })}
-          </div>
-          <div className="mx-auto flex justify-center my-[20px] w-full">
-            <Pagination
-              showSizeChanger={false}
-              current={paginatedData?.page}
-              onChange={handlePaginationChange}
-              total={paginatedData?.total}
-            />
+                ))
+              ) : (
+                <div className="col-span-full text-center py-8 text-gray-500">
+                  No inspiration found
+                </div>
+              )}
+            </Masonry>
           </div>
         </>
       )}

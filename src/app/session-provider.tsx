@@ -92,6 +92,26 @@ const promotionalContent: AdContent[] = [
       'https://res.cloudinary.com/dqipjpy1w/image/upload/v1749574325/ylmpofrfxs25uczb8f4k.png',
     type: 'image',
   },
+  {
+    id: 5,
+    title: '',
+    description: '',
+    ctaText: '',
+    ctaLink: '/payment-qris',
+    image:
+      'https://res.cloudinary.com/dqipjpy1w/image/upload/v1750003561/hszepxvaqvcf0qexoujo.png',
+    type: 'image',
+  },
+  {
+    id: 6,
+    title: '',
+    description: '',
+    ctaText: '',
+    ctaLink: '/dashboard',
+    image:
+      'https://res.cloudinary.com/dqipjpy1w/image/upload/v1750003562/ytobvdbkbgtwjxzyusdk.png',
+    type: 'image',
+  },
 ];
 
 const SessionProvider = ({
@@ -117,6 +137,10 @@ const SessionProvider = ({
   const [currentAdContent, setCurrentAdContent] = useState<AdContent | null>(
     null
   );
+
+  const isHideAds =
+    ['/create', '/payment-qris'].includes(pathname) ||
+    userProfile?.type === 'premium';
 
   useEffect(() => {
     if (parsedSession.accessToken) {
@@ -163,15 +187,16 @@ const SessionProvider = ({
   // Show ads modal every 2 minutes
   useEffect(() => {
     // Set up interval for subsequent ads
+    if (isHideAds) return;
     const interval = setInterval(() => {
       setCurrentAdContent(selectRandomContent());
       setAdsModalVisible(true);
-    }, 1000 * 60 * 2);
+    }, 1000 * 60 * 3);
 
     return () => {
       clearInterval(interval);
     };
-  }, []);
+  }, [isHideAds]);
 
   return (
     <SessionContext.Provider
@@ -197,7 +222,7 @@ const SessionProvider = ({
         open={adsModalVisible}
         onCancel={() => setAdsModalVisible(false)}
         footer={null}
-        width={currentAdContent?.type === 'image' ? 600 : 500}
+        width={currentAdContent?.type === 'image' ? 650 : 500}
         centered
         title={
           currentAdContent?.type === 'image' ? null : currentAdContent?.title

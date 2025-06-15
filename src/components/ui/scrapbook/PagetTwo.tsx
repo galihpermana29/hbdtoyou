@@ -21,10 +21,13 @@ interface FramePosition {
 
 interface PageOneProps {
   userImages?: string[];
+  canvasRef?: React.RefObject<HTMLCanvasElement>;
 }
 
-const PageTwo = ({ userImages }: PageOneProps) => {
-  const canvasRef = useRef<HTMLCanvasElement>(null);
+const PageTwo = ({ userImages, canvasRef: externalCanvasRef }: PageOneProps) => {
+  // Use external ref if provided, otherwise create a local one
+  const localCanvasRef = useRef<HTMLCanvasElement>(null);
+  const canvasRef = externalCanvasRef || localCanvasRef;
   const [frameImage, setFrameImage] = useState<HTMLImageElement | null>(null);
   const [textureImage, setTextureImage] = useState<HTMLImageElement | null>(
     null
@@ -418,7 +421,7 @@ const PageTwo = ({ userImages }: PageOneProps) => {
 
   return (
     <div className="mt-12 mb-12">
-      <h2 className="text-2xl font-bold mb-4 text-center">Page One</h2>
+      <h2 className="text-2xl font-bold mb-4 text-center">Page Two</h2>
       <div className="flex flex-col items-center">
         {cropMode && imageToCrop ? (
           <div className="mb-4 p-4 bg-white rounded-lg shadow-lg max-w-2xl">
@@ -552,11 +555,21 @@ const PageTwo = ({ userImages }: PageOneProps) => {
         {images.some((img) => img !== null) && (
           <div className="mt-6 flex justify-center">
             <button
-              onClick={() => canvasRef.current && downloadCanvasAsImage(canvasRef.current, 'scrapbook-page-two')}
-              className="px-4 py-2 bg-green-500 text-white rounded-md hover:bg-green-600 flex items-center gap-2"
-            >
-              <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5" viewBox="0 0 20 20" fill="currentColor">
-                <path fillRule="evenodd" d="M3 17a1 1 0 011-1h12a1 1 0 110 2H4a1 1 0 01-1-1zm3.293-7.707a1 1 0 011.414 0L9 10.586V3a1 1 0 112 0v7.586l1.293-1.293a1 1 0 111.414 1.414l-3 3a1 1 0 01-1.414 0l-3-3a1 1 0 010-1.414z" clipRule="evenodd" />
+              onClick={() =>
+                canvasRef.current &&
+                downloadCanvasAsImage(canvasRef.current, 'scrapbook-page-two')
+              }
+              className="px-4 py-2 bg-green-500 text-white rounded-md hover:bg-green-600 flex items-center gap-2">
+              <svg
+                xmlns="http://www.w3.org/2000/svg"
+                className="h-5 w-5"
+                viewBox="0 0 20 20"
+                fill="currentColor">
+                <path
+                  fillRule="evenodd"
+                  d="M3 17a1 1 0 011-1h12a1 1 0 110 2H4a1 1 0 01-1-1zm3.293-7.707a1 1 0 011.414 0L9 10.586V3a1 1 0 112 0v7.586l1.293-1.293a1 1 0 111.414 1.414l-3 3a1 1 0 01-1.414 0l-3-3a1 1 0 010-1.414z"
+                  clipRule="evenodd"
+                />
               </svg>
               Download as JPG
             </button>
@@ -573,7 +586,10 @@ const PageTwo = ({ userImages }: PageOneProps) => {
               </li>
               <li>Use the + and - buttons to zoom in/out</li>
               <li>Click Reset Position to return to default position</li>
-              <li>Click the Download button to save your scrapbook page as a JPG image</li>
+              <li>
+                Click the Download button to save your scrapbook page as a JPG
+                image
+              </li>
               {!allImagesUploaded && (
                 <li className="text-amber-600 font-medium">
                   Please upload images for all frames

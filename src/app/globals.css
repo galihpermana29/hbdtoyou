@@ -144,3 +144,28 @@
   padding: 0px !important;
 }
 
+/* Masonry Grid Styles */
+.my-masonry-grid {
+  display: flex;
+  width: auto;
+  margin-left: -16px; /* gutter size offset */
+}
+
+.my-masonry-grid_column {
+  padding-left: 16px; /* gutter size */
+  background-clip: padding-box;
+}
+
+/* Style for items inside masonry grid */
+.my-masonry-grid_column > div {
+  margin-bottom: 16px;
+  break-inside: avoid;
+  transition: transform 0.2s ease;
+}
+
+/* Optional hover effect for entire card */
+.my-masonry-grid_column > div:hover {
+  transform: translateY(-4px);
+  box-shadow: 0 10px 20px rgba(0,0,0,0.1);
+  z-index: 1;
+}
