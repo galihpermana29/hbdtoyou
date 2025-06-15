@@ -41,7 +41,7 @@ export function mapContentToCard(contents: IContent[]) {
           ? jsonContent.momentOfYou.length > 0
             ? jsonContent.momentOfYou[0]
             : 'https://res.cloudinary.com/ddlus5qur/image/upload/v1746085724/phu2rbi6fqnp71hytjex.jpg'
-          : 'https://res.cloudinary.com/ddlus5qur/image/upload/v1746085724/phu2rbi6fqnp71hytjex.jpg';
+          : null;
       }
 
       if (

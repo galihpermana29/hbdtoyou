@@ -1,69 +1,93 @@
 import { Tag } from 'antd';
-import { EllipsisVertical, Heart, Link2 } from 'lucide-react';
+import { Link2 } from 'lucide-react';
 import Image from 'next/image';
 import Link from 'next/link';
-import TruncateText from './TruncateText';
+import { useMemo } from 'react';
 
 export const InspirationCard = ({ data }: { data: any }) => {
+  // Generate a random aspect ratio for each card to create the masonry effect
+  // This ensures the aspect ratio is consistent between renders
+  const aspectRatio = useMemo(() => {
+    // Use the data id or some unique property to generate a consistent random value
+    const seed = data?.id || data?.title || Math.random().toString();
+
+    // Create a hash from the seed string for more randomness
+    const hash = seed
+      .toString()
+      .split('')
+      .reduce((acc, char) => {
+        return ((acc << 5) - acc + char.charCodeAt(0)) | 0;
+      }, 0);
+
+    // Use the absolute value of the hash
+    const positiveHash = Math.abs(hash);
+
+    // More diverse aspect ratio options - from tall to square to slightly wide
+    const aspectRatioOptions = [
+      '2/3', // Tall portrait
+      '3/4', // Portrait
+      '4/5', // Portrait
+      '5/6', // Portrait
+      '7/8', // Portrait
+      '8/9', // Nearly square
+      '1/1', // Square
+      '9/10', // Nearly square
+      '9/16', // Standard portrait video
+    ];
+
+    // Select an aspect ratio based on the hash
+    const index = positiveHash % aspectRatioOptions.length;
+    return aspectRatioOptions[index];
+  }, [data?.id, data?.title]);
   return (
-    <div className=" md:px-[50px] lg:px-[100px]">
-      <div className="flex items-start gap-[20px] flex-col md:flex-row">
-        <div className="w-full md:w-[40%]">
+    <Link href={`https://memoify.live${data?.link}`} target="_blank">
+      <div className="group relative overflow-hidden rounded-lg cursor-pointer">
+        {/* Image */}
+        <div className="w-full">
           <Image
-            className="aspect-video object-cover object-center rounded-md"
+            className="w-full object-cover object-center transition-transform duration-300 group-hover:scale-105"
+            style={{ aspectRatio }}
             src={
               typeof data?.jumbotronImage === 'string'
                 ? data?.jumbotronImage
                 : 'https://res.cloudinary.com/ddlus5qur/image/upload/v1746085724/phu2rbi6fqnp71hytjex.jpg'
             }
-            alt="jumbotron"
+            alt={data?.title || 'Inspiration image'}
             width={700}
-            height={300}
+            height={900}
           />
         </div>
-        <div className="flex-1">
-          <div className="flex justify-between items-center">
-            <h1 className="text-[14px] text-[#475467] font-[400]">
-              {data?.create_date}
-            </h1>
-            {/* <div>
-              <EllipsisVertical size={20} />
-            </div> */}
-          </div>
-          <div className="mb-[24px] mt-[16px]">
-            <h1 className="text-[20px] text-[#1B1B1B] font-[600] capitalize">
+
+        {/* Overlay that appears on hover */}
+        <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/50 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300 flex flex-col justify-end p-4">
+          <div className="transform translate-y-4 group-hover:translate-y-0 transition-transform duration-300">
+            {/* Title and author */}
+            <h1 className="text-[18px] text-white font-[600] mb-1">
               {data?.title}
             </h1>
-            <p className="text-[#7B7B7B] font-[400] text-[14px]">
-              By {data?.user_name}
-            </p>
-          </div>
-          <div>
-            <p className="text-[#7B7B7B] font-[400] text-[14px] mb-[20px]">
-              <TruncateText text={data?.desc} maxLength={100} />
-            </p>
-            <div className="flex gap-3 items-center">
-              <Link2 size={20} />
-              <Link
-                target="_blank"
-                className="text-[14px] font-[400] text-[#E34013]"
-                href={`https://memoify.live${data?.link}`}>
-                <TruncateText
-                  showSeeMore={false}
-                  text={`https://memoify.live${data?.link}`}
-                  maxLength={20}
-                />
-              </Link>
+            {/* <p className="text-white/80 font-[400] text-[14px] mb-2">
+            By {data?.user_name}
+          </p> */}
+
+            {/* Tags */}
+            <div className="flex gap-1 mb-2">
+              <Tag color="cyan">{data?.type}</Tag>
+              <Tag color="blue" className="capitalize">
+                {data?.template_label}
+              </Tag>
             </div>
-          </div>
-          <div className="flex gap-1 mt-[30px]">
-            <Tag color="cyan">{data?.type}</Tag>
-            <Tag color="blue" className="capitalize">
-              {data?.template_label}
-            </Tag>
+
+            {/* Link */}
+            {/* <Link
+              target="_blank"
+              className="text-[14px] font-[500] text-white hover:text-[#E34013] flex items-center gap-2"
+              href={`https://memoify.live${data?.link}`}>
+              <Link2 size={16} />
+              View
+            </Link> */}
           </div>
         </div>
       </div>
-    </div>
+    </Link>
   );
 };
