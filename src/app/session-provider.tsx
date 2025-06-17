@@ -108,8 +108,6 @@ const SessionProvider = ({
     data: '',
   });
 
-  console.log(parsedSession, 'session');
-
   const pathname = usePathname();
 
   const [uploadStateLoading, setUploadStateLoading] = useState(false);

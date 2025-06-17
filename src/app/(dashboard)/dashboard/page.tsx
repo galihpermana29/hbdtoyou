@@ -22,7 +22,6 @@ const DashboardPage = async () => {
     : [];
 
   const dataStats = await getContentStatsByUserId();
-  console.log(dataStats, 'data');
   return (
     <div className="min-h-screen mb-[80px]">
       <div className="fixed top-0 left-0 w-full z-10 ">
