@@ -6,7 +6,6 @@ import { SquarePen, Trash, Trash2 } from 'lucide-react';
 import { useRouter } from 'next/navigation';
 import { useEffect, useState } from 'react';
 import DetailContentModal from './DetailContentModal';
-import { useMemoifyProfile } from '@/app/session-provider';
 import dynamic from 'next/dynamic';
 
 // lazy import
@@ -26,8 +25,6 @@ const DashboardContentContainer = ({ data }: { data: IContent[] }) => {
   const [loading, setLoading] = useState(false);
 
   const router = useRouter();
-
-  const profile = useMemoifyProfile();
 
   const handleDeleteContent = async (contentId: string) => {
     setLoading(true);

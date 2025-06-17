@@ -9,6 +9,7 @@ import magazine from '@/assets/templates/magazine.png';
 import formula1 from '@/assets/templates/formula1.png';
 import graduation from '@/assets/templates/graduation.png';
 import journal from '@/assets/templates/scopus.png';
+import scrapbookv1 from '@/assets/templates/scrapbookv1.jpg';
 import clsx from 'clsx';
 import Image from 'next/image';
 import { ArrowRight } from 'lucide-react';
@@ -62,6 +63,11 @@ export const DataToCardColor = {
     color: 'bg-[#fff]',
     logo: journal,
     text: 'text-[#000]',
+  },
+  scrapbookv1: {
+    color: 'bg-[#651B05cf]',
+    logo: scrapbookv1,
+    text: 'text-[#651B05]',
   },
 };
 

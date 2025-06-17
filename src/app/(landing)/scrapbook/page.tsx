@@ -28,22 +28,34 @@ const ScrapbookPage = () => {
             break;
           case 1:
             if (pageOneCanvasRef.current) {
-              downloadCanvasAsImage(pageOneCanvasRef.current, 'scrapbook-page-one');
+              downloadCanvasAsImage(
+                pageOneCanvasRef.current,
+                'scrapbook-page-one'
+              );
             }
             break;
           case 2:
             if (pageTwoCanvasRef.current) {
-              downloadCanvasAsImage(pageTwoCanvasRef.current, 'scrapbook-page-two');
+              downloadCanvasAsImage(
+                pageTwoCanvasRef.current,
+                'scrapbook-page-two'
+              );
             }
             break;
           case 3:
             if (pageThreeCanvasRef.current) {
-              downloadCanvasAsImage(pageThreeCanvasRef.current, 'scrapbook-page-three');
+              downloadCanvasAsImage(
+                pageThreeCanvasRef.current,
+                'scrapbook-page-three'
+              );
             }
             break;
           case 4:
             if (pageFourCanvasRef.current) {
-              downloadCanvasAsImage(pageFourCanvasRef.current, 'scrapbook-page-four');
+              downloadCanvasAsImage(
+                pageFourCanvasRef.current,
+                'scrapbook-page-four'
+              );
             }
             break;
         }
@@ -62,21 +74,32 @@ const ScrapbookPage = () => {
       <p className="text-center mb-4">
         Upload your photo to place it in the frames
       </p>
-      <CoverBook canvasRef={coverCanvasRef} />
-      <PageOne canvasRef={pageOneCanvasRef} />
-      <PageTwo canvasRef={pageTwoCanvasRef} />
-      <PageThree canvasRef={pageThreeCanvasRef} />
-      <PageFour canvasRef={pageFourCanvasRef} />
-      
+      <div className="px-[18px]">
+        <CoverBook canvasRef={coverCanvasRef} />
+        <PageOne canvasRef={pageOneCanvasRef} />
+        <PageTwo canvasRef={pageTwoCanvasRef} />
+        <PageThree canvasRef={pageThreeCanvasRef} />
+        <PageFour canvasRef={pageFourCanvasRef} />
+      </div>
+
       {/* Floating download button */}
-      <button 
+      <button
         onClick={downloadAllCanvases}
-        className="fixed bottom-8 right-8 bg-blue-600 hover:bg-blue-700 text-white font-bold py-4 px-6 rounded-full shadow-lg flex items-center gap-2 z-50 transition-all hover:scale-105"
-      >
-        <svg xmlns="http://www.w3.org/2000/svg" className="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4" />
+        className="fixed bottom-8 right-8 bg-blue-600 hover:bg-blue-700 text-white font-bold py-4 px-6 rounded-full shadow-lg flex items-center gap-2 z-50 transition-all hover:scale-105">
+        <svg
+          xmlns="http://www.w3.org/2000/svg"
+          className="h-6 w-6"
+          fill="none"
+          viewBox="0 0 24 24"
+          stroke="currentColor">
+          <path
+            strokeLinecap="round"
+            strokeLinejoin="round"
+            strokeWidth={2}
+            d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4"
+          />
         </svg>
-        Save All Pages
+        Generate Scrapbook
       </button>
     </div>
   );

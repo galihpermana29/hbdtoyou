@@ -24,7 +24,10 @@ interface PageOneProps {
   canvasRef?: React.RefObject<HTMLCanvasElement>;
 }
 
-const PageFour = ({ userImages, canvasRef: externalCanvasRef }: PageOneProps) => {
+const PageFour = ({
+  userImages,
+  canvasRef: externalCanvasRef,
+}: PageOneProps) => {
   // Use external ref if provided, otherwise create a local one
   const localCanvasRef = useRef<HTMLCanvasElement>(null);
   const canvasRef = externalCanvasRef || localCanvasRef;
@@ -471,7 +474,7 @@ const PageFour = ({ userImages, canvasRef: externalCanvasRef }: PageOneProps) =>
           <div className="relative">
             <canvas
               ref={canvasRef}
-              className="border border-gray-300 rounded-lg shadow-lg cursor-move"
+              className="border max-w-full border-gray-300 rounded-lg shadow-lg cursor-move"
               onMouseDown={handleCanvasMouseDown}
               onMouseMove={handleCanvasMouseMove}
               onMouseUp={handleCanvasMouseUp}

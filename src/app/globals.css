@@ -142,6 +142,7 @@
 
 .image-ad .ant-modal-content {
   padding: 0px !important;
+  background: transparent !important;
 }
 
 /* Masonry Grid Styles */

@@ -25,6 +25,7 @@ import { useDispatch, useSelector } from 'react-redux';
 import { RootState } from '@/lib/store';
 import {
   removeCollectionOfImages,
+  reset,
   setCollectionOfImages,
 } from '@/lib/uploadSlice';
 import { useRouter } from 'next/navigation';
@@ -131,7 +132,13 @@ const GraduationV1Form = ({
       : await createContent(payload);
     if (res.success) {
       const userLink = selectedTemplate.route + '/' + res.data;
+      
+      // Clear form fields
       form.resetFields();
+      
+      // Reset Redux state for collection of images
+      dispatch(reset());
+      
       if (status === 'draft') {
         router.push('/preview?link=' + userLink);
       } else {

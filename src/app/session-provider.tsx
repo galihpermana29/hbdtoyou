@@ -52,26 +52,6 @@ interface AdContent {
 
 // Array of promotional content
 const promotionalContent: AdContent[] = [
-  // {
-  //   id: 1,
-  //   title: 'Dashboard Features for Premium Users',
-  //   description:
-  //     'Memoify has released a new dashboard feature where premium users can edit or delete their content with ease. Upgrade to premium to access these powerful management tools!',
-  //   ctaText: 'Check My Dashboard',
-  //   ctaLink: '/dashboard',
-  //   image: '/dashboard-feature.png', // Optional: you can add images if you have them
-  //   type: 'text',
-  // },
-  // {
-  //   id: 2,
-  //   title: 'Scheduled Email Gifts',
-  //   description:
-  //     'Memoify now offers auto-send gift via email! Set up a scheduled gift which will be sent to any email address at your chosen date and time. Perfect for birthdays and special occasions.',
-  //   ctaText: 'Try It Now',
-  //   ctaLink: '/create',
-  //   image: '/email-gift.png', // Optional: you can add images if you have them
-  //   type: 'text',
-  // },
   {
     id: 3,
     title: '',
@@ -127,6 +107,8 @@ const SessionProvider = ({
     visible: false,
     data: '',
   });
+
+  console.log(parsedSession, 'session');
 
   const pathname = usePathname();
 

@@ -3,7 +3,7 @@ import DashboardNavbar from '@/components/ui/dashboard-navbar';
 import NavigationBar from '@/components/ui/navbar';
 import { mapContentToCard } from '@/lib/utils';
 import { getSession } from '@/store/get-set-session';
-import { CreditCard, UserRoundPlus, Users } from 'lucide-react';
+import { Camera, CreditCard, UserRoundPlus, Users } from 'lucide-react';
 import DashboardContentContainer from './view/container/DashboardContentContainer';
 import CardClient from './view/container/CardClient';
 
@@ -22,6 +22,7 @@ const DashboardPage = async () => {
     : [];
 
   const dataStats = await getContentStatsByUserId();
+  console.log(dataStats, 'data');
   return (
     <div className="min-h-screen mb-[80px]">
       <div className="fixed top-0 left-0 w-full z-10 ">
@@ -49,15 +50,28 @@ const DashboardPage = async () => {
                   : 0
               }
             />
-            <CardClient
-              icon={<Users />}
-              title="Photobox Taken"
-              stats={
-                dataStats?.success
-                  ? dataStats?.data?.contents?.total_photo_box_content
-                  : 0
-              }
-            />
+            {isAdmin ? (
+              <CardClient
+                icon={<CreditCard />}
+                title="Current Premium Users"
+                stats={
+                  dataStats?.success
+                    ? dataStats?.data?.contents?.total_premium_user
+                    : 0
+                }
+              />
+            ) : (
+              <CardClient
+                icon={<Camera />}
+                title="Photobox Taken"
+                stats={
+                  dataStats?.success
+                    ? dataStats?.data?.contents?.total_photo_box_content
+                    : 0
+                }
+              />
+            )}
+
             {isAdmin ? (
               <CardClient
                 icon={<CreditCard />}
