@@ -1,26 +1,29 @@
-"use client";
+'use client';
 
-import PageFlipScrapbook from "@/components/PageFlipScrapbook";
+import PageFlipScrapbook from '@/components/PageFlipScrapbook';
+import NavigationBar from '@/components/ui/navbar';
 
 const pages = [
-  "https://res.cloudinary.com/dqipjpy1w/image/upload/v1750003560/tl7dqxuefwo2oiaxgj9s.jpg",
-  "https://raw.github.com/blasten/turn.js/master/demos/magazine/pages/02.jpg",
-  "https://raw.github.com/blasten/turn.js/master/demos/magazine/pages/03.jpg",
-  "https://raw.github.com/blasten/turn.js/master/demos/magazine/pages/04.jpg",
-  "https://raw.github.com/blasten/turn.js/master/demos/magazine/pages/05.jpg",
-  "https://raw.github.com/blasten/turn.js/master/demos/magazine/pages/06.jpg",
+  'https://res.cloudinary.com/dqipjpy1w/image/upload/v1750269074/images-api/ME202506181751142581.jpg',
+  'https://res.cloudinary.com/dqipjpy1w/image/upload/v1750269076/images-api/ME202506181751162240.jpg',
+  'https://res.cloudinary.com/dqipjpy1w/image/upload/v1750269078/images-api/ME202506181751180571.jpg',
 ];
 
 const ScrapbookResult = () => {
   // Cover images
-  const coverImage = "https://res.cloudinary.com/dqipjpy1w/image/upload/v1750003560/tl7dqxuefwo2oiaxgj9s.jpg";
-  const backCoverImage = "https://res.cloudinary.com/dqipjpy1w/image/upload/v1750003560/tl7dqxuefwo2oiaxgj9s.jpg";
-  
+  const coverImage =
+    'https://res.cloudinary.com/dqipjpy1w/image/upload/v1750269072/images-api/ME202506181751118631.jpg';
+  const backCoverImage =
+    'https://res.cloudinary.com/dqipjpy1w/image/upload/v1750269079/images-api/ME202506181751195571.jpg';
+
   return (
     <div className="container mx-auto px-4 py-8">
-      <h1 className="text-3xl font-bold text-center mb-8">Your Scrapbook</h1>
-      <PageFlipScrapbook 
-        pages={pages} 
+      <div className="fixed top-0 left-0 w-full z-10 ">
+        <NavigationBar />
+      </div>
+      <div className="mt-[100px]" />
+      <PageFlipScrapbook
+        pages={pages}
         coverImage={coverImage}
         backCoverImage={backCoverImage}
         coverTitle="Scrapbook by Memoify"

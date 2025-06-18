@@ -37,7 +37,7 @@ const ScrapbookResult = async ({ params }: { params: { id: string } }) => {
       <div className="fixed top-0 left-0 w-full z-10 ">
         <NavigationBar />
       </div>
-      <div className="mt-[30px]" />
+      <div className="mt-[100px]" />
       <PageFlipScrapbook
         pages={structuredPages}
         coverImage={coverImage}
