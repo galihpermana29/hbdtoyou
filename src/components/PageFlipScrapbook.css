@@ -1,0 +1,92 @@
+.scrapbook-container {
+  margin: 0 auto;
+  margin-top: 50px;
+  margin-bottom: 20px;
+  width: 100%;
+  max-width: 1000px;
+}
+
+.page {
+  background-color: white;
+  color: #333;
+  box-shadow: 0 0 20px rgba(0, 0, 0, 0.2);
+  overflow: hidden;
+}
+
+.page-cover {
+  background-color: #f8f8f8;
+  color: #333;
+  position: relative;
+}
+
+.page-content {
+  width: 100%;
+  height: 100%;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  position: relative;
+}
+
+.page-image {
+  width: 100%;
+  height: 100%;
+}
+
+.page-img, .cover-image {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  -webkit-touch-callout: none;
+  -webkit-user-select: none;
+  -khtml-user-select: none;
+  -moz-user-select: none;
+  -ms-user-select: none;
+  user-select: none;
+}
+
+.cover-title {
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  text-align: center;
+  background-color: rgba(0, 0, 0, 0.1);
+  padding: 20px;
+  color: white;
+}
+
+.cover-title h2 {
+  font-size: 20px;
+  margin-bottom: 10px;
+  font-weight: bold;
+  max-width: 30%;
+  /* text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.8); */
+}
+
+.controls {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin-top: 20px;
+}
+
+.page-indicator {
+  font-size: 16px;
+  font-weight: bold;
+}
+
+@media (max-width: 768px) {
+  .scrapbook-container {
+    margin-top: 20px;
+  }
+  
+  .cover-title h2 {
+    font-size: 1.8rem;
+  }
+}

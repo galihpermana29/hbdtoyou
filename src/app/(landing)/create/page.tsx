@@ -128,6 +128,13 @@ const CreatePage = () => {
       return router.push('/journal');
     }
 
+    if (template.name.includes('scrapbook')) {
+      const routePath = templateNameToRoute(template.name);
+      return router.push(
+        `/create/scrapbook?templateId=${template.id}&route=${routePath}`
+      );
+    }
+
     const routePath = templateNameToRoute(template.name);
 
     if (template.label === 'premium') {
