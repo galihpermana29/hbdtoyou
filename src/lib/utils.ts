@@ -33,6 +33,12 @@ export function mapContentToCard(contents: IContent[]) {
     const jsonContent = JSON.parse(show.detail_content_json_text);
     const handleJumbotron = () => {
       if (
+        ['scrapbookv1'].includes(show.template_name.split('-')[1].split(' ')[1])
+      ) {
+        return jsonContent?.coverImage;
+      }
+
+      if (
         ['magazinev1', 'spotifyv1', 'magazinev1'].includes(
           show.template_name.split('-')[1].split(' ')[1]
         )

@@ -158,11 +158,9 @@ const ScrapbookPage = () => {
       detail_content_json_text: val.detail_content_json_text,
       title: 'Scrapbook by Memoify',
       caption: 'Create your scrapbook with Memoify',
-      date_scheduled: val?.date_scheduled
-        ? dayjs(val?.date_scheduled).format('DD/MM/YYYY h:mm A Z')
-        : null,
-      dest_email: val?.dest_email,
-      is_scheduled: val?.is_scheduled,
+      date_scheduled: null,
+      dest_email: null,
+      is_scheduled: false,
       status,
     };
 

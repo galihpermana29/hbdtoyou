@@ -27,7 +27,7 @@ const JournalCard: React.FC<JournalCardProps> = ({ entry }) => {
           </span>
         </div>
         <div className="">
-          <h3 className="font-serif text-xl font-semibold mb-2 text-gray-800">
+          <h3 className="font-serif text-xl font-semibold mb-2 text-gray-800 line-clamp-2">
             {jsonEntry?.title}
           </h3>
           <p
@@ -35,10 +35,12 @@ const JournalCard: React.FC<JournalCardProps> = ({ entry }) => {
             dangerouslySetInnerHTML={{ __html: jsonEntry?.abstract }}></p>
         </div>
         <div className="flex items-center justify-between">
-          <p className="text-xs text-gray-500 italic">{jsonEntry?.author}</p>
+          <p className="text-xs text-gray-500 italic line-clamp-1 text-left">
+            {jsonEntry?.author}
+          </p>
           <Link
             href={`/journal/${entry?.id}`}
-            className="text-xs font-medium flex items-center text-blue-600 hover:text-blue-800 transition-colors">
+            className="text-xs font-medium flex justify-end text-blue-600 hover:text-blue-800 transition-colors w-[80%] text-right">
             Read More
             <ArrowRight className="ml-1 h-3 w-3" />
           </Link>
