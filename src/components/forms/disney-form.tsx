@@ -168,13 +168,13 @@ const DisneyForm = ({
       : await createContent(payload);
     if (res.success) {
       const userLink = selectedTemplate.route + '/' + res.data;
-      
+
       // Clear form fields
       form.resetFields();
-      
+
       // Reset Redux state for collection of images
       dispatch(reset());
-      
+
       if (status === 'draft') {
         router.push('/preview?link=' + userLink);
       } else {
@@ -223,8 +223,7 @@ const DisneyForm = ({
         title="Add-Ons"
         footer={null}
         open={modalState.visible}
-        onCancel={() => setModalState({ visible: false, data: '' })}
-        onClose={() => setModalState({ visible: false, data: '' })}>
+        onCancel={() => setModalState({ visible: false, data: '' })}>
         <FinalModal
           profile={profile}
           onSubmit={handleSubmit}

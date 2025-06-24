@@ -167,8 +167,7 @@ const Newspaperv3Form = ({
         title="Add-Ons"
         footer={null}
         open={modalState.visible}
-        onCancel={() => setModalState({ visible: false, data: '' })}
-        onClose={() => setModalState({ visible: false, data: '' })}>
+        onCancel={() => setModalState({ visible: false, data: '' })}>
         <FinalModal
           profile={profile}
           onSubmit={handleSubmit}

@@ -5,7 +5,6 @@ import { motion } from 'framer-motion';
 import { JournalEntry } from '../models/data';
 import JournalLayout from '../view/JournalLayout';
 import NavigationBar from '@/components/ui/navbar';
-import { // Select replaced with FixedSelect} from 'antd';
 import dynamic from 'next/dynamic';
 
 // Dynamically import ReactQuill with SSR disabled
@@ -17,6 +16,7 @@ const ReactQuill = dynamic(() => import('react-quill'), {
 import 'react-quill/dist/quill.snow.css';
 import { createContent } from '@/action/user-api';
 import { useRouter } from 'next/navigation';
+import { Button, Form, Input, message, Select } from 'antd';
 
 const NewEntryPage: React.FC = () => {
   const [form] = Form.useForm();
@@ -140,7 +140,7 @@ const NewEntryPage: React.FC = () => {
                   name="keywords"
                   rules={[{ required: true, message: 'Please enter keywords' }]}
                   className="mb-6">
-                  <FixedSelect
+                  <Select
                     mode="tags"
                     className="rounded-sm"
                     placeholder="e.g., reflection, growth, learning"

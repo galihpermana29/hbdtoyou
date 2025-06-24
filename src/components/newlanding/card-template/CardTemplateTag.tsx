@@ -146,7 +146,7 @@ const CardTemplateTag = ({
           <div className="flex flex-col gap-2">
             {[data.label, ...(data?.tag || [])]?.map((dx) => {
               return (
-                <div className="flex items-center gap-2">
+                <div className="flex items-center gap-2" key={dx}>
                   <Image src={checkIcon} alt="check" />
                   <p className="text-[12px] font-normal capitalize">{dx}</p>
                 </div>

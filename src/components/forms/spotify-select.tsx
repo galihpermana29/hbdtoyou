@@ -1,6 +1,6 @@
 'use client';
 
-import { // Select replaced with FixedSelect} from 'antd';
+import { Form, Select } from 'antd';
 
 const SpotifySelect = ({ name, ...props }: { name: string }) => {
   return (
@@ -10,7 +10,7 @@ const SpotifySelect = ({ name, ...props }: { name: string }) => {
       name={[name]}
       rules={[{ required: true, message: 'Please input a song name!' }]}>
       {/* <Input placeholder="Search a song" size="large" /> */}
-      <FixedSelect
+      <Select
         size="large"
         showSearch
         placeholder="Search a song"

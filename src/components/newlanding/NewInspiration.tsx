@@ -216,7 +216,7 @@ const NewInspirationPage = ({
             {/* End of content message */}
             {!hasMore && filteredData && filteredData.length > 0 && (
               <div className="w-full text-center py-8 text-gray-500">
-                You've reached the end of inspirations
+                You have reached the end of inspirations
               </div>
             )}
           </div>
