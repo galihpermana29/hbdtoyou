@@ -408,7 +408,7 @@ const PageTwo = ({
   };
 
   const zoomOut = (frameIndex: number) => {
-    const newScale = Math.max(framePositions[frameIndex].scale * 0.9, 0.5); // Min zoom 0.5x
+    const newScale = Math.max(framePositions[frameIndex].scale * 0.9, 0.1); // Min zoom 0.1x
     updateFramePosition(frameIndex, {
       ...framePositions[frameIndex],
       scale: newScale,

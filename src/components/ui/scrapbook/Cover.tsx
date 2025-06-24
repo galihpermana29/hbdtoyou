@@ -25,7 +25,10 @@ interface FramePosition {
 
 type FrameIndex = 0 | 1; // 0 = left, 1 = right
 
-const CoverBook = ({ userImage, canvasRef: externalCanvasRef }: CoverBookProps) => {
+const CoverBook = ({
+  userImage,
+  canvasRef: externalCanvasRef,
+}: CoverBookProps) => {
   // Use external ref if provided, otherwise create a local one
   const localCanvasRef = useRef<HTMLCanvasElement>(null);
   const canvasRef = externalCanvasRef || localCanvasRef;
@@ -502,12 +505,12 @@ const CoverBook = ({ userImage, canvasRef: externalCanvasRef }: CoverBookProps) 
     if (frameIndex === 0) {
       setLeftFramePos((prev) => ({
         ...prev,
-        scale: Math.max(0.5, Math.min(3, prev.scale + delta)),
+        scale: Math.max(0.1, Math.min(3, prev.scale + delta)),
       }));
     } else {
       setRightFramePos((prev) => ({
         ...prev,
-        scale: Math.max(0.5, Math.min(3, prev.scale + delta)),
+        scale: Math.max(0.1, Math.min(3, prev.scale + delta)),
       }));
     }
   };
@@ -591,7 +594,7 @@ const CoverBook = ({ userImage, canvasRef: externalCanvasRef }: CoverBookProps) 
           />
 
           {/* Frame Controls */}
-          <div className="mt-4 grid grid-cols-2 gap-6">
+          <div className="mt-4 grid grid-cols-1 md:grid-cols-2 gap-6">
             {/* Left Frame Controls */}
             <div className="border border-gray-200 rounded-lg p-4">
               <h3 className="font-medium mb-3">Left Frame</h3>
@@ -721,11 +724,21 @@ const CoverBook = ({ userImage, canvasRef: externalCanvasRef }: CoverBookProps) 
       {(leftImage || rightImage) && !cropMode && (
         <div className="mt-6 flex justify-center">
           <button
-            onClick={() => canvasRef.current && downloadCanvasAsImage(canvasRef.current, 'scrapbook-cover')}
-            className="px-4 py-2 bg-green-500 text-white rounded-md hover:bg-green-600 flex items-center gap-2"
-          >
-            <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5" viewBox="0 0 20 20" fill="currentColor">
-              <path fillRule="evenodd" d="M3 17a1 1 0 011-1h12a1 1 0 110 2H4a1 1 0 01-1-1zm3.293-7.707a1 1 0 011.414 0L9 10.586V3a1 1 0 112 0v7.586l1.293-1.293a1 1 0 111.414 1.414l-3 3a1 1 0 01-1.414 0l-3-3a1 1 0 010-1.414z" clipRule="evenodd" />
+            onClick={() =>
+              canvasRef.current &&
+              downloadCanvasAsImage(canvasRef.current, 'scrapbook-cover')
+            }
+            className="px-4 py-2 bg-green-500 text-white rounded-md hover:bg-green-600 flex items-center gap-2">
+            <svg
+              xmlns="http://www.w3.org/2000/svg"
+              className="h-5 w-5"
+              viewBox="0 0 20 20"
+              fill="currentColor">
+              <path
+                fillRule="evenodd"
+                d="M3 17a1 1 0 011-1h12a1 1 0 110 2H4a1 1 0 01-1-1zm3.293-7.707a1 1 0 011.414 0L9 10.586V3a1 1 0 112 0v7.586l1.293-1.293a1 1 0 111.414 1.414l-3 3a1 1 0 01-1.414 0l-3-3a1 1 0 010-1.414z"
+                clipRule="evenodd"
+              />
             </svg>
             Download as JPG
           </button>
@@ -741,7 +754,10 @@ const CoverBook = ({ userImage, canvasRef: externalCanvasRef }: CoverBookProps) 
             <li>Use the + and - buttons to zoom in/out</li>
             <li>Click Reset Position to return to default position</li>
             <li>Click Re-crop to adjust the cropping of an image</li>
-            <li>Click the Download button to save your scrapbook cover as a JPG image</li>
+            <li>
+              Click the Download button to save your scrapbook cover as a JPG
+              image
+            </li>
             {!bothImagesUploaded && (
               <li className="text-amber-600 font-medium">
                 Please upload images for both frames
