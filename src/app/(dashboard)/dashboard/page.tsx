@@ -13,7 +13,9 @@ const DashboardPage = async () => {
   //check if it's admin email memoify.live@gmail.com
   const isAdmin = session?.email === 'memoify.live@gmail.com';
   const data = await getContentByUserId(
-    isAdmin ? null : (session?.userId as string)
+    isAdmin ? null : (session?.userId as string),
+    '200',
+    '1'
   );
   const mappedData = data.success
     ? mapContentToCard(data.data).filter(

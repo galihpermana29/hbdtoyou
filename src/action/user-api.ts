@@ -10,6 +10,7 @@ import {
   IDetailContentResponse,
   IGetDetailPayment,
   ILatestContentResponse,
+  ILatestContentResponse2,
   IOAuthResponse,
   IPaymentPayload,
   IProfileResponse,
@@ -443,22 +444,31 @@ export async function getDetailPayment(
   };
 }
 
-export async function getLatestInspiration(): Promise<
-  IGlobalResponse<null | ILatestContentResponse>
-> {
+export async function getLatestInspiration(
+  limit: number,
+  page: number,
+  templateId?: string,
+  keyword?: string
+): Promise<IGlobalResponse<null | ILatestContentResponse2>> {
   const session = await getSession();
-  const res = await fetch(baseUri + `/contents/latest`, {
-    method: 'GET',
-    headers: {
-      'Content-Type': 'application/json',
-      'X-Source': 'web',
-      'X-UserID': session.userId!,
-      Authorization: `Bearer ${session.accessToken}`,
-    },
-    next: {
-      revalidate: 60,
-    },
-  });
+  const res = await fetch(
+    baseUri +
+      `/contents/latest?limit=${limit}&page=${page}${
+        templateId ? `&template_id=${templateId}` : ''
+      }${keyword ? `&keyword=${keyword}` : ''}`,
+    {
+      method: 'GET',
+      headers: {
+        'Content-Type': 'application/json',
+        'X-Source': 'web',
+        'X-UserID': session.userId!,
+        Authorization: `Bearer ${session.accessToken}`,
+      },
+      next: {
+        revalidate: 60,
+      },
+    }
+  );
 
   if (!res.ok) {
     return {
@@ -473,30 +483,42 @@ export async function getLatestInspiration(): Promise<
   return {
     success: true,
     message: data.message,
-    data: data.data,
+    data: data,
   };
 }
 
 export async function getContentByUserId(
-  userId?: string
+  userId?: string,
+  limit?: string,
+  page?: string,
+  template_id?: string
 ): Promise<IGlobalResponse<null | IContent[]>> {
   const session = await getSession();
-  const res = await fetch(
-    baseUri + `${userId ? `/contents?user_id=${userId}` : `/contents`}`,
-    {
-      method: 'GET',
-      headers: {
-        'Content-Type': 'application/json',
-        'X-Source': 'web',
-        'X-UserID': session.userId!,
-        Authorization: `Bearer ${session.accessToken}`,
-      },
-      next: {
-        revalidate: 60,
-        tags: ['dashboard-content'],
-      },
-    }
-  );
+
+  const objParams = {
+    user_id: userId || '',
+    limit: limit || '10',
+    page: page || '1',
+    template_id: template_id || '',
+  };
+
+  if (userId === '') delete objParams.user_id;
+  if (template_id === '') delete objParams.template_id;
+
+  const params = new URLSearchParams(objParams).toString();
+  const res = await fetch(baseUri + `/contents?${params}`, {
+    method: 'GET',
+    headers: {
+      'Content-Type': 'application/json',
+      'X-Source': 'web',
+      'X-UserID': session.userId!,
+      Authorization: `Bearer ${session.accessToken}`,
+    },
+    next: {
+      revalidate: 60,
+      tags: ['dashboard-content'],
+    },
+  });
 
   if (!res.ok) {
     return {

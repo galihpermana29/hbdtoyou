@@ -1,4 +1,5 @@
 import CardTemplate from '@/components/newlanding/card-template/CardTemplate';
+import CardTemplateTag from '@/components/newlanding/card-template/CardTemplateTag';
 
 export const TemplateGridSection = ({
   title,
@@ -24,7 +25,7 @@ export const TemplateGridSection = ({
                 e.stopPropagation();
                 onTemplateClick(template);
               }}>
-              <CardTemplate data={template} type="creation" />
+              <CardTemplateTag data={template} type="creation" />
             </div>
           ))
         ) : (

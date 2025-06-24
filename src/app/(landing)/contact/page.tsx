@@ -1,7 +1,7 @@
 'use client';
 import { submitFeedback } from '@/action/user-api';
 import NavigationBar from '@/components/ui/navbar';
-import { Button, Form, Input, message, Select } from 'antd';
+import { // Select replaced with FixedSelect} from 'antd';
 import TextArea from 'antd/es/input/TextArea';
 
 const ContactPage = () => {
@@ -50,7 +50,7 @@ const ContactPage = () => {
               rules={[{ required: true, message: 'Please input subject!' }]}
               className="!my-[8px]"
               label="Subject">
-              <Select
+              <FixedSelect
                 options={[
                   { label: 'Feedback/Report', value: 'feedback' },
                   { label: 'Business', value: 'business-inquiry' },

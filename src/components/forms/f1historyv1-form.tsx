@@ -166,13 +166,13 @@ const Formula1Form = ({
     if (res.success) {
       const userLink = selectedTemplate.route + '/' + res.data;
       message.success('Successfully created!');
-      
+
       // Clear form fields
       form.resetFields();
-      
+
       // Reset Redux state for collection of images
       dispatch(reset());
-      
+
       setModalState({
         visible: true,
         data: userLink as string,

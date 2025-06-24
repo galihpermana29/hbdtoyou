@@ -62,7 +62,7 @@ export const InspirationCard = ({ data }: { data: any }) => {
         <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/50 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300 flex flex-col justify-end p-4">
           <div className="transform translate-y-4 group-hover:translate-y-0 transition-transform duration-300">
             {/* Title and author */}
-            <h1 className="text-[18px] text-white font-[600] mb-1">
+            <h1 className="text-[12px] text-white font-[600] mb-1">
               {data?.title}
             </h1>
             {/* <p className="text-white/80 font-[400] text-[14px] mb-2">
@@ -70,12 +70,12 @@ export const InspirationCard = ({ data }: { data: any }) => {
           </p> */}
 
             {/* Tags */}
-            <div className="flex gap-1 mb-2">
+            {/* <div className="flex gap-1 mb-2">
               <Tag color="cyan">{data?.type}</Tag>
               <Tag color="blue" className="capitalize">
                 {data?.template_label}
               </Tag>
-            </div>
+            </div> */}
 
             {/* Link */}
             {/* <Link

@@ -7,7 +7,12 @@ import { Button } from 'antd';
 import Link from 'next/link';
 
 const EJournal = async () => {
-  const dx = await getContentByUserId();
+  const dx = await getContentByUserId(
+    null,
+    '9999',
+    '1',
+    '2d4df00e-e773-4391-ad6a-1b6d688950ff' //journal template id
+  );
   const journalsData = dx.success
     ? dx.data.filter((dx) => dx.template_name.includes('journal'))
     : [];

@@ -3,12 +3,17 @@ import { getLatestInspiration } from '@/action/user-api';
 import { Input, message, Select, Spin } from 'antd';
 import Masonry from 'react-masonry-css';
 
-import { useEffect, useState } from 'react';
+import { useEffect, useState, useCallback } from 'react';
+import { useDebounce } from 'use-debounce';
 import { InspirationCard } from './InspirationCard';
 
 import { LoadingOutlined } from '@ant-design/icons';
-import { IAllTemplateResponse } from '@/action/interfaces';
+import {
+  IAllTemplateResponse,
+  ILatestContentResponse2,
+} from '@/action/interfaces';
 import { capitalizeFirstLetter, mapContentToCard } from '@/lib/utils';
+import { useInView } from 'react-intersection-observer';
 
 // Breakpoint object for responsive columns
 const breakpointColumnsObj = {
@@ -27,60 +32,115 @@ const NewInspirationPage = ({
   templates: IAllTemplateResponse[];
 }) => {
   const [data, setData] = useState<any[] | undefined>([]);
-
   const [loading, setLoading] = useState<boolean>(false);
   const [filteredData, setFilteredData] = useState<any[] | undefined>([]);
-
   const [search, setSearch] = useState<string | null>('');
+  const [debouncedSearch] = useDebounce(search, 500);
   const [activeType, setActiveType] = useState<string | null>('all');
+  // Pagination state
+  const [page, setPage] = useState<number>(1);
+  const [hasMore, setHasMore] = useState<boolean>(true);
+  const [loadingMore, setLoadingMore] = useState<boolean>(false);
+  const [totalPages, setTotalPages] = useState<number>(1);
+
+  // Setup the intersection observer hook
+  const { ref, inView } = useInView({
+    threshold: 0.5,
+    triggerOnce: false,
+  });
 
   const templatesOptions = templates?.map((dx) => ({
     value: dx.id,
-    label: dx.name?.split('-')[0],
+    label: dx.name?.split('-')[0]?.split('v')[0],
   }));
 
   const handleSearch = (e: any) => {
     setSearch(e.target.value);
   };
 
-  const handleGetData = async () => {
-    setLoading(true);
-    const data = await getLatestInspiration();
-    if (data.success) {
-      const mappedData = mapContentToCard(data.data?.contents).filter(
-        (show) => show && show?.jumbotronImage && show?.title
-      );
-
-      setData(mappedData ? mappedData : []);
-      setFilteredData(mappedData ? mappedData : []);
-    } else {
-      message.error('Something went wrong');
+  const handleGetData = async (
+    pageNum: number = 1,
+    isLoadingMore: boolean = false
+  ) => {
+    if (pageNum === 1) {
+      setLoading(true);
+    } else if (isLoadingMore) {
+      setLoadingMore(true);
     }
-    setLoading(false);
+
+    try {
+      // Pass template ID if not 'all'
+      const templateId = activeType !== 'all' ? activeType : undefined;
+      // Pass search keyword if present
+      const keyword = debouncedSearch || undefined;
+      const response = await getLatestInspiration(
+        20,
+        pageNum,
+        templateId,
+        keyword
+      );
+      if (response.success && response.data) {
+        const mappedData = mapContentToCard(response.data.data).filter(
+          (show) => show && show?.jumbotronImage && show?.title
+        );
+
+        // Update pagination info
+        setTotalPages(response.data.meta.totalPage);
+        setHasMore(pageNum < response.data.meta.totalPage);
+
+        if (isLoadingMore && pageNum > 1) {
+          // Append new data to existing data
+          setData((prevData) => [...(prevData || []), ...(mappedData || [])]);
+          setFilteredData((prevData) => [
+            ...(prevData || []),
+            ...(mappedData || []),
+          ]);
+        } else {
+          // First load or refresh
+          setData(mappedData || []);
+          setFilteredData(mappedData || []);
+        }
+      } else {
+        message.error('Failed to load inspirations');
+      }
+    } catch (error) {
+      console.error('Error fetching inspirations:', error);
+      message.error('Something went wrong while loading inspirations');
+    } finally {
+      setLoading(false);
+      setLoadingMore(false);
+    }
   };
 
-  const handleSearchByTitle = (title: string, activeType: string) => {
-    const filtered = data?.filter((item) =>
-      item.title.toLowerCase().includes(title.toLowerCase())
-    );
+  // We no longer need local search since we're using the API
 
-    const finalFiltered =
-      activeType === 'all'
-        ? filtered
-        : filtered?.filter((item) => item.template_id === activeType);
+  // Load more data when user scrolls to the bottom
+  const loadMoreData = useCallback(() => {
+    if (!loadingMore && hasMore && !loading) {
+      const nextPage = page + 1;
+      setPage(nextPage);
+      handleGetData(nextPage, true);
+    }
+  }, [loadingMore, hasMore, page, loading, activeType]);
 
-    setFilteredData(finalFiltered || []);
-  };
-
+  // Initial data load
   useEffect(() => {
-    handleGetData();
+    handleGetData(1);
   }, []);
 
+  // Trigger load more when bottom is in view
   useEffect(() => {
-    if (search || activeType) {
-      handleSearchByTitle(search, activeType);
+    if (inView) {
+      loadMoreData();
     }
-  }, [search, activeType]);
+  }, [inView, loadMoreData]);
+
+  // Effect for handling template filter changes and debounced search
+  useEffect(() => {
+    // Reset pagination when filters change
+    setPage(1);
+    handleGetData(1);
+  }, [activeType, debouncedSearch]);
 
   return (
     <div className="mx-auto max-w-6xl 2xl:max-w-7xl px-[20px] min-h-screen my-[40px]">
@@ -103,6 +163,10 @@ const NewInspirationPage = ({
             placeholder="Select a template"
             options={[{ value: 'all', label: 'All' }, ...templatesOptions]}
             className="max-w-[150px] mt-[12px] md:mt-0 !h-[44px] w-full"
+            popupClassName="inspiration-select-dropdown"
+            getPopupContainer={(triggerNode) => triggerNode.parentNode}
+            listHeight={256}
+            virtual={false}
           />
         </div>
       </div>
@@ -123,7 +187,7 @@ const NewInspirationPage = ({
               columnClassName="my-masonry-grid_column">
               {filteredData && filteredData.length > 0 ? (
                 filteredData.map((show, idx) => (
-                  <div key={idx} className="mb-6">
+                  <div key={`${show.id}-${idx}`} className="mb-6">
                     <InspirationCard data={show} />
                   </div>
                 ))
@@ -133,6 +197,28 @@ const NewInspirationPage = ({
                 </div>
               )}
             </Masonry>
+
+            {/* Loading indicator and intersection observer target */}
+            {!loading && hasMore && (
+              <div ref={ref} className="w-full flex justify-center py-8">
+                {loadingMore && (
+                  <Spin
+                    indicator={
+                      <LoadingOutlined
+                        style={{ fontSize: 24, color: '#E34013' }}
+                      />
+                    }
+                  />
+                )}
+              </div>
+            )}
+
+            {/* End of content message */}
+            {!hasMore && filteredData && filteredData.length > 0 && (
+              <div className="w-full text-center py-8 text-gray-500">
+                You've reached the end of inspirations
+              </div>
+            )}
           </div>
         </>
       )}

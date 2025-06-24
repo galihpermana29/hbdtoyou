@@ -12,3 +12,18 @@
 .ant-steps.custom-steps  .ant-steps-item-process .ant-steps-item-icon >.ant-steps-icon .ant-steps-icon-dot{
   background: #e5e5e5eb !important;
 }
+
+/* Fix for Select dropdown scrolling issues */
+.inspiration-select-dropdown {
+  z-index: 1050;
+}
+
+.inspiration-select-dropdown .ant-select-item {
+  padding: 8px 12px;
+}
+
+.inspiration-select-dropdown .rc-virtual-list-holder {
+  overflow-y: auto !important;
+  overflow-x: hidden;
+  max-height: 256px;
+}
