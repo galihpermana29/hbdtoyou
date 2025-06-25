@@ -18,7 +18,7 @@ const DashboardPage = async () => {
     '1'
   );
   const mappedData = data.success
-    ? mapContentToCard(data.data).filter(
+    ? mapContentToCard(data.data, 'dashboard').filter(
         (show) => show && show?.jumbotronImage && show?.title
       )
     : [];

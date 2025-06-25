@@ -28,7 +28,7 @@ export function addLineBreaksEveryThreeSentences(text) {
   return grouped.join('<br/><br/>');
 }
 
-export function mapContentToCard(contents: IContent[]) {
+export function mapContentToCard(contents: IContent[], purpose = 'client') {
   return contents.map((show) => {
     const jsonContent = JSON.parse(show.detail_content_json_text);
     const handleJumbotron = () => {
@@ -70,6 +70,7 @@ export function mapContentToCard(contents: IContent[]) {
     if (!handleJumbotron()) return;
 
     if (
+      purpose === 'client' &&
       Object.prototype.hasOwnProperty.call(jsonContent, 'isPublic') &&
       jsonContent?.isPublic === false
     )

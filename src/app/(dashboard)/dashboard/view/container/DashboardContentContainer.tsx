@@ -12,6 +12,7 @@ import dynamic from 'next/dynamic';
 const DashboardCard = dynamic(() => import('../presentation/DashboardCard'));
 const initSliced = 10;
 const DashboardContentContainer = ({ data }: { data: IContent[] }) => {
+  console.log(data, 'mapped');
   // create load more state
   const [currentData, setCurrentData] = useState<IContent[]>([]);
   // state
