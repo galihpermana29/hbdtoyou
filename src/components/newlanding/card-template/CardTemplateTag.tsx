@@ -72,6 +72,11 @@ export const DataToCardColor = {
     logo: scrapbookv1,
     text: 'text-[#651B05]',
   },
+  scrapbookvintage: {
+    color: 'bg-[#651B05cf]',
+    logo: scrapbookv1,
+    text: 'text-[#651B05]',
+  },
 };
 
 const CardTemplateTag = ({

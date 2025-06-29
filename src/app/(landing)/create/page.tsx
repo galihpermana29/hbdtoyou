@@ -128,13 +128,19 @@ const CreatePage = () => {
       return router.push('/journal');
     }
 
-    if (template.name.includes('scrapbook')) {
+    if (template.name.includes('scrapbookv1')) {
       const routePath = templateNameToRoute(template.name);
       return router.push(
         `/create/scrapbook?templateId=${template.id}&route=${routePath}`
       );
     }
 
+    if (template.name.includes('scrapbookvintage')) {
+      const routePath = templateNameToRoute(template.name);
+      return router.push(
+        `/create/scrapbook-vintage?templateId=${template.id}&route=${routePath}`
+      );
+    }
     const routePath = templateNameToRoute(template.name);
 
     if (template.label === 'premium') {
