@@ -4,6 +4,35 @@ import Meta from 'antd/es/card/Meta';
 import { headers } from 'next/headers';
 import Image from 'next/image';
 import Link from 'next/link';
+import { Metadata } from 'next';
+
+export const metadata: Metadata = {
+  title: 'Browse Templates | Memoify',
+  description: 'Explore our collection of templates inspired by Netflix, Spotify, YouTube and more. Find the perfect design to showcase your memories in style.',
+  keywords: 'templates, Netflix templates, Spotify templates, YouTube templates, custom websites, digital memories, Memoify',
+  openGraph: {
+    title: 'Browse Templates | Memoify',
+    description: 'Explore our collection of templates inspired by Netflix, Spotify, YouTube and more. Find the perfect design to showcase your memories in style.',
+    url: 'https://memoify.live/browse',
+    siteName: 'Memoify',
+    images: [
+      {
+        url: 'https://res.cloudinary.com/dqipjpy1w/image/upload/v1751298448/brave_screenshot_memoify.live_mhwzfs.png',
+        width: 1200,
+        height: 630,
+        alt: 'Browse Memoify Templates',
+      },
+    ],
+    locale: 'en_US',
+    type: 'website',
+  },
+  twitter: {
+    card: 'summary_large_image',
+    title: 'Browse Templates | Memoify',
+    description: 'Explore our collection of templates inspired by Netflix, Spotify, YouTube and more. Find the perfect design to showcase your memories in style.',
+    images: ['https://res.cloudinary.com/dqipjpy1w/image/upload/v1751298448/brave_screenshot_memoify.live_mhwzfs.png'],
+  },
+};
 
 const getTop10 = async () => {
   const headersList = headers();

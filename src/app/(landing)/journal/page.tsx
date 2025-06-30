@@ -5,6 +5,41 @@ const JournalCard = dynamic(() => import('./view/JournalCard'), { ssr: false });
 import { getContentByUserId } from '@/action/user-api';
 import { Button } from 'antd';
 import Link from 'next/link';
+import { Metadata } from 'next';
+
+export const metadata: Metadata = {
+  title: 'Personal Journal | Memoify',
+  description:
+    "Create and publish your personal journal with academic formatting. Document life's moments with the structure and formality of scholarly articles.",
+  keywords:
+    'personal journal, digital journal, academic journal, life moments, document memories, Memoify',
+  openGraph: {
+    title: 'Personal Journal | Memoify',
+    description:
+      "Create and publish your personal journal with academic formatting. Document life's moments with the structure and formality of scholarly articles.",
+    url: 'https://memoify.live/journal',
+    siteName: 'Memoify',
+    images: [
+      {
+        url: 'https://res.cloudinary.com/dqipjpy1w/image/upload/v1751300293/6ad37e37-d0f6-497c-b81f-56d68869b7a3.png',
+        width: 1200,
+        height: 630,
+        alt: 'Memoify Personal Journal',
+      },
+    ],
+    locale: 'en_US',
+    type: 'website',
+  },
+  twitter: {
+    card: 'summary_large_image',
+    title: 'Personal Journal | Memoify',
+    description:
+      "Create and publish your personal journal with academic formatting. Document life's moments with the structure and formality of scholarly articles.",
+    images: [
+      'https://res.cloudinary.com/dqipjpy1w/image/upload/v1751300293/6ad37e37-d0f6-497c-b81f-56d68869b7a3.png',
+    ],
+  },
+};
 
 const EJournal = async () => {
   const dx = await getContentByUserId(
