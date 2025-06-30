@@ -3,7 +3,6 @@ import { AntdRegistry } from '@ant-design/nextjs-registry';
 import { getSession } from '@/store/get-set-session';
 import SessionProvider from './session-provider';
 import { Analytics } from '@vercel/analytics/react';
-import Head from 'next/head';
 
 export default async function RootLayout({
   children,
@@ -13,9 +12,12 @@ export default async function RootLayout({
   const session = await getSession();
   return (
     <html lang="en">
-      <Head>
+      <head>
         <link rel="shortcut icon" href="/favicon.ico" />
-      </Head>
+        <link rel="preconnect" href="https://res.cloudinary.com" />
+        <link rel="dns-prefetch" href="https://res.cloudinary.com" />
+        <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+      </head>
       <body>
         <AntdRegistry>
           <Analytics />

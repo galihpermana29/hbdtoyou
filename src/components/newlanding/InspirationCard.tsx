@@ -53,8 +53,11 @@ export const InspirationCard = ({ data }: { data: any }) => {
                 : 'https://res.cloudinary.com/ddlus5qur/image/upload/v1746085724/phu2rbi6fqnp71hytjex.jpg'
             }
             alt={data?.title || 'Inspiration image'}
-            width={700}
-            height={900}
+            width={400} // Reduced size for mobile-first approach
+            height={500}
+            loading="eager" // Load images eagerly for LCP improvement
+            priority={true} // Prioritize loading for above-the-fold images
+            sizes="(max-width: 640px) 100vw, (max-width: 768px) 50vw, 33vw" // Responsive sizing
           />
         </div>
 

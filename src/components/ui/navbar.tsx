@@ -37,7 +37,9 @@ import {
   Sparkles,
   Zap,
 } from 'lucide-react';
-import jumbotron from '@/assets/fitur-1-image.png';
+import dynamic from 'next/dynamic';
+// Lazy load the jumbotron image
+const jumbotronImage = '/assets/fitur-1-image.png';
 
 import './stlye.css';
 
@@ -147,7 +149,7 @@ const NavigationBar = () => {
             <div className="min-h-[400px]">
               <Image
                 className="max-w-[240px]"
-                src={jumbotron}
+                src={jumbotronImage}
                 alt="jumbotron"
                 width={240}
                 height={136}
