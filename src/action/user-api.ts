@@ -15,6 +15,7 @@ import {
   IPaymentPayload,
   IProfileResponse,
   IQRISPaymentResponse,
+  IResponsePaypal,
 } from './interfaces';
 import { revalidateTag } from 'next/cache';
 
@@ -28,7 +29,7 @@ export interface IGlobalResponse<T> {
   data: T;
 }
 
-const baseUri = process.env.API_URI;
+const baseUri = process.env.NODE_ENV === 'production' ? process.env.API_URI : process.env.STAGING_API;
 
 export async function loginOAuth(
   payload: IOAuthPayload
@@ -453,9 +454,8 @@ export async function getLatestInspiration(
   const session = await getSession();
   const res = await fetch(
     baseUri +
-      `/contents/latest?limit=${limit}&page=${page}${
-        templateId ? `&template_id=${templateId}` : ''
-      }${keyword ? `&keyword=${keyword}` : ''}`,
+    `/contents/latest?limit=${limit}&page=${page}${templateId ? `&template_id=${templateId}` : ''
+    }${keyword ? `&keyword=${keyword}` : ''}`,
     {
       method: 'GET',
       headers: {
@@ -629,6 +629,71 @@ export async function deleteContentById(
   }
 
   revalidateTag('dashboard-content');
+
+  const data = await res.json();
+
+  return {
+    success: true,
+    message: data.message,
+    data: data.data,
+  };
+}
+
+export async function paymentByPaypal(): Promise<IGlobalResponse<null | IResponsePaypal>> {
+  const session = await getSession();
+  const res = await fetch(baseUri + '/payments/paypal', {
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/json',
+      'X-Source': 'web',
+      'X-UserID': session.userId!,
+      Authorization: `Bearer ${session.accessToken}`,
+    },
+  });
+
+  if (!res.ok) {
+    return {
+      success: false,
+      message: res.statusText,
+      data: null,
+    };
+  }
+
+  const data = await res.json();
+
+  return {
+    success: true,
+    message: data.message,
+    data: data.data,
+  };
+}
+
+export async function paymentPaypalCapture({
+  order_id,
+  payment_id
+}: {
+  order_id: string;
+  payment_id: string;
+}): Promise<IGlobalResponse<null | { status: string }>> {
+  const session = await getSession();
+  const res = await fetch(baseUri + '/payments/paypal/capture', {
+    method: 'POST',
+    body: JSON.stringify({ order_id, payment_id }),
+    headers: {
+      'Content-Type': 'application/json',
+      'X-Source': 'web',
+      'X-UserID': session.userId!,
+      Authorization: `Bearer ${session.accessToken}`,
+    },
+  });
+
+  if (!res.ok) {
+    return {
+      success: false,
+      message: res.statusText,
+      data: null,
+    };
+  }
 
   const data = await res.json();
 

@@ -90,7 +90,7 @@ const NavigationBar = () => {
     },
     {
       key: '4',
-      label: <p onClick={() => router.push('/payment-qris')}>Upgrade Plan</p>,
+      label: <p onClick={() => router.push('/payment')}>Upgrade Plan</p>,
       icon: <Zap size={18} className="text-[#667085]" />,
     },
     {
@@ -307,7 +307,7 @@ const NavigationBar = () => {
             Inspiration
           </Link>
           <Link
-            href={'/payment-qris'}
+            href={'/payment'}
             className={`hidden md:block text-[16px] text-[#7B7B7B] font-[500]`}>
             Upgrade Plan
           </Link>
@@ -333,7 +333,7 @@ const NavigationBar = () => {
                     className="md:block text-[16px] text-[#7B7B7B] font-[500] cursor-pointer"
                     onClick={() => {
                       if (session?.accessToken) {
-                        router.push('/payment-qris');
+                        router.push('/payment');
                       } else {
                         signIn('google');
                       }
@@ -353,7 +353,7 @@ const NavigationBar = () => {
                   Inspiration
                 </Link>
                 <Link
-                  href={'/payment-qris'}
+                  href={'/payment'}
                   className={`md:block text-[16px] text-[#7B7B7B] font-[500]`}>
                   Upgrade Plan
                 </Link>
@@ -381,7 +381,7 @@ const NavigationBar = () => {
               type="primary"
               size="large"
               className="!border-[#E34013] !text-[#E34013] !bg-white !font-[500] !text-[14px] !rounded-[8px] !hidden !md:block"
-              onClick={() => router.push('/payment-qris')}>
+              onClick={() => router.push('/payment')}>
               <p>Upgrade to Premium</p>
             </Button>
           )}

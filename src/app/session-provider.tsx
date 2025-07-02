@@ -57,7 +57,7 @@ const promotionalContent: AdContent[] = [
     title: '',
     description: '',
     ctaText: '',
-    ctaLink: '/payment-qris',
+    ctaLink: '/payment',
     image:
       'https://res.cloudinary.com/dqipjpy1w/image/upload/v1749574325/fojp7ewowrwy1ck5j14j.png',
     type: 'image',
@@ -67,7 +67,7 @@ const promotionalContent: AdContent[] = [
     title: '',
     description: '',
     ctaText: '',
-    ctaLink: '/payment-qris',
+    ctaLink: '/payment',
     image:
       'https://res.cloudinary.com/dqipjpy1w/image/upload/v1749574325/ylmpofrfxs25uczb8f4k.png',
     type: 'image',
@@ -77,7 +77,7 @@ const promotionalContent: AdContent[] = [
     title: '',
     description: '',
     ctaText: '',
-    ctaLink: '/payment-qris',
+    ctaLink: '/payment',
     image:
       'https://res.cloudinary.com/dqipjpy1w/image/upload/v1750003561/hszepxvaqvcf0qexoujo.png',
     type: 'image',
@@ -119,7 +119,7 @@ const SessionProvider = ({
   );
 
   const isHideAds =
-    ['/create', '/payment-qris'].includes(pathname) ||
+    ['/create', '/payment'].includes(pathname) ||
     userProfile?.type === 'premium';
 
   useEffect(() => {

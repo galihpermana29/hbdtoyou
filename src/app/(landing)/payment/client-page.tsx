@@ -1,7 +1,7 @@
 'use client';
 
 import { IGetDetailPayment, IQRISPaymentResponse } from '@/action/interfaces';
-import { generateQRIS, getDetailPayment } from '@/action/user-api';
+import { generateQRIS, getDetailPayment, paymentByPaypal } from '@/action/user-api';
 import NavigationBar from '@/components/ui/navbar';
 import { Button, message } from 'antd';
 import Image from 'next/image';
@@ -25,22 +25,49 @@ const PaymentQRIS = () => {
   const [paymentStats, setPaymentStatus] = useState<IGetDetailPayment | null>(
     null
   );
-  const [loading, setLoading] = useState(false);
+  const [loading, setLoading] = useState({
+    qris: false,
+    paypal: false
+  });
 
   const router = useRouter();
   const query = useSearchParams();
   const id = query.get('id');
 
   const handleGenerateQRIS = async () => {
-    setLoading(true);
+    setLoading((prev) => ({
+      ...prev,
+      qris: true
+    }));
     const res = await generateQRIS();
     if (res.success) {
-      router.replace(`/payment-qris?id=${res.data?.payment_id}`);
+      router.replace(`/payment?id=${res.data?.payment_id}`);
       setQRISData(res.data);
     } else {
       message.error(res.message);
     }
-    setLoading(false);
+    setLoading((prev) => ({
+      ...prev,
+      qris: false
+    }));
+  };
+
+  const handlePaypal = async () => {
+    setLoading((prev) => ({
+      ...prev,
+      paypal: true
+    }));
+    const res = await paymentByPaypal();
+    if (res.success) {
+      window.open(`https://www.sandbox.paypal.com/checkoutnow?token=${res.data.order_id}`, '_blank');
+      localStorage.setItem('paypal_payment', JSON.stringify(res.data))
+    } else {
+      message.error(res.message || 'Failed to process PayPal payment');
+    }
+    setLoading((prev) => ({
+      ...prev,
+      paypal: false
+    }));
   };
 
   const handleGetPaymentStatus = async () => {
@@ -54,7 +81,7 @@ const PaymentQRIS = () => {
 
   useEffect(() => {
     if (!qrisData) {
-      router.replace('/payment-qris?id=null');
+      router.replace('/payment?id=null');
     }
   }, [qrisData]);
 
@@ -147,15 +174,24 @@ const PaymentQRIS = () => {
                     with only <span className="font-bold"> IDR 15.000</span>
                   </p>
 
-                  {!qrisData && (
+                  <div className='flex flex-col gap-2'>
+                    {!qrisData && (
+                      <Button
+                        onClick={() => handleGenerateQRIS()}
+                        loading={loading.qris}
+                        type="primary"
+                        className="!bg-[#E34013] mt-[20px] !text-white !rounded-[8px] !text-[16px] !font-[600] !h-[40px] !w-[170px]">
+                        Pay with QRIS
+                      </Button>
+                    )}
                     <Button
-                      onClick={() => handleGenerateQRIS()}
-                      loading={loading}
+                      onClick={handlePaypal}
+                      loading={loading.paypal}
                       type="primary"
-                      className="!bg-[#E34013] mt-[20px] !text-white !rounded-[8px] !text-[16px] !font-[600] !h-[40px] !w-[170px]">
-                      Pay with QRIS
+                      className="!bg-[#FFD140] !text-white !rounded-[8px] !text-[16px] !font-[600] !h-[40px] !w-[170px]">
+                      <Image src='/paypal-logo.svg' width={80} height={80} alt='Paypal Logo' />
                     </Button>
-                  )}
+                  </div>
                 </div>
                 {qrisData ? (
                   <div className="flex flex-col w-full justify-center items-center mt-[20px]">
@@ -204,7 +240,7 @@ const PaymentQRIS = () => {
               </p>
               <Button
                 onClick={() => (window.location.href = '/dashboard')}
-                loading={loading}
+                loading={loading.qris}
                 type="primary"
                 className="!bg-[#E34013] mt-[20px] !text-white !rounded-[8px] !text-[16px] !font-[600] !h-[40px] !w-[170px]">
                 Go to Dashboard

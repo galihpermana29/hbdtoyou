@@ -205,7 +205,7 @@ export default function NewLandingPage() {
                 <p
                   onClick={() => {
                     if (session?.accessToken) {
-                      router.push('/payment-qris');
+                      router.push('/payment');
                     } else {
                       signIn('google');
                     }
@@ -392,7 +392,7 @@ export default function NewLandingPage() {
                     <Button
                       onClick={() => {
                         if (session?.accessToken) {
-                          router.push('/payment-qris');
+                          router.push('/payment');
                         } else {
                           signIn('google');
                         }

@@ -330,7 +330,7 @@ const NewTemplates = ({ data }: { data: IAllTemplateResponse[] }) => {
                 <Button
                   onClick={() => {
                     if (session?.accessToken) {
-                      router.push('/payment-qris');
+                      router.push('/payment');
                     } else {
                       signIn('google');
                     }
@@ -412,8 +412,8 @@ const NewTemplates = ({ data }: { data: IAllTemplateResponse[] }) => {
               <Input
                 size="large"
                 placeholder="Enter your email"
-                // value={email}
-                // onChange={(e) => setEmail(e.target.value)}
+              // value={email}
+              // onChange={(e) => setEmail(e.target.value)}
               />
             </Form.Item>
             <Form.Item>
