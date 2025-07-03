@@ -239,7 +239,7 @@ const CoverBook = ({
   const handleMouseDown = (e: React.MouseEvent<HTMLCanvasElement>) => {
     handleDragStart(e.clientX, e.clientY);
   };
-  
+
   // Touch event handler for drag start
   const handleTouchStart = (e: React.TouchEvent<HTMLCanvasElement>) => {
     // Prevent default to avoid scrolling while dragging
@@ -293,11 +293,12 @@ const CoverBook = ({
   const handleMouseMove = (e: React.MouseEvent<HTMLCanvasElement>) => {
     handleDragMove(e.clientX, e.clientY);
   };
-  
+
   // Touch event handler for drag move
   const handleTouchMove = (e: React.TouchEvent<HTMLCanvasElement>) => {
-    if (e.touches.length === 1) {
+    if (isDragging && e.touches.length === 1) {
       e.preventDefault();
+      e.stopPropagation();
       const touch = e.touches[0];
       handleDragMove(touch.clientX, touch.clientY);
     }
@@ -317,12 +318,12 @@ const CoverBook = ({
   const handleMouseLeave = () => {
     handleDragEnd();
   };
-  
+
   // Touch event handlers for drag end
   const handleTouchEnd = () => {
     handleDragEnd();
   };
-  
+
   const handleTouchCancel = () => {
     handleDragEnd();
   };
@@ -639,6 +640,7 @@ const CoverBook = ({
             onTouchMove={handleTouchMove}
             onTouchEnd={handleTouchEnd}
             onTouchCancel={handleTouchCancel}
+            style={{ touchAction: 'none' }}
           />
 
           {/* Frame Controls */}
@@ -798,7 +800,10 @@ const CoverBook = ({
         <div className="mt-4 text-sm text-gray-600 max-w-md">
           <p className="font-medium">Instructions:</p>
           <ul className="list-disc pl-5 mt-1">
-            <li>Click and drag (or touch and drag on mobile) inside a frame to adjust image position</li>
+            <li>
+              Click and drag (or touch and drag on mobile) inside a frame to
+              adjust image position
+            </li>
             <li>Use the + and - buttons to zoom in/out</li>
             <li>Click Reset Position to return to default position</li>
             <li>Click Re-crop to adjust the cropping of an image</li>
