@@ -1,6 +1,6 @@
 'use client';
 
-import { useRef, useEffect, useState, MouseEvent } from 'react';
+import { useRef, useEffect, useState, MouseEvent, TouchEvent } from 'react';
 import ReactCrop, {
   Crop,
   PixelCrop,
@@ -188,8 +188,8 @@ const CoverBook = ({
     rightFramePos,
   ]);
 
-  // Mouse event handlers for dragging
-  const handleMouseDown = (e: React.MouseEvent<HTMLCanvasElement>) => {
+  // Common function to handle both mouse and touch start events
+  const handleDragStart = (clientX: number, clientY: number) => {
     if (cropMode) return; // Don't allow dragging in crop mode
 
     const canvas = canvasRef.current;
@@ -202,12 +202,12 @@ const CoverBook = ({
     if (!hasLeftImage && !hasRightImage) return;
 
     const rect = canvas.getBoundingClientRect();
-    const x = (e.clientX - rect.left) * (canvas.width / rect.width);
-    const y = (e.clientY - rect.top) * (canvas.height / rect.height);
+    const x = (clientX - rect.left) * (canvas.width / rect.width);
+    const y = (clientY - rect.top) * (canvas.height / rect.height);
 
     const frames = getFrameDimensions(canvas);
 
-    // Check if click is within left frame and we have a left image
+    // Check if interaction is within left frame and we have a left image
     if (
       hasLeftImage &&
       x >= frames.left.x &&
@@ -220,7 +220,7 @@ const CoverBook = ({
       setDragStartX(x);
       setDragStartY(y);
     }
-    // Check if click is within right frame and we have a right image
+    // Check if interaction is within right frame and we have a right image
     else if (
       hasRightImage &&
       x >= frames.right.x &&
@@ -235,7 +235,23 @@ const CoverBook = ({
     }
   };
 
-  const handleMouseMove = (e: React.MouseEvent<HTMLCanvasElement>) => {
+  // Mouse event handler for drag start
+  const handleMouseDown = (e: React.MouseEvent<HTMLCanvasElement>) => {
+    handleDragStart(e.clientX, e.clientY);
+  };
+  
+  // Touch event handler for drag start
+  const handleTouchStart = (e: React.TouchEvent<HTMLCanvasElement>) => {
+    // Prevent default to avoid scrolling while dragging
+    if (e.touches.length === 1) {
+      e.preventDefault();
+      const touch = e.touches[0];
+      handleDragStart(touch.clientX, touch.clientY);
+    }
+  };
+
+  // Common function to handle both mouse and touch move events
+  const handleDragMove = (clientX: number, clientY: number) => {
     if (!isDragging || activeDragFrame === -1) return;
 
     const canvas = canvasRef.current;
@@ -249,8 +265,8 @@ const CoverBook = ({
       return;
 
     const rect = canvas.getBoundingClientRect();
-    const x = (e.clientX - rect.left) * (canvas.width / rect.width);
-    const y = (e.clientY - rect.top) * (canvas.height / rect.height);
+    const x = (clientX - rect.left) * (canvas.width / rect.width);
+    const y = (clientY - rect.top) * (canvas.height / rect.height);
 
     const deltaX = x - dragStartX;
     const deltaY = y - dragStartY;
@@ -273,14 +289,42 @@ const CoverBook = ({
     setDragStartY(y);
   };
 
-  const handleMouseUp = () => {
+  // Mouse event handler for drag move
+  const handleMouseMove = (e: React.MouseEvent<HTMLCanvasElement>) => {
+    handleDragMove(e.clientX, e.clientY);
+  };
+  
+  // Touch event handler for drag move
+  const handleTouchMove = (e: React.TouchEvent<HTMLCanvasElement>) => {
+    if (e.touches.length === 1) {
+      e.preventDefault();
+      const touch = e.touches[0];
+      handleDragMove(touch.clientX, touch.clientY);
+    }
+  };
+
+  // Common function to handle end of drag
+  const handleDragEnd = () => {
     setIsDragging(false);
     setActiveDragFrame(-1);
   };
 
+  // Mouse event handlers for drag end
+  const handleMouseUp = () => {
+    handleDragEnd();
+  };
+
   const handleMouseLeave = () => {
-    setIsDragging(false);
-    setActiveDragFrame(-1);
+    handleDragEnd();
+  };
+  
+  // Touch event handlers for drag end
+  const handleTouchEnd = () => {
+    handleDragEnd();
+  };
+  
+  const handleTouchCancel = () => {
+    handleDragEnd();
   };
 
   // Helper function to draw an image in a frame with position and scale adjustments
@@ -591,6 +635,10 @@ const CoverBook = ({
             onMouseMove={handleMouseMove}
             onMouseUp={handleMouseUp}
             onMouseLeave={handleMouseLeave}
+            onTouchStart={handleTouchStart}
+            onTouchMove={handleTouchMove}
+            onTouchEnd={handleTouchEnd}
+            onTouchCancel={handleTouchCancel}
           />
 
           {/* Frame Controls */}
@@ -750,7 +798,7 @@ const CoverBook = ({
         <div className="mt-4 text-sm text-gray-600 max-w-md">
           <p className="font-medium">Instructions:</p>
           <ul className="list-disc pl-5 mt-1">
-            <li>Click and drag inside a frame to adjust image position</li>
+            <li>Click and drag (or touch and drag on mobile) inside a frame to adjust image position</li>
             <li>Use the + and - buttons to zoom in/out</li>
             <li>Click Reset Position to return to default position</li>
             <li>Click Re-crop to adjust the cropping of an image</li>
