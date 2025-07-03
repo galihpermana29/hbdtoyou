@@ -1,7 +1,11 @@
 'use client';
 
 import { IGetDetailPayment, IQRISPaymentResponse } from '@/action/interfaces';
-import { generateQRIS, getDetailPayment, paymentByPaypal } from '@/action/user-api';
+import {
+  generateQRIS,
+  getDetailPayment,
+  paymentByPaypal,
+} from '@/action/user-api';
 import NavigationBar from '@/components/ui/navbar';
 import { Button, message } from 'antd';
 import Image from 'next/image';
@@ -27,7 +31,7 @@ const PaymentQRIS = () => {
   );
   const [loading, setLoading] = useState({
     qris: false,
-    paypal: false
+    paypal: false,
   });
 
   const router = useRouter();
@@ -37,7 +41,7 @@ const PaymentQRIS = () => {
   const handleGenerateQRIS = async () => {
     setLoading((prev) => ({
       ...prev,
-      qris: true
+      qris: true,
     }));
     const res = await generateQRIS();
     if (res.success) {
@@ -48,25 +52,29 @@ const PaymentQRIS = () => {
     }
     setLoading((prev) => ({
       ...prev,
-      qris: false
+      qris: false,
     }));
   };
 
   const handlePaypal = async () => {
     setLoading((prev) => ({
       ...prev,
-      paypal: true
+      paypal: true,
     }));
     const res = await paymentByPaypal();
     if (res.success) {
-      window.open(`https://www.sandbox.paypal.com/checkoutnow?token=${res.data.order_id}`, '_blank');
-      localStorage.setItem('paypal_payment', JSON.stringify(res.data))
+      // https://www.paypal.com/checkoutnow?token=5O190127TN364715T
+      window.open(
+        `https://www.paypal.com/checkoutnow?token=${res.data.order_id}`,
+        '_blank'
+      );
+      localStorage.setItem('paypal_payment', JSON.stringify(res.data));
     } else {
       message.error(res.message || 'Failed to process PayPal payment');
     }
     setLoading((prev) => ({
       ...prev,
-      paypal: false
+      paypal: false,
     }));
   };
 
@@ -174,7 +182,7 @@ const PaymentQRIS = () => {
                     with only <span className="font-bold"> IDR 15.000</span>
                   </p>
 
-                  <div className='flex flex-col gap-2'>
+                  <div className="flex flex-col gap-2">
                     {!qrisData && (
                       <Button
                         onClick={() => handleGenerateQRIS()}
@@ -189,7 +197,12 @@ const PaymentQRIS = () => {
                       loading={loading.paypal}
                       type="primary"
                       className="!bg-[#FFD140] !text-white !rounded-[8px] !text-[16px] !font-[600] !h-[40px] !w-[170px]">
-                      <Image src='/paypal-logo.svg' width={80} height={80} alt='Paypal Logo' />
+                      <Image
+                        src="/paypal-logo.svg"
+                        width={80}
+                        height={80}
+                        alt="Paypal Logo"
+                      />
                     </Button>
                   </div>
                 </div>
