@@ -1,6 +1,6 @@
 'use client';
 
-import { useRef, useEffect, useState } from 'react';
+import { useRef, useEffect, useState, TouchEvent } from 'react';
 import ReactCrop, {
   Crop,
   PixelCrop,
@@ -321,20 +321,20 @@ const PageTwo = ({
     };
   };
 
-  // Mouse event handlers
-  const handleCanvasMouseDown = (e: React.MouseEvent<HTMLCanvasElement>) => {
+  // Common function for handling both mouse and touch start events
+  const handleDragStart = (clientX: number, clientY: number) => {
     // Don't allow dragging in crop mode
     if (cropMode) return;
 
     const canvas = canvasRef.current;
     if (!canvas) return;
 
-    // Get mouse position relative to canvas
+    // Get position relative to canvas
     const rect = canvas.getBoundingClientRect();
-    const x = (e.clientX - rect.left) * (canvas.width / rect.width);
-    const y = (e.clientY - rect.top) * (canvas.height / rect.height);
+    const x = (clientX - rect.left) * (canvas.width / rect.width);
+    const y = (clientY - rect.top) * (canvas.height / rect.height);
 
-    // Check if we clicked on any image
+    // Check if we clicked/touched on any image
     for (let i = 0; i < images.length; i++) {
       if (!images[i]) continue; // Skip if no image
 
@@ -349,7 +349,7 @@ const PageTwo = ({
       const drawX = canvas.width / 2 - scaledWidth / 2 + pos.x;
       const drawY = canvas.height / 2 - scaledHeight / 2 + pos.y;
 
-      // Check if click is within this image
+      // Check if interaction is within this image
       if (
         x >= drawX &&
         x <= drawX + scaledWidth &&
@@ -364,16 +364,31 @@ const PageTwo = ({
       }
     }
   };
+  
+  // Mouse event handler for drag start
+  const handleCanvasMouseDown = (e: React.MouseEvent<HTMLCanvasElement>) => {
+    handleDragStart(e.clientX, e.clientY);
+  };
+  
+  // Touch event handler for drag start
+  const handleCanvasTouchStart = (e: React.TouchEvent<HTMLCanvasElement>) => {
+    if (e.touches.length === 1) {
+      e.preventDefault();
+      const touch = e.touches[0];
+      handleDragStart(touch.clientX, touch.clientY);
+    }
+  };
 
-  const handleCanvasMouseMove = (e: React.MouseEvent<HTMLCanvasElement>) => {
+  // Common function for handling both mouse and touch move events
+  const handleDragMove = (clientX: number, clientY: number) => {
     if (!isDragging || activeDragFrame === -1) return;
 
     const canvas = canvasRef.current;
     if (!canvas) return;
 
     const rect = canvas.getBoundingClientRect();
-    const x = (e.clientX - rect.left) * (canvas.width / rect.width);
-    const y = (e.clientY - rect.top) * (canvas.height / rect.height);
+    const x = (clientX - rect.left) * (canvas.width / rect.width);
+    const y = (clientY - rect.top) * (canvas.height / rect.height);
 
     const deltaX = x - dragStartX;
     const deltaY = y - dragStartY;
@@ -387,15 +402,44 @@ const PageTwo = ({
     setDragStartX(x);
     setDragStartY(y);
   };
+  
+  // Mouse event handler for drag move
+  const handleCanvasMouseMove = (e: React.MouseEvent<HTMLCanvasElement>) => {
+    handleDragMove(e.clientX, e.clientY);
+  };
+  
+  // Touch event handler for drag move
+  const handleCanvasTouchMove = (e: React.TouchEvent<HTMLCanvasElement>) => {
+    if (isDragging && e.touches.length === 1) {
+      e.preventDefault();
+      e.stopPropagation();
+      const touch = e.touches[0];
+      handleDragMove(touch.clientX, touch.clientY);
+    }
+  };
 
-  const handleCanvasMouseUp = () => {
+  // Common function for handling end of drag
+  const handleDragEnd = () => {
     setIsDragging(false);
     setActiveDragFrame(-1);
   };
+  
+  // Mouse event handlers for drag end
+  const handleCanvasMouseUp = () => {
+    handleDragEnd();
+  };
 
   const handleCanvasMouseLeave = () => {
-    setIsDragging(false);
-    setActiveDragFrame(-1);
+    handleDragEnd();
+  };
+  
+  // Touch event handlers for drag end
+  const handleCanvasTouchEnd = () => {
+    handleDragEnd();
+  };
+  
+  const handleCanvasTouchCancel = () => {
+    handleDragEnd();
   };
 
   // Zoom controls
@@ -479,6 +523,11 @@ const PageTwo = ({
               onMouseMove={handleCanvasMouseMove}
               onMouseUp={handleCanvasMouseUp}
               onMouseLeave={handleCanvasMouseLeave}
+              onTouchStart={handleCanvasTouchStart}
+              onTouchMove={handleCanvasTouchMove}
+              onTouchEnd={handleCanvasTouchEnd}
+              onTouchCancel={handleCanvasTouchCancel}
+              style={{ touchAction: 'none' }}
             />
           </div>
         )}
@@ -585,7 +634,7 @@ const PageTwo = ({
             <p className="font-medium">Instructions:</p>
             <ul className="list-disc pl-5 mt-1">
               <li>
-                Click and drag images to position them anywhere on the page
+                Click and drag (or touch and drag on mobile) to position images anywhere on the page
               </li>
               <li>Use the + and - buttons to zoom in/out</li>
               <li>Click Reset Position to return to default position</li>
