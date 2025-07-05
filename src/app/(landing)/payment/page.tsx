@@ -11,7 +11,7 @@ export const metadata: Metadata = {
     title: 'Premium Upgrade | Memoify',
     description:
       'Upgrade to our premium plan and unlock unlimited features. Enjoy unlimited image storage, songs library, upload size, templates access, and more for your custom websites.',
-    url: 'https://memoify.live/payment-qris',
+    url: 'https://memoify.live/payment',
     siteName: 'Memoify',
     images: [
       {

@@ -44,7 +44,7 @@ const PricingWrapper = () => {
           <PricingCard
             onClickButton={() => {
               if (session?.accessToken) {
-                router.push('/payment-qris');
+                router.push('/payment');
               } else {
                 signIn('google');
               }
