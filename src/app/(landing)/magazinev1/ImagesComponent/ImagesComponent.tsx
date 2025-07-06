@@ -14,7 +14,7 @@ const ImagesComponent = ({ urls }: { urls: string[] }) => {
     <DragElements
       dragMomentum={true}
       className="flex justify-end items-end pr-16 pb-24">
-      {urls.map((url, index) => {
+      {urls?.map((url, index) => {
         const rotation = randomInt(-12, 12);
         const width = isSmallDevice
           ? randomInt(90 * 1.7, 120 * 1.7)
