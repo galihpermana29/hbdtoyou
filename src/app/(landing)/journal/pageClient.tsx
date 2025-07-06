@@ -16,10 +16,11 @@ import { useState, useEffect } from 'react';
 const EJournal = ({ journalsData }: { journalsData: IContent[] }) => {
   const router = useRouter();
   const { accessToken } = useMemoifySession();
-  
+
   // State for search query and filtered journals
   const [searchQuery, setSearchQuery] = useState('');
-  const [filteredJournals, setFilteredJournals] = useState<IContent[]>(journalsData);
+  const [filteredJournals, setFilteredJournals] =
+    useState<IContent[]>(journalsData);
   // Filter journals based on search query
   useEffect(() => {
     if (!searchQuery.trim()) {
@@ -29,18 +30,22 @@ const EJournal = ({ journalsData }: { journalsData: IContent[] }) => {
     }
 
     // Filter journals based on destinationName or author in the JSON string
-    const filtered = journalsData.filter(journal => {
+    const filtered = journalsData.filter((journal) => {
       try {
         // Parse the JSON string
         const jsonData = JSON.parse(journal.detail_content_json_text);
-        
+
         // Check if destinationName or author contains the search query (case insensitive)
-        const destinationNameMatch = jsonData.destinationName && 
-          jsonData.destinationName.toLowerCase().includes(searchQuery.toLowerCase());
-        
-        const authorMatch = jsonData.author && 
+        const destinationNameMatch =
+          jsonData.destinationName &&
+          jsonData.destinationName
+            .toLowerCase()
+            .includes(searchQuery.toLowerCase());
+
+        const authorMatch =
+          jsonData.author &&
           jsonData.author.toLowerCase().includes(searchQuery.toLowerCase());
-        
+
         // Return true if either field matches
         return destinationNameMatch || authorMatch;
       } catch (error) {
@@ -93,7 +98,7 @@ const EJournal = ({ journalsData }: { journalsData: IContent[] }) => {
                 <Input
                   placeholder="Search by destination name or author"
                   size="large"
-                  className="!w-[400px] md:!w-[500px]"
+                  className="!w-full !max-w-[300px] md:!max-w-[500px]"
                   value={searchQuery}
                   onChange={(e) => setSearchQuery(e.target.value)}
                 />
