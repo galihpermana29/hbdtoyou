@@ -11,11 +11,48 @@ import { SessionData } from '@/store/iron-session';
 import { useRouter } from 'next/navigation';
 import { signIn } from 'next-auth/react';
 import { useMemoifySession } from '@/app/session-provider';
+import { useState, useEffect } from 'react';
 
 const EJournal = ({ journalsData }: { journalsData: IContent[] }) => {
   const router = useRouter();
-
   const { accessToken } = useMemoifySession();
+  
+  // State for search query and filtered journals
+  const [searchQuery, setSearchQuery] = useState('');
+  const [filteredJournals, setFilteredJournals] = useState<IContent[]>(journalsData);
+  // Filter journals based on search query
+  useEffect(() => {
+    if (!searchQuery.trim()) {
+      // If search query is empty, show all journals
+      setFilteredJournals(journalsData);
+      return;
+    }
+
+    // Filter journals based on destinationName or author in the JSON string
+    const filtered = journalsData.filter(journal => {
+      try {
+        // Parse the JSON string
+        const jsonData = JSON.parse(journal.detail_content_json_text);
+        
+        // Check if destinationName or author contains the search query (case insensitive)
+        const destinationNameMatch = jsonData.destinationName && 
+          jsonData.destinationName.toLowerCase().includes(searchQuery.toLowerCase());
+        
+        const authorMatch = jsonData.author && 
+          jsonData.author.toLowerCase().includes(searchQuery.toLowerCase());
+        
+        // Return true if either field matches
+        return destinationNameMatch || authorMatch;
+      } catch (error) {
+        // If JSON parsing fails, exclude this entry
+        console.error('Error parsing JSON:', error);
+        return false;
+      }
+    });
+
+    setFilteredJournals(filtered);
+  }, [searchQuery, journalsData]);
+
   return (
     <div>
       <div className="min-h-screen overflow-hidden">
@@ -54,15 +91,17 @@ const EJournal = ({ journalsData }: { journalsData: IContent[] }) => {
 
               <div className="my-[60px]">
                 <Input
-                  placeholder="Search a name"
+                  placeholder="Search by destination name or author"
                   size="large"
                   className="!w-[400px] md:!w-[500px]"
+                  value={searchQuery}
+                  onChange={(e) => setSearchQuery(e.target.value)}
                 />
               </div>
 
               <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 ">
-                {journalsData.length > 0
-                  ? journalsData.map((entry) => (
+                {filteredJournals.length > 0
+                  ? filteredJournals.map((entry) => (
                       <JournalCard key={entry.id} entry={entry} />
                     ))
                   : 'No Journals Available'}
