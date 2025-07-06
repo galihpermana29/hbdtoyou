@@ -2,7 +2,6 @@
 
 import React, { useEffect, useState, useRef } from 'react';
 import { motion } from 'framer-motion';
-import { JournalEntry } from '../models/data';
 import JournalLayout from '../view/JournalLayout';
 import NavigationBar from '@/components/ui/navbar';
 import dynamic from 'next/dynamic';
@@ -16,14 +15,13 @@ const ReactQuill = dynamic(() => import('react-quill'), {
 // import ReactQuill from 'react-quill';
 
 // Character limit for free users
-const MAXLENGTH = 100;
+const MAXLENGTH = 200;
 
 import 'react-quill/dist/quill.snow.css';
 import { createContent } from '@/action/user-api';
 import { useRouter } from 'next/navigation';
 import { Button, Form, Input, message, Select } from 'antd';
 import { useMemoifyProfile } from '@/app/session-provider';
-// import { Quill } from 'react-quill';
 
 const NewEntryPage: React.FC = () => {
   const [form] = Form.useForm();
@@ -77,35 +75,41 @@ const NewEntryPage: React.FC = () => {
     introduction: 0,
   });
 
-  // useEffect(() => {
-  //   // Register a custom Quill module for character counting and limiting
-  //   setTimeout(() => {
+  // 2. Create a ref to act as a flag
+  const quillModuleRegistered = useRef(false);
 
-  //   }, 4000);
-  // }, [type]);
+  useEffect(() => {
+    // Check if on the client AND if our flag is false
+    if (typeof window !== 'undefined' && !quillModuleRegistered.current) {
+      // 1. Dynamically import the core 'quill' library, not 'react-quill'
+      import('quill').then((Quill) => {
+        // 2. The default export of 'quill' is the class itself
+        Quill.default.register('modules/maxlength', function (quill, options) {
+          const fieldName = options.fieldName;
 
-  // Quill.register('modules/maxlength', function (quill: any, options: any) {
-  //   // Store the field name to update the right counter
-  //   const fieldName = options.fieldName;
+          quill.on('text-change', function () {
+            const text = quill.getText() || '';
+            const textLength = text.length - 1;
 
-  //   quill.on('text-change', function () {
-  //     // Get text without HTML tags for accurate counting
-  //     const text = quill.getText() || '';
-  //     const textLength = text.length - 1; // Subtract 1 for the trailing newline
+            setCharCounts((prev) => ({
+              ...prev,
+              [fieldName]: Math.max(0, textLength),
+            }));
 
-  //     // Update character count
-  //     // setCharCounts((prev) => ({
-  //     //   ...prev,
-  //     //   [fieldName]: Math.max(0, textLength),
-  //     // }));
+            if (type !== 'premium' && textLength > options.maxLength) {
+              quill.deleteText(
+                options.maxLength,
+                textLength - options.maxLength
+              );
+            }
+          });
+        });
 
-  //     // Enforce character limit for non-premium users
-  //     if (type !== 'premium' && textLength > options.maxLength) {
-  //       quill.deleteText(options.maxLength, textLength - options.maxLength);
-  //     }
-  //   });
-  // });
-
+        // Set the flag to true after registration
+        quillModuleRegistered.current = true;
+      });
+    }
+  }, [type]);
   return (
     <JournalLayout>
       <div className="min-h-screen overflow-hidden">
@@ -178,10 +182,10 @@ const NewEntryPage: React.FC = () => {
                           ['blockquote'],
                           ['clean'],
                         ],
-                        // maxlength: {
-                        //   maxLength: MAXLENGTH,
-                        //   fieldName: 'abstract',
-                        // },
+                        maxlength: {
+                          maxLength: MAXLENGTH,
+                          fieldName: 'abstract',
+                        },
                       }}
                       theme="snow"
                       placeholder="Write your abstract text here. This section will be displayed in one columns."
@@ -292,10 +296,10 @@ const NewEntryPage: React.FC = () => {
                           ['blockquote'],
                           ['clean'],
                         ],
-                        // maxlength: {
-                        //   maxLength: MAXLENGTH,
-                        //   fieldName: 'preamble',
-                        // },
+                        maxlength: {
+                          maxLength: MAXLENGTH,
+                          fieldName: 'preamble',
+                        },
                       }}
                       theme="snow"
                       placeholder="Write your preamble text here. This section will be displayed in one columns."
@@ -343,10 +347,10 @@ const NewEntryPage: React.FC = () => {
                           ['blockquote'],
                           ['clean'],
                         ],
-                        // maxlength: {
-                        //   maxLength: MAXLENGTH,
-                        //   fieldName: 'introduction',
-                        // },
+                        maxlength: {
+                          maxLength: MAXLENGTH,
+                          fieldName: 'introduction',
+                        },
                       }}
                       theme="snow"
                       placeholder="Write your introduction text here. This section will be displayed in two columns."
