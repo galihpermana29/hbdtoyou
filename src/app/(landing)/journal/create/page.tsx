@@ -23,7 +23,7 @@ import { createContent } from '@/action/user-api';
 import { useRouter } from 'next/navigation';
 import { Button, Form, Input, message, Select } from 'antd';
 import { useMemoifyProfile } from '@/app/session-provider';
-import { Quill } from 'react-quill';
+// import { Quill } from 'react-quill';
 
 const NewEntryPage: React.FC = () => {
   const [form] = Form.useForm();
@@ -84,27 +84,27 @@ const NewEntryPage: React.FC = () => {
   //   }, 4000);
   // }, [type]);
 
-  Quill.register('modules/maxlength', function (quill: any, options: any) {
-    // Store the field name to update the right counter
-    const fieldName = options.fieldName;
+  // Quill.register('modules/maxlength', function (quill: any, options: any) {
+  //   // Store the field name to update the right counter
+  //   const fieldName = options.fieldName;
 
-    quill.on('text-change', function () {
-      // Get text without HTML tags for accurate counting
-      const text = quill.getText() || '';
-      const textLength = text.length - 1; // Subtract 1 for the trailing newline
+  //   quill.on('text-change', function () {
+  //     // Get text without HTML tags for accurate counting
+  //     const text = quill.getText() || '';
+  //     const textLength = text.length - 1; // Subtract 1 for the trailing newline
 
-      // Update character count
-      setCharCounts((prev) => ({
-        ...prev,
-        [fieldName]: Math.max(0, textLength),
-      }));
+  //     // Update character count
+  //     // setCharCounts((prev) => ({
+  //     //   ...prev,
+  //     //   [fieldName]: Math.max(0, textLength),
+  //     // }));
 
-      // Enforce character limit for non-premium users
-      if (type !== 'premium' && textLength > options.maxLength) {
-        quill.deleteText(options.maxLength, textLength - options.maxLength);
-      }
-    });
-  });
+  //     // Enforce character limit for non-premium users
+  //     if (type !== 'premium' && textLength > options.maxLength) {
+  //       quill.deleteText(options.maxLength, textLength - options.maxLength);
+  //     }
+  //   });
+  // });
 
   return (
     <JournalLayout>
@@ -178,10 +178,10 @@ const NewEntryPage: React.FC = () => {
                           ['blockquote'],
                           ['clean'],
                         ],
-                        maxlength: {
-                          maxLength: MAXLENGTH,
-                          fieldName: 'abstract',
-                        },
+                        // maxlength: {
+                        //   maxLength: MAXLENGTH,
+                        //   fieldName: 'abstract',
+                        // },
                       }}
                       theme="snow"
                       placeholder="Write your abstract text here. This section will be displayed in one columns."
@@ -229,10 +229,10 @@ const NewEntryPage: React.FC = () => {
                           ['blockquote'],
                           ['clean'],
                         ],
-                        maxlength: {
-                          maxLength: MAXLENGTH,
-                          fieldName: 'abstractSecondary',
-                        },
+                        // maxlength: {
+                        //   maxLength: MAXLENGTH,
+                        //   fieldName: 'abstractSecondary',
+                        // },
                       }}
                       theme="snow"
                       placeholder="Write your abstract text here. This section will be displayed in one columns."
@@ -292,10 +292,10 @@ const NewEntryPage: React.FC = () => {
                           ['blockquote'],
                           ['clean'],
                         ],
-                        maxlength: {
-                          maxLength: MAXLENGTH,
-                          fieldName: 'preamble',
-                        },
+                        // maxlength: {
+                        //   maxLength: MAXLENGTH,
+                        //   fieldName: 'preamble',
+                        // },
                       }}
                       theme="snow"
                       placeholder="Write your preamble text here. This section will be displayed in one columns."
@@ -343,10 +343,10 @@ const NewEntryPage: React.FC = () => {
                           ['blockquote'],
                           ['clean'],
                         ],
-                        maxlength: {
-                          maxLength: MAXLENGTH,
-                          fieldName: 'introduction',
-                        },
+                        // maxlength: {
+                        //   maxLength: MAXLENGTH,
+                        //   fieldName: 'introduction',
+                        // },
                       }}
                       theme="snow"
                       placeholder="Write your introduction text here. This section will be displayed in two columns."
