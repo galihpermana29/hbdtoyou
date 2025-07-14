@@ -41,8 +41,9 @@ const EpisodeCard = ({
             <Image
               src={imageSrc}
               alt={imageAlt}
-              fill
-              style={{ objectFit: 'cover' }}
+              width={163}
+              height={108.88}
+              className="w-full h-full object-cover"
             />
           ) : (
             <div className="w-full h-full flex items-center justify-center text-black font-bold">
@@ -55,7 +56,8 @@ const EpisodeCard = ({
         <div className="flex flex-col gap-y-2 items-start">
           <p className="geist-font text-base text-white">
             {isComingSoon && '[Coming Soon]'}
-            {isComingSoon ? '' : `Episode ${number}: `}{title}
+            {isComingSoon ? '' : `Episode ${number}: `}
+            {title}
           </p>
           <span className="geist-font text-xs text-[#A3A1A1]">{duration}</span>
         </div>
