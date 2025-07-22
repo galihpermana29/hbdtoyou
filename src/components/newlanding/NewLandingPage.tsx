@@ -14,6 +14,7 @@ import {
   Form,
   Input,
   Carousel,
+  Badge,
 } from 'antd';
 
 import Image from 'next/image';
@@ -345,6 +346,13 @@ export default function NewLandingPage() {
 
                   <div className="flex justify-center items-end h-[215px]">
                     <Button
+                      onClick={() => {
+                        if (session.accessToken) {
+                          router.push('/create');
+                        } else {
+                          signIn('google');
+                        }
+                      }}
                       iconPosition="end"
                       size="large"
                       className="!border-[1px] !h-[48px] !bg-[#E34013] !text-[#fff] !font-[400] mt-[40px] !w-[90%] !text-[16px]">
@@ -356,9 +364,17 @@ export default function NewLandingPage() {
               <Col xs={24} sm={8}>
                 <Card className="h-full flex flex-col justify-between">
                   <div style={{ textAlign: 'center', marginBottom: '24px' }}>
-                    <h1 className="text-[#1B1B1B] font-[700] text-[36px]">
-                      Rp. 15.000,-
-                    </h1>
+                    <div>
+                      <div className="flex items-center justify-center gap-2">
+                        <h1 className="text-[#2f2f2f] font-[700] text-[20px] line-through">
+                          Rp. 30.000,-
+                        </h1>
+                        <Badge count={'30%'} />
+                      </div>
+                      <h1 className="text-[#1B1B1B] font-[700] text-[36px]">
+                        Rp. 20.000,-
+                      </h1>
+                    </div>
                     <p className="mt-[16px] text-[20px] font-[600]">
                       Premium Plan
                     </p>
@@ -399,7 +415,7 @@ export default function NewLandingPage() {
                       }}
                       iconPosition="end"
                       size="large"
-                      className="!border-[1px] !h-[48px] !bg-[#E34013] !text-[#fff] !font-[400] mt-[40px] !w-[90%] !text-[16px]">
+                      className="!border-[1px] !h-[48px] !bg-[#E34013] !text-[#fff] !font-[400] mt-[10px] !w-[90%] !text-[16px]">
                       Get Started
                     </Button>
                   </div>

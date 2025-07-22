@@ -303,7 +303,7 @@ const NewTemplates = ({ data }: { data: IAllTemplateResponse[] }) => {
                   Unlock All the features you need create beautiful custom pages
                 </p>
                 <h1 className="text-[#1B1B1B] font-[700] text-[30px] mt-[12px]">
-                  Rp. 15.000,-
+                  Rp. 20.000,-
                 </h1>
               </div>
               <List
@@ -351,7 +351,7 @@ const NewTemplates = ({ data }: { data: IAllTemplateResponse[] }) => {
                   Custom feature for professional photo studio
                 </p>
                 <h1 className="text-[#1B1B1B] font-[700] text-[30px] mt-[12px]">
-                  Rp. 35.000,-
+                  Rp. 100.000,-
                 </h1>
               </div>
               <List
@@ -412,8 +412,8 @@ const NewTemplates = ({ data }: { data: IAllTemplateResponse[] }) => {
               <Input
                 size="large"
                 placeholder="Enter your email"
-              // value={email}
-              // onChange={(e) => setEmail(e.target.value)}
+                // value={email}
+                // onChange={(e) => setEmail(e.target.value)}
               />
             </Form.Item>
             <Form.Item>
