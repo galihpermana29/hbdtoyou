@@ -1,50 +1,37 @@
 'use client';
 
-import {
-  UserProfileGreen,
-  UserProfileRed,
-  UserProfileYellow,
-} from '@/components/icons/UserProfileIcons';
+import { UserProfileGreen, UserProfileRed, UserProfileYellow } from '@/components/icons/UserProfileIcons';
 import {
   EpisodeCard,
   GalleryGrid,
-  LocationInfo,
   NetflixButton,
-  PersonCard,
-  ScheduleItem,
   SectionHeader,
   WishCard,
-  WishForm,
+  WishForm
 } from '@/components/netflix';
-import { Drawer, Form, Input } from 'antd';
+import { GraduationData } from '@/services/gemini';
+import { Form, Spin } from 'antd';
+import dayjs from 'dayjs';
+import advancedFormat from 'dayjs/plugin/advancedFormat.js';
 import Image from 'next/image';
-import { useState } from 'react';
-// Sample data for the wedding page
-const weddingData = {
-  coupleNames: 'Galih: Graduation Day',
+import { useSearchParams } from 'next/navigation';
+import { useEffect, useState } from 'react';
+dayjs.extend(advancedFormat);
+
+// Default graduation data as fallback
+const defaultGraduationData = {
+  name: 'Galih: Graduation Day',
   subtitle: 'A 4 Years of Journey to A Degree',
-  weddingDate: 'Jumat, 30 Mei 2025',
-  weddingTime: '16:00 WIB',
-  weddingPlace:
-    'Kediaman Mempelai Wanita, Jl. Kalilom Lor Indah Gang Matahari No.100',
-  weddingCity: 'Surabaya',
-  mapEmbedUrl:
+  graduationDate: 'Jumat, 30 Mei 2025',
+  graduationTime: '16:00 WIB',
+  graduationPlace: 'Universitas Brawijaya',
+  graduationCity: 'Surabaya',
+  graduationMapEmbedUrl:
     'https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d253840.49131625626!2d106.66470603628709!3d-6.2297209292163895!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x2e69f3e945e34b9d%3A0x5371bf0fdad786a2!2sJakarta%2C%20Daerah%20Khusus%20Ibukota%20Jakarta!5e0!3m2!1sid!2sid!4v1752330835231!5m2!1sid!2sid',
   storyDescription:
     'In a world where potential is the most valuable currency, a young and determined individual, armed with only a high school diploma and a flicker of ambition, embarks on the treacherous and transformative quest for a Bachelors Degree. This epic journey, fraught with sleepless nights, insurmountable debt, and the ever-present specter of self-doubt, will test their intellectual and emotional limits.',
   synopsis:
     'Along the way, they must forge alliances with wise mentors and loyal companions, battle the formidable beasts of procrastination and academic rigor, and navigate the labyrinthine corridors of university bureaucracy. As they venture deeper into the unknown, they will discover that the true reward is not merely the coveted degree, but the profound and lasting transformation of becoming a scholar, a critical thinker, and a hero in their own right.',
-  quoteText:
-    '"Dan di antara tanda-tanda (kebesaran)-Nya ialah Dia menciptakan untukmu pasangan dari jenismu sendiri agar kamu cenderung dan merasa tenteram kepadanya, dan Dia menjadikan di antaramu rasa kasih dan sayang…"',
-  quoteSource: '(Q.S Ar-Rum: 21)',
-  brideInfo: {
-    name: 'Salsa Lina Agustin',
-    parents: 'Putri dari Bapak Santoso & Ibu Susi Parlina',
-  },
-  groomInfo: {
-    name: 'Luqman Hakim',
-    parents: 'Putra dari Bapak Ahmad & Ibu Siti Aminah',
-  },
   episodes: [
     {
       number: 1,
@@ -109,13 +96,33 @@ const weddingData = {
   ],
 };
 
-const NetlfixWeddingPage = () => {
-  // Show more icon for buttons
+const GraduationFilmV1Page = () => {
+  const searchParams = useSearchParams();
+  const name = searchParams.get('name') || 'Guest';
+  const [isDrawerOpen, setIsDrawerOpen] = useState(false);
+  const [form] = Form.useForm();
+  const [loading, setLoading] = useState(true);
+  const [graduationData, setGraduationData] = useState<GraduationData | null>(null);
 
-  const [open, setOpen] = useState(false);
+  useEffect(() => {
+    // Try to load graduation data from localStorage
+    const storedData = localStorage.getItem('graduationData');
+    if (storedData) {
+      try {
+        const parsedData = JSON.parse(storedData);
+        setGraduationData(parsedData);
+      } catch (error) {
+        setGraduationData(defaultGraduationData as GraduationData);
+      }
+    } else {
+      // If no data in localStorage, use default data
+      setGraduationData(defaultGraduationData as GraduationData);
+    }
+    setLoading(false);
+  }, []);
 
   const onClose = () => {
-    setOpen(false);
+    setIsDrawerOpen(false);
   };
 
   const showMoreIcon = (
@@ -141,47 +148,127 @@ const NetlfixWeddingPage = () => {
     message: string;
   }) => {
     // This would typically send the data to an API
-    console.log('Submitted wish:', values);
     return Promise.resolve();
   };
 
+  if (loading || !graduationData) {
+    return (
+      <div className="min-h-screen bg-black flex items-center justify-center">
+        <Spin size="large" />
+      </div>
+    );
+  }
+
   return (
     <div className="w-full min-h-screen bg-black">
-      <Drawer
-        mask={false}
-        title="Album Graduation Form"
-        placement={'left'}
-        closable={false}
-        onClose={onClose}
-        styles={{
-          body: {
-            backgroundColor: '#18181B',
-            color: 'white',
-          },
-          header: {
-            backgroundColor: '#18181B',
-            color: 'white',
-          },
-          content: {
-            backgroundColor: '#18181B',
-            color: 'white',
-          },
-        }}
-        width={470}
-        open={true}>
-        <Form layout="vertical">
-          <Form.Item
-            name="name"
-            label={<p className="geist-font text-base text-white">Name</p>}
-            rules={[{ required: true }]}>
-            <Input placeholder="Name" />
-          </Form.Item>
-        </Form>
-      </Drawer>
-      <div className="ml-[470px]">
-        <div className="mx-auto bg-black max-w-[440px] h-full px-4 b">
-          {/* Video */}
-          <div className="w-[408px] h-[408px] mb-3">
+      <div className="mx-auto bg-black max-w-[440px] h-full px-4 b">
+        {/* Video */}
+        <div className="w-[408px] h-[408px] mb-3">
+          <Image
+            width={408}
+            height={408}
+            alt="Graduation video"
+            src="https://res.cloudinary.com/dqipjpy1w/image/upload/v1752511962/DSC00257_sk67bh.jpg"
+            className="w-full h-full object-cover"
+          />
+        </div>
+
+        {/* Title */}
+        <div className="flex flex-col gap-y-3 items-start mb-3">
+          <div className="flex items-center gap-x-2">
+            <Image
+              src="/Nikahfix.svg"
+              width={10}
+              height={18}
+              alt="netflix logo"
+            />
+            <span className="text-[#A3A1A1] text-xs">DOCUMENTER</span>
+          </div>
+          <div className="flex flex-col gap-y-1 items-start">
+            <h1 className="font-bold text-2xl text-white geist-font">
+              {graduationData.name}
+            </h1>
+            <p className="text-base text-white geist-font">
+              {graduationData.subtitle}
+            </p>
+          </div>
+          <div className="flex items-center gap-x-2">
+            <Image
+              src="/Top10Icon.svg"
+              width={20}
+              height={21}
+              alt="top 10 logo"
+            />
+            <h2 className="text-[#D1D5DB] text-xl geist-font">
+              Best Graduate (Cumlaude)
+            </h2>
+          </div>
+          <div className="flex items-center gap-x-2 text-white">
+            <span className="text-[#22C55E] font-medium text-base geist-font">
+              100% match
+            </span>
+            <div className="w-[39px] h-[22px] px-[11px] py-[3px] bg-[#4B5563] rounded-full flex items-center justify-center font-semibold text-xs geist-font">
+              SU
+            </div>
+            <span className="text-base geist-font">2025</span>
+            <span className="text-base geist-font">
+              {graduationData.graduationTime} - Drop
+            </span>
+            <Image
+              width={20}
+              height={20}
+              alt="4k full hd icon"
+              src="/4KIcon.svg"
+            />
+            <Image
+              width={20}
+              height={20}
+              alt="4k full hd icon"
+              src="/HDIcon.svg"
+            />
+          </div>
+        </div>
+
+        {/* Buttons */}
+        <div className="flex flex-col gap-y-2 mb-3">
+          <NetflixButton
+            variant="primary"
+            className="!px-6 !py-3 !h-fit"
+            icon={
+              <Image
+                src="/CalendarIcon.svg"
+                width={20}
+                height={20}
+                alt="Calendar Icon"
+              />
+            }>
+            {dayjs(graduationData.graduationDate).format('Do MMM')}
+          </NetflixButton>
+
+          <NetflixButton
+            variant="secondary"
+            className="!px-6 !py-3 !h-fit"
+            icon={
+              <Image
+                src="/LocationIcon.svg"
+                width={20}
+                height={20}
+                alt="Location Icon"
+              />
+            }>
+            {graduationData.graduationPlace}
+          </NetflixButton>
+        </div>
+
+        {/* Quote */}
+        <div className="flex flex-col gap-y-3 text-white mb-3">
+          <p className="text-lg geist-font">{graduationData.storyDescription}</p>
+        </div>
+
+        {/* Synopsis */}
+        <div className="flex flex-col items-start gap-y-3 text-white mb-3">
+          <SectionHeader title="Synopsis" />
+          <div className="w-full h-[228px]">
             <Image
               width={408}
               height={408}
@@ -190,190 +277,84 @@ const NetlfixWeddingPage = () => {
               className="w-full h-full object-cover"
             />
           </div>
-
-          {/* Title */}
-          <div className="flex flex-col gap-y-3 items-start mb-3">
-            <div className="flex items-center gap-x-2">
-              <Image
-                src="/Nikahfix.svg"
-                width={10}
-                height={18}
-                alt="netflix logo"
-              />
-              <span className="text-[#A3A1A1] text-xs">DOCUMENTER</span>
-            </div>
-            <div className="flex flex-col gap-y-1 items-start">
-              <h1 className="font-bold text-2xl text-white geist-font">
-                {weddingData.coupleNames}
-              </h1>
-              <p className="text-base text-white geist-font">
-                {weddingData.subtitle}
-              </p>
-            </div>
-            <div className="flex items-center gap-x-2">
-              <Image
-                src="/Top10Icon.svg"
-                width={20}
-                height={21}
-                alt="top 10 logo"
-              />
-              <h2 className="text-[#D1D5DB] text-xl geist-font">
-                Best Graduate (Cumlaude)
-              </h2>
-            </div>
-            <div className="flex items-center gap-x-2 text-white">
-              <span className="text-[#22C55E] font-medium text-base geist-font">
-                100% match
-              </span>
-              <div className="w-[39px] h-[22px] px-[11px] py-[3px] bg-[#4B5563] rounded-full flex items-center justify-center font-semibold text-xs geist-font">
-                SU
-              </div>
-              <span className="text-base geist-font">2025</span>
-              <span className="text-base geist-font">
-                {weddingData.weddingTime} - Drop
-              </span>
-              <Image
-                width={20}
-                height={20}
-                alt="4k full hd icon"
-                src="/4KIcon.svg"
-              />
-              <Image
-                width={20}
-                height={20}
-                alt="4k full hd icon"
-                src="/HDIcon.svg"
-              />
-            </div>
-          </div>
-
-          {/* Buttons */}
-          <div className="flex flex-col gap-y-2 mb-3">
-            <NetflixButton
-              variant="primary"
-              className="!px-6 !py-3 !h-fit"
-              icon={
-                <Image
-                  src="/CalendarIcon.svg"
-                  width={20}
-                  height={20}
-                  alt="Calendar Icon"
-                />
-              }>
-              30th May
-            </NetflixButton>
-
-            <NetflixButton
-              variant="secondary"
-              className="!px-6 !py-3 !h-fit"
-              icon={
-                <Image
-                  src="/LocationIcon.svg"
-                  width={20}
-                  height={20}
-                  alt="Location Icon"
-                />
-              }>
-              Universitas Brawijaya
-            </NetflixButton>
-          </div>
-
-          {/* Quote */}
-          <div className="flex flex-col gap-y-3 text-white mb-3">
-            <p className="text-lg geist-font">{weddingData.storyDescription}</p>
-          </div>
-
-          {/* Synopsis */}
-          <div className="flex flex-col items-start gap-y-3 text-white mb-3">
-            <SectionHeader title="Synopsis" />
-            <div className="w-full h-[228px]">
-              <Image
-                width={408}
-                height={408}
-                alt="Graduation video"
-                src="https://res.cloudinary.com/dqipjpy1w/image/upload/v1752511962/DSC00257_sk67bh.jpg"
-                className="w-full h-full object-cover"
-              />
-            </div>
-            <p className="text-lg geist-font">{weddingData.synopsis}</p>
-            <NetflixButton
-              variant="text"
-              icon={showMoreIcon}
-              iconPosition="end">
-              Show More
-            </NetflixButton>
-          </div>
-
-          {/* Episode */}
-          <div className="flex flex-col items-start gap-y-3 mb-3">
-            <SectionHeader title="Episode" subtitle="The Story of Our Love" />
-
-            {weddingData.episodes.map((episode, index) => (
-              <EpisodeCard
-                key={index}
-                number={episode.number}
-                title={episode.title}
-                duration={episode.duration}
-                description={episode.description}
-                isComingSoon={episode.number === weddingData.episodes.length}
-                imageSrc={episode.image}
-                imageAlt={episode.title}
-              />
-            ))}
-          </div>
-
-          {/* Our Gallery */}
-          <div className="flex flex-col items-start gap-y-3 w-full mb-3">
-            <SectionHeader title="Our Gallery" />
-            <GalleryGrid images={weddingData.galleryImages} initialLimit={6} />
-            <NetflixButton
-              variant="text"
-              icon={showMoreIcon}
-              iconPosition="end">
-              Show More
-            </NetflixButton>
-          </div>
-
-          {/* Wish for the couple */}
-          <div className="flex flex-col items-start gap-y-3 w-full mb-3">
-            <SectionHeader
-              title="Graduation Wishes"
-              rightElement={
-                <Image
-                  width={30}
-                  height={30}
-                  alt="Info icon"
-                  src="/InfoIcon.svg"
-                />
-              }
-            />
-
-            <div className="flex flex-col gap-y-2 items-start w-full">
-              {weddingData.wishes.map((wish, index) => {
-                const profileIcon = {
-                  green: <UserProfileGreen />,
-                  yellow: <UserProfileYellow />,
-                  red: <UserProfileRed />,
-                }[wish.profileType];
-
-                return (
-                  <WishCard
-                    key={index}
-                    name={wish.name}
-                    message={wish.message}
-                    profileIcon={profileIcon}
-                  />
-                );
-              })}
-            </div>
-          </div>
-
-          {/* Form Submit */}
-          <WishForm onSubmit={handleWishSubmit} />
+          <p className="text-lg geist-font">{graduationData.synopsis}</p>
+          <NetflixButton
+            variant="text"
+            icon={showMoreIcon}
+            iconPosition="end">
+            Show More
+          </NetflixButton>
         </div>
+
+        {/* Episode */}
+        <div className="flex flex-col items-start gap-y-3 mb-3">
+          <SectionHeader title="Episode" subtitle={`The Story of ${graduationData.name}`} />
+
+          {graduationData.episodes.map((episode, index) => (
+            <EpisodeCard
+              key={index}
+              number={episode.number}
+              title={episode.title}
+              duration={episode.duration}
+              description={episode.description}
+              isComingSoon={episode.number === graduationData.episodes.length}
+              imageSrc={episode.image}
+              imageAlt={episode.title}
+            />
+          ))}
+        </div>
+
+        {/* Our Gallery */}
+        <div className="flex flex-col items-start gap-y-3 w-full mb-3">
+          <SectionHeader title="Our Gallery" />
+          <GalleryGrid images={graduationData.galleryImages} initialLimit={6} />
+          <NetflixButton
+            variant="text"
+            icon={showMoreIcon}
+            iconPosition="end">
+            Show More
+          </NetflixButton>
+        </div>
+
+        {/* Wish for the couple */}
+        <div className="flex flex-col items-start gap-y-3 w-full mb-3">
+          <SectionHeader
+            title="Graduation Wishes"
+            rightElement={
+              <Image
+                width={30}
+                height={30}
+                alt="Info icon"
+                src="/InfoIcon.svg"
+              />
+            }
+          />
+
+          <div className="flex flex-col gap-y-2 items-start w-full">
+            {graduationData.wishes.map((wish, index) => {
+              const profileIcon = {
+                green: <UserProfileGreen />,
+                yellow: <UserProfileYellow />,
+                red: <UserProfileRed />,
+              }[wish.profileType];
+
+              return (
+                <WishCard
+                  key={index}
+                  name={wish.name}
+                  message={wish.message}
+                  profileIcon={profileIcon}
+                />
+              );
+            })}
+          </div>
+        </div>
+
+        {/* Form Submit */}
+        <WishForm onSubmit={handleWishSubmit} />
       </div>
     </div>
   );
 };
 
-export default NetlfixWeddingPage;
+export default GraduationFilmV1Page;

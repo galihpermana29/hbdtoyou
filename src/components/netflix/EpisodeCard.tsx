@@ -55,7 +55,11 @@ const EpisodeCard = ({
         {/* Episode info */}
         <div className="flex flex-col gap-y-2 items-start">
           <p className="geist-font text-base text-white">
-            {isComingSoon && '[Coming Soon]'}
+            {isComingSoon && (
+  <>
+    [Coming Soon] <br />
+  </>
+)}
             {isComingSoon ? '' : `Episode ${number}: `}
             {title}
           </p>

@@ -2,6 +2,7 @@ import './globals.css';
 import { AntdRegistry } from '@ant-design/nextjs-registry';
 import { getSession } from '@/store/get-set-session';
 import SessionProvider from './session-provider';
+import QueryProvider from './query-provider';
 import { Analytics } from '@vercel/analytics/react';
 
 export default async function RootLayout({
@@ -22,7 +23,9 @@ export default async function RootLayout({
         <AntdRegistry>
           <Analytics />
           <SessionProvider session={JSON.stringify(session)}>
-            {children}
+            <QueryProvider>
+              {children}
+            </QueryProvider>
           </SessionProvider>
         </AntdRegistry>
       </body>
