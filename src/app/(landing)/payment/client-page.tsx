@@ -179,7 +179,7 @@ const PaymentQRIS = () => {
                     <span className="font-bold">unlimited photobox frames</span>
                     ,{' '}
                     <span className="font-bold">6 credit to use templates</span>{' '}
-                    with only <span className="font-bold"> IDR 15.000</span>
+                    with only <span className="font-bold"> IDR 20.000</span>
                   </p>
 
                   <div className="flex flex-col gap-2">
