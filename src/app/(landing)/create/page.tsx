@@ -44,8 +44,8 @@ const CreatePageServer = () => {
             Under Maintenance
           </h1>
           <p className="text-gray-700 mt-4 max-w-[400px]">
-            We're currently working on improving this feature. Please check back
-            soon!
+            We are currently working on improving this feature. Please check
+            back soon!
           </p>
 
           <div className="mt-6">
