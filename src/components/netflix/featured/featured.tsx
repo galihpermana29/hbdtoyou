@@ -9,7 +9,7 @@ import { Tour, TourProps } from 'antd';
 import { usePathname, useRouter, useSearchParams } from 'next/navigation';
 import TruncateText from '@/components/newlanding/TruncateText';
 import { addLineBreaksEveryThreeSentences } from '@/lib/utils';
-
+import noImage from '@/assets/empty.png';
 export default function Featured({
   title,
   subTitle,
@@ -112,7 +112,7 @@ export default function Featured({
         <div className="w-full max-w-3xl h-[80vh] overflow-y-auto bg-black rounded-lg p-4 ">
           <div className="w-full h-[400px] relative">
             <Image
-              src={jumbotronImage ?? widya}
+              src={jumbotronImage ?? noImage}
               alt="Widya"
               layout="fill"
               objectFit="cover"
