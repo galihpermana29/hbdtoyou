@@ -3,15 +3,15 @@ import NewTemplates from '@/components/newlanding/NewTemplates';
 import { Metadata } from 'next';
 
 export const metadata: Metadata = {
-  title: 'Templates Collection | Memoify',
+  title: 'Digital Gift, Scrapbook & Album Templates | Memoify',
   description:
-    'Explore our full collection of website templates inspired by Netflix, Spotify, YouTube and more. Find the perfect design to showcase your memories in style.',
+    'Explore our full collection of digital gift, digital scrapbook, and digital album templates inspired by Netflix, Spotify, YouTube and more. Find the perfect design to showcase your memories in style.',
   keywords:
-    'templates, Netflix templates, Spotify templates, YouTube templates, custom websites, digital memories, Memoify',
+    'digital gift, digital scrapbook, digital album, virtual present, online gift, electronic memory book, digital photo collection, memory collection, virtual album, online scrapbook, e-gift, hadiah ulang tahun digital, kado digital, scrapbook digital, album foto digital, kenangan digital, kado online, templates, Netflix templates, Spotify templates, YouTube templates, custom websites, digital memories, Memoify',
   openGraph: {
-    title: 'Templates Collection | Memoify',
+    title: 'Digital Gift, Scrapbook & Album Templates | Memoify',
     description:
-      'Explore our full collection of website templates inspired by Netflix, Spotify, YouTube and more. Find the perfect design to showcase your memories in style.',
+      'Explore our full collection of digital gift, digital scrapbook, and digital album templates inspired by Netflix, Spotify, YouTube and more. Find the perfect design to showcase your memories in style.',
     url: 'https://memoify.live/templates',
     siteName: 'Memoify',
     images: [
@@ -27,9 +27,9 @@ export const metadata: Metadata = {
   },
   twitter: {
     card: 'summary_large_image',
-    title: 'Templates Collection | Memoify',
+    title: 'Digital Gift, Scrapbook & Album Templates | Memoify',
     description:
-      'Explore our full collection of website templates inspired by Netflix, Spotify, YouTube and more. Find the perfect design to showcase your memories in style.',
+      'Explore our full collection of digital gift, digital scrapbook, and digital album templates inspired by Netflix, Spotify, YouTube and more. Find the perfect design to showcase your memories in style.',
     images: [
       'https://res.cloudinary.com/dqipjpy1w/image/upload/v1751300212/e47b9e53-9631-4638-9393-ec8ed7b3bdb5.png',
     ],

@@ -4,15 +4,15 @@ import { Metadata } from 'next';
 import EJournal from './pageClient';
 
 export const metadata: Metadata = {
-  title: 'Personal Journal | Memoify',
+  title: 'Personal Journal Digital Gift | Memoify',
   description:
-    "Create and publish your personal journal with academic formatting. Document life's moments with the structure and formality of scholarly articles.",
+    "Create and publish your personal journal as a digital gift, digital scrapbook, or digital album with academic formatting. Document life's moments with the structure and formality of scholarly articles.",
   keywords:
-    'personal journal, digital journal, academic journal, life moments, document memories, Memoify',
+    'digital gift, digital scrapbook, digital album, virtual present, online gift, electronic memory book, digital photo collection, memory collection, virtual album, online scrapbook, e-gift, hadiah ulang tahun digital, kado digital, scrapbook digital, album foto digital, kenangan digital, kado online, jurnal digital, buku harian digital, personal journal, digital journal, academic journal, life moments, document memories, Memoify',
   openGraph: {
-    title: 'Personal Journal | Memoify',
+    title: 'Personal Journal Digital Gift | Memoify',
     description:
-      "Create and publish your personal journal with academic formatting. Document life's moments with the structure and formality of scholarly articles.",
+      "Create and publish your personal journal as a digital gift, digital scrapbook, or digital album with academic formatting. Document life's moments with the structure and formality of scholarly articles.",
     url: 'https://memoify.live/journal',
     siteName: 'Memoify',
     images: [
@@ -28,9 +28,9 @@ export const metadata: Metadata = {
   },
   twitter: {
     card: 'summary_large_image',
-    title: 'Personal Journal | Memoify',
+    title: 'Personal Journal Digital Gift | Memoify',
     description:
-      "Create and publish your personal journal with academic formatting. Document life's moments with the structure and formality of scholarly articles.",
+      "Create and publish your personal journal as a digital gift, digital scrapbook, or digital album with academic formatting. Document life's moments with the structure and formality of scholarly articles.",
     images: [
       'https://res.cloudinary.com/dqipjpy1w/image/upload/v1751300293/6ad37e37-d0f6-497c-b81f-56d68869b7a3.png',
     ],
