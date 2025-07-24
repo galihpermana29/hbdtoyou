@@ -7,12 +7,12 @@ import Link from 'next/link';
 import { Metadata } from 'next';
 
 export const metadata: Metadata = {
-  title: 'Browse Templates | Memoify',
-  description: 'Explore our collection of templates inspired by Netflix, Spotify, YouTube and more. Find the perfect design to showcase your memories in style.',
-  keywords: 'templates, Netflix templates, Spotify templates, YouTube templates, custom websites, digital memories, Memoify',
+  title: 'Browse Digital Gifts, Scrapbooks & Albums | Memoify',
+  description: 'Explore our collection of digital gift, digital scrapbook, and digital album templates inspired by Netflix, Spotify, YouTube and more. Find the perfect design to showcase your memories in style.',
+  keywords: 'digital gift, digital scrapbook, digital album, virtual present, online gift, electronic memory book, digital photo collection, memory collection, virtual album, online scrapbook, e-gift, hadiah ulang tahun digital, kado digital, scrapbook digital, album foto digital, kenangan digital, kado online, templates, Netflix templates, Spotify templates, YouTube templates, custom websites, digital memories, Memoify',
   openGraph: {
-    title: 'Browse Templates | Memoify',
-    description: 'Explore our collection of templates inspired by Netflix, Spotify, YouTube and more. Find the perfect design to showcase your memories in style.',
+    title: 'Browse Digital Gifts, Scrapbooks & Albums | Memoify',
+    description: 'Explore our collection of digital gift, digital scrapbook, and digital album templates inspired by Netflix, Spotify, YouTube and more. Find the perfect design to showcase your memories in style.',
     url: 'https://memoify.live/browse',
     siteName: 'Memoify',
     images: [
@@ -28,8 +28,8 @@ export const metadata: Metadata = {
   },
   twitter: {
     card: 'summary_large_image',
-    title: 'Browse Templates | Memoify',
-    description: 'Explore our collection of templates inspired by Netflix, Spotify, YouTube and more. Find the perfect design to showcase your memories in style.',
+    title: 'Browse Digital Gifts, Scrapbooks & Albums | Memoify',
+    description: 'Explore our collection of digital gift, digital scrapbook, and digital album templates inspired by Netflix, Spotify, YouTube and more. Find the perfect design to showcase your memories in style.',
     images: ['https://res.cloudinary.com/dqipjpy1w/image/upload/v1751298448/brave_screenshot_memoify.live_mhwzfs.png'],
   },
 };

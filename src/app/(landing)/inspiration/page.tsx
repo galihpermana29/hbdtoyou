@@ -5,15 +5,15 @@ import NavigationBar from '@/components/ui/navbar';
 import { Metadata } from 'next';
 
 export const metadata: Metadata = {
-  title: 'Inspiration Gallery | Memoify',
+  title: 'Digital Gift, Scrapbook & Album Inspiration Gallery | Memoify',
   description:
-    'Explore our inspiration gallery showcasing custom websites created with Memoify templates. Get ideas for your own website inspired by Netflix, Spotify, YouTube and more.',
+    'Explore our inspiration gallery showcasing digital gifts, digital scrapbooks, and digital albums created with Memoify templates. Get ideas for your own personalized creations inspired by Netflix, Spotify, YouTube and more.',
   keywords:
-    'inspiration gallery, website examples, custom websites, Netflix templates, Spotify templates, YouTube templates, Memoify',
+    'digital gift, digital scrapbook, digital album, virtual present, online gift, electronic memory book, digital photo collection, memory collection, virtual album, online scrapbook, e-gift, hadiah ulang tahun digital, kado digital, scrapbook digital, album foto digital, kenangan digital, kado online, inspiration gallery, website examples, custom websites, Netflix templates, Spotify templates, YouTube templates, Memoify',
   openGraph: {
-    title: 'Inspiration Gallery | Memoify',
+    title: 'Digital Gift, Scrapbook & Album Inspiration Gallery | Memoify',
     description:
-      'Explore our inspiration gallery showcasing custom websites created with Memoify templates. Get ideas for your own website inspired by Netflix, Spotify, YouTube and more.',
+      'Explore our inspiration gallery showcasing digital gifts, digital scrapbooks, and digital albums created with Memoify templates. Get ideas for your own personalized creations inspired by Netflix, Spotify, YouTube and more.',
     url: 'https://memoify.live/inspiration',
     siteName: 'Memoify',
     images: [
@@ -29,9 +29,9 @@ export const metadata: Metadata = {
   },
   twitter: {
     card: 'summary_large_image',
-    title: 'Inspiration Gallery | Memoify',
+    title: 'Digital Gift, Scrapbook & Album Inspiration Gallery | Memoify',
     description:
-      'Explore our inspiration gallery showcasing custom websites created with Memoify templates. Get ideas for your own website inspired by Netflix, Spotify, YouTube and more.',
+      'Explore our inspiration gallery showcasing digital gifts, digital scrapbooks, and digital albums created with Memoify templates. Get ideas for your own personalized creations inspired by Netflix, Spotify, YouTube and more.',
     images: [
       'https://res.cloudinary.com/dqipjpy1w/image/upload/v1751299237/2fd7834c-6ddf-4d78-b625-028c40a32a34.png',
     ],
