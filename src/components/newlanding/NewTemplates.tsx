@@ -135,12 +135,14 @@ const NewTemplates = ({ data }: { data: IAllTemplateResponse[] }) => {
                   size="large">
                   Create yours
                 </Button>
-                <a href="#demos">
+                <a
+                  href="https://youtu.be/kcRafcMSyHI?si=FA-0xF_R_8XXbbs3"
+                  target="_blank">
                   <Button
                     icon={<CirclePlay />}
                     size="large"
                     className="!border-[1px] !border-[#E34013] !text-[#E34013] !font-[600] !h-[48px] md:!h-[60px] !w-[250px]">
-                    Watch demo
+                    How to create
                   </Button>
                 </a>
               </div>
