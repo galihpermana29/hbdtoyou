@@ -2,16 +2,15 @@
 
 import NavigationBar from '@/components/ui/navbar';
 // dynamic
-import dynamic from 'next/dynamic';
-const JournalCard = dynamic(() => import('./view/JournalCard'), { ssr: false });
-import { Button, Input } from 'antd';
 import { IContent } from '@/action/interfaces';
-import { IronSession } from 'iron-session';
-import { SessionData } from '@/store/iron-session';
-import { useRouter } from 'next/navigation';
-import { signIn } from 'next-auth/react';
 import { useMemoifySession } from '@/app/session-provider';
-import { useState, useEffect } from 'react';
+import { Button, Input, Typography } from 'antd';
+import { SearchIcon } from 'lucide-react';
+import dynamic from 'next/dynamic';
+import Image from 'next/image';
+import { useRouter } from 'next/navigation';
+import { useEffect, useState } from 'react';
+const JournalCard = dynamic(() => import('./view/JournalCard'), { ssr: false });
 
 const EJournal = ({ journalsData }: { journalsData: IContent[] }) => {
   const router = useRouter();
@@ -21,6 +20,26 @@ const EJournal = ({ journalsData }: { journalsData: IContent[] }) => {
   const [searchQuery, setSearchQuery] = useState('');
   const [filteredJournals, setFilteredJournals] =
     useState<IContent[]>(journalsData);
+  const [activeFeature, setActiveFeature] = useState(0);
+
+  const features = [
+    {
+      title: 'Abstract-level emotions',
+      description:
+        'Open your message with a scholarly abstract. Summarize your deepest feelings in 2-3 lines that sound like they belong in a peer-reviewed journal.',
+    },
+    {
+      title: 'Structured like a thesis',
+      description:
+        'From Preamble to Conclusion, every part of your letter follows a research paper format.',
+    },
+    {
+      title: 'Print, publish, or present',
+      description:
+        'Easily publish your journal online, or print it like it’s your final submission to the Journal of Emotional Communication.',
+    },
+  ];
+
   // Filter journals based on search query
   useEffect(() => {
     if (!searchQuery.trim()) {
@@ -59,59 +78,167 @@ const EJournal = ({ journalsData }: { journalsData: IContent[] }) => {
   }, [searchQuery, journalsData]);
 
   return (
-    <div>
-      <div className="min-h-screen overflow-hidden">
-        <div className="fixed top-0 left-0 w-full z-10 ">
-          <NavigationBar />
+    <div className="w-screen">
+      <div className="sticky top-0 left-0 w-full z-40 ">
+        <NavigationBar />
+      </div>
+      <div className="flex flex-col">
+        <div className="flex flex-col items-center justify-center pt-24 pb-16 bg-[#FFF6F5] relative">
+          <div className="flex flex-col items-center justify-center px-8 mx-auto w-full">
+            <div className="flex flex-col items-center justify-center gap-y-12 max-w-5xl">
+              <div className="mx-auto flex flex-col items-center justify-center gap-y-6">
+                <h1 className="text-center text-[#1B1B1B] font-semibold text-6xl inter-font leading-[72px] tracking-[-2%]">
+                  Write a simple love, apology, or birthday letter like a
+                  research paper.
+                </h1>
+                <p className="text-[#7B7B7B] text-xl font-normal inter-font max-w-3xl text-center">
+                  Translating Deep Emotions into Academic Format: A Case Study
+                  in Heartfelt Communication
+                </p>
+              </div>
+              <Button
+                type="primary"
+                className="!px-[22px] !py-4 !bg-[#E34013] !text-white !h-[60px] !rounded-lg !font-semibold !text-lg relative z-30">
+                Publish a Journal
+              </Button>
+            </div>
+          </div>
         </div>
-        <div className="mt-[81px]">
-          <div className="py-[30px] md:py-[90px] flex flex-col text-center items-center mx-auto max-w-6xl 2xl:max-w-7xl px-[20px] min-h-screen">
-            <div>
-              <p className="mt-[16px] font-[700] text-[35px] max-w-[1000px] mx-auto md:text-[50px] lg:text-[60px] leading-[1.2]">
-                Confess your feelings, apologize or write a birthday letter like
-                a scholar journal
-              </p>
-              <p className="text-[16px] md:text-[20px] max-w-[768px] mx-auto font-[400] leading-[30px] text-[#7B7B7B] mt-[24px] mb-[48px]">
-                Search, create and publish your own letter
-              </p>
+        <div className="relative w-full h-fit z-20 pb-24">
+          <Image
+            src="/MacbookProMockup.png"
+            alt="Memoify Live Scrapboox Hero"
+            className="max-w-3xl w-full h-full mx-auto"
+            width={0}
+            height={0}
+            quality={100}
+            loading="eager"
+            priority
+          />
+          <Image
+            src="/scrapbook-background-pattern.svg"
+            alt=""
+            className="w-full h-full absolute -top-1/4 -z-10"
+            width={0}
+            height={0}
+            quality={100}
+            loading="eager"
+            priority
+          />
+        </div>
+        <div className="w-full py-24 bg-white">
+          <div className="max-w-7xl mx-auto px-8">
+            <div className="flex flex-col">
+              <Typography.Text className="!text-[#E55A3B] !font-semibold !text-base !mb-3">
+                Features
+              </Typography.Text>
 
-              <div className="max-w-[600px] flex-1 mt-[20px] md:mt-0 mx-auto">
-                <div className="flex flex-col gap-[20px] md:flex-row justify-center items-center">
+              <Typography.Title
+                level={2}
+                className="!text-4xl !font-semibold !text-[#1B1B1B] !mb-5 !leading-tight !mt-0 !max-w-[624px]">
+                Make your journal truly yours
+              </Typography.Title>
+              <Typography.Paragraph className="!text-[#7B7B7B] !text-xl !leading-relaxed !max-w-[581px] !font-normal">
+                From writing heartfelt entries your personal journal becomes a
+                deeply personal reflection of your life and memories.
+              </Typography.Paragraph>
+
+              <div className="flex gap-x-16 pt-16">
+                <div className="flex flex-col gap-y-10 items-start">
+                  <div className="flex flex-col items-start max-w-[560px]">
+                    {features.map((feature, index) => (
+                      <div
+                        key={index}
+                        className={`w-full pl-6 py-4 border-[4px] border-y-0 border-r-0 cursor-pointer transition-all duration-300 ${activeFeature === index
+                          ? 'border-l-[#E34013]'
+                          : 'border-l-[#F2F4F7] hover:border-l-[#E34013]/50'
+                          }`}
+                        onClick={() => setActiveFeature(index)}>
+                        <div className="flex flex-col gap-y-2 items-start">
+                          <Typography.Title
+                            level={4}
+                            className="!text-xl !font-semibold !text-[#1B1B1B] !mb-0">
+                            {feature.title}
+                          </Typography.Title>
+                          <Typography.Paragraph className="!text-[#7B7B7B] !leading-relaxed !text-base !mb-0 !font-normal">
+                            {feature.description}
+                          </Typography.Paragraph>
+                        </div>
+                      </div>
+                    ))}
+                  </div>
                   <Button
-                    onClick={() => {
-                      if (accessToken) {
-                        router.push('/journal/create');
-                      } else {
-                        signIn('google');
-                      }
-                    }}
-                    className="!bg-[#fff] !text-[#E34013] !border-[1px] 
-                    !border-[#E34013] !rounded-[8px] !text-[16px] !font-[600] !h-[48px] md:!h-[60px] !w-[250px]"
-                    type="default"
-                    size="large">
+                    type="primary"
+                    size="large"
+                    className="!bg-[#E55A3B] !border-[#E55A3B] !rounded-lg !h-12 !px-7 !py-3 !w-fit !text-base !font-semibold">
                     Publish a Journal
                   </Button>
                 </div>
               </div>
-
-              <div className="my-[60px]">
-                <Input
-                  placeholder="Search by destination name or author"
-                  size="large"
-                  className="!w-full !max-w-[300px] md:!max-w-[500px]"
-                  value={searchQuery}
-                  onChange={(e) => setSearchQuery(e.target.value)}
-                />
-              </div>
-
-              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 ">
-                {filteredJournals.length > 0
-                  ? filteredJournals.map((entry) => (
-                      <JournalCard key={entry.id} entry={entry} />
-                    ))
-                  : 'No Journals Available'}
-              </div>
             </div>
+          </div>
+        </div>
+      </div>
+      <div className="py-[30px] md:py-24 flex flex-col text-center items-center min-h-screen bg-[#F9FAFB] w-full gap-y-24">
+        <div className="max-w-7xl mx-auto w-full px-8">
+          <div className="flex items-start gap-x-4 border border-solid border-b-[#EAECF0] border-x-0 border-t-0 self-stretch">
+            <div className="text-start flex flex-col gap-y-1 flex-1 w-full pb-8">
+              <p className="font-semibold text-lg text-[#1B1B1B]">
+                Published Journal
+              </p>
+              <p className="font-normal text-[#7B7B7B] text-sm">
+                A Case Study in Heartfelt Communication
+              </p>
+            </div>
+            <Input
+              placeholder="Search journal"
+              size="large"
+              className="!w-full !max-w-80"
+              value={searchQuery}
+              onChange={(e) => setSearchQuery(e.target.value)}
+              prefix={<SearchIcon className="text-[#667085]" />}
+            />
+          </div>
+        </div>
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 max-w-7xl mx-auto w-full px-8">
+          {filteredJournals.length > 0
+            ? filteredJournals.map((entry) => (
+              <JournalCard key={entry.id} entry={entry} />
+            ))
+            : 'No Journals Available'}
+        </div>
+      </div>
+      <div className="w-full py-24">
+        <div className="max-w-4xl mx-auto px-8 text-center">
+          <Typography.Title
+            level={2}
+            className="!text-4xl !font-semibold !text-[#1B1B1B] !mb-5 !leading-tight !mt-0 !inter-font"
+          >
+            We'll send you a new template update
+          </Typography.Title>
+
+          <Typography.Paragraph className="!text-[#7B7B7B] !text-xl !leading-relaxed !mb-12 !font-normal max-w-2xl mx-auto">
+            No spam. Just the latest releases and new template, interesting inspiration, and
+            exclusive interviews with great people.
+          </Typography.Paragraph>
+
+          <div className="flex flex-col sm:flex-row gap-4 justify-center items-center max-w-md mx-auto">
+            <Input
+              placeholder="Enter your email"
+              size="large"
+              className="!h-12 !rounded-lg !border-[#D0D5DD] !text-base flex-1"
+              style={{
+                fontSize: '16px',
+                fontWeight: 'normal'
+              }}
+            />
+            <Button
+              type="primary"
+              size="large"
+              className="!bg-[#E55A3B] !border-[#E55A3B] hover:!bg-[#d14d30] !rounded-lg !h-12 !px-8 !font-semibold !text-base whitespace-nowrap"
+            >
+              Subscribe
+            </Button>
           </div>
         </div>
       </div>

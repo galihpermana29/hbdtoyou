@@ -49,9 +49,7 @@ const JournaServer = async () => {
     : [];
 
   return (
-    <div>
-      <EJournal journalsData={journalsData} />
-    </div>
+    <EJournal journalsData={journalsData} />
   );
 };
 

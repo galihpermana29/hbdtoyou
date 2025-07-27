@@ -457,9 +457,8 @@ export async function getLatestInspiration(
   const session = await getSession();
   const res = await fetch(
     baseUri +
-      `/contents/latest?limit=${limit}&page=${page}${
-        templateId ? `&template_id=${templateId}` : ''
-      }${keyword ? `&keyword=${keyword}` : ''}`,
+    `/contents/latest?limit=${limit}&page=${page}${templateId ? `&template_id=${templateId}` : ''
+    }${keyword ? `&keyword=${keyword}` : ''}`,
     {
       method: 'GET',
       headers: {
