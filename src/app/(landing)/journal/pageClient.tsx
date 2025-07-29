@@ -229,7 +229,7 @@ const EJournal = ({ journalsData }: { journalsData: IContent[] }) => {
           <Typography.Title
             level={2}
             className="!text-3xl sm:!text-4xl !font-semibold !text-[#1B1B1B] !mb-5 !leading-tight !mt-0 !inter-font">
-            We'll send you a new template update
+            We will send you a new template update
           </Typography.Title>
 
           <Typography.Paragraph className="!text-[#7B7B7B] !text-base sm:!text-lg md:!text-xl !leading-relaxed !mb-8 sm:!mb-12 !font-normal max-w-2xl mx-auto">

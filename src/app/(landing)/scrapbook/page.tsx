@@ -1,4 +1,4 @@
-"use client"
+'use client';
 
 import { useMemoifySession } from '@/app/session-provider';
 import NavigationBar from '@/components/ui/navbar';
@@ -20,11 +20,18 @@ const ButtonGroup = ({ next, previous, goToSlide, ...rest }) => {
     <div className="carousel-button-group absolute gap-x-4 sm:gap-x-8 flex mt-4 sm:mt-8">
       <Button
         shape="circle"
-        className={currentSlide === 0 ? 'disable !w-10 !h-10 sm:!w-14 sm:!h-14' : '!w-10 !h-10 sm:!w-14 sm:!h-14'}
+        className={
+          currentSlide === 0
+            ? 'disable !w-10 !h-10 sm:!w-14 sm:!h-14'
+            : '!w-10 !h-10 sm:!w-14 sm:!h-14'
+        }
         onClick={() => previous()}>
         <ArrowLeft className="text-[#667085]" size={20} />
       </Button>
-      <Button shape="circle" className="!w-10 !h-10 sm:!w-14 sm:!h-14" onClick={() => next()}>
+      <Button
+        shape="circle"
+        className="!w-10 !h-10 sm:!w-14 sm:!h-14"
+        onClick={() => next()}>
         <ArrowRight size={20} className="text-[#667085]" />
       </Button>
     </div>
@@ -38,17 +45,20 @@ const ScrapbookPage = () => {
 
   const features = [
     {
-      title: "Design every page your way",
-      description: "Add your personal flair with custom layouts, handwritten messages, and photo collages that bring your moments to life."
+      title: 'Design every page your way',
+      description:
+        'Add your personal flair with custom layouts, handwritten messages, and photo collages that bring your moments to life.',
     },
     {
-      title: "Preserve memories with meaningful style",
-      description: "Choose from a variety of scrapbook themes and page designs that match your story's vibe — from vintage and dreamy to fun and bold."
+      title: 'Preserve memories with meaningful style',
+      description:
+        "Choose from a variety of scrapbook themes and page designs that match your story's vibe — from vintage and dreamy to fun and bold.",
     },
     {
-      title: "Decorate with stickers, cutouts & more",
-      description: "Have fun adding playful or heartfelt stickers, icons, and design elements that give your scrapbook an extra dose of personality."
-    }
+      title: 'Decorate with stickers, cutouts & more',
+      description:
+        'Have fun adding playful or heartfelt stickers, icons, and design elements that give your scrapbook an extra dose of personality.',
+    },
   ];
 
   return (
@@ -116,7 +126,7 @@ const ScrapbookPage = () => {
             <div className="flex flex-col md:flex-row items-start gap-x-8 gap-y-6 mx-auto px-4 sm:px-8 max-w-7xl">
               <div className="flex flex-col items-start justify-start gap-y-5">
                 <h2 className="text-3xl sm:text-4xl font-semibold text-[#1B1B1B] mb-4">
-                  We've have hundreds of scrapbook template
+                  We have hundreds of scrapbook template
                 </h2>
                 <p className="text-[#7B7B7B] text-base sm:text-lg md:text-xl font-normal">
                   We update our templates every month so you can create better
@@ -233,29 +243,32 @@ const ScrapbookPage = () => {
 
               <Typography.Title
                 level={2}
-                className="!text-3xl sm:!text-4xl !font-semibold !text-[#1B1B1B] !mb-5 !leading-tight !mt-0 !max-w-[624px]"
-              >
-                Creative tools to turn your stories into unforgettable scrapbooks
+                className="!text-3xl sm:!text-4xl !font-semibold !text-[#1B1B1B] !mb-5 !leading-tight !mt-0 !max-w-[624px]">
+                Creative tools to turn your stories into unforgettable
+                scrapbooks
               </Typography.Title>
               <Typography.Paragraph className="!text-[#7B7B7B] !text-base sm:!text-lg md:!text-xl !leading-relaxed !max-w-[869px] !font-normal">
-                From layering heartfelt notes and artistic touches to decorating with themed stickers and
-                beautiful layouts, you can customize every page to create a scrapbook that's uniquely yours.
+                From layering heartfelt notes and artistic touches to decorating
+                with themed stickers and beautiful layouts, you can customize
+                every page to create a scrapbook that is uniquely yours.
               </Typography.Paragraph>
 
-              <div className='flex flex-col lg:flex-row gap-x-8 xl:gap-x-16 gap-y-10 pt-8 sm:pt-12 lg:pt-16'>
-                <div className='flex flex-col gap-y-10 items-start'>
-                  <div className='flex flex-col items-start w-full max-w-full lg:max-w-[560px]'>
+              <div className="flex flex-col lg:flex-row gap-x-8 xl:gap-x-16 gap-y-10 pt-8 sm:pt-12 lg:pt-16">
+                <div className="flex flex-col gap-y-10 items-start">
+                  <div className="flex flex-col items-start w-full max-w-full lg:max-w-[560px]">
                     {features.map((feature, index) => (
                       <div
                         key={index}
-                        className={`w-full pl-6 py-4 border-[4px] border-y-0 border-r-0 cursor-pointer transition-all duration-300 ${activeFeature === index
-                          ? 'border-l-[#E34013]'
-                          : 'border-l-[#F2F4F7] hover:border-l-[#E34013]/50'
-                          }`}
-                        onClick={() => setActiveFeature(index)}
-                      >
-                        <div className='flex flex-col gap-y-2 items-start'>
-                          <Typography.Title level={4} className="!text-xl !font-semibold !text-[#1B1B1B] !mb-0">
+                        className={`w-full pl-6 py-4 border-[4px] border-y-0 border-r-0 cursor-pointer transition-all duration-300 ${
+                          activeFeature === index
+                            ? 'border-l-[#E34013]'
+                            : 'border-l-[#F2F4F7] hover:border-l-[#E34013]/50'
+                        }`}
+                        onClick={() => setActiveFeature(index)}>
+                        <div className="flex flex-col gap-y-2 items-start">
+                          <Typography.Title
+                            level={4}
+                            className="!text-xl !font-semibold !text-[#1B1B1B] !mb-0">
                             {feature.title}
                           </Typography.Title>
                           <Typography.Paragraph className="!text-[#7B7B7B] !leading-relaxed !text-base !mb-0 !font-normal">
@@ -275,12 +288,11 @@ const ScrapbookPage = () => {
                     }}
                     type="primary"
                     size="large"
-                    className="!bg-[#E55A3B] !border-[#E55A3B] !rounded-lg !h-12 !px-7 !py-3 !w-fit !text-base !font-semibold"
-                  >
+                    className="!bg-[#E55A3B] !border-[#E55A3B] !rounded-lg !h-12 !px-7 !py-3 !w-fit !text-base !font-semibold">
                     Create your own!
                   </Button>
                 </div>
-                <div className='w-full max-md:hidden lg:w-[592px] h-auto lg:h-[512px] flex justify-center'>
+                <div className="w-full max-md:hidden lg:w-[592px] h-auto lg:h-[512px] flex justify-center">
                   <div className="flex-shrink-0">
                     <Image
                       className="rounded-lg transition-opacity duration-300"
@@ -303,14 +315,13 @@ const ScrapbookPage = () => {
           <div className="max-w-4xl mx-auto px-4 sm:px-8 text-center">
             <Typography.Title
               level={2}
-              className="!text-3xl sm:!text-4xl !font-semibold !text-[#1B1B1B] !mb-5 !leading-tight !mt-0 !inter-font"
-            >
-              We'll send you a new template update
+              className="!text-3xl sm:!text-4xl !font-semibold !text-[#1B1B1B] !mb-5 !leading-tight !mt-0 !inter-font">
+              We will send you a new template update
             </Typography.Title>
 
             <Typography.Paragraph className="!text-[#7B7B7B] !text-base sm:!text-lg md:!text-xl !leading-relaxed !mb-8 sm:!mb-12 !font-normal max-w-2xl mx-auto">
-              No spam. Just the latest releases and new template, interesting inspiration, and
-              exclusive interviews with great people.
+              No spam. Just the latest releases and new template, interesting
+              inspiration, and exclusive interviews with great people.
             </Typography.Paragraph>
 
             <div className="flex flex-col sm:flex-row gap-4 justify-center items-center max-w-md mx-auto px-4 sm:px-0">
@@ -320,14 +331,13 @@ const ScrapbookPage = () => {
                 className="!h-12 !rounded-lg !border-[#D0D5DD] !text-base flex-1"
                 style={{
                   fontSize: '16px',
-                  fontWeight: 'normal'
+                  fontWeight: 'normal',
                 }}
               />
               <Button
                 type="primary"
                 size="large"
-                className="!bg-[#E55A3B] !border-[#E55A3B] hover:!bg-[#d14d30] !rounded-lg !h-12 !px-8 !font-semibold !text-base whitespace-nowrap"
-              >
+                className="!bg-[#E55A3B] !border-[#E55A3B] hover:!bg-[#d14d30] !rounded-lg !h-12 !px-8 !font-semibold !text-base whitespace-nowrap">
                 Subscribe
               </Button>
             </div>
