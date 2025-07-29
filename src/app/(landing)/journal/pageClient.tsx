@@ -79,7 +79,7 @@ const EJournal = ({ journalsData }: { journalsData: IContent[] }) => {
   }, [searchQuery, journalsData]);
 
   return (
-    <div className="w-screen">
+    <div className="w-screen overflow-x-hidden">
       <div className="sticky top-0 left-0 w-full z-40 ">
         <NavigationBar />
       </div>
