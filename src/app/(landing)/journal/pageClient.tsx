@@ -151,16 +151,17 @@ const EJournal = ({ journalsData }: { journalsData: IContent[] }) => {
                 deeply personal reflection of your life and memories.
               </Typography.Paragraph>
 
-              <div className='flex flex-col lg:flex-row gap-x-8 xl:gap-x-16 gap-y-10 pt-8 sm:pt-12 lg:pt-16'>
+              <div className="flex flex-col lg:flex-row gap-x-8 xl:gap-x-16 gap-y-10 pt-8 sm:pt-12 lg:pt-16">
                 <div className="flex flex-col gap-y-10 items-start">
                   <div className="flex flex-col items-start w-full max-w-full lg:max-w-[560px]">
                     {features.map((feature, index) => (
                       <div
                         key={index}
-                        className={`w-full pl-6 py-4 border-[4px] border-y-0 border-r-0 cursor-pointer transition-all duration-300 ${activeFeature === index
-                          ? 'border-l-[#E34013]'
-                          : 'border-l-[#F2F4F7] hover:border-l-[#E34013]/50'
-                          }`}
+                        className={`w-full pl-6 py-4 border-[4px] border-y-0 border-r-0 cursor-pointer transition-all duration-300 ${
+                          activeFeature === index
+                            ? 'border-l-[#E34013]'
+                            : 'border-l-[#F2F4F7] hover:border-l-[#E34013]/50'
+                        }`}
                         onClick={() => setActiveFeature(index)}>
                         <div className="flex flex-col gap-y-2 items-start">
                           <Typography.Title
@@ -218,8 +219,8 @@ const EJournal = ({ journalsData }: { journalsData: IContent[] }) => {
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 max-w-7xl mx-auto w-full px-8">
           {filteredJournals.length > 0
             ? filteredJournals.map((entry) => (
-              <JournalCard key={entry.id} entry={entry} />
-            ))
+                <JournalCard key={entry.id} entry={entry} />
+              ))
             : 'No Journals Available'}
         </div>
       </div>
@@ -227,14 +228,13 @@ const EJournal = ({ journalsData }: { journalsData: IContent[] }) => {
         <div className="max-w-4xl mx-auto px-4 sm:px-8 text-center">
           <Typography.Title
             level={2}
-            className="!text-3xl sm:!text-4xl !font-semibold !text-[#1B1B1B] !mb-5 !leading-tight !mt-0 !inter-font"
-          >
-            We'll send you a new template update
+            className="!text-3xl sm:!text-4xl !font-semibold !text-[#1B1B1B] !mb-5 !leading-tight !mt-0 !inter-font">
+            We will send you a new template update
           </Typography.Title>
 
           <Typography.Paragraph className="!text-[#7B7B7B] !text-base sm:!text-lg md:!text-xl !leading-relaxed !mb-8 sm:!mb-12 !font-normal max-w-2xl mx-auto">
-            No spam. Just the latest releases and new template, interesting inspiration, and
-            exclusive interviews with great people.
+            No spam. Just the latest releases and new template, interesting
+            inspiration, and exclusive interviews with great people.
           </Typography.Paragraph>
 
           <div className="flex flex-col sm:flex-row gap-4 justify-center items-center max-w-md mx-auto px-4 sm:px-0">
@@ -244,14 +244,13 @@ const EJournal = ({ journalsData }: { journalsData: IContent[] }) => {
               className="!h-12 !rounded-lg !border-[#D0D5DD] !text-base flex-1"
               style={{
                 fontSize: '16px',
-                fontWeight: 'normal'
+                fontWeight: 'normal',
               }}
             />
             <Button
               type="primary"
               size="large"
-              className="!bg-[#E55A3B] !border-[#E55A3B] hover:!bg-[#d14d30] !rounded-lg !h-12 !px-8 !font-semibold !text-base whitespace-nowrap"
-            >
+              className="!bg-[#E55A3B] !border-[#E55A3B] hover:!bg-[#d14d30] !rounded-lg !h-12 !px-8 !font-semibold !text-base whitespace-nowrap">
               Subscribe
             </Button>
           </div>
