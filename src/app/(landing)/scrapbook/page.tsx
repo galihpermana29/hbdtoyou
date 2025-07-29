@@ -17,7 +17,7 @@ const ButtonGroup = ({ next, previous, goToSlide, ...rest }) => {
     carouselState: { currentSlide },
   } = rest;
   return (
-    <div className="carousel-button-group absolute gap-x-4 sm:gap-x-8 flex mt-4 sm:mt-8">
+    <div className="carousel-button-group absolute gap-x-4 sm:gap-x-8 flex mt-4 sm:mt-8 max-md:px-4 px-8">
       <Button
         shape="circle"
         className={
@@ -67,7 +67,7 @@ const ScrapbookPage = () => {
         <NavigationBar />
       </div>
       <div className="flex flex-col">
-        <div className="flex flex-col items-center justify-center pt-24 pb-16 bg-[#FFF6F5] relative">
+        <div className="flex flex-col items-center justify-center pt-12 sm:pt-16 md:pt-24 pb-16 bg-[#FFF6F5] relative">
           <div className="flex flex-col items-center justify-center px-4 sm:px-8 mx-auto w-full">
             <div className="flex flex-col items-center justify-center gap-y-12 max-w-5xl">
               <div className="mx-auto flex flex-col items-center justify-center gap-y-6">
@@ -133,10 +133,10 @@ const ScrapbookPage = () => {
                   gifts for every celebration.
                 </p>
               </div>
-              <div className="flex max-md:flex-col gap-3 md:ml-8 mt-4 md:mt-0">
+              <div className="flex gap-3 md:ml-8 mt-4 md:mt-0 w-full">
                 <Link href={'/inspiration'} prefetch={true}>
                   <Button
-                    className="!px-7 !py-3 !h-12 !border-[#E34013] !text-[#E34013] !rounded-lg !font-semibold !text-base !inter-font"
+                    className="max-md:!flex-1 max-md:!px-3.5 !px-7 !py-3 !h-12 !border-[#E34013] !text-[#E34013] !rounded-lg !font-semibold !text-base !inter-font"
                     ghost>
                     See Inspiration
                   </Button>
@@ -150,7 +150,7 @@ const ScrapbookPage = () => {
                     }
                   }}
                   type="primary"
-                  className="!px-7 !py-3 !h-12 !bg-[#E34013] !border-[#E34013] !rounded-lg !font-semibold !text-base !inter-font">
+                  className="max-md:!flex-1 max-md:!px-3.5 !px-7 !py-3 !h-12 !bg-[#E34013] !border-[#E34013] !rounded-lg !font-semibold !text-base !inter-font">
                   Create your own!
                 </Button>
               </div>
@@ -259,11 +259,10 @@ const ScrapbookPage = () => {
                     {features.map((feature, index) => (
                       <div
                         key={index}
-                        className={`w-full pl-6 py-4 border-[4px] border-y-0 border-r-0 cursor-pointer transition-all duration-300 ${
-                          activeFeature === index
-                            ? 'border-l-[#E34013]'
-                            : 'border-l-[#F2F4F7] hover:border-l-[#E34013]/50'
-                        }`}
+                        className={`w-full pl-6 py-4 border-[4px] border-y-0 border-r-0 cursor-pointer transition-all duration-300 ${activeFeature === index
+                          ? 'border-l-[#E34013]'
+                          : 'border-l-[#F2F4F7] hover:border-l-[#E34013]/50'
+                          }`}
                         onClick={() => setActiveFeature(index)}>
                         <div className="flex flex-col gap-y-2 items-start">
                           <Typography.Title
