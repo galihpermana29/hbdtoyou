@@ -39,7 +39,7 @@ import {
 } from 'lucide-react';
 import dynamic from 'next/dynamic';
 // Lazy load the jumbotron image
-const jumbotronImage = '/assets/fitur-1-image.png';
+import jumbotronImage from '@/assets/fitur-1-image.png';
 
 import './stlye.css';
 
@@ -134,7 +134,7 @@ const NavigationBar = () => {
             <h1 className="text-[16px] font-[600] text-[#101828] text-ellipsis">
               Website Gift
             </h1>
-            <p className="text-[14px] font-[400] text-[#7B7B7B] mt-[5px]">
+            <p className="text-[14px] font-[400] text-[#7B7B7B] mt-[2px]">
               Create custom websites inspired <br /> by your favorite platforms
               like Netflix, Spotify
             </p>
@@ -158,7 +158,7 @@ const NavigationBar = () => {
                 <h1 className="text-[16px] font-[600] text-[#101828] text-ellipsis">
                   We`ve just released an update!
                 </h1>
-                <p className="text-[14px] font-[400] text-[#7B7B7B] mt-[5px]">
+                <p className="text-[14px] font-[400] text-[#7B7B7B] mt-[2px]">
                   Check out the our new template <br /> called “Formula 1 Sites”
                 </p>
               </div>
@@ -166,42 +166,6 @@ const NavigationBar = () => {
           ),
         },
       ],
-    },
-    {
-      value: 'photobox',
-      label: (
-        <div
-          className="flex items-start gap-2"
-          onClick={() => router.push('/photobox')}>
-          <Sparkles size={18} className="text-[#E34013] mt-[10px]" />
-          <div>
-            <h1 className="text-[16px] font-[600] text-[#101828] text-ellipsis">
-              Photobox
-            </h1>
-            <p className="text-[14px] font-[400] text-[#7B7B7B] mt-[5px]">
-              Make every picture a keepsake <br /> with Memoify`s Photobox!
-            </p>
-          </div>
-        </div>
-      ),
-    },
-    {
-      value: 'journal',
-      label: (
-        <div
-          className="flex items-start gap-2"
-          onClick={() => router.push('/journal')}>
-          <BookA size={18} className="text-[#E34013] mt-[10px]" />
-          <div>
-            <h1 className="text-[16px] font-[600] text-[#101828] text-ellipsis">
-              Personal Journal
-            </h1>
-            <p className="text-[14px] font-[400] text-[#7B7B7B] mt-[5px]">
-              Create your personal journal <br /> to capture your life`s moments
-            </p>
-          </div>
-        </div>
-      ),
     },
     {
       value: 'scrapbook',
@@ -214,8 +178,46 @@ const NavigationBar = () => {
             <h1 className="text-[16px] font-[600] text-[#101828] text-ellipsis">
               Digital Scrapbook
             </h1>
-            <p className="text-[14px] font-[400] text-[#7B7B7B] mt-[5px]">
-              Create your digital scrapbook version as a gift
+            <p className="text-[14px] font-[400] text-[#7B7B7B] mt-[2px]">
+              Create your own digital scrapbook <br /> with your favorite photos
+              as a gift
+            </p>
+          </div>
+        </div>
+      ),
+    },
+
+    {
+      value: 'journal',
+      label: (
+        <div
+          className="flex items-start gap-2"
+          onClick={() => router.push('/journal')}>
+          <BookA size={18} className="text-[#E34013] mt-[10px]" />
+          <div>
+            <h1 className="text-[16px] font-[600] text-[#101828] text-ellipsis">
+              Personal Journal
+            </h1>
+            <p className="text-[14px] font-[400] text-[#7B7B7B] mt-[2px]">
+              Create your personal journal <br /> to capture your life`s moments
+            </p>
+          </div>
+        </div>
+      ),
+    },
+    {
+      value: 'photobox',
+      label: (
+        <div
+          className="flex items-start gap-2"
+          onClick={() => router.push('/photobox')}>
+          <Sparkles size={18} className="text-[#E34013] mt-[10px]" />
+          <div>
+            <h1 className="text-[16px] font-[600] text-[#101828] text-ellipsis">
+              Photobox
+            </h1>
+            <p className="text-[14px] font-[400] text-[#7B7B7B] mt-[2px]">
+              Make every picture a keepsake <br /> with Memoify`s Photobox!
             </p>
           </div>
         </div>
@@ -244,6 +246,44 @@ const NavigationBar = () => {
       ),
     },
     {
+      value: 'scrapbook',
+      label: (
+        <div
+          className="flex items-start gap-2"
+          onClick={() => router.push('/scrapbook')}>
+          <BookA size={18} className="text-[#E34013] mt-[10px]" />
+          <div>
+            <h1 className="text-[14px] font-[600] text-[#101828] text-ellipsis">
+              Digital Scrapbook
+            </h1>
+            <p className="text-[12px] font-[400] text-[#7B7B7B] mt-[2px]">
+              Create your own digital scrapbook <br /> with your favorite photos
+              as a gift
+            </p>
+          </div>
+        </div>
+      ),
+    },
+
+    {
+      value: 'journal',
+      label: (
+        <div
+          className="flex items-start gap-2"
+          onClick={() => router.push('/journal')}>
+          <BookA size={18} className="text-[#E34013] mt-[10px]" />
+          <div>
+            <h1 className="text-[14px] font-[600] text-[#101828] text-ellipsis">
+              Personal Journal
+            </h1>
+            <p className="text-[12px] font-[400] text-[#7B7B7B] mt-[2px]">
+              Create your personal journal <br /> to capture your life`s moments
+            </p>
+          </div>
+        </div>
+      ),
+    },
+    {
       value: 'photobox',
       label: (
         <div
@@ -256,24 +296,6 @@ const NavigationBar = () => {
             </h1>
             <p className="text-[12px] font-[400] text-[#7B7B7B] mt-[2px]">
               Make every picture a keepsake <br /> with Memoify`s Photobox!
-            </p>
-          </div>
-        </div>
-      ),
-    },
-    {
-      value: 'journal',
-      label: (
-        <div
-          className="flex items-start gap-2"
-          onClick={() => router.push('/journal')}>
-          <BookA size={18} className="text-[#E34013] mt-[10px]" />
-          <div>
-            <h1 className="text-[14px] font-[600] text-[#101828] text-ellipsis">
-              Personal Journal
-            </h1>
-            <p className="text-[12px] font-[400] text-[#7B7B7B] mt-[5px]">
-              Create your personal journal <br /> to capture your life`s moments
             </p>
           </div>
         </div>
@@ -329,9 +351,7 @@ const NavigationBar = () => {
             className={`hidden md:block text-[16px] text-[#7B7B7B] font-[500]`}>
             Upgrade Plan
           </Link>
-          <Cascader
-            expandTrigger="hover"
-            options={options}>
+          <Cascader expandTrigger="hover" options={options}>
             <a className="hidden md:block text-[16px] text-[#7B7B7B] font-[500] cursor-pointer">
               Features
             </a>
@@ -429,7 +449,7 @@ const NavigationBar = () => {
           />
         </div>
       </div>
-    </div >
+    </div>
   );
 };
 
