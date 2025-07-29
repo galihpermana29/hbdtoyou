@@ -84,7 +84,7 @@ const EJournal = ({ journalsData }: { journalsData: IContent[] }) => {
         <NavigationBar />
       </div>
       <div className="flex flex-col">
-        <div className="flex flex-col items-center justify-center pt-24 pb-16 bg-[#FFF6F5] relative">
+        <div className="flex flex-col items-center justify-center pt-12 sm:pt-16 md:pt-24 pb-16 bg-[#FFF6F5] relative">
           <div className="flex flex-col items-center justify-center px-4 sm:px-8 mx-auto w-full">
             <div className="flex flex-col items-center justify-center gap-y-12 max-w-5xl">
               <div className="mx-auto flex flex-col items-center justify-center gap-y-6">
@@ -158,8 +158,8 @@ const EJournal = ({ journalsData }: { journalsData: IContent[] }) => {
                       <div
                         key={index}
                         className={`w-full pl-6 py-4 border-[4px] border-y-0 border-r-0 cursor-pointer transition-all duration-300 ${activeFeature === index
-                            ? 'border-l-[#E34013]'
-                            : 'border-l-[#F2F4F7] hover:border-l-[#E34013]/50'
+                          ? 'border-l-[#E34013]'
+                          : 'border-l-[#F2F4F7] hover:border-l-[#E34013]/50'
                           }`}
                         onClick={() => setActiveFeature(index)}>
                         <div className="flex flex-col gap-y-2 items-start">
@@ -194,7 +194,7 @@ const EJournal = ({ journalsData }: { journalsData: IContent[] }) => {
           </div>
         </div>
       </div>
-      <div className="py-[30px] md:py-24 flex flex-col text-center items-center min-h-screen bg-[#F9FAFB] w-full gap-y-24">
+      <div className="py-[30px] md:py-24 flex flex-col text-center items-center min-h-screen bg-[#F9FAFB] w-full gap-y-12">
         <div className="max-w-7xl mx-auto w-full max-md:px-4 px-8">
           <div className="flex max-md:flex-col items-start gap-x-4 border border-solid border-b-[#EAECF0] border-x-0 border-t-0 self-stretch max-md:pb-4">
             <div className="text-start flex flex-col gap-y-1 flex-1 w-full max-md:pb-4 pb-8">
@@ -208,7 +208,7 @@ const EJournal = ({ journalsData }: { journalsData: IContent[] }) => {
             <Input
               placeholder="Search journal"
               size="large"
-              className="!w-full !max-w-80"
+              className="!w-full md:!max-w-80"
               value={searchQuery}
               onChange={(e) => setSearchQuery(e.target.value)}
               prefix={<SearchIcon className="text-[#667085]" />}
