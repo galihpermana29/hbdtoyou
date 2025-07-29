@@ -157,11 +157,10 @@ const EJournal = ({ journalsData }: { journalsData: IContent[] }) => {
                     {features.map((feature, index) => (
                       <div
                         key={index}
-                        className={`w-full pl-6 py-4 border-[4px] border-y-0 border-r-0 cursor-pointer transition-all duration-300 ${
-                          activeFeature === index
+                        className={`w-full pl-6 py-4 border-[4px] border-y-0 border-r-0 cursor-pointer transition-all duration-300 ${activeFeature === index
                             ? 'border-l-[#E34013]'
                             : 'border-l-[#F2F4F7] hover:border-l-[#E34013]/50'
-                        }`}
+                          }`}
                         onClick={() => setActiveFeature(index)}>
                         <div className="flex flex-col gap-y-2 items-start">
                           <Typography.Title
@@ -216,11 +215,11 @@ const EJournal = ({ journalsData }: { journalsData: IContent[] }) => {
             />
           </div>
         </div>
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 max-w-7xl mx-auto w-full px-8">
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 max-w-7xl mx-auto w-full max-md:px-4 px-8">
           {filteredJournals.length > 0
             ? filteredJournals.map((entry) => (
-                <JournalCard key={entry.id} entry={entry} />
-              ))
+              <JournalCard key={entry.id} entry={entry} />
+            ))
             : 'No Journals Available'}
         </div>
       </div>
