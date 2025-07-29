@@ -84,31 +84,31 @@ const EJournal = ({ journalsData }: { journalsData: IContent[] }) => {
       </div>
       <div className="flex flex-col">
         <div className="flex flex-col items-center justify-center pt-24 pb-16 bg-[#FFF6F5] relative">
-          <div className="flex flex-col items-center justify-center px-8 mx-auto w-full">
+          <div className="flex flex-col items-center justify-center px-4 sm:px-8 mx-auto w-full">
             <div className="flex flex-col items-center justify-center gap-y-12 max-w-5xl">
               <div className="mx-auto flex flex-col items-center justify-center gap-y-6">
-                <h1 className="text-center text-[#1B1B1B] font-semibold text-6xl inter-font leading-[72px] tracking-[-2%]">
+                <h1 className="text-center text-[#1B1B1B] font-semibold text-4xl md:text-5xl lg:text-6xl inter-font leading-tight md:leading-[72px] tracking-[-2%]">
                   Write a simple love, apology, or birthday letter like a
                   research paper.
                 </h1>
-                <p className="text-[#7B7B7B] text-xl font-normal inter-font max-w-3xl text-center">
+                <p className="text-[#7B7B7B] text-lg md:text-xl font-normal inter-font max-w-3xl text-center">
                   Translating Deep Emotions into Academic Format: A Case Study
                   in Heartfelt Communication
                 </p>
               </div>
               <Button
                 type="primary"
-                className="!px-[22px] !py-4 !bg-[#E34013] !text-white !h-[60px] !rounded-lg !font-semibold !text-lg relative z-30">
+                className="!px-[18px] sm:!px-[22px] !py-4 !bg-[#E34013] !text-white !h-[50px] sm:!h-[60px] !rounded-lg !font-semibold !text-base sm:!text-lg relative z-30 w-[80%] sm:w-auto">
                 Publish a Journal
               </Button>
             </div>
           </div>
         </div>
-        <div className="relative w-full h-fit z-20 pb-24">
+        <div className="relative w-full h-fit z-20 pb-12 sm:pb-16 md:pb-24">
           <Image
             src="/MacbookProMockup.png"
             alt="Memoify Live Scrapboox Hero"
-            className="max-w-3xl w-full h-full mx-auto"
+            className="max-w-7xl w-full h-auto mx-auto px-4 sm:px-0"
             width={0}
             height={0}
             quality={100}
@@ -118,7 +118,7 @@ const EJournal = ({ journalsData }: { journalsData: IContent[] }) => {
           <Image
             src="/scrapbook-background-pattern.svg"
             alt=""
-            className="w-full h-full absolute -top-1/4 -z-10"
+            className="w-full h-full absolute max-md:-top-1/3 -top-1/4 -z-10"
             width={0}
             height={0}
             quality={100}
@@ -126,8 +126,8 @@ const EJournal = ({ journalsData }: { journalsData: IContent[] }) => {
             priority
           />
         </div>
-        <div className="w-full py-24 bg-white">
-          <div className="max-w-7xl mx-auto px-8">
+        <div className="w-full py-12 sm:py-16 md:py-24 bg-white">
+          <div className="max-w-7xl mx-auto px-4 sm:px-8">
             <div className="flex flex-col">
               <Typography.Text className="!text-[#E55A3B] !font-semibold !text-base !mb-3">
                 Features
@@ -135,17 +135,17 @@ const EJournal = ({ journalsData }: { journalsData: IContent[] }) => {
 
               <Typography.Title
                 level={2}
-                className="!text-4xl !font-semibold !text-[#1B1B1B] !mb-5 !leading-tight !mt-0 !max-w-[624px]">
+                className="!text-3xl sm:!text-4xl !font-semibold !text-[#1B1B1B] !mb-5 !leading-tight !mt-0 !max-w-[624px]">
                 Make your journal truly yours
               </Typography.Title>
-              <Typography.Paragraph className="!text-[#7B7B7B] !text-xl !leading-relaxed !max-w-[581px] !font-normal">
+              <Typography.Paragraph className="!text-[#7B7B7B] !text-base sm:!text-lg md:!text-xl !leading-relaxed !max-w-[869px] !font-normal">
                 From writing heartfelt entries your personal journal becomes a
                 deeply personal reflection of your life and memories.
               </Typography.Paragraph>
 
-              <div className="flex gap-x-16 pt-16">
+              <div className='flex flex-col lg:flex-row gap-x-8 xl:gap-x-16 gap-y-10 pt-8 sm:pt-12 lg:pt-16'>
                 <div className="flex flex-col gap-y-10 items-start">
-                  <div className="flex flex-col items-start max-w-[560px]">
+                  <div className="flex flex-col items-start w-full max-w-full lg:max-w-[560px]">
                     {features.map((feature, index) => (
                       <div
                         key={index}
@@ -180,9 +180,9 @@ const EJournal = ({ journalsData }: { journalsData: IContent[] }) => {
         </div>
       </div>
       <div className="py-[30px] md:py-24 flex flex-col text-center items-center min-h-screen bg-[#F9FAFB] w-full gap-y-24">
-        <div className="max-w-7xl mx-auto w-full px-8">
-          <div className="flex items-start gap-x-4 border border-solid border-b-[#EAECF0] border-x-0 border-t-0 self-stretch">
-            <div className="text-start flex flex-col gap-y-1 flex-1 w-full pb-8">
+        <div className="max-w-7xl mx-auto w-full max-md:px-4 px-8">
+          <div className="flex max-md:flex-col items-start gap-x-4 border border-solid border-b-[#EAECF0] border-x-0 border-t-0 self-stretch max-md:pb-4">
+            <div className="text-start flex flex-col gap-y-1 flex-1 w-full max-md:pb-4 pb-8">
               <p className="font-semibold text-lg text-[#1B1B1B]">
                 Published Journal
               </p>
@@ -208,21 +208,21 @@ const EJournal = ({ journalsData }: { journalsData: IContent[] }) => {
             : 'No Journals Available'}
         </div>
       </div>
-      <div className="w-full py-24">
-        <div className="max-w-4xl mx-auto px-8 text-center">
+      <div className="w-full py-12 sm:py-16 md:py-24">
+        <div className="max-w-4xl mx-auto px-4 sm:px-8 text-center">
           <Typography.Title
             level={2}
-            className="!text-4xl !font-semibold !text-[#1B1B1B] !mb-5 !leading-tight !mt-0 !inter-font"
+            className="!text-3xl sm:!text-4xl !font-semibold !text-[#1B1B1B] !mb-5 !leading-tight !mt-0 !inter-font"
           >
             We'll send you a new template update
           </Typography.Title>
 
-          <Typography.Paragraph className="!text-[#7B7B7B] !text-xl !leading-relaxed !mb-12 !font-normal max-w-2xl mx-auto">
+          <Typography.Paragraph className="!text-[#7B7B7B] !text-base sm:!text-lg md:!text-xl !leading-relaxed !mb-8 sm:!mb-12 !font-normal max-w-2xl mx-auto">
             No spam. Just the latest releases and new template, interesting inspiration, and
             exclusive interviews with great people.
           </Typography.Paragraph>
 
-          <div className="flex flex-col sm:flex-row gap-4 justify-center items-center max-w-md mx-auto">
+          <div className="flex flex-col sm:flex-row gap-4 justify-center items-center max-w-md mx-auto px-4 sm:px-0">
             <Input
               placeholder="Enter your email"
               size="large"
