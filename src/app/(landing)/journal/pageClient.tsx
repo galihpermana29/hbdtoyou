@@ -10,6 +10,7 @@ import dynamic from 'next/dynamic';
 import Image from 'next/image';
 import { useRouter } from 'next/navigation';
 import { useEffect, useState } from 'react';
+import { signIn } from 'next-auth/react';
 const JournalCard = dynamic(() => import('./view/JournalCard'), { ssr: false });
 
 const EJournal = ({ journalsData }: { journalsData: IContent[] }) => {
@@ -97,6 +98,13 @@ const EJournal = ({ journalsData }: { journalsData: IContent[] }) => {
                 </p>
               </div>
               <Button
+                onClick={() => {
+                  if (accessToken) {
+                    router.push('/journal/create');
+                  } else {
+                    signIn('google');
+                  }
+                }}
                 type="primary"
                 className="!px-[18px] sm:!px-[22px] !py-4 !bg-[#E34013] !text-white !h-[50px] sm:!h-[60px] !rounded-lg !font-semibold !text-base sm:!text-lg relative z-30 w-[80%] sm:w-auto">
                 Publish a Journal
@@ -108,7 +116,7 @@ const EJournal = ({ journalsData }: { journalsData: IContent[] }) => {
           <Image
             src="/MacbookProMockup.png"
             alt="Memoify Live Scrapboox Hero"
-            className="max-w-7xl w-full h-auto mx-auto px-4 sm:px-0"
+            className="max-w-[768px] w-full h-auto mx-auto px-4 sm:px-0"
             width={0}
             height={0}
             quality={100}
@@ -168,6 +176,13 @@ const EJournal = ({ journalsData }: { journalsData: IContent[] }) => {
                     ))}
                   </div>
                   <Button
+                    onClick={() => {
+                      if (accessToken) {
+                        router.push('/journal/create');
+                      } else {
+                        signIn('google');
+                      }
+                    }}
                     type="primary"
                     size="large"
                     className="!bg-[#E55A3B] !border-[#E55A3B] !rounded-lg !h-12 !px-7 !py-3 !w-fit !text-base !font-semibold">

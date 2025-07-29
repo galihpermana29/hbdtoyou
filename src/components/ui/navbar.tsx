@@ -203,6 +203,24 @@ const NavigationBar = () => {
         </div>
       ),
     },
+    {
+      value: 'scrapbook',
+      label: (
+        <div
+          className="flex items-start gap-2"
+          onClick={() => router.push('/scrapbook')}>
+          <BookA size={18} className="text-[#E34013] mt-[10px]" />
+          <div>
+            <h1 className="text-[16px] font-[600] text-[#101828] text-ellipsis">
+              Digital Scrapbook
+            </h1>
+            <p className="text-[14px] font-[400] text-[#7B7B7B] mt-[5px]">
+              Create your digital scrapbook version as a gift
+            </p>
+          </div>
+        </div>
+      ),
+    },
   ];
 
   const options2 = [
@@ -312,7 +330,6 @@ const NavigationBar = () => {
             Upgrade Plan
           </Link>
           <Cascader
-            className="custom-cascader"
             expandTrigger="hover"
             options={options}>
             <a className="hidden md:block text-[16px] text-[#7B7B7B] font-[500] cursor-pointer">
@@ -412,7 +429,7 @@ const NavigationBar = () => {
           />
         </div>
       </div>
-    </div>
+    </div >
   );
 };
 

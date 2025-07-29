@@ -1,9 +1,13 @@
 "use client"
 
+import { useMemoifySession } from '@/app/session-provider';
 import NavigationBar from '@/components/ui/navbar';
 import { Button, Input, Typography } from 'antd';
 import { ArrowLeft, ArrowRight } from 'lucide-react';
+import { signIn } from 'next-auth/react';
 import Image from 'next/image';
+import Link from 'next/link';
+import { useRouter } from 'next/navigation';
 import { useState } from 'react';
 import Carousel from 'react-multi-carousel';
 import 'react-multi-carousel/lib/styles.css';
@@ -28,6 +32,8 @@ const ButtonGroup = ({ next, previous, goToSlide, ...rest }) => {
 };
 
 const ScrapbookPage = () => {
+  const session = useMemoifySession();
+  const router = useRouter();
   const [activeFeature, setActiveFeature] = useState(0);
 
   const features = [
@@ -64,6 +70,13 @@ const ScrapbookPage = () => {
                 </p>
               </div>
               <Button
+                onClick={() => {
+                  if (session?.accessToken) {
+                    router.push('/create');
+                  } else {
+                    signIn('google');
+                  }
+                }}
                 type="primary"
                 className="!px-[18px] sm:!px-[22px] !py-4 !bg-[#E34013] !text-white !h-[50px] sm:!h-[60px] !rounded-lg !font-semibold !text-base sm:!text-lg relative z-30 w-[80%] sm:w-auto">
                 Create your own!
@@ -111,12 +124,21 @@ const ScrapbookPage = () => {
                 </p>
               </div>
               <div className="flex max-md:flex-col gap-3 md:ml-8 mt-4 md:mt-0">
+                <Link href={'/inspiration'} prefetch={true}>
+                  <Button
+                    className="!px-7 !py-3 !h-12 !border-[#E34013] !text-[#E34013] !rounded-lg !font-semibold !text-base !inter-font"
+                    ghost>
+                    See Inspiration
+                  </Button>
+                </Link>
                 <Button
-                  className="!px-7 !py-3 !h-12 !border-[#E34013] !text-[#E34013] !rounded-lg !font-semibold !text-base !inter-font"
-                  ghost>
-                  See Inspiration
-                </Button>
-                <Button
+                  onClick={() => {
+                    if (session?.accessToken) {
+                      router.push('/create');
+                    } else {
+                      signIn('google');
+                    }
+                  }}
                   type="primary"
                   className="!px-7 !py-3 !h-12 !bg-[#E34013] !border-[#E34013] !rounded-lg !font-semibold !text-base !inter-font">
                   Create your own!
@@ -244,6 +266,13 @@ const ScrapbookPage = () => {
                     ))}
                   </div>
                   <Button
+                    onClick={() => {
+                      if (session?.accessToken) {
+                        router.push('/create');
+                      } else {
+                        signIn('google');
+                      }
+                    }}
                     type="primary"
                     size="large"
                     className="!bg-[#E55A3B] !border-[#E55A3B] !rounded-lg !h-12 !px-7 !py-3 !w-fit !text-base !font-semibold"
