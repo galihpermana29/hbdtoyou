@@ -1,7 +1,7 @@
 @import url('https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:ital,wght@0,200..800;1,200..800&family=Raleway:ital,wght@0,100..900;1,100..900&display=swap');
 @import url('https://fonts.googleapis.com/css2?family=Young+Serif&display=swap');
 @import url('https://fonts.googleapis.com/css2?family=PT+Serif:ital,wght@0,400;0,700;1,400;1,700&display=swap');
-
+@import url('https://fonts.googleapis.com/css2?family=Inter:ital,opsz,wght@0,14..32,100..900;1,14..32,100..900&display=swap');
 
 @font-face {
   font-family: 'Formula1 Display';
@@ -30,14 +30,8 @@
   font-display: swap;
 }
 
-
-
 *{
   font-family: "Plus Jakarta Sans", serif;
-  font-optical-sizing: auto;
-  font-weight: <weight>;
-  font-style: normal;
-  scroll-behavior: smooth;
 }
 
 
@@ -69,6 +63,12 @@
 .f1-font-bold{
   font-family: 'Formula1 Display';
   font-weight: bold;
+}
+
+.inter-font {
+  font-family: "Inter", sans-serif;
+  font-weight: 400;
+  font-style: normal;
 }
 
 @tailwind base;
@@ -169,4 +169,22 @@
   transform: translateY(-4px);
   box-shadow: 0 10px 20px rgba(0,0,0,0.1);
   z-index: 1;
+}
+
+/* Scrapbook Carousel Styles */
+.scrapbook-carousel .slick-slide {
+  padding: 0 8px;
+}
+
+.scrapbook-carousel .slick-track {
+  display: flex;
+  align-items: center;
+}
+
+.scrapbook-carousel .slick-slide > div {
+  height: 100%;
+}
+
+.scrapbook-carousel .slick-arrow {
+  display: none !important;
 }
