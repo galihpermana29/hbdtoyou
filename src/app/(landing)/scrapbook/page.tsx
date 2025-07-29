@@ -95,7 +95,7 @@ const ScrapbookPage = () => {
           </div>
         </div>
         <div className="w-full pb-[50px]">
-          <div className="relative w-full h-fit z-20 pb-24">
+          <div className="relative w-full h-fit z-20 pb-12 sm:pb-16 md:pb-24">
             <Image
               src="/scrapbook-hero.svg"
               alt="Memoify Live Scrapboox Hero"
@@ -120,7 +120,7 @@ const ScrapbookPage = () => {
         </div>
 
         {/* Scrapbook Templates Section */}
-        <div className="flex w-full pb-24">
+        <div className="flex w-full pb-12 sm:pb-16 md:pb-24">
           <div className="flex flex-col w-full">
             {/* Header Section */}
             <div className="flex flex-col md:flex-row items-start gap-x-8 gap-y-6 mx-auto px-4 sm:px-8 max-w-7xl">
@@ -157,7 +157,7 @@ const ScrapbookPage = () => {
             </div>
 
             {/* Templates Carousel */}
-            <div className="w-full pl-4 sm:pl-8 xl:pl-28 pt-10 sm:pt-16">
+            <div className="w-full pl-0 md:pl-8 xl:pl-28 pt-10 sm:pt-16">
               <Carousel
                 // additionalTransfrom={0}
                 arrows={false}
