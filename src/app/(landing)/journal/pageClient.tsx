@@ -79,7 +79,7 @@ const EJournal = ({ journalsData }: { journalsData: IContent[] }) => {
   }, [searchQuery, journalsData]);
 
   return (
-    <div className="w-screen overflow-x-hidden">
+    <div className="w-full overflow-x-hidden">
       <div className="sticky top-0 left-0 w-full z-40 ">
         <NavigationBar />
       </div>
@@ -145,9 +145,9 @@ const EJournal = ({ journalsData }: { journalsData: IContent[] }) => {
           <Image
             src="/MacbookProMockup.png"
             alt="Memoify Live Scrapboox Hero"
-            className="max-w-[768px] w-full h-auto mx-auto px-4 sm:px-0"
-            width={0}
-            height={0}
+            className="mx-auto px-4 sm:px-0"
+            width={1280}
+            height={448}
             priority
           />
         </div>
@@ -175,8 +175,8 @@ const EJournal = ({ journalsData }: { journalsData: IContent[] }) => {
                       <div
                         key={index}
                         className={`w-full pl-6 py-4 border-[4px] border-y-0 border-r-0 cursor-pointer transition-all duration-300 ${activeFeature === index
-                            ? 'border-l-[#E34013]'
-                            : 'border-l-[#F2F4F7] hover:border-l-[#E34013]/50'
+                          ? 'border-l-[#E34013]'
+                          : 'border-l-[#F2F4F7] hover:border-l-[#E34013]/50'
                           }`}
                         onClick={() => setActiveFeature(index)}>
                         <div className="flex flex-col gap-y-2 items-start">
