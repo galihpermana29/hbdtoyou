@@ -62,7 +62,7 @@ const ScrapbookPage = () => {
   ];
 
   return (
-    <div className="w-screen overflow-x-hidden">
+    <div className="w-full overflow-x-hidden">
       <div className="sticky top-0 left-0 w-full z-40">
         <NavigationBar />
       </div>
@@ -102,12 +102,13 @@ const ScrapbookPage = () => {
             backgroundRepeat: "no-repeat"
           }}>
             <Image
-              src="/scrapbook-hero.svg"
+              src="/scrapbook-hero.png"
               alt="Memoify Live Scrapboox Hero"
-              className="max-w-7xl w-full h-auto mx-auto px-4 sm:px-0"
-              width={0}
-              height={0}
+              className="mx-auto px-4 sm:px-0"
+              width={1280}
+              height={610}
               priority
+              loading="eager"
             />
           </div>
         </div>
