@@ -114,10 +114,10 @@ const ScrapbookPage = () => {
         </div>
 
         {/* Scrapbook Templates Section */}
-        <div className="flex w-full pb-12 sm:pb-16 md:pb-24">
-          <div className="flex flex-col w-full">
+        <div className="flex pb-12 sm:pb-16 md:pb-24 w-full">
+          <div className="flex flex-col w-full max-w-7xl mx-auto">
             {/* Header Section */}
-            <div className="flex flex-col md:flex-row items-start gap-x-8 gap-y-6 mx-auto px-4 sm:px-8 max-w-7xl">
+            <div className="flex flex-col md:flex-row items-start gap-x-8 gap-y-6 mx-auto px-4 sm:px-8">
               <div className="flex flex-col items-start justify-start gap-y-5">
                 <h2 className="text-3xl sm:text-4xl font-semibold text-[#1B1B1B] mb-4">
                   We have hundreds of scrapbook template
@@ -127,7 +127,7 @@ const ScrapbookPage = () => {
                   gifts for every celebration.
                 </p>
               </div>
-              <div className="flex gap-3 md:ml-8 mt-4 md:mt-0 w-full">
+              <div className="flex gap-3 md:ml-8 mt-4 md:mt-0 max-md:w-full">
                 <Link href={'/inspiration'} prefetch={true}>
                   <Button
                     className="max-md:!flex-1 max-md:!px-3.5 !px-7 !py-3 !h-12 !border-[#E34013] !text-[#E34013] !rounded-lg !font-semibold !text-base !inter-font"
@@ -151,7 +151,7 @@ const ScrapbookPage = () => {
             </div>
 
             {/* Templates Carousel */}
-            <div className="w-full pl-0 md:pl-8 xl:pl-28 pt-10 sm:pt-16">
+            <div className="w-full pt-10 sm:pt-16">
               <Carousel
                 // additionalTransfrom={0}
                 arrows={false}
