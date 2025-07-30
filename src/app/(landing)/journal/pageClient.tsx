@@ -112,7 +112,7 @@ const EJournal = ({ journalsData }: { journalsData: IContent[] }) => {
             </div>
           </div>
         </div>
-        <div className="relative w-full h-fit z-20 pb-12 sm:pb-16 md:pb-24">
+        {/* <div className="relative w-full h-fit z-20 pb-12 sm:pb-16 md:pb-24">
           <Image
             src="/MacbookProMockup.png"
             alt="Memoify Live Scrapboox Hero"
@@ -131,6 +131,23 @@ const EJournal = ({ journalsData }: { journalsData: IContent[] }) => {
             height={0}
             quality={100}
             loading="eager"
+            priority
+          />
+        </div> */}
+        <div
+          className="relative w-full h-fit z-20 pb-12 sm:pb-16 md:pb-24"
+          style={{
+            backgroundImage: "url('/scrapbook-background-pattern.svg')",
+            backgroundPosition: 'center top',
+            backgroundSize: 'cover',
+            backgroundRepeat: 'no-repeat',
+          }}>
+          <Image
+            src="/MacbookProMockup.png"
+            alt="Memoify Live Scrapboox Hero"
+            className="max-w-[768px] w-full h-auto mx-auto px-4 sm:px-0"
+            width={0}
+            height={0}
             priority
           />
         </div>
@@ -158,8 +175,8 @@ const EJournal = ({ journalsData }: { journalsData: IContent[] }) => {
                       <div
                         key={index}
                         className={`w-full pl-6 py-4 border-[4px] border-y-0 border-r-0 cursor-pointer transition-all duration-300 ${activeFeature === index
-                          ? 'border-l-[#E34013]'
-                          : 'border-l-[#F2F4F7] hover:border-l-[#E34013]/50'
+                            ? 'border-l-[#E34013]'
+                            : 'border-l-[#F2F4F7] hover:border-l-[#E34013]/50'
                           }`}
                         onClick={() => setActiveFeature(index)}>
                         <div className="flex flex-col gap-y-2 items-start">
