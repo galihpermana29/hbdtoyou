@@ -95,25 +95,18 @@ const ScrapbookPage = () => {
           </div>
         </div>
         <div className="w-full pb-[50px]">
-          <div className="relative w-full h-fit z-20 pb-12 sm:pb-16 md:pb-24">
+          <div className="relative w-full h-fit z-20 pb-12 sm:pb-16 md:pb-24" style={{
+            backgroundImage: "url('/scrapbook-background-pattern.svg')",
+            backgroundPosition: "center top",
+            backgroundSize: "cover",
+            backgroundRepeat: "no-repeat"
+          }}>
             <Image
               src="/scrapbook-hero.svg"
               alt="Memoify Live Scrapboox Hero"
               className="max-w-7xl w-full h-auto mx-auto px-4 sm:px-0"
               width={0}
               height={0}
-              quality={100}
-              loading="eager"
-              priority
-            />
-            <Image
-              src="/scrapbook-background-pattern.svg"
-              alt=""
-              className="w-full h-full absolute max-md:-top-1/3 -top-1/4 -z-10"
-              width={0}
-              height={0}
-              quality={100}
-              loading="eager"
               priority
             />
           </div>
