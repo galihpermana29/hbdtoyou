@@ -35,6 +35,7 @@ import useCreateContent from './usecase/useCreateContent';
 import { templateNameToRoute } from '@/lib/utils';
 import { TemplateGridSection } from './view/presentation/CreateTemplateSection';
 import { useRouter } from 'next/navigation';
+import AlbumGraduationv1 from '@/components/forms/albumgraduationv1-form';
 
 const StepsCustom = [
   {
@@ -298,6 +299,18 @@ const CreatePage = () => {
 
               {selectedTemplate.route.includes('f1historyv1') && (
                 <Formula1Form
+                  handleCompleteCreation={handleCompleteCreation}
+                  openNotification={openNotification}
+                  selectedTemplate={selectedTemplate!}
+                  loading={loading}
+                  setLoading={setLoading}
+                  modalState={modalState}
+                  setModalState={setModalState}
+                />
+              )}
+
+              {selectedTemplate.route.includes('albumgraduation1') && (
+                <AlbumGraduationv1
                   handleCompleteCreation={handleCompleteCreation}
                   openNotification={openNotification}
                   selectedTemplate={selectedTemplate!}
