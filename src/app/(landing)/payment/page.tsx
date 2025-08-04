@@ -1,5 +1,6 @@
 import PaymentQRIS from './client-page';
 import { Metadata } from 'next';
+import NewClientPagePayment from './new-client-page';
 
 export const metadata: Metadata = {
   title: 'Premium Digital Gifts, Scrapbooks & Albums | Memoify',
@@ -36,7 +37,8 @@ export const metadata: Metadata = {
 };
 
 const ServerSidePaymentQRIS = () => {
-  return <PaymentQRIS />;
+  // return <PaymentQRIS />;
+  return <NewClientPagePayment />;
 };
 
 export default ServerSidePaymentQRIS;
