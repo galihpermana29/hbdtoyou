@@ -53,12 +53,18 @@ export function Footer() {
             </li>
             <li>
               <Link href="/templates" className="hover:text-gray-300">
-                Browse Templates
+                Digital Gift
+              </Link>
+            </li>
+
+            <li>
+              <Link href="/career" className="hover:text-gray-300">
+                Career
               </Link>
             </li>
             <li>
-              <Link href="/terms" className="hover:text-gray-300">
-                Terms
+              <Link href="/contact" className="hover:text-gray-300">
+                Contact Us
               </Link>
             </li>
           </ul>

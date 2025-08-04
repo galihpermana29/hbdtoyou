@@ -349,17 +349,22 @@ const NavigationBar = () => {
           <Link
             href={'/payment'}
             className={`hidden md:block text-[16px] text-[#7B7B7B] font-[500]`}>
-            Upgrade Plan
+            Pricing
           </Link>
           <Cascader expandTrigger="hover" options={options}>
             <a className="hidden md:block text-[16px] text-[#7B7B7B] font-[500] cursor-pointer">
               Features
             </a>
           </Cascader>
-          <Link
+          {/* <Link
             href={'/contact'}
             className={`hidden md:block text-[16px] text-[#7B7B7B] font-[500]`}>
             Contact
+          </Link> */}
+          <Link
+            href={'/career'}
+            className={`hidden md:block text-[16px] text-[#7B7B7B] font-[500]`}>
+            Career
           </Link>
 
           {sidebar && (
@@ -392,7 +397,7 @@ const NavigationBar = () => {
                 <Link
                   href={'/payment'}
                   className={`md:block text-[16px] text-[#7B7B7B] font-[500]`}>
-                  Upgrade Plan
+                  Pricing
                 </Link>
                 <Cascader
                   placement="topRight"
@@ -402,10 +407,15 @@ const NavigationBar = () => {
                     Features
                   </a>
                 </Cascader>
-                <Link
+                {/* <Link
                   href={'/contact'}
                   className={`md:block text-[16px] text-[#7B7B7B] font-[500]`}>
                   Contact
+                </Link> */}
+                <Link
+                  href={'/career'}
+                  className={`md:block text-[16px] text-[#7B7B7B] font-[500]`}>
+                  Career
                 </Link>
               </div>
             </div>
