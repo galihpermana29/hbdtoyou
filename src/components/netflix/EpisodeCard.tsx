@@ -75,12 +75,6 @@ const EpisodeCard = ({
         {/* Episode info */}
         <div className="flex flex-col gap-y-2 items-start">
           <p className="geist-font text-base text-white">
-            {isComingSoon && (
-              <>
-                [Coming Soon] <br />
-              </>
-            )}
-            {isComingSoon && ''}
             {title}
           </p>
           <span className="geist-font text-xs text-[#A3A1A1]">{duration}</span>

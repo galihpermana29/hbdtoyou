@@ -9,6 +9,7 @@ import { Button } from 'antd';
 import dayjs from 'dayjs';
 import Image from 'next/image';
 import { useState } from 'react';
+import CameraEnhanceIcon from '@mui/icons-material/CameraEnhance';
 
 const NetflixGraduation = ({ parsedData }: { parsedData: any }) => {
   const [showFullSynopsis, setShowFullSynopsis] = useState(false);
@@ -59,7 +60,7 @@ const NetflixGraduation = ({ parsedData }: { parsedData: any }) => {
             <div className='flex items-center gap-x-2 p-0.5 rounded-md bg-[#525252] border-solid border border-[#838383]'>
               <Image src="/memologonetflix.svg" width={40} height={40} alt="Memo Logo Netflix" />
               <span className='text-base font-semibold text-white'>&</span>
-              <Image src="/photographer-photo.svg" width={40} height={40} alt="Photographer" />
+              <CameraEnhanceIcon sx={{ fontSize: '3rem', color: 'white' }} />
             </div>
             <div className='flex flex-col gap-y-0.5'>
               <span className='text-sm font-normal text-[#A4A4A4]'>Collaboration Photographer </span>
@@ -174,7 +175,7 @@ const NetflixGraduation = ({ parsedData }: { parsedData: any }) => {
               width={408}
               height={408}
               alt="Graduation video"
-              src={parsedData.images[0]}
+              src={parsedData.images[1]}
               className="w-full h-full object-cover"
             />
           </div>
