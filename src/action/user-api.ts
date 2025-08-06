@@ -1,6 +1,7 @@
 'use server';
 
 import { getSession } from '@/store/get-set-session';
+import { revalidateTag } from 'next/cache';
 import {
   IAllPaymentResponse,
   IAllTemplateResponse,
@@ -9,14 +10,12 @@ import {
   IContentStats,
   IDetailContentResponse,
   IGetDetailPayment,
-  ILatestContentResponse,
   ILatestContentResponse2,
   IOAuthResponse,
   IPaymentPayload,
   IProfileResponse,
-  IQRISPaymentResponse,
+  IQRISPaymentResponse
 } from './interfaces';
-import { revalidateTag } from 'next/cache';
 
 export interface IOAuthPayload {
   token_email: string;
@@ -28,7 +27,7 @@ export interface IGlobalResponse<T> {
   data: T;
 }
 
-const baseUri = process.env.NEXT_PUBLIC_API_URI;
+const baseUri = process.env.NODE_ENV === 'development' ? process.env.NEXT_PUBLIC_API_URI : process.env.API_URI;
 
 export async function loginOAuth(
   payload: IOAuthPayload
