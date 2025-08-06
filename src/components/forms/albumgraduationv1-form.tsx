@@ -1,40 +1,40 @@
 'use client';
-import {
-  Button,
-  Divider,
-  Form,
-  Image,
-  Input,
-  message,
-  Modal,
-  Switch,
-  Tooltip,
-  Upload,
-} from 'antd';
-import TextArea from 'antd/es/input/TextArea';
-import { useEffect, useState } from 'react';
-import type { GetProp, UploadFile, UploadProps } from 'antd';
-import {
-  LoadingOutlined,
-  MinusCircleOutlined,
-  PlusOutlined,
-} from '@ant-design/icons';
-import { useForm } from 'antd/es/form/Form';
-import { useMemoifyProfile } from '@/app/session-provider';
-import { createContent, editContent } from '@/action/user-api';
-import { beforeUpload, getBase64, getBase64Multiple } from './netflix-form';
 import { IDetailContentResponse } from '@/action/interfaces';
-import { parsingImageFromJSON } from '@/lib/utils';
-import FinalModal from './final-modal';
-import dayjs from 'dayjs';
-import { useRouter } from 'next/navigation';
-import { useDispatch, useSelector } from 'react-redux';
+import { createContent, editContent } from '@/action/user-api';
+import { useMemoifyProfile } from '@/app/session-provider';
 import { RootState } from '@/lib/store';
 import {
   removeCollectionOfImages,
   reset,
   setCollectionOfImages,
 } from '@/lib/uploadSlice';
+import { parsingImageFromJSON } from '@/lib/utils';
+import { generateGraduationStory } from '@/services/gemini';
+import { fetchMovieGenres, Genre } from '@/services/tmdb';
+import {
+  LoadingOutlined,
+  PlusOutlined
+} from '@ant-design/icons';
+import { useQuery } from '@tanstack/react-query';
+import type { GetProp, UploadProps } from 'antd';
+import {
+  Button,
+  DatePicker,
+  Form,
+  Input,
+  message,
+  Modal,
+  Select,
+  Tooltip,
+  Upload
+} from 'antd';
+import { useForm } from 'antd/es/form/Form';
+import dayjs from 'dayjs';
+import { useRouter } from 'next/navigation';
+import { useEffect, useState } from 'react';
+import { useDispatch, useSelector } from 'react-redux';
+import FinalModal from './final-modal';
+import { beforeUpload } from './netflix-form';
 type FileType = Parameters<GetProp<UploadProps, 'beforeUpload'>>[0];
 
 const AlbumGraduationv1 = ({
@@ -69,6 +69,7 @@ const AlbumGraduationv1 = ({
   editData?: IDetailContentResponse;
 }) => {
   const [uploadLoading, setUploadLoading] = useState(false);
+  const [loadingLlm, setLoadingLlm] = useState(false);
 
   const profile = useMemoifyProfile();
   const router = useRouter();
@@ -117,16 +118,26 @@ const AlbumGraduationv1 = ({
     val: any,
     status: 'draft' | 'published' = 'published'
   ) => {
-    // LLM GENERATION PER PROPETIES
-    // const synopsis = llm.gemini()
+
+    // Generate graduation story using Gemini
+    setLoadingLlm(true);
+    const generatedData = await generateGraduationStory({
+      name: val.clientName,
+      university: val.university,
+      graduationDate: val.graduationDate,
+      movieGenre: val.movieGenre
+    });
+    setLoadingLlm(false);
 
     // TODO: Read the object from the antd form
-    const { clientName, subTitle, modalContent, isPublic } = val;
+    const { clientName, movieGenre, university, graduationDate, isPublic, photographerName } = val;
 
     const json_text = {
       clientName,
-      subTitle, //diubah
-      modalContent, //diubah
+      movieGenre,
+      university,
+      graduationDate,
+      photographerName,
       images:
         collectionOfImages.length > 0
           ? collectionOfImages.map((dx) => dx.uri)
@@ -134,7 +145,7 @@ const AlbumGraduationv1 = ({
       isPublic, //leave it
 
       // LLM props
-      // synopsis
+      llm_generated: generatedData,
     };
 
     const payload = {
@@ -154,7 +165,9 @@ const AlbumGraduationv1 = ({
     const res = editData
       ? await editContent(payload, editData.id)
       : await createContent(payload);
+    console.log(res)
     if (res.success) {
+      console.log(res.data)
       const userLink = selectedTemplate.route + '/' + res.data;
 
       // Clear form fields
@@ -201,6 +214,24 @@ const AlbumGraduationv1 = ({
     }
   }, [editData]);
 
+  // Use React Query to fetch movie genres
+  const { data: genres = [], isLoading: genreLoading } = useQuery({
+    queryKey: ['movieGenres'],
+    queryFn: async () => {
+      try {
+        return await fetchMovieGenres();
+      } catch (error) {
+        message.error('Failed to load movie genres');
+        return [];
+      }
+    }
+  });
+
+  const genreOptions = genres.map((genre: Genre, index: number) => ({
+    value: genre.id,
+    label: genre.name
+  }));
+
   return (
     <div>
       <Modal
@@ -213,6 +244,7 @@ const AlbumGraduationv1 = ({
           profile={profile}
           onSubmit={handleSubmit}
           preFormValue={modalState?.data}
+          loading={loadingLlm}
         />
       </Modal>
 
@@ -223,32 +255,41 @@ const AlbumGraduationv1 = ({
         disabled={loading}
         form={form}
         layout="vertical"
-        // onFinish={(val) => handleSubmit(val)}
+      // onFinish={(val) => handleSubmit(val)}
       >
         <Form.Item
-          rules={[{ required: true, message: 'Please input client name!' }]}
+          rules={[{ required: true, message: 'Please enter full name client' }]}
           name={'clientName'}
-          label="Client Name">
-          <Input size="large" placeholder="Galih permana" />
+          label="Full Name Client">
+          <Input size="large" placeholder="Input full name client" />
         </Form.Item>
         <Form.Item
-          rules={[{ required: true, message: 'Please input subtitle!' }]}
-          name={'subTitle'}
-          label="Sub Title">
-          <TextArea
+          rules={[{ required: true, message: 'Please enter photographer name' }]}
+          name={'photographerName'}
+          label="Photographer Name">
+          <Input size="large" placeholder="Input photographer name" />
+        </Form.Item>
+        <Form.Item
+          name="university"
+          label="University Name"
+          rules={[{ required: true, message: 'Please enter university' }]}
+        >
+          <Input
+            placeholder="Input university name"
             size="large"
-            placeholder="This is how me express love. In the meantime you will understand how my brain works. lorem ipsum"
           />
         </Form.Item>
-
         <Form.Item
-          className="!mt-2"
-          rules={[{ required: true, message: 'Please input modal content!' }]}
-          name={'modalContent'}
-          label="Modal Content">
-          <TextArea
+          name="graduationDate"
+          label="Graduation Date"
+          rules={[{ required: true, message: 'Please select your graduation date' }]}
+          className="w-full"
+        >
+          <DatePicker
             size="large"
-            placeholder="This is how me express love. In the meantime you will understand how my brain works. lorem ipsum"
+            placeholder="Input graduation date"
+            format="DD/MM/YYYY"
+            className="w-full"
           />
         </Form.Item>
         {/* LEAVE IT */}
@@ -303,11 +344,24 @@ const AlbumGraduationv1 = ({
             {collectionOfImages.length >= 5 && profile?.type === 'free'
               ? null
               : collectionOfImages.length >= 15 && profile?.type !== 'free'
-              ? null
-              : uploadButton}
+                ? null
+                : uploadButton}
           </Upload>
         </Form.Item>
-
+        <Form.Item
+          name="movieGenre"
+          label="Theme Movie"
+          rules={[{ required: true, message: 'Please select a theme movie' }]}
+        >
+          <Select
+            placeholder="Input theme movie"
+            getPopupContainer={trigger => trigger}
+            options={genreOptions}
+            showSearch
+            filterOption={(input, option) => option?.label?.toLowerCase().includes(input.toLowerCase())}
+            size="large"
+          />
+        </Form.Item>
         <div className="flex justify-end gap-2">
           <Tooltip
             title={
@@ -359,8 +413,9 @@ const AlbumGraduationv1 = ({
             loading={loading || uploadLoading}
             type="primary"
             htmlType="submit"
+            disabled={loadingLlm}
             size="large">
-            {editData ? 'Edit & Publish' : 'Create'}
+            {loadingLlm ? 'Generating...' : editData ? 'Edit & Publish' : 'Create'}
           </Button>
         </div>
       </Form>

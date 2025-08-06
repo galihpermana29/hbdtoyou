@@ -163,7 +163,7 @@ const GraduationFilmV1Page = () => {
     <div className="w-full min-h-screen bg-black">
       <div className="mx-auto bg-black max-w-[440px] h-full px-4 b">
         {/* Video */}
-        <div className="w-[408px] h-[408px] mb-3">
+        <div className="max-w-[408px] w-full h-[408px] mb-3">
           <Image
             width={408}
             height={408}
@@ -307,7 +307,7 @@ const GraduationFilmV1Page = () => {
         {/* Our Gallery */}
         <div className="flex flex-col items-start gap-y-3 w-full mb-3">
           <SectionHeader title="Our Gallery" />
-          <GalleryGrid images={graduationData.galleryImages} initialLimit={6} />
+          {/* <GalleryGrid images={graduationData.galleryImages} initialLimit={6} /> */}
           <NetflixButton
             variant="text"
             icon={showMoreIcon}
