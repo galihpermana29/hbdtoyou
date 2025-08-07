@@ -11,10 +11,7 @@ import {
 import { parsingImageFromJSON } from '@/lib/utils';
 import { generateGraduationStory } from '@/services/gemini';
 import { fetchMovieGenres, Genre } from '@/services/tmdb';
-import {
-  LoadingOutlined,
-  PlusOutlined
-} from '@ant-design/icons';
+import { LoadingOutlined, PlusOutlined } from '@ant-design/icons';
 import { useQuery } from '@tanstack/react-query';
 import type { GetProp, UploadProps } from 'antd';
 import {
@@ -26,7 +23,7 @@ import {
   Modal,
   Select,
   Tooltip,
-  Upload
+  Upload,
 } from 'antd';
 import { useForm } from 'antd/es/form/Form';
 import dayjs from 'dayjs';
@@ -118,19 +115,25 @@ const AlbumGraduationv1 = ({
     val: any,
     status: 'draft' | 'published' = 'published'
   ) => {
-
     // Generate graduation story using Gemini
     setLoadingLlm(true);
     const generatedData = await generateGraduationStory({
       name: val.clientName,
       university: val.university,
       graduationDate: val.graduationDate,
-      movieGenre: val.movieGenre
+      movieGenre: val.movieGenre,
     });
     setLoadingLlm(false);
 
     // TODO: Read the object from the antd form
-    const { clientName, movieGenre, university, graduationDate, isPublic, photographerName } = val;
+    const {
+      clientName,
+      movieGenre,
+      university,
+      graduationDate,
+      isPublic,
+      photographerName,
+    } = val;
 
     const json_text = {
       clientName,
@@ -165,9 +168,9 @@ const AlbumGraduationv1 = ({
     const res = editData
       ? await editContent(payload, editData.id)
       : await createContent(payload);
-    console.log(res)
+    console.log(res);
     if (res.success) {
-      console.log(res.data)
+      console.log(res.data);
       const userLink = selectedTemplate.route + '/' + res.data;
 
       // Clear form fields
@@ -224,12 +227,12 @@ const AlbumGraduationv1 = ({
         message.error('Failed to load movie genres');
         return [];
       }
-    }
+    },
   });
 
   const genreOptions = genres.map((genre: Genre, index: number) => ({
     value: genre.id,
-    label: genre.name
+    label: genre.name,
   }));
 
   return (
@@ -255,7 +258,7 @@ const AlbumGraduationv1 = ({
         disabled={loading}
         form={form}
         layout="vertical"
-      // onFinish={(val) => handleSubmit(val)}
+        // onFinish={(val) => handleSubmit(val)}
       >
         <Form.Item
           rules={[{ required: true, message: 'Please enter full name client' }]}
@@ -264,7 +267,9 @@ const AlbumGraduationv1 = ({
           <Input size="large" placeholder="Input full name client" />
         </Form.Item>
         <Form.Item
-          rules={[{ required: true, message: 'Please enter photographer name' }]}
+          rules={[
+            { required: true, message: 'Please enter photographer name' },
+          ]}
           name={'photographerName'}
           label="Photographer Name">
           <Input size="large" placeholder="Input photographer name" />
@@ -272,19 +277,16 @@ const AlbumGraduationv1 = ({
         <Form.Item
           name="university"
           label="University Name"
-          rules={[{ required: true, message: 'Please enter university' }]}
-        >
-          <Input
-            placeholder="Input university name"
-            size="large"
-          />
+          rules={[{ required: true, message: 'Please enter university' }]}>
+          <Input placeholder="Input university name" size="large" />
         </Form.Item>
         <Form.Item
           name="graduationDate"
           label="Graduation Date"
-          rules={[{ required: true, message: 'Please select your graduation date' }]}
-          className="w-full"
-        >
+          rules={[
+            { required: true, message: 'Please select your graduation date' },
+          ]}
+          className="w-full">
           <DatePicker
             size="large"
             placeholder="Input graduation date"
@@ -344,22 +346,26 @@ const AlbumGraduationv1 = ({
             {collectionOfImages.length >= 5 && profile?.type === 'free'
               ? null
               : collectionOfImages.length >= 15 && profile?.type !== 'free'
-                ? null
-                : uploadButton}
+              ? null
+              : uploadButton}
           </Upload>
         </Form.Item>
         <Form.Item
           name="movieGenre"
           label="Theme Movie"
-          rules={[{ required: true, message: 'Please select a theme movie' }]}
-        >
+          rules={[{ required: true, message: 'Please select a theme movie' }]}>
           <Select
             placeholder="Input theme movie"
-            getPopupContainer={trigger => trigger}
+            getPopupContainer={(trigger) => trigger}
             options={genreOptions}
             showSearch
-            filterOption={(input, option) => option?.label?.toLowerCase().includes(input.toLowerCase())}
+            filterOption={(input, option) =>
+              option?.label?.toLowerCase().includes(input.toLowerCase())
+            }
             size="large"
+            popupClassName="inspiration-select-dropdown"
+            listHeight={256}
+            virtual={false}
           />
         </Form.Item>
         <div className="flex justify-end gap-2">
@@ -415,7 +421,11 @@ const AlbumGraduationv1 = ({
             htmlType="submit"
             disabled={loadingLlm}
             size="large">
-            {loadingLlm ? 'Generating...' : editData ? 'Edit & Publish' : 'Create'}
+            {loadingLlm
+              ? 'Generating...'
+              : editData
+              ? 'Edit & Publish'
+              : 'Create'}
           </Button>
         </div>
       </Form>

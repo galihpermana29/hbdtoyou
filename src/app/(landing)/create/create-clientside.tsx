@@ -94,7 +94,7 @@ const CreatePage = () => {
     setSelectedTemplate,
     setCurrent,
   } = useCreateContent();
-  
+
   const [templateFilter, setTemplateFilter] = useState('All');
 
   const [templates, setTemplates] = useState<IAllTemplateResponse[] | null>(
@@ -387,37 +387,47 @@ const CreatePage = () => {
                 </div>
               ) : (
                 <div className="flex flex-col items-center justify-start w-full">
-                  <div className='flex flex-col md:flex-row items-start md:items-center justify-between w-full mb-6 gap-4'>
-                    <p className='font-semibold text-2xl text-[#1B1B1B]'>Select Your Template</p>
+                  <div className="flex flex-col md:flex-row items-start md:items-center justify-between w-full mb-6 gap-4">
+                    <p className="font-semibold text-2xl text-[#1B1B1B]">
+                      Select Your Template
+                    </p>
                     <Segmented
-                      options={['All', 'Famous Template', 'Graduation Template', 'Memoify Template']}
+                      options={[
+                        'All',
+                        'Popular Template',
+                        // 'Graduation Template',
+                        'Original Template',
+                      ]}
                       value={templateFilter}
                       onChange={(value) => setTemplateFilter(value)}
                       className="bg-gray-100 p-1 rounded-full"
                     />
                   </div>
                   <div className="w-full">
-                    {(templateFilter === 'All' || templateFilter === 'Famous Template') && (
+                    {(templateFilter === 'All' ||
+                      templateFilter === 'Popular Template') && (
                       <TemplateGridSection
                         title="Popular Template"
                         templates={popularTemplates}
                         onTemplateClick={handleTemplateClick}
                       />
                     )}
-                    {(templateFilter === 'All' || templateFilter === 'Memoify Template') && (
+                    {(templateFilter === 'All' ||
+                      templateFilter === 'Original Template') && (
                       <TemplateGridSection
                         title="Original Template"
                         templates={templates}
                         onTemplateClick={handleTemplateClick}
                       />
                     )}
-                    {(templateFilter === 'All' || templateFilter === 'Graduation Template') && (
+                    {/* {(templateFilter === 'All' ||
+                      templateFilter === 'Graduation Template') && (
                       <TemplateGridSection
                         title="Graduation Template"
                         templates={graduationTemplates}
                         onTemplateClick={handleTemplateClick}
                       />
-                    )}
+                    )} */}
                   </div>
                 </div>
               )}
