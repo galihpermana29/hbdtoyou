@@ -1,0 +1,10 @@
+// Export all Netflix-styled components for easier imports
+export { default as SectionHeader } from './SectionHeader';
+export { default as NetflixButton } from './NetflixButton';
+export { default as EpisodeCard } from './EpisodeCard';
+export { default as WishCard } from './WishCard';
+export { default as ScheduleItem } from './ScheduleItem';
+export { default as PersonCard } from './PersonCard';
+export { default as LocationInfo } from './LocationInfo';
+export { default as GalleryGrid } from './GalleryGrid';
+export { default as WishForm } from './WishForm';

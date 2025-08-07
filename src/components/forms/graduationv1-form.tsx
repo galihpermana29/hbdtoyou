@@ -186,6 +186,7 @@ const GraduationV1Form = ({
         open={modalState.visible}
         onCancel={() => setModalState({ visible: false, data: '' })}>
         <FinalModal
+          loading={loading}
           profile={profile}
           onSubmit={handleSubmit}
           preFormValue={modalState?.data}

@@ -31,9 +31,29 @@ export function addLineBreaksEveryThreeSentences(text) {
 export function mapContentToCard(contents: IContent[], purpose = 'client') {
   return contents.map((show) => {
     const jsonContent = JSON.parse(show.detail_content_json_text);
+
+    // add docs
+    // this function is used to get the jumbotron image from the json content
+    //also check if the json content is an array and has at least one item
     const handleJumbotron = () => {
       if (
-        ['scrapbookv1'].includes(show.template_name.split('-')[1].split(' ')[1])
+        ['albumgraduation1'].includes(
+          show.template_name.split('-')[1].split(' ')[1]
+        )
+      ) {
+        return jsonContent
+          ? Array.isArray(jsonContent?.images)
+            ? jsonContent?.images.length > 0
+              ? jsonContent?.images[0]
+              : null
+            : null
+          : null;
+      }
+
+      if (
+        ['scrapbookv1', 'scrapbookvintage'].includes(
+          show.template_name.split('-')[1].split(' ')[1]
+        )
       ) {
         return jsonContent?.coverImage;
       }

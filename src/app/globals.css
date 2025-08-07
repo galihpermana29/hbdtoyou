@@ -32,6 +32,10 @@
 
 *{
   font-family: "Plus Jakarta Sans", serif;
+  font-optical-sizing: auto;
+  /* font-weight: <weight>; */
+  font-style: normal;
+  scroll-behavior: smooth;
 }
 
 
@@ -50,6 +54,10 @@
   font-family: "PT Serif", serif;
   font-weight: 400;
   font-style: normal;
+}
+
+.geist-font {
+  font-family: 'Geist', sans-serif;
 }
 
 .f1-font{
