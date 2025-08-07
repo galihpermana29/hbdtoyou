@@ -234,6 +234,7 @@ const SpotifyForm = ({
         open={modalState.visible}
         onCancel={() => setModalState({ visible: false, data: '' })}>
         <FinalModal
+          loading={loading}
           profile={profile}
           onSubmit={onFinish}
           preFormValue={modalState?.data}
@@ -281,6 +282,9 @@ const SpotifyForm = ({
                       { required: true, message: 'Please input a song name!' },
                     ]}>
                     <Select
+                      popupClassName="inspiration-select-dropdown"
+                      listHeight={256}
+                      virtual={false}
                       notFoundContent={null}
                       defaultActiveFirstOption={false}
                       suffixIcon={null}
@@ -361,6 +365,9 @@ const SpotifyForm = ({
                       { required: true, message: 'Please input a song name!' },
                     ]}>
                     <Select
+                      popupClassName="inspiration-select-dropdown"
+                      listHeight={256}
+                      virtual={false}
                       notFoundContent={null}
                       defaultActiveFirstOption={false}
                       suffixIcon={null}

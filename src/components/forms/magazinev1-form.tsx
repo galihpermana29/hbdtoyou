@@ -218,6 +218,7 @@ const MagazineV1Form = ({
         open={modalState.visible}
         onCancel={() => setModalState({ visible: false, data: '' })}>
         <FinalModal
+          loading={loading}
           profile={profile}
           onSubmit={handleSubmit}
           preFormValue={modalState?.data}
@@ -243,6 +244,9 @@ const MagazineV1Form = ({
           className=" w-full flex-1 !my-[10px]"
           rules={[{ required: true, message: 'Please input a song name!' }]}>
           <Select
+            popupClassName="inspiration-select-dropdown"
+            listHeight={256}
+            virtual={false}
             notFoundContent={null}
             defaultActiveFirstOption={false}
             suffixIcon={null}

@@ -17,10 +17,12 @@ const FinalModal = ({
   profile,
   onSubmit,
   preFormValue,
+  loading,
 }: {
   profile: { type: string };
   onSubmit: (val: any, status: 'draft' | 'published') => Promise<void>;
   preFormValue: any;
+  loading: boolean;
 }) => {
   const [form] = Form.useForm();
   const isScheduled = useWatch('is_scheduled', form);
@@ -122,8 +124,10 @@ const FinalModal = ({
             className="!bg-black !rounded-full"
             type="primary"
             htmlType="submit"
+            loading={loading}
+            disabled={loading}
             size="large">
-            {'Finish'}
+            {loading ? 'Generating...' : 'Finish'}
           </Button>
         </div>
       </Form.Item>

@@ -6,6 +6,7 @@ import {
   Modal,
   notification,
   Progress,
+  Segmented,
   Spin,
   Steps,
 } from 'antd';
@@ -15,6 +16,7 @@ import Link from 'next/link';
 import NetflixForm from '@/components/forms/netflix-form';
 import {
   getAllTemplates,
+  getGraduationTemplates,
   getOriginalTemplates,
   getPopularTemplates,
 } from '@/action/user-api';
@@ -35,6 +37,7 @@ import useCreateContent from './usecase/useCreateContent';
 import { templateNameToRoute } from '@/lib/utils';
 import { TemplateGridSection } from './view/presentation/CreateTemplateSection';
 import { useRouter } from 'next/navigation';
+import AlbumGraduationv1 from '@/components/forms/albumgraduationv1-form';
 
 const StepsCustom = [
   {
@@ -92,6 +95,8 @@ const CreatePage = () => {
     setCurrent,
   } = useCreateContent();
 
+  const [templateFilter, setTemplateFilter] = useState('All');
+
   const [templates, setTemplates] = useState<IAllTemplateResponse[] | null>(
     null
   );
@@ -99,6 +104,10 @@ const CreatePage = () => {
   const router = useRouter();
 
   const [popularTemplates, setPopularTemplates] = useState<
+    IAllTemplateResponse[] | null
+  >(null);
+
+  const [graduationTemplates, setGraduationTemplates] = useState<
     IAllTemplateResponse[] | null
   >(null);
 
@@ -111,6 +120,12 @@ const CreatePage = () => {
         setPopularTemplates(dx.data);
       } else {
         message.error(dx.message);
+      }
+      const gx = await getGraduationTemplates();
+      if (gx.success) {
+        setGraduationTemplates(gx.data);
+      } else {
+        message.error(gx.message);
       }
     } else {
       message.error(data.message);
@@ -307,6 +322,18 @@ const CreatePage = () => {
                   setModalState={setModalState}
                 />
               )}
+
+              {selectedTemplate.route.includes('albumgraduation1') && (
+                <AlbumGraduationv1
+                  handleCompleteCreation={handleCompleteCreation}
+                  openNotification={openNotification}
+                  selectedTemplate={selectedTemplate!}
+                  loading={loading}
+                  setLoading={setLoading}
+                  modalState={modalState}
+                  setModalState={setModalState}
+                />
+              )}
             </div>
           ) : (
             <>
@@ -359,19 +386,48 @@ const CreatePage = () => {
                   </div>
                 </div>
               ) : (
-                <div>
-                  <div>
-                    <TemplateGridSection
-                      title="Popular Template"
-                      templates={popularTemplates}
-                      onTemplateClick={handleTemplateClick}
+                <div className="flex flex-col items-center justify-start w-full">
+                  <div className="flex flex-col md:flex-row items-start md:items-center justify-between w-full mb-6 gap-4">
+                    <p className="font-semibold text-2xl text-[#1B1B1B]">
+                      Select Your Template
+                    </p>
+                    <Segmented
+                      options={[
+                        'All',
+                        'Popular Template',
+                        // 'Graduation Template',
+                        'Original Template',
+                      ]}
+                      value={templateFilter}
+                      onChange={(value) => setTemplateFilter(value)}
+                      className="bg-gray-100 p-1 rounded-full"
                     />
-
-                    <TemplateGridSection
-                      title="Original Template"
-                      templates={templates}
-                      onTemplateClick={handleTemplateClick}
-                    />
+                  </div>
+                  <div className="w-full">
+                    {(templateFilter === 'All' ||
+                      templateFilter === 'Popular Template') && (
+                      <TemplateGridSection
+                        title="Popular Template"
+                        templates={popularTemplates}
+                        onTemplateClick={handleTemplateClick}
+                      />
+                    )}
+                    {(templateFilter === 'All' ||
+                      templateFilter === 'Original Template') && (
+                      <TemplateGridSection
+                        title="Original Template"
+                        templates={templates}
+                        onTemplateClick={handleTemplateClick}
+                      />
+                    )}
+                    {/* {(templateFilter === 'All' ||
+                      templateFilter === 'Graduation Template') && (
+                      <TemplateGridSection
+                        title="Graduation Template"
+                        templates={graduationTemplates}
+                        onTemplateClick={handleTemplateClick}
+                      />
+                    )} */}
                   </div>
                 </div>
               )}

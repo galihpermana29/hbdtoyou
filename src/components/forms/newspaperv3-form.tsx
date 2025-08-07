@@ -169,6 +169,7 @@ const Newspaperv3Form = ({
         open={modalState.visible}
         onCancel={() => setModalState({ visible: false, data: '' })}>
         <FinalModal
+          loading={loading}
           profile={profile}
           onSubmit={handleSubmit}
           preFormValue={modalState?.data}
@@ -229,6 +230,9 @@ const Newspaperv3Form = ({
             },
           ]}>
           <Select
+            popupClassName="inspiration-select-dropdown"
+            listHeight={256}
+            virtual={false}
             onChange={(value) => {
               form.setFieldValue(
                 'desc1',

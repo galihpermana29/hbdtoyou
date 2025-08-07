@@ -1,6 +1,7 @@
 'use server';
 
 import { getSession } from '@/store/get-set-session';
+import { revalidateTag } from 'next/cache';
 import {
   IAllPaymentResponse,
   IAllTemplateResponse,
@@ -9,7 +10,6 @@ import {
   IContentStats,
   IDetailContentResponse,
   IGetDetailPayment,
-  ILatestContentResponse,
   ILatestContentResponse2,
   IOAuthResponse,
   IPaymentPayload,
@@ -17,7 +17,6 @@ import {
   IQRISPaymentResponse,
   IResponsePaypal,
 } from './interfaces';
-import { revalidateTag } from 'next/cache';
 
 export interface IOAuthPayload {
   token_email: string;
@@ -68,6 +67,37 @@ export async function getAllTemplates(): Promise<
 > {
   const session = await getSession();
   const res = await fetch(baseUri + `/templates`, {
+    method: 'GET',
+    headers: {
+      'Content-Type': 'application/json',
+      'X-Source': 'web',
+      'X-UserID': session.userId!,
+      Authorization: `Bearer ${session.accessToken}`,
+    },
+  });
+
+  if (!res.ok) {
+    return {
+      success: false,
+      message: res.statusText,
+      data: null,
+    };
+  }
+
+  const data = await res.json();
+
+  return {
+    success: true,
+    message: data.message,
+    data: data.data,
+  };
+}
+
+export async function getGraduationTemplates(): Promise<
+  IGlobalResponse<null | IAllTemplateResponse[]>
+> {
+  const session = await getSession();
+  const res = await fetch(baseUri + `/templates?category=graduation`, {
     method: 'GET',
     headers: {
       'Content-Type': 'application/json',
@@ -457,8 +487,9 @@ export async function getLatestInspiration(
   const session = await getSession();
   const res = await fetch(
     baseUri +
-    `/contents/latest?limit=${limit}&page=${page}${templateId ? `&template_id=${templateId}` : ''
-    }${keyword ? `&keyword=${keyword}` : ''}`,
+      `/contents/latest?limit=${limit}&page=${page}${
+        templateId ? `&template_id=${templateId}` : ''
+      }${keyword ? `&keyword=${keyword}` : ''}`,
     {
       method: 'GET',
       headers: {
