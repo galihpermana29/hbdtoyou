@@ -2,6 +2,7 @@
 import { IDetailContentResponse } from '@/action/interfaces';
 import { createContent, editContent } from '@/action/user-api';
 import { useMemoifyProfile } from '@/app/session-provider';
+import GeneratingLLMLoadingModal from '@/app/(landing)/albumgraduation1/[id]/GeneratingLLMLoadingModal';
 import { RootState } from '@/lib/store';
 import {
   removeCollectionOfImages,
@@ -66,7 +67,7 @@ const AlbumGraduationv1 = ({
   editData?: IDetailContentResponse;
 }) => {
   const [uploadLoading, setUploadLoading] = useState(false);
-  const [loadingLlm, setLoadingLlm] = useState(false);
+  const [showLlmModal, setShowLlmModal] = useState(false);
 
   const profile = useMemoifyProfile();
   const router = useRouter();
@@ -115,15 +116,20 @@ const AlbumGraduationv1 = ({
     val: any,
     status: 'draft' | 'published' = 'published'
   ) => {
+    // Close the FinalModal if it's open
+    if (modalState.visible) {
+      setModalState({ visible: false, data: '' });
+    }
+
     // Generate graduation story using Gemini
-    setLoadingLlm(true);
+    setShowLlmModal(true);
     const generatedData = await generateGraduationStory({
       name: val.clientName,
       university: val.university,
       graduationDate: val.graduationDate,
       movieGenre: val.movieGenre,
     });
-    setLoadingLlm(false);
+    setShowLlmModal(false);
 
     // TODO: Read the object from the antd form
     const {
@@ -168,7 +174,6 @@ const AlbumGraduationv1 = ({
     const res = editData
       ? await editContent(payload, editData.id)
       : await createContent(payload);
-    console.log(res);
     if (res.success) {
       console.log(res.data);
       const userLink = selectedTemplate.route + '/' + res.data;
@@ -199,17 +204,20 @@ const AlbumGraduationv1 = ({
   useEffect(() => {
     if (editData) {
       const jsonContent = JSON.parse(editData.detail_content_json_text);
+      console.log(jsonContent);
 
       const images = parsingImageFromJSON(
         jsonContent,
         'collection-images',
         'images'
       );
+      console.log(images);
 
       dispatch(setCollectionOfImages(images));
 
       form.setFieldsValue({
         ...jsonContent,
+        graduationDate: dayjs(jsonContent.graduationDate),
         images,
         title2: editData.title,
         caption: editData.caption,
@@ -237,6 +245,9 @@ const AlbumGraduationv1 = ({
 
   return (
     <div>
+      {/* LLM Loading Modal */}
+      <GeneratingLLMLoadingModal isOpen={showLlmModal} />
+
       <Modal
         centered={true}
         title="Add-Ons"
@@ -247,7 +258,6 @@ const AlbumGraduationv1 = ({
           profile={profile}
           onSubmit={handleSubmit}
           preFormValue={modalState?.data}
-          loading={loadingLlm}
         />
       </Modal>
 
@@ -258,7 +268,7 @@ const AlbumGraduationv1 = ({
         disabled={loading}
         form={form}
         layout="vertical"
-        // onFinish={(val) => handleSubmit(val)}
+      // onFinish={(val) => handleSubmit(val)}
       >
         <Form.Item
           rules={[{ required: true, message: 'Please enter full name client' }]}
@@ -346,8 +356,8 @@ const AlbumGraduationv1 = ({
             {collectionOfImages.length >= 5 && profile?.type === 'free'
               ? null
               : collectionOfImages.length >= 15 && profile?.type !== 'free'
-              ? null
-              : uploadButton}
+                ? null
+                : uploadButton}
           </Upload>
         </Form.Item>
         <Form.Item
@@ -419,11 +429,8 @@ const AlbumGraduationv1 = ({
             loading={loading || uploadLoading}
             type="primary"
             htmlType="submit"
-            disabled={loadingLlm}
             size="large">
-            {loadingLlm
-              ? 'Generating...'
-              : editData
+            {editData
               ? 'Edit & Publish'
               : 'Create'}
           </Button>

@@ -2,6 +2,7 @@
 
 import { getDetailContent } from '@/action/user-api';
 import useCreateContent from '@/app/(landing)/create/usecase/useCreateContent';
+import AlbumGraduationv1 from '@/components/forms/albumgraduationv1-form';
 import DisneyForm from '@/components/forms/disney-form';
 import Formula1Form from '@/components/forms/f1historyv1-form';
 import GraduationV1Form from '@/components/forms/graduationv1-form';
@@ -185,6 +186,19 @@ const EditContentDashboardPage = () => {
 
               {selectedTemplate.route.includes('f1historyv1') && (
                 <Formula1Form
+                  handleCompleteCreation={handleCompleteCreation}
+                  openNotification={openNotification}
+                  selectedTemplate={selectedTemplate!}
+                  loading={loading}
+                  setLoading={setLoading}
+                  modalState={modalState}
+                  setModalState={setModalState}
+                />
+              )}
+
+              {selectedTemplate.route.includes('albumgraduation1') && (
+                <AlbumGraduationv1
+                  editData={detailContent}
                   handleCompleteCreation={handleCompleteCreation}
                   openNotification={openNotification}
                   selectedTemplate={selectedTemplate!}

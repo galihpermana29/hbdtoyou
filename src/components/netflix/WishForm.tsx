@@ -49,7 +49,7 @@ const WishForm = ({ onSubmit }: WishFormProps) => {
   };
 
   return (
-    <Form form={form} layout="vertical" onFinish={handleSubmit} requiredMark={false}>
+    <Form className='max-md:!px-2 md:!px-0' form={form} layout="vertical" onFinish={handleSubmit} requiredMark={false}>
       <Form.Item
         name='name'
         className="!mb-3"

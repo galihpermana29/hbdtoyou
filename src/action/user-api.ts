@@ -31,7 +31,7 @@ export interface IGlobalResponse<T> {
 const baseUri =
   process.env.NODE_ENV === 'production'
     ? process.env.API_URI
-    : process.env.STAGING_API;
+    : process.env.NEXT_PUBLIC_STAGING_API;
 
 export async function loginOAuth(
   payload: IOAuthPayload
@@ -487,9 +487,8 @@ export async function getLatestInspiration(
   const session = await getSession();
   const res = await fetch(
     baseUri +
-      `/contents/latest?limit=${limit}&page=${page}${
-        templateId ? `&template_id=${templateId}` : ''
-      }${keyword ? `&keyword=${keyword}` : ''}`,
+    `/contents/latest?limit=${limit}&page=${page}${templateId ? `&template_id=${templateId}` : ''
+    }${keyword ? `&keyword=${keyword}` : ''}`,
     {
       method: 'GET',
       headers: {
