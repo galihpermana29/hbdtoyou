@@ -3,15 +3,15 @@ import Script from 'next/script';
 import { Metadata } from 'next';
 
 export const metadata: Metadata = {
-  title: 'Memoify | Create Custom Websites Inspired by Popular Platforms',
+  title: 'Memoify | Create Digital Gifts, Scrapbooks & Albums Inspired by Popular Platforms',
   description:
-    'With Memoify create custom websites inspired by your favorite platforms like Netflix, Spotify, or YouTube. Add personal touches and let your memories shine!',
+    'With Memoify create digital gifts, digital scrapbooks, and digital albums inspired by your favorite platforms like Netflix, Spotify, or YouTube. Add personal touches and let your memories shine!',
   keywords:
-    'custom websites, Netflix templates, Spotify templates, YouTube templates, personalized websites, digital memories, Memoify',
+    'digital gift, digital scrapbook, digital album, virtual present, online gift, electronic memory book, digital photo collection, memory collection, virtual album, online scrapbook, e-gift, hadiah ulang tahun digital, kado digital, scrapbook digital, album foto digital, kenangan digital, kado online, custom websites, Netflix templates, Spotify templates, YouTube templates, personalized websites, digital memories, Memoify',
   openGraph: {
-    title: 'Memoify | Create Custom Websites Inspired by Popular Platforms',
+    title: 'Memoify | Create Digital Gifts, Scrapbooks & Albums Inspired by Popular Platforms',
     description:
-      'With Memoify create custom websites inspired by your favorite platforms like Netflix, Spotify, or YouTube. Add personal touches and let your memories shine!',
+      'With Memoify create digital gifts, digital scrapbooks, and digital albums inspired by your favorite platforms like Netflix, Spotify, or YouTube. Add personal touches and let your memories shine!',
     url: 'https://memoify.live',
     siteName: 'Memoify',
     images: [
@@ -27,9 +27,9 @@ export const metadata: Metadata = {
   },
   twitter: {
     card: 'summary_large_image',
-    title: 'Memoify | Create Custom Websites Inspired by Popular Platforms',
+    title: 'Memoify | Create Digital Gifts, Scrapbooks & Albums Inspired by Popular Platforms',
     description:
-      'With Memoify create custom websites inspired by your favorite platforms like Netflix, Spotify, or YouTube. Add personal touches and let your memories shine!',
+      'With Memoify create digital gifts, digital scrapbooks, and digital albums inspired by your favorite platforms like Netflix, Spotify, or YouTube. Add personal touches and let your memories shine!',
     images: [
       'https://res.cloudinary.com/dqipjpy1w/image/upload/v1751298448/brave_screenshot_memoify.live_mhwzfs.png',
     ],

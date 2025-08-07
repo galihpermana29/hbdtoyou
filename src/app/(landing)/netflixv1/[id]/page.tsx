@@ -32,7 +32,10 @@ const RootUserPage = async ({ params }: any) => {
       <div className="bg-black overflow-x-hidden">
         <Navbar jumbotronImage={parsedData?.jumbotronImage} />
         <Featured
-          jumbotronImage={parsedData?.jumbotronImage}
+          jumbotronImage={
+            parsedData?.jumbotronImage ||
+            parsedData?.images?.slice(0, midIndex)[0]
+          }
           title={parsedData?.title}
           subTitle={parsedData?.subTitle}
           modalContent={parsedData?.modalContent}

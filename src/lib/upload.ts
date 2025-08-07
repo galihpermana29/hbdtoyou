@@ -98,32 +98,36 @@ export async function uploadImageWithApi(
       success: false,
     };
   }
+}
 
-  // change it with xhr so we can track progress
-  // return new Promise((resolve, reject) => {
-  //   const xhr = new XMLHttpRequest();
-  //   xhr.open('POST', process.env.NEXT_PUBLIC_API_URI + '/uploads', true);
-  //   xhr.setRequestHeader('X-Source', 'test');
-  //   xhr.setRequestHeader('X-UserID', profileId);
-  //   xhr.upload.onprogress = (event) => {
-  //     if (event.lengthComputable) {
-  //       const percentComplete = Math.round((event.loaded / event.total) * 100);
-  //       openNotification(percentComplete, key);
-  //     }
-  //   };
-  //   xhr.onload = () => {
-  //     if (xhr.status === 200) {
-  //       const response = JSON.parse(xhr.responseText);
-  //       resolve({
-  //         message: 'success',
-  //         data: response.secure_url,
-  //         success: true,
-  //       });
-  //     } else {
-  //       reject(new Error('Failed to upload image'));
-  //     }
-  //   };
-  //   xhr.onerror = () => reject(new Error('Upload failed'));
-  //   xhr.send(formData);
-  // });
+export async function uploadMultipleImageWithApi(
+  formData: FormData,
+  openNotification?: (progress: number, key: any) => void,
+  key?: any
+) {
+  // using axios
+  try {
+    const response = await axios.post(
+      `${process.env.NEXT_PUBLIC_API_URI?.replace('v1', 'v2')}/uploads`,
+      formData,
+      {
+        onUploadProgress: (progressEvent) => {
+          const percentCompleted = Math.round(
+            (progressEvent.loaded * 100) / progressEvent.total
+          );
+          openNotification?.(percentCompleted, key);
+        },
+      }
+    );
+    return {
+      message: 'success',
+      data: response.data,
+      success: true,
+    };
+  } catch (error) {
+    return {
+      message: 'Failed to upload image',
+      success: false,
+    };
+  }
 }

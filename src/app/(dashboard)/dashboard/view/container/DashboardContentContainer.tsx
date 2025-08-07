@@ -150,7 +150,7 @@ const DashboardContentContainer = ({ data }: { data: IContent[] }) => {
             </p>
             <Button
               onClick={() => {
-                router.push('/dashboard/create');
+                router.push('/create');
               }}
               iconPosition="end"
               icon={<SquarePen size={16} />}

@@ -135,12 +135,14 @@ const NewTemplates = ({ data }: { data: IAllTemplateResponse[] }) => {
                   size="large">
                   Create yours
                 </Button>
-                <a href="#demos">
+                <a
+                  href="https://youtu.be/kcRafcMSyHI?si=FA-0xF_R_8XXbbs3"
+                  target="_blank">
                   <Button
                     icon={<CirclePlay />}
                     size="large"
                     className="!border-[1px] !border-[#E34013] !text-[#E34013] !font-[600] !h-[48px] md:!h-[60px] !w-[250px]">
-                    Watch demo
+                    How to create
                   </Button>
                 </a>
               </div>
@@ -303,7 +305,7 @@ const NewTemplates = ({ data }: { data: IAllTemplateResponse[] }) => {
                   Unlock All the features you need create beautiful custom pages
                 </p>
                 <h1 className="text-[#1B1B1B] font-[700] text-[30px] mt-[12px]">
-                  Rp. 15.000,-
+                  Rp. 20.000,-
                 </h1>
               </div>
               <List
@@ -330,7 +332,7 @@ const NewTemplates = ({ data }: { data: IAllTemplateResponse[] }) => {
                 <Button
                   onClick={() => {
                     if (session?.accessToken) {
-                      router.push('/payment-qris');
+                      router.push('/payment');
                     } else {
                       signIn('google');
                     }
@@ -351,7 +353,7 @@ const NewTemplates = ({ data }: { data: IAllTemplateResponse[] }) => {
                   Custom feature for professional photo studio
                 </p>
                 <h1 className="text-[#1B1B1B] font-[700] text-[30px] mt-[12px]">
-                  Rp. 35.000,-
+                  Rp. 100.000,-
                 </h1>
               </div>
               <List

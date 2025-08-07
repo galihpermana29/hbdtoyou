@@ -259,7 +259,20 @@ const GraduationV1Form = ({
                   : []
                 : undefined
             }
-            beforeUpload={async (file) => {
+            beforeUpload={async (file, fileList) => {
+              const isBatchTooLarge = fileList.length > 5;
+              if (isBatchTooLarge) {
+                // Find the index of the current file in the list
+                const fileIndex = fileList.findIndex((f) => f.uid === file.uid);
+                // Only show the message once for the first file in a large batch
+                if (fileIndex === 0) {
+                  message.error(
+                    'You can only upload a maximum of 5 files at a time.'
+                  );
+                }
+                // Prevent upload for all files in a batch larger than 5
+                return Upload.LIST_IGNORE;
+              }
               setUploadLoading(true);
               await beforeUpload(
                 file as FileType,

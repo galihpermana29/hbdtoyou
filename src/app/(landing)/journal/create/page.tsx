@@ -1,8 +1,7 @@
 'use client';
 
-import React from 'react';
+import React, { useEffect, useState, useRef } from 'react';
 import { motion } from 'framer-motion';
-import { JournalEntry } from '../models/data';
 import JournalLayout from '../view/JournalLayout';
 import NavigationBar from '@/components/ui/navbar';
 import dynamic from 'next/dynamic';
@@ -13,14 +12,21 @@ const ReactQuill = dynamic(() => import('react-quill'), {
   loading: () => <p>Loading editor...</p>,
 });
 
+// import ReactQuill from 'react-quill';
+
+// Character limit for free users
+const MAXLENGTH = 200;
+
 import 'react-quill/dist/quill.snow.css';
 import { createContent } from '@/action/user-api';
 import { useRouter } from 'next/navigation';
 import { Button, Form, Input, message, Select } from 'antd';
+import { useMemoifyProfile } from '@/app/session-provider';
 
 const NewEntryPage: React.FC = () => {
   const [form] = Form.useForm();
 
+  const { type } = useMemoifyProfile?.() || {};
   const router = useRouter();
   const handleSubmit = async (values: any) => {
     // 2d4df00e-e773-4391-ad6a-1b6d688950ff
@@ -36,6 +42,7 @@ const NewEntryPage: React.FC = () => {
       preamble: values.preamble,
       introduction: values.introduction,
       isPublic: true,
+      destinationName: values.destinationName,
     };
 
     const payload = {
@@ -60,6 +67,49 @@ const NewEntryPage: React.FC = () => {
     }
   };
 
+  // Track character counts for each editor
+  const [charCounts, setCharCounts] = useState({
+    abstract: 0,
+    abstractSecondary: 0,
+    preamble: 0,
+    introduction: 0,
+  });
+
+  // 2. Create a ref to act as a flag
+  const quillModuleRegistered = useRef(false);
+
+  useEffect(() => {
+    // Check if on the client AND if our flag is false
+    if (typeof window !== 'undefined' && !quillModuleRegistered.current) {
+      // 1. Dynamically import the core 'quill' library, not 'react-quill'
+      import('quill').then((Quill) => {
+        // 2. The default export of 'quill' is the class itself
+        Quill.default.register('modules/maxlength', function (quill, options) {
+          const fieldName = options.fieldName;
+
+          quill.on('text-change', function () {
+            const text = quill.getText() || '';
+            const textLength = text.length - 1;
+
+            setCharCounts((prev) => ({
+              ...prev,
+              [fieldName]: Math.max(0, textLength),
+            }));
+
+            if (type !== 'premium' && textLength > options.maxLength) {
+              quill.deleteText(
+                options.maxLength,
+                textLength - options.maxLength
+              );
+            }
+          });
+        });
+
+        // Set the flag to true after registration
+        quillModuleRegistered.current = true;
+      });
+    }
+  }, [type]);
   return (
     <JournalLayout>
       <div className="min-h-screen overflow-hidden">
@@ -82,7 +132,10 @@ const NewEntryPage: React.FC = () => {
                   name="title"
                   rules={[{ required: true, message: 'Please enter a title' }]}
                   className="mb-6">
-                  <Input className="rounded-sm" />
+                  <Input
+                    className="rounded-sm"
+                    placeholder="Enter journal title"
+                  />
                 </Form.Item>
 
                 <Form.Item
@@ -92,7 +145,26 @@ const NewEntryPage: React.FC = () => {
                     { required: true, message: 'Please enter an author' },
                   ]}
                   className="mb-6">
-                  <Input className="rounded-sm" />
+                  <Input
+                    className="rounded-sm"
+                    placeholder="Enter author name"
+                  />
+                </Form.Item>
+
+                <Form.Item
+                  label="Destination Name"
+                  name="destinationName"
+                  rules={[
+                    {
+                      required: true,
+                      message: 'Please enter a destination name',
+                    },
+                  ]}
+                  className="mb-6">
+                  <Input
+                    className="rounded-sm"
+                    placeholder="Enter destination name"
+                  />
                 </Form.Item>
 
                 <Form.Item
@@ -102,17 +174,48 @@ const NewEntryPage: React.FC = () => {
                     { required: true, message: 'Please enter an abstract' },
                   ]}
                   className="mb-6">
-                  <ReactQuill
-                    modules={{
-                      toolbar: [
-                        ['bold', 'italic', 'underline', 'strike'],
-                        ['blockquote'],
-                        ['clean'],
-                      ],
-                    }}
-                    theme="snow"
-                    placeholder="Write your abstract text here. This section will be displayed in one columns."
-                  />
+                  <div className="relative">
+                    <ReactQuill
+                      modules={{
+                        toolbar: [
+                          ['bold', 'italic', 'underline', 'strike'],
+                          ['blockquote'],
+                          ['clean'],
+                        ],
+                        maxlength: {
+                          maxLength: MAXLENGTH,
+                          fieldName: 'abstract',
+                        },
+                      }}
+                      theme="snow"
+                      placeholder="Write your abstract text here. This section will be displayed in one columns."
+                    />
+                    {type !== 'premium' && (
+                      <div className="mt-1 flex justify-between items-center">
+                        <div
+                          className={`text-xs ${
+                            charCounts.abstract > MAXLENGTH * 0.8
+                              ? 'text-orange-500'
+                              : 'text-gray-500'
+                          }`}>
+                          <span
+                            className={
+                              charCounts.abstract >= MAXLENGTH
+                                ? 'text-red-500 font-bold'
+                                : ''
+                            }>
+                            {charCounts.abstract}
+                          </span>
+                          /{MAXLENGTH} characters (Free user limit)
+                        </div>
+                        <a
+                          href="/payment"
+                          className="text-xs text-blue-600 hover:text-blue-800 hover:underline text-right">
+                          Upgrade for unlimited characters →
+                        </a>
+                      </div>
+                    )}
+                  </div>
                 </Form.Item>
 
                 <Form.Item
@@ -122,17 +225,48 @@ const NewEntryPage: React.FC = () => {
                     { required: true, message: 'Please enter an abstract' },
                   ]}
                   className="mb-6">
-                  <ReactQuill
-                    modules={{
-                      toolbar: [
-                        ['bold', 'italic', 'underline', 'strike'],
-                        ['blockquote'],
-                        ['clean'],
-                      ],
-                    }}
-                    theme="snow"
-                    placeholder="Write your abstract text here. This section will be displayed in one columns."
-                  />
+                  <div className="relative">
+                    <ReactQuill
+                      modules={{
+                        toolbar: [
+                          ['bold', 'italic', 'underline', 'strike'],
+                          ['blockquote'],
+                          ['clean'],
+                        ],
+                        // maxlength: {
+                        //   maxLength: MAXLENGTH,
+                        //   fieldName: 'abstractSecondary',
+                        // },
+                      }}
+                      theme="snow"
+                      placeholder="Write your abstract text here. This section will be displayed in one columns."
+                    />
+                    {type !== 'premium' && (
+                      <div className="mt-1 flex justify-between items-center">
+                        <div
+                          className={`text-xs ${
+                            charCounts.abstractSecondary > MAXLENGTH * 0.8
+                              ? 'text-orange-500'
+                              : 'text-gray-500'
+                          }`}>
+                          <span
+                            className={
+                              charCounts.abstractSecondary >= MAXLENGTH
+                                ? 'text-red-500 font-bold'
+                                : ''
+                            }>
+                            {charCounts.abstractSecondary}
+                          </span>
+                          /{MAXLENGTH} characters (Free user limit)
+                        </div>
+                        <a
+                          href="/payment"
+                          className="text-xs text-blue-600 hover:text-blue-800 hover:underline text-right">
+                          Upgrade for unlimited characters →
+                        </a>
+                      </div>
+                    )}
+                  </div>
                 </Form.Item>
 
                 <Form.Item
@@ -154,17 +288,48 @@ const NewEntryPage: React.FC = () => {
                     { required: true, message: 'Please enter a preamble' },
                   ]}
                   className="mb-6">
-                  <ReactQuill
-                    modules={{
-                      toolbar: [
-                        ['bold', 'italic', 'underline', 'strike'],
-                        ['blockquote'],
-                        ['clean'],
-                      ],
-                    }}
-                    theme="snow"
-                    placeholder="Write your preamble text here. This section will be displayed in one columns."
-                  />
+                  <div className="relative">
+                    <ReactQuill
+                      modules={{
+                        toolbar: [
+                          ['bold', 'italic', 'underline', 'strike'],
+                          ['blockquote'],
+                          ['clean'],
+                        ],
+                        maxlength: {
+                          maxLength: MAXLENGTH,
+                          fieldName: 'preamble',
+                        },
+                      }}
+                      theme="snow"
+                      placeholder="Write your preamble text here. This section will be displayed in one columns."
+                    />
+                    {type !== 'premium' && (
+                      <div className="mt-1 flex justify-between items-center">
+                        <div
+                          className={`text-xs ${
+                            charCounts.preamble > MAXLENGTH * 0.8
+                              ? 'text-orange-500'
+                              : 'text-gray-500'
+                          }`}>
+                          <span
+                            className={
+                              charCounts.preamble >= MAXLENGTH
+                                ? 'text-red-500 font-bold'
+                                : ''
+                            }>
+                            {charCounts.preamble}
+                          </span>
+                          /{MAXLENGTH} characters (Free user limit)
+                        </div>
+                        <a
+                          href="/payment"
+                          className="text-xs text-blue-600 hover:text-blue-800 hover:underline text-right">
+                          Upgrade for unlimited characters →
+                        </a>
+                      </div>
+                    )}
+                  </div>
                 </Form.Item>
 
                 <Form.Item
@@ -174,17 +339,48 @@ const NewEntryPage: React.FC = () => {
                     { required: true, message: 'Please enter an introduction' },
                   ]}
                   className="mb-6">
-                  <ReactQuill
-                    modules={{
-                      toolbar: [
-                        ['bold', 'italic', 'underline', 'strike'],
-                        ['blockquote'],
-                        ['clean'],
-                      ],
-                    }}
-                    theme="snow"
-                    placeholder="Write your introduction text here. This section will be displayed in two columns."
-                  />
+                  <div className="relative">
+                    <ReactQuill
+                      modules={{
+                        toolbar: [
+                          ['bold', 'italic', 'underline', 'strike'],
+                          ['blockquote'],
+                          ['clean'],
+                        ],
+                        maxlength: {
+                          maxLength: MAXLENGTH,
+                          fieldName: 'introduction',
+                        },
+                      }}
+                      theme="snow"
+                      placeholder="Write your introduction text here. This section will be displayed in two columns."
+                    />
+                    {type !== 'premium' && (
+                      <div className="mt-1 flex justify-between items-center">
+                        <div
+                          className={`text-xs ${
+                            charCounts.introduction > MAXLENGTH * 0.8
+                              ? 'text-orange-500'
+                              : 'text-gray-500'
+                          }`}>
+                          <span
+                            className={
+                              charCounts.introduction >= MAXLENGTH
+                                ? 'text-red-500 font-bold'
+                                : ''
+                            }>
+                            {charCounts.introduction}
+                          </span>
+                          /{MAXLENGTH} characters (Free user limit)
+                        </div>
+                        <a
+                          href="/payment"
+                          className="text-xs text-blue-600 hover:text-blue-800 hover:underline text-right">
+                          Upgrade for unlimited characters →
+                        </a>
+                      </div>
+                    )}
+                  </div>
                 </Form.Item>
 
                 <div className="flex justify-end">

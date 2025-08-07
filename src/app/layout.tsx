@@ -4,6 +4,7 @@ import { getSession } from '@/store/get-set-session';
 import SessionProvider from './session-provider';
 import QueryProvider from './query-provider';
 import { Analytics } from '@vercel/analytics/react';
+import { PostHogProvider } from '@/providers/PostHogProvider';
 
 export default async function RootLayout({
   children,
@@ -22,11 +23,11 @@ export default async function RootLayout({
       <body>
         <AntdRegistry>
           <Analytics />
-          <SessionProvider session={JSON.stringify(session)}>
-            <QueryProvider>
-              {children}
-            </QueryProvider>
-          </SessionProvider>
+          <PostHogProvider>
+            <SessionProvider session={JSON.stringify(session)}>
+              <QueryProvider>{children}</QueryProvider>
+            </SessionProvider>
+          </PostHogProvider>
         </AntdRegistry>
       </body>
     </html>

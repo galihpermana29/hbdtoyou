@@ -150,3 +150,9 @@ export interface IContentStats {
     total_photo_box_content: number;
   };
 }
+
+export interface IResponsePaypal {
+  order_id: string;
+  payment_id: string;
+  price: string;
+}
