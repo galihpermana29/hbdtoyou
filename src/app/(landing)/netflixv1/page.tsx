@@ -4,7 +4,7 @@ import Featured from '@/components/netflix/featured/featured';
 import List from '@/components/netflix/list/list';
 import Navbar from '@/components/netflix/navbar/navbar';
 import { useRef } from 'react';
-
+import 'react-photo-view/dist/react-photo-view.css';
 const RootExamplePage = () => {
   const ref1 = useRef(null);
   const ref2 = useRef(null);
@@ -23,6 +23,14 @@ const RootExamplePage = () => {
       />
       <List
         title={'You After Meet Me'}
+        tData={[null, null, null, null, null, null, null]}
+      />
+      <List
+        title={'Top Searches'}
+        tData={[null, null, null, null, null, null, null]}
+      />
+      <List
+        title={'Series & Shows'}
         tData={[null, null, null, null, null, null, null]}
       />
     </div>

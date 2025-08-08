@@ -7,6 +7,7 @@ import {
 import Image from 'next/image';
 import { useState } from 'react';
 import widya from '@/assets/widya/after/2.jpg';
+import { PhotoProvider, PhotoView } from 'react-photo-view';
 
 interface ListItemProps {
   index: number;
@@ -18,36 +19,71 @@ export default function ListItem({ index, data }: ListItemProps) {
 
   return (
     <div
-      className={`w-[225px] h-[120px] bg-gray-800 mr-1 overflow-hidden cursor-pointer text-white`}>
-      <Image
-        width={200}
-        height={300}
-        src={data ?? widya}
-        alt=""
-        className="w-full h-full object-cover"
-        onClick={() => setIsHovered(!isHovered)}
-      />
-      <div className="border-2">
-        {/* <video
-          src={trailer}
-          autoPlay
-          loop
-          className="absolute w-full h-[140px] top-0 left-0 object-cover"
-        /> */}
-        <div className="p-2 ">
-          <div className="flex mb-2">
-            <PlayArrow className="icon border-2 border-white p-1 rounded-full mr-2 text-lg" />
-            <Add className="icon border-2 border-white p-1 rounded-full mr-2 text-lg" />
-            <ThumbUpAltOutlined className="icon border-2 border-white p-1 rounded-full mr-2 text-lg" />
-            <ThumbDownOutlined className="icon border-2 border-white p-1 rounded-full text-lg" />
-          </div>
-          <div className="flex items-center mb-2 text-gray-400 text-sm font-semibold">
-            <span>1 hour 14 mins</span>
-            <span className="border border-gray-400 p-1 mx-2">+16</span>
-            <span>1999</span>
-          </div>
-          <p className="text-sm text-gray-300">Comedy, Romance</p>
+      className={`relative w-[225px] h-[120px] ${isHovered ? 'z-50' : 'z-10'}`}
+      onMouseEnter={() => setIsHovered(true)}
+      onMouseLeave={() => setIsHovered(false)}>
+      {/* Main container that transforms on hover */}
+      <div
+        className={`
+          absolute 
+          bg-gray-950 
+          overflow-hidden 
+          cursor-pointer 
+          text-white 
+          transition-all 
+          duration-300 
+          ease-in-out
+          shadow-lg
+          ${
+            isHovered
+              ? 'w-[245px] h-[300px] top-[-40px] left-[-10px] shadow-lg'
+              : 'w-[225px] h-[120px] top-0 left-0'
+          }
+        `}>
+        {/* Image container */}
+        <div
+          className={`${
+            isHovered ? 'h-[140px]' : 'h-[120px]'
+          } rounded-[8px] overflow-hidden`}>
+          <PhotoView key={index} src={data ?? (widya as unknown as string)}>
+            <Image
+              width={isHovered ? 245 : 225}
+              height={isHovered ? 140 : 120}
+              src={data ?? widya}
+              alt=""
+              className="w-full h-full object-cover"
+              priority={true}
+            />
+          </PhotoView>
         </div>
+
+        {/* Content that appears on hover */}
+        {isHovered && (
+          <div className="p-3">
+            {/* Action buttons */}
+            <div className="flex mb-3">
+              <PlayArrow className="icon border-2 border-white p-1 rounded-full mr-2 text-lg hover:bg-white hover:text-black transition-colors w-[25px] h-[25px]" />
+              <Add className="icon border-2 border-white p-1 rounded-full mr-2 text-lg hover:bg-white hover:text-black transition-colors w-[25px] h-[25px]" />
+              <ThumbUpAltOutlined className="icon border-2 border-white p-1 rounded-full mr-2 text-lg hover:bg-white hover:text-black transition-colors w-[25px] h-[25px]" />
+              <ThumbDownOutlined className="icon border-2 border-white p-1 rounded-full text-lg hover:bg-white hover:text-black transition-colors w-[25px] h-[25px]" />
+            </div>
+
+            {/* Movie info */}
+            <div className="flex items-center mb-2 text-gray-400 text-xs font-semibold">
+              <span>1 hour 14 mins</span>
+            </div>
+
+            {/* Genre */}
+            <p className="text-xs mb-[8px] text-gray-300">Comedy, Romance</p>
+
+            {/* Description - only visible on hover */}
+            <p className="text-xs text-gray-400 line-clamp-3">
+              A heartwarming story about love and friendship that transcends
+              time and space. Follow the journey of two souls destined to meet
+              against all odds.
+            </p>
+          </div>
+        )}
       </div>
     </div>
   );

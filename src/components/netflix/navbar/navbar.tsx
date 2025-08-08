@@ -23,7 +23,7 @@ const Navbar = ({ jumbotronImage }: { jumbotronImage?: string }) => {
           ? 'bg-black'
           : 'bg-gradient-to-t from-transparent to-[rgba(0,0,0,0.3)]'
       }`}>
-      <div className="container mx-auto flex items-center justify-between h-16 px-[20px] md:px-12">
+      <div className=" mx-auto flex items-center justify-between h-16 px-[20px] md:px-12">
         <div className="flex items-center space-x-5">
           <img
             onClick={() => router.push('/')}

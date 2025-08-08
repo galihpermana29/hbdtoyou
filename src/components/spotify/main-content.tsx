@@ -3,7 +3,8 @@
 import { ChevronRight } from 'lucide-react';
 import PlaylistCard from './playlist-card';
 import PlaylistSection from './playlist-section';
-
+import { PhotoProvider } from 'react-photo-view';
+import 'react-photo-view/dist/react-photo-view.css';
 const playlists = [
   {
     title: '#1',
@@ -91,9 +92,11 @@ export default function MainContent({
             </button>
           </div>
           <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-4 md:gap-6">
-            {data.map((playlist, index) => (
-              <PlaylistCard key={index} playlist={playlist} />
-            ))}
+            <PhotoProvider>
+              {data.map((playlist, index) => (
+                <PlaylistCard key={index} playlist={playlist} />
+              ))}
+            </PhotoProvider>
           </div>
         </section>
       </div>
