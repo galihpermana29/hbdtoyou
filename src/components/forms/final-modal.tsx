@@ -17,10 +17,12 @@ const FinalModal = ({
   profile,
   onSubmit,
   preFormValue,
+  loading,
 }: {
   profile: { type: string };
   onSubmit: (val: any, status: 'draft' | 'published') => Promise<void>;
   preFormValue: any;
+  loading?: boolean;
 }) => {
   const [form] = Form.useForm();
   const isScheduled = useWatch('is_scheduled', form);
@@ -119,6 +121,7 @@ const FinalModal = ({
       <Form.Item className="!my-0">
         <div className="flex justify-end gap-2 mt-[12px]">
           <Button
+            loading={loading}
             className="!bg-black !rounded-full"
             type="primary"
             htmlType="submit"

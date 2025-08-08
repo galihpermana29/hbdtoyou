@@ -294,6 +294,7 @@ const NetflixForm = ({
         onCancel={() => setModalState({ visible: false, data: '' })}>
         <FinalModal
           profile={profile}
+          loading={loading}
           onSubmit={handleSubmit}
           preFormValue={modalState?.data}
         />
@@ -311,7 +312,7 @@ const NetflixForm = ({
         disabled={loading}
         form={form}
         layout="vertical"
-      // onFinish={(val) => handleSubmit(val)}
+        // onFinish={(val) => handleSubmit(val)}
       >
         <Form.Item
           rules={[
@@ -438,8 +439,8 @@ const NetflixForm = ({
             {collectionOfImages.length >= 10 && profile?.type === 'free'
               ? null
               : collectionOfImages.length >= 20 && profile?.type !== 'free'
-                ? null
-                : uploadButton}
+              ? null
+              : uploadButton}
           </Upload>
         </Form.Item>
 
