@@ -4,7 +4,7 @@ import Featured from '@/components/netflix/featured/featured';
 import List from '@/components/netflix/list/list';
 import Navbar from '@/components/netflix/navbar/navbar';
 import { useRef } from 'react';
-
+import 'react-photo-view/dist/react-photo-view.css';
 const RootExamplePage = () => {
   const ref1 = useRef(null);
   const ref2 = useRef(null);
