@@ -96,7 +96,7 @@ export default function Featured({
   ];
 
   return (
-    <div className="relative h-screen">
+    <div className="relative h-[80vh] mb-[20px]">
       {/* Modal */}
       <Tour
         open={isTutorial === 'true'}
@@ -109,7 +109,9 @@ export default function Featured({
         }}
       />
       <Modal show={showModal} onClose={handleCloseModal}>
-        <div className="w-full max-w-3xl h-[80vh] overflow-y-auto bg-black rounded-lg p-4 ">
+        <div
+          className="w-full max-w-3xl h-[60vh] overflow-y-auto bg-black rounded-lg"
+          id="style-1">
           <div className="w-full h-[400px] relative">
             <Image
               src={jumbotronImage ?? noImage}
@@ -144,7 +146,7 @@ export default function Featured({
         <h1 className="md:text-5xl text-[30px] font-bold" ref={ref2}>
           {title ?? 'Happy Birthday!'}
         </h1>
-        <div className="md:text-lg text-[15px]" ref={ref3}>
+        <div className="md:text-lg text-[15px] max-w-[600px]" ref={ref3}>
           {subTitle ? (
             <TruncateText showSeeMore={true} text={subTitle} maxLength={130} />
           ) : (

@@ -50,9 +50,9 @@ export default function PlayerControls({
             modalContent
           ) : (
             <p>
-              Lorem ipsum dolor sit amet, consectetur adipisicing elit. Dolorem,
-              ratione. Sed impedit aliquid eum deserunt laboriosam, amet quaerat
-              quia architecto!
+              Happy birthday my love, I wish you a happy birthday and a happy
+              life. With everything I have, I want to wish you a happy birthday
+              and a happy life. I love you more than words can express.
             </p>
           )}
         </Modal>

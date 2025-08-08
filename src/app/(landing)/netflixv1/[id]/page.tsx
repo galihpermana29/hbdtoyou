@@ -4,7 +4,7 @@ import List from '@/components/netflix/list/list';
 import Navbar from '@/components/netflix/navbar/navbar';
 import { Watermark } from 'antd';
 import { headers } from 'next/headers';
-
+import 'react-photo-view/dist/react-photo-view.css';
 const getDetailDataNew = async (id: string) => {
   const res = await getDetailContent(id);
   return res;
@@ -41,11 +41,19 @@ const RootUserPage = async ({ params }: any) => {
           modalContent={parsedData?.modalContent}
         />
         <List
-          title={'Upcoming Movies'}
+          title={'You Before Meet Me'}
           tData={parsedData?.images?.slice(0, midIndex)} // First half
         />
         <List
-          title={'Box Office Top Movies'}
+          title={'You After Meet Me'}
+          tData={parsedData?.images?.slice(midIndex)} // Second half
+        />
+        <List
+          title={'Top Searches'}
+          tData={parsedData?.images?.slice(0, midIndex)} // First half
+        />
+        <List
+          title={'Series & Shows'}
           tData={parsedData?.images?.slice(midIndex)} // Second half
         />
       </div>

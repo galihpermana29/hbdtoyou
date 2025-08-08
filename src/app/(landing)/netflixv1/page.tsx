@@ -25,6 +25,14 @@ const RootExamplePage = () => {
         title={'You After Meet Me'}
         tData={[null, null, null, null, null, null, null]}
       />
+      <List
+        title={'Top Searches'}
+        tData={[null, null, null, null, null, null, null]}
+      />
+      <List
+        title={'Series & Shows'}
+        tData={[null, null, null, null, null, null, null]}
+      />
     </div>
   );
 };

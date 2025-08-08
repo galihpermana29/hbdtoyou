@@ -7,7 +7,7 @@ import Sidebar from '@/components/spotify/sidebar';
 import { Tour, TourProps } from 'antd';
 import { usePathname, useRouter, useSearchParams } from 'next/navigation';
 import { useRef } from 'react';
-
+import 'react-photo-view/dist/react-photo-view.css';
 export default function HomePage() {
   const ref1 = useRef(null);
   const ref2 = useRef(null);

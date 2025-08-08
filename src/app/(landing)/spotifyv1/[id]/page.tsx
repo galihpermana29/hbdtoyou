@@ -4,7 +4,7 @@ import MainContent from '@/components/spotify/main-content';
 import Player from '@/components/spotify/player';
 import Sidebar from '@/components/spotify/sidebar';
 import { Watermark } from 'antd';
-
+import 'react-photo-view/dist/react-photo-view.css';
 const getDetailDataNew = async (id: string) => {
   const res = await getDetailContent(id);
   return res;

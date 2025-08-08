@@ -1,15 +1,17 @@
 import NewLandingPage from '@/components/newlanding/NewLandingPage';
 import Script from 'next/script';
 import { Metadata } from 'next';
-
+import 'react-photo-view/dist/react-photo-view.css';
 export const metadata: Metadata = {
-  title: 'Memoify | Create Digital Gifts, Scrapbooks & Albums Inspired by Popular Platforms',
+  title:
+    'Memoify | Create Digital Gifts, Scrapbooks & Albums Inspired by Popular Platforms',
   description:
     'With Memoify create digital gifts, digital scrapbooks, and digital albums inspired by your favorite platforms like Netflix, Spotify, or YouTube. Add personal touches and let your memories shine!',
   keywords:
     'digital gift, digital scrapbook, digital album, virtual present, online gift, electronic memory book, digital photo collection, memory collection, virtual album, online scrapbook, e-gift, hadiah ulang tahun digital, kado digital, scrapbook digital, album foto digital, kenangan digital, kado online, custom websites, Netflix templates, Spotify templates, YouTube templates, personalized websites, digital memories, Memoify',
   openGraph: {
-    title: 'Memoify | Create Digital Gifts, Scrapbooks & Albums Inspired by Popular Platforms',
+    title:
+      'Memoify | Create Digital Gifts, Scrapbooks & Albums Inspired by Popular Platforms',
     description:
       'With Memoify create digital gifts, digital scrapbooks, and digital albums inspired by your favorite platforms like Netflix, Spotify, or YouTube. Add personal touches and let your memories shine!',
     url: 'https://memoify.live',
@@ -27,7 +29,8 @@ export const metadata: Metadata = {
   },
   twitter: {
     card: 'summary_large_image',
-    title: 'Memoify | Create Digital Gifts, Scrapbooks & Albums Inspired by Popular Platforms',
+    title:
+      'Memoify | Create Digital Gifts, Scrapbooks & Albums Inspired by Popular Platforms',
     description:
       'With Memoify create digital gifts, digital scrapbooks, and digital albums inspired by your favorite platforms like Netflix, Spotify, or YouTube. Add personal touches and let your memories shine!',
     images: [
