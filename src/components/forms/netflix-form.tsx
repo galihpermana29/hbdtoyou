@@ -293,8 +293,8 @@ const NetflixForm = ({
         open={modalState.visible}
         onCancel={() => setModalState({ visible: false, data: '' })}>
         <FinalModal
-          loading={loading}
           profile={profile}
+          loading={loading}
           onSubmit={handleSubmit}
           preFormValue={modalState?.data}
         />
