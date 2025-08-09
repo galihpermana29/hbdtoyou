@@ -41,21 +41,21 @@ const NetflixGraduation = ({ parsedData }: { parsedData: any }) => {
     return Promise.resolve();
   };
 
+  // Handle Instagram Story sharing
+  const handleInstagramStoryShare = () => {
+
+  };
+
   return (
     <div className="w-full min-h-screen bg-black">
       <div className="mx-auto bg-black max-w-[440px] h-full relative">
         <Button
-          iconPosition="start"
-          icon={
-            <Image
-              src="/instagram-icon.svg"
-              width={16}
-              height={16}
-              alt="Add to Your Story Icon"
-            />
-          }
-          className="!pl-2.5 !pr-3 !py-[9px] !h-10 !text-sm !font-bold !text-white !rounded-lg !bg-[rgba(163,163,163,0.7)] !absolute right-8 top-3"
-          type="text">
+          onClick={handleInstagramStoryShare}
+          iconPosition='start'
+          icon={<Image src="/instagram-icon.svg" width={16} height={16} alt="Add to Your Story Icon" />}
+          className='!pl-2.5 !pr-3 !py-[9px] !h-10 !text-sm !font-bold !text-white !rounded-lg !bg-[rgba(163,163,163,0.7)] !absolute right-8 top-3 cursor-pointer hover:!bg-[rgba(183,183,183,0.8)]'
+          type='text'
+        >
           Add to Your Story
         </Button>
         {/* Video */}
