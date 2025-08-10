@@ -3,7 +3,7 @@
 import { Button } from 'antd';
 import { ReactNode } from 'react';
 
-type ButtonVariant = 'primary' | 'secondary' | 'text';
+type ButtonVariant = 'primary' | 'secondary' | 'text' | 'textBlack';
 type IconPosition = 'start' | 'end';
 
 interface NetflixButtonProps {
@@ -42,7 +42,8 @@ const NetflixButton = ({
   const variantClasses = {
     primary: '!bg-[#D22F26] !text-white !border-none',
     secondary: '!bg-white/10 !text-white !border-none',
-    text: '!bg-black !border-none !p-0 !h-fit !text-white',
+    text: '!bg-black !border-none !p-0 !text-white',
+    textBlack: '!bg-white !border-none !p-0 !text-black',
   };
 
   // Width classes
