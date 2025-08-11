@@ -70,7 +70,7 @@ export async function uploadImageClientSide(
 
 export async function uploadImageWithApi(
   formData: FormData,
-  openNotification: (progress: number, key: any) => void,
+  openNotification: (progress: number, key: any, isError?: boolean) => void,
   key: any
 ) {
   // using axios
@@ -93,6 +93,7 @@ export async function uploadImageWithApi(
       success: true,
     };
   } catch (error) {
+    openNotification(0, key, true);
     return {
       message: 'Failed to upload image',
       success: false,

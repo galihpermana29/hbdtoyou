@@ -615,26 +615,27 @@ const Formula1Form = ({
             </div>
           }>
           <Upload
+            customRequest={({ onSuccess }) => {
+              setTimeout(() => {
+                onSuccess?.('ok', undefined);
+              }, 0);
+            }}
             accept=".jpg, .jpeg, .png"
             multiple={true}
             maxCount={profile?.type === 'free' ? 1 : 15}
             listType="picture-card"
             onRemove={(file) => handleRemoveCollectionImage(file.uid)}
             beforeUpload={async (file, fileList) => {
-              const isBatchTooLarge = fileList.length > 5;
-              if (isBatchTooLarge) {
+              if (fileList.length > 5) {
                 // Find the index of the current file in the list
                 const fileIndex = fileList.findIndex((f) => f.uid === file.uid);
-                // Only show the message once for the first file in a large batch
-                if (fileIndex === 0) {
-                  message.error(
-                    'You can only upload a maximum of 5 files at a time.'
-                  );
+
+                // Only process the first 5 files, ignore the rest
+                if (fileIndex >= 5) {
+                  return Upload.LIST_IGNORE;
                 }
-                // Prevent upload for all files in a batch larger than 5
-                return Upload.LIST_IGNORE;
               }
-              setUploadLoading(true);
+              // setUploadLoading(true);
               await beforeUpload(
                 file as FileType,
                 profile
@@ -646,7 +647,7 @@ const Formula1Form = ({
                 handleSetCollectionImagesURI,
                 'images'
               );
-              setUploadLoading(false);
+              // setUploadLoading(false);
             }}>
             {collectionOfImages.length >= 1 && profile?.type === 'free'
               ? null

@@ -21,12 +21,7 @@ import {
 } from '@ant-design/icons';
 import { searchSpotifySong } from '@/action/spotify-api';
 import { useDebounce } from 'use-debounce';
-import {
-  beforeUpload,
-  FileType,
-  uploadImage,
-  validateSlug,
-} from './netflix-form';
+import { beforeUpload, FileType, validateSlug } from './netflix-form';
 import { useMemoifyProfile } from '@/app/session-provider';
 import { createContent, editContent } from '@/action/user-api';
 import { revalidateRandom } from '@/lib/revalidate';
@@ -469,21 +464,15 @@ const SpotifyForm = ({
                 return Upload.LIST_IGNORE;
               }
 
-              const isBatchTooLarge = fileList.length > 5;
-              if (isBatchTooLarge) {
+              if (fileList.length > 5) {
                 // Find the index of the current file in the list
                 const fileIndex = fileList.findIndex((f) => f.uid === file.uid);
-                // Only show the message once for the first file in a large batch
-                if (fileIndex === 0) {
-                  message.error(
-                    'You can only upload a maximum of 5 files at a time.'
-                  );
-                }
-                // Prevent upload for all files in a batch larger than 5
-                return Upload.LIST_IGNORE;
-              }
 
-              setUploadLoading(true);
+                // Only process the first 5 files, ignore the rest
+                if (fileIndex >= 5) {
+                  return Upload.LIST_IGNORE;
+                }
+              }
 
               await beforeUpload(
                 file as FileType,
@@ -496,7 +485,6 @@ const SpotifyForm = ({
                 handleSetCollectionImagesURI,
                 'momentOfYou'
               );
-              setUploadLoading(false);
             }}>
             {collectionOfImages.length >= 1 && profile?.type === 'free'
               ? null
