@@ -31,7 +31,7 @@ export interface IGlobalResponse<T> {
 const baseUri =
   process.env.NODE_ENV === 'production'
     ? process.env.API_URI
-    : process.env.STAGING_API;
+    : process.env.NEXT_PUBLIC_STAGING_API;
 
 export async function loginOAuth(
   payload: IOAuthPayload
