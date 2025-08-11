@@ -38,31 +38,121 @@ const NetflixGraduation = ({ parsedData }: { parsedData: any }) => {
       }
 
       try {
+        // Show loading message
+        const loadingMsg = message.loading('Generating image...', 0);
+
         // Store original body line height
         const originalLineHeight = document.body.style.lineHeight;
 
         // Set body line height to 0.5 for better image generation
         document.body.style.lineHeight = '0.5';
 
+        // Pre-load all images to avoid Safari issues
+        const element = captureRef.current as HTMLElement;
+        const images = element.querySelectorAll('img');
+        await Promise.all(
+          Array.from(images).map(
+            (img: HTMLImageElement) =>
+              new Promise<void>((resolve) => {
+                if (img.complete) {
+                  resolve();
+                } else {
+                  img.onload = () => resolve();
+                  img.onerror = () => resolve();
+                }
+              })
+          )
+        );
+
+        // Optimize html2canvas for Safari
         const canvas = await html2canvas(captureRef.current, {
-          scale: 2,
+          scale: 1.5, // Reduced scale for better performance
           useCORS: true,
           allowTaint: true,
           backgroundColor: '#000000',
-          width: 1080,
-          height: 1920,
+          width: 720,
+          height: 1280,
+          logging: false,
+          imageTimeout: 0,
+          removeContainer: true, // Clean up after rendering
+          onclone: (clonedDoc) => {
+            // Fix for Safari: ensure all images are loaded in the clone
+            const clonedImages = clonedDoc.getElementsByTagName('img');
+            for (let i = 0; i < clonedImages.length; i++) {
+              clonedImages[i].crossOrigin = 'anonymous';
+            }
+          }
         });
 
         // Restore original body line height
         document.body.style.lineHeight = originalLineHeight;
 
-        const link = document.createElement('a');
-        link.download = `instagram-story-${parsedData?.llm_generated?.name || 'graduation'}-${dayjs().format('YYYY-MM-DD-HH-mm')}.png`;
-        link.href = canvas.toDataURL('image/png');
-        link.click();
+        // Close loading message
+        loadingMsg();
 
-        message.success('Instagram story template downloaded successfully!');
+        // Safari-compatible download approach
+        const fileName = `instagram-story-${
+          parsedData?.llm_generated?.name || 'graduation'
+        }-${dayjs().format('YYYY-MM-DD-HH-mm')}.png`;
+        
+        // Check if using Safari
+        const isSafari = /^((?!chrome|android).)*safari/i.test(navigator.userAgent);
+        
+        if (isSafari) {
+          // Safari approach - use data URL directly
+          const imgData = canvas.toDataURL('image/png', 0.8); // Use compression for better performance
+          const newTab = window.open();
+          if (newTab) {
+            newTab.document.write(`
+              <html>
+                <head>
+                  <title>${fileName}</title>
+                  <style>
+                    body { margin: 0; display: flex; flex-direction: column; align-items: center; background: #f0f0f0; font-family: system-ui; }
+                    .container { max-width: 100%; padding: 20px; text-align: center; }
+                    img { max-width: 100%; height: auto; border: 1px solid #ddd; box-shadow: 0 2px 5px rgba(0,0,0,0.2); }
+                    .instructions { margin-top: 20px; padding: 15px; background: #fff; border-radius: 8px; box-shadow: 0 1px 3px rgba(0,0,0,0.1); }
+                  </style>
+                </head>
+                <body>
+                  <div class="container">
+                    <img src="${imgData}" alt="Instagram Story Template" />
+                    <div class="instructions">
+                      <h3>Your image is ready!</h3>
+                      <p>To save: Right-click (or press and hold) on the image and select "Save Image As..."</p>
+                    </div>
+                  </div>
+                </body>
+              </html>
+            `);
+            newTab.document.close();
+            message.success('Image ready! Check the new tab to download.');
+          } else {
+            message.warning('Please allow pop-ups to view your image');
+            // Fallback for blocked popups
+            const link = document.createElement('a');
+            link.href = imgData;
+            link.download = fileName;
+            link.click();
+          }
+        } else {
+          // Standard approach for other browsers - more efficient with Blob
+          canvas.toBlob((blob) => {
+            if (blob) {
+              const link = document.createElement('a');
+              link.download = fileName;
+              link.href = URL.createObjectURL(blob);
+              link.click();
+              // Clean up the URL object after download starts
+              setTimeout(() => URL.revokeObjectURL(link.href), 100);
+              message.success('Instagram story template downloaded successfully!');
+            } else {
+              message.error('Failed to generate image');
+            }
+          }, 'image/png', 0.9); // Use slight compression for better performance
+        }
       } catch (error) {
+        console.error('Error generating image:', error);
         message.error('Failed to generate Instagram story template');
 
         // Ensure line height is restored even if there's an error
@@ -78,7 +168,6 @@ const NetflixGraduation = ({ parsedData }: { parsedData: any }) => {
     // The setTimeout ensures all images/assets inside the template have a moment to load
     const timer = setTimeout(generateImage, 100);
     return () => clearTimeout(timer); // Cleanup the timer
-
   }, [templateToCapture, parsedData]); // Dependency array
 
   const resetState = () => {
@@ -105,7 +194,10 @@ const NetflixGraduation = ({ parsedData }: { parsedData: any }) => {
   );
 
   // Handle wish submission
-  const handleWishSubmit = async (values: { name: string; message: string }) => {
+  const handleWishSubmit = async (values: {
+    name: string;
+    message: string;
+  }) => {
     return Promise.resolve();
   };
 
@@ -133,9 +225,8 @@ const NetflixGraduation = ({ parsedData }: { parsedData: any }) => {
             left: '-9999px',
             width: '1080px',
             height: '1920px',
-            backgroundColor: 'black'
-          }}
-        >
+            backgroundColor: 'black',
+          }}>
           {templates[templateToCapture]}
         </div>
       )}
