@@ -27,7 +27,7 @@ const SelectStoryTemplate = ({ isOpen, onClose, onSelect, loadingModalVisible }:
       title={<Title level={4}>Choose Instagram Story Template</Title>}
       open={isOpen}
       onCancel={onClose}
-      width={800}
+      width={500}
       centered
       styles={{
         header: {
@@ -63,7 +63,7 @@ const SelectStoryTemplate = ({ isOpen, onClose, onSelect, loadingModalVisible }:
         <Text>Select a template for your Instagram story:</Text>
 
         <Radio.Group onChange={handleTemplateChange} value={selectedTemplate} className="w-full !pb-6">
-          <Space direction="vertical" className="w-full" size="large">
+          <Space className="flex md:flex-row flex-col gap-y-4 w-full" size="large">
             <Radio value="first" className="w-full">
               <div className="flex flex-col gap-y-2">
                 <Text strong className="text-lg">Template 1</Text>

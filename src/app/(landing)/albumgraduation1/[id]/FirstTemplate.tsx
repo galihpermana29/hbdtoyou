@@ -98,7 +98,17 @@ const FirstTemplate = ({ data }: FirstTemplateProps) => {
         {data?.images?.map((image: string, index: number) => (
           <div key={index} className="w-[235px] h-[368px] relative rounded-xl overflow-hidden bg-[#232323]">
             <div className="w-full h-full relative">
-              <Image src={image} alt="Gallery Image" width='0' height='0' className="w-full h-full object-cover object-center" />
+              <div 
+                style={{
+                  backgroundImage: `url(${image})`,
+                  backgroundSize: 'cover',
+                  backgroundPosition: 'center',
+                  width: '100%',
+                  height: '100%'
+                }}
+                role="img"
+                aria-label="Gallery Image"
+              />
               <div className="absolute top-[17px] left-[17px]">
                 <Image src='/Nikahfix.svg' width={25} height={45} alt="Nikahfix Logo" />
               </div>

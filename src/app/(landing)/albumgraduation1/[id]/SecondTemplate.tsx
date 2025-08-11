@@ -100,7 +100,17 @@ const SecondTemplate = ({ data }: SecondTemplateProps) => {
               <span className="geist-font text-[196px] font-extrabold absolute bottom-0 leading-[159.2px] tracking-[-0.36px] left-3 text-transparent" style={{ WebkitTextStroke: '2px white' }}>{index + 1}</span>
               {/* Image after number in DOM order so it appears on top */}
               <div className="relative w-[160px] h-[230px] rounded-xl overflow-hidden">
-                <Image src={image} width={160} height='0' alt="Gallery Image" className="object-cover rounded-xl h-full" />
+                <div
+                  style={{
+                    backgroundImage: `url(${image})`,
+                    backgroundSize: 'cover',
+                    backgroundPosition: 'center',
+                    width: '160px',
+                    height: '100%'
+                  }}
+                  role="img"
+                  aria-label="Gallery Image"
+                />
               </div>
             </div>
           ))}
@@ -112,7 +122,17 @@ const SecondTemplate = ({ data }: SecondTemplateProps) => {
           {data?.images?.map((image: string, index: number) => (
             <div className="w-[235px] h-[368px] relative bg-[#232323] overflow-hidden rounded-xl" key={`gallery-${index}`}>
               <div className="w-full h-full relative">
-                <Image src={image} width={235} height={368} alt="Gallery Image" className="w-full h-full object-cover object-center" />
+                <div
+                  style={{
+                    backgroundImage: `url(${image})`,
+                    backgroundSize: 'cover',
+                    backgroundPosition: 'center',
+                    width: '235px',
+                    height: '368px'
+                  }}
+                  role="img"
+                  aria-label="Gallery Image"
+                />
                 <div className="absolute top-[17px] left-[17px]">
                   <Image src='/Nikahfix.svg' width={25} height={45} alt="Nikahfix Logo" />
                 </div>
