@@ -49,8 +49,8 @@ const NetflixGraduation = ({ parsedData }: { parsedData: any }) => {
           useCORS: true,
           allowTaint: true,
           backgroundColor: '#000000',
-          width: 540,
-          height: 960,
+          width: 1080,
+          height: 1920,
         });
 
         // Restore original body line height
