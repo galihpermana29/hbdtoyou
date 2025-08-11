@@ -268,7 +268,7 @@ const AlbumGraduationv1 = ({
         disabled={loading}
         form={form}
         layout="vertical"
-      // onFinish={(val) => handleSubmit(val)}
+        // onFinish={(val) => handleSubmit(val)}
       >
         <Form.Item
           rules={[{ required: true, message: 'Please enter full name client' }]}
@@ -326,6 +326,11 @@ const AlbumGraduationv1 = ({
             </div>
           }>
           <Upload
+            customRequest={({ onSuccess }) => {
+              setTimeout(() => {
+                onSuccess?.('ok', undefined);
+              }, 0);
+            }}
             accept=".jpg, .jpeg, .png"
             multiple={true}
             maxCount={profile?.type === 'free' ? 5 : 15}
@@ -338,8 +343,18 @@ const AlbumGraduationv1 = ({
                 : undefined
             }
             onRemove={(file) => handleRemoveCollectionImage(file.uid)}
-            beforeUpload={async (file) => {
-              setUploadLoading(true);
+            beforeUpload={async (file, fileList) => {
+              if (fileList.length > 5) {
+                // Find the index of the current file in the list
+                const fileIndex = fileList.findIndex((f) => f.uid === file.uid);
+
+                // Only process the first 5 files, ignore the rest
+                if (fileIndex >= 5) {
+                  return Upload.LIST_IGNORE;
+                }
+              }
+
+              // setUploadLoading(true);
               await beforeUpload(
                 file as FileType,
                 profile
@@ -351,13 +366,13 @@ const AlbumGraduationv1 = ({
                 handleSetCollectionImagesURI,
                 'images'
               );
-              setUploadLoading(false);
+              // setUploadLoading(false);
             }}>
             {collectionOfImages.length >= 5 && profile?.type === 'free'
               ? null
               : collectionOfImages.length >= 15 && profile?.type !== 'free'
-                ? null
-                : uploadButton}
+              ? null
+              : uploadButton}
           </Upload>
         </Form.Item>
         <Form.Item
@@ -430,9 +445,7 @@ const AlbumGraduationv1 = ({
             type="primary"
             htmlType="submit"
             size="large">
-            {editData
-              ? 'Edit & Publish'
-              : 'Create'}
+            {editData ? 'Edit & Publish' : 'Create'}
           </Button>
         </div>
       </Form>
