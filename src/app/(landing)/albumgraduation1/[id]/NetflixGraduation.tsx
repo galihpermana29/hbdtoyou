@@ -5,15 +5,87 @@ import GalleryGrid from '@/components/netflix/GalleryGrid';
 import NetflixButton from '@/components/netflix/NetflixButton';
 import SectionHeader from '@/components/netflix/SectionHeader';
 import WishForm from '@/components/netflix/WishForm';
-import { Button } from 'antd';
-import dayjs from 'dayjs';
-import Image from 'next/image';
-import { useState } from 'react';
 import CameraEnhanceIcon from '@mui/icons-material/CameraEnhance';
+import { Button, message } from 'antd';
+import dayjs from 'dayjs';
+import html2canvas from 'html2canvas';
+import Image from 'next/image';
+import { useEffect, useRef, useState } from 'react';
+import FirstTemplate from './FirstTemplate';
+import SecondTemplate from './SecondTemplate';
+import SelectStoryTemplate from './SelectStoryTemplate';
 
 const NetflixGraduation = ({ parsedData }: { parsedData: any }) => {
-  console.log(parsedData);
   const [showFullSynopsis, setShowFullSynopsis] = useState(false);
+  const [isTemplateModalOpen, setIsTemplateModalOpen] = useState(false);
+  const [loadingModalVisible, setLoadingModalVisible] = useState(false);
+  const [templateToCapture, setTemplateToCapture] = useState(null);
+
+  // 💡 Ref to get the DOM node of the hidden container
+  const captureRef = useRef();
+
+  // This effect runs AFTER the component re-renders with the template
+  useEffect(() => {
+    // If there's no template to capture, do nothing.
+    if (!templateToCapture) return;
+
+    const generateImage = async () => {
+      // Ensure the element is available
+      if (!captureRef.current) {
+        message.error('Failed to generate template.');
+        resetState();
+        return;
+      }
+
+      try {
+        // Store original body line height
+        const originalLineHeight = document.body.style.lineHeight;
+
+        // Set body line height to 0.5 for better image generation
+        document.body.style.lineHeight = '0.5';
+
+        const canvas = await html2canvas(captureRef.current, {
+          scale: 2,
+          useCORS: true,
+          allowTaint: true,
+          backgroundColor: '#000000',
+          width: 1080,
+          height: 1920,
+        });
+
+        // Restore original body line height
+        document.body.style.lineHeight = originalLineHeight;
+
+        const link = document.createElement('a');
+        link.download = `instagram-story-${parsedData?.llm_generated?.name || 'graduation'}-${dayjs().format('YYYY-MM-DD-HH-mm')}.png`;
+        link.href = canvas.toDataURL('image/png');
+        link.click();
+
+        message.success('Instagram story template downloaded successfully!');
+      } catch (error) {
+        message.error('Failed to generate Instagram story template');
+
+        // Ensure line height is restored even if there's an error
+        if (document.body.style.lineHeight === '0.5') {
+          document.body.style.lineHeight = '';
+        }
+      } finally {
+        // Clean up state after capture is complete
+        resetState();
+      }
+    };
+
+    // The setTimeout ensures all images/assets inside the template have a moment to load
+    const timer = setTimeout(generateImage, 100);
+    return () => clearTimeout(timer); // Cleanup the timer
+
+  }, [templateToCapture, parsedData]); // Dependency array
+
+  const resetState = () => {
+    setLoadingModalVisible(false);
+    setTemplateToCapture(null); // Reset the template
+    setIsTemplateModalOpen(false);
+  };
 
   const showMoreIcon = (
     <svg
@@ -33,16 +105,40 @@ const NetflixGraduation = ({ parsedData }: { parsedData: any }) => {
   );
 
   // Handle wish submission
-  const handleWishSubmit = async (values: {
-    name: string;
-    message: string;
-  }) => {
-    // This would typically send the data to an API
+  const handleWishSubmit = async (values: { name: string; message: string }) => {
     return Promise.resolve();
+  };
+
+  // This is the function you call when a user clicks a button
+  const handleTemplateSelect = (templateType) => {
+    setLoadingModalVisible(true);
+    setTemplateToCapture(templateType); // ✅ Set the template to render
+  };
+
+  // A map for cleaner template selection
+  const templates = {
+    first: <FirstTemplate data={parsedData} />,
+    second: <SecondTemplate data={parsedData} />,
   };
 
   return (
     <div className="w-full min-h-screen bg-black">
+      {templateToCapture && (
+        <div
+          ref={captureRef}
+          style={{
+            position: 'fixed',
+            // Position it off-screen so the user never sees it
+            top: '-9999px',
+            left: '-9999px',
+            width: '1080px',
+            height: '1920px',
+            backgroundColor: 'black'
+          }}
+        >
+          {templates[templateToCapture]}
+        </div>
+      )}
       <div className="mx-auto bg-black max-w-[440px] h-full relative">
         <Button
           iconPosition="start"
@@ -54,10 +150,19 @@ const NetflixGraduation = ({ parsedData }: { parsedData: any }) => {
               alt="Add to Your Story Icon"
             />
           }
-          className="!pl-2.5 !pr-3 !py-[9px] !h-10 !text-sm !font-bold !text-white !rounded-lg !bg-[rgba(163,163,163,0.7)] !absolute right-8 top-3"
-          type="text">
+          className="!pl-2.5 !pr-3 !py-[9px] !h-10 !text-sm !font-bold !text-white !rounded-lg !bg-[rgba(163,163,163,0.7)] !absolute right-3 top-3"
+          type="text"
+          onClick={() => setIsTemplateModalOpen(true)}>
           Add to Your Story
         </Button>
+
+        <SelectStoryTemplate
+          isOpen={isTemplateModalOpen}
+          onClose={() => setIsTemplateModalOpen(false)}
+          onSelect={handleTemplateSelect}
+          loadingModalVisible={loadingModalVisible}
+        />
+
         {/* Video */}
         <div className="w-full h-[408px] mb-[23px]">
           <Image

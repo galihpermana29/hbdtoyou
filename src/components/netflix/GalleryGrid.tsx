@@ -41,7 +41,7 @@ const GalleryGrid = ({ images, initialLimit = 6 }: GalleryGridProps) => {
   return (
     <div className="flex flex-col gap-y-2 items-start w-full">
       {/* Image grid */}
-      <div className="grid grid-cols-3 grid-rows-2 gap-5 w-full">
+      <div className="grid grid-cols-3 grid-rows-2 gap-2 w-full">
         {displayImages.map((image, index) => (
           <div
             key={index}
