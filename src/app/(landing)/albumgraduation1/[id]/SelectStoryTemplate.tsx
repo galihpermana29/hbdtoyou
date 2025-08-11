@@ -11,7 +11,12 @@ interface SelectStoryTemplateProps {
 
 const { Title, Text } = Typography;
 
-const SelectStoryTemplate = ({ isOpen, onClose, onSelect, loadingModalVisible }: SelectStoryTemplateProps) => {
+const SelectStoryTemplate = ({
+  isOpen,
+  onClose,
+  onSelect,
+  loadingModalVisible,
+}: SelectStoryTemplateProps) => {
   const [selectedTemplate, setSelectedTemplate] = useState<string>('first');
 
   const handleTemplateChange = (e: any) => {
@@ -54,23 +59,33 @@ const SelectStoryTemplate = ({ isOpen, onClose, onSelect, loadingModalVisible }:
         <Button key="cancel" onClick={onClose} disabled={loadingModalVisible}>
           Cancel
         </Button>,
-        <Button loading={loadingModalVisible} key="select" type="primary" onClick={handleSelect}>
+        <Button
+          loading={loadingModalVisible}
+          key="select"
+          type="primary"
+          onClick={handleSelect}>
           Select Template
         </Button>,
-      ]}
-    >
+      ]}>
       <div className="flex flex-col gap-y-6">
         <Text>Select a template for your Instagram story:</Text>
 
-        <Radio.Group onChange={handleTemplateChange} value={selectedTemplate} className="w-full !pb-6">
-          <Space className="flex md:flex-row flex-col gap-y-4 w-full" size="large">
+        <Radio.Group
+          onChange={handleTemplateChange}
+          value={selectedTemplate}
+          className="w-full !pb-6">
+          <Space
+            className="flex md:flex-row flex-col gap-y-4 w-full"
+            size="large">
             <Radio value="first" className="w-full">
               <div className="flex flex-col gap-y-2">
-                <Text strong className="text-lg">Template 1</Text>
+                <Text strong className="text-lg">
+                  Template 1
+                </Text>
                 <div className="border border-gray-300 rounded-lg p-4 w-full">
                   <div className="w-full flex items-center justify-center">
                     <Image
-                      src="/FirstOption.svg"
+                      src="https://res.cloudinary.com/dqipjpy1w/image/upload/v1754934694/Option_1_lhqbfn.jpg"
                       width={150}
                       height={300}
                       alt="Template 1 Preview"
@@ -83,11 +98,13 @@ const SelectStoryTemplate = ({ isOpen, onClose, onSelect, loadingModalVisible }:
 
             <Radio value="second" className="w-full">
               <div className="flex flex-col gap-y-2">
-                <Text strong className="text-lg">Template 2</Text>
+                <Text strong className="text-lg">
+                  Template 2
+                </Text>
                 <div className="border border-gray-300 rounded-lg p-4 w-full">
                   <div className="w-full flex items-center justify-center">
                     <Image
-                      src="/SecondOption.svg"
+                      src="https://res.cloudinary.com/dqipjpy1w/image/upload/v1754934690/Option_2_adzoh4.jpg"
                       width={150}
                       height={300}
                       alt="Template 2 Preview"
