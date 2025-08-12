@@ -119,11 +119,17 @@ const FirstTemplate = ({ data }: FirstTemplateProps) => {
       <div className="flex flex-col gap-y-4 text-center justify-center items-center absolute top-[1682px] left-1/2 -translate-x-1/2 right-1/2 w-full">
         <p className="geist-font font-normal text-2xl text-[#A4A4A4]">Collaboration Photographer</p>
         <div className="flex items-center gap-x-2 p-0.5 rounded-md bg-[#525252] border-solid border border-[#838383] h-fit w-fit">
-          <Image
-            src="/memologonetflix.svg"
-            width={72}
-            height={72}
-            alt="Memo Logo Netflix"
+          <div
+            style={{
+              backgroundImage: 'url(/memologonetflix.svg)',
+              backgroundSize: 'contain',
+              backgroundPosition: 'center',
+              backgroundRepeat: 'no-repeat',
+              width: 72,
+              height: 72,
+            }}
+            aria-label="Memo Logo Netflix"
+            role="img"
           />
           <span className="text-base font-semibold text-white">&</span>
           <CameraEnhanceIcon
