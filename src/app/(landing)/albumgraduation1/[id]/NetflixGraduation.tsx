@@ -37,6 +37,19 @@ const NetflixGraduation = ({ parsedData }: { parsedData: any }) => {
         return;
       }
 
+      const isMobile = screen.width < 1024;
+      let lazyImagesChanges = false;
+
+      if (isMobile) {
+        const lazyImages = document.querySelectorAll('img[loading="lazy"]');
+        if (lazyImages.length > 0) {
+          lazyImages.forEach((img) => {
+            img.setAttribute('loading', 'eager');
+            lazyImagesChanges = true;
+          });
+        }
+      }
+
       try {
         // Store original body line height
         const originalLineHeight = document.body.style.lineHeight;
@@ -45,10 +58,12 @@ const NetflixGraduation = ({ parsedData }: { parsedData: any }) => {
         document.body.style.lineHeight = '0.5';
 
         const canvas = await html2canvas(captureRef.current, {
-          scale: 2,
+          scale: 1,
           useCORS: true,
           allowTaint: true,
           backgroundColor: '#000000',
+          width: 1080,
+          height: 1920,
         });
 
         // Restore original body line height
@@ -68,13 +83,19 @@ const NetflixGraduation = ({ parsedData }: { parsedData: any }) => {
           document.body.style.lineHeight = '';
         }
       } finally {
+        if (isMobile && lazyImagesChanges) {
+          const lazyImages = document.querySelectorAll('img[loading="eager"]');
+          lazyImages.forEach((img) => {
+            img.setAttribute('loading', 'lazy');
+          });
+        }
         // Clean up state after capture is complete
         resetState();
       }
     };
 
     // The setTimeout ensures all images/assets inside the template have a moment to load
-    const timer = setTimeout(generateImage, 100);
+    const timer = setTimeout(generateImage, 500);
     return () => clearTimeout(timer); // Cleanup the timer
 
   }, [templateToCapture, parsedData]); // Dependency array
