@@ -37,6 +37,19 @@ const NetflixGraduation = ({ parsedData }: { parsedData: any }) => {
         return;
       }
 
+      const isMobile = screen.width < 1024;
+      let lazyImagesChanges = false;
+
+      if (isMobile) {
+        const lazyImages = document.querySelectorAll('img[loading="lazy"]');
+        if (lazyImages.length > 0) {
+          lazyImages.forEach((img) => {
+            img.setAttribute('loading', 'eager');
+            lazyImagesChanges = true;
+          });
+        }
+      }
+
       try {
         // Store original body line height
         const originalLineHeight = document.body.style.lineHeight;
@@ -70,6 +83,12 @@ const NetflixGraduation = ({ parsedData }: { parsedData: any }) => {
           document.body.style.lineHeight = '';
         }
       } finally {
+        if (isMobile && lazyImagesChanges) {
+          const lazyImages = document.querySelectorAll('img[loading="eager"]');
+          lazyImages.forEach((img) => {
+            img.setAttribute('loading', 'lazy');
+          });
+        }
         // Clean up state after capture is complete
         resetState();
       }
