@@ -9,7 +9,7 @@ interface FirstTemplateProps {
 
 const FirstTemplate = ({ data }: FirstTemplateProps) => {
   return (
-    <div id="first-template" className="w-[1080px] mx-auto h-[1920px] bg-black overflow-hidden">
+    <div id="first-template" className="w-[1080px] mx-auto h-[1920px] bg-black overflow-hidden relative">
       <div className="w-full relative">
         <div className="relative w-full">
           <Image src={data?.images?.[0] || '/instagram-template-example.svg'} width='0' className="w-full object-cover" height={1041} alt="Instagram Template Example" />
@@ -98,7 +98,7 @@ const FirstTemplate = ({ data }: FirstTemplateProps) => {
         {data?.images?.map((image: string, index: number) => (
           <div key={index} className="w-[235px] h-[368px] relative rounded-xl overflow-hidden bg-[#232323]">
             <div className="w-full h-full relative">
-              <div 
+              <div
                 style={{
                   backgroundImage: `url(${image})`,
                   backgroundSize: 'cover',
