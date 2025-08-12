@@ -57,7 +57,9 @@ const NetflixGraduation = ({ parsedData }: { parsedData: any }) => {
         document.body.style.lineHeight = originalLineHeight;
 
         const link = document.createElement('a');
-        link.download = `instagram-story-${parsedData?.llm_generated?.name || 'graduation'}-${dayjs().format('YYYY-MM-DD-HH-mm')}.png`;
+        link.download = `instagram-story-${
+          parsedData?.llm_generated?.name || 'graduation'
+        }-${dayjs().format('YYYY-MM-DD-HH-mm')}.png`;
         link.href = canvas.toDataURL('image/png');
         link.click();
 
@@ -78,7 +80,6 @@ const NetflixGraduation = ({ parsedData }: { parsedData: any }) => {
     // The setTimeout ensures all images/assets inside the template have a moment to load
     const timer = setTimeout(generateImage, 100);
     return () => clearTimeout(timer); // Cleanup the timer
-
   }, [templateToCapture, parsedData]); // Dependency array
 
   const resetState = () => {
@@ -105,7 +106,10 @@ const NetflixGraduation = ({ parsedData }: { parsedData: any }) => {
   );
 
   // Handle wish submission
-  const handleWishSubmit = async (values: { name: string; message: string }) => {
+  const handleWishSubmit = async (values: {
+    name: string;
+    message: string;
+  }) => {
     return Promise.resolve();
   };
 
@@ -169,9 +173,8 @@ const NetflixGraduation = ({ parsedData }: { parsedData: any }) => {
             left: '-9999px',
             width: '1080px',
             height: '1920px',
-            backgroundColor: 'black'
-          }}
-        >
+            backgroundColor: 'black',
+          }}>
           {templates[templateToCapture]}
         </div>
       )}
