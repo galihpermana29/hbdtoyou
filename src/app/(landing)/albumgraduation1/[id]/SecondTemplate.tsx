@@ -13,7 +13,7 @@ const SecondTemplate = ({ data }: SecondTemplateProps) => {
       <div className="w-full relative">
         <div className="relative w-full">
           <Image src={data?.images?.[0] || '/instagram-template-example.svg'} width='0' className="w-full object-cover" height={1041} alt="Instagram Template Example" />
-          <div className="absolute inset-0 bg-gradient-to-b from-transparent via-transparent to-black" style={{ mixBlendMode: 'multiply' }} />
+          <div className="absolute inset-0 bg-gradient-to-b from-transparent via-black/30 to-black" style={{ mixBlendMode: 'multiply' }} />
         </div>
         <div className="flex items-center justify-between p-6 absolute top-0 left-0 right-0">
           <div className="flex items-center gap-x-3">
