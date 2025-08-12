@@ -37,6 +37,19 @@ const NetflixGraduation = ({ parsedData }: { parsedData: any }) => {
         return;
       }
 
+      const isMobile = screen.width < 1024;
+      let lazyImagesChanges = false;
+
+      if (isMobile) {
+        const lazyImages = document.querySelectorAll('img[loading="lazy"]');
+        if (lazyImages.length > 0) {
+          lazyImages.forEach((img) => {
+            img.setAttribute('loading', 'eager');
+            lazyImagesChanges = true;
+          });
+        }
+      }
+
       try {
         // Store original body line height
         const originalLineHeight = document.body.style.lineHeight;
@@ -45,7 +58,7 @@ const NetflixGraduation = ({ parsedData }: { parsedData: any }) => {
         document.body.style.lineHeight = '0.5';
 
         const canvas = await html2canvas(captureRef.current, {
-          scale: 2,
+          scale: 1,
           useCORS: true,
           allowTaint: true,
           backgroundColor: '#000000',
@@ -57,9 +70,7 @@ const NetflixGraduation = ({ parsedData }: { parsedData: any }) => {
         document.body.style.lineHeight = originalLineHeight;
 
         const link = document.createElement('a');
-        link.download = `instagram-story-${
-          parsedData?.llm_generated?.name || 'graduation'
-        }-${dayjs().format('YYYY-MM-DD-HH-mm')}.png`;
+        link.download = `instagram-story-${parsedData?.llm_generated?.name || 'graduation'}-${dayjs().format('YYYY-MM-DD-HH-mm')}.png`;
         link.href = canvas.toDataURL('image/png');
         link.click();
 
@@ -72,14 +83,21 @@ const NetflixGraduation = ({ parsedData }: { parsedData: any }) => {
           document.body.style.lineHeight = '';
         }
       } finally {
+        if (isMobile && lazyImagesChanges) {
+          const lazyImages = document.querySelectorAll('img[loading="eager"]');
+          lazyImages.forEach((img) => {
+            img.setAttribute('loading', 'lazy');
+          });
+        }
         // Clean up state after capture is complete
         resetState();
       }
     };
 
     // The setTimeout ensures all images/assets inside the template have a moment to load
-    const timer = setTimeout(generateImage, 100);
+    const timer = setTimeout(generateImage, 500);
     return () => clearTimeout(timer); // Cleanup the timer
+
   }, [templateToCapture, parsedData]); // Dependency array
 
   const resetState = () => {
@@ -106,10 +124,7 @@ const NetflixGraduation = ({ parsedData }: { parsedData: any }) => {
   );
 
   // Handle wish submission
-  const handleWishSubmit = async (values: {
-    name: string;
-    message: string;
-  }) => {
+  const handleWishSubmit = async (values: { name: string; message: string }) => {
     return Promise.resolve();
   };
 
@@ -137,8 +152,9 @@ const NetflixGraduation = ({ parsedData }: { parsedData: any }) => {
             left: '-9999px',
             width: '1080px',
             height: '1920px',
-            backgroundColor: 'black',
-          }}>
+            backgroundColor: 'black'
+          }}
+        >
           {templates[templateToCapture]}
         </div>
       )}
