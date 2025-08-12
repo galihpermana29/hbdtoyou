@@ -110,9 +110,45 @@ const NetflixGraduation = ({ parsedData }: { parsedData: any }) => {
   };
 
   // This is the function you call when a user clicks a button
-  const handleTemplateSelect = (templateType) => {
+  const handleTemplateSelect = async (templateType: 'first' | 'second') => {
     setLoadingModalVisible(true);
-    setTemplateToCapture(templateType); // ✅ Set the template to render
+
+    try {
+      // Store original body line height
+      const originalLineHeight = document.body.style.lineHeight;
+
+      // Set body line height to 0.5 for better image generation
+      document.body.style.lineHeight = '0.5';
+
+      const canvas = await html2canvas(captureRef.current, {
+        scale: 2,
+        useCORS: true,
+        allowTaint: true,
+        backgroundColor: '#000000',
+        width: 480,
+        height: 840,
+      });
+
+      // Restore original body line height
+      document.body.style.lineHeight = originalLineHeight;
+
+      const link = document.createElement('a');
+      link.download = `instagram-story-${parsedData?.llm_generated?.name || 'graduation'}-${dayjs().format('YYYY-MM-DD-HH-mm')}.png`;
+      link.href = canvas.toDataURL('image/png');
+      link.click();
+
+      message.success('Instagram story template downloaded successfully!');
+    } catch (error) {
+      message.error('Failed to generate Instagram story template');
+
+      // Ensure line height is restored even if there's an error
+      if (document.body.style.lineHeight === '0.5') {
+        document.body.style.lineHeight = '';
+      }
+    } finally {
+      // Clean up state after capture is complete
+      resetState();
+    }
   };
 
   // A map for cleaner template selection
