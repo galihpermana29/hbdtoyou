@@ -2,7 +2,7 @@
 
 import { getDetailContent } from '@/action/user-api';
 import NetflixGraduation from './NetflixGraduation';
-
+import 'react-photo-view/dist/react-photo-view.css';
 const getDetailDataNew = async (id: string) => {
   const res = await getDetailContent(id);
   return res;
