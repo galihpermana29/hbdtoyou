@@ -3,6 +3,7 @@
 import Image from 'next/image';
 import { ReactNode, useState } from 'react';
 import NetflixButton from './NetflixButton';
+import { PhotoView } from 'react-photo-view';
 
 interface EpisodeCardProps {
   number: number;
@@ -58,13 +59,15 @@ const EpisodeCard = ({
         {/* Thumbnail image or placeholder */}
         <div className="w-[163px] h-[108.88px] shrink-0 bg-yellow-300 relative overflow-hidden rounded-sm">
           {imageSrc ? (
-            <Image
-              src={imageSrc}
-              alt={imageAlt}
-              width={163}
-              height={108.88}
-              className="w-full h-full object-cover"
-            />
+            <PhotoView key={title} src={imageSrc}>
+              <Image
+                src={imageSrc}
+                alt={imageAlt}
+                width={163}
+                height={108.88}
+                className="w-full h-full object-cover"
+              />
+            </PhotoView>
           ) : (
             <div className="w-full h-full flex items-center justify-center text-black font-bold">
               {number}
@@ -74,16 +77,19 @@ const EpisodeCard = ({
 
         {/* Episode info */}
         <div className="flex flex-col gap-y-2 items-start">
-          <p className="geist-font text-base text-white">
-            {title}
-          </p>
+          <p className="geist-font text-base text-white">{title}</p>
           <span className="geist-font text-xs text-[#A3A1A1]">{duration}</span>
         </div>
       </div>
 
       {/* Episode description */}
       <div className="w-full">
-        <p className={showFullDescription ? "geist-font text-sm text-[#A3A1A1]" : "geist-font text-sm text-[#A3A1A1] line-clamp-3"}>
+        <p
+          className={
+            showFullDescription
+              ? 'geist-font text-sm text-[#A3A1A1]'
+              : 'geist-font text-sm text-[#A3A1A1] line-clamp-3'
+          }>
           {description}
         </p>
         {description.length > 100 && (
@@ -91,9 +97,8 @@ const EpisodeCard = ({
             variant="text"
             icon={showMoreIcon}
             iconPosition="end"
-            className='!mt-2'
-            onClick={() => setShowFullDescription(!showFullDescription)}
-          >
+            className="!mt-2"
+            onClick={() => setShowFullDescription(!showFullDescription)}>
             {showFullDescription ? 'Show Less' : 'Show More'}
           </NetflixButton>
         )}
