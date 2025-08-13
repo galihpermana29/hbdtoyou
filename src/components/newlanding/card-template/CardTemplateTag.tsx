@@ -99,7 +99,7 @@ const CardTemplateTag = ({
           type === 'preview'
             ? 'w-[350px] md:w-[400px]'
             : type === 'scrapbook'
-            ? 'w-[280px] p-[12px] min-h-[200px]'
+            ? 'w-[280px] p-[12px] !min-h-[250px]'
             : 'w-full max-w-[350px] md:max-w-[400px]'
         )}>
         <div className="flex items-center justify-between h-[50px]">

@@ -20,6 +20,8 @@ import {
 import CardTemplateTag from '@/components/newlanding/card-template/CardTemplateTag';
 import { CheckIcon, CircleCheck } from 'lucide-react';
 import clsx from 'clsx';
+import { json } from 'stream/consumers';
+import { useRouter, useSearchParams } from 'next/navigation';
 
 const FormGeneration = ({
   openNotification,
@@ -41,6 +43,10 @@ const FormGeneration = ({
   const dispatch = useDispatch();
   const [form] = Form.useForm();
   const profile = useMemoifyProfile();
+
+  const router = useRouter();
+  const query = useSearchParams();
+  const templateName = query.get('route');
 
   const [popularTemplates, setPopularTemplates] = useState<
     IAllTemplateResponse[] | null
@@ -70,12 +76,17 @@ const FormGeneration = ({
     if (dx.success) {
       const filteredTemplates =
         dx.data?.filter((dx) => dx.name.includes('Scrapbook')) || [];
-      console.log(filteredTemplates, 'filtered?');
+
       setPopularTemplates(filteredTemplates);
 
       // Set the first template as selected by default if available
       if (filteredTemplates.length > 0) {
         setSelectedTemplateId(filteredTemplates[0].id);
+        router.push(
+          `/scrapbook/create?templateId=${filteredTemplates[0].id}&route=${
+            filteredTemplates[0].name?.split('- ')[1]
+          }`
+        );
         form.setFieldValue('templateId', filteredTemplates[0].id);
       }
     } else {
@@ -97,8 +108,6 @@ const FormGeneration = ({
       isPublic: true,
     };
 
-    return;
-
     const payload = {
       template_id: selectedTemplateId,
       detail_content_json_text: JSON.stringify(json_text),
@@ -112,6 +121,12 @@ const FormGeneration = ({
     };
 
     const res = await createContent(payload);
+    if (res.success) {
+      router.push(`/${templateName}/${res.data}`);
+      message.success('Successfully created!');
+    } else {
+      message.error(res.message);
+    }
     setLoading(false);
   };
 
@@ -129,7 +144,18 @@ const FormGeneration = ({
           second
         </p>
       </div>
-      <Form form={form} layout="vertical" onFinish={handleFinish}>
+      <Form
+        form={form}
+        layout="vertical"
+        onFinish={handleFinish}
+        requiredMark={false}>
+        <div className="mt-[10px] mb-[5px]">
+          <h3 className="text-[15px] font-semibold">AI Models</h3>
+
+          <p className="text-[13px] text-gray-600 max-w-[400px]">
+            Memo AI 1.0 (Cropping & Layouting)
+          </p>
+        </div>
         <Form.Item
           getValueFromEvent={(e) => {
             // return just the fileList (or your custom format if needed)
@@ -226,6 +252,11 @@ const FormGeneration = ({
                     e.stopPropagation();
                     setSelectedTemplateId(template.id);
                     form.setFieldValue('templateId', template.id);
+                    router.push(
+                      `/scrapbook/create?templateId=${template.id}&route=${
+                        template.name?.split('- ')[1]
+                      }`
+                    );
                   }}>
                   {selectedTemplateId === template.id && (
                     <div className="absolute top-2 right-2 z-10 bg-blue-500 rounded-full p-1">
