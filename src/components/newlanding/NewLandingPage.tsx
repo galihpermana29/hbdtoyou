@@ -1,42 +1,39 @@
 'use client';
 
-import { useState } from 'react';
 import {
-  Layout,
-  Typography,
+  Badge,
   Button,
-  Space,
   Card,
-  Row,
+  Carousel,
   Col,
-  Statistic,
-  List,
   Form,
   Input,
-  Carousel,
-  Badge,
+  Layout,
+  List,
+  Row,
+  Space,
+  Statistic,
+  Typography,
 } from 'antd';
+import { useState } from 'react';
 
+import { ArrowRight, CircleCheck } from 'lucide-react';
 import Image from 'next/image';
-import NavigationBar from '../ui/navbar';
-import { ArrowRight, ArrowUpRight, CircleCheck } from 'lucide-react';
 import Link from 'next/link';
-import photoboxCompilation from '@/assets/photobox-compilation.png';
+import NavigationBar from '../ui/navbar';
 
 import fictional1 from '@/assets/fictional-1.png';
-import fictional2 from '@/assets/fictional2.png';
 import fictional3 from '@/assets/fictional-3.png';
 import fictional4 from '@/assets/fictional-4.png';
 import fictional5 from '@/assets/fictional-5.png';
+import fictional2 from '@/assets/fictional2.png';
 
+import { useMemoifySession } from '@/app/session-provider';
 import mockup1 from '@/assets/mockup1.png';
 import mockup2 from '@/assets/mockup2.png';
 import mockup3 from '@/assets/mockup3.png';
-import mockIlustrasi from '@/assets/mock-illustrasi.png';
-import mockPhotobox from '@/assets/mock-photobox.png';
-import { useRouter } from 'next/navigation';
-import { useMemoifySession } from '@/app/session-provider';
 import { signIn } from 'next-auth/react';
+import { useRouter } from 'next/navigation';
 
 const { Footer } = Layout;
 const { Title, Text, Paragraph } = Typography;
@@ -142,7 +139,7 @@ export default function NewLandingPage() {
             </div>
             <div className="flex-1 w-full">
               <Image
-                src="/scrapbook-landing-hero.svg"
+                src="https://res.cloudinary.com/dqipjpy1w/image/upload/v1755179368/Container_a73yhv.png"
                 alt="photobox-compilation"
                 width={552}
                 height={496}
@@ -154,7 +151,7 @@ export default function NewLandingPage() {
         <div className="flex flex-col lg:flex-row-reverse items-start lg:items-center justify-between gap-[30px] mx-auto max-w-6xl 2xl:max-w-7xl px-[20px] py-[90px]">
           <div className="flex-1 w-full">
             <Image
-              src="/research-format-hero.svg"
+              src="https://res.cloudinary.com/dqipjpy1w/image/upload/v1755179525/Container_1_abrwgt.png"
               alt="Say It with Logic and Love"
               width={552}
               height={496}
@@ -200,7 +197,7 @@ export default function NewLandingPage() {
             </div>
             <div className="flex-1 w-full">
               <Image
-                src="/capture-landing-hero.svg"
+                src="https://res.cloudinary.com/dqipjpy1w/image/upload/v1755179589/Container_2_qqcuhs.png"
                 alt="Capture Moments in Style"
                 width={552}
                 height={496}
@@ -286,7 +283,7 @@ export default function NewLandingPage() {
             </div>
             <div className="flex-1 w-full">
               <Image
-                src="/showcase-your-moments.svg"
+                src="https://res.cloudinary.com/dqipjpy1w/image/upload/v1755179670/Frame_14_lmcmak.png"
                 alt="Your way to showcase your moments"
                 className="w-full h-full object-contain"
                 width="0"
