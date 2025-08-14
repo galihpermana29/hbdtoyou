@@ -67,12 +67,22 @@ export const DataToCardColor = {
     logo: journal,
     text: 'text-[#000]',
   },
-  scrapbookv1: {
+  scrapbook1: {
     color: 'bg-[#651B05cf]',
     logo: scrapbookv1,
     text: 'text-[#651B05]',
   },
-  scrapbookvintage: {
+  scrapbook2: {
+    color: 'bg-[#651B05cf]',
+    logo: scrapbookv1,
+    text: 'text-[#651B05]',
+  },
+  scrapbook3: {
+    color: 'bg-[#651B05cf]',
+    logo: scrapbookv1,
+    text: 'text-[#651B05]',
+  },
+  scrapbook4: {
     color: 'bg-[#651B05cf]',
     logo: scrapbookv1,
     text: 'text-[#651B05]',

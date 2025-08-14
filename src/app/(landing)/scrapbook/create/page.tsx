@@ -2,11 +2,14 @@
 import NavigationBar from '@/components/ui/navbar';
 import FormGeneration from './FormGeneration';
 import useCreateContent from '../../create/usecase/useCreateContent';
-import ScrapbookResult1 from '../../scrapbookv1/page';
-import ScrapbookResult2 from '../../scrapbookvintage/page';
+import ScrapbookResult1 from '../../scrapbook1/page';
+import ScrapbookResult2 from '../../scrapbook2/page';
 import { useState } from 'react';
 import { Spin } from 'antd';
 import { LoadingOutlined } from '@ant-design/icons';
+import { useSearchParams } from 'next/navigation';
+import Scrapbook3 from '../../scrapbook3/page';
+import Scrapbook4 from '../../scrapbook4/page';
 
 const ScrapbookCreatePage = () => {
   const {
@@ -27,10 +30,16 @@ const ScrapbookCreatePage = () => {
 
   const [selectedTemplateId, setSelectedTemplateId] = useState<string>('');
 
+  const query = useSearchParams();
+  const templateName = query.get('route');
+
   const scrapbookPreview = {
-    '518886f6-65b6-48cd-beb9-9a9ffc621251': <ScrapbookResult1 />,
-    '44d0e72e-bf4f-4d5c-8323-c0135b910f3c': <ScrapbookResult2 />,
+    scrapbook1: <ScrapbookResult1 />,
+    scrapbook2: <ScrapbookResult2 />,
+    scrapbook3: <Scrapbook3 />,
+    scrapbook4: <Scrapbook4 />,
   };
+
   return (
     <div className="mt-[80px]">
       {contextHolder}
@@ -60,7 +69,7 @@ const ScrapbookCreatePage = () => {
                   Preview of the scrapbook
                 </p>
               </div>
-              {scrapbookPreview?.[selectedTemplateId]}
+              {scrapbookPreview?.[templateName]}
             </div>
           </div>
         </div>

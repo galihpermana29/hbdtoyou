@@ -23,7 +23,7 @@ const ScrapbookResult1 = () => {
       <div className="fixed top-0 left-0 w-full z-10 ">
         <NavigationBar />
       </div>
-      <div className={pathname === '/scrapbookv1' ? 'mt-[100px]' : ''} />
+      <div className={pathname === '/scrapbook1' ? 'mt-[100px]' : ''} />
       <PageFlipScrapbook
         pages={pages}
         coverImage={coverImage}

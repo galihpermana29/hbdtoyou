@@ -76,7 +76,7 @@ const FormGeneration = ({
     if (dx.success) {
       const filteredTemplates =
         dx.data?.filter((dx) => dx.name.includes('Scrapbook')) || [];
-
+      console.log(filteredTemplates, 'filteredTemplates');
       setPopularTemplates(filteredTemplates);
 
       // Set the first template as selected by default if available
@@ -94,8 +94,7 @@ const FormGeneration = ({
     }
   };
 
-  const handleFinish = async (values: any) => {
-    console.log(values);
+  const handleFinish = async () => {
     setLoading(true);
     const json_text = {
       title: 'Scrapbook AI',
