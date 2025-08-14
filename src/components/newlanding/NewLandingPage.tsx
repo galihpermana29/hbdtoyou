@@ -125,10 +125,11 @@ export default function NewLandingPage() {
           <div className="flex flex-col lg:flex-row-reverse items-start lg:items-center justify-between gap-[30px] mx-auto max-w-6xl 2xl:max-w-7xl px-[20px] py-[90px]">
             <div style={{ flex: 1, minWidth: '300px' }}>
               <p className="text-[#1B1B1B] font-[700] text-[30px] md:text-[36px]">
-                Your Memories Deserve More Than Just a Gallery
+                Your memories deserve more than just a gallery
               </p>
               <p className="text-[#7b7b7b] text-[16px] md:text-[20px] font-[400] mt-[20px]">
-                Craft beautiful scrapbooks that capture your favorite moments — with photos, notes, and a touch of you
+                Craft beautiful scrapbooks that capture your favorite moments —
+                with photos, notes, and a touch of you
               </p>
               <Link href={'/scrapbook'} prefetch={true}>
                 <Button
@@ -141,7 +142,7 @@ export default function NewLandingPage() {
             </div>
             <div className="flex-1 w-full">
               <Image
-                src='/scrapbook-landing-hero.svg'
+                src="/scrapbook-landing-hero.svg"
                 alt="photobox-compilation"
                 width={552}
                 height={496}
@@ -153,7 +154,7 @@ export default function NewLandingPage() {
         <div className="flex flex-col lg:flex-row-reverse items-start lg:items-center justify-between gap-[30px] mx-auto max-w-6xl 2xl:max-w-7xl px-[20px] py-[90px]">
           <div className="flex-1 w-full">
             <Image
-              src='/research-format-hero.svg'
+              src="/research-format-hero.svg"
               alt="Say It with Logic and Love"
               width={552}
               height={496}
@@ -161,10 +162,11 @@ export default function NewLandingPage() {
           </div>
           <div style={{ flex: 1, minWidth: '300px' }}>
             <p className="text-[#1B1B1B] font-[700] text-[30px] md:text-[36px]">
-              Say It with Logic and Love, Letters in Research Format
+              Say it with logic and love, letters in research format
             </p>
             <p className="text-[#7b7b7b] text-[16px] md:text-[20px] font-[400] mt-[20px]">
-              Transform your feelings into meaningful messages with academic-style letters that still hit the heart.
+              Transform your feelings into meaningful messages with
+              academic-style letters that still hit the heart.
             </p>
             <Link href={'/journal'} prefetch={true}>
               <Button
@@ -184,7 +186,8 @@ export default function NewLandingPage() {
                 Capture moments in style, with our homies Photobox
               </p>
               <p className="text-[#7b7b7b] text-[16px] md:text-[20px] font-[400] mt-[20px]">
-                Make every picture a keepsake with Memoify’s Photobox! Designed to add a touch of creativity and personality to your moments
+                Make every picture a keepsake with Memoify’s Photobox! Designed
+                to add a touch of creativity and personality to your moments
               </p>
               <Link href={'/photobox'} prefetch={true}>
                 <Button
@@ -197,7 +200,7 @@ export default function NewLandingPage() {
             </div>
             <div className="flex-1 w-full">
               <Image
-                src='/capture-landing-hero.svg'
+                src="/capture-landing-hero.svg"
                 alt="Capture Moments in Style"
                 width={552}
                 height={496}
@@ -215,12 +218,14 @@ export default function NewLandingPage() {
                   Your way to showcase your moments
                 </p>
                 <p className="text-[#7b7b7b] text-[16px] md:text-[20px] font-[400] mt-[20px]">
-                  Personalize your memories like never before. lets you create stunning, interactive web inspired by your favorite platforms—whether it's Netflix, Spotify, etc.
+                  Personalize your memories like never before. lets you create
+                  stunning, interactive web inspired by your favorite
+                  platforms—whether it's Netflix, Spotify, etc.
                 </p>
               </div>
-              <div className='flex flex-col gap-y-6'>
-                <div className='flex items-start gap-x-4'>
-                  <div className='w-12 h-12 rounded-lg border border-solid border-[#EAECF0] text-2xl font-bold shrink-0 flex items-center justify-center'>
+              <div className="flex flex-col gap-y-6">
+                <div className="flex items-start gap-x-4">
+                  <div className="w-12 h-12 rounded-lg border border-solid border-[#EAECF0] text-2xl font-bold shrink-0 flex items-center justify-center">
                     ❤️
                   </div>
                   <div className="flex flex-col gap-y-2">
@@ -238,8 +243,8 @@ export default function NewLandingPage() {
                     </Link>
                   </div>
                 </div>
-                <div className='flex items-start gap-x-4'>
-                  <div className='w-12 h-12 rounded-lg border border-solid border-[#EAECF0] text-2xl font-bold shrink-0 flex items-center justify-center'>
+                <div className="flex items-start gap-x-4">
+                  <div className="w-12 h-12 rounded-lg border border-solid border-[#EAECF0] text-2xl font-bold shrink-0 flex items-center justify-center">
                     📷
                   </div>
                   <div className="flex flex-col gap-y-2">
@@ -247,7 +252,8 @@ export default function NewLandingPage() {
                       Photobox with Your Loved Ones
                     </h1>
                     <p className="text-[16px] font-[400] text-[#7b7b7b] mb-[20px]">
-                      Take beautiful snapshots with friends and family using our interactive photobox feature to create lasting memories.
+                      Take beautiful snapshots with friends and family using our
+                      interactive photobox feature to create lasting memories.
                     </p>
                     <Link
                       href={'/templates'}
@@ -256,8 +262,8 @@ export default function NewLandingPage() {
                     </Link>
                   </div>
                 </div>
-                <div className='flex items-start gap-x-4'>
-                  <div className='w-12 h-12 rounded-lg border border-solid border-[#EAECF0] text-2xl font-bold shrink-0 flex items-center justify-center'>
+                <div className="flex items-start gap-x-4">
+                  <div className="w-12 h-12 rounded-lg border border-solid border-[#EAECF0] text-2xl font-bold shrink-0 flex items-center justify-center">
                     🚀
                   </div>
                   <div className="flex flex-col gap-y-2">
@@ -265,7 +271,9 @@ export default function NewLandingPage() {
                       Join Hundreds of Premium Users
                     </h1>
                     <p className="text-[16px] font-[400] text-[#7b7b7b] mb-[20px]">
-                      Be part of a growing community that enjoys exclusive features, unlimited templates, and a seamless memory-sharing experience.
+                      Be part of a growing community that enjoys exclusive
+                      features, unlimited templates, and a seamless
+                      memory-sharing experience.
                     </p>
                     <Link
                       href={'/templates'}
@@ -277,7 +285,13 @@ export default function NewLandingPage() {
               </div>
             </div>
             <div className="flex-1 w-full">
-              <Image src='/showcase-your-moments.svg' alt="Your way to showcase your moments" className='w-full h-full object-contain' width='0' height='0' />
+              <Image
+                src="/showcase-your-moments.svg"
+                alt="Your way to showcase your moments"
+                className="w-full h-full object-contain"
+                width="0"
+                height="0"
+              />
             </div>
           </div>
         </div>
