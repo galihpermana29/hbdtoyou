@@ -220,7 +220,7 @@ export default function NewLandingPage() {
                 <p className="text-[#7b7b7b] text-[16px] md:text-[20px] font-[400] mt-[20px]">
                   Personalize your memories like never before. lets you create
                   stunning, interactive web inspired by your favorite
-                  platforms—whether it's Netflix, Spotify, etc.
+                  platforms—whether it&apos;s Netflix, Spotify, etc.
                 </p>
               </div>
               <div className="flex flex-col gap-y-6">
