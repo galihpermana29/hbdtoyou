@@ -72,7 +72,8 @@ const ScrapbookPage = () => {
             <div className="flex flex-col items-center justify-center gap-y-12 max-w-5xl">
               <div className="mx-auto flex flex-col items-center justify-center gap-y-6">
                 <h1 className="text-center text-[#1B1B1B] font-semibold text-4xl md:text-5xl lg:text-6xl inter-font leading-tight md:leading-[72px] tracking-[-2%]">
-                  Bring your memories to life with personalized scrapbooks
+                  Bring your memories to life with memo-ai to generate
+                  scrapbooks
                 </h1>
                 <p className="text-[#7B7B7B] text-lg md:text-xl font-normal inter-font max-w-3xl text-center">
                   Easily create heartfelt scrapbooks filled with photos, notes,
@@ -95,12 +96,14 @@ const ScrapbookPage = () => {
           </div>
         </div>
         <div className="w-full pb-[50px]">
-          <div className="relative w-full h-fit z-20 pb-12 sm:pb-16 md:pb-24" style={{
-            backgroundImage: "url('/scrapbook-background-pattern.svg')",
-            backgroundPosition: "center top",
-            backgroundSize: "cover",
-            backgroundRepeat: "no-repeat"
-          }}>
+          <div
+            className="relative w-full h-fit z-20 pb-12 sm:pb-16 md:pb-24"
+            style={{
+              backgroundImage: "url('/scrapbook-background-pattern.svg')",
+              backgroundPosition: 'center top',
+              backgroundSize: 'cover',
+              backgroundRepeat: 'no-repeat',
+            }}>
             <Image
               src="/scrapbook-hero.png"
               alt="Memoify Live Scrapboox Hero"
@@ -253,10 +256,11 @@ const ScrapbookPage = () => {
                     {features.map((feature, index) => (
                       <div
                         key={index}
-                        className={`w-full pl-6 py-4 border-[4px] border-y-0 border-r-0 cursor-pointer transition-all duration-300 ${activeFeature === index
-                          ? 'border-l-[#E34013]'
-                          : 'border-l-[#F2F4F7] hover:border-l-[#E34013]/50'
-                          }`}
+                        className={`w-full pl-6 py-4 border-[4px] border-y-0 border-r-0 cursor-pointer transition-all duration-300 ${
+                          activeFeature === index
+                            ? 'border-l-[#E34013]'
+                            : 'border-l-[#F2F4F7] hover:border-l-[#E34013]/50'
+                        }`}
                         onClick={() => setActiveFeature(index)}>
                         <div className="flex flex-col gap-y-2 items-start">
                           <Typography.Title

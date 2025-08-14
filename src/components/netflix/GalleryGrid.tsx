@@ -3,6 +3,7 @@
 import Image from 'next/image';
 import { useState } from 'react';
 import NetflixButton from './NetflixButton';
+import { PhotoView } from 'react-photo-view';
 
 interface GalleryGridProps {
   images: any[];
@@ -41,18 +42,20 @@ const GalleryGrid = ({ images, initialLimit = 6 }: GalleryGridProps) => {
   return (
     <div className="flex flex-col gap-y-2 items-start w-full">
       {/* Image grid */}
-      <div className="grid grid-cols-3 grid-rows-2 gap-5 w-full">
+      <div className="grid grid-cols-3 grid-rows-2 gap-2 w-full">
         {displayImages.map((image, index) => (
           <div
             key={index}
             className="bg-yellow-300 rounded-md h-[191.18px] relative overflow-hidden">
             {image ? (
-              <Image
-                src={image}
-                alt="Netflix Graduation"
-                fill
-                style={{ objectFit: 'cover' }}
-              />
+              <PhotoView key={index} src={image}>
+                <Image
+                  src={image}
+                  alt="Netflix Graduation"
+                  fill
+                  style={{ objectFit: 'cover' }}
+                />
+              </PhotoView>
             ) : (
               <div className="w-full h-full flex items-center justify-center text-black font-bold">
                 {index + 1}

@@ -89,7 +89,7 @@ const CardTemplateTag = ({
   type = 'preview',
 }: {
   data: IAllTemplateResponse;
-  type?: 'creation' | 'preview';
+  type?: 'creation' | 'preview' | 'scrapbook';
 }) => {
   return (
     <div>
@@ -98,6 +98,8 @@ const CardTemplateTag = ({
           'p-[24px] transition cursor-pointer group min-h-[400px] flex flex-col justify-between bg-[#F9FAFB] rounded-[8px] border-[1px] border-[#EAECF0]',
           type === 'preview'
             ? 'w-[350px] md:w-[400px]'
+            : type === 'scrapbook'
+            ? 'w-[280px] p-[12px] !min-h-[250px]'
             : 'w-full max-w-[350px] md:max-w-[400px]'
         )}>
         <div className="flex items-center justify-between h-[50px]">
@@ -112,24 +114,26 @@ const CardTemplateTag = ({
             />
           )}
           <div className="flex items-center gap-2">
-            <div
-              onClick={(e) => {
-                e.stopPropagation();
-              }}>
-              <Link
-                target="_blank"
-                // split netflix - netflixv1
-                href={`/${data.name.split('-')[1]?.split(' ')[1]}`}>
-                <h1
-                  className={clsx(
-                    'text-[18px] font-[600] hover:underline',
-                    DataToCardColor[data.name.split('-')[1]?.split(' ')[1]]
-                      ?.text
-                  )}>
-                  See Preview
-                </h1>
-              </Link>
-            </div>
+            {type !== 'scrapbook' && (
+              <div
+                onClick={(e) => {
+                  e.stopPropagation();
+                }}>
+                <Link
+                  target="_blank"
+                  // split netflix - netflixv1
+                  href={`/${data.name.split('-')[1]?.split(' ')[1]}`}>
+                  <h1
+                    className={clsx(
+                      'text-[16px] font-[600] hover:underline',
+                      DataToCardColor[data.name.split('-')[1]?.split(' ')[1]]
+                        ?.text
+                    )}>
+                    Preview
+                  </h1>
+                </Link>
+              </div>
+            )}
 
             <ArrowRight
               size={24}
@@ -146,21 +150,23 @@ const CardTemplateTag = ({
             className="w-full aspect-video object-cover rounded-md"
           />
         </div>
-        <div className="mt-[16px]">
-          <h1 className="mb-[12px] text-[12px] font-semibold">
-            Template specs:
-          </h1>
-          <div className="flex flex-col gap-2">
-            {[data.label, ...(data?.tag || [])]?.map((dx) => {
-              return (
-                <div className="flex items-center gap-2" key={dx}>
-                  <Image src={checkIcon} alt="check" />
-                  <p className="text-[12px] font-normal capitalize">{dx}</p>
-                </div>
-              );
-            })}
+        {type !== 'scrapbook' && (
+          <div className="mt-[16px]">
+            <h1 className="mb-[12px] text-[12px] font-semibold">
+              Template specs:
+            </h1>
+            <div className="flex flex-col gap-2">
+              {[data.label, ...(data?.tag || [])]?.map((dx) => {
+                return (
+                  <div className="flex items-center gap-2" key={dx}>
+                    <Image src={checkIcon} alt="check" />
+                    <p className="text-[12px] font-normal capitalize">{dx}</p>
+                  </div>
+                );
+              })}
+            </div>
           </div>
-        </div>
+        )}
       </div>
     </div>
   );

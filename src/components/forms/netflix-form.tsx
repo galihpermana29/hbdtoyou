@@ -54,7 +54,7 @@ export const getBase64Multiple = (file: FileType): Promise<string> =>
 export const beforeUpload = async (
   file: FileType,
   type: 'premium' | 'free' = 'free',
-  openNotification: (progress: number, key: any) => void,
+  openNotification: (progress: number, key: any, isError?: boolean) => void,
   setFormValues?: (
     { uri, uid }: { uri: string; uid: string },
     formName: string,
@@ -66,59 +66,43 @@ export const beforeUpload = async (
   const isJpgOrPng = file.type === 'image/jpeg' || file.type === 'image/png';
   if (!isJpgOrPng) {
     message.error('You can only upload JPG/PNG file!');
+    return Upload.LIST_IGNORE;
   }
   const sizing = type === 'free' ? 1 : 10;
   const isLt2M = file.size / 1024 / 1024 < sizing;
   if (!isLt2M) {
     if (type === 'free') {
       message.error('Free account can only upload image below 1MB!');
+      return Upload.LIST_IGNORE;
     } else {
       message.error('Maximum image size is 10MB!');
+      return Upload.LIST_IGNORE;
     }
   } else {
-    const reader = new FileReader();
-    reader.onload = async () => {
-      const formData = new FormData();
-      formData.append('file', file);
-      const key = uuidv4();
+    const formData = new FormData();
+    formData.append('file', file);
+    const key = file.name;
 
-      const dx = await uploadImageWithApi(formData, openNotification, key);
+    const dx = await uploadImageWithApi(formData, openNotification, key);
 
-      if (setFormValues) {
+    if (setFormValues && dx.success) {
+      setFormValues(
         {
-          setFormValues(
-            {
-              uri: dx.data.data,
-              uid: file.uid,
-            },
-            formName!,
-            index
-          );
-        }
-      }
+          uri: dx.data.data,
+          uid: file.uid,
+        },
+        formName!,
+        index
+      );
 
       message.success('Image uploaded!');
-    };
-    reader.readAsDataURL(file as FileType);
+    } else {
+      message.error('Something went wrong!');
+      throw new Error('Something went wrong!');
+    }
   }
 
   return isJpgOrPng && isLt2M;
-};
-
-export const uploadImage = async (
-  base64: File,
-  type: 'free' | 'premium',
-  openNotification: (progress: number, key: any) => void
-) => {
-  const key = uuidv4();
-
-  const data = await uploadImageClientSide(base64, type, openNotification, key);
-  if (data.success) {
-    return data.data;
-  } else {
-    message.error(data.message);
-    throw new Error('Error');
-  }
 };
 
 const NetflixForm = ({
@@ -400,6 +384,11 @@ const NetflixForm = ({
             </div>
           }>
           <Upload
+            customRequest={({ onSuccess }) => {
+              setTimeout(() => {
+                onSuccess?.('ok', undefined);
+              }, 0);
+            }}
             accept=".jpg, .jpeg, .png"
             multiple={true}
             maxCount={profile?.type === 'free' ? 5 : 20}
@@ -409,20 +398,16 @@ const NetflixForm = ({
             }
             onRemove={(file) => handleRemoveCollectionImage(file.uid)}
             beforeUpload={async (file, fileList) => {
-              const isBatchTooLarge = fileList.length > 5;
-              if (isBatchTooLarge) {
+              if (fileList.length > 5) {
                 // Find the index of the current file in the list
                 const fileIndex = fileList.findIndex((f) => f.uid === file.uid);
-                // Only show the message once for the first file in a large batch
-                if (fileIndex === 0) {
-                  message.error(
-                    'You can only upload a maximum of 5 files at a time.'
-                  );
+
+                // Only process the first 5 files, ignore the rest
+                if (fileIndex >= 5) {
+                  return Upload.LIST_IGNORE;
                 }
-                // Prevent upload for all files in a batch larger than 5
-                return Upload.LIST_IGNORE;
               }
-              setUploadLoading(true);
+
               await beforeUpload(
                 file as FileType,
                 profile
@@ -434,7 +419,6 @@ const NetflixForm = ({
                 handleSetCollectionImagesURI,
                 'images'
               );
-              setUploadLoading(false);
             }}>
             {collectionOfImages.length >= 10 && profile?.type === 'free'
               ? null

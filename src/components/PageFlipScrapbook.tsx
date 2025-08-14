@@ -57,12 +57,12 @@ interface PageFlipScrapbookProps {
   backCoverTitle?: string;
 }
 
-const PageFlipScrapbook: React.FC<PageFlipScrapbookProps> = ({ 
-  pages, 
-  coverImage = "https://res.cloudinary.com/dqipjpy1w/image/upload/v1750003560/tl7dqxuefwo2oiaxgj9s.jpg",
-  backCoverImage = "https://res.cloudinary.com/dqipjpy1w/image/upload/v1750003560/tl7dqxuefwo2oiaxgj9s.jpg",
-  coverTitle = "Scrapbook by Memoify",
-  backCoverTitle = "The End"
+const PageFlipScrapbook: React.FC<PageFlipScrapbookProps> = ({
+  pages,
+  coverImage = 'https://res.cloudinary.com/dqipjpy1w/image/upload/v1750003560/tl7dqxuefwo2oiaxgj9s.jpg',
+  backCoverImage = 'https://res.cloudinary.com/dqipjpy1w/image/upload/v1750003560/tl7dqxuefwo2oiaxgj9s.jpg',
+  coverTitle = 'Scrapbook by Memoify',
+  backCoverTitle = 'The End',
 }) => {
   const book = useRef<any>(null);
   const [page, setPage] = useState(0);
@@ -136,9 +136,7 @@ const PageFlipScrapbook: React.FC<PageFlipScrapbookProps> = ({
           showPageCorners={true}
           disableFlipByClick={false}>
           {/* Cover Page */}
-          <PageCover image={coverImage}>
-            {coverTitle}
-          </PageCover>
+          <PageCover image={coverImage}>{coverTitle}</PageCover>
 
           {/* Content Pages */}
           {pages.map((image, index) => (
@@ -146,9 +144,7 @@ const PageFlipScrapbook: React.FC<PageFlipScrapbookProps> = ({
           ))}
 
           {/* Back Cover */}
-          <PageCover image={backCoverImage}>
-            {backCoverTitle}
-          </PageCover>
+          <PageCover image={backCoverImage}>{backCoverTitle}</PageCover>
         </HTMLFlipBook>
       </div>
 

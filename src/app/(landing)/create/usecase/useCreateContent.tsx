@@ -30,21 +30,36 @@ const useCreateContent = () => {
 
   const [api, contextHolder] = notification.useNotification();
 
-  const openNotification = (progress: number = 0, key: any) => {
-    api.open({
-      message: (
-        <p className="text-[14px] text-black font-[600]">
-          {progress < 100 ? `Uploading ${progress}%` : 'Uploading completed'}
-        </p>
-      ),
-      description: (
-        <div>
-          <Progress percent={progress} />
-        </div>
-      ),
-      duration: 2000,
-      key: key,
-    });
+  const openNotification = (
+    progress: number = 0,
+    key: any,
+    isError?: boolean
+  ) => {
+    if (isError) {
+      api.error({
+        message: (
+          <p className="text-[14px] text-black font-[600]">
+            Something went wrong!
+          </p>
+        ),
+        duration: 20,
+        key: key,
+      });
+    } else {
+      api.open({
+        message: (
+          <p className="text-[14px] text-black font-[600]">
+            {progress < 100 ? `Uploading ${progress}%` : 'Uploading completed'}
+          </p>
+        ),
+        description: (
+          <div>
+            <Progress percent={progress} />
+          </div>
+        ),
+        key: key,
+      });
+    }
   };
 
   const handleCompleteCreation = () => {
