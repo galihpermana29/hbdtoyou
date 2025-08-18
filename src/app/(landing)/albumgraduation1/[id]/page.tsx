@@ -17,9 +17,7 @@ const GraduationNetflixPage = async ({ params }: any) => {
     return <div>No data</div>;
   }
 
-  const parsedData = JSON.parse(data.data.detail_content_json_text);
-
-  return <NetflixGraduation parsedData={parsedData} />;
+  return <NetflixGraduation dataContent={data.data} id={id} />;
 };
 
 export default GraduationNetflixPage;

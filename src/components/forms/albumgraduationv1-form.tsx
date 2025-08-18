@@ -204,14 +204,12 @@ const AlbumGraduationv1 = ({
   useEffect(() => {
     if (editData) {
       const jsonContent = JSON.parse(editData.detail_content_json_text);
-      console.log(jsonContent);
 
       const images = parsingImageFromJSON(
         jsonContent,
         'collection-images',
         'images'
       );
-      console.log(images);
 
       dispatch(setCollectionOfImages(images));
 
@@ -268,7 +266,7 @@ const AlbumGraduationv1 = ({
         disabled={loading}
         form={form}
         layout="vertical"
-        // onFinish={(val) => handleSubmit(val)}
+      // onFinish={(val) => handleSubmit(val)}
       >
         <Form.Item
           rules={[{ required: true, message: 'Please enter full name client' }]}
@@ -371,8 +369,8 @@ const AlbumGraduationv1 = ({
             {collectionOfImages.length >= 5 && profile?.type === 'free'
               ? null
               : collectionOfImages.length >= 15 && profile?.type !== 'free'
-              ? null
-              : uploadButton}
+                ? null
+                : uploadButton}
           </Upload>
         </Form.Item>
         <Form.Item

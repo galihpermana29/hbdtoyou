@@ -22,34 +22,20 @@ const WishForm = ({ onSubmit }: WishFormProps) => {
   const [isSubmitting, setIsSubmitting] = useState(false);
 
   const handleSubmit = async (values: FormValues) => {
-    if (!values.name || !values.message) {
-      message.error('Please fill in all fields');
-      return;
-    }
-
     setIsSubmitting(true);
 
     try {
-      if (onSubmit) {
-        await onSubmit(values);
-        message.success('Your wish has been sent!');
-        form.resetFields();
-      } else {
-        // Simulate submission if no onSubmit handler is provided
-        await new Promise(resolve => setTimeout(resolve, 1000));
-        message.success('Your wish has been sent!');
-        form.resetFields();
-      }
+      await onSubmit(values);
+      form.resetFields();
     } catch (error) {
       message.error('Failed to send your wish. Please try again.');
-      console.error('Form submission error:', error);
     } finally {
       setIsSubmitting(false);
     }
   };
 
   return (
-    <Form className='max-md:!px-2 md:!px-0' form={form} layout="vertical" onFinish={handleSubmit} requiredMark={false}>
+    <Form id='wish-form' className='max-md:!px-2 md:!px-0' form={form} layout="vertical" onFinish={handleSubmit} requiredMark={false}>
       <Form.Item
         name='name'
         className="!mb-3"
@@ -61,7 +47,6 @@ const WishForm = ({ onSubmit }: WishFormProps) => {
 
       <Form.Item
         name='message'
-        className="!mb-3"
         label={<p className="geist-font text-base text-white">Message</p>}
         rules={[{ required: true, message: 'Please enter your message' }]}
       >

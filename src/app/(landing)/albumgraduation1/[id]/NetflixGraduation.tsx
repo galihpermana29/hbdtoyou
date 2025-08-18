@@ -1,9 +1,11 @@
 'use client';
 
+import { addWishesContent } from '@/action/user-api';
 import EpisodeCard from '@/components/netflix/EpisodeCard';
 import GalleryGrid from '@/components/netflix/GalleryGrid';
 import NetflixButton from '@/components/netflix/NetflixButton';
 import SectionHeader from '@/components/netflix/SectionHeader';
+import WishCard from '@/components/netflix/WishCard';
 import WishForm from '@/components/netflix/WishForm';
 import CameraEnhanceIcon from '@mui/icons-material/CameraEnhance';
 import { Button, message } from 'antd';
@@ -11,12 +13,14 @@ import dayjs from 'dayjs';
 import html2canvas from 'html2canvas';
 import Image from 'next/image';
 import { useEffect, useRef, useState } from 'react';
+import { PhotoProvider, PhotoView } from 'react-photo-view';
+import 'react-photo-view/dist/react-photo-view.css';
 import FirstTemplate from './FirstTemplate';
 import SecondTemplate from './SecondTemplate';
 import SelectStoryTemplate from './SelectStoryTemplate';
-import { PhotoProvider, PhotoView } from 'react-photo-view';
-import 'react-photo-view/dist/react-photo-view.css';
-const NetflixGraduation = ({ parsedData }: { parsedData: any }) => {
+
+const NetflixGraduation = ({ dataContent, id }: { dataContent: any, id: string }) => {
+  const parsedData = JSON.parse(dataContent.detail_content_json_text);
   const [showFullSynopsis, setShowFullSynopsis] = useState(false);
   const [isTemplateModalOpen, setIsTemplateModalOpen] = useState(false);
   const [loadingModalVisible, setLoadingModalVisible] = useState(false);
@@ -71,9 +75,8 @@ const NetflixGraduation = ({ parsedData }: { parsedData: any }) => {
         document.body.style.lineHeight = originalLineHeight;
 
         const link = document.createElement('a');
-        link.download = `instagram-story-${
-          parsedData?.llm_generated?.name || 'graduation'
-        }-${dayjs().format('YYYY-MM-DD-HH-mm')}.png`;
+        link.download = `instagram-story-${parsedData?.llm_generated?.name || 'graduation'
+          }-${dayjs().format('YYYY-MM-DD-HH-mm')}.png`;
         link.href = canvas.toDataURL('image/png');
         link.click();
 
@@ -130,7 +133,12 @@ const NetflixGraduation = ({ parsedData }: { parsedData: any }) => {
     name: string;
     message: string;
   }) => {
-    return Promise.resolve();
+    const res = await addWishesContent(id, values);
+    if (res.success) {
+      message.success('Wish added successfully!');
+    } else {
+      message.error(res.message);
+    }
   };
 
   // This is the function you call when a user clicks a button
@@ -416,24 +424,25 @@ const NetflixGraduation = ({ parsedData }: { parsedData: any }) => {
               }
             />
 
-            {/* <div className="flex flex-col gap-y-2 items-start w-full">
-              {parsedData.llm_generated.wishes.map((wish, index) => {
-                const profileIcon = {
-                  green: <UserProfileGreen />,
-                  yellow: <UserProfileYellow />,
-                  red: <UserProfileRed />,
-                }[wish.profileType];
+            <div className="flex flex-col gap-y-2 items-start w-full">
+              {dataContent.wishes.length > 0 && dataContent.wishes.map((wish, index) => {
+                const profileIcons = [
+                  <Image src="/UserProfileGreen.svg" width={40} height={40} alt="green profile icon" key={`icon-green-${index}`} />,
+                  <Image src="/UserProfileYellow.svg" width={40} height={40} alt="yellow profile icon" key={`icon-yellow-${index}`} />,
+                  <Image src="/UserProfileRed.svg" width={40} height={40} alt="red profile icon" key={`icon-red-${index}`} />,
+                ];
+                const randomIcon = profileIcons[Math.floor(Math.random() * profileIcons.length)];
 
                 return (
                   <WishCard
                     key={index}
                     name={wish.name}
                     message={wish.message}
-                    profileIcon={profileIcon}
+                    profileIcon={randomIcon}
                   />
                 );
               })}
-            </div> */}
+            </div>
           </div>
 
           {/* Form Submit */}
