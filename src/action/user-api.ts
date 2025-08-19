@@ -298,6 +298,9 @@ export async function getDetailContent(
       'X-UserID': session.userId!,
       Authorization: `Bearer ${session.accessToken}`,
     },
+    next: {
+      tags: ['netflix-graduation-content'],
+    },
   });
 
   if (!res.ok) {
@@ -309,6 +312,47 @@ export async function getDetailContent(
   }
 
   const data = await res.json();
+
+  return {
+    success: true,
+    message: data.message,
+    data: data.data,
+  };
+}
+
+export async function addWishesContent(
+  id: string,
+  payload: {
+    name: string;
+    message: string;
+  }
+): Promise<IGlobalResponse<null | {
+  data: string;
+}>> {
+  const session = await getSession();
+  const res = await fetch(baseUri + `/contents/${id}/wish`, {
+    method: 'PUT',
+    headers: {
+      'Content-Type': 'application/json',
+      'X-Source': 'web',
+      'X-UserID': session.userId!,
+      Authorization: `Bearer ${session.accessToken}`,
+    },
+    body: JSON.stringify(payload),
+  });
+
+
+  if (!res.ok) {
+    return {
+      success: false,
+      message: res.statusText,
+      data: null,
+    };
+  }
+
+  const data = await res.json();
+
+  revalidateTag('netflix-graduation-content');
 
   return {
     success: true,
