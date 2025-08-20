@@ -1,6 +1,6 @@
 'use client';
 
-import { Button } from 'antd';
+import { Button, ButtonProps } from 'antd';
 import { ReactNode } from 'react';
 
 type ButtonVariant = 'primary' | 'secondary' | 'text' | 'textBlack';
@@ -14,6 +14,7 @@ interface NetflixButtonProps {
   onClick?: () => void;
   className?: string;
   fullWidth?: boolean;
+  props?: ButtonProps;
 }
 
 /**
@@ -34,6 +35,7 @@ const NetflixButton = ({
   onClick,
   className = '',
   fullWidth = false,
+  ...props
 }: NetflixButtonProps) => {
   // Base classes for all button variants
   const baseClasses = '!font-semibold !text-base !rounded-[6px]';
@@ -55,6 +57,7 @@ const NetflixButton = ({
       icon={icon}
       iconPosition={iconPosition}
       className={`${baseClasses} ${variantClasses[variant]} ${widthClasses} ${className} geist-font flex items-center justify-center gap-x-2`}
+      {...props}
     >
       {children}
     </Button>

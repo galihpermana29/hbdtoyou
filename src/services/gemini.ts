@@ -19,11 +19,6 @@ export interface GraduationData {
     description: string;
     image: string;
   }[];
-  wishes: {
-    name: string;
-    message: string;
-    profileType: 'green' | 'yellow' | 'red';
-  }[];
 }
 
 export interface GraduationInput {
@@ -100,7 +95,6 @@ export async function generateGraduationStory(input: GraduationInput): Promise<G
       storyDescription: generatedContent.storyDescription,
       synopsis: generatedContent.synopsis,
       episodes: generatedContent.episodes,
-      wishes: []
     };
 
     return graduationData;
