@@ -5,9 +5,10 @@ import {
   generateQRIS,
   getDetailPayment,
   paymentByPaypal,
+  getListPackages,
 } from '@/action/user-api';
 import NavigationBar from '@/components/ui/navbar';
-import { Button, Typography, message } from 'antd';
+import { Button, Select, Typography, message } from 'antd';
 import Image from 'next/image';
 import { useEffect, useState } from 'react';
 import { motion } from 'framer-motion';
@@ -17,6 +18,7 @@ import CountdownTimer from '@/components/ui/countdown';
 import { useRouter, useSearchParams } from 'next/navigation';
 import { useMemoifySession } from '../../session-provider';
 import emptyState from '@/assets/empty.png';
+import { useQuery } from '@tanstack/react-query';
 
 const { Title, Text } = Typography;
 
@@ -41,15 +43,34 @@ const NewClientPagePayment = () => {
   const router = useRouter();
   const query = useSearchParams();
   const id = query.get('id');
+  const type = query.get('type');
+  const planId = query.get('plan_id');
+
+  const { data: listPackages, isFetching } = useQuery({
+    queryKey: [{ key: 'list-packages', planId }],
+    queryFn: async () => {
+      const data = await getListPackages();
+      return data.data;
+    },
+    enabled: !!planId,
+  });
+
+  const detailPackages =
+    listPackages?.find((item) => item.id === planId) || null;
 
   const handleGenerateQRIS = async () => {
     setLoading((prev) => ({
       ...prev,
       qris: true,
     }));
-    const res = await generateQRIS();
+    const res = await generateQRIS({
+      package_id: planId!,
+      payment_method: 'qris',
+    });
     if (res.success) {
-      router.replace(`/payment?id=${res.data?.payment_id}`);
+      router.replace(
+        `/payment?id=${res.data?.payment_id}&type=${type}&plan_id=${planId}`
+      );
       setQRISData(res.data);
       setPaymentMethod('qris');
     } else {
@@ -69,7 +90,7 @@ const NewClientPagePayment = () => {
     const res = await paymentByPaypal();
     if (res.success) {
       window.open(
-        `https://www.paypal.com/checkoutnow?token=${res.data.order_id}`,
+        `https://www.paypal.com/checkoutnow?token=${res.data.order_id}&type=${type}&plan_id=${planId}`,
         '_blank'
       );
       localStorage.setItem('paypal_payment', JSON.stringify(res.data));
@@ -94,7 +115,7 @@ const NewClientPagePayment = () => {
 
   useEffect(() => {
     if (!qrisData) {
-      router.replace('/payment?id=null');
+      router.replace(`/payment?id=null&type=${type}&plan_id=${planId}`);
     }
   }, [qrisData, router]);
 
@@ -244,6 +265,7 @@ const NewClientPagePayment = () => {
                           style={{ height: '48px', width: '33%' }}>
                           <span className="flex items-center">
                             <svg
+                              className="hidden md:block"
                               viewBox="0 0 24 24"
                               width="18"
                               height="18"
@@ -279,6 +301,7 @@ const NewClientPagePayment = () => {
                           style={{ height: '48px', width: '33%' }}>
                           <span className="flex items-center">
                             <svg
+                              className="hidden md:block"
                               viewBox="0 0 24 24"
                               width="18"
                               height="18"
@@ -299,6 +322,7 @@ const NewClientPagePayment = () => {
                           style={{ height: '48px', width: '33%' }}>
                           <span className="flex items-center">
                             <svg
+                              className="hidden md:block"
                               viewBox="0 0 24 24"
                               width="18"
                               height="18"
@@ -340,13 +364,34 @@ const NewClientPagePayment = () => {
                         />
                         <span>Pay with QRIS</span>
                       </Button>
-
-                      <div className="flex justify-between items-center mt-6 h-full">
-                        <Text strong>Total Amount:</Text>
-                        <Text strong className="text-purple-600 text-xl">
-                          IDR 20,000
-                        </Text>
-                      </div>
+                      {!isFetching && (
+                        <div className="h-[60%] flex flex-col justify-end mt-[20px]">
+                          <div className="flex justify-between items-center">
+                            <Text strong>Package:</Text>
+                            <Select
+                              options={listPackages?.map((dx) => ({
+                                value: dx.id,
+                                label: dx.name,
+                              }))}
+                              onChange={(value) => {
+                                router.replace(
+                                  `/payment?id=null&type=${type}&plan_id=${value}`
+                                );
+                              }}
+                              value={detailPackages?.id}
+                            />
+                            {/* <Text strong className="text-purple-600 text-xl">
+                            {detailPackages?.name}
+                          </Text> */}
+                          </div>
+                          <div className="flex justify-between items-center">
+                            <Text strong>Total Amount:</Text>
+                            <Text strong className="text-purple-600 text-xl">
+                              IDR {detailPackages?.price}
+                            </Text>
+                          </div>
+                        </div>
+                      )}
                     </div>
                   ) : (
                     <div className="flex flex-col items-center justify-center mt-4">

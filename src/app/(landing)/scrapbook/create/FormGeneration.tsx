@@ -76,7 +76,6 @@ const FormGeneration = ({
     if (dx.success) {
       const filteredTemplates =
         dx.data?.filter((dx) => dx.name.includes('Scrapbook')) || [];
-      console.log(filteredTemplates, 'filteredTemplates');
       setPopularTemplates(filteredTemplates);
 
       // Set the first template as selected by default if available
@@ -153,6 +152,14 @@ const FormGeneration = ({
 
           <p className="text-[13px] text-gray-600 max-w-[400px]">
             Memo AI 1.0 (Cropping & Layouting)
+          </p>
+        </div>
+        <div className="mt-[10px] mb-[5px]">
+          <h3 className="text-[15px] font-semibold">AI Token</h3>
+
+          <p className="text-[13px] text-gray-600 max-w-[400px]">
+            You have {profile?.token_scrapbook} token, to generate scrapbook you
+            need at least 1 token
           </p>
         </div>
         <Form.Item
@@ -272,6 +279,7 @@ const FormGeneration = ({
         </Form.Item>
 
         <Button
+          disabled={profile?.token_scrapbook < 1}
           type="primary"
           style={{
             height: '50px',
@@ -279,7 +287,7 @@ const FormGeneration = ({
           }}
           htmlType="submit"
           size="large">
-          {'Generate Scrapbook'}
+          {profile?.token_scrapbook < 1 ? 'Upgrade Plan' : 'Generate Scrapbook'}
         </Button>
       </Form>
     </div>

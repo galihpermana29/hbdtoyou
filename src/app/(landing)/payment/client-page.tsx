@@ -39,21 +39,21 @@ const PaymentQRIS = () => {
   const id = query.get('id');
 
   const handleGenerateQRIS = async () => {
-    setLoading((prev) => ({
-      ...prev,
-      qris: true,
-    }));
-    const res = await generateQRIS();
-    if (res.success) {
-      router.replace(`/payment?id=${res.data?.payment_id}`);
-      setQRISData(res.data);
-    } else {
-      message.error(res.message);
-    }
-    setLoading((prev) => ({
-      ...prev,
-      qris: false,
-    }));
+    // setLoading((prev) => ({
+    //   ...prev,
+    //   qris: true,
+    // }));
+    // const res = await generateQRIS();
+    // if (res.success) {
+    //   router.replace(`/payment?id=${res.data?.payment_id}`);
+    //   setQRISData(res.data);
+    // } else {
+    //   message.error(res.message);
+    // }
+    // setLoading((prev) => ({
+    //   ...prev,
+    //   qris: false,
+    // }));
   };
 
   const handlePaypal = async () => {

@@ -24,9 +24,11 @@ export default async function RootLayout({
         <AntdRegistry>
           <Analytics />
           <PostHogProvider>
-            <SessionProvider session={JSON.stringify(session)}>
-              <QueryProvider>{children}</QueryProvider>
-            </SessionProvider>
+            <QueryProvider>
+              <SessionProvider session={JSON.stringify(session)}>
+                {children}
+              </SessionProvider>
+            </QueryProvider>
           </PostHogProvider>
         </AntdRegistry>
       </body>

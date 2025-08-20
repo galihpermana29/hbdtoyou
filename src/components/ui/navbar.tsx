@@ -18,6 +18,7 @@ import Link from 'next/link';
 import { useEffect, useState } from 'react';
 import { signIn, signOut } from 'next-auth/react';
 import {
+  useMemoifyProfile,
   useMemoifySession,
   useMemoifyUpgradePlan,
 } from '@/app/session-provider';
@@ -34,20 +35,21 @@ import {
   LogOut,
   Menu,
   Settings,
+  Settings2,
   Sparkles,
   Zap,
 } from 'lucide-react';
 import dynamic from 'next/dynamic';
 // Lazy load the jumbotron image
 import jumbotronImage from '@/assets/fitur-1-image.png';
-
+import GasMeterOutlined from '@mui/icons-material/GasMeterOutlined';
 import './stlye.css';
+import { formatNumberWithComma } from '@/lib/utils';
 
 const NavigationBar = () => {
-  const [userProfile, setUserProfile] = useState<IProfileResponse | null>(null);
   const [sidebar, setSidebar] = useState<boolean>(false);
   const session = useMemoifySession();
-  const { setModalState: setModalUpgradePlan } = useMemoifyUpgradePlan();
+  const userProfile = useMemoifyProfile();
 
   const router = useRouter();
   const items: MenuProps['items'] = [
@@ -95,8 +97,20 @@ const NavigationBar = () => {
     },
     {
       key: '6',
-      label: userProfile ? `${userProfile?.quota} Credit` : '0',
+      label: userProfile
+        ? `${formatNumberWithComma(userProfile?.quota || 0)} Credit`
+        : '0 Credit',
       icon: <BadgeDollarSign size={18} className="text-[#667085]" />,
+      style: {
+        cursor: 'default',
+      },
+    },
+    {
+      key: '9',
+      label: userProfile
+        ? `${formatNumberWithComma(userProfile?.token_scrapbook || 0)} Token`
+        : '0 Token',
+      icon: <Settings2 size={18} className="text-[#667085]" />,
       style: {
         cursor: 'default',
       },
@@ -303,20 +317,20 @@ const NavigationBar = () => {
     },
   ];
 
-  const handleGetProfile = async () => {
-    const res = await getUserProfile();
-    if (res.success) {
-      setUserProfile(res.data);
-    } else {
-      message.error(res.message);
-    }
-  };
+  // const handleGetProfile = async () => {
+  //   const res = await getUserProfile();
+  //   if (res.success) {
+  //     setUserProfile(res.data);
+  //   } else {
+  //     message.error(res.message);
+  //   }
+  // };
 
-  useEffect(() => {
-    if (session.accessToken) {
-      handleGetProfile();
-    }
-  }, [session]);
+  // useEffect(() => {
+  //   if (session.accessToken) {
+  //     handleGetProfile();
+  //   }
+  // }, [session]);
 
   return (
     <div className="border-b-[1px] bg-white">

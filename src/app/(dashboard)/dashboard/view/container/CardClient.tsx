@@ -25,6 +25,10 @@ const CardClient = ({
         <h1 className="text-[#1B1B1B] font-[600] text-[36px]">
           {profile?.quota}
         </h1>
+      ) : title === 'Scrapbook Token' ? (
+        <h1 className="text-[#1B1B1B] font-[600] text-[36px]">
+          {profile?.token_scrapbook}
+        </h1>
       ) : (
         <h1 className="text-[#1B1B1B] font-[600] text-[36px]">{stats}</h1>
       )}
