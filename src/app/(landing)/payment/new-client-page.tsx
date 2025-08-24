@@ -368,27 +368,30 @@ const NewClientPagePayment = () => {
                       </div>
 
                       {/* QRIS Button */}
-                      <Button
-                        onClick={handleGenerateQRIS}
-                        loading={loading.qris}
-                        type="primary"
-                        block
-                        size="large"
-                        className="!bg-[#E34013] hover:bg-purple-700 mt-4 flex items-center justify-center">
-                        <Image
-                          src={qrisImage}
-                          alt="QRIS"
-                          width={24}
-                          height={24}
-                          className="mr-2"
-                        />
-                        <span>Pay with QRIS</span>
-                      </Button>
+                      {planId && planId !== '' && (
+                        <Button
+                          onClick={handleGenerateQRIS}
+                          loading={loading.qris}
+                          type="primary"
+                          block
+                          size="large"
+                          className="!bg-[#E34013] hover:bg-purple-700 mt-4 flex items-center justify-center">
+                          <Image
+                            src={qrisImage}
+                            alt="QRIS"
+                            width={24}
+                            height={24}
+                            className="mr-2"
+                          />
+                          <span>Pay with QRIS</span>
+                        </Button>
+                      )}
                       {listPackages?.length > 0 && (
                         <div className="h-[60%] flex flex-col justify-end mt-[20px]">
                           <div className="flex justify-between items-center">
                             <Text strong>Package:</Text>
                             <Select
+                              className="min-w-[150px]"
                               options={listPackages?.map((dx) => ({
                                 value: dx.id,
                                 label: dx.name,

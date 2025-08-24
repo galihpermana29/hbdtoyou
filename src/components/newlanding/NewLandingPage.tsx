@@ -65,7 +65,7 @@ export default function NewLandingPage() {
           <div className="max-w-[600px] mr-[20px] flex-1 mt-[20px] md:mt-0">
             <div className="flex gap-[5px] border-[1px] border-[#D0D5DD] rounded-[6px] max-w-max p-[5px] text-[14px] text-[#1B1B1B] font-[500]">
               <p className="border-[1px] border-[#D0D5DD] rounded-[6px]">
-                • New template is airing now!
+                • Scrapbook AI is now available!
               </p>{' '}
               <span>Try it now!</span>
             </div>
@@ -89,7 +89,7 @@ export default function NewLandingPage() {
                   Get Started
                 </Button>
               </Link>
-              <Link prefetch={true} href={'/photobox'}>
+              <Link prefetch={true} href={'/scrapbook'}>
                 <Button
                   size="large"
                   className="!border-[1px] !border-[#E34013] !text-[#E34013] !font-[600] !h-[60px] !w-[150px]">
