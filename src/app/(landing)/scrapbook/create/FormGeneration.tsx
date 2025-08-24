@@ -252,7 +252,7 @@ const FormGeneration = ({
           rules={[
             { required: true, message: 'Please select a template style' },
           ]}>
-          <div className="flex gap-[10px] overflow-x-auto max-w-[500px]">
+          <div className="flex gap-[10px] overflow-x-auto max-w-[320px] md:max-w-[500px]">
             {popularTemplates?.length ? (
               popularTemplates.map((template, idx) => (
                 <div

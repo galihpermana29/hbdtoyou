@@ -64,8 +64,8 @@ const ScrapbookCreatePage = () => {
             </div>
 
             <div className="flex-[1.5]">
-              <div className="my-[40px] lg:my-[0px]">
-                <h1 className="text-[#1B1B1B] font-[600] text-[18px]">
+              <div className="my-[40px] lg:my-[0px] px-[16px]">
+                <h1 className="text-[#1B1B1B] font-[600] text-[18px] ">
                   Style Preview
                 </h1>
                 <p className="text-[#7B7B7B] text-[14px] font-[400] max-w-[400px]">
