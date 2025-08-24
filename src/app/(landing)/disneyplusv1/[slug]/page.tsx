@@ -6,6 +6,7 @@ import TrailerSection from '../../../../components/disney+/TrailerSection';
 import { Button } from '../../../../components/disney+/ui/button';
 import { getDetailContent } from '@/action/user-api';
 import { Watermark } from 'antd';
+import WatchModal from './component/WatchModal';
 
 const getDetailDataNew = async (id: string) => {
   const res = await getDetailContent(id);
@@ -56,11 +57,12 @@ export default async function DynamicDisneyPage({ params }: { params: any }) {
                     : 'Bangun pagi ke kampus dosen menghilang'}
                 </p>
                 <div className="flex flex-wrap gap-4 mt-1">
-                  <Button className="bg-white text-black hover:bg-gray-200 gap-2">
+                  {/* <Button className="bg-white text-black hover:bg-gray-200 gap-2">
                     <Play className="h-5 w-5" />
                     Watch First Episode
                     <span className="text-sm ml-2">S1 E1</span>
-                  </Button>
+                  </Button> */}
+                  <WatchModal content={parsedData.modalContent} />
                   {/* <Button variant="outline" className="gap-2 text-black hidden">
                   <Plus className="h-5 w-5" />
                   Add to Watchlist
