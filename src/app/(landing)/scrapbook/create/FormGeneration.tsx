@@ -178,11 +178,11 @@ const FormGeneration = ({
                 Collection of images
               </h3>
 
-              <p className="text-[13px] text-gray-600 max-w-[400px]">
+              {/* <p className="text-[13px] text-gray-600 max-w-[400px]">
                 Account with <span className="font-bold">free</span> plan can
                 only add 5 images. To add up to 20 images, upgrade to{' '}
                 <span className="font-bold">premium</span> plan.
-              </p>
+              </p> */}
             </div>
           }>
           <Upload
