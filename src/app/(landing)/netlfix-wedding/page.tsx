@@ -1,11 +1,6 @@
 'use client';
 
 import {
-  UserProfileGreen,
-  UserProfileRed,
-  UserProfileYellow,
-} from '@/components/icons/UserProfileIcons';
-import {
   EpisodeCard,
   GalleryGrid,
   LocationInfo,
@@ -324,7 +319,7 @@ const NetlfixWeddingPage = () => {
             }
           />
 
-          <div className="flex flex-col gap-y-2 items-start w-full">
+          {/* <div className="flex flex-col gap-y-2 items-start w-full">
             {weddingData.wishes.map((wish, index) => {
               const profileIcon = {
                 green: <UserProfileGreen />,
@@ -341,7 +336,7 @@ const NetlfixWeddingPage = () => {
                 />
               );
             })}
-          </div>
+          </div> */}
         </div>
 
         {/* Form Submit */}

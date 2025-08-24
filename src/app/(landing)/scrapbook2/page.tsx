@@ -4,17 +4,17 @@ import PageFlipScrapbook from '@/components/PageFlipScrapbook';
 import NavigationBar from '@/components/ui/navbar';
 import { usePathname } from 'next/navigation';
 
-const ScrapbookResult1 = () => {
+const ScrapbookResult2 = () => {
   // Cover images
   const coverImage =
-    'https://res.cloudinary.com/dqipjpy1w/image/upload/v1750269072/images-api/ME202506181751118631.jpg';
+    'https://res.cloudinary.com/dqipjpy1w/image/upload/v1751193200/images-api/ME202506291033201230.jpg';
   const backCoverImage =
-    'https://res.cloudinary.com/dqipjpy1w/image/upload/v1750269079/images-api/ME202506181751195571.jpg';
+    'https://res.cloudinary.com/dqipjpy1w/image/upload/v1751193206/images-api/ME202506291033263480.jpg';
 
   const pages = [
-    'https://res.cloudinary.com/dqipjpy1w/image/upload/v1750269074/images-api/ME202506181751142581.jpg',
-    'https://res.cloudinary.com/dqipjpy1w/image/upload/v1750269076/images-api/ME202506181751162240.jpg',
-    'https://res.cloudinary.com/dqipjpy1w/image/upload/v1750269078/images-api/ME202506181751180571.jpg',
+    'https://res.cloudinary.com/dqipjpy1w/image/upload/v1751193202/images-api/ME202506291033220420.jpg',
+    'https://res.cloudinary.com/dqipjpy1w/image/upload/v1751193203/images-api/ME202506291033233460.jpg',
+    'https://res.cloudinary.com/dqipjpy1w/image/upload/v1751193205/images-api/ME202506291033248701.jpg',
   ];
 
   const pathname = usePathname();
@@ -23,7 +23,7 @@ const ScrapbookResult1 = () => {
       <div className="fixed top-0 left-0 w-full z-10 ">
         <NavigationBar />
       </div>
-      <div className={pathname === '/scrapbookv1' ? 'mt-[100px]' : ''} />
+      <div className={pathname === '/scrapbook2' ? 'mt-[100px]' : ''} />
       <PageFlipScrapbook
         pages={pages}
         coverImage={coverImage}
@@ -35,4 +35,4 @@ const ScrapbookResult1 = () => {
   );
 };
 
-export default ScrapbookResult1;
+export default ScrapbookResult2;

@@ -150,3 +150,8 @@ export function parsingImageFromJSON(
 export function templateNameToRoute(templateName: string) {
   return templateName.split('-')[1].split(' ')[1];
 }
+
+// create function to make thousand with comma separator
+export function formatNumberWithComma(num: number) {
+  return num.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ',');
+}

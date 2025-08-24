@@ -67,12 +67,27 @@ export const DataToCardColor = {
     logo: journal,
     text: 'text-[#000]',
   },
-  scrapbookv1: {
+  scrapbook1: {
     color: 'bg-[#651B05cf]',
     logo: scrapbookv1,
     text: 'text-[#651B05]',
   },
-  scrapbookvintage: {
+  scrapbook2: {
+    color: 'bg-[#651B05cf]',
+    logo: scrapbookv1,
+    text: 'text-[#651B05]',
+  },
+  scrapbook3: {
+    color: 'bg-[#651B05cf]',
+    logo: scrapbookv1,
+    text: 'text-[#651B05]',
+  },
+  scrapbook4: {
+    color: 'bg-[#651B05cf]',
+    logo: scrapbookv1,
+    text: 'text-[#651B05]',
+  },
+  scrapbook5: {
     color: 'bg-[#651B05cf]',
     logo: scrapbookv1,
     text: 'text-[#651B05]',
@@ -99,7 +114,7 @@ const CardTemplateTag = ({
           type === 'preview'
             ? 'w-[350px] md:w-[400px]'
             : type === 'scrapbook'
-            ? 'w-[280px] p-[12px] min-h-[200px]'
+            ? 'w-[280px] p-[12px] !min-h-[250px]'
             : 'w-full max-w-[350px] md:max-w-[400px]'
         )}>
         <div className="flex items-center justify-between h-[50px]">

@@ -1,42 +1,41 @@
 'use client';
 
-import { useState } from 'react';
 import {
-  Layout,
-  Typography,
+  Badge,
   Button,
-  Space,
   Card,
-  Row,
+  Carousel,
   Col,
-  Statistic,
-  List,
   Form,
   Input,
-  Carousel,
-  Badge,
+  Layout,
+  List,
+  Row,
+  Space,
+  Statistic,
+  Typography,
 } from 'antd';
+import { useState } from 'react';
 
+import { ArrowRight, CircleCheck } from 'lucide-react';
 import Image from 'next/image';
-import NavigationBar from '../ui/navbar';
-import { ArrowRight, ArrowUpRight, CircleCheck } from 'lucide-react';
 import Link from 'next/link';
-import photoboxCompilation from '@/assets/photobox-compilation.png';
+import NavigationBar from '../ui/navbar';
 
 import fictional1 from '@/assets/fictional-1.png';
-import fictional2 from '@/assets/fictional2.png';
 import fictional3 from '@/assets/fictional-3.png';
 import fictional4 from '@/assets/fictional-4.png';
 import fictional5 from '@/assets/fictional-5.png';
+import fictional2 from '@/assets/fictional2.png';
 
+import { useMemoifySession } from '@/app/session-provider';
 import mockup1 from '@/assets/mockup1.png';
 import mockup2 from '@/assets/mockup2.png';
 import mockup3 from '@/assets/mockup3.png';
-import mockIlustrasi from '@/assets/mock-illustrasi.png';
-import mockPhotobox from '@/assets/mock-photobox.png';
-import { useRouter } from 'next/navigation';
-import { useMemoifySession } from '@/app/session-provider';
 import { signIn } from 'next-auth/react';
+import { useRouter } from 'next/navigation';
+import { useQuery } from '@tanstack/react-query';
+import { getListPackages } from '@/action/user-api';
 
 const { Footer } = Layout;
 const { Title, Text, Paragraph } = Typography;
@@ -45,8 +44,17 @@ export default function NewLandingPage() {
   const [email, setEmail] = useState('');
   const router = useRouter();
   const session = useMemoifySession();
+
+  const { data: packages, isFetching } = useQuery({
+    queryKey: ['packages'],
+    queryFn: async () => {
+      const data = await getListPackages();
+      return data.data;
+    },
+  });
+
   return (
-    <div className="min-h-screen">
+    <div>
       <div className="fixed top-0 left-0 w-full z-10 ">
         <NavigationBar />
       </div>
@@ -125,25 +133,24 @@ export default function NewLandingPage() {
           <div className="flex flex-col lg:flex-row-reverse items-start lg:items-center justify-between gap-[30px] mx-auto max-w-6xl 2xl:max-w-7xl px-[20px] py-[90px]">
             <div style={{ flex: 1, minWidth: '300px' }}>
               <p className="text-[#1B1B1B] font-[700] text-[30px] md:text-[36px]">
-                Capture moments in style, with our homies Photobox
+                Your memories deserve more than just a gallery
               </p>
               <p className="text-[#7b7b7b] text-[16px] md:text-[20px] font-[400] mt-[20px]">
-                Make every picture a keepsake with Memoify`s Photobox! Designed
-                to add a touch of nostalgia and personality to your memories.
+                Craft beautiful scrapbooks that capture your favorite moments —
+                with photos, notes, and a touch of you
               </p>
-              <Link href={'/photobox'} prefetch={true}>
+              <Link href={'/scrapbook'} prefetch={true}>
                 <Button
                   iconPosition="end"
                   size="large"
-                  icon={<ArrowUpRight size={17} />}
-                  className="!border-[1px] !bg-[#E34013] !text-[#fff] !font-[600] mt-[40px] !h-[44px] !w-[150px]">
-                  Try it now
+                  className="!border-[1px] !bg-[#E34013] !text-[#fff] !font-[600] mt-[40px] !h-[44px]">
+                  Start My Scrapbook
                 </Button>
               </Link>
             </div>
             <div className="flex-1 w-full">
               <Image
-                src={mockPhotobox}
+                src="https://res.cloudinary.com/dqipjpy1w/image/upload/v1755179368/Container_a73yhv.png"
                 alt="photobox-compilation"
                 width={552}
                 height={496}
@@ -152,74 +159,147 @@ export default function NewLandingPage() {
           </div>
         </div>
 
-        {/* Features Section */}
-        <div className="mx-auto max-w-6xl 2xl:max-w-7xl px-[20px] py-[90px]">
-          <div className="max-w-[700px]">
+        <div className="flex flex-col lg:flex-row-reverse items-start lg:items-center justify-between gap-[30px] mx-auto max-w-6xl 2xl:max-w-7xl px-[20px] py-[90px]">
+          <div className="flex-1 w-full">
+            <Image
+              src="https://res.cloudinary.com/dqipjpy1w/image/upload/v1755179525/Container_1_abrwgt.png"
+              alt="Say It with Logic and Love"
+              width={552}
+              height={496}
+            />
+          </div>
+          <div style={{ flex: 1, minWidth: '300px' }}>
             <p className="text-[#1B1B1B] font-[700] text-[30px] md:text-[36px]">
-              Your way to showcase your moments
+              Say it with logic and love, letters in research format
             </p>
             <p className="text-[#7b7b7b] text-[16px] md:text-[20px] font-[400] mt-[20px]">
-              Personalize your memories like never before. lets you create
-              stunning, interactive web inspired by your favorite
-              platforms—whether it`s Netflix, Spotify, etc.
+              Transform your feelings into meaningful messages with
+              academic-style letters that still hit the heart.
             </p>
+            <Link href={'/journal'} prefetch={true}>
+              <Button
+                iconPosition="end"
+                size="large"
+                className="!border-[1px] !bg-[#E34013] !text-[#fff] !font-[600] mt-[40px] !h-[44px]">
+                Try the Letter Generator
+              </Button>
+            </Link>
           </div>
+        </div>
 
-          <div className="flex items-center lg:items-center flex-col lg:flex-row justify-between gap-[40px] mt-[80px] lg:h-[580px]">
-            <div className="flex-1 flex flex-col justify-between h-full gap-6 py-[30px]">
-              <div className="">
-                <h1 className="text-[#1B1B1B] font-[700] text-[20px] mb-[8px]">
-                  Give the Best Memories to Your Love Ones
-                </h1>
-                <p className="text-[16px] font-[400] text-[#7b7b7b] mb-[20px]">
-                  Make every moment unforgettable by creating a personalized
-                  digital space to celebrate and cherish special memories.
+        <div style={{ background: '#F9FAFB' }}>
+          <div className="flex flex-col lg:flex-row-reverse items-start lg:items-center justify-between gap-[30px] mx-auto max-w-6xl 2xl:max-w-7xl px-[20px] py-[90px]">
+            <div style={{ flex: 1, minWidth: '300px' }}>
+              <p className="text-[#1B1B1B] font-[700] text-[30px] md:text-[36px]">
+                Capture moments in style, with our homies Photobox
+              </p>
+              <p className="text-[#7b7b7b] text-[16px] md:text-[20px] font-[400] mt-[20px]">
+                Make every picture a keepsake with Memoify’s Photobox! Designed
+                to add a touch of creativity and personality to your moments
+              </p>
+              <Link href={'/photobox'} prefetch={true}>
+                <Button
+                  iconPosition="end"
+                  size="large"
+                  className="!border-[1px] !bg-[#E34013] !text-[#fff] !font-[600] mt-[40px] !h-[44px]">
+                  Capture now!
+                </Button>
+              </Link>
+            </div>
+            <div className="flex-1 w-full">
+              <Image
+                src="https://res.cloudinary.com/dqipjpy1w/image/upload/v1755179589/Container_2_qqcuhs.png"
+                alt="Capture Moments in Style"
+                width={552}
+                height={496}
+              />
+            </div>
+          </div>
+        </div>
+
+        {/* Features Section */}
+        <div className="mx-auto max-w-6xl 2xl:max-w-7xl">
+          <div className="flex items-center lg:items-center flex-col lg:flex-row justify-between">
+            <div className="flex-1 flex flex-col justify-between h-full gap-6 py-24 pl-5 pr-20 gap-y-16">
+              <div className="max-w-[700px]">
+                <p className="text-[#1B1B1B] font-[700] text-[30px] md:text-[36px]">
+                  Your way to showcase your moments
                 </p>
-                <Link
-                  href={'/templates'}
-                  className="text-[#E34013] font-[700] text-[16px] flex items-center gap-2 underline">
-                  Custom your Netflix site <ArrowRight size={17} />
-                </Link>
+                <p className="text-[#7b7b7b] text-[16px] md:text-[20px] font-[400] mt-[20px]">
+                  Personalize your memories like never before. lets you create
+                  stunning, interactive web inspired by your favorite
+                  platforms—whether it&apos;s Netflix, Spotify, etc.
+                </p>
               </div>
-              <div>
-                <h1 className="text-[#1B1B1B] font-[700] text-[20px] mb-[8px]">
-                  Photobox with Your Loved Ones
-                </h1>
-                <p className="text-[16px] font-[400] text-[#7b7b7b] mb-[20px]">
-                  Take beautiful snapshots with friends and family using our
-                  interactive photobox feature to create lasting memories.
-                </p>
-                <Link
-                  href={'/photobox'}
-                  className="text-[#E34013] font-[700] text-[16px] flex items-center gap-2 underline">
-                  Capture your memories now <ArrowRight size={17} />
-                </Link>
-              </div>
-              <div>
-                <h1 className="text-[#1B1B1B] font-[700] text-[20px] mb-[8px]">
-                  Join Hundreds of Premium Users
-                </h1>
-                <p className="text-[16px] font-[400] text-[#7b7b7b] mb-[20px]">
-                  Be part of a growing community that enjoys exclusive features,
-                  unlimited templates, and a seamless memory-sharing experience.
-                </p>
-                <p
-                  onClick={() => {
-                    if (session?.accessToken) {
-                      router.push('/payment');
-                    } else {
-                      signIn('google');
-                    }
-                  }}
-                  className="text-[#E34013] font-[700] cursor-pointer text-[16px] flex items-center gap-2 underline">
-                  Join premium now! <ArrowRight size={17} />
-                </p>
+              <div className="flex flex-col gap-y-6">
+                <div className="flex items-start gap-x-4">
+                  <div className="w-12 h-12 rounded-lg border border-solid border-[#EAECF0] text-2xl font-bold shrink-0 flex items-center justify-center">
+                    ❤️
+                  </div>
+                  <div className="flex flex-col gap-y-2">
+                    <h1 className="text-[#1B1B1B] font-[700] text-[20px] mb-[8px]">
+                      Give the Best Memories to Your Love Ones
+                    </h1>
+                    <p className="text-[16px] font-[400] text-[#7b7b7b] mb-[20px]">
+                      Make every moment unforgettable by creating a personalized
+                      digital space to celebrate and cherish special memories.
+                    </p>
+                    <Link
+                      href={'/templates'}
+                      className="text-[#E34013] font-[700] text-[16px] flex items-center gap-2 underline">
+                      Custom your Netflix site <ArrowRight size={17} />
+                    </Link>
+                  </div>
+                </div>
+                <div className="flex items-start gap-x-4">
+                  <div className="w-12 h-12 rounded-lg border border-solid border-[#EAECF0] text-2xl font-bold shrink-0 flex items-center justify-center">
+                    📷
+                  </div>
+                  <div className="flex flex-col gap-y-2">
+                    <h1 className="text-[#1B1B1B] font-[700] text-[20px] mb-[8px]">
+                      Photobox with Your Loved Ones
+                    </h1>
+                    <p className="text-[16px] font-[400] text-[#7b7b7b] mb-[20px]">
+                      Take beautiful snapshots with friends and family using our
+                      interactive photobox feature to create lasting memories.
+                    </p>
+                    <Link
+                      href={'/templates'}
+                      className="text-[#E34013] font-[700] text-[16px] flex items-center gap-2 underline">
+                      Create new memories now <ArrowRight size={17} />
+                    </Link>
+                  </div>
+                </div>
+                <div className="flex items-start gap-x-4">
+                  <div className="w-12 h-12 rounded-lg border border-solid border-[#EAECF0] text-2xl font-bold shrink-0 flex items-center justify-center">
+                    🚀
+                  </div>
+                  <div className="flex flex-col gap-y-2">
+                    <h1 className="text-[#1B1B1B] font-[700] text-[20px] mb-[8px]">
+                      Join Hundreds of Premium Users
+                    </h1>
+                    <p className="text-[16px] font-[400] text-[#7b7b7b] mb-[20px]">
+                      Be part of a growing community that enjoys exclusive
+                      features, unlimited templates, and a seamless
+                      memory-sharing experience.
+                    </p>
+                    <Link
+                      href={'/templates'}
+                      className="text-[#E34013] font-[700] text-[16px] flex items-center gap-2 underline">
+                      Join premium now! <ArrowRight size={17} />
+                    </Link>
+                  </div>
+                </div>
               </div>
             </div>
             <div className="flex-1 w-full">
-              <div className="lg:h-[580px] w-full">
-                <Image src={mockIlustrasi} alt="illustrasi" width={1000} />
-              </div>
+              <Image
+                src="https://res.cloudinary.com/dqipjpy1w/image/upload/v1755179670/Frame_14_lmcmak.png"
+                alt="Your way to showcase your moments"
+                className="w-full h-full object-contain"
+                width="0"
+                height="0"
+              />
             </div>
           </div>
         </div>
@@ -312,7 +392,73 @@ export default function NewLandingPage() {
             </p>
 
             <Row gutter={[24, 24]} justify="center">
-              <Col xs={24} sm={8}>
+              {!isFetching &&
+                packages?.map((dx) => {
+                  return (
+                    <Col xs={24} sm={8} key={dx.id}>
+                      <Card className=" flex flex-col justify-between">
+                        <div
+                          style={{ textAlign: 'center', marginBottom: '24px' }}>
+                          <h1 className="text-[#1B1B1B] font-[700] text-[36px]">
+                            IDR {dx.price}
+                          </h1>
+                          <p className="mt-[16px] text-[20px] font-[600]">
+                            {dx.name}
+                          </p>
+                          <p className="text-[#7B7B7B] text-[16px] font-[400]">
+                            {dx.description}
+                          </p>
+                        </div>
+                        <List
+                          bordered={false}
+                          itemLayout="horizontal"
+                          dataSource={dx.features || []}
+                          renderItem={(item) => (
+                            <List.Item>
+                              <List.Item.Meta
+                                avatar={<CircleCheck color="#079455" />}
+                                title={item}
+                              />
+                            </List.Item>
+                          )}
+                        />
+
+                        <div className="flex justify-center items-end">
+                          <Button
+                            onClick={() => {
+                              if (session.accessToken) {
+                                if (dx.name === 'Free Plan') {
+                                  router.push('/create');
+                                }
+
+                                if (dx.name === 'Premium Plan') {
+                                  router.push(
+                                    `/payment?type=premium&plan_id=${dx.id}`
+                                  );
+                                }
+
+                                if (dx.name === 'Advanced Plan') {
+                                  router.push(
+                                    `/payment?type=advanced&plan_id=${dx.id}`
+                                  );
+                                }
+                              } else {
+                                signIn('google');
+                              }
+                            }}
+                            iconPosition="end"
+                            size="large"
+                            className="!border-[1px] !h-[48px] !bg-[#E34013] !text-[#fff] !font-[400] mt-[40px] !w-[90%] !text-[16px]">
+                            {session?.accessToken
+                              ? 'Try now'
+                              : 'Sign in with Google'}
+                          </Button>
+                        </div>
+                      </Card>
+                    </Col>
+                  );
+                })}
+              {/* <Col xs={24} sm={8}>
                 <Card className="h-full flex flex-col justify-between">
                   <div style={{ textAlign: 'center', marginBottom: '24px' }}>
                     <h1 className="text-[#1B1B1B] font-[700] text-[36px]">
@@ -471,7 +617,7 @@ export default function NewLandingPage() {
                     </Link>
                   </div>
                 </Card>
-              </Col>
+              </Col> */}
             </Row>
           </div>
 

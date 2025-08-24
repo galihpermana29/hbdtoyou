@@ -64,7 +64,7 @@ const DashboardPage = async () => {
             ) : (
               <CardClient
                 icon={<Camera />}
-                title="Photobox Taken"
+                title="Scrapbook Token"
                 stats={
                   dataStats?.success
                     ? dataStats?.data?.contents?.total_photo_box_content

@@ -4,17 +4,17 @@ import PageFlipScrapbook from '@/components/PageFlipScrapbook';
 import NavigationBar from '@/components/ui/navbar';
 import { usePathname } from 'next/navigation';
 
-const ScrapbookResult2 = () => {
+const Scrapbook5 = () => {
   // Cover images
   const coverImage =
-    'https://res.cloudinary.com/dqipjpy1w/image/upload/v1751193200/images-api/ME202506291033201230.jpg';
+    'https://res.cloudinary.com/dduonada5/image/upload/v1756027445/images-scrapbook/template_5_page_0.jpg';
   const backCoverImage =
-    'https://res.cloudinary.com/dqipjpy1w/image/upload/v1751193206/images-api/ME202506291033263480.jpg';
+    'https://res.cloudinary.com/dduonada5/image/upload/v1756027448/images-scrapbook/template_5_page_4.jpg';
 
   const pages = [
-    'https://res.cloudinary.com/dqipjpy1w/image/upload/v1751193202/images-api/ME202506291033220420.jpg',
-    'https://res.cloudinary.com/dqipjpy1w/image/upload/v1751193203/images-api/ME202506291033233460.jpg',
-    'https://res.cloudinary.com/dqipjpy1w/image/upload/v1751193205/images-api/ME202506291033248701.jpg',
+    'https://res.cloudinary.com/dduonada5/image/upload/v1756027448/images-scrapbook/template_5_page_2.jpg',
+    'https://res.cloudinary.com/dduonada5/image/upload/v1756027448/images-scrapbook/template_5_page_1.jpg',
+    'https://res.cloudinary.com/dduonada5/image/upload/v1756027449/images-scrapbook/template_5_page_3.jpg',
   ];
 
   const pathname = usePathname();
@@ -23,7 +23,7 @@ const ScrapbookResult2 = () => {
       <div className="fixed top-0 left-0 w-full z-10 ">
         <NavigationBar />
       </div>
-      <div className={pathname === '/scrapbookvintage' ? 'mt-[100px]' : ''} />
+      <div className={pathname === '/scrapbook5' ? 'mt-[100px]' : ''} />
       <PageFlipScrapbook
         pages={pages}
         coverImage={coverImage}
@@ -35,4 +35,4 @@ const ScrapbookResult2 = () => {
   );
 };
 
-export default ScrapbookResult2;
+export default Scrapbook5;

@@ -17,6 +17,7 @@ import { store } from '@/lib/store';
 interface SessionContextType {
   parsedSession: SessionData;
   userProfile: IProfileResponse | null;
+  sessionLoading: boolean;
   upgradeModal: {
     modalState: {
       visible: boolean;
@@ -118,6 +119,8 @@ const SessionProvider = ({
     null
   );
 
+  const [loading, setLoading] = useState(true);
+
   const isHideAds =
     ['/create', '/payment'].includes(pathname) ||
     userProfile?.type === 'premium';
@@ -125,19 +128,23 @@ const SessionProvider = ({
   useEffect(() => {
     if (parsedSession.accessToken) {
       const handleGetProfile = async () => {
+        console.log('DAPET?');
+        setLoading(true);
         const res = await getUserProfile();
         if (res.success) {
           setUserProfile(res.data);
         }
+        setLoading(false);
       };
 
       handleGetProfile();
     }
-  }, []);
+  }, [parsedSession.accessToken]);
 
   useEffect(() => {
     if (parsedSession.accessToken) {
       const interval = setInterval(async () => {
+        setLoading(true);
         const spotifySession = await getSpotifyAccessToken();
         const newSession = {
           spotify: {
@@ -150,13 +157,14 @@ const SessionProvider = ({
         };
 
         await setSessionSpecific(newSession.spotify, 'spotify');
+        setLoading(false);
       }, 1000 * 60 * 30);
 
       return () => {
         clearInterval(interval);
       };
     }
-  }, []);
+  }, [parsedSession.accessToken]);
 
   // Function to randomly select promotional content
   const selectRandomContent = () => {
@@ -182,6 +190,7 @@ const SessionProvider = ({
     <SessionContext.Provider
       value={{
         parsedSession,
+        sessionLoading: loading,
         userProfile,
         upgradeModal: {
           modalState,
@@ -254,7 +263,10 @@ const SessionProvider = ({
         )}
       </Modal>
 
-      <Provider store={store}>{children}</Provider>
+      <Provider store={store}>
+        {children}
+        {/* {parsedSession.accessToken ? userProfile ? children : <></> : children} */}
+      </Provider>
       {!['/spotify', '/magazinev1', 'journal'].includes(pathname) && <Footer />}
     </SessionContext.Provider>
   );

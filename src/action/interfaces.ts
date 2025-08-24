@@ -82,6 +82,7 @@ export interface IProfileResponse {
   email: string;
   type: string;
   quota: number;
+  token_scrapbook: number;
 }
 
 export interface IContentPayload {
@@ -103,12 +104,6 @@ export interface IDetailContentResponse {
   title?: string;
 }
 
-export interface IPaymentPayload {
-  content_id: string;
-  amount: number;
-  proof_payment_url: string;
-}
-
 export interface IAllPaymentResponse {
   id: string;
   user_id: string;
@@ -124,6 +119,11 @@ export interface IQRISPaymentResponse {
   payment_id: string;
   qris_resp: string;
   price?: number;
+}
+
+export interface IPaymentPayload {
+  package_id: string;
+  payment_method: 'qris' | 'paypal';
 }
 
 export interface IGetDetailPayment {
@@ -155,4 +155,19 @@ export interface IResponsePaypal {
   order_id: string;
   payment_id: string;
   price: string;
+}
+
+export interface IListPackageResponse {
+  id: string;
+  name: string;
+  description: string;
+  price: string;
+  price_paypal: string;
+  price_midtrans: string;
+  quota_basic: number;
+  token_scrapbook: number;
+  duration_days: number;
+  features: string[];
+  is_active: boolean;
+  is_popular: boolean;
 }

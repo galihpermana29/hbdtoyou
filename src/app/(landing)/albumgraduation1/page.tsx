@@ -1,13 +1,13 @@
 'use client';
 
-import { UserProfileGreen, UserProfileRed, UserProfileYellow } from '@/components/icons/UserProfileIcons';
+// import { UserProfileGreen, UserProfileRed, UserProfileYellow } from '@/components/icons/UserProfileIcons';
 import {
   EpisodeCard,
   GalleryGrid,
   NetflixButton,
   SectionHeader,
   WishCard,
-  WishForm
+  WishForm,
 } from '@/components/netflix';
 import { GraduationData } from '@/services/gemini';
 import { Form, Spin } from 'antd';
@@ -102,7 +102,9 @@ const GraduationFilmV1Page = () => {
   const [isDrawerOpen, setIsDrawerOpen] = useState(false);
   const [form] = Form.useForm();
   const [loading, setLoading] = useState(true);
-  const [graduationData, setGraduationData] = useState<GraduationData | null>(null);
+  const [graduationData, setGraduationData] = useState<GraduationData | null>(
+    null
+  );
 
   useEffect(() => {
     // Try to load graduation data from localStorage
@@ -262,7 +264,9 @@ const GraduationFilmV1Page = () => {
 
         {/* Quote */}
         <div className="flex flex-col gap-y-3 text-white mb-3">
-          <p className="text-lg geist-font">{graduationData.storyDescription}</p>
+          <p className="text-lg geist-font">
+            {graduationData.storyDescription}
+          </p>
         </div>
 
         {/* Synopsis */}
@@ -278,17 +282,17 @@ const GraduationFilmV1Page = () => {
             />
           </div>
           <p className="text-lg geist-font">{graduationData.synopsis}</p>
-          <NetflixButton
-            variant="text"
-            icon={showMoreIcon}
-            iconPosition="end">
+          <NetflixButton variant="text" icon={showMoreIcon} iconPosition="end">
             Show More
           </NetflixButton>
         </div>
 
         {/* Episode */}
         <div className="flex flex-col items-start gap-y-3 mb-3">
-          <SectionHeader title="Episode" subtitle={`The Story of ${graduationData.name}`} />
+          <SectionHeader
+            title="Episode"
+            subtitle={`The Story of ${graduationData.name}`}
+          />
 
           {graduationData.episodes.map((episode, index) => (
             <EpisodeCard
@@ -308,10 +312,7 @@ const GraduationFilmV1Page = () => {
         <div className="flex flex-col items-start gap-y-3 w-full mb-3">
           <SectionHeader title="Our Gallery" />
           {/* <GalleryGrid images={graduationData.galleryImages} initialLimit={6} /> */}
-          <NetflixButton
-            variant="text"
-            icon={showMoreIcon}
-            iconPosition="end">
+          <NetflixButton variant="text" icon={showMoreIcon} iconPosition="end">
             Show More
           </NetflixButton>
         </div>
@@ -331,7 +332,7 @@ const GraduationFilmV1Page = () => {
           />
 
           <div className="flex flex-col gap-y-2 items-start w-full">
-            {graduationData.wishes.map((wish, index) => {
+            {/* {graduationData.wishes.map((wish, index) => {
               const profileIcon = {
                 green: <UserProfileGreen />,
                 yellow: <UserProfileYellow />,
@@ -346,7 +347,7 @@ const GraduationFilmV1Page = () => {
                   profileIcon={profileIcon}
                 />
               );
-            })}
+            })} */}
           </div>
         </div>
 

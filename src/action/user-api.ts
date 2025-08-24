@@ -11,12 +11,14 @@ import {
   IDetailContentResponse,
   IGetDetailPayment,
   ILatestContentResponse2,
+  IListPackageResponse,
   IOAuthResponse,
   IPaymentPayload,
   IProfileResponse,
   IQRISPaymentResponse,
   IResponsePaypal,
 } from './interfaces';
+import { SessionData } from '@/store/iron-session';
 
 export interface IOAuthPayload {
   token_email: string;
@@ -186,10 +188,11 @@ export async function getOriginalTemplates(): Promise<
   };
 }
 
-export async function getUserProfile(): Promise<
-  IGlobalResponse<null | IProfileResponse>
-> {
-  const session = await getSession();
+export async function getUserProfile(overrideSession?: {
+  userId: string;
+  accessToken: string;
+}): Promise<IGlobalResponse<null | IProfileResponse>> {
+  const session = overrideSession || (await getSession());
   const res = await fetch(baseUri + `/users/${session.userId}`, {
     method: 'GET',
     headers: {
@@ -298,6 +301,9 @@ export async function getDetailContent(
       'X-UserID': session.userId!,
       Authorization: `Bearer ${session.accessToken}`,
     },
+    next: {
+      tags: ['netflix-graduation-content'],
+    },
   });
 
   if (!res.ok) {
@@ -309,6 +315,48 @@ export async function getDetailContent(
   }
 
   const data = await res.json();
+
+  return {
+    success: true,
+    message: data.message,
+    data: data.data,
+  };
+}
+
+export async function addWishesContent(
+  id: string,
+  payload: {
+    name: string;
+    message: string;
+  }
+): Promise<
+  IGlobalResponse<null | {
+    data: string;
+  }>
+> {
+  const session = await getSession();
+  const res = await fetch(baseUri + `/contents/${id}/wish`, {
+    method: 'PUT',
+    headers: {
+      'Content-Type': 'application/json',
+      'X-Source': 'web',
+      'X-UserID': session.userId!,
+      Authorization: `Bearer ${session.accessToken}`,
+    },
+    body: JSON.stringify(payload),
+  });
+
+  if (!res.ok) {
+    return {
+      success: false,
+      message: res.statusText,
+      data: null,
+    };
+  }
+
+  const data = await res.json();
+
+  revalidateTag('netflix-graduation-content');
 
   return {
     success: true,
@@ -415,9 +463,9 @@ export async function approveRejectProof(
   };
 }
 
-export async function generateQRIS(): Promise<
-  IGlobalResponse<null | IQRISPaymentResponse>
-> {
+export async function generateQRIS(
+  payload: IPaymentPayload
+): Promise<IGlobalResponse<null | IQRISPaymentResponse>> {
   const session = await getSession();
   const res = await fetch(baseUri?.replace('v1', 'v2') + `/payments`, {
     method: 'POST',
@@ -427,7 +475,7 @@ export async function generateQRIS(): Promise<
       'X-UserID': session.userId!,
       Authorization: `Bearer ${session.accessToken}`,
     },
-    // body: JSON.stringify(payload),
+    body: JSON.stringify(payload),
   });
 
   if (!res.ok) {
@@ -487,8 +535,9 @@ export async function getLatestInspiration(
   const session = await getSession();
   const res = await fetch(
     baseUri +
-    `/contents/latest?limit=${limit}&page=${page}${templateId ? `&template_id=${templateId}` : ''
-    }${keyword ? `&keyword=${keyword}` : ''}`,
+      `/contents/latest?limit=${limit}&page=${page}${
+        templateId ? `&template_id=${templateId}` : ''
+      }${keyword ? `&keyword=${keyword}` : ''}`,
     {
       method: 'GET',
       headers: {
@@ -739,5 +788,63 @@ export async function paymentPaypalCapture({
     success: true,
     message: data.message,
     data: data.data,
+  };
+}
+
+export async function getListPackages(): Promise<
+  IGlobalResponse<null | IListPackageResponse[]>
+> {
+  const session = await getSession();
+  const res = await fetch(baseUri + `/packages`, {
+    method: 'GET',
+    headers: {
+      'Content-Type': 'application/json',
+      'X-Source': 'web',
+      'X-UserID': session.userId!,
+      Authorization: `Bearer ${session.accessToken}`,
+    },
+  });
+
+  if (!res.ok) {
+    return {
+      success: false,
+      message: res.statusText,
+      data: null,
+    };
+  }
+
+  const data = await res.json();
+
+  return {
+    success: true,
+    message: data.message,
+    data: data.data,
+  };
+}
+
+export async function warmUpAIModel(): Promise<IGlobalResponse<null | any>> {
+  const session = await getSession();
+  const res = await fetch(baseUri + `/warm-up-model`, {
+    method: 'GET',
+    headers: {
+      'Content-Type': 'application/json',
+      'X-Source': 'web',
+      'X-UserID': session.userId!,
+      Authorization: `Bearer ${session.accessToken}`,
+    },
+  });
+
+  if (!res.ok) {
+    return {
+      success: false,
+      message: res.statusText,
+      data: null,
+    };
+  }
+
+  return {
+    success: true,
+    message: 'success',
+    data: null,
   };
 }

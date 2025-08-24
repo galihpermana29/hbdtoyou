@@ -1,36 +1,46 @@
 'use client';
-import NavigationBar from '@/components/ui/navbar';
 import FormGeneration from './FormGeneration';
 import useCreateContent from '../../create/usecase/useCreateContent';
-import ScrapbookResult1 from '../../scrapbookv1/page';
-import ScrapbookResult2 from '../../scrapbookvintage/page';
-import { useState } from 'react';
+import ScrapbookResult1 from '../../scrapbook1/page';
+import ScrapbookResult2 from '../../scrapbook2/page';
+import { useEffect, useState } from 'react';
 import { Spin } from 'antd';
 import { LoadingOutlined } from '@ant-design/icons';
+import { useSearchParams } from 'next/navigation';
+import Scrapbook3 from '../../scrapbook3/page';
+import Scrapbook4 from '../../scrapbook4/page';
+import { warmUpAIModel } from '@/action/user-api';
+import Scrapbook5 from '../../scrapbook5/page';
 
 const ScrapbookCreatePage = () => {
   const {
     loading,
-    current,
-    selectedTemplate,
-    modalState,
-    setModalState,
-    session,
-    profile,
+
     contextHolder,
     openNotification,
-    handleCompleteCreation,
+
     setLoading,
-    setSelectedTemplate,
-    setCurrent,
   } = useCreateContent();
 
   const [selectedTemplateId, setSelectedTemplateId] = useState<string>('');
 
+  const query = useSearchParams();
+  const templateName = query.get('route');
+
   const scrapbookPreview = {
-    '518886f6-65b6-48cd-beb9-9a9ffc621251': <ScrapbookResult1 />,
-    '44d0e72e-bf4f-4d5c-8323-c0135b910f3c': <ScrapbookResult2 />,
+    scrapbook1: <Scrapbook3 />,
+    scrapbook3: <ScrapbookResult2 />,
+    scrapbook2: <ScrapbookResult1 />,
+    scrapbook4: <Scrapbook4 />,
+    scrapbook5: <Scrapbook5 />,
   };
+
+  useEffect(() => {
+    if (templateName === 'scrapbook1') {
+      warmUpAIModel();
+    }
+  }, [templateName]);
+
   return (
     <div className="mt-[80px]">
       {contextHolder}
@@ -41,7 +51,7 @@ const ScrapbookCreatePage = () => {
       />
       <div className="w-full overflow-x-hidden min-h-screen">
         <div className="flex flex-col items-center justify-start min-h-screen py-[30px] mb-[50px]">
-          <div className="mx-auto max-w-6xl 2xl:max-w-[1400px] px-[20px] flex-1 w-full flex">
+          <div className="mx-auto max-w-6xl 2xl:max-w-[1400px] px-[20px] flex-1 w-full flex flex-col justify-center items-center lg:justify-normal lg:items-center lg:flex-row gap-[50px]">
             <div className="flex-[1] max-w-[400px]">
               <FormGeneration
                 openNotification={openNotification}
@@ -51,8 +61,9 @@ const ScrapbookCreatePage = () => {
                 loading={loading}
               />
             </div>
-            <div className="flex-[1.5] px-[30px]">
-              <div className="mb-[40px]">
+
+            <div className="flex-[1.5]">
+              <div className="my-[40px] lg:my-[0px]">
                 <h1 className="text-[#1B1B1B] font-[600] text-[18px]">
                   Style Preview
                 </h1>
@@ -60,7 +71,7 @@ const ScrapbookCreatePage = () => {
                   Preview of the scrapbook
                 </p>
               </div>
-              {scrapbookPreview?.[selectedTemplateId]}
+              {scrapbookPreview?.[templateName]}
             </div>
           </div>
         </div>

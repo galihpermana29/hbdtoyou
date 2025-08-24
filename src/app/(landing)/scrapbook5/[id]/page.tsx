@@ -2,25 +2,12 @@ import { getDetailContent } from '@/action/user-api';
 import PageFlipScrapbook from '@/components/PageFlipScrapbook';
 import NavigationBar from '@/components/ui/navbar';
 
-const pages = [
-  'https://res.cloudinary.com/dqipjpy1w/image/upload/v1750003560/tl7dqxuefwo2oiaxgj9s.jpg',
-  'https://raw.github.com/blasten/turn.js/master/demos/magazine/pages/02.jpg',
-  'https://raw.github.com/blasten/turn.js/master/demos/magazine/pages/03.jpg',
-  'https://raw.github.com/blasten/turn.js/master/demos/magazine/pages/04.jpg',
-  'https://raw.github.com/blasten/turn.js/master/demos/magazine/pages/05.jpg',
-  'https://raw.github.com/blasten/turn.js/master/demos/magazine/pages/06.jpg',
-];
-
 const getDetailDataNew = async (id: string) => {
   const res = await getDetailContent(id);
   return res;
 };
 
-const ScrapbookVintageResult = async ({
-  params,
-}: {
-  params: { id: string };
-}) => {
+const Scrapbook5Result = async ({ params }: { params: { id: string } }) => {
   const { id } = params;
 
   const data = await getDetailDataNew(id);
@@ -53,4 +40,4 @@ const ScrapbookVintageResult = async ({
   );
 };
 
-export default ScrapbookVintageResult;
+export default Scrapbook5Result;

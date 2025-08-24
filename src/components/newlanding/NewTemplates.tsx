@@ -286,7 +286,7 @@ const NewTemplates = ({ data }: { data: IAllTemplateResponse[] }) => {
         </div>
       </div>
 
-      <div className="py-[30px] md:py-[90px] relative bg-[#F9FAFB]">
+      {/* <div className="py-[30px] md:py-[90px] relative bg-[#F9FAFB]">
         <div className="flex-col gap-[20px] lg:gap-0 lg:flex-row flex justify-between items-start mx-auto max-w-6xl 2xl:max-w-7xl px-[20px] ">
           <div className="max-w-[440px]">
             <h1 className="text-[#1B1B1B] font-[600] text-[30px] md:text-[36px]">
@@ -395,7 +395,7 @@ const NewTemplates = ({ data }: { data: IAllTemplateResponse[] }) => {
             </Card>
           </div>
         </div>
-      </div>
+      </div> */}
 
       {/* Newsletter Section */}
       <div className="">

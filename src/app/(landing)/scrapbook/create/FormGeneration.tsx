@@ -20,6 +20,8 @@ import {
 import CardTemplateTag from '@/components/newlanding/card-template/CardTemplateTag';
 import { CheckIcon, CircleCheck } from 'lucide-react';
 import clsx from 'clsx';
+import { json } from 'stream/consumers';
+import { useRouter, useSearchParams } from 'next/navigation';
 
 const FormGeneration = ({
   openNotification,
@@ -41,6 +43,10 @@ const FormGeneration = ({
   const dispatch = useDispatch();
   const [form] = Form.useForm();
   const profile = useMemoifyProfile();
+
+  const router = useRouter();
+  const query = useSearchParams();
+  const templateName = query.get('route');
 
   const [popularTemplates, setPopularTemplates] = useState<
     IAllTemplateResponse[] | null
@@ -70,21 +76,27 @@ const FormGeneration = ({
     if (dx.success) {
       const filteredTemplates =
         dx.data?.filter((dx) => dx.name.includes('Scrapbook')) || [];
-      console.log(filteredTemplates, 'filtered?');
       setPopularTemplates(filteredTemplates);
 
       // Set the first template as selected by default if available
       if (filteredTemplates.length > 0) {
-        setSelectedTemplateId(filteredTemplates[0].id);
-        form.setFieldValue('templateId', filteredTemplates[0].id);
+        const scrapbook1Data = filteredTemplates.find(
+          (dx) => dx.name?.split('- ')[1] === 'scrapbook1'
+        );
+        setSelectedTemplateId(scrapbook1Data?.id || '');
+        router.push(
+          `/scrapbook/create?templateId=${scrapbook1Data?.id}&route=${
+            scrapbook1Data?.name?.split('- ')[1]
+          }`
+        );
+        form.setFieldValue('templateId', scrapbook1Data?.id);
       }
     } else {
       message.error(dx.message);
     }
   };
 
-  const handleFinish = async (values: any) => {
-    console.log(values);
+  const handleFinish = async () => {
     setLoading(true);
     const json_text = {
       title: 'Scrapbook AI',
@@ -96,8 +108,6 @@ const FormGeneration = ({
           : null,
       isPublic: true,
     };
-
-    return;
 
     const payload = {
       template_id: selectedTemplateId,
@@ -112,6 +122,14 @@ const FormGeneration = ({
     };
 
     const res = await createContent(payload);
+    if (res.success) {
+      form.resetFields();
+
+      router.push(`/${templateName}/${res.data}`);
+      message.success('Successfully created!');
+    } else {
+      message.error(res.message);
+    }
     setLoading(false);
   };
 
@@ -129,7 +147,26 @@ const FormGeneration = ({
           second
         </p>
       </div>
-      <Form form={form} layout="vertical" onFinish={handleFinish}>
+      <Form
+        form={form}
+        layout="vertical"
+        onFinish={handleFinish}
+        requiredMark={false}>
+        <div className="mt-[10px] mb-[5px]">
+          <h3 className="text-[15px] font-semibold">AI Models</h3>
+
+          <p className="text-[13px] text-gray-600 max-w-[400px]">
+            Memo AI 1.0 (Cropping & Layouting)
+          </p>
+        </div>
+        <div className="mt-[10px] mb-[5px]">
+          <h3 className="text-[15px] font-semibold">AI Token</h3>
+
+          <p className="text-[13px] text-gray-600 max-w-[400px]">
+            You have {profile?.token_scrapbook} token, to generate scrapbook you
+            need at least 1 token
+          </p>
+        </div>
         <Form.Item
           getValueFromEvent={(e) => {
             // return just the fileList (or your custom format if needed)
@@ -146,11 +183,11 @@ const FormGeneration = ({
                 Collection of images
               </h3>
 
-              <p className="text-[13px] text-gray-600 max-w-[400px]">
+              {/* <p className="text-[13px] text-gray-600 max-w-[400px]">
                 Account with <span className="font-bold">free</span> plan can
                 only add 5 images. To add up to 20 images, upgrade to{' '}
                 <span className="font-bold">premium</span> plan.
-              </p>
+              </p> */}
             </div>
           }>
           <Upload
@@ -226,6 +263,11 @@ const FormGeneration = ({
                     e.stopPropagation();
                     setSelectedTemplateId(template.id);
                     form.setFieldValue('templateId', template.id);
+                    router.push(
+                      `/scrapbook/create?templateId=${template.id}&route=${
+                        template.name?.split('- ')[1]
+                      }`
+                    );
                   }}>
                   {selectedTemplateId === template.id && (
                     <div className="absolute top-2 right-2 z-10 bg-blue-500 rounded-full p-1">
@@ -242,6 +284,7 @@ const FormGeneration = ({
         </Form.Item>
 
         <Button
+          disabled={profile?.token_scrapbook < 1}
           type="primary"
           style={{
             height: '50px',
@@ -249,7 +292,7 @@ const FormGeneration = ({
           }}
           htmlType="submit"
           size="large">
-          {'Generate Scrapbook'}
+          {profile?.token_scrapbook < 1 ? 'Upgrade Plan' : 'Generate Scrapbook'}
         </Button>
       </Form>
     </div>
