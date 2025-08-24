@@ -123,16 +123,32 @@ const FormGeneration = ({
       status: 'published',
     };
 
-    const res = await createContent(payload);
-    if (res.success) {
-      form.resetFields();
+    try {
+      const timeoutPromise = new Promise((_, reject) =>
+        setTimeout(() => reject(new Error('timeout')), 30000)
+      );
 
-      router.push(`/${templateName}/${res.data}`);
-      message.success('Successfully created!');
-    } else {
-      message.error(res.message);
+      const res: any = await Promise.race([
+        createContent(payload),
+        timeoutPromise,
+      ]);
+
+      if (res.success) {
+        form.resetFields();
+        router.push(`/${templateName}/${res.data}`);
+        message.success('Successfully created!');
+      } else {
+        message.error(res.message);
+      }
+    } catch (error: any) {
+      if (error.message === 'timeout') {
+        message.error('Server is busy, try again later.');
+      } else {
+        message.error(error.message || 'An unexpected error occurred.');
+      }
+    } finally {
+      setLoading(false);
     }
-    setLoading(false);
   };
 
   useEffect(() => {
