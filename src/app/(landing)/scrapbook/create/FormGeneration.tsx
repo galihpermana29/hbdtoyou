@@ -144,7 +144,7 @@ const FormGeneration = ({
       if (error.message === 'timeout') {
         message.error('Server is busy, try again later.');
       } else {
-        message.error(error.message || 'An unexpected error occurred.');
+        message.error('Server is busy, try again later.');
       }
     } finally {
       setLoading(false);
