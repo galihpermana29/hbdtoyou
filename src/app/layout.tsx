@@ -5,6 +5,7 @@ import SessionProvider from './session-provider';
 import QueryProvider from './query-provider';
 import { Analytics } from '@vercel/analytics/react';
 import { PostHogProvider } from '@/providers/PostHogProvider';
+import { getUserProfile } from '@/action/user-api';
 
 export default async function RootLayout({
   children,
@@ -12,6 +13,13 @@ export default async function RootLayout({
   children: React.ReactNode;
 }>) {
   const session = await getSession();
+  const res = session?.accessToken
+    ? await getUserProfile({
+        userId: session.userId!,
+        accessToken: session.accessToken!,
+      })
+    : null;
+
   return (
     <html lang="en">
       <head>
@@ -25,7 +33,9 @@ export default async function RootLayout({
           <Analytics />
           <PostHogProvider>
             <QueryProvider>
-              <SessionProvider session={JSON.stringify(session)}>
+              <SessionProvider
+                session={JSON.stringify(session)}
+                initialProfileData={res?.data || null}>
                 {children}
               </SessionProvider>
             </QueryProvider>

@@ -175,7 +175,6 @@ const AlbumGraduationv1 = ({
       ? await editContent(payload, editData.id)
       : await createContent(payload);
     if (res.success) {
-      console.log(res.data);
       const userLink = selectedTemplate.route + '/' + res.data;
 
       // Clear form fields
@@ -266,7 +265,7 @@ const AlbumGraduationv1 = ({
         disabled={loading}
         form={form}
         layout="vertical"
-      // onFinish={(val) => handleSubmit(val)}
+        // onFinish={(val) => handleSubmit(val)}
       >
         <Form.Item
           rules={[{ required: true, message: 'Please enter full name client' }]}
@@ -369,8 +368,8 @@ const AlbumGraduationv1 = ({
             {collectionOfImages.length >= 5 && profile?.type === 'free'
               ? null
               : collectionOfImages.length >= 15 && profile?.type !== 'free'
-                ? null
-                : uploadButton}
+              ? null
+              : uploadButton}
           </Upload>
         </Form.Item>
         <Form.Item

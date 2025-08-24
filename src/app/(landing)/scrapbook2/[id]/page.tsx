@@ -27,7 +27,6 @@ const ScrapbookVintageResult = async ({
   if (!data.data) {
     return <div>No data</div>;
   }
-  console.log(data.data, 'daata?');
   const parsedData = JSON.parse(data.data.detail_content_json_text);
 
   // Cover images

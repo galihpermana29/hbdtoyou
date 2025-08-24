@@ -98,12 +98,17 @@ const promotionalContent: AdContent[] = [
 const SessionProvider = ({
   children,
   session,
+  initialProfileData,
 }: {
   children: React.ReactNode;
   session: string;
+  initialProfileData: IProfileResponse | null;
 }) => {
   const parsedSession: SessionData = session ? JSON.parse(session) : {};
-  const [userProfile, setUserProfile] = useState<IProfileResponse | null>(null);
+  const [userProfile, setUserProfile] = useState<IProfileResponse | null>(
+    initialProfileData
+  );
+
   const [modalState, setModalState] = useState({
     visible: false,
     data: '',
@@ -128,7 +133,6 @@ const SessionProvider = ({
   useEffect(() => {
     if (parsedSession.accessToken) {
       const handleGetProfile = async () => {
-        console.log('DAPET?');
         setLoading(true);
         const res = await getUserProfile();
         if (res.success) {
@@ -137,7 +141,9 @@ const SessionProvider = ({
         setLoading(false);
       };
 
-      handleGetProfile();
+      setTimeout(() => {
+        handleGetProfile();
+      }, 1000);
     }
   }, [parsedSession.accessToken]);
 

@@ -47,7 +47,7 @@ const NewClientPagePayment = () => {
   const planId = query.get('plan_id');
 
   const { data: listPackages, isFetching } = useQuery({
-    queryKey: [{ key: 'list-packages', planId }],
+    queryKey: ['packages'],
     queryFn: async () => {
       const data = await getListPackages();
       return data.data;
