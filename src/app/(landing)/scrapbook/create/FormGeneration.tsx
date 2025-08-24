@@ -125,7 +125,7 @@ const FormGeneration = ({
 
     try {
       const timeoutPromise = new Promise((_, reject) =>
-        setTimeout(() => reject(new Error('timeout')), 30000)
+        setTimeout(() => reject(new Error('timeout')), 40000)
       );
 
       const res: any = await Promise.race([
