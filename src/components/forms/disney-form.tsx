@@ -69,7 +69,7 @@ const DisneyForm = ({
   editData?: IDetailContentResponse;
 }) => {
   const [imageUrl, setImageUrl] = useState<string>();
-
+  const [listEpisodesURL, setListEpisodesURL] = useState<string[]>([]);
   const [uploadLoading, setUploadLoading] = useState(false);
 
   const profile = useMemoifyProfile();
@@ -100,12 +100,23 @@ const DisneyForm = ({
     formName: string,
     fieldIndex?: number
   ) => {
-    const currentValues = form.getFieldValue(formName) || [];
-    currentValues[fieldIndex!] = {
-      ...currentValues[fieldIndex!],
-      imageUrl: payload.uri,
-    };
-    form.setFieldsValue({ [formName]: currentValues });
+    // console.log(payload, 'payload?');
+    // const currentValues = form.getFieldValue(formName) || [];
+    // console.log(currentValues, 'currentValues');
+    // currentValues.forEach((item, index) => {
+    //   if (index === fieldIndex) {
+    //     item.imageUrl = payload.uri;
+    //   } else {
+    //     item.imageUrl = listEpisodesURL[index];
+    //   }
+    // });
+    // currentValues[fieldIndex!] = {
+    //   ...currentValues[fieldIndex!],
+    //   imageUrl: payload.uri,
+    // };
+    setListEpisodesURL((prev) => [...prev, payload.uri]);
+    // console.log(currentValues, 'currentValues 2', formName);
+    // form.setFieldsValue({ [formName]: currentValues });
   };
 
   const handleSetJumbotronImageURI = (
@@ -137,7 +148,7 @@ const DisneyForm = ({
     } = val;
 
     const json_text = {
-      jumbotronImage: jumbotronImage?.uri,
+      jumbotronImage: imageUrl,
       title,
       subTitle,
       modalContent,
@@ -145,7 +156,24 @@ const DisneyForm = ({
         collectionOfImages.length > 0
           ? collectionOfImages.map((dx) => dx.uri)
           : null,
-      episodes: episodes,
+      episodes: episodes
+        ? episodes.map((dx, index) => {
+            // Make sure we have a valid episode object
+            if (!dx)
+              return {
+                title: '',
+                desc: '',
+                imageUrl: listEpisodesURL[index] || '',
+              };
+
+            // Always prioritize the state-tracked URL over any potentially corrupted form data
+            return {
+              title: dx.title || '',
+              desc: dx.desc || '',
+              imageUrl: listEpisodesURL[index] || dx.imageUrl || '',
+            };
+          })
+        : [],
       isPublic,
     };
 
@@ -203,6 +231,11 @@ const DisneyForm = ({
         'images'
       );
 
+      const listEpisodesURL = jsonContent?.episodes?.map((dx, index) => {
+        return dx.imageUrl;
+      });
+
+      setListEpisodesURL(listEpisodesURL);
       setImageUrl(jsonContent.jumbotronImage);
       dispatch(setCollectionOfImages(images));
 
@@ -320,6 +353,11 @@ const DisneyForm = ({
                           listType="picture-card"
                           className="avatar-uploader"
                           showUploadList={false}
+                          customRequest={({ onSuccess }) => {
+                            setTimeout(() => {
+                              onSuccess?.('ok', undefined);
+                            }, 0);
+                          }}
                           beforeUpload={async (file) => {
                             setUploadLoading(true);
                             await beforeUpload(
@@ -338,12 +376,9 @@ const DisneyForm = ({
                             );
                             setUploadLoading(false);
                           }}>
-                          {form.getFieldValue('episodes')?.[index]?.imageUrl ? (
+                          {listEpisodesURL[index] ? (
                             <img
-                              src={
-                                form.getFieldValue('episodes')?.[index]
-                                  ?.imageUrl
-                              }
+                              src={listEpisodesURL[index]}
                               alt="avatar"
                               style={{
                                 width: '100%',
@@ -386,7 +421,12 @@ const DisneyForm = ({
                       <Button
                         danger
                         type="default"
-                        onClick={() => remove(name)}
+                        onClick={() => {
+                          remove(name);
+                          setListEpisodesURL((prev) =>
+                            prev.filter((_, index) => index !== name)
+                          );
+                        }}
                         icon={<MinusCircleOutlined />}>
                         Remove
                       </Button>
@@ -401,13 +441,21 @@ const DisneyForm = ({
                 onClick={() => {
                   if (profile?.quota === 0) {
                     if (fields.length <= 1) {
-                      add();
+                      add({
+                        imageUrl: '',
+                        title: '',
+                        desc: '',
+                      });
                     } else {
                       message.error('You can only add 2 moments');
                     }
                   } else {
                     if (fields.length <= 15) {
-                      add();
+                      add({
+                        imageUrl: '',
+                        title: '',
+                        desc: '',
+                      });
                     } else {
                       message.error('Limit reached');
                     }

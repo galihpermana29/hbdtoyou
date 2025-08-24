@@ -9,11 +9,7 @@ export default function TrailerSection({ data }: { data?: string }) {
       <h2 className="text-xl font-bold mb-6">Trailers & More</h2>
       <div className="relative aspect-video rounded-lg overflow-hidden group cursor-pointer">
         <Image
-          src={
-            data
-              ? data
-              : 'https://res.cloudinary.com/dxuumohme/image/upload/v1736524123/nzdbzleig7ssk6sf7ch5.jpg'
-          }
+          src={data ? data : ''}
           alt="The Jumbotron"
           fill
           className="object-cover"
