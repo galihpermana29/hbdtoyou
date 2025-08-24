@@ -18,6 +18,7 @@ import {
   IQRISPaymentResponse,
   IResponsePaypal,
 } from './interfaces';
+import { SessionData } from '@/store/iron-session';
 
 export interface IOAuthPayload {
   token_email: string;
@@ -187,10 +188,11 @@ export async function getOriginalTemplates(): Promise<
   };
 }
 
-export async function getUserProfile(): Promise<
-  IGlobalResponse<null | IProfileResponse>
-> {
-  const session = await getSession();
+export async function getUserProfile(overrideSession?: {
+  userId: string;
+  accessToken: string;
+}): Promise<IGlobalResponse<null | IProfileResponse>> {
+  const session = overrideSession || (await getSession());
   const res = await fetch(baseUri + `/users/${session.userId}`, {
     method: 'GET',
     headers: {
@@ -327,9 +329,11 @@ export async function addWishesContent(
     name: string;
     message: string;
   }
-): Promise<IGlobalResponse<null | {
-  data: string;
-}>> {
+): Promise<
+  IGlobalResponse<null | {
+    data: string;
+  }>
+> {
   const session = await getSession();
   const res = await fetch(baseUri + `/contents/${id}/wish`, {
     method: 'PUT',
@@ -341,7 +345,6 @@ export async function addWishesContent(
     },
     body: JSON.stringify(payload),
   });
-
 
   if (!res.ok) {
     return {
@@ -816,5 +819,32 @@ export async function getListPackages(): Promise<
     success: true,
     message: data.message,
     data: data.data,
+  };
+}
+
+export async function warmUpAIModel(): Promise<IGlobalResponse<null | any>> {
+  const session = await getSession();
+  const res = await fetch(baseUri + `/warm-up-model`, {
+    method: 'GET',
+    headers: {
+      'Content-Type': 'application/json',
+      'X-Source': 'web',
+      'X-UserID': session.userId!,
+      Authorization: `Bearer ${session.accessToken}`,
+    },
+  });
+
+  if (!res.ok) {
+    return {
+      success: false,
+      message: res.statusText,
+      data: null,
+    };
+  }
+
+  return {
+    success: true,
+    message: 'success',
+    data: null,
   };
 }

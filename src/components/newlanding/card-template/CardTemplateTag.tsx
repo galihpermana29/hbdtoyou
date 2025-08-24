@@ -87,6 +87,11 @@ export const DataToCardColor = {
     logo: scrapbookv1,
     text: 'text-[#651B05]',
   },
+  scrapbook5: {
+    color: 'bg-[#651B05cf]',
+    logo: scrapbookv1,
+    text: 'text-[#651B05]',
+  },
   albumgraduation1: {
     color: 'bg-[#D9182133]',
     logo: netflixv1,

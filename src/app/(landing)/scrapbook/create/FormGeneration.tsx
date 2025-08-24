@@ -80,13 +80,16 @@ const FormGeneration = ({
 
       // Set the first template as selected by default if available
       if (filteredTemplates.length > 0) {
-        setSelectedTemplateId(filteredTemplates[0].id);
+        const scrapbook1Data = filteredTemplates.find(
+          (dx) => dx.name?.split('- ')[1] === 'scrapbook1'
+        );
+        setSelectedTemplateId(scrapbook1Data?.id || '');
         router.push(
-          `/scrapbook/create?templateId=${filteredTemplates[0].id}&route=${
-            filteredTemplates[0].name?.split('- ')[1]
+          `/scrapbook/create?templateId=${scrapbook1Data?.id}&route=${
+            scrapbook1Data?.name?.split('- ')[1]
           }`
         );
-        form.setFieldValue('templateId', filteredTemplates[0].id);
+        form.setFieldValue('templateId', scrapbook1Data?.id);
       }
     } else {
       message.error(dx.message);
@@ -120,6 +123,8 @@ const FormGeneration = ({
 
     const res = await createContent(payload);
     if (res.success) {
+      form.resetFields();
+
       router.push(`/${templateName}/${res.data}`);
       message.success('Successfully created!');
     } else {

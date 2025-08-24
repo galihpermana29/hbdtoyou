@@ -22,7 +22,6 @@ import {
   useMemoifySession,
   useMemoifyUpgradePlan,
 } from '@/app/session-provider';
-import { getUserProfile } from '@/action/user-api';
 import { IProfileResponse } from '@/action/interfaces';
 import { removeSession } from '@/store/get-set-session';
 import Image from 'next/image';
@@ -45,12 +44,12 @@ import jumbotronImage from '@/assets/fitur-1-image.png';
 import GasMeterOutlined from '@mui/icons-material/GasMeterOutlined';
 import './stlye.css';
 import { formatNumberWithComma } from '@/lib/utils';
+import { getUserProfile } from '@/action/user-api';
 
 const NavigationBar = () => {
   const [sidebar, setSidebar] = useState<boolean>(false);
   const session = useMemoifySession();
-  const userProfile = useMemoifyProfile();
-
+  const [userProfile, setUserProfile] = useState<IProfileResponse | null>(null);
   const router = useRouter();
   const items: MenuProps['items'] = [
     {
@@ -317,20 +316,20 @@ const NavigationBar = () => {
     },
   ];
 
-  // const handleGetProfile = async () => {
-  //   const res = await getUserProfile();
-  //   if (res.success) {
-  //     setUserProfile(res.data);
-  //   } else {
-  //     message.error(res.message);
-  //   }
-  // };
+  const handleGetProfile = async () => {
+    const res = await getUserProfile();
+    if (res.success) {
+      setUserProfile(res.data);
+    } else {
+      message.error(res.message);
+    }
+  };
 
-  // useEffect(() => {
-  //   if (session.accessToken) {
-  //     handleGetProfile();
-  //   }
-  // }, [session]);
+  useEffect(() => {
+    if (session.accessToken) {
+      handleGetProfile();
+    }
+  }, [session]);
 
   return (
     <div className="border-b-[1px] bg-white">

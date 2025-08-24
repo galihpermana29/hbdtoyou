@@ -1,31 +1,25 @@
 'use client';
-import NavigationBar from '@/components/ui/navbar';
 import FormGeneration from './FormGeneration';
 import useCreateContent from '../../create/usecase/useCreateContent';
 import ScrapbookResult1 from '../../scrapbook1/page';
 import ScrapbookResult2 from '../../scrapbook2/page';
-import { useState } from 'react';
-import { Divider, Spin } from 'antd';
+import { useEffect, useState } from 'react';
+import { Spin } from 'antd';
 import { LoadingOutlined } from '@ant-design/icons';
 import { useSearchParams } from 'next/navigation';
 import Scrapbook3 from '../../scrapbook3/page';
 import Scrapbook4 from '../../scrapbook4/page';
+import { warmUpAIModel } from '@/action/user-api';
+import Scrapbook5 from '../../scrapbook5/page';
 
 const ScrapbookCreatePage = () => {
   const {
     loading,
-    current,
-    selectedTemplate,
-    modalState,
-    setModalState,
-    session,
-    profile,
+
     contextHolder,
     openNotification,
-    handleCompleteCreation,
+
     setLoading,
-    setSelectedTemplate,
-    setCurrent,
   } = useCreateContent();
 
   const [selectedTemplateId, setSelectedTemplateId] = useState<string>('');
@@ -35,10 +29,17 @@ const ScrapbookCreatePage = () => {
 
   const scrapbookPreview = {
     scrapbook1: <Scrapbook3 />,
-    scrapbook2: <ScrapbookResult2 />,
-    scrapbook3: <ScrapbookResult1 />,
+    scrapbook3: <ScrapbookResult2 />,
+    scrapbook2: <ScrapbookResult1 />,
     scrapbook4: <Scrapbook4 />,
+    scrapbook5: <Scrapbook5 />,
   };
+
+  useEffect(() => {
+    if (templateName === 'scrapbook1') {
+      warmUpAIModel();
+    }
+  }, [templateName]);
 
   return (
     <div className="mt-[80px]">
