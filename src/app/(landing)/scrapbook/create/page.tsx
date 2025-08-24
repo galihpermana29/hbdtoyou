@@ -37,6 +37,7 @@ const ScrapbookCreatePage = () => {
 
   useEffect(() => {
     if (templateName === 'scrapbook1') {
+      console.log('warm up');
       warmUpAIModel();
     }
   }, [templateName]);

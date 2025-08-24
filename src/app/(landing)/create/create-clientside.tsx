@@ -143,19 +143,16 @@ const CreatePage = () => {
       return router.push('/journal');
     }
 
-    if (template.name.includes('scrapbookv1')) {
-      const routePath = templateNameToRoute(template.name);
-      return router.push(
-        `/create/scrapbook?templateId=${template.id}&route=${routePath}`
-      );
+    if (template.name.includes('scrapbook')) {
+      return router.push(`/scrapbook/create`);
     }
 
-    if (template.name.includes('scrapbookvintage')) {
-      const routePath = templateNameToRoute(template.name);
-      return router.push(
-        `/create/scrapbook-vintage?templateId=${template.id}&route=${routePath}`
-      );
-    }
+    // if (template.name.includes('scrapbookvintage')) {
+    //   const routePath = templateNameToRoute(template.name);
+    //   return router.push(
+    //     `/create/scrapbook-vintage?templateId=${template.id}&route=${routePath}`
+    //   );
+    // }
     const routePath = templateNameToRoute(template.name);
 
     if (template.label === 'premium') {
@@ -406,28 +403,28 @@ const CreatePage = () => {
                   <div className="w-full">
                     {(templateFilter === 'All' ||
                       templateFilter === 'Popular Template') && (
-                        <TemplateGridSection
-                          title="Popular Template"
-                          templates={popularTemplates}
-                          onTemplateClick={handleTemplateClick}
-                        />
-                      )}
+                      <TemplateGridSection
+                        title="Popular Template"
+                        templates={popularTemplates}
+                        onTemplateClick={handleTemplateClick}
+                      />
+                    )}
                     {(templateFilter === 'All' ||
                       templateFilter === 'Original Template') && (
-                        <TemplateGridSection
-                          title="Original Template"
-                          templates={templates}
-                          onTemplateClick={handleTemplateClick}
-                        />
-                      )}
+                      <TemplateGridSection
+                        title="Original Template"
+                        templates={templates}
+                        onTemplateClick={handleTemplateClick}
+                      />
+                    )}
                     {(templateFilter === 'All' ||
                       templateFilter === 'Graduation Template') && (
-                        <TemplateGridSection
-                          title="Graduation Template"
-                          templates={graduationTemplates}
-                          onTemplateClick={handleTemplateClick}
-                        />
-                      )}
+                      <TemplateGridSection
+                        title="Graduation Template"
+                        templates={graduationTemplates}
+                        onTemplateClick={handleTemplateClick}
+                      />
+                    )}
                   </div>
                 </div>
               )}

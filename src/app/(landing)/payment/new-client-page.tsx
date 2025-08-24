@@ -1,6 +1,10 @@
 'use client';
 
-import { IGetDetailPayment, IQRISPaymentResponse } from '@/action/interfaces';
+import {
+  IGetDetailPayment,
+  IListPackageResponse,
+  IQRISPaymentResponse,
+} from '@/action/interfaces';
 import {
   generateQRIS,
   getDetailPayment,
@@ -46,14 +50,24 @@ const NewClientPagePayment = () => {
   const type = query.get('type');
   const planId = query.get('plan_id');
 
-  const { data: listPackages, isFetching } = useQuery({
-    queryKey: ['packages'],
-    queryFn: async () => {
-      const data = await getListPackages();
-      return data.data;
-    },
-    enabled: !!planId,
-  });
+  const [listPackages, setListPackages] = useState<
+    IListPackageResponse[] | null
+  >(null);
+
+  // const { data: listPackages, refetch } = useQuery({
+  //   queryKey: ['packages'],
+  //   queryFn: async () => {
+  //     const data = await getListPackages();
+  //     return data.data;
+  //   },
+  //   enabled: !!planId && !!session?.accessToken,
+  // });
+
+  const handleGetListPackages = async () => {
+    const data = await getListPackages();
+    setListPackages(data.data);
+    return data.data;
+  };
 
   const detailPackages =
     listPackages?.find((item) => item.id === planId) || null;
@@ -118,6 +132,12 @@ const NewClientPagePayment = () => {
       router.replace(`/payment?id=null&type=${type}&plan_id=${planId}`);
     }
   }, [qrisData, router]);
+
+  useEffect(() => {
+    if (planId && session?.accessToken) {
+      handleGetListPackages();
+    }
+  }, [planId, session?.accessToken]);
 
   useEffect(() => {
     if (id && isValidUUIDv4(id)) {
@@ -364,7 +384,7 @@ const NewClientPagePayment = () => {
                         />
                         <span>Pay with QRIS</span>
                       </Button>
-                      {!isFetching && (
+                      {listPackages?.length > 0 && (
                         <div className="h-[60%] flex flex-col justify-end mt-[20px]">
                           <div className="flex justify-between items-center">
                             <Text strong>Package:</Text>

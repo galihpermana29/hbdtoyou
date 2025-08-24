@@ -16,6 +16,7 @@ import {
   createContent,
   getOriginalTemplates,
   getPopularTemplates,
+  warmUpAIModel,
 } from '@/action/user-api';
 import CardTemplateTag from '@/components/newlanding/card-template/CardTemplateTag';
 import { CheckIcon, CircleCheck } from 'lucide-react';
@@ -72,6 +73,7 @@ const FormGeneration = ({
   );
 
   const handleGetTemplates = async () => {
+    await warmUpAIModel();
     const dx = await getPopularTemplates();
     if (dx.success) {
       const filteredTemplates =
@@ -191,6 +193,7 @@ const FormGeneration = ({
             </div>
           }>
           <Upload
+            disabled={profile?.token_scrapbook === 0}
             customRequest={({ onSuccess }) => {
               setTimeout(() => {
                 onSuccess?.('ok', undefined);
