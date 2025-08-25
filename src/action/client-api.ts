@@ -2,7 +2,7 @@ import { IContentPayload } from './interfaces';
 import { IGlobalResponse } from './user-api';
 const baseUri =
   process.env.NODE_ENV === 'production'
-    ? process.env.API_URI
+    ? process.env.NEXT_PUBLIC_API_URI
     : process.env.NEXT_PUBLIC_STAGING_API;
 
 export async function createContentClientSide(

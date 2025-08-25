@@ -134,8 +134,8 @@ const FormGeneration = ({
       //   timeoutPromise,
       // ]);
       const res = await createContentClientSide(payload);
-
-      if (res.success) {
+      console.log(res, 'res?');
+      if (res?.success) {
         form.resetFields();
         router.push(`/${templateName}/${res.data}`);
         message.success('Successfully created!');
