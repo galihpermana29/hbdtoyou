@@ -8,8 +8,8 @@ export function ErrorBoundaryCustom() {
   return (
     <div className="h-[80vh] w-full  flex flex-col items-center justify-center">
       <p className="text-[#475467] font-[400] text-[16px]">
-        Looks like something went wrong, i hope you don't mind. Please try again
-        or contact our support.
+        Looks like something went wrong, i hope you don&apos;t mind. Please try
+        again or contact our support.
       </p>
       <Button
         onClick={() => {
