@@ -18,9 +18,19 @@ import 'react-photo-view/dist/react-photo-view.css';
 import FirstTemplate from './FirstTemplate';
 import SecondTemplate from './SecondTemplate';
 import SelectStoryTemplate from './SelectStoryTemplate';
+import { ErrorBoundaryCustom } from '@/components/ui/error-boundary';
 
-const NetflixGraduation = ({ dataContent, id }: { dataContent: any, id: string }) => {
-  const parsedData = JSON.parse(dataContent.detail_content_json_text);
+let parsedData;
+
+const NetflixGraduation = ({
+  dataContent,
+  id,
+}: {
+  dataContent: any;
+  id: string;
+}) => {
+  parsedData = JSON.parse(dataContent.detail_content_json_text);
+
   const [showFullSynopsis, setShowFullSynopsis] = useState(false);
   const [isTemplateModalOpen, setIsTemplateModalOpen] = useState(false);
   const [loadingModalVisible, setLoadingModalVisible] = useState(false);
@@ -75,8 +85,9 @@ const NetflixGraduation = ({ dataContent, id }: { dataContent: any, id: string }
         document.body.style.lineHeight = originalLineHeight;
 
         const link = document.createElement('a');
-        link.download = `instagram-story-${parsedData?.llm_generated?.name || 'graduation'
-          }-${dayjs().format('YYYY-MM-DD-HH-mm')}.png`;
+        link.download = `instagram-story-${
+          parsedData?.llm_generated?.name || 'graduation'
+        }-${dayjs().format('YYYY-MM-DD-HH-mm')}.png`;
         link.href = canvas.toDataURL('image/png');
         link.click();
 
@@ -152,6 +163,17 @@ const NetflixGraduation = ({ dataContent, id }: { dataContent: any, id: string }
     first: <FirstTemplate data={parsedData} />,
     second: <SecondTemplate data={parsedData} />,
   };
+
+  try {
+    parsedData = JSON.parse(dataContent.detail_content_json_text);
+  } catch (error) {
+    console.error('Error parsing JSON:', error);
+    parsedData = null;
+  }
+
+  if (!parsedData) {
+    return <ErrorBoundaryCustom />;
+  }
 
   return (
     <PhotoProvider>
@@ -425,23 +447,45 @@ const NetflixGraduation = ({ dataContent, id }: { dataContent: any, id: string }
             />
 
             <div className="flex flex-col gap-y-2 items-start w-full">
-              {dataContent.wishes.length > 0 && dataContent.wishes.map((wish, index) => {
-                const profileIcons = [
-                  <Image src="/UserProfileGreen.svg" width={40} height={40} alt="green profile icon" key={`icon-green-${index}`} />,
-                  <Image src="/UserProfileYellow.svg" width={40} height={40} alt="yellow profile icon" key={`icon-yellow-${index}`} />,
-                  <Image src="/UserProfileRed.svg" width={40} height={40} alt="red profile icon" key={`icon-red-${index}`} />,
-                ];
-                const randomIcon = profileIcons[Math.floor(Math.random() * profileIcons.length)];
+              {dataContent?.wishes?.length > 0 &&
+                dataContent?.wishes?.map((wish, index) => {
+                  const profileIcons = [
+                    <Image
+                      src="/UserProfileGreen.svg"
+                      width={40}
+                      height={40}
+                      alt="green profile icon"
+                      key={`icon-green-${index}`}
+                    />,
+                    <Image
+                      src="/UserProfileYellow.svg"
+                      width={40}
+                      height={40}
+                      alt="yellow profile icon"
+                      key={`icon-yellow-${index}`}
+                    />,
+                    <Image
+                      src="/UserProfileRed.svg"
+                      width={40}
+                      height={40}
+                      alt="red profile icon"
+                      key={`icon-red-${index}`}
+                    />,
+                  ];
+                  const randomIcon =
+                    profileIcons[
+                      Math.floor(Math.random() * profileIcons.length)
+                    ];
 
-                return (
-                  <WishCard
-                    key={index}
-                    name={wish.name}
-                    message={wish.message}
-                    profileIcon={randomIcon}
-                  />
-                );
-              })}
+                  return (
+                    <WishCard
+                      key={index}
+                      name={wish.name}
+                      message={wish.message}
+                      profileIcon={randomIcon}
+                    />
+                  );
+                })}
             </div>
           </div>
 
