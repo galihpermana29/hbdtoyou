@@ -145,7 +145,8 @@ const FormGeneration = ({
       if (error.message === 'timeout') {
         message.error('Server is busy, try again later.');
       } else {
-        message.error('Server is busy, try again later.');
+        message.error('Error while hit API');
+        console.log(error, 'error');
       }
     } finally {
       setLoading(false);
