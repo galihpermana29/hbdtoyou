@@ -334,14 +334,14 @@ export async function addWishesContent(
     data: string;
   }>
 > {
-  const session = await getSession();
+  // const session = await getSession();
   const res = await fetch(baseUri + `/contents/${id}/wish`, {
     method: 'PUT',
     headers: {
       'Content-Type': 'application/json',
       'X-Source': 'web',
-      'X-UserID': session.userId!,
-      Authorization: `Bearer ${session.accessToken}`,
+      // 'X-UserID': session.userId!,
+      // Authorization: `Bearer ${session.accessToken}`,
     },
     body: JSON.stringify(payload),
   });

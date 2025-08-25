@@ -1,5 +1,6 @@
 import { getDetailContent } from '@/action/user-api';
 import PageFlipScrapbook from '@/components/PageFlipScrapbook';
+import { ErrorBoundaryCustom } from '@/components/ui/error-boundary';
 import NavigationBar from '@/components/ui/navbar';
 
 const getDetailDataNew = async (id: string) => {
@@ -15,8 +16,17 @@ const Scrapbook4Result = async ({ params }: { params: { id: string } }) => {
     return <div>No data</div>;
   }
 
-  const parsedData = JSON.parse(data.data.detail_content_json_text);
+  let parsedData;
+  try {
+    parsedData = JSON.parse(data.data.detail_content_json_text);
+  } catch (error) {
+    console.error('Error parsing JSON:', error);
+    parsedData = null;
+  }
 
+  if (!parsedData) {
+    return <ErrorBoundaryCustom />;
+  }
   // Cover images
   const coverImage = parsedData?.coverImage;
   const backCoverImage = parsedData?.backCoverImage;
