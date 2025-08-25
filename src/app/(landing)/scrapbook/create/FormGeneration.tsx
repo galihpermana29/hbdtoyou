@@ -124,14 +124,15 @@ const FormGeneration = ({
     };
 
     try {
-      const timeoutPromise = new Promise((_, reject) =>
-        setTimeout(() => reject(new Error('timeout')), 40000)
-      );
+      // const timeoutPromise = new Promise((_, reject) =>
+      //   setTimeout(() => reject(new Error('timeout')), 40000)
+      // );
 
-      const res: any = await Promise.race([
-        createContent(payload),
-        timeoutPromise,
-      ]);
+      // const res: any = await Promise.race([
+      //   createContent(payload),
+      //   timeoutPromise,
+      // ]);
+      const res = await createContent(payload);
 
       if (res.success) {
         form.resetFields();
