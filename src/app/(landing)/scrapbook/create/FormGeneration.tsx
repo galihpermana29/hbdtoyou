@@ -23,6 +23,7 @@ import { CheckIcon, CircleCheck } from 'lucide-react';
 import clsx from 'clsx';
 import { json } from 'stream/consumers';
 import { useRouter, useSearchParams } from 'next/navigation';
+import { createContentClientSide } from '@/action/client-api';
 
 const FormGeneration = ({
   openNotification,
@@ -132,7 +133,7 @@ const FormGeneration = ({
       //   createContent(payload),
       //   timeoutPromise,
       // ]);
-      const res = await createContent(payload);
+      const res = await createContentClientSide(payload);
 
       if (res.success) {
         form.resetFields();
