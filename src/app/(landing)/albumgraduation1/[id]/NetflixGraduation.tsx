@@ -30,7 +30,7 @@ const NetflixGraduation = ({
   id: string;
 }) => {
   parsedData = JSON.parse(dataContent.detail_content_json_text);
-  console.log(parsedData, 'parsed?');
+
   const [showFullSynopsis, setShowFullSynopsis] = useState(false);
   const [isTemplateModalOpen, setIsTemplateModalOpen] = useState(false);
   const [loadingModalVisible, setLoadingModalVisible] = useState(false);
