@@ -139,7 +139,7 @@ const FormGeneration = ({
         router.push(`/${templateName}/${res.data}`);
         message.success('Successfully created!');
       } else {
-        message.error(res.message);
+        message.error('You dont have enough token');
       }
     } catch (error: any) {
       if (error.message === 'timeout') {
@@ -202,12 +202,6 @@ const FormGeneration = ({
               <h3 className="text-[15px] font-semibold">
                 Collection of images
               </h3>
-
-              {/* <p className="text-[13px] text-gray-600 max-w-[400px]">
-                Account with <span className="font-bold">free</span> plan can
-                only add 5 images. To add up to 20 images, upgrade to{' '}
-                <span className="font-bold">premium</span> plan.
-              </p> */}
             </div>
           }>
           <Upload
