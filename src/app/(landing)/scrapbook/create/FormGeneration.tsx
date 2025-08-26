@@ -46,6 +46,8 @@ const FormGeneration = ({
   const [form] = Form.useForm();
   const profile = useMemoifyProfile();
 
+  // const isFreeAccount = profile?.token_scrapbook < 1;
+
   const router = useRouter();
   const query = useSearchParams();
   const templateName = query.get('route');
@@ -181,11 +183,11 @@ const FormGeneration = ({
         </div>
         <div className="mt-[10px] mb-[5px]">
           <h3 className="text-[15px] font-semibold">AI Token</h3>
-
-          <p className="text-[13px] text-gray-600 max-w-[400px]">
+          <p className="text-[13px] text-gray-600 max-w-[400px]">It's free</p>
+          {/* <p className="text-[13px] text-gray-600 max-w-[400px]">
             You have {profile?.token_scrapbook} token, to generate scrapbook you
             need at least 1 token
-          </p>
+          </p> */}
         </div>
         <Form.Item
           getValueFromEvent={(e) => {
@@ -205,7 +207,7 @@ const FormGeneration = ({
             </div>
           }>
           <Upload
-            disabled={profile?.token_scrapbook === 0}
+            // disabled={profile?.token_scrapbook === 0}
             customRequest={({ onSuccess }) => {
               setTimeout(() => {
                 onSuccess?.('ok', undefined);
@@ -213,7 +215,7 @@ const FormGeneration = ({
             }}
             accept=".jpg, .jpeg, .png"
             multiple={true}
-            maxCount={profile?.type === 'free' ? 5 : 20}
+            maxCount={profile?.type === 'free' ? 3 : 20}
             listType="picture-card"
             fileList={
               collectionOfImages.length > 0 ? (collectionOfImages as any) : []
@@ -232,11 +234,7 @@ const FormGeneration = ({
 
               await beforeUpload(
                 file as FileType,
-                profile
-                  ? profile?.token_scrapbook > 0
-                    ? 'premium'
-                    : 'free'
-                  : 'free',
+                'premium',
                 openNotification,
                 handleSetCollectionImagesURI,
                 'images'
@@ -299,7 +297,7 @@ const FormGeneration = ({
         </Form.Item>
 
         <Button
-          disabled={profile?.token_scrapbook < 1}
+          // disabled={profile?.token_scrapbook < 1}
           type="primary"
           style={{
             height: '50px',
@@ -307,7 +305,8 @@ const FormGeneration = ({
           }}
           htmlType="submit"
           size="large">
-          {profile?.token_scrapbook < 1 ? 'Upgrade Plan' : 'Generate Scrapbook'}
+          {/* {profile?.token_scrapbook < 1 ? 'Upgrade Plan' : 'Generate Scrapbook'} */}
+          Generate Scrapbook
         </Button>
       </Form>
     </div>
