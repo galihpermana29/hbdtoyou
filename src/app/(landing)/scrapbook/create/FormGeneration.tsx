@@ -134,7 +134,6 @@ const FormGeneration = ({
       //   timeoutPromise,
       // ]);
       const res = await createContentClientSide(payload);
-      console.log(res, 'res?');
       if (res?.success) {
         form.resetFields();
         router.push(`/${templateName}/${res.data}`);
@@ -240,7 +239,7 @@ const FormGeneration = ({
               await beforeUpload(
                 file as FileType,
                 profile
-                  ? ['premium', 'pending'].includes(profile.type as any)
+                  ? profile?.token_scrapbook > 0
                     ? 'premium'
                     : 'free'
                   : 'free',
