@@ -30,7 +30,7 @@ export function addLineBreaksEveryThreeSentences(text) {
 
 export function mapContentToCard(contents: IContent[], purpose = 'client') {
   return contents.map((show) => {
-    const jsonContent = JSON.parse(show.detail_content_json_text);
+    const jsonContent = JSON.parse(show?.detail_content_json_text || '{}');
 
     // add docs
     // this function is used to get the jumbotron image from the json content
