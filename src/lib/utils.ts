@@ -51,9 +51,13 @@ export function mapContentToCard(contents: IContent[], purpose = 'client') {
       }
 
       if (
-        ['scrapbookv1', 'scrapbookvintage'].includes(
-          show.template_name.split('-')[1].split(' ')[1]
-        )
+        [
+          'scrapbook1',
+          'scrapbook2',
+          'scrapbook3',
+          'scrapbook4',
+          'scrapbook5',
+        ].includes(show.template_name.split('-')[1].split(' ')[1])
       ) {
         return jsonContent?.coverImage;
       }
