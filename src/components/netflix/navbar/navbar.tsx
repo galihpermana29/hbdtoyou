@@ -46,7 +46,7 @@ const Navbar = ({ jumbotronImage }: { jumbotronImage?: string }) => {
           <Image
             width={32}
             height={32}
-            src={jumbotronImage ?? widya}
+            src={jumbotronImage ?? ''}
             alt=""
             className="w-8 h-8 rounded-md object-cover cursor-pointer"
           />

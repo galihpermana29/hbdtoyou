@@ -115,7 +115,9 @@ export default function List({ title, tData, ref5 }: ListProps) {
         />
         <div
           className="flex mt-2 w-max transition-transform duration-500 ease-in-out"
-          style={{ transform: 'translateX(-50px)' }} // Initial position
+          style={{ 
+            transform: 'translateX(-50px)'
+          }} 
           ref={listRef}>
           <PhotoProvider>
             {getItemsWithClones().map((dx: any, idx: any) => (

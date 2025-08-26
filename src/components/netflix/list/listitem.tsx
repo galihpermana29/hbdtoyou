@@ -19,10 +19,16 @@ export default function ListItem({ index, data }: ListItemProps) {
 
   return (
     <div
-      className={`relative w-[225px] h-[120px] ${isHovered ? 'z-50' : 'z-10'}`}
+      className="relative w-[225px] h-[120px]"
       onMouseEnter={() => setIsHovered(true)}
-      onMouseLeave={() => setIsHovered(false)}>
-      {/* Main container that transforms on hover */}
+      onMouseLeave={() => setIsHovered(false)}
+      style={{
+        transform: isHovered ? 'scale(1.09) translateY(-80px)' : 'scale(1)',
+        transformOrigin: 'center',
+        zIndex: isHovered ? 999 : 1,
+        transition: 'all 0.3s ease-in-out',
+      }}>
+      {/* Main container */}
       <div
         className={`
           absolute 
@@ -30,16 +36,16 @@ export default function ListItem({ index, data }: ListItemProps) {
           overflow-hidden 
           cursor-pointer 
           text-white 
-          transition-all 
-          duration-300 
-          ease-in-out
           shadow-lg
           ${
             isHovered
-              ? 'w-[245px] h-[300px] top-[-40px] left-[-10px] shadow-lg'
+              ? 'w-[245px] h-[300px] top-[-40px] left-[-10px] shadow-2xl border-white'
               : 'w-[225px] h-[120px] top-0 left-0'
           }
-        `}>
+        `}
+        style={{
+          transition: 'all 0.3s ease-in-out',
+        }}>
         {/* Image container */}
         <div
           className={`${
@@ -76,7 +82,7 @@ export default function ListItem({ index, data }: ListItemProps) {
             {/* Genre */}
             <p className="text-xs mb-[8px] text-gray-300">Comedy, Romance</p>
 
-            {/* Description - only visible on hover */}
+            {/* Description */}
             <p className="text-xs text-gray-400 line-clamp-3">
               A heartwarming story about love and friendship that transcends
               time and space. Follow the journey of two souls destined to meet
