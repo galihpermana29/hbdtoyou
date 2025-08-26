@@ -186,7 +186,7 @@ const NetflixForm = ({
     const { jumbotronImage, title, subTitle, modalContent, isPublic } = val;
 
     const json_text = {
-      jumbotronImage: jumbotronImage?.uri,
+      jumbotronImage: imageUrl,
       title,
       subTitle,
       modalContent,

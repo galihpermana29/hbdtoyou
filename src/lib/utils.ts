@@ -75,6 +75,7 @@ export function mapContentToCard(contents: IContent[], purpose = 'client') {
           show.template_name.split('-')[1].split(' ')[1]
         )
       ) {
+        console.log('ppp>?', show, jsonContent);
         return jsonContent.jumbotronImage;
       }
 
