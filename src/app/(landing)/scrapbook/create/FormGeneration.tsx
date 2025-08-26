@@ -183,7 +183,7 @@ const FormGeneration = ({
         </div>
         <div className="mt-[10px] mb-[5px]">
           <h3 className="text-[15px] font-semibold">AI Token</h3>
-          <p className="text-[13px] text-gray-600 max-w-[400px]">It's free</p>
+          <p className="text-[13px] text-gray-600 max-w-[400px]">It is free</p>
           {/* <p className="text-[13px] text-gray-600 max-w-[400px]">
             You have {profile?.token_scrapbook} token, to generate scrapbook you
             need at least 1 token
