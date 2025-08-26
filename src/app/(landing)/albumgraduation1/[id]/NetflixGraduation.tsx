@@ -30,7 +30,7 @@ const NetflixGraduation = ({
   id: string;
 }) => {
   parsedData = JSON.parse(dataContent.detail_content_json_text);
-
+  console.log(parsedData, 'parsed?');
   const [showFullSynopsis, setShowFullSynopsis] = useState(false);
   const [isTemplateModalOpen, setIsTemplateModalOpen] = useState(false);
   const [loadingModalVisible, setLoadingModalVisible] = useState(false);
@@ -171,7 +171,7 @@ const NetflixGraduation = ({
     parsedData = null;
   }
 
-  if (!parsedData) {
+  if (!parsedData || !parsedData.images) {
     return <ErrorBoundaryCustom />;
   }
 
@@ -223,7 +223,7 @@ const NetflixGraduation = ({
               width={408}
               height={408}
               alt="Graduation video"
-              src={parsedData.images[0]}
+              src={parsedData.images ? parsedData.images[0] : ''}
               className="w-full h-full object-cover"
             />
           </div>
@@ -373,12 +373,12 @@ const NetflixGraduation = ({
           <div className="flex flex-col items-start gap-y-3 text-white mb-3 max-md:px-2 md:px-0">
             <SectionHeader title="Synopsis" />
             <div className="w-full h-[228px]">
-              <PhotoView src={parsedData.images[1]}>
+              <PhotoView src={parsedData?.images ? parsedData.images[1] : ''}>
                 <Image
                   width={408}
                   height={408}
                   alt="Graduation video"
-                  src={parsedData.images[1]}
+                  src={parsedData?.images ? parsedData.images[1] : ''}
                   className="w-full h-full object-cover"
                 />
               </PhotoView>
@@ -417,7 +417,11 @@ const NetflixGraduation = ({
                 isComingSoon={
                   episode.number === parsedData.llm_generated.episodes.length
                 }
-                imageSrc={parsedData.images[episode.number - 1]}
+                imageSrc={
+                  parsedData?.images
+                    ? parsedData.images[episode.number - 1]
+                    : ''
+                }
                 imageAlt={episode.title}
               />
             ))}

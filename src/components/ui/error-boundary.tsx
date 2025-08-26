@@ -6,7 +6,7 @@ import { SquarePen } from 'lucide-react';
 export function ErrorBoundaryCustom() {
   const router = useRouter();
   return (
-    <div className="h-[80vh] w-full  flex flex-col items-center justify-center">
+    <div className="h-[80vh] w-full  flex flex-col items-center justify-center px-[30px]">
       <p className="text-[#475467] font-[400] text-[16px]">
         Looks like something went wrong, i hope you don&apos;t mind. Please try
         again or contact our support.
