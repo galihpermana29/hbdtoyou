@@ -1,12 +1,11 @@
-import { Play, Plus } from 'lucide-react';
 import Image from 'next/image';
-import EpisodeList from '../../../../components/disney+/EpisodeList';
-import SimilarShows from '../../../../components/disney+/SimilarShows';
-import TrailerSection from '../../../../components/disney+/TrailerSection';
-import { Button } from '../../../../components/disney+/ui/button';
+
 import { getDetailContent } from '@/action/user-api';
 import { Watermark } from 'antd';
 import WatchModal from './component/WatchModal';
+import EpisodeList from '@/components/disney+/EpisodeList';
+import SimilarShows from '@/components/disney+/SimilarShows';
+import TrailerSection from '@/components/disney+/TrailerSection';
 
 const getDetailDataNew = async (id: string) => {
   const res = await getDetailContent(id);

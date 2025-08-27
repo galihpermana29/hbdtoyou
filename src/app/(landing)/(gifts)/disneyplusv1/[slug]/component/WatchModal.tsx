@@ -2,8 +2,8 @@
 import { addLineBreaksEveryThreeSentences } from '@/lib/utils';
 import { Modal } from 'antd';
 import { useState } from 'react';
-import { Button } from '../../../../../components/disney+/ui/button';
 import { Play } from 'lucide-react';
+import { Button } from '@/components/disney+/ui/button';
 
 const WatchModal = ({ content }: { content: string }) => {
   const [modalState, setModalState] = useState(false);

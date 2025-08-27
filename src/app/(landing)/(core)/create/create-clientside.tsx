@@ -22,7 +22,6 @@ import {
 } from '@/action/user-api';
 import { IAllTemplateResponse } from '@/action/interfaces';
 import SpotifyForm from '@/components/forms/spotify-form';
-import { useMemoifyProfile, useMemoifySession } from '../../session-provider';
 import { signIn } from 'next-auth/react';
 import DisneyForm from '@/components/forms/disney-form';
 import Newspaperv1Form from '@/components/forms/newspaperv1-form';
@@ -38,6 +37,10 @@ import { templateNameToRoute } from '@/lib/utils';
 import { TemplateGridSection } from './view/presentation/CreateTemplateSection';
 import { useRouter } from 'next/navigation';
 import AlbumGraduationv1 from '@/components/forms/albumgraduationv1-form';
+import NewNetflixForm from '@/components/forms/new/new-netflix-form';
+import NewDisneyForm from '@/components/forms/new/new-disney-form';
+import NewSpotifyForm from '@/components/forms/new/new-spotify-form';
+import NewMagazineV1Form from '@/components/forms/new/new-magazine1-form';
 
 const StepsCustom = [
   {
@@ -147,12 +150,6 @@ const CreatePage = () => {
       return router.push(`/scrapbook/create`);
     }
 
-    // if (template.name.includes('scrapbookvintage')) {
-    //   const routePath = templateNameToRoute(template.name);
-    //   return router.push(
-    //     `/create/scrapbook-vintage?templateId=${template.id}&route=${routePath}`
-    //   );
-    // }
     const routePath = templateNameToRoute(template.name);
 
     if (template.label === 'premium') {
@@ -213,7 +210,7 @@ const CreatePage = () => {
           {selectedTemplate ? (
             <div className="w-full">
               {selectedTemplate.route.includes('netflixv1') && (
-                <NetflixForm
+                <NewNetflixForm
                   handleCompleteCreation={handleCompleteCreation}
                   openNotification={openNotification}
                   selectedTemplate={selectedTemplate}
@@ -222,10 +219,19 @@ const CreatePage = () => {
                   modalState={modalState}
                   setModalState={setModalState}
                 />
+                // <NetflixForm
+                //   handleCompleteCreation={handleCompleteCreation}
+                //   openNotification={openNotification}
+                //   selectedTemplate={selectedTemplate}
+                //   loading={loading}
+                //   setLoading={setLoading}
+                //   modalState={modalState}
+                //   setModalState={setModalState}
+                // />
               )}
 
               {selectedTemplate.route.includes('spotifyv1') && (
-                <SpotifyForm
+                <NewSpotifyForm
                   handleCompleteCreation={handleCompleteCreation}
                   openNotification={openNotification}
                   selectedTemplate={selectedTemplate}
@@ -234,10 +240,19 @@ const CreatePage = () => {
                   modalState={modalState}
                   setModalState={setModalState}
                 />
+                // <SpotifyForm
+                //   handleCompleteCreation={handleCompleteCreation}
+                //   openNotification={openNotification}
+                //   selectedTemplate={selectedTemplate}
+                //   loading={loading}
+                //   setLoading={setLoading}
+                //   modalState={modalState}
+                //   setModalState={setModalState}
+                // />
               )}
 
               {selectedTemplate.route.includes('disneyplusv1') && (
-                <DisneyForm
+                <NewDisneyForm
                   handleCompleteCreation={handleCompleteCreation}
                   openNotification={openNotification}
                   selectedTemplate={selectedTemplate}
@@ -246,6 +261,15 @@ const CreatePage = () => {
                   modalState={modalState}
                   setModalState={setModalState}
                 />
+                // <DisneyForm
+                //   handleCompleteCreation={handleCompleteCreation}
+                //   openNotification={openNotification}
+                //   selectedTemplate={selectedTemplate}
+                //   loading={loading}
+                //   setLoading={setLoading}
+                //   modalState={modalState}
+                //   setModalState={setModalState}
+                // />
               )}
 
               {selectedTemplate.route.includes('newspaperv1') && (
@@ -297,7 +321,7 @@ const CreatePage = () => {
               )}
 
               {selectedTemplate.route.includes('magazinev1') && (
-                <MagazineV1Form
+                <NewMagazineV1Form
                   handleCompleteCreation={handleCompleteCreation}
                   openNotification={openNotification}
                   selectedTemplate={selectedTemplate!}
@@ -306,6 +330,15 @@ const CreatePage = () => {
                   modalState={modalState}
                   setModalState={setModalState}
                 />
+                // <MagazineV1Form
+                //   handleCompleteCreation={handleCompleteCreation}
+                //   openNotification={openNotification}
+                //   selectedTemplate={selectedTemplate!}
+                //   loading={loading}
+                //   setLoading={setLoading}
+                //   modalState={modalState}
+                //   setModalState={setModalState}
+                // />
               )}
 
               {selectedTemplate.route.includes('f1historyv1') && (

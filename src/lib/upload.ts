@@ -1,4 +1,4 @@
-import axios from 'axios';
+import axios, { AxiosProgressEvent } from 'axios';
 
 export async function uploadImageClientSide(
   file: File,
@@ -126,6 +126,76 @@ export async function uploadMultipleImageWithApi(
       success: true,
     };
   } catch (error) {
+    return {
+      message: 'Failed to upload image',
+      success: false,
+    };
+  }
+}
+
+/**
+ * Uploads an image file to the API server with progress tracking and error handling.
+ *
+ * @param formData - FormData object containing the file to upload. Should include the file under the 'file' key.
+ * @param openNotification - Optional callback function to handle upload progress notifications.
+ *   - progress: Upload progress percentage (0-100)
+ *   - key: Unique identifier for the upload operation
+ *   - isError: Boolean flag indicating if the notification is for an error (defaults to false)
+ * @param key - Optional unique identifier for the upload operation, passed to the notification callback
+ *
+ * @returns Promise resolving to an object with:
+ *   - message: Status message ('success' or error description)
+ *   - data: Response data from the server (on success)
+ *   - success: Boolean indicating if the upload was successful
+ *
+ * @example
+ * ```typescript
+ * const formData = new FormData();
+ * formData.append('file', selectedFile);
+ *
+ * const result = await newUploadImageWithAPI(
+ *   formData,
+ *   (progress, key, isError) => {
+ *     if (isError) {
+ *       console.error('Upload failed');
+ *     } else {
+ *       console.log(`Upload progress: ${progress}%`);
+ *     }
+ *   },
+ *   'upload-123'
+ * );
+ *
+ * if (result.success) {
+ *   console.log('Upload successful:', result.data);
+ * }
+ * ```
+ */
+export async function newUploadImageWithAPI(
+  formData: FormData,
+  openNotification?: (progress: number, key: any, isError?: boolean) => void,
+  key?: any
+) {
+  // using axios
+  try {
+    const response = await axios.post(
+      `${process.env.NEXT_PUBLIC_API_URI}/uploads`,
+      formData,
+      {
+        onUploadProgress: (progressEvent: AxiosProgressEvent) => {
+          const percentCompleted = Math.round(
+            (progressEvent.loaded * 100) / progressEvent.total!
+          );
+          openNotification?.(percentCompleted, key);
+        },
+      }
+    );
+    return {
+      message: 'success',
+      data: response.data,
+      success: true,
+    };
+  } catch (error) {
+    openNotification?.(0, key, true);
     return {
       message: 'Failed to upload image',
       success: false,

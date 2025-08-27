@@ -1,7 +1,7 @@
 'use client';
 
 import { getDetailContent } from '@/action/user-api';
-import useCreateContent from '@/app/(landing)/create/usecase/useCreateContent';
+import useCreateContent from '@/app/(landing)/(core)/create/usecase/useCreateContent';
 import AlbumGraduationv1 from '@/components/forms/albumgraduationv1-form';
 import DisneyForm from '@/components/forms/disney-form';
 import Formula1Form from '@/components/forms/f1historyv1-form';
@@ -9,6 +9,10 @@ import GraduationV1Form from '@/components/forms/graduationv1-form';
 import GraduationV2Form from '@/components/forms/graduationv2-form';
 import MagazineV1Form from '@/components/forms/magazinev1-form';
 import NetflixForm from '@/components/forms/netflix-form';
+import NewDisneyForm from '@/components/forms/new/new-disney-form';
+import NewMagazineV1Form from '@/components/forms/new/new-magazine1-form';
+import NewNetflixForm from '@/components/forms/new/new-netflix-form';
+import NewSpotifyForm from '@/components/forms/new/new-spotify-form';
 import Newspaperv1Form from '@/components/forms/newspaperv1-form';
 import Newspaperv3Form from '@/components/forms/newspaperv3-form';
 import SpotifyForm from '@/components/forms/spotify-form';
@@ -81,7 +85,7 @@ const EditContentDashboardPage = () => {
           {selectedTemplate ? (
             <div className="w-full">
               {selectedTemplate.route.includes('netflixv1') && (
-                <NetflixForm
+                <NewNetflixForm
                   editData={detailContent}
                   handleCompleteCreation={handleCompleteCreation}
                   openNotification={openNotification}
@@ -91,10 +95,20 @@ const EditContentDashboardPage = () => {
                   modalState={modalState}
                   setModalState={setModalState}
                 />
+                // <NetflixForm
+                //   editData={detailContent}
+                //   handleCompleteCreation={handleCompleteCreation}
+                //   openNotification={openNotification}
+                //   selectedTemplate={selectedTemplate}
+                //   loading={loading}
+                //   setLoading={setLoading}
+                //   modalState={modalState}
+                //   setModalState={setModalState}
+                // />
               )}
 
               {selectedTemplate.route.includes('spotifyv1') && (
-                <SpotifyForm
+                <NewSpotifyForm
                   editData={detailContent}
                   handleCompleteCreation={handleCompleteCreation}
                   openNotification={openNotification}
@@ -104,10 +118,20 @@ const EditContentDashboardPage = () => {
                   modalState={modalState}
                   setModalState={setModalState}
                 />
+                // <SpotifyForm
+                //   editData={detailContent}
+                //   handleCompleteCreation={handleCompleteCreation}
+                //   openNotification={openNotification}
+                //   selectedTemplate={selectedTemplate}
+                //   loading={loading}
+                //   setLoading={setLoading}
+                //   modalState={modalState}
+                //   setModalState={setModalState}
+                // />
               )}
 
               {selectedTemplate.route.includes('disneyplusv1') && (
-                <DisneyForm
+                <NewDisneyForm
                   editData={detailContent}
                   handleCompleteCreation={handleCompleteCreation}
                   openNotification={openNotification}
@@ -117,6 +141,16 @@ const EditContentDashboardPage = () => {
                   modalState={modalState}
                   setModalState={setModalState}
                 />
+                // <DisneyForm
+                //   editData={detailContent}
+                //   handleCompleteCreation={handleCompleteCreation}
+                //   openNotification={openNotification}
+                //   selectedTemplate={selectedTemplate}
+                //   loading={loading}
+                //   setLoading={setLoading}
+                //   modalState={modalState}
+                //   setModalState={setModalState}
+                // />
               )}
 
               {selectedTemplate.route.includes('newspaperv1') && (
@@ -172,7 +206,7 @@ const EditContentDashboardPage = () => {
               )}
 
               {selectedTemplate.route.includes('magazinev1') && (
-                <MagazineV1Form
+                <NewMagazineV1Form
                   editData={detailContent}
                   handleCompleteCreation={handleCompleteCreation}
                   openNotification={openNotification}
@@ -182,6 +216,16 @@ const EditContentDashboardPage = () => {
                   modalState={modalState}
                   setModalState={setModalState}
                 />
+                // <MagazineV1Form
+                //   editData={detailContent}
+                //   handleCompleteCreation={handleCompleteCreation}
+                //   openNotification={openNotification}
+                //   selectedTemplate={selectedTemplate!}
+                //   loading={loading}
+                //   setLoading={setLoading}
+                //   modalState={modalState}
+                //   setModalState={setModalState}
+                // />
               )}
 
               {selectedTemplate.route.includes('f1historyv1') && (

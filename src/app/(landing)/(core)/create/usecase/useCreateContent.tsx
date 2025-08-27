@@ -1,23 +1,58 @@
 import { useMemoifyProfile, useMemoifySession } from '@/app/session-provider';
 import { reset } from '@/lib/uploadSlice';
 import { notification, Progress } from 'antd';
+import { NotificationInstance } from 'antd/es/notification/interface';
 import { useState } from 'react';
 import { useDispatch } from 'react-redux';
 
-const useCreateContent = () => {
+// Define reusable types
+interface Template {
+  id: string;
+  route: string;
+}
+
+type ModalType = 'finish' | 'draft' | 'preview' | string;
+
+interface ModalState {
+  visible: boolean;
+  data: any;
+  type?: ModalType;
+}
+
+type NotificationKey = string | number;
+
+export type OpenNotificationFunction = (
+  progress: number,
+  key: NotificationKey,
+  isError?: boolean
+) => void;
+
+export interface UseCreateContentReturn {
+  loading: boolean;
+  current: number;
+  selectedTemplate: Template | null;
+  modalState: ModalState;
+  setModalState: React.Dispatch<React.SetStateAction<ModalState>>;
+  session: any; // TODO: Add proper session type when available
+  profile: any; // TODO: Add proper profile type when available
+  api: NotificationInstance;
+  contextHolder: React.ReactElement;
+  openNotification: OpenNotificationFunction;
+  handleCompleteCreation: () => void;
+  setLoading: React.Dispatch<React.SetStateAction<boolean>>;
+  setSelectedTemplate: React.Dispatch<React.SetStateAction<Template | null>>;
+  setCurrent: React.Dispatch<React.SetStateAction<number>>;
+}
+
+const useCreateContent = (): UseCreateContentReturn => {
   const [loading, setLoading] = useState(false);
   const [current, setCurrent] = useState(0);
 
-  const [selectedTemplate, setSelectedTemplate] = useState<{
-    id: string;
-    route: string;
-  } | null>(null);
+  const [selectedTemplate, setSelectedTemplate] = useState<Template | null>(
+    null
+  );
 
-  const [modalState, setModalState] = useState<{
-    visible: boolean;
-    data: any;
-    type?: any;
-  }>({
+  const [modalState, setModalState] = useState<ModalState>({
     visible: false,
     data: '',
     type: '',
@@ -30,9 +65,9 @@ const useCreateContent = () => {
 
   const [api, contextHolder] = notification.useNotification();
 
-  const openNotification = (
+  const openNotification: OpenNotificationFunction = (
     progress: number = 0,
-    key: any,
+    key: NotificationKey,
     isError?: boolean
   ) => {
     if (isError) {
