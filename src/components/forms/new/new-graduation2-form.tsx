@@ -1,36 +1,23 @@
 'use client';
-import { IDetailContentResponse } from '@/action/interfaces';
-import { createContent, editContent } from '@/action/user-api';
-import { useMemoifyProfile } from '@/app/session-provider';
-import GeneratingLLMLoadingModal from '@/app/(landing)/albumgraduation1/[id]/GeneratingLLMLoadingModal';
-import { reset } from '@/lib/uploadSlice';
-import { generateGraduationStory } from '@/services/gemini';
-import { fetchMovieGenres, Genre } from '@/services/tmdb';
-import { useQuery } from '@tanstack/react-query';
-import {
-  Button,
-  DatePicker,
-  Form,
-  Input,
-  message,
-  Modal,
-  Select,
-  Tooltip,
-} from 'antd';
+import { Button, Form, Input, message, Modal, Tooltip } from 'antd';
+import { useEffect } from 'react';
 import { useForm, useWatch } from 'antd/es/form/Form';
+import { useMemoifyProfile } from '@/app/session-provider';
+import { createContent } from '@/action/user-api';
+import { IDetailContentResponse } from '@/action/interfaces';
 import dayjs from 'dayjs';
 import { useRouter } from 'next/navigation';
-import { useEffect, useState } from 'react';
-import { useDispatch } from 'react-redux';
-import FinalModal from './final-modal';
-import DraggerUpload, { AccountType } from '../ui/uploader/uploader';
+import { useSelector } from 'react-redux';
+import { RootState } from '@/lib/store';
+
+import FinalModal from '../final-modal';
+import DraggerUpload, { AccountType } from '@/components/ui/uploader/uploader';
 import { UseCreateContentReturn } from '@/app/(landing)/(core)/create/usecase/useCreateContent';
 
-interface NewAlbumGraduationFormProps extends Partial<UseCreateContentReturn> {
+interface NewGraduation2FormProps extends Partial<UseCreateContentReturn> {
   editData?: IDetailContentResponse;
 }
-
-const AlbumGraduationv1 = ({
+const NewGraduation2Form = ({
   loading,
   setLoading,
   modalState,
@@ -39,62 +26,41 @@ const AlbumGraduationv1 = ({
   openNotification,
   handleCompleteCreation,
   editData,
-}: NewAlbumGraduationFormProps) => {
-  const [showLlmModal, setShowLlmModal] = useState(false);
-
+}: NewGraduation2FormProps) => {
   const profile = useMemoifyProfile();
-  const router = useRouter();
   const [form] = useForm();
 
-  const dispatch = useDispatch();
   const images = useWatch('images', form);
+  const router = useRouter();
+
+  const collectionOfImages = useSelector(
+    (state: RootState) => state.uploadSlice.collectionOfImages
+  );
 
   const handleSubmit = async (
     val: any,
     status: 'draft' | 'published' = 'published'
   ) => {
     setLoading(true);
-    // Close the FinalModal if it's open
-    if (modalState.visible) {
-      setModalState({ visible: false, data: '' });
-    }
-
-    // Generate graduation story using Gemini
-    setShowLlmModal(true);
-    const generatedData = await generateGraduationStory({
-      name: val.clientName,
-      university: val.university,
-      graduationDate: val.graduationDate,
-      movieGenre: val.movieGenre,
-    });
-    setShowLlmModal(false);
-
-    // TODO: Read the object from the antd form
-    const {
-      clientName,
-      movieGenre,
-      university,
-      graduationDate,
-      isPublic,
-      photographerName,
-    } = val;
+    const { university, faculty, major, yearOfGraduation, name, isPublic } =
+      val;
 
     const json_text = {
-      clientName,
-      movieGenre,
       university,
-      graduationDate,
-      photographerName,
-      images: images,
-      isPublic, //leave it
-
-      // LLM props
-      llm_generated: generatedData,
+      faculty,
+      major,
+      name,
+      yearOfGraduation,
+      images:
+        collectionOfImages.length > 0
+          ? collectionOfImages.map((dx) => dx.uri)
+          : null,
+      isPublic,
     };
 
     const payload = {
       template_id: selectedTemplate.id,
-      detail_content_json_text: JSON.stringify(json_text), /// part json
+      detail_content_json_text: JSON.stringify(json_text),
       title: val?.title2 ? val?.title2 : '',
       caption: val?.caption ? val?.caption : '',
 
@@ -106,18 +72,10 @@ const AlbumGraduationv1 = ({
       status,
     };
 
-    const res = editData
-      ? await editContent(payload, editData.id)
-      : await createContent(payload);
+    const res = await createContent(payload);
     if (res.success) {
       const userLink = selectedTemplate.route + '/' + res.data;
-
-      // Clear form fields
       form.resetFields();
-
-      // Reset Redux state for collection of images
-      dispatch(reset());
-
       if (status === 'draft') {
         setLoading(false);
         router.push('/preview?link=' + userLink);
@@ -144,37 +102,15 @@ const AlbumGraduationv1 = ({
 
       form.setFieldsValue({
         ...jsonContent,
-        graduationDate: dayjs(jsonContent.graduationDate),
-        images: jsonContent.images,
+        images: jsonContent?.images || [],
         title2: editData.title,
         caption: editData.caption,
       });
     }
   }, [editData]);
 
-  // Use React Query to fetch movie genres
-  const { data: genres = [], isLoading: genreLoading } = useQuery({
-    queryKey: ['movieGenres'],
-    queryFn: async () => {
-      try {
-        return await fetchMovieGenres();
-      } catch (error) {
-        message.error('Failed to load movie genres');
-        return [];
-      }
-    },
-  });
-
-  const genreOptions = genres.map((genre: Genre, index: number) => ({
-    value: genre.id,
-    label: genre.name,
-  }));
-
   return (
     <div>
-      {/* LLM Loading Modal */}
-      <GeneratingLLMLoadingModal isOpen={showLlmModal} />
-
       <Modal
         centered={true}
         title="Add-Ons"
@@ -182,15 +118,12 @@ const AlbumGraduationv1 = ({
         open={modalState.visible}
         onCancel={() => setModalState({ visible: false, data: '' })}>
         <FinalModal
+          loading={loading}
           profile={profile}
           onSubmit={handleSubmit}
           preFormValue={modalState?.data}
         />
       </Modal>
-
-      {/* TODO - Josua:
-      Change the form like the design
-      */}
       <Form
         disabled={loading}
         form={form}
@@ -198,56 +131,51 @@ const AlbumGraduationv1 = ({
         // onFinish={(val) => handleSubmit(val)}
       >
         <Form.Item
-          rules={[{ required: true, message: 'Please enter full name client' }]}
-          name={'clientName'}
-          label="Full Name Client">
-          <Input size="large" placeholder="Input full name client" />
+          rules={[{ required: true, message: 'Please input name!' }]}
+          name={'name'}
+          label="Your name ">
+          <Input size="large" placeholder="Write your name here" />
+        </Form.Item>
+        <Form.Item
+          rules={[{ required: true, message: 'Please input unversity!' }]}
+          name={'university'}
+          label="University (e.g: Universitas Indonesia)">
+          <Input size="large" placeholder="Write your university here" />
+        </Form.Item>
+        <Form.Item
+          rules={[{ required: true, message: 'Please input faculty!' }]}
+          name={'faculty'}
+          label="Faculty (e.g: Faculty of Computer and Science)">
+          <Input size="large" placeholder="Write your faculty here" />
+        </Form.Item>
+        <Form.Item
+          rules={[{ required: true, message: 'Please input major!' }]}
+          name={'major'}
+          label="Major (e.g: Information Technology)">
+          <Input size="large" placeholder="Write your major here" />
         </Form.Item>
         <Form.Item
           rules={[
-            { required: true, message: 'Please enter photographer name' },
+            { required: true, message: 'Please input year of graduation!' },
           ]}
-          name={'photographerName'}
-          label="Photographer Name">
-          <Input size="large" placeholder="Input photographer name" />
-        </Form.Item>
-        <Form.Item
-          name="university"
-          label="University Name"
-          rules={[{ required: true, message: 'Please enter university' }]}>
-          <Input placeholder="Input university name" size="large" />
-        </Form.Item>
-        <Form.Item
-          name="graduationDate"
-          label="Graduation Date"
-          rules={[
-            { required: true, message: 'Please select your graduation date' },
-          ]}
-          className="w-full">
-          <DatePicker
+          name={'yearOfGraduation'}
+          label="Year of Graduation (e.g: 2024)">
+          <Input
             size="large"
-            placeholder="Input graduation date"
-            format="DD/MM/YYYY"
-            className="w-full"
+            placeholder="Write your year of graduation here"
           />
         </Form.Item>
-        {/* LEAVE IT */}
         <Form.Item
-          getValueFromEvent={(e) => {
-            // return just the fileList (or your custom format if needed)
-            if (Array.isArray(e)) return e;
-            return e?.fileList;
-          }}
           name={'images'}
           label={
             <div className="mt-[10px] mb-[5px]">
               <h3 className="text-[15px] font-semibold">
-                Collection of client images
+                Collection of images
               </h3>
 
               <p className="text-[13px] text-gray-600 max-w-[400px]">
                 Account with <span className="font-bold">free</span> plan can
-                only add 5 images. To add up to 15 images, upgrade to{' '}
+                only add 4 images. To add up to 15 images, upgrade to{' '}
                 <span className="font-bold">premium</span> plan.
               </p>
             </div>
@@ -258,26 +186,8 @@ const AlbumGraduationv1 = ({
             formItemName={'images'}
             type={profile?.type as AccountType}
             multiple={true}
-            limit={profile?.type === 'free' ? 5 : 20}
+            limit={profile?.type === 'free' ? 4 : 20}
             openNotification={openNotification}
-          />
-        </Form.Item>
-        <Form.Item
-          name="movieGenre"
-          label="Theme Movie"
-          rules={[{ required: true, message: 'Please select a theme movie' }]}>
-          <Select
-            placeholder="Input theme movie"
-            getPopupContainer={(trigger) => trigger}
-            options={genreOptions}
-            showSearch
-            filterOption={(input, option) =>
-              option?.label?.toLowerCase().includes(input.toLowerCase())
-            }
-            size="large"
-            popupClassName="inspiration-select-dropdown"
-            listHeight={256}
-            virtual={false}
           />
         </Form.Item>
         <div className="flex justify-end gap-2">
@@ -340,4 +250,4 @@ const AlbumGraduationv1 = ({
   );
 };
 
-export default AlbumGraduationv1;
+export default NewGraduation2Form;

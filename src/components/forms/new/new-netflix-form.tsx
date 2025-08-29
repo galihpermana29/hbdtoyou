@@ -1,36 +1,24 @@
 'use client';
-import { IDetailContentResponse } from '@/action/interfaces';
-import { createContent, editContent } from '@/action/user-api';
-import { useMemoifyProfile } from '@/app/session-provider';
-import GeneratingLLMLoadingModal from '@/app/(landing)/albumgraduation1/[id]/GeneratingLLMLoadingModal';
-import { reset } from '@/lib/uploadSlice';
-import { generateGraduationStory } from '@/services/gemini';
-import { fetchMovieGenres, Genre } from '@/services/tmdb';
-import { useQuery } from '@tanstack/react-query';
-import {
-  Button,
-  DatePicker,
-  Form,
-  Input,
-  message,
-  Modal,
-  Select,
-  Tooltip,
-} from 'antd';
+import { Button, Form, Input, message, Modal, Tooltip } from 'antd';
+import TextArea from 'antd/es/input/TextArea';
+import { useEffect } from 'react';
 import { useForm, useWatch } from 'antd/es/form/Form';
-import dayjs from 'dayjs';
+import { createContent, editContent } from '@/action/user-api';
 import { useRouter } from 'next/navigation';
-import { useEffect, useState } from 'react';
+import { IDetailContentResponse } from '@/action/interfaces';
+import dayjs from 'dayjs';
 import { useDispatch } from 'react-redux';
-import FinalModal from './final-modal';
-import DraggerUpload, { AccountType } from '../ui/uploader/uploader';
+import { reset } from '@/lib/uploadSlice';
+import { useMemoifyProfile } from '@/app/session-provider';
+import FinalModal from '../final-modal';
+import DraggerUpload, { AccountType } from '@/components/ui/uploader/uploader';
 import { UseCreateContentReturn } from '@/app/(landing)/(core)/create/usecase/useCreateContent';
 
-interface NewAlbumGraduationFormProps extends Partial<UseCreateContentReturn> {
+interface NewNetflixFormProps extends Partial<UseCreateContentReturn> {
   editData?: IDetailContentResponse;
 }
 
-const AlbumGraduationv1 = ({
+const NewNetflixForm = ({
   loading,
   setLoading,
   modalState,
@@ -39,14 +27,13 @@ const AlbumGraduationv1 = ({
   openNotification,
   handleCompleteCreation,
   editData,
-}: NewAlbumGraduationFormProps) => {
-  const [showLlmModal, setShowLlmModal] = useState(false);
-
+}: NewNetflixFormProps) => {
+  const dispatch = useDispatch();
   const profile = useMemoifyProfile();
   const router = useRouter();
   const [form] = useForm();
 
-  const dispatch = useDispatch();
+  const jumbotronImage = useWatch('jumbotronImage', form);
   const images = useWatch('images', form);
 
   const handleSubmit = async (
@@ -54,49 +41,23 @@ const AlbumGraduationv1 = ({
     status: 'draft' | 'published' = 'published'
   ) => {
     setLoading(true);
-    // Close the FinalModal if it's open
-    if (modalState.visible) {
-      setModalState({ visible: false, data: '' });
-    }
 
-    // Generate graduation story using Gemini
-    setShowLlmModal(true);
-    const generatedData = await generateGraduationStory({
-      name: val.clientName,
-      university: val.university,
-      graduationDate: val.graduationDate,
-      movieGenre: val.movieGenre,
-    });
-    setShowLlmModal(false);
-
-    // TODO: Read the object from the antd form
-    const {
-      clientName,
-      movieGenre,
-      university,
-      graduationDate,
-      isPublic,
-      photographerName,
-    } = val;
-
+    const { jumbotronImage, title, subTitle, modalContent, isPublic, images } =
+      val;
     const json_text = {
-      clientName,
-      movieGenre,
-      university,
-      graduationDate,
-      photographerName,
+      jumbotronImage: jumbotronImage,
+      title,
+      subTitle,
+      modalContent,
       images: images,
-      isPublic, //leave it
-
-      // LLM props
-      llm_generated: generatedData,
+      isPublic,
     };
 
     const payload = {
       template_id: selectedTemplate.id,
-      detail_content_json_text: JSON.stringify(json_text), /// part json
+      detail_content_json_text: JSON.stringify(json_text),
       title: val?.title2 ? val?.title2 : '',
-      caption: val?.caption ? val?.caption : '',
+      caption: val?.caption,
 
       date_scheduled: val?.date_scheduled
         ? dayjs(val?.date_scheduled).format('DD/MM/YYYY h:mm A Z')
@@ -109,6 +70,7 @@ const AlbumGraduationv1 = ({
     const res = editData
       ? await editContent(payload, editData.id)
       : await createContent(payload);
+
     if (res.success) {
       const userLink = selectedTemplate.route + '/' + res.data;
 
@@ -120,6 +82,7 @@ const AlbumGraduationv1 = ({
 
       if (status === 'draft') {
         setLoading(false);
+        // window.open(userLink as string, '_blank');
         router.push('/preview?link=' + userLink);
       } else {
         setLoading(false);
@@ -133,9 +96,10 @@ const AlbumGraduationv1 = ({
         handleCompleteCreation();
       }
     } else {
-      setLoading(false);
-      message.error(res.message);
+      message.error(`Something went wrong!, ${res.message}`);
     }
+    setLoading(false);
+    return;
   };
 
   useEffect(() => {
@@ -144,37 +108,16 @@ const AlbumGraduationv1 = ({
 
       form.setFieldsValue({
         ...jsonContent,
-        graduationDate: dayjs(jsonContent.graduationDate),
-        images: jsonContent.images,
+        jumbotronImage: jsonContent?.jumbotronImage || null,
+        images: jsonContent?.images || [],
         title2: editData.title,
         caption: editData.caption,
       });
     }
   }, [editData]);
 
-  // Use React Query to fetch movie genres
-  const { data: genres = [], isLoading: genreLoading } = useQuery({
-    queryKey: ['movieGenres'],
-    queryFn: async () => {
-      try {
-        return await fetchMovieGenres();
-      } catch (error) {
-        message.error('Failed to load movie genres');
-        return [];
-      }
-    },
-  });
-
-  const genreOptions = genres.map((genre: Genre, index: number) => ({
-    value: genre.id,
-    label: genre.name,
-  }));
-
   return (
     <div>
-      {/* LLM Loading Modal */}
-      <GeneratingLLMLoadingModal isOpen={showLlmModal} />
-
       <Modal
         centered={true}
         title="Add-Ons"
@@ -183,71 +126,79 @@ const AlbumGraduationv1 = ({
         onCancel={() => setModalState({ visible: false, data: '' })}>
         <FinalModal
           profile={profile}
+          loading={loading}
           onSubmit={handleSubmit}
           preFormValue={modalState?.data}
         />
       </Modal>
-
-      {/* TODO - Josua:
-      Change the form like the design
-      */}
-      <Form
-        disabled={loading}
-        form={form}
-        layout="vertical"
-        // onFinish={(val) => handleSubmit(val)}
-      >
-        <Form.Item
-          rules={[{ required: true, message: 'Please enter full name client' }]}
-          name={'clientName'}
-          label="Full Name Client">
-          <Input size="large" placeholder="Input full name client" />
-        </Form.Item>
+      <Button
+        className="!bg-black !rounded-full mb-[20px]"
+        type="primary"
+        onClick={() => {
+          router.replace('/netflixv1?isTutorial=true');
+        }}
+        size="large">
+        See tutorial
+      </Button>
+      <Form disabled={loading} form={form} layout="vertical">
         <Form.Item
           rules={[
-            { required: true, message: 'Please enter photographer name' },
+            {
+              required: true,
+              message: 'Please input image!',
+            },
           ]}
-          name={'photographerName'}
-          label="Photographer Name">
-          <Input size="large" placeholder="Input photographer name" />
-        </Form.Item>
-        <Form.Item
-          name="university"
-          label="University Name"
-          rules={[{ required: true, message: 'Please enter university' }]}>
-          <Input placeholder="Input university name" size="large" />
-        </Form.Item>
-        <Form.Item
-          name="graduationDate"
-          label="Graduation Date"
-          rules={[
-            { required: true, message: 'Please select your graduation date' },
-          ]}
-          className="w-full">
-          <DatePicker
-            size="large"
-            placeholder="Input graduation date"
-            format="DD/MM/YYYY"
-            className="w-full"
+          name={'jumbotronImage'}
+          label="Jumbotron Image">
+          <DraggerUpload
+            profileImageURL={jumbotronImage}
+            form={form}
+            formItemName={'jumbotronImage'}
+            type={profile?.type as AccountType}
+            multiple={false}
+            limit={1}
+            openNotification={openNotification}
           />
         </Form.Item>
-        {/* LEAVE IT */}
         <Form.Item
-          getValueFromEvent={(e) => {
-            // return just the fileList (or your custom format if needed)
-            if (Array.isArray(e)) return e;
-            return e?.fileList;
-          }}
+          rules={[{ required: true, message: 'Please input title!' }]}
+          name={'title'}
+          label="Title">
+          <Input size="large" placeholder="Happy birthday to my cats" />
+        </Form.Item>
+        <Form.Item
+          rules={[{ required: true, message: 'Please input subtitle!' }]}
+          name={'subTitle'}
+          label="Sub Title">
+          <TextArea
+            size="large"
+            placeholder="This is how me express love. In the meantime you will understand how my brain works. lorem ipsum"
+          />
+        </Form.Item>
+
+        <Form.Item
+          rules={[{ required: true, message: 'Please input modal content!' }]}
+          name={'modalContent'}
+          label="Modal Content">
+          <TextArea
+            size="large"
+            placeholder="This is how me express love. In the meantime you will understand how my brain works. lorem ipsum"
+          />
+        </Form.Item>
+        <Form.Item
+          rules={[
+            { required: true, message: 'Please upload atleast 1 content' },
+          ]}
           name={'images'}
           label={
             <div className="mt-[10px] mb-[5px]">
               <h3 className="text-[15px] font-semibold">
-                Collection of client images
+                Collection of images
               </h3>
 
               <p className="text-[13px] text-gray-600 max-w-[400px]">
                 Account with <span className="font-bold">free</span> plan can
-                only add 5 images. To add up to 15 images, upgrade to{' '}
+                only add 5 images. To add up to 20 images, upgrade to{' '}
                 <span className="font-bold">premium</span> plan.
               </p>
             </div>
@@ -262,24 +213,7 @@ const AlbumGraduationv1 = ({
             openNotification={openNotification}
           />
         </Form.Item>
-        <Form.Item
-          name="movieGenre"
-          label="Theme Movie"
-          rules={[{ required: true, message: 'Please select a theme movie' }]}>
-          <Select
-            placeholder="Input theme movie"
-            getPopupContainer={(trigger) => trigger}
-            options={genreOptions}
-            showSearch
-            filterOption={(input, option) =>
-              option?.label?.toLowerCase().includes(input.toLowerCase())
-            }
-            size="large"
-            popupClassName="inspiration-select-dropdown"
-            listHeight={256}
-            virtual={false}
-          />
-        </Form.Item>
+
         <div className="flex justify-end gap-2">
           <Tooltip
             title={
@@ -315,6 +249,7 @@ const AlbumGraduationv1 = ({
               form
                 .validateFields()
                 .then(() => {
+                  // handleSubmit(form.getFieldsValue(), 'published');
                   setModalState({
                     visible: true,
                     data: form.getFieldsValue(),
@@ -340,4 +275,4 @@ const AlbumGraduationv1 = ({
   );
 };
 
-export default AlbumGraduationv1;
+export default NewNetflixForm;

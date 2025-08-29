@@ -78,7 +78,7 @@ export default async function GraduationV1Page({ params }: { params: any }) {
         </h2>
         <div className="relative w-32 h-32 md:w-48 md:h-48 mx-auto mt-8 overflow-hidden rounded-lg">
           <Image
-            src="https://res.cloudinary.com/dxuumohme/image/upload/v1736878627/bubjbkztn7xfrxmusjtp.jpg"
+            src={Array.isArray(parsedData?.images) ? parsedData?.images[0] : ''}
             alt="Breathe life"
             fill
             className="object-cover transition-transform duration-700 ease-in-out hover:scale-105"
