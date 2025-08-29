@@ -1,4 +1,3 @@
-import PaymentQRIS from './client-page';
 import { Metadata } from 'next';
 import NewClientPagePayment from './new-client-page';
 

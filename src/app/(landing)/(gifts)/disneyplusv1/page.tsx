@@ -1,9 +1,9 @@
 import { Play, Plus } from 'lucide-react';
 import Image from 'next/image';
-import EpisodeList from '../../../components/disney+/EpisodeList';
-import SimilarShows from '../../../components/disney+/SimilarShows';
-import TrailerSection from '../../../components/disney+/TrailerSection';
-import { Button } from '../../../components/disney+/ui/button';
+import SimilarShows from '@/components/disney+/SimilarShows';
+import TrailerSection from '@/components/disney+/TrailerSection';
+import { Button } from '@/components/disney+/ui/button';
+import EpisodeList from '@/components/disney+/EpisodeList';
 
 export default function DisneyPage() {
   return (

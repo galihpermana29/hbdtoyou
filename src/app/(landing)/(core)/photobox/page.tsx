@@ -2,8 +2,8 @@
 import { useState } from 'react';
 import PictureInFrame from '@/components/photobox/PictureFrame/PictureFrame';
 import Cameragram from '@/components/photobox/Cameragram/Cameragram';
-import { useParams, useRouter } from 'next/navigation';
-import { FrameData, frameData } from '@/lib/frameData';
+import { useRouter } from 'next/navigation';
+import { frameData } from '@/lib/frameData';
 import Carousel from 'react-multi-carousel';
 import 'react-multi-carousel/lib/styles.css';
 import { message, notification, Progress, Spin } from 'antd';
@@ -12,7 +12,6 @@ import NavigationBar from '@/components/ui/navbar';
 import { uploadImageClientSide } from '@/lib/upload';
 
 import { v4 as uuidv4 } from 'uuid';
-import { useMemoifySession } from '../../session-provider';
 
 const uploadImage = async (base64: string) => {
   const data = await fetch('/api/upload', {

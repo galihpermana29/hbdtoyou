@@ -1,37 +1,23 @@
 'use client';
-import {
-  Button,
-  Divider,
-  Form,
-  Input,
-  message,
-  Modal,
-  Switch,
-  Tooltip,
-  Upload,
-} from 'antd';
-import { useEffect, useState } from 'react';
-import type { GetProp, UploadProps } from 'antd';
-import { LoadingOutlined, PlusOutlined } from '@ant-design/icons';
-import { useForm } from 'antd/es/form/Form';
+import { Button, Form, Input, message, Modal, Tooltip } from 'antd';
+import { useEffect } from 'react';
+import { useForm, useWatch } from 'antd/es/form/Form';
 import { useMemoifyProfile } from '@/app/session-provider';
 import { createContent } from '@/action/user-api';
-import { beforeUpload } from './netflix-form';
-import TextArea from 'antd/es/input/TextArea';
-import { parsingImageFromJSON } from '@/lib/utils';
 import { IDetailContentResponse } from '@/action/interfaces';
-import FinalModal from './final-modal';
 import dayjs from 'dayjs';
 import { useRouter } from 'next/navigation';
-import { useDispatch, useSelector } from 'react-redux';
+import { useSelector } from 'react-redux';
 import { RootState } from '@/lib/store';
-import {
-  removeCollectionOfImages,
-  setCollectionOfImages,
-} from '@/lib/uploadSlice';
-type FileType = Parameters<GetProp<UploadProps, 'beforeUpload'>>[0];
 
-const GraduationV2Form = ({
+import FinalModal from '../final-modal';
+import DraggerUpload, { AccountType } from '@/components/ui/uploader/uploader';
+import { UseCreateContentReturn } from '@/app/(landing)/(core)/create/usecase/useCreateContent';
+
+interface NewGraduation2FormProps extends Partial<UseCreateContentReturn> {
+  editData?: IDetailContentResponse;
+}
+const NewGraduation2Form = ({
   loading,
   setLoading,
   modalState,
@@ -40,65 +26,22 @@ const GraduationV2Form = ({
   openNotification,
   handleCompleteCreation,
   editData,
-}: {
-  loading: boolean;
-  setLoading: React.Dispatch<React.SetStateAction<boolean>>;
-  modalState: {
-    visible: boolean;
-    data: string;
-  };
-  setModalState: React.Dispatch<
-    React.SetStateAction<{
-      visible: boolean;
-      data: any;
-      type?: any;
-    }>
-  >;
-  selectedTemplate: {
-    id: string;
-    route: string;
-  };
-  openNotification: (progress: number, key: any) => void;
-  handleCompleteCreation: () => void;
-  editData?: IDetailContentResponse;
-}) => {
-  const [uploadLoading, setUploadLoading] = useState(false);
-
+}: NewGraduation2FormProps) => {
   const profile = useMemoifyProfile();
-
   const [form] = useForm();
+
+  const images = useWatch('images', form);
   const router = useRouter();
 
   const collectionOfImages = useSelector(
     (state: RootState) => state.uploadSlice.collectionOfImages
   );
 
-  const dispatch = useDispatch();
-
-  const handleSetCollectionImagesURI = (
-    payload: { uri: string; uid: string },
-    formName: string
-  ) => {
-    dispatch(setCollectionOfImages([{ ...payload, url: payload.uri }]));
-  };
-
-  const handleRemoveCollectionImage = (uid: string) => {
-    dispatch(removeCollectionOfImages(uid));
-    const images = collectionOfImages.filter((item) => item.uid !== uid);
-    form.setFieldValue('images', images?.length > 0 ? images : undefined);
-  };
-
-  const uploadButton = (
-    <button style={{ border: 0, background: 'none' }} type="button">
-      {loading ? <LoadingOutlined /> : <PlusOutlined />}
-      <div style={{ marginTop: 8 }}>Upload</div>
-    </button>
-  );
-
   const handleSubmit = async (
     val: any,
     status: 'draft' | 'published' = 'published'
   ) => {
+    setLoading(true);
     const { university, faculty, major, yearOfGraduation, name, isPublic } =
       val;
 
@@ -134,8 +77,10 @@ const GraduationV2Form = ({
       const userLink = selectedTemplate.route + '/' + res.data;
       form.resetFields();
       if (status === 'draft') {
+        setLoading(false);
         router.push('/preview?link=' + userLink);
       } else {
+        setLoading(false);
         setModalState({
           visible: true,
           data: userLink as string,
@@ -146,6 +91,7 @@ const GraduationV2Form = ({
         handleCompleteCreation();
       }
     } else {
+      setLoading(false);
       message.error(res.message);
     }
   };
@@ -154,17 +100,9 @@ const GraduationV2Form = ({
     if (editData) {
       const jsonContent = JSON.parse(editData.detail_content_json_text);
 
-      const images = parsingImageFromJSON(
-        jsonContent,
-        'collection-images',
-        'images'
-      );
-
-      setCollectionOfImages(images);
-
       form.setFieldsValue({
         ...jsonContent,
-        images,
+        images: jsonContent?.images || [],
         title2: editData.title,
         caption: editData.caption,
       });
@@ -228,11 +166,6 @@ const GraduationV2Form = ({
           />
         </Form.Item>
         <Form.Item
-          getValueFromEvent={(e) => {
-            // return just the fileList (or your custom format if needed)
-            if (Array.isArray(e)) return e;
-            return e?.fileList;
-          }}
           name={'images'}
           label={
             <div className="mt-[10px] mb-[5px]">
@@ -247,54 +180,15 @@ const GraduationV2Form = ({
               </p>
             </div>
           }>
-          <Upload
-            customRequest={({ onSuccess }) => {
-              setTimeout(() => {
-                onSuccess?.('ok', undefined);
-              }, 0);
-            }}
-            accept=".jpg, .jpeg, .png"
+          <DraggerUpload
+            profileImageURL={images}
+            form={form}
+            formItemName={'images'}
+            type={profile?.type as AccountType}
             multiple={true}
-            maxCount={profile?.type === 'free' ? 5 : 15}
-            listType="picture-card"
-            fileList={
-              editData
-                ? collectionOfImages.length > 0
-                  ? (collectionOfImages as any)
-                  : []
-                : undefined
-            }
-            onRemove={(file) => handleRemoveCollectionImage(file.uid)}
-            beforeUpload={async (file, fileList) => {
-              if (fileList.length > 5) {
-                // Find the index of the current file in the list
-                const fileIndex = fileList.findIndex((f) => f.uid === file.uid);
-
-                // Only process the first 5 files, ignore the rest
-                if (fileIndex >= 5) {
-                  return Upload.LIST_IGNORE;
-                }
-              }
-              // setUploadLoading(true);
-              await beforeUpload(
-                file as FileType,
-                profile
-                  ? ['premium', 'pending'].includes(profile.type as any)
-                    ? 'premium'
-                    : 'free'
-                  : 'free',
-                openNotification,
-                handleSetCollectionImagesURI,
-                'images'
-              );
-              // setUploadLoading(false);
-            }}>
-            {collectionOfImages.length >= 4 && profile?.type === 'free'
-              ? null
-              : collectionOfImages.length >= 15 && profile?.type !== 'free'
-              ? null
-              : uploadButton}
-          </Upload>
+            limit={profile?.type === 'free' ? 4 : 20}
+            openNotification={openNotification}
+          />
         </Form.Item>
         <div className="flex justify-end gap-2">
           <Tooltip
@@ -319,7 +213,7 @@ const GraduationV2Form = ({
                   });
               }}
               className="!bg-white !text-black !border-[1px] !border-black !rounded-full"
-              loading={loading || uploadLoading}
+              loading={loading}
               type="primary"
               htmlType="submit"
               size="large">
@@ -344,7 +238,7 @@ const GraduationV2Form = ({
                 });
             }}
             className="!bg-black !rounded-full"
-            loading={loading || uploadLoading}
+            loading={loading}
             type="primary"
             htmlType="submit"
             size="large">
@@ -356,4 +250,4 @@ const GraduationV2Form = ({
   );
 };
 
-export default GraduationV2Form;
+export default NewGraduation2Form;

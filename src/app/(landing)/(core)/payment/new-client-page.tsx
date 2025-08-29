@@ -20,9 +20,7 @@ import { motion } from 'framer-motion';
 import qrisImage from '@/assets/qris-logo.png';
 import CountdownTimer from '@/components/ui/countdown';
 import { useRouter, useSearchParams } from 'next/navigation';
-import { useMemoifySession } from '../../session-provider';
-import emptyState from '@/assets/empty.png';
-import { useQuery } from '@tanstack/react-query';
+import { useMemoifySession } from '@/app/session-provider';
 
 const { Title, Text } = Typography;
 

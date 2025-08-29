@@ -3,18 +3,10 @@ import { IDetailContentResponse } from '@/action/interfaces';
 import { createContent, editContent } from '@/action/user-api';
 import { useMemoifyProfile } from '@/app/session-provider';
 import GeneratingLLMLoadingModal from '@/app/(landing)/albumgraduation1/[id]/GeneratingLLMLoadingModal';
-import { RootState } from '@/lib/store';
-import {
-  removeCollectionOfImages,
-  reset,
-  setCollectionOfImages,
-} from '@/lib/uploadSlice';
-import { parsingImageFromJSON } from '@/lib/utils';
+import { reset } from '@/lib/uploadSlice';
 import { generateGraduationStory } from '@/services/gemini';
 import { fetchMovieGenres, Genre } from '@/services/tmdb';
-import { LoadingOutlined, PlusOutlined } from '@ant-design/icons';
 import { useQuery } from '@tanstack/react-query';
-import type { GetProp, UploadProps } from 'antd';
 import {
   Button,
   DatePicker,
@@ -24,16 +16,19 @@ import {
   Modal,
   Select,
   Tooltip,
-  Upload,
 } from 'antd';
-import { useForm } from 'antd/es/form/Form';
+import { useForm, useWatch } from 'antd/es/form/Form';
 import dayjs from 'dayjs';
 import { useRouter } from 'next/navigation';
 import { useEffect, useState } from 'react';
-import { useDispatch, useSelector } from 'react-redux';
+import { useDispatch } from 'react-redux';
 import FinalModal from './final-modal';
-import { beforeUpload } from './netflix-form';
-type FileType = Parameters<GetProp<UploadProps, 'beforeUpload'>>[0];
+import DraggerUpload, { AccountType } from '../ui/uploader/uploader';
+import { UseCreateContentReturn } from '@/app/(landing)/(core)/create/usecase/useCreateContent';
+
+interface NewAlbumGraduationFormProps extends Partial<UseCreateContentReturn> {
+  editData?: IDetailContentResponse;
+}
 
 const AlbumGraduationv1 = ({
   loading,
@@ -44,78 +39,21 @@ const AlbumGraduationv1 = ({
   openNotification,
   handleCompleteCreation,
   editData,
-}: {
-  loading: boolean;
-  setLoading: React.Dispatch<React.SetStateAction<boolean>>;
-  modalState: {
-    visible: boolean;
-    data: string;
-  };
-  setModalState: React.Dispatch<
-    React.SetStateAction<{
-      visible: boolean;
-      data: any;
-      type?: any;
-    }>
-  >;
-  selectedTemplate: {
-    id: string;
-    route: string;
-  };
-  openNotification: (progress: number, key: any) => void;
-  handleCompleteCreation: () => void;
-  editData?: IDetailContentResponse;
-}) => {
-  const [uploadLoading, setUploadLoading] = useState(false);
+}: NewAlbumGraduationFormProps) => {
   const [showLlmModal, setShowLlmModal] = useState(false);
 
   const profile = useMemoifyProfile();
   const router = useRouter();
   const [form] = useForm();
 
-  const collectionOfImages = useSelector(
-    (state: RootState) => state.uploadSlice.collectionOfImages
-  );
-
   const dispatch = useDispatch();
-
-  const handleSetCollectionImagesURI = (
-    payload: { uri: string; uid: string },
-    formName: string
-  ) => {
-    dispatch(setCollectionOfImages([{ ...payload, url: payload.uri }]));
-  };
-
-  const handleRemoveCollectionImage = (uid: string) => {
-    dispatch(removeCollectionOfImages(uid));
-    const images = collectionOfImages.filter((item) => item.uid !== uid);
-    form.setFieldValue('images', images?.length > 0 ? images : undefined);
-  };
-
-  const handleSetStoryImageURI = (
-    payload: { uri: string; uid: string },
-    formName: string,
-    fieldIndex?: number
-  ) => {
-    const currentValues = form.getFieldValue(formName) || [];
-    currentValues[fieldIndex!] = {
-      ...currentValues[fieldIndex!],
-      imageUrl: payload.uri,
-    };
-    form.setFieldsValue({ [formName]: currentValues });
-  };
-
-  const uploadButton = (
-    <button style={{ border: 0, background: 'none' }} type="button">
-      {loading ? <LoadingOutlined /> : <PlusOutlined />}
-      <div style={{ marginTop: 8 }}>Upload</div>
-    </button>
-  );
+  const images = useWatch('images', form);
 
   const handleSubmit = async (
     val: any,
     status: 'draft' | 'published' = 'published'
   ) => {
+    setLoading(true);
     // Close the FinalModal if it's open
     if (modalState.visible) {
       setModalState({ visible: false, data: '' });
@@ -147,10 +85,7 @@ const AlbumGraduationv1 = ({
       university,
       graduationDate,
       photographerName,
-      images:
-        collectionOfImages.length > 0
-          ? collectionOfImages.map((dx) => dx.uri)
-          : null, //leave it
+      images: images,
       isPublic, //leave it
 
       // LLM props
@@ -184,8 +119,10 @@ const AlbumGraduationv1 = ({
       dispatch(reset());
 
       if (status === 'draft') {
+        setLoading(false);
         router.push('/preview?link=' + userLink);
       } else {
+        setLoading(false);
         setModalState({
           visible: true,
           data: userLink as string,
@@ -196,6 +133,7 @@ const AlbumGraduationv1 = ({
         handleCompleteCreation();
       }
     } else {
+      setLoading(false);
       message.error(res.message);
     }
   };
@@ -204,18 +142,10 @@ const AlbumGraduationv1 = ({
     if (editData) {
       const jsonContent = JSON.parse(editData.detail_content_json_text);
 
-      const images = parsingImageFromJSON(
-        jsonContent,
-        'collection-images',
-        'images'
-      );
-
-      dispatch(setCollectionOfImages(images));
-
       form.setFieldsValue({
         ...jsonContent,
         graduationDate: dayjs(jsonContent.graduationDate),
-        images,
+        images: jsonContent.images,
         title2: editData.title,
         caption: editData.caption,
       });
@@ -322,55 +252,15 @@ const AlbumGraduationv1 = ({
               </p>
             </div>
           }>
-          <Upload
-            customRequest={({ onSuccess }) => {
-              setTimeout(() => {
-                onSuccess?.('ok', undefined);
-              }, 0);
-            }}
-            accept=".jpg, .jpeg, .png"
+          <DraggerUpload
+            profileImageURL={images}
+            form={form}
+            formItemName={'images'}
+            type={profile?.type as AccountType}
             multiple={true}
-            maxCount={profile?.type === 'free' ? 5 : 15}
-            listType="picture-card"
-            fileList={
-              editData
-                ? collectionOfImages.length > 0
-                  ? (collectionOfImages as any)
-                  : []
-                : undefined
-            }
-            onRemove={(file) => handleRemoveCollectionImage(file.uid)}
-            beforeUpload={async (file, fileList) => {
-              if (fileList.length > 5) {
-                // Find the index of the current file in the list
-                const fileIndex = fileList.findIndex((f) => f.uid === file.uid);
-
-                // Only process the first 5 files, ignore the rest
-                if (fileIndex >= 5) {
-                  return Upload.LIST_IGNORE;
-                }
-              }
-
-              // setUploadLoading(true);
-              await beforeUpload(
-                file as FileType,
-                profile
-                  ? ['premium', 'pending'].includes(profile.type as any)
-                    ? 'premium'
-                    : 'free'
-                  : 'free',
-                openNotification,
-                handleSetCollectionImagesURI,
-                'images'
-              );
-              // setUploadLoading(false);
-            }}>
-            {collectionOfImages.length >= 5 && profile?.type === 'free'
-              ? null
-              : collectionOfImages.length >= 15 && profile?.type !== 'free'
-              ? null
-              : uploadButton}
-          </Upload>
+            limit={profile?.type === 'free' ? 5 : 20}
+            openNotification={openNotification}
+          />
         </Form.Item>
         <Form.Item
           name="movieGenre"
@@ -413,7 +303,7 @@ const AlbumGraduationv1 = ({
                   });
               }}
               className="!bg-white !text-black !border-[1px] !border-black !rounded-full"
-              loading={loading || uploadLoading}
+              loading={loading}
               type="primary"
               htmlType="submit"
               size="large">
@@ -438,7 +328,7 @@ const AlbumGraduationv1 = ({
                 });
             }}
             className="!bg-black !rounded-full"
-            loading={loading || uploadLoading}
+            loading={loading}
             type="primary"
             htmlType="submit"
             size="large">

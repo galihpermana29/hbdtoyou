@@ -1,76 +1,45 @@
 'use client';
-import { beforeUpload, FileType } from '@/components/forms/netflix-form';
-import { Button, Form, message, Upload } from 'antd';
-import { useSelector } from 'react-redux';
-import { RootState } from '@/lib/store';
-import { useDispatch } from 'react-redux';
+import { Button, Form, message } from 'antd';
 import { useMemoifyProfile } from '@/app/session-provider';
-import {
-  removeCollectionOfImages,
-  setCollectionOfImages,
-} from '@/lib/uploadSlice';
-import { PlusOutlined } from '@ant-design/icons';
 import { IAllTemplateResponse } from '@/action/interfaces';
 import { useEffect, useState } from 'react';
 import {
   createContent,
-  getOriginalTemplates,
   getPopularTemplates,
   warmUpAIModel,
 } from '@/action/user-api';
 import CardTemplateTag from '@/components/newlanding/card-template/CardTemplateTag';
-import { CheckIcon, CircleCheck } from 'lucide-react';
+import { CheckIcon } from 'lucide-react';
 import clsx from 'clsx';
-import { json } from 'stream/consumers';
 import { useRouter, useSearchParams } from 'next/navigation';
+import DraggerUpload, { AccountType } from '@/components/ui/uploader/uploader';
+import { useWatch } from 'antd/es/form/Form';
+
+interface FormGenerationProps {
+  openNotification: (progress: number, key: any, isError?: boolean) => void;
+  selectedTemplateId: string;
+  setSelectedTemplateId: (id: string) => void;
+  setLoading: (loading: boolean) => void;
+  loading: boolean;
+}
 
 const FormGeneration = ({
   openNotification,
   selectedTemplateId,
   setSelectedTemplateId,
   setLoading,
-  loading,
-}: {
-  openNotification: (progress: number, key: any, isError?: boolean) => void;
-  selectedTemplateId: string;
-  setSelectedTemplateId: (id: string) => void;
-  setLoading: (loading: boolean) => void;
-  loading: boolean;
-}) => {
-  const collectionOfImages = useSelector(
-    (state: RootState) => state.uploadSlice.collectionOfImages
-  );
-
-  const dispatch = useDispatch();
+}: FormGenerationProps) => {
   const [form] = Form.useForm();
   const profile = useMemoifyProfile();
 
   const router = useRouter();
   const query = useSearchParams();
   const templateName = query.get('route');
+  const images = useWatch('images', form);
 
   const [popularTemplates, setPopularTemplates] = useState<
     IAllTemplateResponse[] | null
   >(null);
-  const handleSetCollectionImagesURI = (
-    payload: { uri: string; uid: string },
-    formName: string
-  ) => {
-    dispatch(setCollectionOfImages([{ ...payload, url: payload.uri }]));
-  };
-
-  const handleRemoveCollectionImage = (uid: string) => {
-    dispatch(removeCollectionOfImages(uid));
-    const images = collectionOfImages.filter((item) => item.uid !== uid);
-    form.setFieldValue('images', images?.length > 0 ? images : undefined);
-  };
-
-  const uploadButton = (
-    <button style={{ border: 0, background: 'none' }} type="button">
-      <PlusOutlined />
-      <div style={{ marginTop: 8 }}>Upload</div>
-    </button>
-  );
 
   const handleGetTemplates = async () => {
     await warmUpAIModel();
@@ -98,16 +67,12 @@ const FormGeneration = ({
     }
   };
 
-  const handleFinish = async () => {
+  const handleFinish = async (value: any) => {
     setLoading(true);
     const json_text = {
       title: 'Scrapbook AI',
       subTitle: 'Scrapbook AI',
-
-      images:
-        collectionOfImages.length > 0
-          ? collectionOfImages.map((dx) => dx.uri)
-          : null,
+      images: value.images || null,
       isPublic: true,
     };
 
@@ -186,11 +151,6 @@ const FormGeneration = ({
           </p>
         </div>
         <Form.Item
-          getValueFromEvent={(e) => {
-            // return just the fileList (or your custom format if needed)
-            if (Array.isArray(e)) return e;
-            return e?.fileList;
-          }}
           rules={[
             { required: true, message: 'Please upload atleast 1 content' },
           ]}
@@ -200,58 +160,18 @@ const FormGeneration = ({
               <h3 className="text-[15px] font-semibold">
                 Collection of images
               </h3>
-
-              {/* <p className="text-[13px] text-gray-600 max-w-[400px]">
-                Account with <span className="font-bold">free</span> plan can
-                only add 5 images. To add up to 20 images, upgrade to{' '}
-                <span className="font-bold">premium</span> plan.
-              </p> */}
             </div>
           }>
-          <Upload
+          <DraggerUpload
             disabled={profile?.token_scrapbook === 0}
-            customRequest={({ onSuccess }) => {
-              setTimeout(() => {
-                onSuccess?.('ok', undefined);
-              }, 0);
-            }}
-            accept=".jpg, .jpeg, .png"
+            profileImageURL={images}
+            form={form}
+            formItemName={'images'}
+            type={profile?.type as AccountType}
             multiple={true}
-            maxCount={profile?.type === 'free' ? 5 : 20}
-            listType="picture-card"
-            fileList={
-              collectionOfImages.length > 0 ? (collectionOfImages as any) : []
-            }
-            onRemove={(file) => handleRemoveCollectionImage(file.uid)}
-            beforeUpload={async (file, fileList) => {
-              if (fileList.length > 5) {
-                // Find the index of the current file in the list
-                const fileIndex = fileList.findIndex((f) => f.uid === file.uid);
-
-                // Only process the first 5 files, ignore the rest
-                if (fileIndex >= 5) {
-                  return Upload.LIST_IGNORE;
-                }
-              }
-
-              await beforeUpload(
-                file as FileType,
-                profile
-                  ? ['premium', 'pending'].includes(profile.type as any)
-                    ? 'premium'
-                    : 'free'
-                  : 'free',
-                openNotification,
-                handleSetCollectionImagesURI,
-                'images'
-              );
-            }}>
-            {collectionOfImages.length >= 10 && profile?.type === 'free'
-              ? null
-              : collectionOfImages.length >= 20 && profile?.type !== 'free'
-              ? null
-              : uploadButton}
-          </Upload>
+            limit={profile?.type === 'free' ? 5 : 20}
+            openNotification={openNotification}
+          />
         </Form.Item>
 
         <Form.Item

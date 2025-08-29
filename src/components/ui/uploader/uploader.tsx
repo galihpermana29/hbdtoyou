@@ -22,6 +22,7 @@ interface DraggerUploadI {
   limit?: number;
   multiple?: boolean;
   openNotification?: OpenNotificationFunction;
+  disabled?: boolean;
 }
 
 const DraggerUpload = ({
@@ -32,6 +33,7 @@ const DraggerUpload = ({
   multiple = false,
   type = AccountType.free,
   openNotification,
+  disabled = false,
 }: DraggerUploadI) => {
   const [loadingUpload, setLoadingUpload] = useState(false);
   const [fileList, setFileList] = useState<any[]>([]);
@@ -153,6 +155,7 @@ const DraggerUpload = ({
     <div className="flex flex-col items-start">
       <LoadingHandler isLoading={loadingUpload} classname="h-[169px]">
         <Upload
+          disabled={disabled}
           maxCount={limit}
           multiple={multiple}
           accept=".jpg, .jpeg, .png"
@@ -161,7 +164,7 @@ const DraggerUpload = ({
             if (limit === 1) {
               form.setFieldValue(formItemName, null);
             } else {
-              const currentValue = Array.isArray(formItemName) 
+              const currentValue = Array.isArray(formItemName)
                 ? form.getFieldValue(formItemName)
                 : val[formItemName as string];
               form.setFieldValue(
@@ -188,7 +191,7 @@ const DraggerUpload = ({
               if (limit === 1) {
                 form.setFieldValue(formItemName, data);
               } else {
-                const currentValue = Array.isArray(formItemName) 
+                const currentValue = Array.isArray(formItemName)
                   ? form.getFieldValue(formItemName)
                   : form.getFieldValue(formItemName as string);
                 form.setFieldValue(

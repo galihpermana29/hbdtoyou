@@ -1,16 +1,17 @@
 'use client';
 import FormGeneration from './FormGeneration';
 import useCreateContent from '../../create/usecase/useCreateContent';
-import ScrapbookResult1 from '../../scrapbook1/page';
-import ScrapbookResult2 from '../../scrapbook2/page';
 import { useEffect, useState } from 'react';
 import { Spin } from 'antd';
 import { LoadingOutlined } from '@ant-design/icons';
 import { useSearchParams } from 'next/navigation';
-import Scrapbook3 from '../../scrapbook3/page';
-import Scrapbook4 from '../../scrapbook4/page';
+import ScrapbookResult1 from '@/app/(landing)/(scrapbooks)/scrapbook1/page';
+import ScrapbookResult2 from '@/app/(landing)/(scrapbooks)/scrapbook2/page';
+import Scrapbook3 from '@/app/(landing)/(scrapbooks)/scrapbook3/page';
+import Scrapbook4 from '@/app/(landing)/(scrapbooks)/scrapbook4/page';
+import Scrapbook5 from '@/app/(landing)/(scrapbooks)/scrapbook5/page';
+
 import { warmUpAIModel } from '@/action/user-api';
-import Scrapbook5 from '../../scrapbook5/page';
 
 const ScrapbookCreatePage = () => {
   const {

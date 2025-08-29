@@ -1,42 +1,24 @@
 'use client';
-import {
-  Badge,
-  Button,
-  Col,
-  Divider,
-  Form,
-  Image,
-  Input,
-  message,
-  Modal,
-  Row,
-  Select,
-  Switch,
-  Upload,
-} from 'antd';
+import { Badge, Button, Form, Input, message, Modal, Select } from 'antd';
 import TextArea from 'antd/es/input/TextArea';
-import { useEffect, useState } from 'react';
-import type { GetProp, UploadFile, UploadProps } from 'antd';
-import {
-  LoadingOutlined,
-  MinusCircleOutlined,
-  PlusOutlined,
-} from '@ant-design/icons';
-import { v4 as uuidv4 } from 'uuid';
+import { useEffect } from 'react';
+
 import { useForm, useWatch } from 'antd/es/form/Form';
-import { revalidateRandom } from '@/lib/revalidate';
 import { useMemoifyProfile } from '@/app/session-provider';
 import { createContent, editContent } from '@/action/user-api';
-import { beforeUpload, getBase64, getBase64Multiple } from './netflix-form';
 import { v3Songs } from '@/lib/songs';
 import { IDetailContentResponse } from '@/action/interfaces';
-import { parsingImageFromJSON } from '@/lib/utils';
-import FinalModal from './final-modal';
 import dayjs from 'dayjs';
 import { useRouter } from 'next/navigation';
-type FileType = Parameters<GetProp<UploadProps, 'beforeUpload'>>[0];
+import DraggerUpload, { AccountType } from '@/components/ui/uploader/uploader';
+import FinalModal from '../final-modal';
+import { UseCreateContentReturn } from '@/app/(landing)/(core)/create/usecase/useCreateContent';
 
-const Newspaperv3Form = ({
+interface NewNewspaper3FormProps extends Partial<UseCreateContentReturn> {
+  editData?: IDetailContentResponse;
+}
+
+const NewNewspaper3Form = ({
   loading,
   setLoading,
   modalState,
@@ -45,51 +27,13 @@ const Newspaperv3Form = ({
   openNotification,
   handleCompleteCreation,
   editData,
-}: {
-  loading: boolean;
-  setLoading: React.Dispatch<React.SetStateAction<boolean>>;
-  modalState: {
-    visible: boolean;
-    data: string;
-  };
-  setModalState: React.Dispatch<
-    React.SetStateAction<{
-      visible: boolean;
-      data: any;
-      type?: any;
-    }>
-  >;
-  selectedTemplate: {
-    id: string;
-    route: string;
-  };
-  openNotification: (progress: number, key: any) => void;
-  handleCompleteCreation: () => void;
-  editData?: IDetailContentResponse;
-}) => {
-  const [imageUrl, setImageUrl] = useState<string>();
-
+}: NewNewspaper3FormProps) => {
   const profile = useMemoifyProfile();
-  const [uploadLoading, setUploadLoading] = useState(false);
   const [form] = useForm();
   const router = useRouter();
 
   const selectedSongs = useWatch('song', form);
-
-  const handleSetJumbotronImageURI = (
-    payload: { uri: string; uid: string },
-    formName: string
-  ) => {
-    form.setFieldValue(formName, payload);
-    setImageUrl(payload.uri);
-  };
-
-  const uploadButton = (
-    <button style={{ border: 0, background: 'none' }} type="button">
-      {loading ? <LoadingOutlined /> : <PlusOutlined />}
-      <div style={{ marginTop: 8 }}>Upload</div>
-    </button>
-  );
+  const jumbotronImage = useWatch('jumbotronImage', form);
 
   const handleSubmit = async (
     val: any,
@@ -98,7 +42,7 @@ const Newspaperv3Form = ({
     const { jumbotronImage, desc1, notableLyrics, isPublic } = val;
 
     const json_text = {
-      jumbotronImage: jumbotronImage?.uri,
+      jumbotronImage: jumbotronImage,
       desc1,
       notableLyrics,
       id: selectedSongs ?? '0W5o1Kxw1VlohSajPqeBMF',
@@ -147,12 +91,9 @@ const Newspaperv3Form = ({
   useEffect(() => {
     if (editData) {
       const jsonContent = JSON.parse(editData.detail_content_json_text);
-      const jumbotronImage = parsingImageFromJSON(jsonContent, 'jumbotron');
-      setImageUrl(jsonContent.jumbotronImage);
-
       form.setFieldsValue({
         ...jsonContent,
-        jumbotronImage,
+        jumbotronImage: jsonContent.jumbotronImage,
         song: jsonContent?.id,
         title2: editData.title,
         caption: editData.caption,
@@ -190,33 +131,15 @@ const Newspaperv3Form = ({
           ]}
           name={'jumbotronImage'}
           label="Jumbotron Image">
-          <Upload
-            accept=".jpg, .jpeg, .png"
-            name="avatar"
-            listType="picture-card"
-            className="avatar-uploader"
-            showUploadList={false}
-            beforeUpload={async (file) => {
-              setUploadLoading(true);
-              await beforeUpload(
-                file,
-                profile
-                  ? ['premium', 'pending'].includes(profile.type as any)
-                    ? 'premium'
-                    : 'free'
-                  : 'free',
-                openNotification,
-                handleSetJumbotronImageURI,
-                'jumbotronImage'
-              );
-              setUploadLoading(false);
-            }}>
-            {imageUrl ? (
-              <img src={imageUrl} alt="avatar" style={{ width: '100%' }} />
-            ) : (
-              uploadButton
-            )}
-          </Upload>
+          <DraggerUpload
+            profileImageURL={jumbotronImage}
+            form={form}
+            formItemName={'jumbotronImage'}
+            type={profile?.type as AccountType}
+            multiple={false}
+            limit={1}
+            openNotification={openNotification}
+          />
         </Form.Item>
 
         <Form.Item
@@ -326,7 +249,7 @@ const Newspaperv3Form = ({
                 });
             }}
             className="!bg-white !text-black !border-[1px] !border-black !rounded-full"
-            loading={loading || uploadLoading}
+            loading={loading}
             type="primary"
             htmlType="submit"
             size="large">
@@ -350,7 +273,7 @@ const Newspaperv3Form = ({
                 });
             }}
             className="!bg-black !rounded-full"
-            loading={loading || uploadLoading}
+            loading={loading}
             type="primary"
             htmlType="submit"
             size="large">
@@ -362,4 +285,4 @@ const Newspaperv3Form = ({
   );
 };
 
-export default Newspaperv3Form;
+export default NewNewspaper3Form;

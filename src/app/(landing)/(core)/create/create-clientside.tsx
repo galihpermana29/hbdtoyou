@@ -1,36 +1,17 @@
 'use client';
 import NavigationBar from '@/components/ui/navbar';
-import {
-  Button,
-  message,
-  Modal,
-  notification,
-  Progress,
-  Segmented,
-  Spin,
-  Steps,
-} from 'antd';
+import { Button, message, Segmented, Spin, Steps } from 'antd';
 import { useEffect, useState } from 'react';
 import { LoadingOutlined } from '@ant-design/icons';
 import Link from 'next/link';
-import NetflixForm from '@/components/forms/netflix-form';
 import {
-  getAllTemplates,
   getGraduationTemplates,
   getOriginalTemplates,
   getPopularTemplates,
 } from '@/action/user-api';
 import { IAllTemplateResponse } from '@/action/interfaces';
-import SpotifyForm from '@/components/forms/spotify-form';
 import { signIn } from 'next-auth/react';
-import DisneyForm from '@/components/forms/disney-form';
-import Newspaperv1Form from '@/components/forms/newspaperv1-form';
-import Newspaperv3Form from '@/components/forms/newspaperv3-form';
-import GraduationV1Form from '@/components/forms/graduationv1-form';
-import GraduationV2Form from '@/components/forms/graduationv2-form';
-import MagazineV1Form from '@/components/forms/magazinev1-form';
-import Formula1Form from '@/components/forms/f1historyv1-form';
-import CardTemplate from '@/components/newlanding/card-template/CardTemplate';
+
 import { ArrowLeft } from 'lucide-react';
 import useCreateContent from './usecase/useCreateContent';
 import { templateNameToRoute } from '@/lib/utils';
@@ -41,6 +22,10 @@ import NewNetflixForm from '@/components/forms/new/new-netflix-form';
 import NewDisneyForm from '@/components/forms/new/new-disney-form';
 import NewSpotifyForm from '@/components/forms/new/new-spotify-form';
 import NewMagazineV1Form from '@/components/forms/new/new-magazine1-form';
+import NewNewspaper1Form from '@/components/forms/new/new-newspaper1-form';
+import NewNewspaper3Form from '@/components/forms/new/new-newspaper3-form';
+import NewGraduation1Form from '@/components/forms/new/new-graduation1-form';
+import NewGraduation2Form from '@/components/forms/new/new-graduation2-form';
 
 const StepsCustom = [
   {
@@ -162,6 +147,18 @@ const CreatePage = () => {
     setCurrent(1);
   };
 
+  const templateComponents = {
+    netflixv1: NewNetflixForm,
+    spotifyv1: NewSpotifyForm,
+    disneyplusv1: NewDisneyForm,
+    newspaperv1: NewNewspaper1Form,
+    newspaperv3: NewNewspaper3Form,
+    graduationv1: NewGraduation1Form,
+    graduationv2: NewGraduation2Form,
+    magazinev1: NewMagazineV1Form,
+    albumgraduation1: AlbumGraduationv1,
+  };
+
   useEffect(() => {
     handleGetTemplates();
   }, []);
@@ -209,161 +206,25 @@ const CreatePage = () => {
           </div>
           {selectedTemplate ? (
             <div className="w-full">
-              {selectedTemplate.route.includes('netflixv1') && (
-                <NewNetflixForm
-                  handleCompleteCreation={handleCompleteCreation}
-                  openNotification={openNotification}
-                  selectedTemplate={selectedTemplate}
-                  loading={loading}
-                  setLoading={setLoading}
-                  modalState={modalState}
-                  setModalState={setModalState}
-                />
-                // <NetflixForm
-                //   handleCompleteCreation={handleCompleteCreation}
-                //   openNotification={openNotification}
-                //   selectedTemplate={selectedTemplate}
-                //   loading={loading}
-                //   setLoading={setLoading}
-                //   modalState={modalState}
-                //   setModalState={setModalState}
-                // />
-              )}
+              {(() => {
+                const TemplateComponent =
+                  templateComponents[selectedTemplate.route];
 
-              {selectedTemplate.route.includes('spotifyv1') && (
-                <NewSpotifyForm
-                  handleCompleteCreation={handleCompleteCreation}
-                  openNotification={openNotification}
-                  selectedTemplate={selectedTemplate}
-                  loading={loading}
-                  setLoading={setLoading}
-                  modalState={modalState}
-                  setModalState={setModalState}
-                />
-                // <SpotifyForm
-                //   handleCompleteCreation={handleCompleteCreation}
-                //   openNotification={openNotification}
-                //   selectedTemplate={selectedTemplate}
-                //   loading={loading}
-                //   setLoading={setLoading}
-                //   modalState={modalState}
-                //   setModalState={setModalState}
-                // />
-              )}
-
-              {selectedTemplate.route.includes('disneyplusv1') && (
-                <NewDisneyForm
-                  handleCompleteCreation={handleCompleteCreation}
-                  openNotification={openNotification}
-                  selectedTemplate={selectedTemplate}
-                  loading={loading}
-                  setLoading={setLoading}
-                  modalState={modalState}
-                  setModalState={setModalState}
-                />
-                // <DisneyForm
-                //   handleCompleteCreation={handleCompleteCreation}
-                //   openNotification={openNotification}
-                //   selectedTemplate={selectedTemplate}
-                //   loading={loading}
-                //   setLoading={setLoading}
-                //   modalState={modalState}
-                //   setModalState={setModalState}
-                // />
-              )}
-
-              {selectedTemplate.route.includes('newspaperv1') && (
-                <Newspaperv1Form
-                  handleCompleteCreation={handleCompleteCreation}
-                  openNotification={openNotification}
-                  selectedTemplate={selectedTemplate}
-                  loading={loading}
-                  setLoading={setLoading}
-                  modalState={modalState}
-                  setModalState={setModalState}
-                />
-              )}
-
-              {selectedTemplate.route.includes('newspaperv3') && (
-                <Newspaperv3Form
-                  handleCompleteCreation={handleCompleteCreation}
-                  openNotification={openNotification}
-                  selectedTemplate={selectedTemplate}
-                  loading={loading}
-                  setLoading={setLoading}
-                  modalState={modalState}
-                  setModalState={setModalState}
-                />
-              )}
-
-              {selectedTemplate.route.includes('graduationv1') && (
-                <GraduationV1Form
-                  handleCompleteCreation={handleCompleteCreation}
-                  openNotification={openNotification}
-                  selectedTemplate={selectedTemplate}
-                  loading={loading}
-                  setLoading={setLoading}
-                  modalState={modalState}
-                  setModalState={setModalState}
-                />
-              )}
-
-              {selectedTemplate.route.includes('graduationv2') && (
-                <GraduationV2Form
-                  handleCompleteCreation={handleCompleteCreation}
-                  openNotification={openNotification}
-                  selectedTemplate={selectedTemplate}
-                  loading={loading}
-                  setLoading={setLoading}
-                  modalState={modalState}
-                  setModalState={setModalState}
-                />
-              )}
-
-              {selectedTemplate.route.includes('magazinev1') && (
-                <NewMagazineV1Form
-                  handleCompleteCreation={handleCompleteCreation}
-                  openNotification={openNotification}
-                  selectedTemplate={selectedTemplate!}
-                  loading={loading}
-                  setLoading={setLoading}
-                  modalState={modalState}
-                  setModalState={setModalState}
-                />
-                // <MagazineV1Form
-                //   handleCompleteCreation={handleCompleteCreation}
-                //   openNotification={openNotification}
-                //   selectedTemplate={selectedTemplate!}
-                //   loading={loading}
-                //   setLoading={setLoading}
-                //   modalState={modalState}
-                //   setModalState={setModalState}
-                // />
-              )}
-
-              {selectedTemplate.route.includes('f1historyv1') && (
-                <Formula1Form
-                  handleCompleteCreation={handleCompleteCreation}
-                  openNotification={openNotification}
-                  selectedTemplate={selectedTemplate!}
-                  loading={loading}
-                  setLoading={setLoading}
-                  modalState={modalState}
-                  setModalState={setModalState}
-                />
-              )}
-
-              {selectedTemplate.route.includes('albumgraduation1') && (
-                <AlbumGraduationv1
-                  handleCompleteCreation={handleCompleteCreation}
-                  openNotification={openNotification}
-                  selectedTemplate={selectedTemplate!}
-                  loading={loading}
-                  setLoading={setLoading}
-                  modalState={modalState}
-                  setModalState={setModalState}
-                />
-              )}
+                if (TemplateComponent) {
+                  return (
+                    <TemplateComponent
+                      handleCompleteCreation={handleCompleteCreation}
+                      openNotification={openNotification}
+                      selectedTemplate={selectedTemplate}
+                      loading={loading}
+                      setLoading={setLoading}
+                      modalState={modalState}
+                      setModalState={setModalState}
+                    />
+                  );
+                }
+                return null;
+              })()}
             </div>
           ) : (
             <>
