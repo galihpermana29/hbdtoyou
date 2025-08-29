@@ -3,7 +3,7 @@ import FormGeneration from './FormGeneration';
 import useCreateContent from '../../create/usecase/useCreateContent';
 import ScrapbookResult1 from '../../scrapbook1/page';
 import ScrapbookResult2 from '../../scrapbook2/page';
-import { useEffect, useState } from 'react';
+import { Suspense, useEffect, useState } from 'react';
 import { Spin } from 'antd';
 import { LoadingOutlined } from '@ant-design/icons';
 import { useSearchParams } from 'next/navigation';
@@ -28,11 +28,31 @@ const ScrapbookCreatePage = () => {
   const templateName = query.get('route');
 
   const scrapbookPreview = {
-    scrapbook1: <Scrapbook3 />,
-    scrapbook3: <ScrapbookResult2 />,
-    scrapbook2: <ScrapbookResult1 />,
-    scrapbook4: <Scrapbook4 />,
-    scrapbook5: <Scrapbook5 />,
+    scrapbook1: (
+      <Suspense>
+        <Scrapbook3 />
+      </Suspense>
+    ),
+    scrapbook3: (
+      <Suspense>
+        <ScrapbookResult2 />
+      </Suspense>
+    ),
+    scrapbook2: (
+      <Suspense>
+        <ScrapbookResult1 />
+      </Suspense>
+    ),
+    scrapbook4: (
+      <Suspense>
+        <Scrapbook4 />
+      </Suspense>
+    ),
+    scrapbook5: (
+      <Suspense>
+        <Scrapbook5 />
+      </Suspense>
+    ),
   };
 
   useEffect(() => {
