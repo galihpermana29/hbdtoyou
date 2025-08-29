@@ -121,6 +121,13 @@ export interface IQRISPaymentResponse {
   price?: number;
 }
 
+export interface IPaypalPaymentResponse {
+  payment_id: string;
+  qris_resp: string;
+  price?: number;
+  order_id?: string;
+}
+
 export interface IPaymentPayload {
   package_id: string;
   payment_method: 'qris' | 'paypal';

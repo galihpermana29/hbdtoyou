@@ -10,6 +10,7 @@ import {
   getDetailPayment,
   paymentByPaypal,
   getListPackages,
+  generatePaypal,
 } from '@/action/user-api';
 import NavigationBar from '@/components/ui/navbar';
 import { Button, Select, Typography, message } from 'antd';
@@ -101,7 +102,11 @@ const NewClientPagePayment = () => {
       ...prev,
       paypal: true,
     }));
-    const res = await paymentByPaypal();
+    // const res = await paymentByPaypal();
+    const res = await generatePaypal({
+      package_id: planId!,
+      payment_method: 'paypal',
+    });
     if (res.success) {
       window.open(
         `https://www.paypal.com/checkoutnow?token=${res.data.order_id}&type=${type}&plan_id=${planId}`,

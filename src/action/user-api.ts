@@ -14,6 +14,7 @@ import {
   IListPackageResponse,
   IOAuthResponse,
   IPaymentPayload,
+  IPaypalPaymentResponse,
   IProfileResponse,
   IQRISPaymentResponse,
   IResponsePaypal,
@@ -466,6 +467,38 @@ export async function approveRejectProof(
 export async function generateQRIS(
   payload: IPaymentPayload
 ): Promise<IGlobalResponse<null | IQRISPaymentResponse>> {
+  const session = await getSession();
+  const res = await fetch(baseUri?.replace('v1', 'v2') + `/payments`, {
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/json',
+      'X-Source': 'web',
+      'X-UserID': session.userId!,
+      Authorization: `Bearer ${session.accessToken}`,
+    },
+    body: JSON.stringify(payload),
+  });
+
+  if (!res.ok) {
+    return {
+      success: false,
+      message: res.statusText,
+      data: null,
+    };
+  }
+
+  const data = await res.json();
+
+  return {
+    success: true,
+    message: data.message,
+    data: data.data,
+  };
+}
+
+export async function generatePaypal(
+  payload: IPaymentPayload
+): Promise<IGlobalResponse<null | IPaypalPaymentResponse>> {
   const session = await getSession();
   const res = await fetch(baseUri?.replace('v1', 'v2') + `/payments`, {
     method: 'POST',
