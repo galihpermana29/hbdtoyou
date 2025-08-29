@@ -46,7 +46,7 @@ const FormGeneration = ({
   const [form] = Form.useForm();
   const profile = useMemoifyProfile();
 
-  // const isFreeAccount = profile?.token_scrapbook < 1;
+  const isFreeAccount = profile?.token_scrapbook < 1;
 
   const router = useRouter();
   const query = useSearchParams();
@@ -127,14 +127,6 @@ const FormGeneration = ({
     };
 
     try {
-      // const timeoutPromise = new Promise((_, reject) =>
-      //   setTimeout(() => reject(new Error('timeout')), 40000)
-      // );
-
-      // const res: any = await Promise.race([
-      //   createContent(payload),
-      //   timeoutPromise,
-      // ]);
       const res = await createContentClientSide(payload);
       if (res?.success) {
         form.resetFields();
@@ -183,11 +175,11 @@ const FormGeneration = ({
         </div>
         <div className="mt-[10px] mb-[5px]">
           <h3 className="text-[15px] font-semibold">AI Token</h3>
-          <p className="text-[13px] text-gray-600 max-w-[400px]">It is free</p>
-          {/* <p className="text-[13px] text-gray-600 max-w-[400px]">
+          {/* <p className="text-[13px] text-gray-600 max-w-[400px]">It is free</p> */}
+          <p className="text-[13px] text-gray-600 max-w-[400px]">
             You have {profile?.token_scrapbook} token, to generate scrapbook you
             need at least 1 token
-          </p> */}
+          </p>
         </div>
         <Form.Item
           getValueFromEvent={(e) => {
@@ -207,7 +199,7 @@ const FormGeneration = ({
             </div>
           }>
           <Upload
-            // disabled={profile?.token_scrapbook === 0}
+            disabled={isFreeAccount}
             customRequest={({ onSuccess }) => {
               setTimeout(() => {
                 onSuccess?.('ok', undefined);
@@ -297,7 +289,7 @@ const FormGeneration = ({
         </Form.Item>
 
         <Button
-          // disabled={profile?.token_scrapbook < 1}
+          disabled={isFreeAccount}
           type="primary"
           style={{
             height: '50px',
@@ -305,8 +297,8 @@ const FormGeneration = ({
           }}
           htmlType="submit"
           size="large">
-          {/* {profile?.token_scrapbook < 1 ? 'Upgrade Plan' : 'Generate Scrapbook'} */}
-          Generate Scrapbook
+          {isFreeAccount ? 'Upgrade Plan' : 'Generate Scrapbook'}
+          {/* Generate Scrapbook */}
         </Button>
       </Form>
     </div>
