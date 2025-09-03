@@ -77,6 +77,7 @@ const AlbumGraduationv1 = ({
       graduationDate,
       isPublic,
       photographerName,
+      link,
     } = val;
 
     const json_text = {
@@ -87,7 +88,7 @@ const AlbumGraduationv1 = ({
       photographerName,
       images: images,
       isPublic, //leave it
-
+      link,
       // LLM props
       llm_generated: generatedData,
     };
@@ -233,11 +234,12 @@ const AlbumGraduationv1 = ({
         </Form.Item>
         {/* LEAVE IT */}
         <Form.Item
-          getValueFromEvent={(e) => {
-            // return just the fileList (or your custom format if needed)
-            if (Array.isArray(e)) return e;
-            return e?.fileList;
-          }}
+          rules={[
+            {
+              required: true,
+              message: 'Please upload at least one image',
+            },
+          ]}
           name={'images'}
           label={
             <div className="mt-[10px] mb-[5px]">
@@ -279,6 +281,15 @@ const AlbumGraduationv1 = ({
             listHeight={256}
             virtual={false}
           />
+        </Form.Item>
+
+        <Form.Item
+          rules={[
+            { required: true, message: 'Please input sosial media link' },
+          ]}
+          name={'link'}
+          label="Sosial Media PG">
+          <Input placeholder="Input sosial media link" size="large" />
         </Form.Item>
         <div className="flex justify-end gap-2">
           <Tooltip

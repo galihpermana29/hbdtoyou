@@ -42,19 +42,21 @@ const DraggerUpload = ({
     fileList: newFileList,
     file,
   }) => {
-    if (file.size! > (type === AccountType.free ? 1 : 10) * 1024 * 1024) {
-      return message.error(
-        `${
-          type === AccountType.free ? 1 : 10
-        }MB is the maximum file size allowed`
-      );
-    }
-
-    if (newFileList.length > limit) {
-      message.error(`You can only upload ${limit} photos at a time!`);
-      return;
-    }
-    setFileList(newFileList);
+    // if (file.size! > (type === AccountType.free ? 1 : 9) * 1024 * 1024) {
+    //   return message.error(
+    //     `${
+    //       type === AccountType.free ? 1 : 9
+    //     }MB is the maximum file size allowed`
+    //   );
+    // }
+    // if (newFileList.length > limit) {
+    //   message.error(`You can only upload ${limit} photos at a time!`);
+    //   return;
+    // }
+    // console.log(newFileList, 'filelist?', fileList);
+    // setFileList(
+    //   fileList?.length > 0 ? [...fileList, ...newFileList] : newFileList
+    // );
   };
 
   const beforeUpload = async (file: RcFile, fileList: RcFile[]) => {
@@ -65,7 +67,7 @@ const DraggerUpload = ({
 
     //   // Only process the first 5 files, ignore the rest
     //   if (fileIndex >= 5) {
-    //     return Upload.LIST_IGNORE;
+    //     return false;
     //   }
     // }
 
@@ -73,11 +75,11 @@ const DraggerUpload = ({
     const isJpgOrPng = file.type === 'image/jpeg' || file.type === 'image/png';
     if (!isJpgOrPng) {
       message.error('You can only upload JPG/PNG file!');
-      return Upload.LIST_IGNORE;
+      return false;
     }
 
     // Validate file size based on account type
-    const maxSizeMB = type === 'free' ? 1 : 10;
+    const maxSizeMB = type === 'free' ? 1 : 9;
     const fileSizeMB = file.size / 1024 / 1024;
 
     if (fileSizeMB >= maxSizeMB) {
@@ -86,7 +88,7 @@ const DraggerUpload = ({
           ? 'Free account can only upload image below 1MB!'
           : 'Maximum image size is 10MB!';
       message.error(errorMessage);
-      return Upload.LIST_IGNORE;
+      return false;
     }
 
     // Proceed with upload if validation passes
@@ -106,12 +108,12 @@ const DraggerUpload = ({
         return result.data?.data;
       } else {
         message.error(result.message || 'Upload failed');
-        return Upload.LIST_IGNORE;
+        return false;
       }
     } catch (error) {
       setLoadingUpload(false);
       message.error('Upload failed due to network error');
-      return Upload.LIST_IGNORE;
+      return false;
     }
   };
 
@@ -167,6 +169,7 @@ const DraggerUpload = ({
               const currentValue = Array.isArray(formItemName)
                 ? form.getFieldValue(formItemName)
                 : val[formItemName as string];
+
               form.setFieldValue(
                 formItemName,
                 currentValue?.filter((dx: string) => dx !== file.url) || []
@@ -182,7 +185,7 @@ const DraggerUpload = ({
 
               // Only process the first 5 files, ignore the rest
               if (fileIndex >= limit) {
-                return Upload.LIST_IGNORE;
+                return false;
               }
             }
 

@@ -139,7 +139,6 @@ const NewSpotifyForm = ({
   useEffect(() => {
     if (editData) {
       const jsonContent = JSON.parse(editData.detail_content_json_text);
-      console.log(jsonContent, '?????');
       form.setFieldsValue({
         ...jsonContent,
         ourSongs: [],
