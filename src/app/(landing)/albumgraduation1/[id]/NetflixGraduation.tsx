@@ -74,14 +74,12 @@ const NetflixGraduation = ({
         document.body.style.lineHeight = '0.5';
 
         const canvas = await html2canvas(captureRef.current, {
-          scale: 1,
+          scale: 2 / 3,
           useCORS: true,
           allowTaint: true,
-          logging: false,
           backgroundColor: '#000000',
           width: 1080,
           height: 1920,
-          imageTimeout: 15000,
         });
 
         // Restore original body line height
