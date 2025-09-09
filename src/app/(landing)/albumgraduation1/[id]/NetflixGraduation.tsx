@@ -77,9 +77,11 @@ const NetflixGraduation = ({
           scale: 1,
           useCORS: true,
           allowTaint: true,
+          logging: false,
           backgroundColor: '#000000',
           width: 1080,
           height: 1920,
+          imageTimeout: 15000,
         });
 
         // Restore original body line height
@@ -113,7 +115,7 @@ const NetflixGraduation = ({
     };
 
     // The setTimeout ensures all images/assets inside the template have a moment to load
-    const timer = setTimeout(generateImage, 500);
+    const timer = setTimeout(generateImage, 1500);
     return () => clearTimeout(timer); // Cleanup the timer
   }, [templateToCapture, parsedData]); // Dependency array
 
