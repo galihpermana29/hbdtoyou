@@ -32,7 +32,6 @@ const FormGeneration = ({
 }: FormGenerationProps) => {
   const [form] = Form.useForm();
   const profile = useMemoifyProfile();
-  console.log(profile, '?');
   const isFreeAccount = profile?.token_scrapbook < 1;
 
   const router = useRouter();

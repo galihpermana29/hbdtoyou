@@ -107,7 +107,6 @@ const CardTemplateTag = ({
   data: IAllTemplateResponse;
   type?: 'creation' | 'preview' | 'scrapbook';
 }) => {
-  console.log(data, '>');
   return (
     <div>
       <div

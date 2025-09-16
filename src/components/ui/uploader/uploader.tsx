@@ -125,33 +125,41 @@ const DraggerUpload = ({
     </button>
   );
 
-  const updateFileList = (
-    profileImageURL: string | string[],
-    limit: number
-  ) => {
-    if (profileImageURL) {
-      return limit === 1
-        ? [
-            {
-              uid: '-1',
-              name: 'image.png',
-              status: 'done',
-              url: profileImageURL,
-            },
-          ]
-        : (profileImageURL as string[]).map((dx, idx) => ({
-            uid: idx + 1001,
-            name: `image ${idx}.png`,
-            status: 'done',
-            url: dx,
-          }));
+  const updateFileList = (profileImageURL: string | string[] | undefined) => {
+    // 1. Handle the case where the prop is empty or undefined
+    if (!profileImageURL || profileImageURL.length === 0) {
+      return [];
     }
+
+    // 2. Check if it's a string (single image for free account)
+    if (typeof profileImageURL === 'string') {
+      return [
+        {
+          uid: '-1',
+          name: 'image.png',
+          status: 'done',
+          url: profileImageURL,
+        },
+      ];
+    }
+
+    // 3. If it's an array, map over it (for premium account)
+    if (Array.isArray(profileImageURL)) {
+      return profileImageURL.map((url, idx) => ({
+        uid: `${idx}-${url}`, // Make UID more unique
+        name: `image ${idx}.png`,
+        status: 'done',
+        url: url,
+      }));
+    }
+
+    // Fallback for any other case
     return [];
   };
 
   useEffect(() => {
-    setFileList(updateFileList(profileImageURL!, limit));
-  }, [profileImageURL, limit]);
+    setFileList(updateFileList(profileImageURL!));
+  }, [profileImageURL]);
 
   return (
     <div className="flex flex-col items-start">

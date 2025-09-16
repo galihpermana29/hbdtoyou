@@ -135,11 +135,13 @@ const CreatePage = () => {
     if (template.name.includes('scrapbook')) {
       return router.push(`/scrapbook/create`);
     }
-    const routePath = templateNameToRoute(template.name);
 
     if (template.label === 'premium' && isFreeAccount) {
       return message.info('Premium plan required');
     }
+
+    const routePath = templateNameToRoute(template.name);
+    console.log(routePath, 'routePath', template);
 
     setSelectedTemplate({ id: template.id, route: routePath });
     setCurrent(1);

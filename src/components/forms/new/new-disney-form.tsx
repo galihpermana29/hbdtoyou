@@ -368,7 +368,6 @@ const NewDisneyForm = ({
           </Tooltip>
           <Button
             onClick={() => {
-              console.log(form.getFieldsValue(), 'v form.getFieldsValue()');
               form
                 .validateFields()
                 .then(() => {
