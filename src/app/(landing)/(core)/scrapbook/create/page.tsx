@@ -73,8 +73,8 @@ const ScrapbookCreatePage = () => {
       />
       <div className="w-full overflow-x-hidden min-h-screen">
         <div className="flex flex-col items-center justify-start min-h-screen py-[30px] mb-[50px]">
-          <div className="mx-auto max-w-6xl 2xl:max-w-[1400px] px-[20px] flex-1 w-full flex flex-col justify-center items-center lg:justify-normal lg:items-center lg:flex-row gap-[50px]">
-            <div className="flex-[1] max-w-[400px]">
+          <div className="mx-auto max-w-6xl 2xl:max-w-[1500px] px-[20px] flex-1 w-full flex flex-col justify-center items-center lg:justify-normal lg:items-center lg:flex-row gap-[50px]">
+            <div className="flex-[1] max-w-[500px] border-[#EDEDED] border-[1px] p-[24px] rounded-[16px]">
               <FormGeneration
                 openNotification={openNotification}
                 selectedTemplateId={selectedTemplateId}
@@ -84,7 +84,7 @@ const ScrapbookCreatePage = () => {
               />
             </div>
 
-            <div className="flex-[1.5]">
+            <div className="flex-[1.5] bg-[#F8FAFB] p-[24px] rounded-[16px] border-[#EDEDED] border-[1px]">
               <div className="my-[40px] lg:my-[0px] px-[16px]">
                 <h1 className="text-[#1B1B1B] font-[600] text-[18px] ">
                   Style Preview

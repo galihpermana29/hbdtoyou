@@ -29,6 +29,7 @@ const NewNewspaper1Form = ({
 }: NewNewspaper1FormProps) => {
   const [form] = useForm();
   const profile = useMemoifyProfile();
+  const isFreeAccount = profile?.quota < 1;
   const jumbotronImage = useWatch('jumbotronImage', form);
   const router = useRouter();
 
@@ -70,7 +71,7 @@ const NewNewspaper1Form = ({
       form.resetFields();
       if (status === 'draft') {
         setLoading(false);
-        router.push('/preview?link=' + userLink);
+        window.location.href = `/preview?link=${userLink}`;
       } else {
         setLoading(false);
         setModalState({
@@ -136,7 +137,7 @@ const NewNewspaper1Form = ({
             profileImageURL={jumbotronImage}
             form={form}
             formItemName={'jumbotronImage'}
-            type={profile?.type as AccountType}
+            type={isFreeAccount ? AccountType.free : AccountType.premium}
             multiple={false}
             limit={1}
             openNotification={openNotification}
@@ -190,7 +191,11 @@ const NewNewspaper1Form = ({
                           ])}
                           form={form}
                           formItemName={['stories', name, 'imageUrl']}
-                          type={profile?.type as AccountType}
+                          type={
+                            isFreeAccount
+                              ? AccountType.free
+                              : AccountType.premium
+                          }
                           multiple={false}
                           limit={1}
                           openNotification={openNotification}
@@ -236,7 +241,7 @@ const NewNewspaper1Form = ({
                 size="large"
                 type="primary"
                 onClick={() => {
-                  if (profile?.quota === 0) {
+                  if (isFreeAccount) {
                     if (fields.length <= 1) {
                       add();
                     } else {
@@ -266,7 +271,7 @@ const NewNewspaper1Form = ({
 
         <div className="flex justify-end gap-2">
           <Button
-            disabled={profile?.type === 'free'}
+            disabled={isFreeAccount}
             onClick={() => {
               form
                 .validateFields()

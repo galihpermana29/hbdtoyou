@@ -2,6 +2,7 @@ import { getDetailContent } from '@/action/user-api';
 import PageFlipScrapbook from '@/components/PageFlipScrapbook';
 import { ErrorBoundaryCustom } from '@/components/ui/error-boundary';
 import NavigationBar from '@/components/ui/navbar';
+import ResultWrapper from '../../result-wrapper';
 
 const getDetailDataNew = async (id: string) => {
   const res = await getDetailContent(id);
@@ -39,13 +40,15 @@ const Scrapbook3Result = async ({ params }: { params: { id: string } }) => {
         <NavigationBar />
       </div>
       <div className="mt-[100px]" />
-      <PageFlipScrapbook
-        pages={structuredPages}
-        coverImage={coverImage}
-        backCoverImage={backCoverImage}
-        coverTitle=""
-        backCoverTitle=""
-      />
+      <ResultWrapper>
+        <PageFlipScrapbook
+          pages={structuredPages}
+          coverImage={coverImage}
+          backCoverImage={backCoverImage}
+          coverTitle=""
+          backCoverTitle=""
+        />
+      </ResultWrapper>
     </div>
   );
 };

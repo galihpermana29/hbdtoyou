@@ -1,6 +1,10 @@
+.dragger-upload{
+  width: 100% !important;
+}
+
 .dragger-upload .ant-upload-list .ant-upload {
   width: 100% !important;
-  max-width: 187px !important;
+  max-width: 100% !important;
   height: 187px !important;
   aspect-ratio: 1/1 !important;
   background-color: none;
@@ -8,8 +12,8 @@
 
 .dragger-upload .ant-upload-list-item-container {
   width: 100% !important;
-  max-width: 187px !important;
-  height: 187px !important;
+  max-width: 100px !important;
+  height: 100px !important;
   aspect-ratio: 1/1 !important;
 }
 
@@ -19,7 +23,7 @@
   .ant-upload-wrapper.ant-upload-picture-circle-wrapper .ant-upload-list.ant-upload-list-picture-card,
   .ant-upload-wrapper.ant-upload-picture-circle-wrapper .ant-upload-list.ant-upload-list-picture-circle {
     display: flex !important;
-    flex-direction: column !important;
-    align-items: center !important;
+    /* flex-direction: column !important; */
+    /* align-items: center !important; */
   }
 }

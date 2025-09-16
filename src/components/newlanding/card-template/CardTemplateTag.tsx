@@ -15,6 +15,7 @@ import Image from 'next/image';
 import { ArrowRight } from 'lucide-react';
 
 import checkIcon from '@/assets/check-icon.png';
+import { Badge } from 'antd';
 
 export const DataToCardColor = {
   netflixv1: {
@@ -106,6 +107,7 @@ const CardTemplateTag = ({
   data: IAllTemplateResponse;
   type?: 'creation' | 'preview' | 'scrapbook';
 }) => {
+  console.log(data, '>');
   return (
     <div>
       <div
@@ -130,32 +132,42 @@ const CardTemplateTag = ({
           )}
           <div className="flex items-center gap-2">
             {type !== 'scrapbook' && (
-              <div
-                onClick={(e) => {
-                  e.stopPropagation();
-                }}>
-                <Link
-                  target="_blank"
-                  // split netflix - netflixv1
-                  href={`/${data.name.split('-')[1]?.split(' ')[1]}`}>
-                  <h1
-                    className={clsx(
-                      'text-[16px] font-[600] hover:underline',
-                      DataToCardColor[data.name.split('-')[1]?.split(' ')[1]]
-                        ?.text
-                    )}>
-                    Preview
-                  </h1>
-                </Link>
-              </div>
+              <>
+                <div
+                  onClick={(e) => {
+                    e.stopPropagation();
+                  }}>
+                  <Link
+                    target="_blank"
+                    // split netflix - netflixv1
+                    href={`/${data.name.split('-')[1]?.split(' ')[1]}`}>
+                    <h1
+                      className={clsx(
+                        'text-[16px] font-[600] hover:underline',
+                        DataToCardColor[data.name.split('-')[1]?.split(' ')[1]]
+                          ?.text
+                      )}>
+                      Preview
+                    </h1>
+                  </Link>
+                </div>
+                <ArrowRight
+                  size={24}
+                  className={clsx(
+                    DataToCardColor[data.name.split('-')[1]?.split(' ')[1]]
+                      ?.text
+                  )}
+                />
+              </>
             )}
 
-            <ArrowRight
-              size={24}
-              className={clsx(
-                DataToCardColor[data.name.split('-')[1]?.split(' ')[1]]?.text
-              )}
-            />
+            {type === 'scrapbook' && (
+              <Badge
+                className="capitalize"
+                count={data.label}
+                color={data.label === 'premium' ? 'gold' : 'red'}
+              />
+            )}
           </div>
         </div>
         <div className="mt-[16px]">

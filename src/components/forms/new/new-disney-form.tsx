@@ -30,6 +30,7 @@ const NewDisneyForm = ({
   editData,
 }: NewDisneyFormProps) => {
   const profile = useMemoifyProfile();
+  const isFreeAccount = profile?.quota < 1;
   const router = useRouter();
   const [form] = useForm();
   const dispatch = useDispatch();
@@ -90,7 +91,8 @@ const NewDisneyForm = ({
 
       if (status === 'draft') {
         setLoading(false);
-        router.push('/preview?link=' + userLink);
+        window.location.href = `/preview?link=${userLink}`;
+        //window.location.href = `/preview?link=${userLink}`;
       } else {
         setLoading(false);
         setModalState({
@@ -157,7 +159,7 @@ const NewDisneyForm = ({
             profileImageURL={jumbotronImage}
             form={form}
             formItemName={'jumbotronImage'}
-            type={profile?.type as AccountType}
+            type={isFreeAccount ? AccountType.free : AccountType.premium}
             multiple={false}
             limit={1}
             openNotification={openNotification}
@@ -211,7 +213,11 @@ const NewDisneyForm = ({
                           ])}
                           form={form}
                           formItemName={['episodes', name, 'imageUrl']}
-                          type={profile?.type as AccountType}
+                          type={
+                            isFreeAccount
+                              ? AccountType.free
+                              : AccountType.premium
+                          }
                           multiple={false}
                           limit={1}
                           openNotification={openNotification}
@@ -259,7 +265,7 @@ const NewDisneyForm = ({
                 size="large"
                 type="primary"
                 onClick={() => {
-                  if (profile?.quota === 0) {
+                  if (isFreeAccount) {
                     if (fields.length <= 1) {
                       add({
                         imageUrl: '',
@@ -324,22 +330,22 @@ const NewDisneyForm = ({
             profileImageURL={images}
             form={form}
             formItemName={'images'}
-            type={profile?.type as AccountType}
+            type={isFreeAccount ? AccountType.free : AccountType.premium}
             multiple={true}
-            limit={profile?.type === 'free' ? 5 : 20}
+            limit={isFreeAccount ? 5 : 20}
             openNotification={openNotification}
           />
         </Form.Item>
         <div className="flex justify-end gap-2">
           <Tooltip
             title={
-              profile?.type === 'free'
+              isFreeAccount
                 ? 'To save as draft and see preview, please join premium plan'
                 : ''
             }
             placement="top">
             <Button
-              disabled={profile?.type === 'free'}
+              disabled={isFreeAccount}
               onClick={() => {
                 form
                   .validateFields()

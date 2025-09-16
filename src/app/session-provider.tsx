@@ -34,6 +34,8 @@ interface SessionContextType {
     setVisible: React.Dispatch<React.SetStateAction<boolean>>;
     currentAdContent: AdContent | null;
   };
+  queryKey: string;
+  setQueryKey: React.Dispatch<React.SetStateAction<string>>;
 }
 
 // Create a default empty context
@@ -124,6 +126,8 @@ const SessionProvider = ({
     null
   );
 
+  const [queryKey, setQueryKey] = useState('');
+
   const [loading, setLoading] = useState(true);
 
   const isHideAds =
@@ -131,7 +135,7 @@ const SessionProvider = ({
     userProfile?.type === 'premium';
 
   useEffect(() => {
-    if (parsedSession.accessToken) {
+    if (parsedSession.accessToken && queryKey && queryKey !== '') {
       const handleGetProfile = async () => {
         setLoading(true);
         const res = await getUserProfile();
@@ -145,7 +149,7 @@ const SessionProvider = ({
         handleGetProfile();
       }, 1000);
     }
-  }, [parsedSession.accessToken]);
+  }, [parsedSession.accessToken, queryKey]);
 
   useEffect(() => {
     if (parsedSession.accessToken) {
@@ -211,6 +215,8 @@ const SessionProvider = ({
           setVisible: setAdsModalVisible,
           currentAdContent,
         },
+        queryKey,
+        setQueryKey,
       }}>
       {/* Promotional Ads Modal */}
       <Modal
@@ -285,6 +291,15 @@ export const useMemoifySession = () => {
     throw new Error('useSession must be used within a SessionProvider');
   }
   return context.parsedSession;
+};
+
+// Create a custom hook to access the context
+export const useRevalidateProfile = () => {
+  const context = useContext(SessionContext);
+  if (!context) {
+    throw new Error('useSession must be used within a SessionProvider');
+  }
+  return context.setQueryKey;
 };
 
 // Create a custom hook to access the context

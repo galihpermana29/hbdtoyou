@@ -31,6 +31,7 @@ const NewMagazineV1Form = ({
   editData,
 }: NewMagazine1FormProps) => {
   const profile = useMemoifyProfile();
+  const isFreeAccount = profile?.quota < 1;
   const [form] = useForm();
   const selectedSongs = useWatch('song', form);
 
@@ -90,7 +91,7 @@ const NewMagazineV1Form = ({
 
       if (status === 'draft') {
         setLoading(false);
-        router.push('/preview?link=' + userLink);
+        window.location.href = `/preview?link=${userLink}`;
       } else {
         setLoading(false);
         setModalState({
@@ -249,9 +250,9 @@ const NewMagazineV1Form = ({
             profileImageURL={momentOfYou}
             form={form}
             formItemName={'momentOfYou'}
-            type={profile?.type as AccountType}
+            type={isFreeAccount ? AccountType.free : AccountType.premium}
             multiple={true}
-            limit={profile?.type === 'free' ? 5 : 20}
+            limit={isFreeAccount ? 5 : 20}
             openNotification={openNotification}
           />
         </Form.Item>
@@ -263,7 +264,7 @@ const NewMagazineV1Form = ({
 
         <div className="flex justify-end gap-2">
           <Button
-            disabled={profile?.type === 'free'}
+            disabled={isFreeAccount}
             onClick={() => {
               form
                 .validateFields()

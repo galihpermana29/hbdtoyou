@@ -29,6 +29,7 @@ const NewNewspaper3Form = ({
   editData,
 }: NewNewspaper3FormProps) => {
   const profile = useMemoifyProfile();
+  const isFreeAccount = profile?.quota < 1;
   const [form] = useForm();
   const router = useRouter();
 
@@ -70,7 +71,7 @@ const NewNewspaper3Form = ({
       const userLink = selectedTemplate.route + '/' + res.data;
       form.resetFields();
       if (status === 'draft') {
-        router.push('/preview?link=' + userLink);
+        window.location.href = `/preview?link=${userLink}`;
       } else {
         setModalState({
           visible: true,
@@ -135,7 +136,7 @@ const NewNewspaper3Form = ({
             profileImageURL={jumbotronImage}
             form={form}
             formItemName={'jumbotronImage'}
-            type={profile?.type as AccountType}
+            type={isFreeAccount ? AccountType.free : AccountType.premium}
             multiple={false}
             limit={1}
             openNotification={openNotification}
@@ -178,13 +179,7 @@ const NewNewspaper3Form = ({
                 </div>
               ),
               value: dx.id,
-              disabled: dx.isPremium
-                ? profile
-                  ? profile.quota > 0
-                    ? false
-                    : true
-                  : false
-                : false,
+              disabled: dx.isPremium ? isFreeAccount : false,
             }))}
             placeholder="Select a song"
             size="large"
@@ -235,7 +230,7 @@ const NewNewspaper3Form = ({
 
         <div className="flex justify-end gap-2">
           <Button
-            disabled={profile?.type === 'free'}
+            disabled={isFreeAccount}
             onClick={() => {
               form
                 .validateFields()

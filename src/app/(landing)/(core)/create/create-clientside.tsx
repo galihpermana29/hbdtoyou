@@ -82,6 +82,7 @@ const CreatePage = () => {
     setSelectedTemplate,
     setCurrent,
   } = useCreateContent();
+  const isFreeAccount = profile?.quota < 1;
 
   const [templateFilter, setTemplateFilter] = useState('All');
 
@@ -134,13 +135,10 @@ const CreatePage = () => {
     if (template.name.includes('scrapbook')) {
       return router.push(`/scrapbook/create`);
     }
-
     const routePath = templateNameToRoute(template.name);
 
-    if (template.label === 'premium') {
-      if (!['pending', 'premium'].includes(profile?.type as any)) {
-        return message.info('Premium plan required');
-      }
+    if (template.label === 'premium' && isFreeAccount) {
+      return message.info('Premium plan required');
     }
 
     setSelectedTemplate({ id: template.id, route: routePath });

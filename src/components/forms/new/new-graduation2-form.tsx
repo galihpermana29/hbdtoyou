@@ -28,6 +28,7 @@ const NewGraduation2Form = ({
   editData,
 }: NewGraduation2FormProps) => {
   const profile = useMemoifyProfile();
+  const isFreeAccount = profile?.quota < 1;
   const [form] = useForm();
 
   const images = useWatch('images', form);
@@ -78,7 +79,7 @@ const NewGraduation2Form = ({
       form.resetFields();
       if (status === 'draft') {
         setLoading(false);
-        router.push('/preview?link=' + userLink);
+        window.location.href = `/preview?link=${userLink}`;
       } else {
         setLoading(false);
         setModalState({
@@ -184,22 +185,22 @@ const NewGraduation2Form = ({
             profileImageURL={images}
             form={form}
             formItemName={'images'}
-            type={profile?.type as AccountType}
+            type={isFreeAccount ? AccountType.free : AccountType.premium}
             multiple={true}
-            limit={profile?.type === 'free' ? 4 : 20}
+            limit={isFreeAccount ? 4 : 20}
             openNotification={openNotification}
           />
         </Form.Item>
         <div className="flex justify-end gap-2">
           <Tooltip
             title={
-              profile?.type === 'free'
+              isFreeAccount
                 ? 'To save as draft and see preview, please join premium plan'
                 : ''
             }
             placement="top">
             <Button
-              disabled={profile?.type === 'free'}
+              disabled={isFreeAccount}
               onClick={() => {
                 form
                   .validateFields()

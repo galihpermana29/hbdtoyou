@@ -1,10 +1,14 @@
-import { useMemoifyProfile, useMemoifySession } from '@/app/session-provider';
+import {
+  useMemoifyProfile,
+  useMemoifySession,
+  useRevalidateProfile,
+} from '@/app/session-provider';
 import { reset } from '@/lib/uploadSlice';
 import { notification, Progress } from 'antd';
 import { NotificationInstance } from 'antd/es/notification/interface';
 import { useState } from 'react';
 import { useDispatch } from 'react-redux';
-
+import { v4 as uuidv4 } from 'uuid';
 // Define reusable types
 interface Template {
   id: string;
@@ -62,6 +66,7 @@ const useCreateContent = (): UseCreateContentReturn => {
 
   const session = useMemoifySession();
   const profile = useMemoifyProfile();
+  const revalidateProfile = useRevalidateProfile();
 
   const [api, contextHolder] = notification.useNotification();
 
@@ -100,7 +105,7 @@ const useCreateContent = (): UseCreateContentReturn => {
   const handleCompleteCreation = () => {
     setSelectedTemplate(null);
     setCurrent(2);
-
+    revalidateProfile(uuidv4());
     //rest
     dispatch(reset());
   };

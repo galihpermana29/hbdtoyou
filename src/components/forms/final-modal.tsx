@@ -19,11 +19,12 @@ const FinalModal = ({
   preFormValue,
   loading,
 }: {
-  profile: { type: string };
+  profile: { type: string; quota?: number };
   onSubmit: (val: any, status: 'draft' | 'published') => Promise<void>;
   preFormValue: any;
   loading?: boolean;
 }) => {
+  const isFreeAccount = profile?.quota < 1;
   const [form] = Form.useForm();
   const isScheduled = useWatch('is_scheduled', form);
   const isPublic = useWatch('isPublic', form);
@@ -50,8 +51,8 @@ const FinalModal = ({
             </p>
           </div>
         }
-        initialValue={profile?.type === 'free' ? true : false}>
-        <Switch disabled={profile?.type === 'free'} />
+        initialValue={isFreeAccount ? true : false}>
+        <Switch disabled={isFreeAccount} />
       </Form.Item>
 
       {isPublic && (
@@ -89,8 +90,8 @@ const FinalModal = ({
             </p>
           </div>
         }
-        initialValue={profile?.type === 'free' ? false : true}>
-        <Switch disabled={profile?.type === 'free'} />
+        initialValue={isFreeAccount ? false : true}>
+        <Switch disabled={isFreeAccount} />
       </Form.Item>
       {isScheduled && (
         <Row gutter={[12, 12]} justify="center">

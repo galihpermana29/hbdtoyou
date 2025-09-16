@@ -43,6 +43,7 @@ const AlbumGraduationv1 = ({
   const [showLlmModal, setShowLlmModal] = useState(false);
 
   const profile = useMemoifyProfile();
+  const isFreeAccount = profile?.quota < 1;
   const router = useRouter();
   const [form] = useForm();
 
@@ -121,7 +122,7 @@ const AlbumGraduationv1 = ({
 
       if (status === 'draft') {
         setLoading(false);
-        router.push('/preview?link=' + userLink);
+        window.location.href = `/preview?link=${userLink}`;
       } else {
         setLoading(false);
         setModalState({
@@ -258,9 +259,9 @@ const AlbumGraduationv1 = ({
             profileImageURL={images}
             form={form}
             formItemName={'images'}
-            type={profile?.type as AccountType}
+            type={isFreeAccount ? AccountType.free : AccountType.premium}
             multiple={true}
-            limit={profile?.type === 'free' ? 5 : 20}
+            limit={isFreeAccount ? 5 : 20}
             openNotification={openNotification}
           />
         </Form.Item>
@@ -294,13 +295,13 @@ const AlbumGraduationv1 = ({
         <div className="flex justify-end gap-2">
           <Tooltip
             title={
-              profile?.type === 'free'
+              isFreeAccount
                 ? 'To save as draft and see preview, please join premium plan'
                 : ''
             }
             placement="top">
             <Button
-              disabled={profile?.type === 'free'}
+              disabled={isFreeAccount}
               onClick={() => {
                 form
                   .validateFields()

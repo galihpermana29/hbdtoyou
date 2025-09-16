@@ -2,6 +2,7 @@ import { getDetailContent } from '@/action/user-api';
 import PageFlipScrapbook from '@/components/PageFlipScrapbook';
 import { ErrorBoundaryCustom } from '@/components/ui/error-boundary';
 import NavigationBar from '@/components/ui/navbar';
+import ResultWrapper from '../../result-wrapper';
 
 const pages = [
   'https://res.cloudinary.com/dqipjpy1w/image/upload/v1750003560/tl7dqxuefwo2oiaxgj9s.jpg',
@@ -51,13 +52,15 @@ const ScrapbookVintageResult = async ({
         <NavigationBar />
       </div>
       <div className="mt-[100px]" />
-      <PageFlipScrapbook
-        pages={structuredPages}
-        coverImage={coverImage}
-        backCoverImage={backCoverImage}
-        coverTitle=""
-        backCoverTitle=""
-      />
+      <ResultWrapper>
+        <PageFlipScrapbook
+          pages={structuredPages}
+          coverImage={coverImage}
+          backCoverImage={backCoverImage}
+          coverTitle=""
+          backCoverTitle=""
+        />
+      </ResultWrapper>
     </div>
   );
 };

@@ -1,5 +1,5 @@
 'use client';
-import { Button, Form, message } from 'antd';
+import { Button, Divider, Form, Input, message } from 'antd';
 import { useMemoifyProfile } from '@/app/session-provider';
 import { IAllTemplateResponse } from '@/action/interfaces';
 import { useEffect, useState } from 'react';
@@ -14,6 +14,7 @@ import clsx from 'clsx';
 import { useRouter, useSearchParams } from 'next/navigation';
 import DraggerUpload, { AccountType } from '@/components/ui/uploader/uploader';
 import { useWatch } from 'antd/es/form/Form';
+import { formatNumberWithComma } from '@/lib/utils';
 
 interface FormGenerationProps {
   openNotification: (progress: number, key: any, isError?: boolean) => void;
@@ -31,7 +32,7 @@ const FormGeneration = ({
 }: FormGenerationProps) => {
   const [form] = Form.useForm();
   const profile = useMemoifyProfile();
-
+  console.log(profile, '?');
   const isFreeAccount = profile?.token_scrapbook < 1;
 
   const router = useRouter();
@@ -95,7 +96,7 @@ const FormGeneration = ({
 
       if (res.success) {
         form.resetFields();
-        router.push(`/${templateName}/${res.data}`);
+        window.location.href = `/${templateName}/${res.data}`;
         message.success('Successfully created!');
       } else {
         message.error(res.message);
@@ -116,13 +117,12 @@ const FormGeneration = ({
   }, []);
   return (
     <div>
-      <div className="mb-[40px]">
-        <h1 className="text-[#1B1B1B] font-[600] text-[18px]">
-          Scrapbook AI Form
+      <div className="mb-[24px]">
+        <h1 className="text-[#1B1B1B] font-[600] text-[18px] lg:text-[24px]">
+          Create your scrapbook in seconds
         </h1>
-        <p className="text-[#7B7B7B] text-[14px] font-[400] max-w-[400px]">
-          Fill the form and generate your scrapbook instantly within just in a
-          second
+        <p className="text-[#666D80] text-[16px] font-[400] max-w-[400px]">
+          Fill the form, upload photos, choose a style, then generate. Easy!
         </p>
       </div>
       <Form
@@ -130,48 +130,52 @@ const FormGeneration = ({
         layout="vertical"
         onFinish={handleFinish}
         requiredMark={false}>
-        <div className="mt-[10px] mb-[5px]">
-          <h3 className="text-[15px] font-semibold">AI Models</h3>
+        <div className="flex gap-[12px]">
+          <div className="mt-[10px] mb-[5px] flex-1">
+            <h3 className="text-[14px] font-medium mb-[6px]">AI Models</h3>
 
-          <p className="text-[13px] text-gray-600 max-w-[400px]">
-            Memo AI 1.0 (Cropping & Layouting)
-          </p>
+            <Input value={'Memo AI 1.0 (Cropping & Layouting)'} readOnly />
+          </div>
+          <div className="mt-[10px] mb-[5px]">
+            <h3 className="text-[14px] font-medium mb-[6px]">AI Token</h3>
+            <Input
+              className="!w-[120px]"
+              value={
+                formatNumberWithComma(profile?.token_scrapbook || 0) + ' Left'
+              }
+              readOnly
+            />
+          </div>
         </div>
-        <div className="mt-[10px] mb-[5px]">
-          <h3 className="text-[15px] font-semibold">AI Token</h3>
-          <p className="text-[13px] text-gray-600 max-w-[400px]">
-            You have {profile?.token_scrapbook} token, to generate scrapbook you
-            need at least 1 token
-          </p>
-        </div>
+        <Divider className="!my-[12px]" />
         <Form.Item
           rules={[
             { required: true, message: 'Please upload atleast 1 content' },
           ]}
           name={'images'}
           label={
-            <div className="mt-[10px] mb-[5px]">
+            <div>
               <h3 className="text-[15px] font-semibold">
                 Collection of images
               </h3>
             </div>
           }>
           <DraggerUpload
-            disabled={isFreeAccount}
+            // disabled={isFreeAccount}
             profileImageURL={images}
             form={form}
             formItemName={'images'}
-            type={profile?.type as AccountType}
+            type={isFreeAccount ? AccountType.free : AccountType.premium}
             multiple={true}
-            limit={profile?.type === 'free' ? 5 : 20}
+            limit={isFreeAccount ? 2 : 15}
             openNotification={openNotification}
           />
         </Form.Item>
-
+        <Divider className="!my-[12px]" />
         <Form.Item
           name="templateId"
           label={
-            <div className="mt-[10px] mb-[5px]">
+            <div>
               <h3 className="text-[15px] font-semibold">Scrapbook Style</h3>
 
               <p className="text-[13px] text-gray-600 max-w-[400px]">
@@ -192,6 +196,10 @@ const FormGeneration = ({
                     selectedTemplateId === template.id ? '' : ''
                   )}
                   onClick={(e) => {
+                    if (template.label === 'premium' && isFreeAccount) {
+                      return message.info('Premium plan required');
+                    }
+
                     e.preventDefault();
                     e.stopPropagation();
                     setSelectedTemplateId(template.id);
@@ -215,17 +223,28 @@ const FormGeneration = ({
             )}
           </div>
         </Form.Item>
-
+        {isFreeAccount ? (
+          <p className="text-[12px] text-gray-600 my-[12px]">
+            You can use <span className="font-semibold">scrapbook 1</span> in
+            free tier
+          </p>
+        ) : (
+          <p className="text-[12px] text-gray-600 my-[12px]">
+            <span className="font-semibold text-[#E34013]">1 token</span> per
+            scrapbook. You can edit and regenerate later
+          </p>
+        )}
         <Button
-          disabled={isFreeAccount}
+          // disabled={isFreeAccount}
           type="primary"
           style={{
             height: '50px',
             width: '100%',
           }}
+          className="!bg-[#E34013]"
           htmlType="submit"
           size="large">
-          {isFreeAccount ? 'Upgrade Plan' : 'Generate Scrapbook'}
+          {'Generate Scrapbook'}
         </Button>
       </Form>
     </div>

@@ -66,6 +66,7 @@ const NewSpotifyForm = ({
   const [value] = useDebounce(searchedSong, 1000);
 
   const profile = useMemoifyProfile();
+  const isFreeAccount = profile?.quota < 1;
   const router = useRouter();
   const dispatch = useDispatch();
 
@@ -110,7 +111,7 @@ const NewSpotifyForm = ({
 
       if (status === 'draft') {
         setLoading(false);
-        router.push('/preview?link=' + userLink);
+        window.location.href = `/preview?link=${userLink}`;
       } else {
         setLoading(false);
         setModalState({
@@ -240,7 +241,7 @@ const NewSpotifyForm = ({
                 size="large"
                 type="primary"
                 onClick={() => {
-                  if (profile?.quota === 0) {
+                  if (isFreeAccount) {
                     if (fields.length <= 2) {
                       add();
                       setSearchedOptions([]);
@@ -318,7 +319,7 @@ const NewSpotifyForm = ({
                 size="large"
                 type="primary"
                 onClick={() => {
-                  if (profile?.quota === 0) {
+                  if (isFreeAccount) {
                     if (fields.length <= 2) {
                       add();
                       setSearchedOptions([]);
@@ -369,9 +370,10 @@ const NewSpotifyForm = ({
             profileImageURL={momentOfYou}
             form={form}
             formItemName={'momentOfYou'}
-            type={profile?.type as AccountType}
-            multiple={profile?.type === 'free' ? false : true}
-            limit={profile?.type === 'free' ? 1 : 20}
+            type={isFreeAccount ? AccountType.free : AccountType.premium}
+            disabled={isFreeAccount}
+            multiple={isFreeAccount ? false : true}
+            limit={isFreeAccount ? 1 : 20}
             openNotification={openNotification}
           />
         </Form.Item>
@@ -396,13 +398,13 @@ const NewSpotifyForm = ({
         <div className="flex justify-end gap-2">
           <Tooltip
             title={
-              profile?.type === 'free'
+              isFreeAccount
                 ? 'To save as draft and see preview, please join premium plan'
                 : ''
             }
             placement="top">
             <Button
-              disabled={profile?.type === 'free'}
+              disabled={isFreeAccount}
               onClick={() => {
                 form
                   .validateFields()
