@@ -68,11 +68,17 @@ export default function MainContent({
   ref3?: any;
 }) {
   const data = momentOfYou
-    ? momentOfYou.map((dx: any, idx) => ({
-        title: `#${idx + 1}`,
-        description: '',
-        image: dx,
-      }))
+    ? typeof momentOfYou === 'string'
+      ? [momentOfYou].map((dx: any, idx) => ({
+          title: `#${idx + 1}`,
+          description: '',
+          image: dx,
+        }))
+      : momentOfYou.map((dx: any, idx) => ({
+          title: `#${idx + 1}`,
+          description: '',
+          image: dx,
+        }))
     : playlists;
 
   return (

@@ -372,14 +372,14 @@ const NewSpotifyForm = ({
             formItemName={'momentOfYou'}
             type={isFreeAccount ? AccountType.free : AccountType.premium}
             // disabled={isFreeAccount}
-            multiple={isFreeAccount ? false : true}
-            limit={isFreeAccount ? 1 : 20}
+            multiple={true}
+            limit={isFreeAccount ? 2 : 20}
             openNotification={openNotification}
           />
         </Form.Item>
         <p className="text-[13px] text-gray-600 max-w-[400px]">
           Account with <span className="font-bold">free</span> plan can only add
-          1 images. To add up to 20 images, upgrade to{' '}
+          2 images. To add up to 20 images, upgrade to{' '}
           <span className="font-bold">premium</span> plan.
         </p>
 

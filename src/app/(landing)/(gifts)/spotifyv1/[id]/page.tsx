@@ -18,6 +18,8 @@ export default async function HomePage({ params }: any) {
   }
 
   const parsedData = JSON.parse(data.data.detail_content_json_text);
+
+  console.log(parsedData, 'data?');
   return (
     <Watermark
       zIndex={99}
