@@ -6,6 +6,7 @@ import WatchModal from './component/WatchModal';
 import EpisodeList from '@/components/disney+/EpisodeList';
 import SimilarShows from '@/components/disney+/SimilarShows';
 import TrailerSection from '@/components/disney+/TrailerSection';
+import MusicPlayer from '@/components/ui/music-player/music-player';
 
 const getDetailDataNew = async (id: string) => {
   const res = await getDetailContent(id);
@@ -29,6 +30,7 @@ export default async function DynamicDisneyPage({ params }: { params: any }) {
       content={data.data.user_type === 'free' ? 'memoify.live' : ''}>
       <main className="min-h-screen bg-[#1A1D29] text-white">
         {/* Hero Section */}
+        <MusicPlayer />
         <div className="relative h-[100vh] w-full">
           <Image
             src={

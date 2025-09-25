@@ -4,6 +4,7 @@ import dynamic from 'next/dynamic';
 import { getDetailContent } from '@/action/user-api';
 import ImagesComponent from '../ImagesComponent/ImagesComponent';
 import { Watermark } from 'antd';
+import MusicPlayer from '@/components/ui/music-player/music-player';
 const Typewriter = dynamic(() => import('@/components/fancy/typewriter'), {
   ssr: false,
 });
@@ -94,7 +95,7 @@ export default async function MagazineDetailV1({ params }: { params: any }) {
             />
           </p>
         </div>
-
+        <MusicPlayer />
         <ImagesComponent urls={parsedData ? parsedData.momentOfYou : urls} />
         {/* <DragElements
         dragMomentum={true}

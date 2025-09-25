@@ -1,4 +1,5 @@
 import { getDetailContent } from '@/action/user-api';
+import MusicPlayer from '@/components/ui/music-player/music-player';
 import { v3Songs } from '@/lib/songs';
 import dayjs from 'dayjs';
 import Image from 'next/image';
@@ -102,7 +103,7 @@ export default async function Home({ params }: { params: any }) {
             )}
           </div>
         </div>
-
+        <MusicPlayer />
         {/* Footer */}
         <div className="border-t border-black p-4 flex justify-between items-center text-sm font-serif">
           <div>VOL. 1... NO. 1</div>

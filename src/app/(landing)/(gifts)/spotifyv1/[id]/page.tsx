@@ -5,6 +5,7 @@ import Player from '@/components/spotify/player';
 import Sidebar from '@/components/spotify/sidebar';
 import { Watermark } from 'antd';
 import 'react-photo-view/dist/react-photo-view.css';
+import MusicPlayer from '@/components/ui/music-player/music-player';
 const getDetailDataNew = async (id: string) => {
   const res = await getDetailContent(id);
   return res;
@@ -28,6 +29,7 @@ export default async function HomePage({ params }: any) {
         <div className="flex h-[calc(100%-96px)] gap-[20px]">
           <div className="hidden lg:block w-[320px]" />
           <Sidebar ourSongs={parsedData?.ourSongs} />
+          <MusicPlayer />
           <main className="flex-1 overflow-y-auto">
             <Header imageUri={parsedData?.momentOfYou[0]} />
             <MainContent

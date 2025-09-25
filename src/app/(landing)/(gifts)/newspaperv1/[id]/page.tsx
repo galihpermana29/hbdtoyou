@@ -4,6 +4,7 @@ import DailyFeed from '@/components/newspaper/DailyFeed';
 import FeaturedStories from '@/components/newspaper/FeaturedStories';
 import Navigation from '@/components/newspaper/Navigation';
 import NewsletterSection from '@/components/newspaper/NewsletterSection';
+import MusicPlayer from '@/components/ui/music-player/music-player';
 
 const getDetailDataNew = async (id: string) => {
   const res = await getDetailContent(id);
@@ -46,6 +47,8 @@ export default async function NewspaperPage({ params }: { params: any }) {
           <Navigation />
         </div>
       </header>
+
+      <MusicPlayer />
 
       {/* Main Content */}
       <div className="container mx-auto px-4 py-8">

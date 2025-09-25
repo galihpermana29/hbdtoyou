@@ -2,6 +2,7 @@ import { getDetailContent } from '@/action/user-api';
 import Featured from '@/components/netflix/featured/featured';
 import List from '@/components/netflix/list/list';
 import Navbar from '@/components/netflix/navbar/navbar';
+import MusicPlayer from '@/components/ui/music-player/music-player';
 import { Watermark } from 'antd';
 import { headers } from 'next/headers';
 import 'react-photo-view/dist/react-photo-view.css';
@@ -30,6 +31,7 @@ const RootUserPage = async ({ params }: any) => {
       font={{ color: 'rgba(227, 64, 19, 0.19)', fontSize: 50 }}
       content={data.data.user_type === 'free' ? 'memoify.live' : ''}>
       <div className="bg-black overflow-x-hidden">
+        <MusicPlayer />
         <Navbar jumbotronImage={parsedData?.jumbotronImage} />
         <Featured
           jumbotronImage={
