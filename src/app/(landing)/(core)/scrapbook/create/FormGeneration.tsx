@@ -95,7 +95,7 @@ const FormGeneration = ({
 
       if (res.success) {
         form.resetFields();
-        window.location.href = `/${templateName}/${res.data}`;
+        window.location.href = `/${templateName}/${res.data}?isNew=true`;
         message.success('Successfully created!');
       } else {
         message.error(res.message);

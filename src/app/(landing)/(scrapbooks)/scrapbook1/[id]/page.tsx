@@ -19,8 +19,15 @@ const getDetailDataNew = async (id: string) => {
   return res;
 };
 
-const ScrapbookResult = async ({ params }: { params: { id: string } }) => {
+const ScrapbookResult = async ({
+  params,
+  searchParams,
+}: {
+  params: { id: string };
+  searchParams: { isNew: string };
+}) => {
   const { id } = params;
+  const { isNew } = searchParams ?? { isNew: 'false' };
 
   const data = await getDetailDataNew(id);
   if (!data.data) {
@@ -50,7 +57,7 @@ const ScrapbookResult = async ({ params }: { params: { id: string } }) => {
         <NavigationBar />
       </div>
       <div className="mt-[100px]" />
-      <ResultWrapper>
+      <ResultWrapper isNew={isNew === 'true'}>
         <PageFlipScrapbook
           pages={structuredPages}
           coverImage={coverImage}

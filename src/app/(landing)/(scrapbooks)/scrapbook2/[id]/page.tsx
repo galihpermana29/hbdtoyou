@@ -20,8 +20,10 @@ const getDetailDataNew = async (id: string) => {
 
 const ScrapbookVintageResult = async ({
   params,
+  searchParams,
 }: {
   params: { id: string };
+  searchParams: { isNew: string };
 }) => {
   const { id } = params;
 
@@ -52,7 +54,7 @@ const ScrapbookVintageResult = async ({
         <NavigationBar />
       </div>
       <div className="mt-[100px]" />
-      <ResultWrapper>
+      <ResultWrapper isNew={searchParams.isNew === 'true'}>
         <PageFlipScrapbook
           pages={structuredPages}
           coverImage={coverImage}

@@ -27,7 +27,7 @@ const ClientResult = () => {
           <Input
             className="!text-[#E34013]"
             size="large"
-            value={currentUrl}
+            value={currentUrl ? currentUrl.split('?')[0] : ''}
             disabled
           />
           <Button

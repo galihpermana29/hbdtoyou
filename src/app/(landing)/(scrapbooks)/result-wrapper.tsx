@@ -1,6 +1,15 @@
 import ClientResult from './client-result';
 
-const ResultWrapper = ({ children }: { children: React.ReactNode }) => {
+const ResultWrapper = ({
+  children,
+  isNew,
+}: {
+  children: React.ReactNode;
+  isNew: boolean;
+}) => {
+  if (!isNew) {
+    return <div>{children}</div>;
+  }
   return (
     <div className="bg-[#F8FAFB] p-[24px] rounded-[16px] border-[#EDEDED] border-[1px] flex flex-col items-center justify-center text-center">
       <div className="mb-[20px]">
