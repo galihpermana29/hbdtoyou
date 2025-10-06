@@ -35,7 +35,7 @@ const FinalModal = ({
         onSubmit({ ...val, ...preFormValue }, 'published');
       }}
       layout="vertical"
-      className="!max-h-[500px] overflow-y-auto overflow-x-hidden">
+      className="!max-h-[700px] overflow-y-auto overflow-x-hidden">
       <Form.Item
         className="!mb-[5px]"
         name={'isPublic'}
@@ -55,7 +55,8 @@ const FinalModal = ({
         <Switch disabled={isFreeAccount} />
       </Form.Item>
 
-      {isPublic && (
+      {/* not using this title caption anymore */}
+      {/* {isPublic && (
         <>
           <Form.Item
             rules={[{ required: true, message: 'Please input title!' }]}
@@ -72,7 +73,8 @@ const FinalModal = ({
             <TextArea size="large" placeholder="Your inspiration caption" />
           </Form.Item>
         </>
-      )}
+      )} */}
+
       <Form.Item
         name={'is_scheduled'}
         label={
@@ -118,6 +120,23 @@ const FinalModal = ({
           </Col>
         </Row>
       )}
+
+
+      <Form.Item name={'message'} rules={[{ required: true, message: 'Please input feedback!' }]} label={
+        <div className="mt-[10px] mb-[5px]">
+          <h3 className="text-[15px] font-semibold">
+            What do you think about our website?
+          </h3>
+
+          <p className="text-[13px] text-gray-600 max-w-[400px]">
+            We value your feedback and would love to hear your thoughts on our
+            website. Your feedback helps us improve and provide a better
+            experience for you.
+          </p>
+        </div>
+      }>
+        <TextArea size="large" placeholder="Your feedback" />
+      </Form.Item>
 
       <Form.Item className="!my-0">
         <div className="flex justify-end gap-2 mt-[12px]">

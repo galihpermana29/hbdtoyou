@@ -3,7 +3,7 @@ import { Button, Form, Input, message, Modal, Tooltip } from 'antd';
 import { useEffect } from 'react';
 import { useForm, useWatch } from 'antd/es/form/Form';
 import { useMemoifyProfile } from '@/app/session-provider';
-import { createContent } from '@/action/user-api';
+import { createContent, submitFeedback } from '@/action/user-api';
 import { IDetailContentResponse } from '@/action/interfaces';
 import dayjs from 'dayjs';
 import { useRouter } from 'next/navigation';
@@ -75,6 +75,16 @@ const NewGraduation2Form = ({
 
     const res = await createContent(payload);
     if (res.success) {
+      const data = await submitFeedback({
+        message: val?.message,
+        type: 'feedback',
+        email: profile?.email,
+      });
+
+      if (!data.success) {
+        message.error(data.message);
+      }
+
       const userLink = selectedTemplate.route + '/' + res.data;
       form.resetFields();
       if (status === 'draft') {
@@ -129,7 +139,7 @@ const NewGraduation2Form = ({
         disabled={loading}
         form={form}
         layout="vertical"
-        // onFinish={(val) => handleSubmit(val)}
+      // onFinish={(val) => handleSubmit(val)}
       >
         <Form.Item
           rules={[{ required: true, message: 'Please input name!' }]}

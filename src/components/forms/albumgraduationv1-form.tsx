@@ -1,6 +1,6 @@
 'use client';
 import { IDetailContentResponse } from '@/action/interfaces';
-import { createContent, editContent } from '@/action/user-api';
+import { createContent, editContent, submitFeedback } from '@/action/user-api';
 import { useMemoifyProfile } from '@/app/session-provider';
 import GeneratingLLMLoadingModal from '@/app/(landing)/albumgraduation1/[id]/GeneratingLLMLoadingModal';
 import { reset } from '@/lib/uploadSlice';
@@ -112,6 +112,15 @@ const AlbumGraduationv1 = ({
       ? await editContent(payload, editData.id)
       : await createContent(payload);
     if (res.success) {
+      const data = await submitFeedback({
+        message: val?.message,
+        type: 'feedback',
+        email: profile?.email,
+      });
+
+      if (!data.success) {
+        message.error(data.message);
+      }
       const userLink = selectedTemplate.route + '/' + res.data;
 
       // Clear form fields
@@ -148,8 +157,8 @@ const AlbumGraduationv1 = ({
         ...jsonContent,
         graduationDate: dayjs(jsonContent.graduationDate),
         images: jsonContent.images,
-        title2: editData.title,
-        caption: editData.caption,
+        // title2: editData.title,
+        // caption: editData.caption,
       });
     }
   }, [editData]);
@@ -197,7 +206,7 @@ const AlbumGraduationv1 = ({
         disabled={loading}
         form={form}
         layout="vertical"
-        // onFinish={(val) => handleSubmit(val)}
+      // onFinish={(val) => handleSubmit(val)}
       >
         <Form.Item
           rules={[{ required: true, message: 'Please enter full name client' }]}

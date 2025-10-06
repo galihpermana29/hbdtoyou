@@ -3,7 +3,7 @@ import { Button, Form, Input, message, Modal, Tooltip } from 'antd';
 import TextArea from 'antd/es/input/TextArea';
 import { useEffect } from 'react';
 import { useForm, useWatch } from 'antd/es/form/Form';
-import { createContent, editContent } from '@/action/user-api';
+import { createContent, editContent, submitFeedback } from '@/action/user-api';
 import { useRouter } from 'next/navigation';
 import { IDetailContentResponse } from '@/action/interfaces';
 import dayjs from 'dayjs';
@@ -30,6 +30,7 @@ const NewNetflixForm = ({
 }: NewNetflixFormProps) => {
   const dispatch = useDispatch();
   const profile = useMemoifyProfile();
+  console.log(profile, 'profile')
   const isFreeAccount = profile?.quota < 1;
   const router = useRouter();
   const [form] = useForm();
@@ -60,6 +61,7 @@ const NewNetflixForm = ({
       title: val?.title2 ? val?.title2 : '',
       caption: val?.caption,
 
+
       date_scheduled: val?.date_scheduled
         ? dayjs(val?.date_scheduled).format('DD/MM/YYYY h:mm A Z')
         : null,
@@ -73,6 +75,16 @@ const NewNetflixForm = ({
       : await createContent(payload);
 
     if (res.success) {
+      const data = await submitFeedback({
+        message: val?.message,
+        type: 'feedback',
+        email: profile?.email,
+      });
+
+      if (!data.success) {
+        message.error(data.message);
+      }
+
       const userLink = selectedTemplate.route + '/' + res.data;
 
       // Clear form fields
@@ -111,8 +123,8 @@ const NewNetflixForm = ({
         ...jsonContent,
         jumbotronImage: jsonContent?.jumbotronImage || null,
         images: jsonContent?.images || [],
-        title2: editData.title,
-        caption: editData.caption,
+        title2: editData?.title,
+        caption: editData?.caption,
       });
     }
   }, [editData]);

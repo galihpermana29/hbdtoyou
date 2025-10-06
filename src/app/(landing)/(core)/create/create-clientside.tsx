@@ -141,7 +141,6 @@ const CreatePage = () => {
     }
 
     const routePath = templateNameToRoute(template.name);
-    console.log(routePath, 'routePath', template);
 
     setSelectedTemplate({ id: template.id, route: routePath });
     setCurrent(1);
@@ -297,28 +296,28 @@ const CreatePage = () => {
                   <div className="w-full">
                     {(templateFilter === 'All' ||
                       templateFilter === 'Popular Template') && (
-                      <TemplateGridSection
-                        title="Popular Template"
-                        templates={popularTemplates}
-                        onTemplateClick={handleTemplateClick}
-                      />
-                    )}
+                        <TemplateGridSection
+                          title="Popular Template"
+                          templates={popularTemplates}
+                          onTemplateClick={handleTemplateClick}
+                        />
+                      )}
                     {(templateFilter === 'All' ||
                       templateFilter === 'Original Template') && (
-                      <TemplateGridSection
-                        title="Original Template"
-                        templates={templates}
-                        onTemplateClick={handleTemplateClick}
-                      />
-                    )}
+                        <TemplateGridSection
+                          title="Original Template"
+                          templates={templates}
+                          onTemplateClick={handleTemplateClick}
+                        />
+                      )}
                     {(templateFilter === 'All' ||
                       templateFilter === 'Graduation Template') && (
-                      <TemplateGridSection
-                        title="Graduation Template"
-                        templates={graduationTemplates}
-                        onTemplateClick={handleTemplateClick}
-                      />
-                    )}
+                        <TemplateGridSection
+                          title="Graduation Template"
+                          templates={graduationTemplates}
+                          onTemplateClick={handleTemplateClick}
+                        />
+                      )}
                   </div>
                 </div>
               )}

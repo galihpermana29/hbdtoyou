@@ -5,7 +5,7 @@ import { useEffect } from 'react';
 import { MinusCircleOutlined, PlusOutlined } from '@ant-design/icons';
 import { useForm, useWatch } from 'antd/es/form/Form';
 import { useMemoifyProfile } from '@/app/session-provider';
-import { createContent, editContent } from '@/action/user-api';
+import { createContent, editContent, submitFeedback } from '@/action/user-api';
 import { IDetailContentResponse } from '@/action/interfaces';
 import dayjs from 'dayjs';
 import { useRouter } from 'next/navigation';
@@ -67,6 +67,16 @@ const NewNewspaper1Form = ({
       : await createContent(payload);
 
     if (res.success) {
+      const data = await submitFeedback({
+        message: val?.message,
+        type: 'feedback',
+        email: profile?.email,
+      });
+
+      if (!data.success) {
+        message.error(data.message);
+      }
+
       const userLink = selectedTemplate.route + '/' + res.data;
       form.resetFields();
       if (status === 'draft') {
@@ -122,7 +132,7 @@ const NewNewspaper1Form = ({
         disabled={loading}
         form={form}
         layout="vertical"
-        // onFinish={(val) => handleSubmit(val)}
+      // onFinish={(val) => handleSubmit(val)}
       >
         <Form.Item
           rules={[

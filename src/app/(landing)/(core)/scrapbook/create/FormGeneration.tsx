@@ -1,5 +1,5 @@
 'use client';
-import { Button, Divider, Form, Input, message } from 'antd';
+import { Badge, Button, Divider, Form, Input, message, Select } from 'antd';
 import { useMemoifyProfile } from '@/app/session-provider';
 import { IAllTemplateResponse } from '@/action/interfaces';
 import { useEffect, useState } from 'react';
@@ -15,6 +15,17 @@ import { useRouter, useSearchParams } from 'next/navigation';
 import DraggerUpload, { AccountType } from '@/components/ui/uploader/uploader';
 import { useWatch } from 'antd/es/form/Form';
 import { formatNumberWithComma } from '@/lib/utils';
+import MemoRichText from '@/components/ui/custom-rich-text/MemoRichText';
+import {
+  parsePromptContent,
+} from '@/lib/promptParser';
+import {
+  modelSelectData,
+  stringInitialPrompt,
+  templatesPrompt,
+  templatePrompts,
+} from '@/lib/scrapbook-constant';
+
 
 interface FormGenerationProps {
   openNotification: (progress: number, key: any, isError?: boolean) => void;
@@ -39,9 +50,13 @@ const FormGeneration = ({
   const templateName = query.get('route');
   const images = useWatch('images', form);
 
+  const selectedModel = useWatch('model', form);
+
   const [popularTemplates, setPopularTemplates] = useState<
     IAllTemplateResponse[] | null
   >(null);
+  const [selectedTemplateContent, setSelectedTemplateContent] = useState<string>(stringInitialPrompt);
+
 
   const handleGetTemplates = async () => {
     await warmUpAIModel();
@@ -58,8 +73,7 @@ const FormGeneration = ({
         );
         setSelectedTemplateId(scrapbook1Data?.id || '');
         router.push(
-          `/scrapbook/create?templateId=${scrapbook1Data?.id}&route=${
-            scrapbook1Data?.name?.split('- ')[1]
+          `/scrapbook/create?templateId=${scrapbook1Data?.id}&route=${scrapbook1Data?.name?.split('- ')[1]
           }`
         );
         form.setFieldValue('templateId', scrapbook1Data?.id);
@@ -70,6 +84,18 @@ const FormGeneration = ({
   };
 
   const handleFinish = async (value: any) => {
+
+    if (selectedModel === 'memo-ai-2.0') {
+      // Parse and validate the prompt content
+      const parsedPrompt = parsePromptContent(value.main_theme);
+      if (!parsedPrompt) {
+        return; // Error messages already shown by parser
+      }
+      console.log('Parsed prompt:', parsedPrompt);
+
+    }
+
+    // return;
     setLoading(true);
     const json_text = {
       title: 'Scrapbook AI',
@@ -116,24 +142,18 @@ const FormGeneration = ({
   }, []);
   return (
     <div>
-      <div className="mb-[24px]">
-        <h1 className="text-[#1B1B1B] font-[600] text-[18px] lg:text-[24px]">
-          Create your scrapbook in seconds
-        </h1>
-        <p className="text-[#666D80] text-[16px] font-[400] max-w-[400px]">
-          Fill the form, upload photos, choose a style, then generate. Easy!
-        </p>
-      </div>
+
       <Form
         form={form}
         layout="vertical"
         onFinish={handleFinish}
         requiredMark={false}>
-        <div className="flex gap-[12px]">
+        <div className="flex flex-col-reverse md:flex-row md:gap-[12px]">
           <div className="mt-[10px] mb-[5px] flex-1">
             <h3 className="text-[14px] font-medium mb-[6px]">AI Models</h3>
-
-            <Input value={'Memo AI 1.0 (Cropping & Layouting)'} readOnly />
+            <Form.Item name="model">
+              <Select options={profile?.email === 'memoify.live@gmail.com' ? modelSelectData : modelSelectData.filter((item) => item.value !== 'memo-ai-2.0')} defaultValue={'memo-ai-1.0'} />
+            </Form.Item>
           </div>
           <div className="mt-[10px] mb-[5px]">
             <h3 className="text-[14px] font-medium mb-[6px]">AI Token</h3>
@@ -146,6 +166,28 @@ const FormGeneration = ({
             />
           </div>
         </div>
+        {selectedModel === 'memo-ai-2.0' && (
+          <>
+            <div className="flex justify-between mb-[6px]">
+              <h3 className="text-[14px] font-medium mb-[6px]">User Prompt</h3>
+              <Select
+                variant='borderless'
+                className="!w-[150px]"
+                options={templatesPrompt?.map((item) => ({ label: item, value: item }))}
+                defaultValue={templatesPrompt[0]}
+                onChange={(value) => {
+                  const selectedPrompt = templatePrompts[value] || stringInitialPrompt;
+                  setSelectedTemplateContent(selectedPrompt);
+                  form.setFieldValue('main_theme', selectedPrompt);
+                }}
+              />
+
+            </div>
+            <Form.Item name={'main_theme'} initialValue={selectedTemplateContent}>
+              <MemoRichText key={selectedTemplateContent} defaultContent={selectedTemplateContent} />
+            </Form.Item>
+          </>
+        )}
         <Divider className="!my-[12px]" />
         <Form.Item
           rules={[
@@ -204,8 +246,7 @@ const FormGeneration = ({
                     setSelectedTemplateId(template.id);
                     form.setFieldValue('templateId', template.id);
                     router.push(
-                      `/scrapbook/create?templateId=${template.id}&route=${
-                        template.name?.split('- ')[1]
+                      `/scrapbook/create?templateId=${template.id}&route=${template.name?.split('- ')[1]
                       }`
                     );
                   }}>

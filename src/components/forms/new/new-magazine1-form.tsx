@@ -4,7 +4,7 @@ import TextArea from 'antd/es/input/TextArea';
 import { useEffect, useState } from 'react';
 import { useForm, useWatch } from 'antd/es/form/Form';
 import { useMemoifyProfile } from '@/app/session-provider';
-import { createContent, editContent } from '@/action/user-api';
+import { createContent, editContent, submitFeedback } from '@/action/user-api';
 import { useDebounce } from 'use-debounce';
 import { IDetailContentResponse } from '@/action/interfaces';
 import { useRouter } from 'next/navigation';
@@ -81,6 +81,16 @@ const NewMagazineV1Form = ({
       : await createContent(payload);
 
     if (res.success) {
+      const data = await submitFeedback({
+        message: val?.message,
+        type: 'feedback',
+        email: profile?.email,
+      });
+
+      if (!data.success) {
+        message.error(data.message);
+      }
+
       const userLink = selectedTemplate.route + '/' + res.data;
 
       // Clear form fields
@@ -149,7 +159,7 @@ const NewMagazineV1Form = ({
         disabled={loading}
         form={form}
         layout="vertical"
-        // onFinish={(val) => handleSubmit(val)}
+      // onFinish={(val) => handleSubmit(val)}
       >
         {selectedSongs && (
           <div className="max-w-[400px] my-[12px]">
@@ -179,9 +189,9 @@ const NewMagazineV1Form = ({
             options={
               searchedOptions.length > 0
                 ? searchedOptions.map((item: any) => ({
-                    label: item.artistName + ' - ' + item.songName,
-                    value: item.id,
-                  }))
+                  label: item.artistName + ' - ' + item.songName,
+                  value: item.id,
+                }))
                 : []
             }
           />

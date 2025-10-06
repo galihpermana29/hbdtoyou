@@ -6,7 +6,7 @@ import { PlusOutlined, MinusCircleOutlined } from '@ant-design/icons';
 import { searchSpotifySong } from '@/action/spotify-api';
 import { useDebounce } from 'use-debounce';
 import { useMemoifyProfile } from '@/app/session-provider';
-import { createContent, editContent } from '@/action/user-api';
+import { createContent, editContent, submitFeedback } from '@/action/user-api';
 import TextArea from 'antd/es/input/TextArea';
 import { useRouter } from 'next/navigation';
 import { IDetailContentResponse } from '@/action/interfaces';
@@ -101,6 +101,16 @@ const NewSpotifyForm = ({
       ? await editContent(payload, editData.id)
       : await createContent(payload);
     if (res.success) {
+      const data = await submitFeedback({
+        message: values?.message,
+        type: 'feedback',
+        email: profile?.email,
+      });
+
+      if (!data.success) {
+        message.error(data.message);
+      }
+
       const userLink = selectedTemplate.route + '/' + res.data;
 
       // Clear form fields
@@ -145,8 +155,8 @@ const NewSpotifyForm = ({
         ourSongs: [],
         songsForYou: [],
         momentOfYou: jsonContent.momentOfYou,
-        title2: editData.title,
-        caption: editData.caption,
+        title2: editData?.title,
+        caption: editData?.caption,
       });
     }
   }, [editData]);
@@ -222,9 +232,9 @@ const NewSpotifyForm = ({
                       options={
                         searchedOptions.length > 0
                           ? searchedOptions.map((item: any) => ({
-                              label: item.artistName + ' - ' + item.songName,
-                              value: item.id,
-                            }))
+                            label: item.artistName + ' - ' + item.songName,
+                            value: item.id,
+                          }))
                           : []
                       }
                     />
@@ -305,9 +315,9 @@ const NewSpotifyForm = ({
                       options={
                         searchedOptions.length > 0
                           ? searchedOptions.map((item: any) => ({
-                              label: item.artistName + ' - ' + item.songName,
-                              value: item.id,
-                            }))
+                            label: item.artistName + ' - ' + item.songName,
+                            value: item.id,
+                          }))
                           : []
                       }
                     />
