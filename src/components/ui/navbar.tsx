@@ -408,7 +408,7 @@ const NavigationBar = () => {
                   Inspiration
                 </Link>
                 <Link
-                  href={'/payment'}
+                  href={'/payment?plan_id=291eba3b-f13f-47db-a793-bde0683b10ca'}
                   className={`md:block text-[16px] text-[#7B7B7B] font-[500]`}>
                   Pricing
                 </Link>
