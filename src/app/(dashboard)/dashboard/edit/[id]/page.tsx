@@ -40,6 +40,7 @@ const EditContentDashboardPage = () => {
   const templateName = useSearchParams().get('templateName');
   const templateId = useSearchParams().get('templateId');
 
+  //check if it's admin email memoify.live@gmail.com
   const getDetailContentById = async (id: string) => {
     setLoading(true);
     const res = await getDetailContent(id);
@@ -83,7 +84,7 @@ const EditContentDashboardPage = () => {
       {contextHolder}
       <div className="fixed top-0 left-0 w-full z-10 ">
         <NavigationBar />
-        <DashboardNavbar />
+        <DashboardNavbar isAdmin={false} />
       </div>
       <div className="flex flex-col items-center justify-start min-h-screen py-[30px] mb-[50px] !pt-[180px]">
         <div className="mx-auto max-w-6xl 2xl:max-w-7xl px-[20px] flex-1 w-full">
