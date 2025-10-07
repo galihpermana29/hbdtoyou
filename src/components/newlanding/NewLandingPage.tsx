@@ -6,11 +6,13 @@ import {
   Card,
   Carousel,
   Col,
+  Collapse,
   Form,
   Input,
   Layout,
   List,
   Row,
+  Segmented,
   Space,
   Statistic,
   Typography,
@@ -36,12 +38,14 @@ import { signIn } from 'next-auth/react';
 import { useRouter } from 'next/navigation';
 import { useQuery } from '@tanstack/react-query';
 import { getListPackages } from '@/action/user-api';
+import { faqDataEnglish, faqDataIndonesian } from '@/lib/faqData';
 
 const { Footer } = Layout;
 const { Title, Text, Paragraph } = Typography;
 
 export default function NewLandingPage() {
   const [email, setEmail] = useState('');
+  const [faqLanguage, setFaqLanguage] = useState<'English' | 'Indonesia'>('English');
   const router = useRouter();
   const session = useMemoifySession();
 
@@ -304,82 +308,6 @@ export default function NewLandingPage() {
           </div>
         </div>
 
-        {/* Stats Section */}
-        <div
-          style={{ padding: '60px 50px' }}
-          className="bg-[url(/stat-background.jpeg)] bg-no-repeat bg-cover">
-          <div className="mx-auto max-w-6xl 2xl:max-w-7xl px-[20px]">
-            <div className="max-w-[768px] mx-auto">
-              <p className="text-center text-[30px] md:text-[36px] font-[700] text-black mb-[20px]">
-                Go, take a look at how much users love us
-              </p>
-              <p className="text-[16px] md:text-[20px] font-[400] text-[#7B7B7B] leading-[30px] text-center mb-[60px]">
-                We grow from the reviews and feedback of users like you. We are
-                constantly working to improve our product and services to meet
-                your needs.
-              </p>
-            </div>
-
-            <Row gutter={[24, 24]} justify="center">
-              <Col xs={24} sm={8}>
-                <Card
-                  style={{
-                    textAlign: 'center',
-                    height: '100%',
-                  }}>
-                  <Statistic
-                    className="flex flex-col-reverse"
-                    title={
-                      <p className="mt-[12px] text-[18px] font-[600] text-[#000000]">
-                        User has Joined
-                      </p>
-                    }
-                    value={2000}
-                    suffix="+"
-                  />
-                  <p className="text-[16px] max-w-[200px] mx-auto font-[400] text-[#9a9a9a] mt-[8px]">
-                    They love our pre-made templates
-                  </p>
-                </Card>
-              </Col>
-              <Col xs={24} sm={8}>
-                <Card style={{ textAlign: 'center', height: '100%' }}>
-                  <Statistic
-                    className="flex flex-col-reverse"
-                    title={
-                      <p className="mt-[12px] text-[18px] font-[600] text-[#000000]">
-                        User Premium
-                      </p>
-                    }
-                    value={129}
-                    suffix="+"
-                  />
-                  <p className="text-[16px] max-w-[200px] mx-auto font-[400] text-[#9a9a9a] mt-[8px]">
-                    They feel useful and want to keep
-                  </p>
-                </Card>
-              </Col>
-              <Col xs={24} sm={8}>
-                <Card style={{ textAlign: 'center', height: '100%' }}>
-                  <Statistic
-                    className="flex flex-col-reverse"
-                    title={
-                      <p className="mt-[12px] text-[18px] font-[600] text-[#000000]">
-                        Useful Templates
-                      </p>
-                    }
-                    value={7}
-                    suffix="+"
-                  />
-                  <p className="text-[16px] max-w-[200px] mx-auto font-[400] text-[#9a9a9a] mt-[8px]">
-                    You can use them and share with your friends
-                  </p>
-                </Card>
-              </Col>
-            </Row>
-          </div>
-        </div>
-
         {/* Pricing Section */}
         <div className="">
           <div className="mx-auto max-w-6xl 2xl:max-w-7xl px-[20px] py-[90px]">
@@ -458,166 +386,6 @@ export default function NewLandingPage() {
                     </Col>
                   );
                 })}
-              {/* <Col xs={24} sm={8}>
-                <Card className="h-full flex flex-col justify-between">
-                  <div style={{ textAlign: 'center', marginBottom: '24px' }}>
-                    <h1 className="text-[#1B1B1B] font-[700] text-[36px]">
-                      Free
-                    </h1>
-                    <p className="mt-[16px] text-[20px] font-[600]">
-                      Basic Plan
-                    </p>
-                    <p className="text-[#7B7B7B] text-[16px] font-[400]">
-                      Perfect for trying out Memoify
-                    </p>
-                  </div>
-                  <List
-                    bordered={false}
-                    itemLayout="horizontal"
-                    dataSource={[
-                      'Limited image storage',
-                      'Limited image library',
-                      'Basic image resolution',
-                      'Watermark',
-                    ]}
-                    renderItem={(item) => (
-                      <List.Item>
-                        <List.Item.Meta
-                          avatar={<CircleCheck color="#079455" />}
-                          title={item}
-                        />
-                      </List.Item>
-                    )}
-                  />
-
-                  <div className="flex justify-center items-end h-[215px]">
-                    <Button
-                      onClick={() => {
-                        if (session.accessToken) {
-                          router.push('/create');
-                        } else {
-                          signIn('google');
-                        }
-                      }}
-                      iconPosition="end"
-                      size="large"
-                      className="!border-[1px] !h-[48px] !bg-[#E34013] !text-[#fff] !font-[400] mt-[40px] !w-[90%] !text-[16px]">
-                      {session?.accessToken ? 'Try now' : 'Sign in with Google'}
-                    </Button>
-                  </div>
-                </Card>
-              </Col>
-              <Col xs={24} sm={8}>
-                <Card className="h-full flex flex-col justify-between">
-                  <div style={{ textAlign: 'center', marginBottom: '24px' }}>
-                    <div>
-                      <div className="flex items-center justify-center gap-2">
-                        <h1 className="text-[#2f2f2f] font-[700] text-[20px] line-through">
-                          Rp. 30.000,-
-                        </h1>
-                        <Badge count={'30%'} />
-                      </div>
-                      <h1 className="text-[#1B1B1B] font-[700] text-[36px]">
-                        Rp. 20.000,-
-                      </h1>
-                    </div>
-                    <p className="mt-[16px] text-[20px] font-[600]">
-                      Premium Plan
-                    </p>
-                    <p className="text-[#7B7B7B] text-[16px] font-[400]">
-                      Unlock All the features you need create beautiful custom
-                      pages
-                    </p>
-                  </div>
-                  <List
-                    bordered={false}
-                    itemLayout="horizontal"
-                    dataSource={[
-                      'Unlimited image storage',
-                      'Unlimited songs library',
-                      'Unlimited upload size',
-                      'Unlimited photobox frames',
-                      '6 credit to use templates',
-                      'No Watermark',
-                    ]}
-                    renderItem={(item) => (
-                      <List.Item>
-                        <List.Item.Meta
-                          avatar={<CircleCheck color="#079455" />}
-                          title={item}
-                        />
-                      </List.Item>
-                    )}
-                  />
-
-                  <div className="flex justify-center items-end">
-                    <Button
-                      onClick={() => {
-                        if (session?.accessToken) {
-                          router.push('/payment');
-                        } else {
-                          signIn('google');
-                        }
-                      }}
-                      iconPosition="end"
-                      size="large"
-                      className="!border-[1px] !h-[48px] !bg-[#E34013] !text-[#fff] !font-[400] mt-[10px] !w-[90%] !text-[16px]">
-                      Get Started
-                    </Button>
-                  </div>
-                </Card>
-              </Col>
-              <Col xs={24} sm={8}>
-                <Card className="h-full flex flex-col justify-between">
-                  <div style={{ textAlign: 'center', marginBottom: '24px' }}>
-                    <h1 className="text-[#1B1B1B] font-[700] text-[36px]">
-                      Rp. 100.000,-
-                    </h1>
-                    <p className="mt-[16px] text-[20px] font-[600]">
-                      Business Plan
-                    </p>
-                    <p className="text-[#7B7B7B] text-[16px] font-[400] max-w-[250px] mx-auto">
-                      Custom feature for professional photo studio
-                    </p>
-                  </div>
-                  <List
-                    bordered={false}
-                    itemLayout="horizontal"
-                    dataSource={[
-                      'Creating you 1  new custom template',
-                      'Download photo on your custom site',
-                      'Unlimited photo storage',
-                      '24 Customer support',
-                      'Unlimited credit per month',
-                      'No Watermark',
-                    ]}
-                    renderItem={(item) => (
-                      <List.Item>
-                        <List.Item.Meta
-                          avatar={<CircleCheck color="#079455" />}
-                          title={item}
-                        />
-                      </List.Item>
-                    )}
-                  />
-
-                  <div className="flex justify-center items-end">
-                    <Link
-                      target="_blank"
-                      className="w-full"
-                      href={
-                        'https://api.whatsapp.com/send/?phone=62895383233303&text=hello&type=phone_number&app_absent=0'
-                      }>
-                      <Button
-                        iconPosition="end"
-                        size="large"
-                        className="!border-[1px] !h-[48px] !border-[#E34013] !text-[#E34013] !font-[400] mt-[40px] !w-[100%] !text-[16px]">
-                        Chat our sales
-                      </Button>
-                    </Link>
-                  </div>
-                </Card>
-              </Col> */}
             </Row>
           </div>
 
@@ -664,6 +432,120 @@ export default function NewLandingPage() {
             </div>
           </div>
         </div>
+
+        {/* FAQ Section */}
+        <div id="faq-section" style={{ background: '#F9FAFB' }}>
+          <div className="mx-auto max-w-6xl 2xl:max-w-7xl px-[20px] py-[90px]">
+            <div className="max-w-[768px] mx-auto mb-[48px]">
+              <h1 className="text-center text-[#1B1B1B] font-[700] text-[30px] md:text-[36px] mb-[20px]">
+                {'Frequently Asked Questions'}
+              </h1>
+              <p className="text-[#7b7b7b] text-[16px] md:text-[20px] font-[400] text-center">
+                {'Everything you need to know about Memoify. Can\'t find the answer you\'re looking for? Feel free to contact our support team.'}
+              </p>
+              <div className="flex justify-center mt-[32px]">
+                <Segmented
+                  options={['English', 'Indonesia']}
+                  value={faqLanguage}
+                  onChange={(value) => setFaqLanguage(value as 'English' | 'Indonesia')}
+                  size="large"
+                />
+              </div>
+            </div>
+            <div className="max-w-[900px] mx-auto">
+              <Collapse
+                items={faqLanguage === 'English' ? faqDataEnglish : faqDataIndonesian}
+                defaultActiveKey={['1']}
+                expandIconPosition="end"
+                className="bg-white"
+                style={{
+                  borderRadius: '8px',
+                  border: 'none',
+                }}
+                size="large"
+              />
+            </div>
+          </div>
+        </div>
+
+
+        {/* Stats Section */}
+        <div
+          style={{ padding: '60px 50px' }}
+          className="bg-[url(/stat-background.jpeg)] bg-no-repeat bg-cover">
+          <div className="mx-auto max-w-6xl 2xl:max-w-7xl px-[20px]">
+            <div className="max-w-[768px] mx-auto">
+              <p className="text-center text-[30px] md:text-[36px] font-[700] text-black mb-[20px]">
+                Go, take a look at how much users love us
+              </p>
+              <p className="text-[16px] md:text-[20px] font-[400] text-[#7B7B7B] leading-[30px] text-center mb-[60px]">
+                We grow from the reviews and feedback of users like you. We are
+                constantly working to improve our product and services to meet
+                your needs.
+              </p>
+            </div>
+
+            <Row gutter={[24, 24]} justify="center">
+              <Col xs={24} sm={8}>
+                <Card
+                  style={{
+                    textAlign: 'center',
+                    height: '100%',
+                  }}>
+                  <Statistic
+                    className="flex flex-col-reverse"
+                    title={
+                      <p className="mt-[12px] text-[18px] font-[600] text-[#000000]">
+                        User has Joined
+                      </p>
+                    }
+                    value={5000}
+                    suffix="+"
+                  />
+                  <p className="text-[16px] max-w-[200px] mx-auto font-[400] text-[#9a9a9a] mt-[8px]">
+                    They love our pre-made templates
+                  </p>
+                </Card>
+              </Col>
+              <Col xs={24} sm={8}>
+                <Card style={{ textAlign: 'center', height: '100%' }}>
+                  <Statistic
+                    className="flex flex-col-reverse"
+                    title={
+                      <p className="mt-[12px] text-[18px] font-[600] text-[#000000]">
+                        User Premium
+                      </p>
+                    }
+                    value={300}
+                    suffix="+"
+                  />
+                  <p className="text-[16px] max-w-[200px] mx-auto font-[400] text-[#9a9a9a] mt-[8px]">
+                    They feel useful and want to keep
+                  </p>
+                </Card>
+              </Col>
+              <Col xs={24} sm={8}>
+                <Card style={{ textAlign: 'center', height: '100%' }}>
+                  <Statistic
+                    className="flex flex-col-reverse"
+                    title={
+                      <p className="mt-[12px] text-[18px] font-[600] text-[#000000]">
+                        Useful Templates
+                      </p>
+                    }
+                    value={15}
+                    suffix="+"
+                  />
+                  <p className="text-[16px] max-w-[200px] mx-auto font-[400] text-[#9a9a9a] mt-[8px]">
+                    You can use them and share with your friends
+                  </p>
+                </Card>
+              </Col>
+            </Row>
+          </div>
+        </div>
+
+
 
         {/* Newsletter Section */}
         <div className="">

@@ -15,6 +15,7 @@ import {
 import NavigationBar from '@/components/ui/navbar';
 import { Button, Select, Typography, message } from 'antd';
 import Image from 'next/image';
+import Link from 'next/link';
 import { useEffect, useState } from 'react';
 import { motion } from 'framer-motion';
 
@@ -274,14 +275,20 @@ const NewClientPagePayment = () => {
                       upgrade your plan, please scan the QRIS code below with
                       your phone.
                     </p>
+                    <p className="text-sm mt-[10px]">
+                      If you have any question please visit our FAQ section{' '}
+                      <Link href="/#faq-section" className="text-[#E34013] underline font-medium">
+                        here
+                      </Link>
+                    </p>
                   </div>
 
                   {/* Payment Method Options */}
                   {!qrisData ? (
-                    <div className="h-[70%]">
+                    <div className="h-[50%]">
                       <div className="flex space-x-4 mb-6">
                         <Button
-                          onClick={() => {}}
+                          onClick={() => { }}
                           type="default"
                           disabled={true}
                           className="flex items-center justify-center"
@@ -317,7 +324,7 @@ const NewClientPagePayment = () => {
                         </Button>
 
                         <Button
-                          onClick={() => {}}
+                          onClick={() => { }}
                           type="default"
                           disabled={true}
                           className="flex items-center justify-center"
