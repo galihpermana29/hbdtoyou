@@ -5,6 +5,13 @@ export interface IOAuthResponse {
   token: string;
 }
 
+export interface IFeedback {
+  id: string;
+  email: string;
+  message: string;
+  type: string;
+}
+
 export interface IAllTemplateResponse {
   id: string;
   name: string;
