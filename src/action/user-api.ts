@@ -9,6 +9,7 @@ import {
   IContentPayload,
   IContentStats,
   IDetailContentResponse,
+  IFeedback,
   IGetDetailPayment,
   ILatestContentResponse2,
   IListPackageResponse,
@@ -667,6 +668,37 @@ export async function submitFeedback(payload: {
       Authorization: `Bearer ${session.accessToken}`,
     },
     body: JSON.stringify(payload),
+  });
+
+  if (!res.ok) {
+    return {
+      success: false,
+      message: res.statusText,
+      data: null,
+    };
+  }
+
+  const data = await res.json();
+
+  return {
+    success: true,
+    message: data.message,
+    data: data.data,
+  };
+}
+
+export async function getListFeedbacks(): Promise<
+  IGlobalResponse<IFeedback[] | null>
+> {
+  const session = await getSession();
+  const res = await fetch(baseUri + `/feedbacks`, {
+    method: 'GET',
+    headers: {
+      'Content-Type': 'application/json',
+      'X-Source': 'web',
+      'X-UserID': session.userId!,
+      Authorization: `Bearer ${session.accessToken}`,
+    },
   });
 
   if (!res.ok) {

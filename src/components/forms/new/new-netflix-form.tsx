@@ -30,7 +30,7 @@ const NewNetflixForm = ({
 }: NewNetflixFormProps) => {
   const dispatch = useDispatch();
   const profile = useMemoifyProfile();
-  console.log(profile, 'profile')
+
   const isFreeAccount = profile?.quota < 1;
   const router = useRouter();
   const [form] = useForm();

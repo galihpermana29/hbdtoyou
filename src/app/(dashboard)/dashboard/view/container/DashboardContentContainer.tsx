@@ -10,10 +10,11 @@ import dynamic from 'next/dynamic';
 
 // lazy import
 const DashboardCard = dynamic(() => import('../presentation/DashboardCard'));
-const initSliced = 10;
+const initSliced = 25;
 const DashboardContentContainer = ({ data }: { data: IContent[] }) => {
   // create load more state
   const [currentData, setCurrentData] = useState<IContent[]>([]);
+  const [displayCount, setDisplayCount] = useState(initSliced);
   // state
   const [modalType, setModalType] = useState<{
     type: string;
@@ -95,9 +96,9 @@ const DashboardContentContainer = ({ data }: { data: IContent[] }) => {
 
   useEffect(() => {
     if (data.length > 0) {
-      setCurrentData(data.slice(0, initSliced));
+      setCurrentData(data.slice(0, displayCount));
     }
-  }, [data]);
+  }, [data, displayCount]);
 
   return (
     <div>
@@ -126,14 +127,8 @@ const DashboardContentContainer = ({ data }: { data: IContent[] }) => {
               <Button
                 onClick={() => {
                   if (currentData.length >= data.length) return;
-                  const newData = [
-                    ...currentData,
-                    ...data.slice(
-                      currentData.length,
-                      currentData.length + initSliced
-                    ),
-                  ];
-                  setCurrentData(newData);
+                  const newCount = displayCount + initSliced;
+                  setDisplayCount(newCount);
                 }}
                 iconPosition="end"
                 className="!bg-[#E34013] !text-white !rounded-[8px] !text-[14px] !font-[600] !h-[38px] mt-[24px]"

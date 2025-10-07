@@ -30,6 +30,7 @@ import {
   BadgeDollarSign,
   Book,
   BookA,
+  ChevronDown,
   House,
   LogOut,
   Menu,
@@ -447,7 +448,14 @@ const NavigationBar = () => {
           )}
           {session.accessToken && (
             <Dropdown menu={{ items }}>
-              <Avatar size={40}>{userProfile?.fullname.charAt(0)}</Avatar>
+              <div className="flex items-center gap-2 cursor-pointer">
+                <Avatar size={40}>{userProfile?.fullname.charAt(0)}</Avatar>
+                <div className='hidden md:block'>
+                  <p className="font-bold text-[14px]">{userProfile?.fullname}</p>
+                  <p className="text-[#7B7B7B] text-[12px]">{userProfile?.email}</p>
+                </div>
+                <ChevronDown size={16} className='hidden md:block' />
+              </div>
             </Dropdown>
           )}
 
