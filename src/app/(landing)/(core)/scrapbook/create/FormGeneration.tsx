@@ -25,6 +25,7 @@ import {
   templatesPrompt,
   templatePrompts,
 } from '@/lib/scrapbook-constant';
+import { createContentClientSide } from '@/action/client-api';
 
 
 interface FormGenerationProps {
@@ -120,7 +121,7 @@ const FormGeneration = ({
     };
 
     try {
-      const res: any = await createContent(payload);
+      const res: any = await createContentClientSide(payload);
 
       if (res.success) {
         form.resetFields();
