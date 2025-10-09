@@ -85,9 +85,11 @@ const FormGeneration = ({
 
   const handleFinish = async (value: any) => {
 
+    let parsedPrompt = null;
+
     if (selectedModel === 'memo-ai-2.0') {
       // Parse and validate the prompt content
-      const parsedPrompt = parsePromptContent(value.main_theme);
+      parsedPrompt = parsePromptContent(value.main_theme);
       if (!parsedPrompt) {
         return; // Error messages already shown by parser
       }
@@ -102,6 +104,7 @@ const FormGeneration = ({
       subTitle: 'Scrapbook AI',
       images: value.images || null,
       isPublic: true,
+      ...(parsedPrompt ? parsedPrompt : {})
     };
 
     const payload = {
