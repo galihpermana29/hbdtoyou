@@ -33,7 +33,7 @@ export interface IGlobalResponse<T> {
 }
 
 const baseUri =
-  process.env.NODE_ENV === 'production'
+  process.env.APP_ENV === 'production'
     ? process.env.API_URI
     : process.env.STAGING_API;
 
