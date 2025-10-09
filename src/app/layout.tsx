@@ -15,9 +15,9 @@ export default async function RootLayout({
   const session = await getSession();
   const res = session?.accessToken
     ? await getUserProfile({
-        userId: session.userId!,
-        accessToken: session.accessToken!,
-      })
+      userId: session.userId!,
+      accessToken: session.accessToken!,
+    })
     : null;
 
   return (
