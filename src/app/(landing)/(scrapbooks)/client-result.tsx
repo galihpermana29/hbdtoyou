@@ -15,7 +15,7 @@ const ClientResult = () => {
 
   const handleCopy = () => {
     if (typeof window !== 'undefined') {
-      navigator.clipboard.writeText(window.location.href);
+      navigator.clipboard.writeText(window.location.href?.split('?')[0] || '');
       message.success('Copied!');
     }
   };
