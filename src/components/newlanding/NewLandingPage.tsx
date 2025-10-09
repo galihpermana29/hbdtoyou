@@ -56,7 +56,7 @@ export default function NewLandingPage() {
       return data.data;
     },
   });
-  console.log(process.env.NEXT_PUBLIC_APP_ENV, process.env.NEXT_PUBLIC_STAGING_API)
+  console.log(process.env.NEXT_PUBLIC_APP_ENV, process.env.NEXT_PUBLIC_STAGING_API, process.env.NEXT_PUBLIC_API_URI)
 
   return (
     <div>
