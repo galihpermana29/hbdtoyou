@@ -94,7 +94,7 @@ const FormGeneration = ({
       if (!parsedPrompt) {
         return; // Error messages already shown by parser
       }
-      console.log('Parsed prompt:', parsedPrompt);
+      console.log('Parsed prompt:', parsedPrompt, value.model);
 
     }
 
@@ -105,6 +105,7 @@ const FormGeneration = ({
       subTitle: 'Scrapbook AI',
       images: value.images || null,
       isPublic: true,
+      model: value?.model ?? 'v1',
       ...(parsedPrompt ? parsedPrompt : {})
     };
 
