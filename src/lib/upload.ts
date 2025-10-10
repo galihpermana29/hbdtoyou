@@ -1,4 +1,8 @@
 import axios, { AxiosProgressEvent } from 'axios';
+const API_URI =
+  process.env.NEXT_PUBLIC_APP_ENV === 'staging'
+    ? process.env.NEXT_PUBLIC_STAGING_API
+    : process.env.NEXT_PUBLIC_API_URI;
 
 export async function uploadImageClientSide(
   file: File,
@@ -75,18 +79,14 @@ export async function uploadImageWithApi(
 ) {
   // using axios
   try {
-    const response = await axios.post(
-      `${process.env.NEXT_PUBLIC_API_URI}/uploads`,
-      formData,
-      {
-        onUploadProgress: (progressEvent) => {
-          const percentCompleted = Math.round(
-            (progressEvent.loaded * 100) / progressEvent.total
-          );
-          openNotification(percentCompleted, key);
-        },
-      }
-    );
+    const response = await axios.post(`${API_URI}/uploads`, formData, {
+      onUploadProgress: (progressEvent) => {
+        const percentCompleted = Math.round(
+          (progressEvent.loaded * 100) / progressEvent.total
+        );
+        openNotification(percentCompleted, key);
+      },
+    });
     return {
       message: 'success',
       data: response.data,
@@ -109,7 +109,7 @@ export async function uploadMultipleImageWithApi(
   // using axios
   try {
     const response = await axios.post(
-      `${process.env.NEXT_PUBLIC_API_URI?.replace('v1', 'v2')}/uploads`,
+      `${API_URI?.replace('v1', 'v2')}/uploads`,
       formData,
       {
         onUploadProgress: (progressEvent) => {
@@ -177,18 +177,14 @@ export async function newUploadImageWithAPI(
 ) {
   // using axios
   try {
-    const response = await axios.post(
-      `${process.env.NEXT_PUBLIC_API_URI}/uploads`,
-      formData,
-      {
-        onUploadProgress: (progressEvent: AxiosProgressEvent) => {
-          const percentCompleted = Math.round(
-            (progressEvent.loaded * 100) / progressEvent.total!
-          );
-          openNotification?.(percentCompleted, key);
-        },
-      }
-    );
+    const response = await axios.post(`${API_URI}/uploads`, formData, {
+      onUploadProgress: (progressEvent: AxiosProgressEvent) => {
+        const percentCompleted = Math.round(
+          (progressEvent.loaded * 100) / progressEvent.total!
+        );
+        openNotification?.(percentCompleted, key);
+      },
+    });
     return {
       message: 'success',
       data: response.data,

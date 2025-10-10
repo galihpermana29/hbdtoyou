@@ -166,7 +166,6 @@ const NewEntryPage: React.FC = () => {
                     placeholder="Enter destination name"
                   />
                 </Form.Item>
-
                 <Form.Item
                   label="Abstract"
                   name="abstract"
@@ -174,49 +173,46 @@ const NewEntryPage: React.FC = () => {
                     { required: true, message: 'Please enter an abstract' },
                   ]}
                   className="mb-6">
-                  <div className="relative">
-                    <ReactQuill
-                      modules={{
-                        toolbar: [
-                          ['bold', 'italic', 'underline', 'strike'],
-                          ['blockquote'],
-                          ['clean'],
-                        ],
-                        maxlength: {
-                          maxLength: MAXLENGTH,
-                          fieldName: 'abstract',
-                        },
-                      }}
-                      theme="snow"
-                      placeholder="Write your abstract text here. This section will be displayed in one columns."
-                    />
-                    {type !== 'premium' && (
-                      <div className="mt-1 flex justify-between items-center">
-                        <div
-                          className={`text-xs ${
-                            charCounts.abstract > MAXLENGTH * 0.8
-                              ? 'text-orange-500'
-                              : 'text-gray-500'
-                          }`}>
-                          <span
-                            className={
-                              charCounts.abstract >= MAXLENGTH
-                                ? 'text-red-500 font-bold'
-                                : ''
-                            }>
-                            {charCounts.abstract}
-                          </span>
-                          /{MAXLENGTH} characters (Free user limit)
-                        </div>
-                        <a
-                          href="/payment"
-                          className="text-xs text-blue-600 hover:text-blue-800 hover:underline text-right">
-                          Upgrade for unlimited characters →
-                        </a>
-                      </div>
-                    )}
-                  </div>
+                  <ReactQuill
+                    modules={{
+                      toolbar: [
+                        ['bold', 'italic', 'underline', 'strike'],
+                        ['blockquote'],
+                        ['clean'],
+                      ],
+                      maxlength: {
+                        maxLength: MAXLENGTH,
+                        fieldName: 'abstract',
+                      },
+                    }}
+                    theme="snow"
+                    placeholder="Write your abstract text here. This section will be displayed in one columns."
+                  />
                 </Form.Item>
+                {type !== 'premium' && (
+                  <div className="mt-1 flex justify-between items-center mb-6">
+                    <div
+                      className={`text-xs ${charCounts.abstract > MAXLENGTH * 0.8
+                        ? 'text-orange-500'
+                        : 'text-gray-500'
+                        }`}>
+                      <span
+                        className={
+                          charCounts.abstract >= MAXLENGTH
+                            ? 'text-red-500 font-bold'
+                            : ''
+                        }>
+                        {charCounts.abstract}
+                      </span>
+                      /{MAXLENGTH} characters (Free user limit)
+                    </div>
+                    <a
+                      href="/payment"
+                      className="text-xs text-blue-600 hover:text-blue-800 hover:underline text-right">
+                      Upgrade for unlimited characters →
+                    </a>
+                  </div>
+                )}
 
                 <Form.Item
                   label={`Abstract English`}
@@ -225,49 +221,46 @@ const NewEntryPage: React.FC = () => {
                     { required: true, message: 'Please enter an abstract' },
                   ]}
                   className="mb-6">
-                  <div className="relative">
-                    <ReactQuill
-                      modules={{
-                        toolbar: [
-                          ['bold', 'italic', 'underline', 'strike'],
-                          ['blockquote'],
-                          ['clean'],
-                        ],
-                        // maxlength: {
-                        //   maxLength: MAXLENGTH,
-                        //   fieldName: 'abstractSecondary',
-                        // },
-                      }}
-                      theme="snow"
-                      placeholder="Write your abstract text here. This section will be displayed in one columns."
-                    />
-                    {type !== 'premium' && (
-                      <div className="mt-1 flex justify-between items-center">
-                        <div
-                          className={`text-xs ${
-                            charCounts.abstractSecondary > MAXLENGTH * 0.8
-                              ? 'text-orange-500'
-                              : 'text-gray-500'
-                          }`}>
-                          <span
-                            className={
-                              charCounts.abstractSecondary >= MAXLENGTH
-                                ? 'text-red-500 font-bold'
-                                : ''
-                            }>
-                            {charCounts.abstractSecondary}
-                          </span>
-                          /{MAXLENGTH} characters (Free user limit)
-                        </div>
-                        <a
-                          href="/payment"
-                          className="text-xs text-blue-600 hover:text-blue-800 hover:underline text-right">
-                          Upgrade for unlimited characters →
-                        </a>
-                      </div>
-                    )}
-                  </div>
+                  <ReactQuill
+                    modules={{
+                      toolbar: [
+                        ['bold', 'italic', 'underline', 'strike'],
+                        ['blockquote'],
+                        ['clean'],
+                      ],
+                      // maxlength: {
+                      //   maxLength: MAXLENGTH,
+                      //   fieldName: 'abstractSecondary',
+                      // },
+                    }}
+                    theme="snow"
+                    placeholder="Write your abstract text here. This section will be displayed in one columns."
+                  />
                 </Form.Item>
+                {type !== 'premium' && (
+                  <div className="mt-1 flex justify-between items-center mb-6">
+                    <div
+                      className={`text-xs ${charCounts.abstractSecondary > MAXLENGTH * 0.8
+                        ? 'text-orange-500'
+                        : 'text-gray-500'
+                        }`}>
+                      <span
+                        className={
+                          charCounts.abstractSecondary >= MAXLENGTH
+                            ? 'text-red-500 font-bold'
+                            : ''
+                        }>
+                        {charCounts.abstractSecondary}
+                      </span>
+                      /{MAXLENGTH} characters (Free user limit)
+                    </div>
+                    <a
+                      href="/payment"
+                      className="text-xs text-blue-600 hover:text-blue-800 hover:underline text-right">
+                      Upgrade for unlimited characters →
+                    </a>
+                  </div>
+                )}
 
                 <Form.Item
                   label="Keywords (comma-separated)"
@@ -288,49 +281,46 @@ const NewEntryPage: React.FC = () => {
                     { required: true, message: 'Please enter a preamble' },
                   ]}
                   className="mb-6">
-                  <div className="relative">
-                    <ReactQuill
-                      modules={{
-                        toolbar: [
-                          ['bold', 'italic', 'underline', 'strike'],
-                          ['blockquote'],
-                          ['clean'],
-                        ],
-                        maxlength: {
-                          maxLength: MAXLENGTH,
-                          fieldName: 'preamble',
-                        },
-                      }}
-                      theme="snow"
-                      placeholder="Write your preamble text here. This section will be displayed in one columns."
-                    />
-                    {type !== 'premium' && (
-                      <div className="mt-1 flex justify-between items-center">
-                        <div
-                          className={`text-xs ${
-                            charCounts.preamble > MAXLENGTH * 0.8
-                              ? 'text-orange-500'
-                              : 'text-gray-500'
-                          }`}>
-                          <span
-                            className={
-                              charCounts.preamble >= MAXLENGTH
-                                ? 'text-red-500 font-bold'
-                                : ''
-                            }>
-                            {charCounts.preamble}
-                          </span>
-                          /{MAXLENGTH} characters (Free user limit)
-                        </div>
-                        <a
-                          href="/payment"
-                          className="text-xs text-blue-600 hover:text-blue-800 hover:underline text-right">
-                          Upgrade for unlimited characters →
-                        </a>
-                      </div>
-                    )}
-                  </div>
+                  <ReactQuill
+                    modules={{
+                      toolbar: [
+                        ['bold', 'italic', 'underline', 'strike'],
+                        ['blockquote'],
+                        ['clean'],
+                      ],
+                      maxlength: {
+                        maxLength: MAXLENGTH,
+                        fieldName: 'preamble',
+                      },
+                    }}
+                    theme="snow"
+                    placeholder="Write your preamble text here. This section will be displayed in one columns."
+                  />
                 </Form.Item>
+                {type !== 'premium' && (
+                  <div className="mt-1 flex justify-between items-center mb-6">
+                    <div
+                      className={`text-xs ${charCounts.preamble > MAXLENGTH * 0.8
+                        ? 'text-orange-500'
+                        : 'text-gray-500'
+                        }`}>
+                      <span
+                        className={
+                          charCounts.preamble >= MAXLENGTH
+                            ? 'text-red-500 font-bold'
+                            : ''
+                        }>
+                        {charCounts.preamble}
+                      </span>
+                      /{MAXLENGTH} characters (Free user limit)
+                    </div>
+                    <a
+                      href="/payment"
+                      className="text-xs text-blue-600 hover:text-blue-800 hover:underline text-right">
+                      Upgrade for unlimited characters →
+                    </a>
+                  </div>
+                )}
 
                 <Form.Item
                   label="Introduction"
@@ -339,49 +329,46 @@ const NewEntryPage: React.FC = () => {
                     { required: true, message: 'Please enter an introduction' },
                   ]}
                   className="mb-6">
-                  <div className="relative">
-                    <ReactQuill
-                      modules={{
-                        toolbar: [
-                          ['bold', 'italic', 'underline', 'strike'],
-                          ['blockquote'],
-                          ['clean'],
-                        ],
-                        maxlength: {
-                          maxLength: MAXLENGTH,
-                          fieldName: 'introduction',
-                        },
-                      }}
-                      theme="snow"
-                      placeholder="Write your introduction text here. This section will be displayed in two columns."
-                    />
-                    {type !== 'premium' && (
-                      <div className="mt-1 flex justify-between items-center">
-                        <div
-                          className={`text-xs ${
-                            charCounts.introduction > MAXLENGTH * 0.8
-                              ? 'text-orange-500'
-                              : 'text-gray-500'
-                          }`}>
-                          <span
-                            className={
-                              charCounts.introduction >= MAXLENGTH
-                                ? 'text-red-500 font-bold'
-                                : ''
-                            }>
-                            {charCounts.introduction}
-                          </span>
-                          /{MAXLENGTH} characters (Free user limit)
-                        </div>
-                        <a
-                          href="/payment"
-                          className="text-xs text-blue-600 hover:text-blue-800 hover:underline text-right">
-                          Upgrade for unlimited characters →
-                        </a>
-                      </div>
-                    )}
-                  </div>
+                  <ReactQuill
+                    modules={{
+                      toolbar: [
+                        ['bold', 'italic', 'underline', 'strike'],
+                        ['blockquote'],
+                        ['clean'],
+                      ],
+                      maxlength: {
+                        maxLength: MAXLENGTH,
+                        fieldName: 'introduction',
+                      },
+                    }}
+                    theme="snow"
+                    placeholder="Write your introduction text here. This section will be displayed in two columns."
+                  />
                 </Form.Item>
+                {type !== 'premium' && (
+                  <div className="mt-1 flex justify-between items-center mb-6">
+                    <div
+                      className={`text-xs ${charCounts.introduction > MAXLENGTH * 0.8
+                        ? 'text-orange-500'
+                        : 'text-gray-500'
+                        }`}>
+                      <span
+                        className={
+                          charCounts.introduction >= MAXLENGTH
+                            ? 'text-red-500 font-bold'
+                            : ''
+                        }>
+                        {charCounts.introduction}
+                      </span>
+                      /{MAXLENGTH} characters (Free user limit)
+                    </div>
+                    <a
+                      href="/payment"
+                      className="text-xs text-blue-600 hover:text-blue-800 hover:underline text-right">
+                      Upgrade for unlimited characters →
+                    </a>
+                  </div>
+                )}
 
                 <div className="flex justify-end">
                   <Button
