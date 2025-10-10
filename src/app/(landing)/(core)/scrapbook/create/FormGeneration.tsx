@@ -88,7 +88,7 @@ const FormGeneration = ({
 
     let parsedPrompt = null;
 
-    if (selectedModel === 'memo-ai-2.0') {
+    if (selectedModel === 'v2') {
       // Parse and validate the prompt content
       parsedPrompt = parsePromptContent(value.main_theme);
       if (!parsedPrompt) {
@@ -157,7 +157,7 @@ const FormGeneration = ({
           <div className="mt-[10px] mb-[5px] flex-1">
             <h3 className="text-[14px] font-medium mb-[6px]">AI Models</h3>
             <Form.Item name="model">
-              <Select options={profile?.email === 'memoify.live@gmail.com' ? modelSelectData : modelSelectData.filter((item) => item.value !== 'memo-ai-2.0')} defaultValue={'memo-ai-1.0'} />
+              <Select options={profile?.email === 'memoify.live@gmail.com' ? modelSelectData : modelSelectData.filter((item) => item.value !== 'v2')} defaultValue={'v1'} />
             </Form.Item>
           </div>
           <div className="mt-[10px] mb-[5px]">
@@ -171,7 +171,7 @@ const FormGeneration = ({
             />
           </div>
         </div>
-        {selectedModel === 'memo-ai-2.0' && (
+        {selectedModel === 'v2' && (
           <>
             <div className="flex justify-between mb-[6px]">
               <h3 className="text-[14px] font-medium mb-[6px]">User Prompt</h3>
