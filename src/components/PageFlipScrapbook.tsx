@@ -55,6 +55,7 @@ interface PageFlipScrapbookProps {
   backCoverImage?: string;
   coverTitle?: string;
   backCoverTitle?: string;
+  enableVideoExport?: boolean;
 }
 
 const PageFlipScrapbook: React.FC<PageFlipScrapbookProps> = ({
@@ -63,6 +64,7 @@ const PageFlipScrapbook: React.FC<PageFlipScrapbookProps> = ({
   backCoverImage = 'https://res.cloudinary.com/dqipjpy1w/image/upload/v1750003560/tl7dqxuefwo2oiaxgj9s.jpg',
   coverTitle = 'Scrapbook by Memoify',
   backCoverTitle = 'The End',
+  enableVideoExport = true,
 }) => {
   const book = useRef<any>(null);
   const [page, setPage] = useState(0);
@@ -70,6 +72,8 @@ const PageFlipScrapbook: React.FC<PageFlipScrapbookProps> = ({
   const [orientation, setOrientation] = useState<'portrait' | 'landscape'>(
     'portrait'
   );
+  const [isExporting, setIsExporting] = useState(false);
+  const [exportError, setExportError] = useState<string | null>(null);
 
   const onInit = () => {
     // Wait a moment for the component to fully initialize
@@ -101,6 +105,61 @@ const PageFlipScrapbook: React.FC<PageFlipScrapbookProps> = ({
     // Safely handle page number
     if (typeof e.data === 'number') {
       setPage(e.data);
+    }
+  };
+
+  const handleExportVideo = async () => {
+    setIsExporting(true);
+    setExportError(null);
+
+    try {
+      const response = await fetch('/api/export-video', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          pages,
+          coverImage,
+          backCoverImage,
+        }),
+      });
+
+      const data = await response.json();
+
+      if (!response.ok) {
+        throw new Error(data.error || 'Failed to export video');
+      }
+
+      // Convert base64 to blob and download
+      const byteCharacters = atob(data.gif);
+      const byteNumbers = new Array(byteCharacters.length);
+      for (let i = 0; i < byteCharacters.length; i++) {
+        byteNumbers[i] = byteCharacters.charCodeAt(i);
+      }
+      const byteArray = new Uint8Array(byteNumbers);
+      const blob = new Blob([byteArray], { type: 'image/gif' });
+      
+      // Download the GIF
+      const link = document.createElement('a');
+      link.href = URL.createObjectURL(blob);
+      link.download = `scrapbook-${Date.now()}.gif`;
+      document.body.appendChild(link);
+      link.click();
+      document.body.removeChild(link);
+      
+      // Clean up the blob URL
+      URL.revokeObjectURL(link.href);
+
+      alert('GIF exported successfully!');
+    } catch (error) {
+      console.error('Export error:', error);
+      setExportError(
+        error instanceof Error ? error.message : 'Failed to export video'
+      );
+      alert('Failed to export GIF. Please try again.');
+    } finally {
+      setIsExporting(false);
     }
   };
 
@@ -163,6 +222,56 @@ const PageFlipScrapbook: React.FC<PageFlipScrapbookProps> = ({
           Next
         </button>
       </div>
+
+      {enableVideoExport && (
+        <div className="mt-4 flex flex-col items-center">
+          <button
+            className="bg-green-500 hover:bg-green-700 text-white font-bold py-3 px-6 rounded-lg disabled:opacity-50 disabled:cursor-not-allowed flex items-center gap-2"
+            onClick={handleExportVideo}
+            disabled={isExporting}>
+            {isExporting ? (
+              <>
+                <svg
+                  className="animate-spin h-5 w-5"
+                  xmlns="http://www.w3.org/2000/svg"
+                  fill="none"
+                  viewBox="0 0 24 24">
+                  <circle
+                    className="opacity-25"
+                    cx="12"
+                    cy="12"
+                    r="10"
+                    stroke="currentColor"
+                    strokeWidth="4"></circle>
+                  <path
+                    className="opacity-75"
+                    fill="currentColor"
+                    d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                </svg>
+                Generating GIF...
+              </>
+            ) : (
+              <>
+                <svg
+                  xmlns="http://www.w3.org/2000/svg"
+                  className="h-5 w-5"
+                  viewBox="0 0 24 24"
+                  fill="none"
+                  stroke="currentColor"
+                  strokeWidth="2">
+                  <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path>
+                  <polyline points="7 10 12 15 17 10"></polyline>
+                  <line x1="12" y1="15" x2="12" y2="3"></line>
+                </svg>
+                Export to GIF
+              </>
+            )}
+          </button>
+          {exportError && (
+            <p className="text-red-500 mt-2 text-sm">{exportError}</p>
+          )}
+        </div>
+      )}
     </div>
   );
 };
