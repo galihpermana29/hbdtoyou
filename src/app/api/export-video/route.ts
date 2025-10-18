@@ -71,7 +71,7 @@ export async function POST(request: NextRequest) {
       composition: {
         ...composition,
         durationInFrames,
-        fps: 3, // Minimal FPS for fastest rendering under 10s timeout
+        fps: 2, // Minimal FPS for fastest rendering under 10s timeout
         width: 800, // Reduced width for faster rendering
         height: 600, // Reduced height for faster rendering
       },
