@@ -15,9 +15,9 @@ export const RemotionRoot: React.FC = () => {
         id="ScrapbookVideo"
         component={ScrapbookComposition as any}
         durationInFrames={300}
-        fps={12}
-        width={640}
-        height={480}
+        fps={4}
+        width={1200}
+        height={800}
         defaultProps={{
           pages: [],
           coverImage: '',

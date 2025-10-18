@@ -131,13 +131,25 @@ const PageFlipScrapbook: React.FC<PageFlipScrapbookProps> = ({
         throw new Error(data.error || 'Failed to export video');
       }
 
+      // Convert base64 to blob and download
+      const byteCharacters = atob(data.gif);
+      const byteNumbers = new Array(byteCharacters.length);
+      for (let i = 0; i < byteCharacters.length; i++) {
+        byteNumbers[i] = byteCharacters.charCodeAt(i);
+      }
+      const byteArray = new Uint8Array(byteNumbers);
+      const blob = new Blob([byteArray], { type: 'image/gif' });
+      
       // Download the GIF
       const link = document.createElement('a');
-      link.href = data.gifUrl;
+      link.href = URL.createObjectURL(blob);
       link.download = `scrapbook-${Date.now()}.gif`;
       document.body.appendChild(link);
       link.click();
       document.body.removeChild(link);
+      
+      // Clean up the blob URL
+      URL.revokeObjectURL(link.href);
 
       alert('GIF exported successfully!');
     } catch (error) {

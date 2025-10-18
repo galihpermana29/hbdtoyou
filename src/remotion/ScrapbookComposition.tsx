@@ -1,12 +1,7 @@
 'use client';
 
-import React, { useEffect, useRef, useState } from 'react';
+import React from 'react';
 import { AbsoluteFill, useCurrentFrame, useVideoConfig, Img } from 'remotion';
-
-interface ScrapbookPage {
-  image: string;
-  isFlipping?: boolean;
-}
 
 interface ScrapbookCompositionProps {
   pages: string[];
@@ -20,105 +15,114 @@ export const ScrapbookComposition: React.FC<ScrapbookCompositionProps> = ({
   backCoverImage,
 }) => {
   const frame = useCurrentFrame();
-  const { fps } = useVideoConfig();
+  const { fps, width, height } = useVideoConfig();
 
-  // Duration for each page (1.5 seconds for smaller GIF)
-  const pageDuration = fps * 1.5;
-  // Flip animation duration (0.3 seconds for faster, smaller GIF)
+  // Duration for each spread (1.5 seconds)
+  const spreadDuration = fps * 1.5;
+  // Flip animation duration (0.3 seconds)
   const flipDuration = fps * 0.3;
 
-  // Calculate total pages including covers
-  const allPages = [coverImage, ...pages, backCoverImage];
-  const totalPages = allPages.length;
-
-  // Calculate current page index
-  const currentPageIndex = Math.floor(frame / pageDuration);
-  const frameInPage = frame % pageDuration;
-
-  // Determine if we're in a flip animation
-  const isFlipping = frameInPage < flipDuration && currentPageIndex < totalPages - 1;
-  const flipProgress = isFlipping ? frameInPage / flipDuration : 0;
-
-  // Get current and next page
-  const currentPage = allPages[Math.min(currentPageIndex, totalPages - 1)];
-  const nextPage = allPages[Math.min(currentPageIndex + 1, totalPages - 1)];
+  // Build spread structure: [cover solo], [page1, page2], [page3, page4], ...
+  const spreads: (string | [string, string])[] = [];
+  
+  // First spread: Cover alone
+  spreads.push(coverImage);
+  
+  // All remaining pages paired (including back cover)
+  const allContentPages = [...pages, backCoverImage];
+  for (let i = 0; i < allContentPages.length; i += 2) {
+    if (i + 1 < allContentPages.length) {
+      spreads.push([allContentPages[i], allContentPages[i + 1]]);
+    } else {
+      spreads.push(allContentPages[i]); // Single page if odd number
+    }
+  }
+  
+  // Calculate current spread index
+  const currentSpreadIndex = Math.floor(frame / spreadDuration);
+  const frameInSpread = frame % spreadDuration;
+  
+  // Get current spread
+  const currentSpread = spreads[Math.min(currentSpreadIndex, spreads.length - 1)];
+  
+  // Determine if single or double page
+  const isSinglePage = typeof currentSpread === 'string';
+  const leftPage = isSinglePage ? null : currentSpread[0];
+  const rightPage = isSinglePage ? null : currentSpread[1];
+  const singlePage = isSinglePage ? currentSpread : null;
+  
+  // Calculate if we're in flip animation
+  const isFlipping = frameInSpread < flipDuration;
+  const flipProgress = isFlipping ? frameInSpread / flipDuration : 0;
+  
+  // Page dimensions
+  const pageWidth = width / 2;
+  const pageHeight = height;
 
   return (
-    <AbsoluteFill style={{ backgroundColor: '#1a1a1a' }}>
-      <div
-        style={{
-          width: '100%',
-          height: '100%',
-          display: 'flex',
-          justifyContent: 'center',
-          alignItems: 'center',
-          perspective: '2000px',
-        }}>
-        {/* Current Page */}
+    <AbsoluteFill style={{ backgroundColor: 'transparent' }}>
+      {/* Single Page Layout (Cover or Back Cover) */}
+      {isSinglePage && singlePage && (
         <div
           style={{
-            position: 'absolute',
-            width: '550px',
-            height: '733px',
-            transformStyle: 'preserve-3d',
-            transform: isFlipping
-              ? `rotateY(${-flipProgress * 180}deg)`
-              : 'rotateY(0deg)',
-            transition: 'none',
+            width: '100%',
+            height: '100%',
+            display: 'flex',
+            justifyContent: 'center',
+            alignItems: 'center',
           }}>
-          {/* Front of current page */}
-          <div
+          <Img
+            src={singlePage}
             style={{
-              position: 'absolute',
-              width: '100%',
+              width: pageWidth,
               height: '100%',
-              backfaceVisibility: 'hidden',
-              boxShadow: '0 10px 30px rgba(0,0,0,0.5)',
-            }}>
-            <Img
-              src={currentPage}
-              style={{
-                width: '100%',
-                height: '100%',
-                objectFit: 'cover',
-              }}
-            />
-          </div>
-
-          {/* Back of current page (shows next page) */}
-          <div
-            style={{
-              position: 'absolute',
-              width: '100%',
-              height: '100%',
-              backfaceVisibility: 'hidden',
-              transform: 'rotateY(180deg)',
-              boxShadow: '0 10px 30px rgba(0,0,0,0.5)',
-            }}>
-            <Img
-              src={nextPage}
-              style={{
-                width: '100%',
-                height: '100%',
-                objectFit: 'cover',
-              }}
-            />
-          </div>
+              objectFit: 'contain',
+            }}
+          />
         </div>
+      )}
 
-        {/* Page counter */}
+      {/* Double Page Layout (Regular Spreads) */}
+      {!isSinglePage && (
         <div
           style={{
-            position: 'absolute',
-            bottom: '40px',
-            color: 'white',
-            fontSize: '24px',
-            fontWeight: 'bold',
-            textShadow: '0 2px 4px rgba(0,0,0,0.8)',
+            width: '100%',
+            height: '100%',
+            display: 'flex',
+            margin: 0,
+            padding: 0,
           }}>
-          Page {currentPageIndex + 1} of {totalPages}
+          {/* Left Page */}
+          {leftPage && (
+            <Img
+              src={leftPage}
+              style={{
+                width: pageWidth,
+                height: '100%',
+                objectFit: 'contain',
+                display: 'block',
+                margin: 0,
+                padding: 0,
+              }}
+            />
+          )}
+
+          {/* Right Page */}
+          {rightPage && (
+            <Img
+              src={rightPage}
+              style={{
+                width: pageWidth,
+                height: '100%',
+                objectFit: 'contain',
+                display: 'block',
+                margin: 0,
+                padding: 0,
+              }}
+            />
+          )}
         </div>
-      </div>
+      )}
     </AbsoluteFill>
   );
 };
