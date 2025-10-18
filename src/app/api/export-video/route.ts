@@ -11,11 +11,13 @@ export const runtime = 'nodejs';
 
 export async function POST(request: NextRequest) {
   let outputPath = '';
-  
+
   try {
     // Dynamic import to avoid build-time bundling issues
     const { bundle } = await import('@remotion/bundler');
-    const { renderMedia, selectComposition } = await import('@remotion/renderer');
+    const { renderMedia, selectComposition } = await import(
+      '@remotion/renderer'
+    );
 
     const body = await request.json();
     const { pages, coverImage, backCoverImage } = body;
@@ -27,12 +29,20 @@ export async function POST(request: NextRequest) {
       );
     }
 
+    // Limit pages to avoid timeout on Vercel free plan (10s limit)
+    if (pages.length > 6) {
+      return NextResponse.json(
+        { error: 'Too many pages. Maximum 6 pages allowed for GIF export.' },
+        { status: 400 }
+      );
+    }
+
     // Calculate duration based on spread structure:
     // 1 spread for cover (solo) + paired spreads for all remaining pages (including back cover)
     const allContentPages = pages.length + 1; // pages + back cover
     const pairedSpreads = Math.ceil(allContentPages / 2); // Pair up all content
     const totalSpreads = 1 + pairedSpreads; // cover + paired content
-    const durationInFrames = totalSpreads * 6; // 1.5 seconds * 4 fps per spread
+    const durationInFrames = totalSpreads * 4; // ~1.3 seconds * 3 fps per spread (faster)
 
     // Use system temp directory instead of public folder
     const tempDir = os.tmpdir();
@@ -61,9 +71,9 @@ export async function POST(request: NextRequest) {
       composition: {
         ...composition,
         durationInFrames,
-        fps: 4, // Ultra low FPS for smallest file size and faster rendering
-        width: 1200, // Landscape width for 2-page spread
-        height: 800, // Taller height to prevent cropping (3:2 ratio)
+        fps: 3, // Minimal FPS for fastest rendering under 10s timeout
+        width: 800, // Reduced width for faster rendering
+        height: 600, // Reduced height for faster rendering
       },
       serveUrl: bundleLocation,
       codec: 'gif',
@@ -78,7 +88,7 @@ export async function POST(request: NextRequest) {
     // Read the GIF file and return as base64
     const gifBuffer = fs.readFileSync(outputPath);
     const base64Gif = gifBuffer.toString('base64');
-    
+
     // Clean up the temp file
     fs.unlinkSync(outputPath);
 
@@ -89,7 +99,7 @@ export async function POST(request: NextRequest) {
     });
   } catch (error) {
     console.error('Error generating GIF:', error);
-    
+
     // Clean up temp file if it exists
     if (outputPath && fs.existsSync(outputPath)) {
       try {
@@ -98,7 +108,7 @@ export async function POST(request: NextRequest) {
         console.error('Error cleaning up temp file:', cleanupError);
       }
     }
-    
+
     return NextResponse.json(
       {
         error: 'Failed to generate GIF',

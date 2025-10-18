@@ -225,10 +225,15 @@ const PageFlipScrapbook: React.FC<PageFlipScrapbookProps> = ({
 
       {enableVideoExport && (
         <div className="mt-4 flex flex-col items-center">
+          {pages.length > 6 && (
+            <p className="text-yellow-600 text-sm mb-2 text-center">
+              ⚠️ Maximum 6 pages allowed for GIF export. Please remove some pages.
+            </p>
+          )}
           <button
             className="bg-green-500 hover:bg-green-700 text-white font-bold py-3 px-6 rounded-lg disabled:opacity-50 disabled:cursor-not-allowed flex items-center gap-2"
             onClick={handleExportVideo}
-            disabled={isExporting}>
+            disabled={isExporting || pages.length > 6}>
             {isExporting ? (
               <>
                 <svg
