@@ -3,6 +3,7 @@
 import React, { useState, useRef, useEffect } from 'react';
 import HTMLFlipBook from 'react-pageflip';
 import './PageFlipScrapbook.css';
+import { message } from 'antd';
 
 interface PageCoverProps {
   children?: React.ReactNode;
@@ -111,7 +112,9 @@ const PageFlipScrapbook: React.FC<PageFlipScrapbookProps> = ({
   const handleExportVideo = async () => {
     setIsExporting(true);
     setExportError(null);
+    message.info("This feature is under review")
 
+    return
     try {
       const response = await fetch('/api/export-video', {
         method: 'POST',
@@ -139,7 +142,7 @@ const PageFlipScrapbook: React.FC<PageFlipScrapbookProps> = ({
       }
       const byteArray = new Uint8Array(byteNumbers);
       const blob = new Blob([byteArray], { type: 'image/gif' });
-      
+
       // Download the GIF
       const link = document.createElement('a');
       link.href = URL.createObjectURL(blob);
@@ -147,7 +150,7 @@ const PageFlipScrapbook: React.FC<PageFlipScrapbookProps> = ({
       document.body.appendChild(link);
       link.click();
       document.body.removeChild(link);
-      
+
       // Clean up the blob URL
       URL.revokeObjectURL(link.href);
 
