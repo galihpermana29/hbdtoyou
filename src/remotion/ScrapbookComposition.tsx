@@ -17,10 +17,10 @@ export const ScrapbookComposition: React.FC<ScrapbookCompositionProps> = ({
   const frame = useCurrentFrame();
   const { fps, width, height } = useVideoConfig();
 
-  // Duration for each spread (1.5 seconds)
-  const spreadDuration = fps * 1.5;
-  // Flip animation duration (0.3 seconds)
-  const flipDuration = fps * 0.3;
+  // Duration for each spread (1.3 seconds - faster)
+  const spreadDuration = Math.ceil(fps * 1.3);
+  // Flip animation duration (0.2 seconds - faster)
+  const flipDuration = Math.ceil(fps * 0.2);
 
   // Build spread structure: [cover solo], [page1, page2], [page3, page4], ...
   const spreads: (string | [string, string])[] = [];
