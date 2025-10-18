@@ -93,6 +93,16 @@ export const DataToCardColor = {
     logo: scrapbookv1,
     text: 'text-[#651B05]',
   },
+  scrapbook7: {
+    color: 'bg-[#651B05cf]',
+    logo: scrapbookv1,
+    text: 'text-[#651B05]',
+  },
+  scrapbook6: {
+    color: 'bg-[#651B05cf]',
+    logo: scrapbookv1,
+    text: 'text-[#651B05]',
+  },
   albumgraduation1: {
     color: 'bg-[#D9182133]',
     logo: netflixv1,
@@ -115,8 +125,8 @@ const CardTemplateTag = ({
           type === 'preview'
             ? 'w-[350px] md:w-[400px]'
             : type === 'scrapbook'
-            ? 'w-[280px] p-[12px] !min-h-[250px]'
-            : 'w-full max-w-[350px] md:max-w-[400px]'
+              ? 'w-[280px] p-[12px] !min-h-[250px]'
+              : 'w-full max-w-[350px] md:max-w-[400px]'
         )}>
         <div className="flex items-center justify-between h-[50px]">
           {DataToCardColor[data.name.split('-')[1]?.split(' ')[1]]?.logo && (

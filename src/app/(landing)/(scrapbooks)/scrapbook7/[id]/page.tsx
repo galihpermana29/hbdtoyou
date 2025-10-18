@@ -47,7 +47,7 @@ const getDetailDataNew = async (id: string) => {
   return res;
 };
 
-const Scrapbook3Result = async ({
+const Scrapbook7Result = async ({
   params,
   searchParams,
 }: {
@@ -97,4 +97,4 @@ const Scrapbook3Result = async ({
   );
 };
 
-export default Scrapbook3Result;
+export default Scrapbook7Result;

@@ -1,11 +1,11 @@
 export const modelSelectData = [
   {
     label: 'Memo AI 1.0 (Cropping & Layouting)',
-    value: 'memo-ai-1.0',
+    value: 'v1',
   },
   {
     label: 'Memo AI 2.0 (Generative/Custom Text)',
-    value: 'memo-ai-2.0',
+    value: 'v2',
   },
 ];
 

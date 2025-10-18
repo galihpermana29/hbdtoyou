@@ -41,13 +41,12 @@ export const metadata: Metadata = {
     ],
   },
 };
-
 const getDetailDataNew = async (id: string) => {
   const res = await getDetailContent(id);
   return res;
 };
 
-const Scrapbook3Result = async ({
+const Scrapbook6Result = async ({
   params,
   searchParams,
 }: {
@@ -97,4 +96,4 @@ const Scrapbook3Result = async ({
   );
 };
 
-export default Scrapbook3Result;
+export default Scrapbook6Result;
