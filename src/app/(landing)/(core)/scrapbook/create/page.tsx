@@ -14,6 +14,8 @@ import Scrapbook5 from '@/app/(landing)/(scrapbooks)/scrapbook5/page';
 
 import { warmUpAIModel } from '@/action/user-api';
 import GeneratingLLMLoadingModal from '@/app/(landing)/albumgraduation1/[id]/GeneratingLLMLoadingModal';
+import Scrapbook6 from '@/app/(landing)/(scrapbooks)/scrapbook6/page';
+import Scrapbook7 from '@/app/(landing)/(scrapbooks)/scrapbook7/page';
 
 const ScrapbookCreatePage = () => {
   const {
@@ -55,6 +57,16 @@ const ScrapbookCreatePage = () => {
     scrapbook5: (
       <Suspense>
         <Scrapbook5 />
+      </Suspense>
+    ),
+    scrapbook6: (
+      <Suspense>
+        <Scrapbook6 />
+      </Suspense>
+    ),
+    scrapbook7: (
+      <Suspense>
+        <Scrapbook7 />
       </Suspense>
     ),
   };
