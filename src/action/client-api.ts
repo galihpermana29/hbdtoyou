@@ -1,7 +1,7 @@
 import { IContentPayload } from './interfaces';
 import { IGlobalResponse } from './user-api';
 const baseUri =
-  process.env.APP_ENV === 'production'
+  process.env.NEXT_PUBLIC_APP_ENV === 'production'
     ? process.env.NEXT_PUBLIC_API_URI
     : process.env.NEXT_PUBLIC_STAGING_API;
 
