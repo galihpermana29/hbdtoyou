@@ -4,7 +4,8 @@ import fs from 'fs';
 import os from 'os';
 import { v4 as uuidv4 } from 'uuid';
 
-export const maxDuration = 300; // 5 minutes max execution time
+// maxDuration only works on Vercel Pro plan
+// Free plan has 10 second limit by default
 export const dynamic = 'force-dynamic';
 export const runtime = 'nodejs';
 
