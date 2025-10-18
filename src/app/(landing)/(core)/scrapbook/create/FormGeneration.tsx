@@ -51,7 +51,7 @@ const FormGeneration = ({
   const templateName = query.get('route');
   const images = useWatch('images', form);
 
-  const selectedModel = useWatch('model', form);
+  const selectedModel = useWatch('model', form) || 'v2';
 
   const [popularTemplates, setPopularTemplates] = useState<
     IAllTemplateResponse[] | null
@@ -157,7 +157,7 @@ const FormGeneration = ({
           <div className="mt-[10px] mb-[5px] flex-1">
             <h3 className="text-[14px] font-medium mb-[6px]">AI Models</h3>
             <Form.Item name="model">
-              <Select options={profile?.email === 'memoify.live@gmail.com' ? modelSelectData : modelSelectData.filter((item) => item.value !== 'v2')} defaultValue={'v1'} />
+              <Select options={modelSelectData} defaultValue={'v2'} />
             </Form.Item>
           </div>
           <div className="mt-[10px] mb-[5px]">
