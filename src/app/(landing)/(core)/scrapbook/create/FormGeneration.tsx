@@ -144,6 +144,7 @@ const FormGeneration = ({
 
   useEffect(() => {
     handleGetTemplates();
+    form.setFieldValue('model', 'v2');
   }, []);
   return (
     <div>
