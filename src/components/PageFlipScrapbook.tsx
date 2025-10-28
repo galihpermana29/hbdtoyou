@@ -112,9 +112,7 @@ const PageFlipScrapbook: React.FC<PageFlipScrapbookProps> = ({
   const handleExportVideo = async () => {
     setIsExporting(true);
     setExportError(null);
-    message.info("This feature is under review")
 
-    return
     try {
       const response = await fetch('/api/export-video', {
         method: 'POST',
@@ -234,7 +232,7 @@ const PageFlipScrapbook: React.FC<PageFlipScrapbookProps> = ({
             </p>
           )}
           <button
-            className="bg-green-500 hover:bg-green-700 text-white font-bold py-3 px-6 rounded-lg disabled:opacity-50 disabled:cursor-not-allowed flex items-center gap-2"
+            className="!bg-[#E34013] text-white font-bold py-3 px-6 rounded-lg disabled:opacity-50 disabled:cursor-not-allowed flex items-center gap-2"
             onClick={handleExportVideo}
             disabled={isExporting || pages.length > 6}>
             {isExporting ? (
