@@ -59,7 +59,11 @@ export async function uploadImageClientSide(
             success: true,
           });
         } else {
-          reject(new Error('Failed to upload image'));
+          reject(
+            new Error(
+              'Your internet connection is poor, try upload one by one photo'
+            )
+          );
         }
       };
 
@@ -95,7 +99,7 @@ export async function uploadImageWithApi(
   } catch (error) {
     openNotification(0, key, true);
     return {
-      message: 'Failed to upload image',
+      message: 'Your internet connection is poor, try upload one by one photo',
       success: false,
     };
   }
@@ -127,7 +131,7 @@ export async function uploadMultipleImageWithApi(
     };
   } catch (error) {
     return {
-      message: 'Failed to upload image',
+      message: 'Your internet connection is poor, try upload one by one photo',
       success: false,
     };
   }
@@ -193,7 +197,7 @@ export async function newUploadImageWithAPI(
   } catch (error) {
     openNotification?.(0, key, true);
     return {
-      message: 'Failed to upload image',
+      message: 'Your internet connection is poor, try upload one by one photo',
       success: false,
     };
   }

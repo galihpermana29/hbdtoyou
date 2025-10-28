@@ -36,7 +36,11 @@ export const uploadCanvasImage = async (
             if (result.success) {
               resolve(result.data.data);
             } else {
-              reject(new Error('Failed to upload image'));
+              reject(
+                new Error(
+                  'Your internet connection is poor, try upload one by one photo'
+                )
+              );
             }
           } else {
             reject(new Error('Failed to create blob from canvas'));
@@ -70,7 +74,13 @@ export const uploadAllCanvasesAndCreateScrapbook = async (
     message.loading('Uploading images...', 0);
 
     const uploadedImages: string[] = [];
-    const { coverCanvasRef, pageOneCanvasRef, pageTwoCanvasRef, pageThreeCanvasRef, pageFourCanvasRef } = canvasRefs;
+    const {
+      coverCanvasRef,
+      pageOneCanvasRef,
+      pageTwoCanvasRef,
+      pageThreeCanvasRef,
+      pageFourCanvasRef,
+    } = canvasRefs;
 
     // Upload cover
     if (coverCanvasRef.current) {
@@ -123,14 +133,21 @@ export const uploadAllCanvasesAndCreateScrapbook = async (
     };
 
     // Submit the content
-    await handleSubmit({
-      detail_content_json_text: JSON.stringify(json_text),
-    }, templateId, router, templateType);
+    await handleSubmit(
+      {
+        detail_content_json_text: JSON.stringify(json_text),
+      },
+      templateId,
+      router,
+      templateType
+    );
 
     setIsUploading(false);
   } catch (error) {
     console.error('Error uploading images:', error);
-    message.error('Failed to upload images. Please try again.');
+    message.error(
+      'Your internet connection is poor, try upload one by one photos. Please try again.'
+    );
     setIsUploading(false);
   }
 };
@@ -146,8 +163,12 @@ export const handleSubmit = async (
   const payload = {
     template_id: templateId,
     detail_content_json_text: val.detail_content_json_text,
-    title: `${templateType === 'scrapbookvintage' ? 'Vintage ' : ''}Scrapbook by Memoify`,
-    caption: `Create your ${templateType === 'scrapbookvintage' ? 'vintage ' : ''}scrapbook with Memoify`,
+    title: `${
+      templateType === 'scrapbookvintage' ? 'Vintage ' : ''
+    }Scrapbook by Memoify`,
+    caption: `Create your ${
+      templateType === 'scrapbookvintage' ? 'vintage ' : ''
+    }scrapbook with Memoify`,
     date_scheduled: null,
     dest_email: null,
     is_scheduled: false,

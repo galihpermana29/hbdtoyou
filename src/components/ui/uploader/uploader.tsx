@@ -107,12 +107,12 @@ const DraggerUpload = ({
       if (result.success) {
         return result.data?.data;
       } else {
-        message.error(result.message || 'Upload failed');
+        message.error('Your internet connection is poor, try upload one by one photo');
         return false;
       }
     } catch (error) {
       setLoadingUpload(false);
-      message.error('Upload failed due to network error');
+      message.error('Your internet connection is poor, try upload one by one photo');
       return false;
     }
   };

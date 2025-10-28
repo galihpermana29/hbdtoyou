@@ -119,6 +119,23 @@ const PageFlipScrapbook: React.FC<PageFlipScrapbookProps> = ({
         backCoverImage: backCoverImage!,
       });
 
+      // Copy GIF to clipboard if supported
+      if (navigator.clipboard && window.ClipboardItem) {
+        try {
+          await navigator.clipboard.write([
+            new ClipboardItem({
+              'image/gif': blob
+            })
+          ]);
+          message.success('GIF copied to clipboard and downloaded!');
+        } catch (clipboardError) {
+          console.warn('Clipboard copy failed:', clipboardError);
+          message.success('GIF downloaded! (Clipboard copy not supported)');
+        }
+      } else {
+        message.success('GIF downloaded! (Clipboard copy not supported on this browser)');
+      }
+
       // Download the GIF (same download logic)
       const link = document.createElement('a');
       link.href = URL.createObjectURL(blob);
@@ -130,10 +147,9 @@ const PageFlipScrapbook: React.FC<PageFlipScrapbookProps> = ({
       // Clean up the blob URL
       URL.revokeObjectURL(link.href);
 
-      alert('GIF exported successfully!');
     } catch (error) {
       console.error('Export error:', error);
-      alert('Failed to export GIF. Please try again.');
+      message.error('Failed to export GIF. Please try again.');
     }
   };
 
@@ -251,7 +267,7 @@ const PageFlipScrapbook: React.FC<PageFlipScrapbookProps> = ({
                   <polyline points="7 10 12 15 17 10"></polyline>
                   <line x1="12" y1="15" x2="12" y2="3"></line>
                 </svg>
-                Share as GIF
+                Share as GIF (Copy + Download)
               </>
             )}
           </button>
