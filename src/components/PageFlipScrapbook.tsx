@@ -1,7 +1,8 @@
 'use client';
 
-import React, { useState, useRef, useEffect } from 'react';
+import React, { useState, useRef, useEffect, useCallback } from 'react';
 import HTMLFlipBook from 'react-pageflip';
+import { useGifExport } from '../hooks/useGifExport';
 import './PageFlipScrapbook.css';
 import { message } from 'antd';
 
@@ -73,8 +74,8 @@ const PageFlipScrapbook: React.FC<PageFlipScrapbookProps> = ({
   const [orientation, setOrientation] = useState<'portrait' | 'landscape'>(
     'portrait'
   );
-  const [isExporting, setIsExporting] = useState(false);
-  const [exportError, setExportError] = useState<string | null>(null);
+  // Use the new client-side GIF export hook
+  const { exportToGif, isExporting, exportProgress, exportError } = useGifExport();
 
   const onInit = () => {
     // Wait a moment for the component to fully initialize
@@ -110,38 +111,15 @@ const PageFlipScrapbook: React.FC<PageFlipScrapbookProps> = ({
   };
 
   const handleExportVideo = async () => {
-    setIsExporting(true);
-    setExportError(null);
-
     try {
-      const response = await fetch('/api/export-video', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({
-          pages,
-          coverImage,
-          backCoverImage,
-        }),
+      // Use the new client-side export with same concept as Remotion
+      const blob = await exportToGif({
+        pages,
+        coverImage: coverImage!,
+        backCoverImage: backCoverImage!,
       });
 
-      const data = await response.json();
-
-      if (!response.ok) {
-        throw new Error(data.error || 'Failed to export video');
-      }
-
-      // Convert base64 to blob and download
-      const byteCharacters = atob(data.gif);
-      const byteNumbers = new Array(byteCharacters.length);
-      for (let i = 0; i < byteCharacters.length; i++) {
-        byteNumbers[i] = byteCharacters.charCodeAt(i);
-      }
-      const byteArray = new Uint8Array(byteNumbers);
-      const blob = new Blob([byteArray], { type: 'image/gif' });
-
-      // Download the GIF
+      // Download the GIF (same download logic)
       const link = document.createElement('a');
       link.href = URL.createObjectURL(blob);
       link.download = `scrapbook-${Date.now()}.gif`;
@@ -155,12 +133,7 @@ const PageFlipScrapbook: React.FC<PageFlipScrapbookProps> = ({
       alert('GIF exported successfully!');
     } catch (error) {
       console.error('Export error:', error);
-      setExportError(
-        error instanceof Error ? error.message : 'Failed to export video'
-      );
       alert('Failed to export GIF. Please try again.');
-    } finally {
-      setIsExporting(false);
     }
   };
 
@@ -226,15 +199,24 @@ const PageFlipScrapbook: React.FC<PageFlipScrapbookProps> = ({
 
       {enableVideoExport && (
         <div className="mt-4 flex flex-col items-center">
-          {pages.length > 6 && (
-            <p className="text-yellow-600 text-sm mb-2 text-center">
-              ⚠️ Maximum 6 pages allowed for GIF export. Please remove some pages.
-            </p>
+          {isExporting && (
+            <div className="mb-2 w-full max-w-xs">
+              <div className="flex justify-between text-sm text-gray-600 mb-1">
+                <span>Generating GIF...</span>
+                <span>{Math.round(exportProgress)}%</span>
+              </div>
+              <div className="w-full bg-gray-200 rounded-full h-2">
+                <div
+                  className="bg-[#E34013] h-2 rounded-full transition-all duration-300"
+                  style={{ width: `${exportProgress}%` }}
+                ></div>
+              </div>
+            </div>
           )}
           <button
             className="!bg-[#E34013] text-white font-bold py-3 px-6 rounded-lg disabled:opacity-50 disabled:cursor-not-allowed flex items-center gap-2"
             onClick={handleExportVideo}
-            disabled={isExporting || pages.length > 6}>
+            disabled={isExporting}>
             {isExporting ? (
               <>
                 <svg
@@ -269,7 +251,7 @@ const PageFlipScrapbook: React.FC<PageFlipScrapbookProps> = ({
                   <polyline points="7 10 12 15 17 10"></polyline>
                   <line x1="12" y1="15" x2="12" y2="3"></line>
                 </svg>
-                Export to GIF
+                Share as GIF
               </>
             )}
           </button>
