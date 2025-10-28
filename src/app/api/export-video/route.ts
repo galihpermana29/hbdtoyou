@@ -42,7 +42,7 @@ export async function POST(request: NextRequest) {
     const allContentPages = pages.length + 1; // pages + back cover
     const pairedSpreads = Math.ceil(allContentPages / 2); // Pair up all content
     const totalSpreads = 1 + pairedSpreads; // cover + paired content
-    const durationInFrames = totalSpreads * 4; // ~1.3 seconds * 3 fps per spread (faster)
+    const durationInFrames = totalSpreads * 3; // ~1.5 seconds * 2 fps per spread (fastest)
 
     // Use system temp directory instead of public folder
     const tempDir = os.tmpdir();
@@ -51,8 +51,17 @@ export async function POST(request: NextRequest) {
 
     // Bundle the Remotion project
     const bundleLocation = await bundle({
-      entryPoint: path.join(process.cwd(), 'src', 'remotion', 'Root.tsx'),
-      webpackOverride: (config) => config,
+      entryPoint: path.resolve(process.cwd(), 'src', 'remotion', 'Root.tsx'),
+      webpackOverride: (config) => {
+        // Ensure proper module resolution for Netlify
+        config.resolve = config.resolve || {};
+        config.resolve.extensions = ['.tsx', '.ts', '.jsx', '.js', '.json'];
+        config.resolve.modules = [
+          path.resolve(process.cwd(), 'node_modules'),
+          'node_modules'
+        ];
+        return config;
+      },
     });
 
     // Get composition
