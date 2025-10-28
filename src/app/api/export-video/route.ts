@@ -52,16 +52,7 @@ export async function POST(request: NextRequest) {
     // Bundle the Remotion project
     const bundleLocation = await bundle({
       entryPoint: path.resolve(process.cwd(), 'src', 'remotion', 'Root.tsx'),
-      webpackOverride: (config) => {
-        // Ensure proper module resolution for Netlify
-        config.resolve = config.resolve || {};
-        config.resolve.extensions = ['.tsx', '.ts', '.jsx', '.js', '.json'];
-        config.resolve.modules = [
-          path.resolve(process.cwd(), 'node_modules'),
-          'node_modules'
-        ];
-        return config;
-      },
+      webpackOverride: (config) => config,
     });
 
     // Get composition
