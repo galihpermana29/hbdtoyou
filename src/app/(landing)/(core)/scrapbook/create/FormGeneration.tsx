@@ -70,7 +70,7 @@ const FormGeneration = ({
       // Set the first template as selected by default if available
       if (filteredTemplates.length > 0) {
         const scrapbook1Data = filteredTemplates.find(
-          (dx) => dx.name?.split('- ')[1] === 'scrapbook1'
+          (dx) => dx.name?.split('- ')[1] === 'scrapbook7'
         );
         setSelectedTemplateId(scrapbook1Data?.id || '');
         router.push(
