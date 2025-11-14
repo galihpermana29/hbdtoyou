@@ -7,14 +7,14 @@ import { usePathname } from 'next/navigation';
 const ScrapbookResult1 = () => {
   // Cover images
   const coverImage =
-    'https://res.cloudinary.com/dqipjpy1w/image/upload/v1750269072/images-api/ME202506181751118631.jpg';
+    'https://res.cloudinary.com/braiwjaya-university/image/upload/v1763139474/t1c1_xqmu5m.png';
   const backCoverImage =
-    'https://res.cloudinary.com/dqipjpy1w/image/upload/v1750269079/images-api/ME202506181751195571.jpg';
+    'https://res.cloudinary.com/braiwjaya-university/image/upload/v1763139483/t1c5_wkitrm.png';
 
   const pages = [
-    'https://res.cloudinary.com/dqipjpy1w/image/upload/v1750269074/images-api/ME202506181751142581.jpg',
-    'https://res.cloudinary.com/dqipjpy1w/image/upload/v1750269076/images-api/ME202506181751162240.jpg',
-    'https://res.cloudinary.com/dqipjpy1w/image/upload/v1750269078/images-api/ME202506181751180571.jpg',
+    'https://res.cloudinary.com/braiwjaya-university/image/upload/v1763139477/t1c3_astq95.png',
+    'https://res.cloudinary.com/braiwjaya-university/image/upload/v1763139479/t1c4_uhbwl3.png',
+    'https://res.cloudinary.com/braiwjaya-university/image/upload/v1763139476/t1c2_bav7fp.png',
   ];
 
   const pathname = usePathname();

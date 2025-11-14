@@ -19,7 +19,7 @@ export const metadata: Metadata = {
     siteName: 'Memoify',
     images: [
       {
-        url: 'https://res.cloudinary.com/dqipjpy1w/image/upload/v1751298448/brave_screenshot_memoify.live_mhwzfs.png',
+        url: 'https://res.cloudinary.com/braiwjaya-university/image/upload/v1763138771/brave_screenshot_memoify.live_lvsx21.png',
         width: 1200,
         height: 630,
         alt: 'Memoify - Create Custom Websites Inspired by Popular Platforms',
@@ -35,7 +35,7 @@ export const metadata: Metadata = {
     description:
       'With Memoify create digital gifts, digital scrapbooks, and digital albums inspired by your favorite platforms like Netflix, Spotify, or YouTube. Add personal touches and let your memories shine!',
     images: [
-      'https://res.cloudinary.com/dqipjpy1w/image/upload/v1751298448/brave_screenshot_memoify.live_mhwzfs.png',
+      'https://res.cloudinary.com/braiwjaya-university/image/upload/v1763138771/brave_screenshot_memoify.live_lvsx21.png',
     ],
   },
 };
@@ -61,7 +61,11 @@ export default function Home() {
           `,
         }}
       />
-      {process.env.IS_MAINTENANCE ? <MaintenancePage /> : <NewLandingPage />}
+      {process.env.IS_MAINTENANCE === 'true' ? (
+        <MaintenancePage />
+      ) : (
+        <NewLandingPage />
+      )}
     </div>
   );
 }

@@ -45,7 +45,9 @@ const { Title, Text, Paragraph } = Typography;
 
 export default function NewLandingPage() {
   const [email, setEmail] = useState('');
-  const [faqLanguage, setFaqLanguage] = useState<'English' | 'Indonesia'>('English');
+  const [faqLanguage, setFaqLanguage] = useState<'English' | 'Indonesia'>(
+    'English'
+  );
   const router = useRouter();
   const session = useMemoifySession();
 
@@ -154,7 +156,7 @@ export default function NewLandingPage() {
             </div>
             <div className="flex-1 w-full">
               <Image
-                src="https://res.cloudinary.com/dqipjpy1w/image/upload/v1755179368/Container_a73yhv.png"
+                src="https://res.cloudinary.com/braiwjaya-university/image/upload/v1763140795/c1_rhcq33.png"
                 alt="photobox-compilation"
                 width={552}
                 height={496}
@@ -166,7 +168,7 @@ export default function NewLandingPage() {
         <div className="flex flex-col lg:flex-row-reverse items-start lg:items-center justify-between gap-[30px] mx-auto max-w-6xl 2xl:max-w-7xl px-[20px] py-[90px]">
           <div className="flex-1 w-full">
             <Image
-              src="https://res.cloudinary.com/dqipjpy1w/image/upload/v1755179525/Container_1_abrwgt.png"
+              src="https://res.cloudinary.com/braiwjaya-university/image/upload/v1763140757/c2_pllk6x.png"
               alt="Say It with Logic and Love"
               width={552}
               height={496}
@@ -212,7 +214,7 @@ export default function NewLandingPage() {
             </div>
             <div className="flex-1 w-full">
               <Image
-                src="https://res.cloudinary.com/dqipjpy1w/image/upload/v1755179589/Container_2_qqcuhs.png"
+                src="https://res.cloudinary.com/braiwjaya-university/image/upload/v1763140756/c3_xtxriv.png"
                 alt="Capture Moments in Style"
                 width={552}
                 height={496}
@@ -298,7 +300,7 @@ export default function NewLandingPage() {
             </div>
             <div className="flex-1 w-full">
               <Image
-                src="https://res.cloudinary.com/dqipjpy1w/image/upload/v1755179670/Frame_14_lmcmak.png"
+                src="https://res.cloudinary.com/braiwjaya-university/image/upload/v1763140756/c4_bzxorn.png"
                 alt="Your way to showcase your moments"
                 className="w-full h-full object-contain"
                 width="0"
@@ -441,20 +443,26 @@ export default function NewLandingPage() {
                 {'Frequently Asked Questions'}
               </h1>
               <p className="text-[#7b7b7b] text-[16px] md:text-[20px] font-[400] text-center">
-                {'Everything you need to know about Memoify. Can\'t find the answer you\'re looking for? Feel free to contact our support team.'}
+                {
+                  "Everything you need to know about Memoify. Can't find the answer you're looking for? Feel free to contact our support team."
+                }
               </p>
               <div className="flex justify-center mt-[32px]">
                 <Segmented
                   options={['English', 'Indonesia']}
                   value={faqLanguage}
-                  onChange={(value) => setFaqLanguage(value as 'English' | 'Indonesia')}
+                  onChange={(value) =>
+                    setFaqLanguage(value as 'English' | 'Indonesia')
+                  }
                   size="large"
                 />
               </div>
             </div>
             <div className="max-w-[900px] mx-auto">
               <Collapse
-                items={faqLanguage === 'English' ? faqDataEnglish : faqDataIndonesian}
+                items={
+                  faqLanguage === 'English' ? faqDataEnglish : faqDataIndonesian
+                }
                 defaultActiveKey={['1']}
                 expandIconPosition="end"
                 className="bg-white"
@@ -467,7 +475,6 @@ export default function NewLandingPage() {
             </div>
           </div>
         </div>
-
 
         {/* Stats Section */}
         <div
@@ -544,8 +551,6 @@ export default function NewLandingPage() {
             </Row>
           </div>
         </div>
-
-
 
         {/* Newsletter Section */}
         <div className="">
