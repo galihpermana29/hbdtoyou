@@ -2,6 +2,7 @@ import NewLandingPage from '@/components/newlanding/NewLandingPage';
 import Script from 'next/script';
 import { Metadata } from 'next';
 import 'react-photo-view/dist/react-photo-view.css';
+import MaintenancePage from './maintenance/page';
 export const metadata: Metadata = {
   title:
     'Memoify | Create Digital Gifts, Scrapbooks & Albums Inspired by Popular Platforms',
@@ -60,7 +61,7 @@ export default function Home() {
           `,
         }}
       />
-      <NewLandingPage />
+      {process.env.IS_MAINTENANCE ? <MaintenancePage /> : <NewLandingPage />}
     </div>
   );
 }
