@@ -6,15 +6,24 @@ import { usePathname } from 'next/navigation';
 
 const ScrapbookResult1 = () => {
   // Cover images
-  const coverImage =
-    'https://res.cloudinary.com/braiwjaya-university/image/upload/v1763139474/t1c1_xqmu5m.png';
-  const backCoverImage =
-    'https://res.cloudinary.com/braiwjaya-university/image/upload/v1763139483/t1c5_wkitrm.png';
+  // const coverImage =
+  //   'https://res.cloudinary.com/braiwjaya-university/image/upload/v1763139474/t1c1_xqmu5m.png';
+  // const backCoverImage =
+  //   'https://res.cloudinary.com/braiwjaya-university/image/upload/v1763139483/t1c5_wkitrm.png';
 
+  // const pages = [
+  //   'https://res.cloudinary.com/braiwjaya-university/image/upload/v1763139477/t1c3_astq95.png',
+  //   'https://res.cloudinary.com/braiwjaya-university/image/upload/v1763139479/t1c4_uhbwl3.png',
+  //   'https://res.cloudinary.com/braiwjaya-university/image/upload/v1763139476/t1c2_bav7fp.png',
+
+  const coverImage =
+    'https://res.cloudinary.com/braiwjaya-university/image/upload/v1763139610/t2c1_ly6lpa.jpg';
+  const backCoverImage =
+    'https://res.cloudinary.com/braiwjaya-university/image/upload/v1763139618/t2c5_zmfvgr.png';
   const pages = [
-    'https://res.cloudinary.com/braiwjaya-university/image/upload/v1763139477/t1c3_astq95.png',
-    'https://res.cloudinary.com/braiwjaya-university/image/upload/v1763139479/t1c4_uhbwl3.png',
-    'https://res.cloudinary.com/braiwjaya-university/image/upload/v1763139476/t1c2_bav7fp.png',
+    'https://res.cloudinary.com/braiwjaya-university/image/upload/v1763139614/t2c3_w7mqdd.png',
+    'https://res.cloudinary.com/braiwjaya-university/image/upload/v1763139617/t2c4_uoee44.png',
+    'https://res.cloudinary.com/braiwjaya-university/image/upload/v1763139612/t2c2_vg7nlo.png',
   ];
 
   const pathname = usePathname();
