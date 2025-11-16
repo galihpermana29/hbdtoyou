@@ -168,7 +168,7 @@ const NewNewspaper1Form = ({
             placeholder="This is how me express love. In the meantime you will understand how my brain works. lorem ipsum"
           />
         </Form.Item>
-        <Form.List name="stories">
+        <Form.List name="stories" initialValue={[{ imageUrl: '', title: '', desc: '' }]}>
           {(fields, { add, remove }) => (
             <>
               <div className="mt-[10px] mb-[5px]">
@@ -238,7 +238,13 @@ const NewNewspaper1Form = ({
                       <Button
                         danger
                         type="default"
-                        onClick={() => remove(name)}
+                        onClick={() => {
+                          if (fields.length > 1) {
+                            remove(name);
+                          } else {
+                            message.error('At least 1 story is required');
+                          }
+                        }}
                         icon={<MinusCircleOutlined />}>
                         Remove
                       </Button>
