@@ -50,11 +50,22 @@ export async function loginOAuth(
   });
 
   if (!res.ok) {
-    return {
-      success: false,
-      message: res.statusText,
-      data: null,
-    };
+    try {
+      const errorData = await res.json();
+      const errorMessage =
+        errorData.errors?.[0] || errorData.status || res.statusText;
+      return {
+        success: false,
+        message: errorMessage,
+        data: null,
+      };
+    } catch {
+      return {
+        success: false,
+        message: res.statusText,
+        data: null,
+      };
+    }
   }
 
   const data = await res.json();
@@ -81,11 +92,22 @@ export async function getAllTemplates(): Promise<
   });
 
   if (!res.ok) {
-    return {
-      success: false,
-      message: res.statusText,
-      data: null,
-    };
+    try {
+      const errorData = await res.json();
+      const errorMessage =
+        errorData.errors?.[0] || errorData.status || res.statusText;
+      return {
+        success: false,
+        message: errorMessage,
+        data: null,
+      };
+    } catch {
+      return {
+        success: false,
+        message: res.statusText,
+        data: null,
+      };
+    }
   }
 
   const data = await res.json();
@@ -112,11 +134,22 @@ export async function getGraduationTemplates(): Promise<
   });
 
   if (!res.ok) {
-    return {
-      success: false,
-      message: res.statusText,
-      data: null,
-    };
+    try {
+      const errorData = await res.json();
+      const errorMessage =
+        errorData.errors?.[0] || errorData.status || res.statusText;
+      return {
+        success: false,
+        message: errorMessage,
+        data: null,
+      };
+    } catch {
+      return {
+        success: false,
+        message: res.statusText,
+        data: null,
+      };
+    }
   }
 
   const data = await res.json();
@@ -143,11 +176,22 @@ export async function getPopularTemplates(): Promise<
   });
 
   if (!res.ok) {
-    return {
-      success: false,
-      message: res.statusText,
-      data: null,
-    };
+    try {
+      const errorData = await res.json();
+      const errorMessage =
+        errorData.errors?.[0] || errorData.status || res.statusText;
+      return {
+        success: false,
+        message: errorMessage,
+        data: null,
+      };
+    } catch {
+      return {
+        success: false,
+        message: res.statusText,
+        data: null,
+      };
+    }
   }
 
   const data = await res.json();
@@ -174,11 +218,22 @@ export async function getOriginalTemplates(): Promise<
   });
 
   if (!res.ok) {
-    return {
-      success: false,
-      message: res.statusText,
-      data: null,
-    };
+    try {
+      const errorData = await res.json();
+      const errorMessage =
+        errorData.errors?.[0] || errorData.status || res.statusText;
+      return {
+        success: false,
+        message: errorMessage,
+        data: null,
+      };
+    } catch {
+      return {
+        success: false,
+        message: res.statusText,
+        data: null,
+      };
+    }
   }
 
   const data = await res.json();
@@ -206,11 +261,22 @@ export async function getUserProfile(overrideSession?: {
   });
 
   if (!res.ok) {
-    return {
-      success: false,
-      message: res.statusText,
-      data: null,
-    };
+    try {
+      const errorData = await res.json();
+      const errorMessage =
+        errorData.errors?.[0] || errorData.status || res.statusText;
+      return {
+        success: false,
+        message: errorMessage,
+        data: null,
+      };
+    } catch {
+      return {
+        success: false,
+        message: res.statusText,
+        data: null,
+      };
+    }
   }
 
   const data = await res.json();
@@ -238,11 +304,22 @@ export async function createContent(
   });
 
   if (!res.ok) {
-    return {
-      success: false,
-      message: res.statusText,
-      data: null,
-    };
+    try {
+      const errorData = await res.json();
+      const errorMessage =
+        errorData.errors?.[0] || errorData.status || res.statusText;
+      return {
+        success: false,
+        message: errorMessage,
+        data: null,
+      };
+    } catch {
+      return {
+        success: false,
+        message: res.statusText,
+        data: null,
+      };
+    }
   }
 
   revalidateTag('dashboard-content');
@@ -273,11 +350,22 @@ export async function editContent(
   });
 
   if (!res.ok) {
-    return {
-      success: false,
-      message: res.statusText,
-      data: null,
-    };
+    try {
+      const errorData = await res.json();
+      const errorMessage =
+        errorData.errors?.[0] || errorData.status || res.statusText;
+      return {
+        success: false,
+        message: errorMessage,
+        data: null,
+      };
+    } catch {
+      return {
+        success: false,
+        message: res.statusText,
+        data: null,
+      };
+    }
   }
 
   revalidateTag('dashboard-content');
@@ -309,11 +397,22 @@ export async function getDetailContent(
   });
 
   if (!res.ok) {
-    return {
-      success: false,
-      message: res.statusText,
-      data: null,
-    };
+    try {
+      const errorData = await res.json();
+      const errorMessage =
+        errorData.errors?.[0] || errorData.status || res.statusText;
+      return {
+        success: false,
+        message: errorMessage,
+        data: null,
+      };
+    } catch {
+      return {
+        success: false,
+        message: res.statusText,
+        data: null,
+      };
+    }
   }
 
   const data = await res.json();
@@ -349,11 +448,22 @@ export async function addWishesContent(
   });
 
   if (!res.ok) {
-    return {
-      success: false,
-      message: res.statusText,
-      data: null,
-    };
+    try {
+      const errorData = await res.json();
+      const errorMessage =
+        errorData.errors?.[0] || errorData.status || res.statusText;
+      return {
+        success: false,
+        message: errorMessage,
+        data: null,
+      };
+    } catch {
+      return {
+        success: false,
+        message: res.statusText,
+        data: null,
+      };
+    }
   }
 
   const data = await res.json();
@@ -383,11 +493,22 @@ export async function submitPaymentProof(
   });
 
   if (!res.ok) {
-    return {
-      success: false,
-      message: res.statusText,
-      data: null,
-    };
+    try {
+      const errorData = await res.json();
+      const errorMessage =
+        errorData.errors?.[0] || errorData.status || res.statusText;
+      return {
+        success: false,
+        message: errorMessage,
+        data: null,
+      };
+    } catch {
+      return {
+        success: false,
+        message: res.statusText,
+        data: null,
+      };
+    }
   }
 
   const data = await res.json();
@@ -414,11 +535,22 @@ export async function getListPayment(): Promise<
   });
 
   if (!res.ok) {
-    return {
-      success: false,
-      message: res.statusText,
-      data: null,
-    };
+    try {
+      const errorData = await res.json();
+      const errorMessage =
+        errorData.errors?.[0] || errorData.status || res.statusText;
+      return {
+        success: false,
+        message: errorMessage,
+        data: null,
+      };
+    } catch {
+      return {
+        success: false,
+        message: res.statusText,
+        data: null,
+      };
+    }
   }
 
   const data = await res.json();
@@ -449,11 +581,22 @@ export async function approveRejectProof(
   });
 
   if (!res.ok) {
-    return {
-      success: false,
-      message: res.statusText,
-      data: null,
-    };
+    try {
+      const errorData = await res.json();
+      const errorMessage =
+        errorData.errors?.[0] || errorData.status || res.statusText;
+      return {
+        success: false,
+        message: errorMessage,
+        data: null,
+      };
+    } catch {
+      return {
+        success: false,
+        message: res.statusText,
+        data: null,
+      };
+    }
   }
 
   const data = await res.json();
@@ -481,11 +624,22 @@ export async function generateQRIS(
   });
 
   if (!res.ok) {
-    return {
-      success: false,
-      message: res.statusText,
-      data: null,
-    };
+    try {
+      const errorData = await res.json();
+      const errorMessage =
+        errorData.errors?.[0] || errorData.status || res.statusText;
+      return {
+        success: false,
+        message: errorMessage,
+        data: null,
+      };
+    } catch {
+      return {
+        success: false,
+        message: res.statusText,
+        data: null,
+      };
+    }
   }
 
   const data = await res.json();
@@ -513,11 +667,22 @@ export async function generatePaypal(
   });
 
   if (!res.ok) {
-    return {
-      success: false,
-      message: res.statusText,
-      data: null,
-    };
+    try {
+      const errorData = await res.json();
+      const errorMessage =
+        errorData.errors?.[0] || errorData.status || res.statusText;
+      return {
+        success: false,
+        message: errorMessage,
+        data: null,
+      };
+    } catch {
+      return {
+        success: false,
+        message: res.statusText,
+        data: null,
+      };
+    }
   }
 
   const data = await res.json();
@@ -544,11 +709,22 @@ export async function getDetailPayment(
   });
 
   if (!res.ok) {
-    return {
-      success: false,
-      message: res.statusText,
-      data: null,
-    };
+    try {
+      const errorData = await res.json();
+      const errorMessage =
+        errorData.errors?.[0] || errorData.status || res.statusText;
+      return {
+        success: false,
+        message: errorMessage,
+        data: null,
+      };
+    } catch {
+      return {
+        success: false,
+        message: res.statusText,
+        data: null,
+      };
+    }
   }
 
   const data = await res.json();
@@ -587,11 +763,22 @@ export async function getLatestInspiration(
   );
 
   if (!res.ok) {
-    return {
-      success: false,
-      message: res.statusText,
-      data: null,
-    };
+    try {
+      const errorData = await res.json();
+      const errorMessage =
+        errorData.errors?.[0] || errorData.status || res.statusText;
+      return {
+        success: false,
+        message: errorMessage,
+        data: null,
+      };
+    } catch {
+      return {
+        success: false,
+        message: res.statusText,
+        data: null,
+      };
+    }
   }
 
   const data = await res.json();
@@ -637,11 +824,22 @@ export async function getContentByUserId(
   });
 
   if (!res.ok) {
-    return {
-      success: false,
-      message: res.statusText,
-      data: null,
-    };
+    try {
+      const errorData = await res.json();
+      const errorMessage =
+        errorData.errors?.[0] || errorData.status || res.statusText;
+      return {
+        success: false,
+        message: errorMessage,
+        data: null,
+      };
+    } catch {
+      return {
+        success: false,
+        message: res.statusText,
+        data: null,
+      };
+    }
   }
 
   const data = await res.json();
@@ -671,11 +869,22 @@ export async function submitFeedback(payload: {
   });
 
   if (!res.ok) {
-    return {
-      success: false,
-      message: res.statusText,
-      data: null,
-    };
+    try {
+      const errorData = await res.json();
+      const errorMessage =
+        errorData.errors?.[0] || errorData.status || res.statusText;
+      return {
+        success: false,
+        message: errorMessage,
+        data: null,
+      };
+    } catch {
+      return {
+        success: false,
+        message: res.statusText,
+        data: null,
+      };
+    }
   }
 
   const data = await res.json();
@@ -702,11 +911,22 @@ export async function getListFeedbacks(): Promise<
   });
 
   if (!res.ok) {
-    return {
-      success: false,
-      message: res.statusText,
-      data: null,
-    };
+    try {
+      const errorData = await res.json();
+      const errorMessage =
+        errorData.errors?.[0] || errorData.status || res.statusText;
+      return {
+        success: false,
+        message: errorMessage,
+        data: null,
+      };
+    } catch {
+      return {
+        success: false,
+        message: res.statusText,
+        data: null,
+      };
+    }
   }
 
   const data = await res.json();
@@ -737,11 +957,22 @@ export async function getContentStatsByUserId(): Promise<
   });
 
   if (!res.ok) {
-    return {
-      success: false,
-      message: res.statusText,
-      data: null,
-    };
+    try {
+      const errorData = await res.json();
+      const errorMessage =
+        errorData.errors?.[0] || errorData.status || res.statusText;
+      return {
+        success: false,
+        message: errorMessage,
+        data: null,
+      };
+    } catch {
+      return {
+        success: false,
+        message: res.statusText,
+        data: null,
+      };
+    }
   }
 
   const data = await res.json();
@@ -768,11 +999,22 @@ export async function deleteContentById(
   });
 
   if (!res.ok) {
-    return {
-      success: false,
-      message: res.statusText,
-      data: null,
-    };
+    try {
+      const errorData = await res.json();
+      const errorMessage =
+        errorData.errors?.[0] || errorData.status || res.statusText;
+      return {
+        success: false,
+        message: errorMessage,
+        data: null,
+      };
+    } catch {
+      return {
+        success: false,
+        message: res.statusText,
+        data: null,
+      };
+    }
   }
 
   revalidateTag('dashboard-content');
@@ -801,11 +1043,22 @@ export async function paymentByPaypal(): Promise<
   });
 
   if (!res.ok) {
-    return {
-      success: false,
-      message: res.statusText,
-      data: null,
-    };
+    try {
+      const errorData = await res.json();
+      const errorMessage =
+        errorData.errors?.[0] || errorData.status || res.statusText;
+      return {
+        success: false,
+        message: errorMessage,
+        data: null,
+      };
+    } catch {
+      return {
+        success: false,
+        message: res.statusText,
+        data: null,
+      };
+    }
   }
 
   const data = await res.json();
@@ -840,11 +1093,22 @@ export async function paymentPaypalCapture({
   );
 
   if (!res.ok) {
-    return {
-      success: false,
-      message: res.statusText,
-      data: null,
-    };
+    try {
+      const errorData = await res.json();
+      const errorMessage =
+        errorData.errors?.[0] || errorData.status || res.statusText;
+      return {
+        success: false,
+        message: errorMessage,
+        data: null,
+      };
+    } catch {
+      return {
+        success: false,
+        message: res.statusText,
+        data: null,
+      };
+    }
   }
 
   const data = await res.json();
@@ -871,11 +1135,22 @@ export async function getListPackages(): Promise<
   });
 
   if (!res.ok) {
-    return {
-      success: false,
-      message: res.statusText,
-      data: null,
-    };
+    try {
+      const errorData = await res.json();
+      const errorMessage =
+        errorData.errors?.[0] || errorData.status || res.statusText;
+      return {
+        success: false,
+        message: errorMessage,
+        data: null,
+      };
+    } catch {
+      return {
+        success: false,
+        message: res.statusText,
+        data: null,
+      };
+    }
   }
 
   const data = await res.json();
@@ -900,11 +1175,22 @@ export async function warmUpAIModel(): Promise<IGlobalResponse<null | any>> {
   });
 
   if (!res.ok) {
-    return {
-      success: false,
-      message: res.statusText,
-      data: null,
-    };
+    try {
+      const errorData = await res.json();
+      const errorMessage =
+        errorData.errors?.[0] || errorData.status || res.statusText;
+      return {
+        success: false,
+        message: errorMessage,
+        data: null,
+      };
+    } catch {
+      return {
+        success: false,
+        message: res.statusText,
+        data: null,
+      };
+    }
   }
 
   return {
