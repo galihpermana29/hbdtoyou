@@ -3,7 +3,7 @@ import Featured from '@/components/netflix/featured/featured';
 import List from '@/components/netflix/list/list';
 import Navbar from '@/components/netflix/navbar/navbar';
 import MusicPlayer from '@/components/ui/music-player/music-player';
-import { Watermark } from 'antd';
+import LockScreen from '@/components/ui/lock-screen';
 import { headers } from 'next/headers';
 import 'react-photo-view/dist/react-photo-view.css';
 const getDetailDataNew = async (id: string) => {
@@ -25,42 +25,54 @@ const RootUserPage = async ({ params }: any) => {
 
   if (!totalItems) return <div className="min-h-screen">No data</div>;
 
-  return (
-    <Watermark
-      zIndex={99}
-      font={{ color: 'rgba(227, 64, 19, 0.19)', fontSize: 50 }}
-      content={data.data.user_type === 'free' ? 'memoify.live' : ''}>
-      <div className="bg-black overflow-x-hidden">
-        <MusicPlayer />
-        <Navbar jumbotronImage={parsedData?.jumbotronImage} />
-        <Featured
-          jumbotronImage={
-            parsedData?.jumbotronImage ||
-            parsedData?.images?.slice(0, midIndex)[0]
-          }
-          title={parsedData?.title}
-          subTitle={parsedData?.subTitle}
-          modalContent={parsedData?.modalContent}
-        />
-        <List
-          title={'You Before Meet Me'}
-          tData={parsedData?.images?.slice(0, midIndex)} // First half
-        />
-        <List
-          title={'You After Meet Me'}
-          tData={parsedData?.images?.slice(midIndex)} // Second half
-        />
-        <List
-          title={'Top Searches'}
-          tData={parsedData?.images?.slice(0, midIndex)} // First half
-        />
-        <List
-          title={'Series & Shows'}
-          tData={parsedData?.images?.slice(midIndex)} // Second half
-        />
-      </div>
-    </Watermark>
+  const lockedContent =
+    data.data.status === 'locked' || data.data.user_type === 'free';
+
+  const content = (
+    <div className="bg-black overflow-x-hidden">
+      <MusicPlayer />
+      <Navbar jumbotronImage={parsedData?.jumbotronImage} />
+      <Featured
+        jumbotronImage={
+          parsedData?.jumbotronImage ||
+          parsedData?.images?.slice(0, midIndex)[0]
+        }
+        title={parsedData?.title}
+        subTitle={parsedData?.subTitle}
+        modalContent={parsedData?.modalContent}
+      />
+      <List
+        title={'You Before Meet Me'}
+        tData={parsedData?.images?.slice(0, midIndex)} // First half
+      />
+      <List
+        title={'You After Meet Me'}
+        tData={parsedData?.images?.slice(midIndex)} // Second half
+      />
+      <List
+        title={'Top Searches'}
+        tData={parsedData?.images?.slice(0, midIndex)} // First half
+      />
+      <List
+        title={'Series & Shows'}
+        tData={parsedData?.images?.slice(midIndex)} // Second half
+      />
+    </div>
   );
+
+  if (lockedContent) {
+    return (
+      <LockScreen
+        contentId={id}
+        initiallyLocked
+        title="Content locked for free users"
+        message="Unlock to view this Netflix-style album. Upgrade your plan for full access.">
+        {content}
+      </LockScreen>
+    );
+  }
+
+  return content;
 };
 
 export default RootUserPage;

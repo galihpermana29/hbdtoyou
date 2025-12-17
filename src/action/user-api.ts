@@ -477,6 +477,51 @@ export async function addWishesContent(
   };
 }
 
+export async function unlockContent(contentId: string): Promise<
+  IGlobalResponse<null | {
+    data: string;
+  }>
+> {
+  const session = await getSession();
+  const res = await fetch(baseUri + `/contents/unlock`, {
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/json',
+      'X-Source': 'web',
+      'X-UserID': session.userId!,
+      Authorization: `Bearer ${session.accessToken}`,
+    },
+    body: JSON.stringify({ content_id: contentId }),
+  });
+
+  if (!res.ok) {
+    try {
+      const errorData = await res.json();
+      const errorMessage =
+        errorData.errors?.[0] || errorData.status || res.statusText;
+      return {
+        success: false,
+        message: errorMessage,
+        data: null,
+      };
+    } catch {
+      return {
+        success: false,
+        message: res.statusText,
+        data: null,
+      };
+    }
+  }
+
+  const data = await res.json();
+
+  return {
+    success: true,
+    message: data.message,
+    data: data.data,
+  };
+}
+
 export async function submitPaymentProof(
   payload: IPaymentPayload
 ): Promise<IGlobalResponse<null | string>> {

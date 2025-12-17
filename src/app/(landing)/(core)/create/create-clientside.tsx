@@ -136,9 +136,9 @@ const CreatePage = () => {
       return router.push(`/scrapbook/create`);
     }
 
-    if (template.label === 'premium' && isFreeAccount) {
-      return message.info('Premium plan required');
-    }
+    // if (template.label === 'premium' && isFreeAccount) {
+    //   return message.info('Premium plan required');
+    // }
 
     const routePath = templateNameToRoute(template.name);
 
@@ -296,28 +296,28 @@ const CreatePage = () => {
                   <div className="w-full">
                     {(templateFilter === 'All' ||
                       templateFilter === 'Popular Template') && (
-                        <TemplateGridSection
-                          title="Popular Template"
-                          templates={popularTemplates}
-                          onTemplateClick={handleTemplateClick}
-                        />
-                      )}
+                      <TemplateGridSection
+                        title="Popular Template"
+                        templates={popularTemplates}
+                        onTemplateClick={handleTemplateClick}
+                      />
+                    )}
                     {(templateFilter === 'All' ||
                       templateFilter === 'Original Template') && (
-                        <TemplateGridSection
-                          title="Original Template"
-                          templates={templates}
-                          onTemplateClick={handleTemplateClick}
-                        />
-                      )}
+                      <TemplateGridSection
+                        title="Original Template"
+                        templates={templates}
+                        onTemplateClick={handleTemplateClick}
+                      />
+                    )}
                     {(templateFilter === 'All' ||
                       templateFilter === 'Graduation Template') && (
-                        <TemplateGridSection
-                          title="Graduation Template"
-                          templates={graduationTemplates}
-                          onTemplateClick={handleTemplateClick}
-                        />
-                      )}
+                      <TemplateGridSection
+                        title="Graduation Template"
+                        templates={graduationTemplates}
+                        onTemplateClick={handleTemplateClick}
+                      />
+                    )}
                   </div>
                 </div>
               )}

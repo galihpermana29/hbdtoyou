@@ -16,9 +16,7 @@ import DraggerUpload, { AccountType } from '@/components/ui/uploader/uploader';
 import { useWatch } from 'antd/es/form/Form';
 import { formatNumberWithComma } from '@/lib/utils';
 import MemoRichText from '@/components/ui/custom-rich-text/MemoRichText';
-import {
-  parsePromptContent,
-} from '@/lib/promptParser';
+import { parsePromptContent } from '@/lib/promptParser';
 import {
   modelSelectData,
   stringInitialPrompt,
@@ -26,7 +24,6 @@ import {
   templatePrompts,
 } from '@/lib/scrapbook-constant';
 import { createContentClientSide } from '@/action/client-api';
-
 
 interface FormGenerationProps {
   openNotification: (progress: number, key: any, isError?: boolean) => void;
@@ -56,8 +53,8 @@ const FormGeneration = ({
   const [popularTemplates, setPopularTemplates] = useState<
     IAllTemplateResponse[] | null
   >(null);
-  const [selectedTemplateContent, setSelectedTemplateContent] = useState<string>(stringInitialPrompt);
-
+  const [selectedTemplateContent, setSelectedTemplateContent] =
+    useState<string>(stringInitialPrompt);
 
   const handleGetTemplates = async () => {
     await warmUpAIModel();
@@ -74,7 +71,8 @@ const FormGeneration = ({
         );
         setSelectedTemplateId(scrapbook1Data?.id || '');
         router.push(
-          `/scrapbook/create?templateId=${scrapbook1Data?.id}&route=${scrapbook1Data?.name?.split('- ')[1]
+          `/scrapbook/create?templateId=${scrapbook1Data?.id}&route=${
+            scrapbook1Data?.name?.split('- ')[1]
           }`
         );
         form.setFieldValue('templateId', scrapbook1Data?.id);
@@ -85,7 +83,6 @@ const FormGeneration = ({
   };
 
   const handleFinish = async (value: any) => {
-
     let parsedPrompt = null;
 
     if (selectedModel === 'v2') {
@@ -95,7 +92,6 @@ const FormGeneration = ({
         return; // Error messages already shown by parser
       }
       console.log('Parsed prompt:', parsedPrompt, value.model);
-
     }
 
     // return;
@@ -106,7 +102,7 @@ const FormGeneration = ({
       images: value.images || null,
       isPublic: true,
       model: value?.model ?? 'v1',
-      ...(parsedPrompt ? parsedPrompt : {})
+      ...(parsedPrompt ? parsedPrompt : {}),
     };
 
     const payload = {
@@ -148,7 +144,6 @@ const FormGeneration = ({
   }, []);
   return (
     <div>
-
       <Form
         form={form}
         layout="vertical"
@@ -177,20 +172,28 @@ const FormGeneration = ({
             <div className="flex justify-between mb-[6px]">
               <h3 className="text-[14px] font-medium mb-[6px]">User Prompt</h3>
               <Select
-                variant='borderless'
+                variant="borderless"
                 className="!w-[150px]"
-                options={templatesPrompt?.map((item) => ({ label: item, value: item }))}
+                options={templatesPrompt?.map((item) => ({
+                  label: item,
+                  value: item,
+                }))}
                 defaultValue={templatesPrompt[0]}
                 onChange={(value) => {
-                  const selectedPrompt = templatePrompts[value] || stringInitialPrompt;
+                  const selectedPrompt =
+                    templatePrompts[value] || stringInitialPrompt;
                   setSelectedTemplateContent(selectedPrompt);
                   form.setFieldValue('main_theme', selectedPrompt);
                 }}
               />
-
             </div>
-            <Form.Item name={'main_theme'} initialValue={selectedTemplateContent}>
-              <MemoRichText key={selectedTemplateContent} defaultContent={selectedTemplateContent} />
+            <Form.Item
+              name={'main_theme'}
+              initialValue={selectedTemplateContent}>
+              <MemoRichText
+                key={selectedTemplateContent}
+                defaultContent={selectedTemplateContent}
+              />
             </Form.Item>
           </>
         )}
@@ -243,16 +246,17 @@ const FormGeneration = ({
                     selectedTemplateId === template.id ? '' : ''
                   )}
                   onClick={(e) => {
-                    if (template.label === 'premium' && isFreeAccount) {
-                      return message.info('Premium plan required');
-                    }
+                    // if (template.label === 'premium' && isFreeAccount) {
+                    //   return message.info('Premium plan required');
+                    // }
 
                     e.preventDefault();
                     e.stopPropagation();
                     setSelectedTemplateId(template.id);
                     form.setFieldValue('templateId', template.id);
                     router.push(
-                      `/scrapbook/create?templateId=${template.id}&route=${template.name?.split('- ')[1]
+                      `/scrapbook/create?templateId=${template.id}&route=${
+                        template.name?.split('- ')[1]
                       }`
                     );
                   }}>
