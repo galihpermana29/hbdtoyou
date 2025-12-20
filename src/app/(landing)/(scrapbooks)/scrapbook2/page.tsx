@@ -5,23 +5,14 @@ import NavigationBar from '@/components/ui/navbar';
 import { usePathname } from 'next/navigation';
 
 const ScrapbookResult2 = () => {
-  // Cover images
-  // const coverImage =
-  //   'https://res.cloudinary.com/braiwjaya-university/image/upload/v1763139610/t2c1_ly6lpa.jpg';
-  // const backCoverImage =
-  //   'https://res.cloudinary.com/braiwjaya-university/image/upload/v1763139618/t2c5_zmfvgr.png';
-  // const pages = [
-  //   'https://res.cloudinary.com/braiwjaya-university/image/upload/v1763139614/t2c3_w7mqdd.png',
-  //   'https://res.cloudinary.com/braiwjaya-university/image/upload/v1763139617/t2c4_uoee44.png',
-  //   'https://res.cloudinary.com/braiwjaya-university/image/upload/v1763139612/t2c2_vg7nlo.png',
   const coverImage =
-    'https://res.cloudinary.com/braiwjaya-university/image/upload/v1763193118/t3c1_dhwqn9.png';
+    'https://res.cloudinary.com/daxoobtu4/image/upload/v1766216716/t3c1_rj4byp.png';
   const backCoverImage =
-    'https://res.cloudinary.com/braiwjaya-university/image/upload/v1763193105/t3c5_fshtz7.png';
+    'https://res.cloudinary.com/daxoobtu4/image/upload/v1766216716/t3c5_wuw6op.png';
   const pages = [
-    'https://res.cloudinary.com/braiwjaya-university/image/upload/v1763193109/t3c2_yzo5xp.png',
-    'https://res.cloudinary.com/braiwjaya-university/image/upload/v1763193108/t3c3_zr2yj2.png',
-    'https://res.cloudinary.com/braiwjaya-university/image/upload/v1763193111/t3c4_olbfo0.png',
+    'https://res.cloudinary.com/daxoobtu4/image/upload/v1766216716/t3c2_juyjfr.png',
+    'https://res.cloudinary.com/daxoobtu4/image/upload/v1766216717/t3c3_gyjkvc.png',
+    'https://res.cloudinary.com/daxoobtu4/image/upload/v1766216716/t3c4_c5ybrj.png',
   ];
 
   const pathname = usePathname();

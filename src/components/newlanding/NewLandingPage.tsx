@@ -40,6 +40,10 @@ import { useQuery } from '@tanstack/react-query';
 import { getListPackages } from '@/action/user-api';
 import { faqDataEnglish, faqDataIndonesian } from '@/lib/faqData';
 
+import c1 from '@/assets/c1.png';
+import c2 from '@/assets/c2.png';
+import c3 from '@/assets/c3.png';
+import c4 from '@/assets/c4.png';
 const { Footer } = Layout;
 const { Title, Text, Paragraph } = Typography;
 
@@ -156,7 +160,7 @@ export default function NewLandingPage() {
             </div>
             <div className="flex-1 w-full">
               <Image
-                src="https://res.cloudinary.com/braiwjaya-university/image/upload/v1763140795/c1_rhcq33.png"
+                src={c1}
                 alt="photobox-compilation"
                 width={552}
                 height={496}
@@ -168,7 +172,7 @@ export default function NewLandingPage() {
         <div className="flex flex-col lg:flex-row-reverse items-start lg:items-center justify-between gap-[30px] mx-auto max-w-6xl 2xl:max-w-7xl px-[20px] py-[90px]">
           <div className="flex-1 w-full">
             <Image
-              src="https://res.cloudinary.com/braiwjaya-university/image/upload/v1763140757/c2_pllk6x.png"
+              src={c2}
               alt="Say It with Logic and Love"
               width={552}
               height={496}
@@ -214,7 +218,7 @@ export default function NewLandingPage() {
             </div>
             <div className="flex-1 w-full">
               <Image
-                src="https://res.cloudinary.com/braiwjaya-university/image/upload/v1763140756/c3_xtxriv.png"
+                src={c3}
                 alt="Capture Moments in Style"
                 width={552}
                 height={496}
@@ -300,7 +304,7 @@ export default function NewLandingPage() {
             </div>
             <div className="flex-1 w-full">
               <Image
-                src="https://res.cloudinary.com/braiwjaya-university/image/upload/v1763140756/c4_bzxorn.png"
+                src={c4}
                 alt="Your way to showcase your moments"
                 className="w-full h-full object-contain"
                 width="0"

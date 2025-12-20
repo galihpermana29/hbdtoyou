@@ -7,14 +7,14 @@ import { usePathname } from 'next/navigation';
 const Scrapbook6 = () => {
   // Cover images
   const coverImage =
-    'https://res.cloudinary.com/braiwjaya-university/image/upload/v1763139984/t6c1_ieyasv.png';
+    'https://res.cloudinary.com/daxoobtu4/image/upload/v1766217272/t6c1_yzjaom.png';
   const backCoverImage =
-    'https://res.cloudinary.com/braiwjaya-university/image/upload/v1763139948/t6c5_h7kh0x.png';
+    'https://res.cloudinary.com/daxoobtu4/image/upload/v1766217273/t6c5_okcnsw.png';
 
   const pages = [
-    'https://res.cloudinary.com/braiwjaya-university/image/upload/v1763139947/t6c2_ykcold.png',
-    'https://res.cloudinary.com/braiwjaya-university/image/upload/v1763139946/t6c3_usuxu4.png',
-    'https://res.cloudinary.com/braiwjaya-university/image/upload/v1763139950/t6c4_blldz2.png',
+    'https://res.cloudinary.com/daxoobtu4/image/upload/v1766217273/t6c2_upykav.png',
+    'https://res.cloudinary.com/daxoobtu4/image/upload/v1766217273/t6c3_wzihyl.png',
+    'https://res.cloudinary.com/daxoobtu4/image/upload/v1766217273/t6c4_ldc0pw.png',
   ];
 
   const pathname = usePathname();
