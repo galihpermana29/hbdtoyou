@@ -1,17 +1,17 @@
 'use client';
 
 import { IProfileResponse } from '@/action/interfaces';
-import { getUserProfile } from '@/action/user-api';
-import { SessionData } from '@/store/iron-session';
-import { Button, Form, Modal, Space, Image } from 'antd';
-import React, { createContext, useContext, useEffect, useState } from 'react';
-import { Footer } from '@/components/ui/footer';
-import { usePathname } from 'next/navigation';
-import dayjs from 'dayjs';
 import { getSpotifyAccessToken } from '@/action/spotify-api';
-import { setSessionSpecific } from '@/store/get-set-session';
-import { Provider } from 'react-redux';
+import { getUserProfile } from '@/action/user-api';
+import { Footer } from '@/components/ui/footer';
 import { store } from '@/lib/store';
+import { setSessionSpecific } from '@/store/get-set-session';
+import { SessionData } from '@/store/iron-session';
+import { Button, Image, Modal, Space } from 'antd';
+import dayjs from 'dayjs';
+import { usePathname } from 'next/navigation';
+import React, { createContext, useContext, useEffect, useState } from 'react';
+import { Provider } from 'react-redux';
 
 // Define the context type
 interface SessionContextType {
@@ -62,7 +62,7 @@ const promotionalContent: AdContent[] = [
     ctaText: '',
     ctaLink: '/payment',
     image:
-      'https://res.cloudinary.com/braiwjaya-university/image/upload/v1763139120/Banner_1_1_z2h2vg.png',
+      'https://res.cloudinary.com/dztygf08a/image/upload/v1775229734/banner1_d8bvj0.png',
     type: 'image',
   },
   {
@@ -72,7 +72,7 @@ const promotionalContent: AdContent[] = [
     ctaText: '',
     ctaLink: '/payment',
     image:
-      'https://res.cloudinary.com/braiwjaya-university/image/upload/v1763139119/Instagram_post_-_28_evusfl.png',
+      'https://res.cloudinary.com/dztygf08a/image/upload/v1775229725/banner4_givkxi.png',
     type: 'image',
   },
   {
@@ -82,7 +82,7 @@ const promotionalContent: AdContent[] = [
     ctaText: '',
     ctaLink: '/payment',
     image:
-      'https://res.cloudinary.com/braiwjaya-university/image/upload/v1763139189/Ads_Dashboard_3_tjtjs9.png',
+      'https://res.cloudinary.com/dztygf08a/image/upload/v1775229730/banner3_bivfgx.png',
     type: 'image',
   },
   {
@@ -92,7 +92,7 @@ const promotionalContent: AdContent[] = [
     ctaText: '',
     ctaLink: '/dashboard',
     image:
-      'https://res.cloudinary.com/braiwjaya-university/image/upload/v1763139118/Instagram_post_-_30_rz63fu.png',
+      'https://res.cloudinary.com/dztygf08a/image/upload/v1775229732/banner2_mgmbp5.png',
     type: 'image',
   },
 ];
