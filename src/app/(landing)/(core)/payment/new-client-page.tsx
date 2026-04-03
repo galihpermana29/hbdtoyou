@@ -51,7 +51,7 @@ const NewClientPagePayment = () => {
   const type = query.get('type');
   const planId = query.get('plan_id');
 
-  const [couponCode, setCouponCode] = useState('');
+  const [couponCode, setCouponCode] = useState('MEMOAPRIL');
   const [couponLoading, setCouponLoading] = useState(false);
   const [couponPreview, setCouponPreview] = useState<ICouponPreviewResponse | null>(null);
 
