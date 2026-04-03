@@ -1,7 +1,6 @@
 'use client';
 
 import {
-  Badge,
   Button,
   Card,
   Carousel,
@@ -15,7 +14,7 @@ import {
   Segmented,
   Space,
   Statistic,
-  Typography,
+  Typography
 } from 'antd';
 import { useState } from 'react';
 
@@ -30,15 +29,15 @@ import fictional4 from '@/assets/fictional-4.png';
 import fictional5 from '@/assets/fictional-5.png';
 import fictional2 from '@/assets/fictional2.png';
 
+import { getListPackages } from '@/action/user-api';
 import { useMemoifySession } from '@/app/session-provider';
 import mockup1 from '@/assets/mockup1.png';
 import mockup2 from '@/assets/mockup2.png';
 import mockup3 from '@/assets/mockup3.png';
+import { faqDataEnglish, faqDataIndonesian } from '@/lib/faqData';
+import { useQuery } from '@tanstack/react-query';
 import { signIn } from 'next-auth/react';
 import { useRouter } from 'next/navigation';
-import { useQuery } from '@tanstack/react-query';
-import { getListPackages } from '@/action/user-api';
-import { faqDataEnglish, faqDataIndonesian } from '@/lib/faqData';
 
 import c1 from '@/assets/c1.png';
 import c2 from '@/assets/c2.png';
@@ -510,7 +509,7 @@ export default function NewLandingPage() {
                         User has Joined
                       </p>
                     }
-                    value={5000}
+                    value={9000}
                     suffix="+"
                   />
                   <p className="text-[16px] max-w-[200px] mx-auto font-[400] text-[#9a9a9a] mt-[8px]">
@@ -527,7 +526,7 @@ export default function NewLandingPage() {
                         User Premium
                       </p>
                     }
-                    value={300}
+                    value={1000}
                     suffix="+"
                   />
                   <p className="text-[16px] max-w-[200px] mx-auto font-[400] text-[#9a9a9a] mt-[8px]">
