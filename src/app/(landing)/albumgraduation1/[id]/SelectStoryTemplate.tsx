@@ -85,7 +85,7 @@ const SelectStoryTemplate = ({
                 <div className="border border-gray-300 rounded-lg p-4 w-full">
                   <div className="w-full flex items-center justify-center">
                     <Image
-                      src="https://res.cloudinary.com/dqipjpy1w/image/upload/v1754934694/Option_1_lhqbfn.jpg"
+                      src="https://res.cloudinary.com/braiwjaya-university/image/upload/v1763140620/Option_1_snt6ay.jpg"
                       width={150}
                       height={300}
                       alt="Template 1 Preview"
@@ -104,7 +104,7 @@ const SelectStoryTemplate = ({
                 <div className="border border-gray-300 rounded-lg p-4 w-full">
                   <div className="w-full flex items-center justify-center">
                     <Image
-                      src="https://res.cloudinary.com/dqipjpy1w/image/upload/v1754934690/Option_2_adzoh4.jpg"
+                      src="https://res.cloudinary.com/braiwjaya-university/image/upload/v1763140606/Option_2_vlakzs.jpg"
                       width={150}
                       height={300}
                       alt="Template 2 Preview"

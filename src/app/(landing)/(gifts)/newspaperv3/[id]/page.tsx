@@ -3,6 +3,7 @@ import MusicPlayer from '@/components/ui/music-player/music-player';
 import { v3Songs } from '@/lib/songs';
 import dayjs from 'dayjs';
 import Image from 'next/image';
+import LockScreen from '@/components/ui/lock-screen';
 
 const getDetailDataNew = async (id: string) => {
   const res = await getDetailContent(id);
@@ -33,11 +34,12 @@ export default async function Home({ params }: { params: any }) {
   }
 
   const parsedData = JSON.parse(data.data.detail_content_json_text);
+  const lockedContent = data.data.status === 'locked' || data.data.user_type === 'free';
   const selectedSongs = v3Songs.find((dx) => dx.id === parsedData.id);
 
   const contents = splitTextIntoColumns(parsedData.desc1);
   const defaultContents = splitTextIntoColumns(selectedSongs!.lyrics);
-  return (
+  const content = (
     <main className="min-h-screen bg-white p-4 md:p-8 lg:p-12">
       <div className="max-w-4xl mx-auto border border-black">
         {/* Header Section */}
@@ -113,4 +115,18 @@ export default async function Home({ params }: { params: any }) {
       </div>
     </main>
   );
+
+  if (lockedContent) {
+    return (
+      <LockScreen
+        contentId={id}
+        initiallyLocked
+        title="Content locked for free users"
+        message="Unlock to view this newspaper. Upgrade your plan for full access.">
+        {content}
+      </LockScreen>
+    );
+  }
+
+  return content;
 }

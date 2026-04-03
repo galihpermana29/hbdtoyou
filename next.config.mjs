@@ -26,6 +26,21 @@ const nextConfig = {
     unoptimized: true,
   },
 
+  webpack: (config, { isServer }) => {
+    // Exclude Remotion from webpack processing
+    config.externals = config.externals || [];
+    
+    if (isServer) {
+      config.externals.push({
+        '@remotion/bundler': '@remotion/bundler',
+        '@remotion/renderer': '@remotion/renderer',
+        '@remotion/lambda': '@remotion/lambda',
+      });
+    }
+
+    return config;
+  },
+
   async rewrites() {
     return [
       {

@@ -57,6 +57,11 @@ export function mapContentToCard(contents: IContent[], purpose = 'client') {
           'scrapbook3',
           'scrapbook4',
           'scrapbook5',
+          'scrapbook6',
+          'scrapbook7',
+          'scrapbook8',
+          'scrapbook9',
+          'scrapbook10',
         ].includes(show.template_name.split('-')[1].split(' ')[1])
       ) {
         return jsonContent?.coverImage;
@@ -89,6 +94,10 @@ export function mapContentToCard(contents: IContent[], purpose = 'client') {
           ? jsonContent.images[0]
           : 'https://res.cloudinary.com/ddlus5qur/image/upload/v1746085724/phu2rbi6fqnp71hytjex.jpg';
       }
+
+      if (show.template_name.includes('journal')) {
+        return 'journal';
+      }
     };
 
     if (!handleJumbotron()) return;
@@ -113,7 +122,9 @@ export function mapContentToCard(contents: IContent[], purpose = 'client') {
             12
           )
         : 'A title',
-      link: `/${show.template_name.split('-')[1].split(' ')[1]}/${show.id}`,
+      link: show.template_name.includes('journal')
+        ? `/journal/${show.id}`
+        : `/${show.template_name.split('-')[1].split(' ')[1]}/${show.id}`,
       desc: show?.caption
         ? show?.caption
         : jsonContent?.subTitle || 'A description',

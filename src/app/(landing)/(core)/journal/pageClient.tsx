@@ -13,14 +13,24 @@ import { useEffect, useState } from 'react';
 import { signIn } from 'next-auth/react';
 const JournalCard = dynamic(() => import('./view/JournalCard'), { ssr: false });
 
+const isJournalPublic = (journal: IContent): boolean => {
+  try {
+    const jsonData = JSON.parse(journal.detail_content_json_text);
+    return jsonData.isPublic !== false;
+  } catch {
+    return true;
+  }
+};
+
 const EJournal = ({ journalsData }: { journalsData: IContent[] }) => {
   const router = useRouter();
   const { accessToken } = useMemoifySession();
 
-  // State for search query and filtered journals
+  const publicJournals = journalsData.filter(isJournalPublic);
+
   const [searchQuery, setSearchQuery] = useState('');
   const [filteredJournals, setFilteredJournals] =
-    useState<IContent[]>(journalsData);
+    useState<IContent[]>(publicJournals);
   const [activeFeature, setActiveFeature] = useState(0);
 
   const features = [
@@ -41,21 +51,16 @@ const EJournal = ({ journalsData }: { journalsData: IContent[] }) => {
     },
   ];
 
-  // Filter journals based on search query
   useEffect(() => {
     if (!searchQuery.trim()) {
-      // If search query is empty, show all journals
-      setFilteredJournals(journalsData);
+      setFilteredJournals(publicJournals);
       return;
     }
 
-    // Filter journals based on destinationName or author in the JSON string
-    const filtered = journalsData.filter((journal) => {
+    const filtered = publicJournals.filter((journal) => {
       try {
-        // Parse the JSON string
         const jsonData = JSON.parse(journal.detail_content_json_text);
 
-        // Check if destinationName or author contains the search query (case insensitive)
         const destinationNameMatch =
           jsonData.destinationName &&
           jsonData.destinationName
@@ -66,17 +71,15 @@ const EJournal = ({ journalsData }: { journalsData: IContent[] }) => {
           jsonData.author &&
           jsonData.author.toLowerCase().includes(searchQuery.toLowerCase());
 
-        // Return true if either field matches
         return destinationNameMatch || authorMatch;
       } catch (error) {
-        // If JSON parsing fails, exclude this entry
         console.error('Error parsing JSON:', error);
         return false;
       }
     });
 
     setFilteredJournals(filtered);
-  }, [searchQuery, journalsData]);
+  }, [searchQuery, publicJournals]);
 
   return (
     <div className="w-full overflow-x-hidden">

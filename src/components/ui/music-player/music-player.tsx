@@ -9,7 +9,8 @@ const MusicPlayer = () => {
   const [isLoading, setIsLoading] = useState(false);
   const [hasUserInteracted, setHasUserInteracted] = useState(false);
 
-  const audioUrl = 'https://res.cloudinary.com/dqipjpy1w/video/upload/v1758815756/Semo_-_The_Last_Dance_Cinematic_Classical_FLVxyPl1wC0_g2pt2c.mp3';
+  const audioUrl =
+    'https://res.cloudinary.com/braiwjaya-university/video/upload/v1763140918/Semo_-_The_Last_Dance_e016fm.mp3';
 
   useEffect(() => {
     const audio = audioRef.current;
@@ -37,45 +38,45 @@ const MusicPlayer = () => {
   }, []);
 
   // Start music on first user interaction
-  useEffect(() => {
-    const startMusicOnInteraction = async () => {
-      if (hasUserInteracted) return;
-      
-      const audio = audioRef.current;
-      if (!audio) return;
+  // useEffect(() => {
+  //   const startMusicOnInteraction = async () => {
+  //     if (hasUserInteracted) return;
 
-      try {
-        audio.volume = 0.5;
-        await audio.play();
-        setIsPlaying(true);
-        setHasUserInteracted(true);
-        console.log('🎵 Music started after user interaction!');
-        
-        // Remove all listeners after successful start
-        document.removeEventListener('click', startMusicOnInteraction);
-        document.removeEventListener('keydown', startMusicOnInteraction);
-        document.removeEventListener('touchstart', startMusicOnInteraction);
-        document.removeEventListener('scroll', startMusicOnInteraction);
-      } catch (error) {
-        console.log('Failed to start music:', error);
-      }
-    };
+  //     const audio = audioRef.current;
+  //     if (!audio) return;
 
-    if (!hasUserInteracted) {
-      // Listen for any user interaction
-      document.addEventListener('click', startMusicOnInteraction);
-      document.addEventListener('keydown', startMusicOnInteraction);
-      document.addEventListener('touchstart', startMusicOnInteraction);
-      document.addEventListener('scroll', startMusicOnInteraction);
-    }
+  //     try {
+  //       audio.volume = 0.5;
+  //       await audio.play();
+  //       setIsPlaying(true);
+  //       setHasUserInteracted(true);
+  //       console.log('🎵 Music started after user interaction!');
 
-    return () => {
-      document.removeEventListener('click', startMusicOnInteraction);
-      document.removeEventListener('keydown', startMusicOnInteraction);
-      document.removeEventListener('touchstart', startMusicOnInteraction);
-      document.removeEventListener('scroll', startMusicOnInteraction);
-    };
-  }, [hasUserInteracted]);
+  //       // Remove all listeners after successful start
+  //       document.removeEventListener('click', startMusicOnInteraction);
+  //       document.removeEventListener('keydown', startMusicOnInteraction);
+  //       document.removeEventListener('touchstart', startMusicOnInteraction);
+  //       document.removeEventListener('scroll', startMusicOnInteraction);
+  //     } catch (error) {
+  //       console.log('Failed to start music:', error);
+  //     }
+  //   };
+
+  //   if (!hasUserInteracted) {
+  //     // Listen for any user interaction
+  //     document.addEventListener('click', startMusicOnInteraction);
+  //     document.addEventListener('keydown', startMusicOnInteraction);
+  //     document.addEventListener('touchstart', startMusicOnInteraction);
+  //     document.addEventListener('scroll', startMusicOnInteraction);
+  //   }
+
+  //   return () => {
+  //     document.removeEventListener('click', startMusicOnInteraction);
+  //     document.removeEventListener('keydown', startMusicOnInteraction);
+  //     document.removeEventListener('touchstart', startMusicOnInteraction);
+  //     document.removeEventListener('scroll', startMusicOnInteraction);
+  //   };
+  // }, [hasUserInteracted]);
 
   const togglePlay = async () => {
     const audio = audioRef.current;

@@ -30,11 +30,22 @@ export async function createContentClientSide(
   });
 
   if (!res.ok) {
-    return {
-      success: false,
-      message: res.statusText,
-      data: null,
-    };
+    try {
+      const errorData = await res.json();
+      const errorMessage =
+        errorData.errors?.[0] || errorData.status || res.statusText;
+      return {
+        success: false,
+        message: errorMessage,
+        data: null,
+      };
+    } catch {
+      return {
+        success: false,
+        message: res.statusText,
+        data: null,
+      };
+    }
   }
 
   const data = await res.json();

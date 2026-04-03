@@ -3,7 +3,7 @@ import React from 'react';
 import dynamic from 'next/dynamic';
 import { getDetailContent } from '@/action/user-api';
 import ImagesComponent from '../ImagesComponent/ImagesComponent';
-import { Watermark } from 'antd';
+import LockScreen from '@/components/ui/lock-screen';
 import MusicPlayer from '@/components/ui/music-player/music-player';
 const Typewriter = dynamic(() => import('@/components/fancy/typewriter'), {
   ssr: false,
@@ -50,6 +50,8 @@ export default async function MagazineDetailV1({ params }: { params: any }) {
   }
 
   const parsedData = JSON.parse(data.data.detail_content_json_text);
+  const isFreeUser = data.data.user_type === 'free';
+  const lockedContent = data.data.status === 'locked' || isFreeUser;
 
   const sentences = parsedData?.desc
     .split('.')
@@ -57,47 +59,43 @@ export default async function MagazineDetailV1({ params }: { params: any }) {
     .filter((sentence: any) => sentence !== '')
     .flatMap(splitLongSentence); // Use flatMap to include split sentences in sequence
 
-  return (
-    <Watermark
-      zIndex={9999999}
-      font={{ color: 'rgba(227, 64, 19, 0.19)', fontSize: 50 }}
-      content={data.data.user_type === 'free' ? 'memoify.live' : ''}>
-      <div className="w-full flex  justify-between h-screen relative bg-[#181818] overflow-hidden">
-        <div className="w-full h-full md:text-4xl lg:text-5xl xl:text-6xl sm:text-3xl text-3xl flex flex-col items-start justify-start text-foreground dark:text-muted font-normal overflow-hidden p-8 md:p-24 md:pt-48 absolute">
-          <iframe
-            allow="autoplay; clipboard-write; encrypted-media; fullscreen; picture-in-picture"
-            loading="lazy"
-            src={`https://open.spotify.com/embed/track/${
-              parsedData ? parsedData.id : '1CVUWAC845LKEDHH0l8XG2'
-            }`}
-            height={80}
-            className="max-w-[370px] mb-[20px] relative z-[999999]"></iframe>
-          <p
-            className="whitespace-pre-wrap max-w-[500px]"
-            suppressHydrationWarning>
-            <Typewriter
-              text={
-                sentences.length > 0
-                  ? sentences
-                  : [
-                      'All of this photo is our moments.',
-                      'I want to say a Happy Birthday to you.',
-                      'I never knew that i will always be with you for a long time period of time',
-                      'I wish you all the best in your life.',
-                      'Remember that you have me, and you can share anything with me.',
-                    ]
-              }
-              speed={70}
-              className="text-white"
-              waitTime={1500}
-              deleteSpeed={60}
-              cursorChar={'_'}
-            />
-          </p>
-        </div>
-        <MusicPlayer />
-        <ImagesComponent urls={parsedData ? parsedData.momentOfYou : urls} />
-        {/* <DragElements
+  const content = (
+    <div className="w-full flex  justify-between h-screen relative bg-[#181818] overflow-hidden">
+      <div className="w-full h-full md:text-4xl lg:text-5xl xl:text-6xl sm:text-3xl text-3xl flex flex-col items-start justify-start text-foreground dark:text-muted font-normal overflow-hidden p-8 md:p-24 md:pt-48 absolute">
+        <iframe
+          allow="autoplay; clipboard-write; encrypted-media; fullscreen; picture-in-picture"
+          loading="lazy"
+          src={`https://open.spotify.com/embed/track/${
+            parsedData ? parsedData.id : '1CVUWAC845LKEDHH0l8XG2'
+          }`}
+          height={80}
+          className="max-w-[370px] mb-[20px] relative z-[999999]"></iframe>
+        <p
+          className="whitespace-pre-wrap max-w-[500px]"
+          suppressHydrationWarning>
+          <Typewriter
+            text={
+              sentences.length > 0
+                ? sentences
+                : [
+                    'All of this photo is our moments.',
+                    'I want to say a Happy Birthday to you.',
+                    'I never knew that i will always be with you for a long time period of time',
+                    'I wish you all the best in your life.',
+                    'Remember that you have me, and you can share anything with me.',
+                  ]
+            }
+            speed={70}
+            className="text-white"
+            waitTime={1500}
+            deleteSpeed={60}
+            cursorChar={'_'}
+          />
+        </p>
+      </div>
+      <MusicPlayer />
+      <ImagesComponent urls={parsedData ? parsedData.momentOfYou : urls} />
+      {/* <DragElements
         dragMomentum={true}
         className="flex justify-end items-end pr-16 pb-24">
         {urls.map((url, index) => {
@@ -144,7 +142,20 @@ export default async function MagazineDetailV1({ params }: { params: any }) {
           );
         })}
       </DragElements> */}
-      </div>
-    </Watermark>
+    </div>
   );
+
+  if (lockedContent) {
+    return (
+      <LockScreen
+        contentId={id}
+        initiallyLocked
+        title="Content locked for free users"
+        message="Unlock to view this magazine. Upgrade your plan for full access.">
+        {content}
+      </LockScreen>
+    );
+  }
+
+  return content;
 }

@@ -15,7 +15,7 @@ export const metadata: Metadata = {
     siteName: 'Memoify',
     images: [
       {
-        url: 'https://res.cloudinary.com/dqipjpy1w/image/upload/v1751300369/5a13cbf6-312a-4c2a-a927-05c19a3eeda5.png',
+        url: 'https://res.cloudinary.com/braiwjaya-university/image/upload/v1763139312/Screenshot_2025-11-14_at_23.55.02_qlviw3.png',
         width: 1200,
         height: 630,
         alt: 'Contact Memoify',
@@ -30,7 +30,7 @@ export const metadata: Metadata = {
     description:
       "Get in touch with our team for support, feedback, or business inquiries about our digital gifts, digital scrapbooks, and digital albums. We're here to help with all your questions about our custom website templates inspired by popular platforms.",
     images: [
-      'https://res.cloudinary.com/dqipjpy1w/image/upload/v1751300369/5a13cbf6-312a-4c2a-a927-05c19a3eeda5.png',
+      'https://res.cloudinary.com/braiwjaya-university/image/upload/v1763139312/Screenshot_2025-11-14_at_23.55.02_qlviw3.png',
     ],
   },
 };

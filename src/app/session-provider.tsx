@@ -62,7 +62,7 @@ const promotionalContent: AdContent[] = [
     ctaText: '',
     ctaLink: '/payment',
     image:
-      'https://res.cloudinary.com/dqipjpy1w/image/upload/v1749574325/fojp7ewowrwy1ck5j14j.png',
+      'https://res.cloudinary.com/braiwjaya-university/image/upload/v1763139120/Banner_1_1_z2h2vg.png',
     type: 'image',
   },
   {
@@ -72,7 +72,7 @@ const promotionalContent: AdContent[] = [
     ctaText: '',
     ctaLink: '/payment',
     image:
-      'https://res.cloudinary.com/dqipjpy1w/image/upload/v1749574325/ylmpofrfxs25uczb8f4k.png',
+      'https://res.cloudinary.com/braiwjaya-university/image/upload/v1763139119/Instagram_post_-_28_evusfl.png',
     type: 'image',
   },
   {
@@ -82,7 +82,7 @@ const promotionalContent: AdContent[] = [
     ctaText: '',
     ctaLink: '/payment',
     image:
-      'https://res.cloudinary.com/dqipjpy1w/image/upload/v1750003561/hszepxvaqvcf0qexoujo.png',
+      'https://res.cloudinary.com/braiwjaya-university/image/upload/v1763139189/Ads_Dashboard_3_tjtjs9.png',
     type: 'image',
   },
   {
@@ -92,7 +92,7 @@ const promotionalContent: AdContent[] = [
     ctaText: '',
     ctaLink: '/dashboard',
     image:
-      'https://res.cloudinary.com/dqipjpy1w/image/upload/v1750003562/ytobvdbkbgtwjxzyusdk.png',
+      'https://res.cloudinary.com/braiwjaya-university/image/upload/v1763139118/Instagram_post_-_30_rz63fu.png',
     type: 'image',
   },
 ];

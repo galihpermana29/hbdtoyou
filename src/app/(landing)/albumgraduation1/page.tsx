@@ -40,7 +40,7 @@ const defaultGraduationData = {
       description:
         'The story begins in the seemingly ordinary world of post-high school life. Our hero, feeling the pull of a greater purpose, receives their "call to adventure" in the form of a university acceptance letter.',
       image:
-        'https://res.cloudinary.com/dqipjpy1w/image/upload/v1752511968/DSC00322_wqazoc.jpg',
+        'https://res.cloudinary.com/braiwjaya-university/image/upload/v1763140407/DSC00418_qccp4d.jpg',
     },
     {
       number: 2,
@@ -49,7 +49,7 @@ const defaultGraduationData = {
       description:
         'Months into their journey, the initial excitement has waned, replaced by the grueling reality of mid-term examinations. Our hero, now part of a fellowship of equally stressed-out classmates, faces a series of relentless tests that push them to their breaking point.',
       image:
-        'https://res.cloudinary.com/dqipjpy1w/image/upload/v1752512189/DSC00418_kam90v.jpg',
+        'https://res.cloudinary.com/braiwjaya-university/image/upload/v1763140409/DSC00350_ydkxqy.jpg',
     },
     {
       number: 3,
@@ -58,7 +58,7 @@ const defaultGraduationData = {
       description:
         'Years have passed, and our hero is now a seasoned upperclassman, bearing the scars and wisdom of their long and arduous journey. The final trial awaits: the senior thesis, a monumental undertaking that requires them to synthesize everything they have learned into a single, original work of scholarship',
       image:
-        'https://res.cloudinary.com/dqipjpy1w/image/upload/v1752511974/DSC00350_ba15tz.jpg',
+        'https://res.cloudinary.com/braiwjaya-university/image/upload/v1763140412/DSC00486_qozscs.jpg',
     },
     {
       number: 4,
@@ -67,13 +67,13 @@ const defaultGraduationData = {
       description:
         'The hero, having conquered the academic realm and armed with the "elixir" of knowledge, believes the final battle is won. However, the journey is far from over. Stepping out of the hallowed halls of the university, they find themselves in a new, bewildering world: the job market.',
       image:
-        'https://res.cloudinary.com/dqipjpy1w/image/upload/v1752511968/DSC00322_wqazoc.jpg',
+        'https://res.cloudinary.com/braiwjaya-university/image/upload/v1763140413/DSC00455_nxwhi9.jpg',
     },
   ],
   galleryImages: Array(6)
     .fill(null)
     .map((_, index) => ({
-      src: 'https://res.cloudinary.com/dqipjpy1w/image/upload/v1752512189/DSC00418_kam90v.jpg', // Placeholder for real images
+      src: 'https://res.cloudinary.com/braiwjaya-university/image/upload/v1763140439/DSC00498_szziu8.jpg', // Placeholder for real images
       alt: `Wedding gallery image ${index + 1}`,
     })),
   wishes: [
@@ -170,7 +170,7 @@ const GraduationFilmV1Page = () => {
             width={408}
             height={408}
             alt="Graduation video"
-            src="https://res.cloudinary.com/dqipjpy1w/image/upload/v1752511962/DSC00257_sk67bh.jpg"
+            src="https://res.cloudinary.com/braiwjaya-university/image/upload/v1763140439/DSC00498_szziu8.jpg"
             className="w-full h-full object-cover"
           />
         </div>
@@ -277,7 +277,7 @@ const GraduationFilmV1Page = () => {
               width={408}
               height={408}
               alt="Graduation video"
-              src="https://res.cloudinary.com/dqipjpy1w/image/upload/v1752511962/DSC00257_sk67bh.jpg"
+              src="https://res.cloudinary.com/braiwjaya-university/image/upload/v1763140439/DSC00498_szziu8.jpg"
               className="w-full h-full object-cover"
             />
           </div>

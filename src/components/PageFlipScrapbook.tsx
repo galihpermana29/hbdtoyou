@@ -1,8 +1,10 @@
 'use client';
 
-import React, { useState, useRef, useEffect } from 'react';
+import React, { useState, useRef, useEffect, useCallback } from 'react';
 import HTMLFlipBook from 'react-pageflip';
+import { useGifExport } from '../hooks/useGifExport';
 import './PageFlipScrapbook.css';
+import { message } from 'antd';
 
 interface PageCoverProps {
   children?: React.ReactNode;
@@ -55,6 +57,7 @@ interface PageFlipScrapbookProps {
   backCoverImage?: string;
   coverTitle?: string;
   backCoverTitle?: string;
+  enableVideoExport?: boolean;
 }
 
 const PageFlipScrapbook: React.FC<PageFlipScrapbookProps> = ({
@@ -63,6 +66,7 @@ const PageFlipScrapbook: React.FC<PageFlipScrapbookProps> = ({
   backCoverImage = 'https://res.cloudinary.com/dqipjpy1w/image/upload/v1750003560/tl7dqxuefwo2oiaxgj9s.jpg',
   coverTitle = 'Scrapbook by Memoify',
   backCoverTitle = 'The End',
+  enableVideoExport = true,
 }) => {
   const book = useRef<any>(null);
   const [page, setPage] = useState(0);
@@ -70,6 +74,8 @@ const PageFlipScrapbook: React.FC<PageFlipScrapbookProps> = ({
   const [orientation, setOrientation] = useState<'portrait' | 'landscape'>(
     'portrait'
   );
+  // Use the new client-side GIF export hook
+  const { exportToGif, isExporting, exportProgress, exportError } = useGifExport();
 
   const onInit = () => {
     // Wait a moment for the component to fully initialize
@@ -101,6 +107,49 @@ const PageFlipScrapbook: React.FC<PageFlipScrapbookProps> = ({
     // Safely handle page number
     if (typeof e.data === 'number') {
       setPage(e.data);
+    }
+  };
+
+  const handleExportVideo = async () => {
+    try {
+      // Use the new client-side export with same concept as Remotion
+      const blob = await exportToGif({
+        pages,
+        coverImage: coverImage!,
+        backCoverImage: backCoverImage!,
+      });
+
+      // Copy GIF to clipboard if supported
+      if (navigator.clipboard && window.ClipboardItem) {
+        try {
+          await navigator.clipboard.write([
+            new ClipboardItem({
+              'image/gif': blob
+            })
+          ]);
+          message.success('GIF copied to clipboard and downloaded!');
+        } catch (clipboardError) {
+          console.warn('Clipboard copy failed:', clipboardError);
+          message.success('GIF downloaded! (Clipboard copy not supported)');
+        }
+      } else {
+        message.success('GIF downloaded! (Clipboard copy not supported on this browser)');
+      }
+
+      // Download the GIF (same download logic)
+      const link = document.createElement('a');
+      link.href = URL.createObjectURL(blob);
+      link.download = `scrapbook-${Date.now()}.gif`;
+      document.body.appendChild(link);
+      link.click();
+      document.body.removeChild(link);
+
+      // Clean up the blob URL
+      URL.revokeObjectURL(link.href);
+
+    } catch (error) {
+      console.error('Export error:', error);
+      message.error('Failed to export GIF. Please try again.');
     }
   };
 
@@ -163,6 +212,70 @@ const PageFlipScrapbook: React.FC<PageFlipScrapbookProps> = ({
           Next
         </button>
       </div>
+
+      {enableVideoExport && (
+        <div className="mt-4 flex flex-col items-center">
+          {isExporting && (
+            <div className="mb-2 w-full max-w-xs">
+              <div className="flex justify-between text-sm text-gray-600 mb-1">
+                <span>Generating GIF...</span>
+                <span>{Math.round(exportProgress)}%</span>
+              </div>
+              <div className="w-full bg-gray-200 rounded-full h-2">
+                <div
+                  className="bg-[#E34013] h-2 rounded-full transition-all duration-300"
+                  style={{ width: `${exportProgress}%` }}
+                ></div>
+              </div>
+            </div>
+          )}
+          <button
+            className="!bg-[#E34013] text-white font-bold py-3 px-6 rounded-lg disabled:opacity-50 disabled:cursor-not-allowed flex items-center gap-2"
+            onClick={handleExportVideo}
+            disabled={isExporting}>
+            {isExporting ? (
+              <>
+                <svg
+                  className="animate-spin h-5 w-5"
+                  xmlns="http://www.w3.org/2000/svg"
+                  fill="none"
+                  viewBox="0 0 24 24">
+                  <circle
+                    className="opacity-25"
+                    cx="12"
+                    cy="12"
+                    r="10"
+                    stroke="currentColor"
+                    strokeWidth="4"></circle>
+                  <path
+                    className="opacity-75"
+                    fill="currentColor"
+                    d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                </svg>
+                Generating GIF...
+              </>
+            ) : (
+              <>
+                <svg
+                  xmlns="http://www.w3.org/2000/svg"
+                  className="h-5 w-5"
+                  viewBox="0 0 24 24"
+                  fill="none"
+                  stroke="currentColor"
+                  strokeWidth="2">
+                  <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path>
+                  <polyline points="7 10 12 15 17 10"></polyline>
+                  <line x1="12" y1="15" x2="12" y2="3"></line>
+                </svg>
+                Share as GIF (Copy + Download)
+              </>
+            )}
+          </button>
+          {exportError && (
+            <p className="text-red-500 mt-2 text-sm">{exportError}</p>
+          )}
+        </div>
+      )}
     </div>
   );
 };

@@ -8,19 +8,31 @@ import {
   IContent,
   IContentPayload,
   IContentStats,
+  IDashboardBrevo,
+  IDashboardCloudinary,
+  IDashboardOverview,
+  IDashboardScheduled,
+  IDashboardTransactions,
+  IDashboardTransactionsParams,
+  ICoupon,
+  ICouponCreatePayload,
+  ICouponListParams,
+  ICouponPreviewPayload,
+  ICouponPreviewResponse,
+  ICouponUpdatePayload,
   IDetailContentResponse,
   IFeedback,
   IGetDetailPayment,
   ILatestContentResponse2,
   IListPackageResponse,
   IOAuthResponse,
+  IPackagePayload,
   IPaymentPayload,
   IPaypalPaymentResponse,
   IProfileResponse,
   IQRISPaymentResponse,
   IResponsePaypal,
 } from './interfaces';
-import { SessionData } from '@/store/iron-session';
 
 export interface IOAuthPayload {
   token_email: string;
@@ -50,11 +62,22 @@ export async function loginOAuth(
   });
 
   if (!res.ok) {
-    return {
-      success: false,
-      message: res.statusText,
-      data: null,
-    };
+    try {
+      const errorData = await res.json();
+      const errorMessage =
+        errorData.errors?.[0] || errorData.status || res.statusText;
+      return {
+        success: false,
+        message: errorMessage,
+        data: null,
+      };
+    } catch {
+      return {
+        success: false,
+        message: res.statusText,
+        data: null,
+      };
+    }
   }
 
   const data = await res.json();
@@ -81,11 +104,22 @@ export async function getAllTemplates(): Promise<
   });
 
   if (!res.ok) {
-    return {
-      success: false,
-      message: res.statusText,
-      data: null,
-    };
+    try {
+      const errorData = await res.json();
+      const errorMessage =
+        errorData.errors?.[0] || errorData.status || res.statusText;
+      return {
+        success: false,
+        message: errorMessage,
+        data: null,
+      };
+    } catch {
+      return {
+        success: false,
+        message: res.statusText,
+        data: null,
+      };
+    }
   }
 
   const data = await res.json();
@@ -112,11 +146,22 @@ export async function getGraduationTemplates(): Promise<
   });
 
   if (!res.ok) {
-    return {
-      success: false,
-      message: res.statusText,
-      data: null,
-    };
+    try {
+      const errorData = await res.json();
+      const errorMessage =
+        errorData.errors?.[0] || errorData.status || res.statusText;
+      return {
+        success: false,
+        message: errorMessage,
+        data: null,
+      };
+    } catch {
+      return {
+        success: false,
+        message: res.statusText,
+        data: null,
+      };
+    }
   }
 
   const data = await res.json();
@@ -143,11 +188,22 @@ export async function getPopularTemplates(): Promise<
   });
 
   if (!res.ok) {
-    return {
-      success: false,
-      message: res.statusText,
-      data: null,
-    };
+    try {
+      const errorData = await res.json();
+      const errorMessage =
+        errorData.errors?.[0] || errorData.status || res.statusText;
+      return {
+        success: false,
+        message: errorMessage,
+        data: null,
+      };
+    } catch {
+      return {
+        success: false,
+        message: res.statusText,
+        data: null,
+      };
+    }
   }
 
   const data = await res.json();
@@ -174,11 +230,22 @@ export async function getOriginalTemplates(): Promise<
   });
 
   if (!res.ok) {
-    return {
-      success: false,
-      message: res.statusText,
-      data: null,
-    };
+    try {
+      const errorData = await res.json();
+      const errorMessage =
+        errorData.errors?.[0] || errorData.status || res.statusText;
+      return {
+        success: false,
+        message: errorMessage,
+        data: null,
+      };
+    } catch {
+      return {
+        success: false,
+        message: res.statusText,
+        data: null,
+      };
+    }
   }
 
   const data = await res.json();
@@ -206,11 +273,22 @@ export async function getUserProfile(overrideSession?: {
   });
 
   if (!res.ok) {
-    return {
-      success: false,
-      message: res.statusText,
-      data: null,
-    };
+    try {
+      const errorData = await res.json();
+      const errorMessage =
+        errorData.errors?.[0] || errorData.status || res.statusText;
+      return {
+        success: false,
+        message: errorMessage,
+        data: null,
+      };
+    } catch {
+      return {
+        success: false,
+        message: res.statusText,
+        data: null,
+      };
+    }
   }
 
   const data = await res.json();
@@ -238,11 +316,22 @@ export async function createContent(
   });
 
   if (!res.ok) {
-    return {
-      success: false,
-      message: res.statusText,
-      data: null,
-    };
+    try {
+      const errorData = await res.json();
+      const errorMessage =
+        errorData.errors?.[0] || errorData.status || res.statusText;
+      return {
+        success: false,
+        message: errorMessage,
+        data: null,
+      };
+    } catch {
+      return {
+        success: false,
+        message: res.statusText,
+        data: null,
+      };
+    }
   }
 
   revalidateTag('dashboard-content');
@@ -273,11 +362,22 @@ export async function editContent(
   });
 
   if (!res.ok) {
-    return {
-      success: false,
-      message: res.statusText,
-      data: null,
-    };
+    try {
+      const errorData = await res.json();
+      const errorMessage =
+        errorData.errors?.[0] || errorData.status || res.statusText;
+      return {
+        success: false,
+        message: errorMessage,
+        data: null,
+      };
+    } catch {
+      return {
+        success: false,
+        message: res.statusText,
+        data: null,
+      };
+    }
   }
 
   revalidateTag('dashboard-content');
@@ -309,11 +409,22 @@ export async function getDetailContent(
   });
 
   if (!res.ok) {
-    return {
-      success: false,
-      message: res.statusText,
-      data: null,
-    };
+    try {
+      const errorData = await res.json();
+      const errorMessage =
+        errorData.errors?.[0] || errorData.status || res.statusText;
+      return {
+        success: false,
+        message: errorMessage,
+        data: null,
+      };
+    } catch {
+      return {
+        success: false,
+        message: res.statusText,
+        data: null,
+      };
+    }
   }
 
   const data = await res.json();
@@ -349,16 +460,72 @@ export async function addWishesContent(
   });
 
   if (!res.ok) {
-    return {
-      success: false,
-      message: res.statusText,
-      data: null,
-    };
+    try {
+      const errorData = await res.json();
+      const errorMessage =
+        errorData.errors?.[0] || errorData.status || res.statusText;
+      return {
+        success: false,
+        message: errorMessage,
+        data: null,
+      };
+    } catch {
+      return {
+        success: false,
+        message: res.statusText,
+        data: null,
+      };
+    }
   }
 
   const data = await res.json();
 
   revalidateTag('netflix-graduation-content');
+
+  return {
+    success: true,
+    message: data.message,
+    data: data.data,
+  };
+}
+
+export async function unlockContent(contentId: string): Promise<
+  IGlobalResponse<null | {
+    data: string;
+  }>
+> {
+  const session = await getSession();
+  const res = await fetch(baseUri + `/contents/unlock`, {
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/json',
+      'X-Source': 'web',
+      'X-UserID': session.userId!,
+      Authorization: `Bearer ${session.accessToken}`,
+    },
+    body: JSON.stringify({ content_id: contentId }),
+  });
+
+  if (!res.ok) {
+    try {
+      const errorData = await res.json();
+      const errorMessage =
+        errorData.errors?.[0] || errorData.status || res.statusText;
+      return {
+        success: false,
+        message: errorMessage,
+        data: null,
+      };
+    } catch {
+      return {
+        success: false,
+        message: res.statusText,
+        data: null,
+      };
+    }
+  }
+
+  const data = await res.json();
 
   return {
     success: true,
@@ -383,11 +550,22 @@ export async function submitPaymentProof(
   });
 
   if (!res.ok) {
-    return {
-      success: false,
-      message: res.statusText,
-      data: null,
-    };
+    try {
+      const errorData = await res.json();
+      const errorMessage =
+        errorData.errors?.[0] || errorData.status || res.statusText;
+      return {
+        success: false,
+        message: errorMessage,
+        data: null,
+      };
+    } catch {
+      return {
+        success: false,
+        message: res.statusText,
+        data: null,
+      };
+    }
   }
 
   const data = await res.json();
@@ -414,11 +592,22 @@ export async function getListPayment(): Promise<
   });
 
   if (!res.ok) {
-    return {
-      success: false,
-      message: res.statusText,
-      data: null,
-    };
+    try {
+      const errorData = await res.json();
+      const errorMessage =
+        errorData.errors?.[0] || errorData.status || res.statusText;
+      return {
+        success: false,
+        message: errorMessage,
+        data: null,
+      };
+    } catch {
+      return {
+        success: false,
+        message: res.statusText,
+        data: null,
+      };
+    }
   }
 
   const data = await res.json();
@@ -449,11 +638,22 @@ export async function approveRejectProof(
   });
 
   if (!res.ok) {
-    return {
-      success: false,
-      message: res.statusText,
-      data: null,
-    };
+    try {
+      const errorData = await res.json();
+      const errorMessage =
+        errorData.errors?.[0] || errorData.status || res.statusText;
+      return {
+        success: false,
+        message: errorMessage,
+        data: null,
+      };
+    } catch {
+      return {
+        success: false,
+        message: res.statusText,
+        data: null,
+      };
+    }
   }
 
   const data = await res.json();
@@ -481,11 +681,22 @@ export async function generateQRIS(
   });
 
   if (!res.ok) {
-    return {
-      success: false,
-      message: res.statusText,
-      data: null,
-    };
+    try {
+      const errorData = await res.json();
+      const errorMessage =
+        errorData.errors?.[0] || errorData.status || res.statusText;
+      return {
+        success: false,
+        message: errorMessage,
+        data: null,
+      };
+    } catch {
+      return {
+        success: false,
+        message: res.statusText,
+        data: null,
+      };
+    }
   }
 
   const data = await res.json();
@@ -513,11 +724,22 @@ export async function generatePaypal(
   });
 
   if (!res.ok) {
-    return {
-      success: false,
-      message: res.statusText,
-      data: null,
-    };
+    try {
+      const errorData = await res.json();
+      const errorMessage =
+        errorData.errors?.[0] || errorData.status || res.statusText;
+      return {
+        success: false,
+        message: errorMessage,
+        data: null,
+      };
+    } catch {
+      return {
+        success: false,
+        message: res.statusText,
+        data: null,
+      };
+    }
   }
 
   const data = await res.json();
@@ -544,11 +766,22 @@ export async function getDetailPayment(
   });
 
   if (!res.ok) {
-    return {
-      success: false,
-      message: res.statusText,
-      data: null,
-    };
+    try {
+      const errorData = await res.json();
+      const errorMessage =
+        errorData.errors?.[0] || errorData.status || res.statusText;
+      return {
+        success: false,
+        message: errorMessage,
+        data: null,
+      };
+    } catch {
+      return {
+        success: false,
+        message: res.statusText,
+        data: null,
+      };
+    }
   }
 
   const data = await res.json();
@@ -587,11 +820,22 @@ export async function getLatestInspiration(
   );
 
   if (!res.ok) {
-    return {
-      success: false,
-      message: res.statusText,
-      data: null,
-    };
+    try {
+      const errorData = await res.json();
+      const errorMessage =
+        errorData.errors?.[0] || errorData.status || res.statusText;
+      return {
+        success: false,
+        message: errorMessage,
+        data: null,
+      };
+    } catch {
+      return {
+        success: false,
+        message: res.statusText,
+        data: null,
+      };
+    }
   }
 
   const data = await res.json();
@@ -637,11 +881,22 @@ export async function getContentByUserId(
   });
 
   if (!res.ok) {
-    return {
-      success: false,
-      message: res.statusText,
-      data: null,
-    };
+    try {
+      const errorData = await res.json();
+      const errorMessage =
+        errorData.errors?.[0] || errorData.status || res.statusText;
+      return {
+        success: false,
+        message: errorMessage,
+        data: null,
+      };
+    } catch {
+      return {
+        success: false,
+        message: res.statusText,
+        data: null,
+      };
+    }
   }
 
   const data = await res.json();
@@ -671,11 +926,22 @@ export async function submitFeedback(payload: {
   });
 
   if (!res.ok) {
-    return {
-      success: false,
-      message: res.statusText,
-      data: null,
-    };
+    try {
+      const errorData = await res.json();
+      const errorMessage =
+        errorData.errors?.[0] || errorData.status || res.statusText;
+      return {
+        success: false,
+        message: errorMessage,
+        data: null,
+      };
+    } catch {
+      return {
+        success: false,
+        message: res.statusText,
+        data: null,
+      };
+    }
   }
 
   const data = await res.json();
@@ -702,11 +968,22 @@ export async function getListFeedbacks(): Promise<
   });
 
   if (!res.ok) {
-    return {
-      success: false,
-      message: res.statusText,
-      data: null,
-    };
+    try {
+      const errorData = await res.json();
+      const errorMessage =
+        errorData.errors?.[0] || errorData.status || res.statusText;
+      return {
+        success: false,
+        message: errorMessage,
+        data: null,
+      };
+    } catch {
+      return {
+        success: false,
+        message: res.statusText,
+        data: null,
+      };
+    }
   }
 
   const data = await res.json();
@@ -737,11 +1014,22 @@ export async function getContentStatsByUserId(): Promise<
   });
 
   if (!res.ok) {
-    return {
-      success: false,
-      message: res.statusText,
-      data: null,
-    };
+    try {
+      const errorData = await res.json();
+      const errorMessage =
+        errorData.errors?.[0] || errorData.status || res.statusText;
+      return {
+        success: false,
+        message: errorMessage,
+        data: null,
+      };
+    } catch {
+      return {
+        success: false,
+        message: res.statusText,
+        data: null,
+      };
+    }
   }
 
   const data = await res.json();
@@ -768,11 +1056,22 @@ export async function deleteContentById(
   });
 
   if (!res.ok) {
-    return {
-      success: false,
-      message: res.statusText,
-      data: null,
-    };
+    try {
+      const errorData = await res.json();
+      const errorMessage =
+        errorData.errors?.[0] || errorData.status || res.statusText;
+      return {
+        success: false,
+        message: errorMessage,
+        data: null,
+      };
+    } catch {
+      return {
+        success: false,
+        message: res.statusText,
+        data: null,
+      };
+    }
   }
 
   revalidateTag('dashboard-content');
@@ -801,11 +1100,22 @@ export async function paymentByPaypal(): Promise<
   });
 
   if (!res.ok) {
-    return {
-      success: false,
-      message: res.statusText,
-      data: null,
-    };
+    try {
+      const errorData = await res.json();
+      const errorMessage =
+        errorData.errors?.[0] || errorData.status || res.statusText;
+      return {
+        success: false,
+        message: errorMessage,
+        data: null,
+      };
+    } catch {
+      return {
+        success: false,
+        message: res.statusText,
+        data: null,
+      };
+    }
   }
 
   const data = await res.json();
@@ -840,11 +1150,22 @@ export async function paymentPaypalCapture({
   );
 
   if (!res.ok) {
-    return {
-      success: false,
-      message: res.statusText,
-      data: null,
-    };
+    try {
+      const errorData = await res.json();
+      const errorMessage =
+        errorData.errors?.[0] || errorData.status || res.statusText;
+      return {
+        success: false,
+        message: errorMessage,
+        data: null,
+      };
+    } catch {
+      return {
+        success: false,
+        message: res.statusText,
+        data: null,
+      };
+    }
   }
 
   const data = await res.json();
@@ -871,11 +1192,22 @@ export async function getListPackages(): Promise<
   });
 
   if (!res.ok) {
-    return {
-      success: false,
-      message: res.statusText,
-      data: null,
-    };
+    try {
+      const errorData = await res.json();
+      const errorMessage =
+        errorData.errors?.[0] || errorData.status || res.statusText;
+      return {
+        success: false,
+        message: errorMessage,
+        data: null,
+      };
+    } catch {
+      return {
+        success: false,
+        message: res.statusText,
+        data: null,
+      };
+    }
   }
 
   const data = await res.json();
@@ -885,6 +1217,103 @@ export async function getListPackages(): Promise<
     message: data.message,
     data: data.data,
   };
+}
+
+export async function createPackage(
+  payload: IPackagePayload
+): Promise<IGlobalResponse<null | { data: string }>> {
+  const session = await getSession();
+
+  const res = await fetch(baseUri + `/packages`, {
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/json',
+      'X-Source': 'web',
+      'X-UserID': session.userId!,
+      Authorization: `Bearer ${session.accessToken}`,
+    },
+    body: JSON.stringify(payload),
+  });
+
+  if (!res.ok) {
+    try {
+      const errorData = await res.json();
+      return {
+        success: false,
+        message: errorData.errors?.[0] || errorData.status || res.statusText,
+        data: null,
+      };
+    } catch {
+      return { success: false, message: res.statusText, data: null };
+    }
+  }
+
+  const data = await res.json();
+  return { success: true, message: 'success', data };
+}
+
+export async function updatePackage(
+  id: string,
+  payload: Partial<IPackagePayload>
+): Promise<IGlobalResponse<null>> {
+  const session = await getSession();
+
+  const res = await fetch(baseUri + `/packages/${id}`, {
+    method: 'PATCH',
+    headers: {
+      'Content-Type': 'application/json',
+      'X-Source': 'web',
+      'X-UserID': session.userId!,
+      Authorization: `Bearer ${session.accessToken}`,
+    },
+    body: JSON.stringify(payload),
+  });
+
+  if (!res.ok) {
+    try {
+      const errorData = await res.json();
+      return {
+        success: false,
+        message: errorData.errors?.[0] || errorData.status || res.statusText,
+        data: null,
+      };
+    } catch {
+      return { success: false, message: res.statusText, data: null };
+    }
+  }
+
+  return { success: true, message: 'success', data: null };
+}
+
+export async function deletePackage(
+  id: string
+): Promise<IGlobalResponse<null>> {
+  const session = await getSession();
+
+  const res = await fetch(baseUri + `/packages/${id}`, {
+    method: 'DELETE',
+    headers: {
+      'Content-Type': 'application/json',
+      'X-Source': 'web',
+      'X-UserID': session.userId!,
+      Authorization: `Bearer ${session.accessToken}`,
+    },
+  });
+
+  if (!res.ok) {
+    try {
+      const errorData = await res.json();
+      return {
+        success: false,
+        message: errorData.errors?.[0] || errorData.status || res.statusText,
+        data: null,
+      };
+    } catch {
+      return { success: false, message: res.statusText, data: null };
+    }
+  }
+
+  return { success: true, message: 'success', data: null };
 }
 
 export async function warmUpAIModel(): Promise<IGlobalResponse<null | any>> {
@@ -900,11 +1329,22 @@ export async function warmUpAIModel(): Promise<IGlobalResponse<null | any>> {
   });
 
   if (!res.ok) {
-    return {
-      success: false,
-      message: res.statusText,
-      data: null,
-    };
+    try {
+      const errorData = await res.json();
+      const errorMessage =
+        errorData.errors?.[0] || errorData.status || res.statusText;
+      return {
+        success: false,
+        message: errorMessage,
+        data: null,
+      };
+    } catch {
+      return {
+        success: false,
+        message: res.statusText,
+        data: null,
+      };
+    }
   }
 
   return {
@@ -912,4 +1352,381 @@ export async function warmUpAIModel(): Promise<IGlobalResponse<null | any>> {
     message: 'success',
     data: null,
   };
+}
+
+export async function getDashboardOverview(): Promise<
+  IGlobalResponse<null | IDashboardOverview>
+> {
+  const session = await getSession();
+  const res = await fetch(baseUri + `/dashboards/overview`, {
+    method: 'GET',
+    headers: {
+      'Content-Type': 'application/json',
+      'X-Source': 'web',
+      'X-UserID': session.userId!,
+      Authorization: `Bearer ${session.accessToken}`,
+    },
+    next: { revalidate: 60 },
+  });
+
+  if (!res.ok) {
+    try {
+      const errorData = await res.json();
+      return {
+        success: false,
+        message: errorData.errors?.[0] || errorData.status || res.statusText,
+        data: null,
+      };
+    } catch {
+      return { success: false, message: res.statusText, data: null };
+    }
+  }
+
+  const data = await res.json();
+  return { success: true, message: 'success', data: data.data };
+}
+
+export async function getDashboardCloudinary(): Promise<
+  IGlobalResponse<null | IDashboardCloudinary>
+> {
+  const session = await getSession();
+  const res = await fetch(baseUri + `/dashboards/cloudinary`, {
+    method: 'GET',
+    headers: {
+      'Content-Type': 'application/json',
+      'X-Source': 'web',
+      'X-UserID': session.userId!,
+      Authorization: `Bearer ${session.accessToken}`,
+    },
+    next: { revalidate: 60 },
+  });
+
+  if (!res.ok) {
+    try {
+      const errorData = await res.json();
+      return {
+        success: false,
+        message: errorData.errors?.[0] || errorData.status || res.statusText,
+        data: null,
+      };
+    } catch {
+      return { success: false, message: res.statusText, data: null };
+    }
+  }
+
+  const data = await res.json();
+  return { success: true, message: 'success', data: data.data };
+}
+
+export async function getDashboardBrevo(): Promise<
+  IGlobalResponse<null | IDashboardBrevo>
+> {
+  const session = await getSession();
+  const res = await fetch(baseUri + `/dashboards/email`, {
+    method: 'GET',
+    headers: {
+      'Content-Type': 'application/json',
+      'X-Source': 'web',
+      'X-UserID': session.userId!,
+      Authorization: `Bearer ${session.accessToken}`,
+    },
+    next: { revalidate: 60 },
+  });
+  if (!res.ok) {
+    try {
+      const errorData = await res.json();
+      return {
+        success: false,
+        message: errorData.errors?.[0] || errorData.status || res.statusText,
+        data: null,
+      };
+    } catch {
+      return { success: false, message: res.statusText, data: null };
+    }
+  }
+
+  const data = await res.json();
+  return { success: true, message: 'success', data: data.data };
+}
+
+export async function getDashboardScheduled(): Promise<
+  IGlobalResponse<null | IDashboardScheduled>
+> {
+  const session = await getSession();
+  const res = await fetch(baseUri + `/dashboards/scheduled`, {
+    method: 'GET',
+    headers: {
+      'Content-Type': 'application/json',
+      'X-Source': 'web',
+      'X-UserID': session.userId!,
+      Authorization: `Bearer ${session.accessToken}`,
+    },
+    next: { revalidate: 60 },
+  });
+
+  if (!res.ok) {
+    try {
+      const errorData = await res.json();
+      return {
+        success: false,
+        message: errorData.errors?.[0] || errorData.status || res.statusText,
+        data: null,
+      };
+    } catch {
+      return { success: false, message: res.statusText, data: null };
+    }
+  }
+
+  const data = await res.json();
+  return { success: true, message: 'success', data: data.data };
+}
+
+export async function getDashboardTransactions(
+  params?: IDashboardTransactionsParams
+): Promise<IGlobalResponse<null | IDashboardTransactions>> {
+  const session = await getSession();
+
+  const searchParams = new URLSearchParams();
+  if (params?.method) searchParams.set('method', params.method);
+  if (params?.status) searchParams.set('status', params.status);
+  if (params?.date_from) searchParams.set('date_from', params.date_from);
+  if (params?.date_to) searchParams.set('date_to', params.date_to);
+  if (params?.page) searchParams.set('page', params.page);
+  if (params?.limit) searchParams.set('limit', params.limit);
+
+  const qs = searchParams.toString();
+  const url = baseUri + `/dashboards/transactions` + (qs ? `?${qs}` : '');
+
+  const res = await fetch(url, {
+    method: 'GET',
+    headers: {
+      'Content-Type': 'application/json',
+      'X-Source': 'web',
+      'X-UserID': session.userId!,
+      Authorization: `Bearer ${session.accessToken}`,
+    },
+    cache: 'no-store',
+  });
+
+  if (!res.ok) {
+    try {
+      const errorData = await res.json();
+      return {
+        success: false,
+        message: errorData.errors?.[0] || errorData.status || res.statusText,
+        data: null,
+      };
+    } catch {
+      return { success: false, message: res.statusText, data: null };
+    }
+  }
+
+  const data = await res.json();
+  return { success: true, message: 'success', data: data.data };
+}
+
+// ─── Coupon APIs ────────────────────────────────────────────────
+
+export async function getCoupons(
+  params?: ICouponListParams
+): Promise<IGlobalResponse<null | ICoupon[]>> {
+  const session = await getSession();
+
+  const searchParams = new URLSearchParams();
+  if (params?.is_active) searchParams.set('is_active', params.is_active);
+  if (params?.page) searchParams.set('page', params.page);
+  if (params?.limit) searchParams.set('limit', params.limit);
+
+  const qs = searchParams.toString();
+  const url = baseUri + `/coupons` + (qs ? `?${qs}` : '');
+
+  const res = await fetch(url, {
+    method: 'GET',
+    headers: {
+      'Content-Type': 'application/json',
+      'X-Source': 'web',
+      'X-UserID': session.userId!,
+      Authorization: `Bearer ${session.accessToken}`,
+    },
+    cache: 'no-store',
+  });
+
+  if (!res.ok) {
+    try {
+      const errorData = await res.json();
+      return {
+        success: false,
+        message: errorData.errors?.[0] || errorData.status || res.statusText,
+        data: null,
+      };
+    } catch {
+      return { success: false, message: res.statusText, data: null };
+    }
+  }
+
+  const data = await res.json();
+  return { success: true, message: 'success', data };
+}
+
+export async function getCouponById(
+  id: string
+): Promise<IGlobalResponse<null | ICoupon>> {
+  const session = await getSession();
+
+  const res = await fetch(baseUri + `/coupons/${id}`, {
+    method: 'GET',
+    headers: {
+      'Content-Type': 'application/json',
+      'X-Source': 'web',
+      'X-UserID': session.userId!,
+      Authorization: `Bearer ${session.accessToken}`,
+    },
+    cache: 'no-store',
+  });
+
+  if (!res.ok) {
+    try {
+      const errorData = await res.json();
+      return {
+        success: false,
+        message: errorData.errors?.[0] || errorData.status || res.statusText,
+        data: null,
+      };
+    } catch {
+      return { success: false, message: res.statusText, data: null };
+    }
+  }
+
+  const data = await res.json();
+  return { success: true, message: 'success', data };
+}
+
+export async function createCoupon(
+  payload: ICouponCreatePayload
+): Promise<IGlobalResponse<null | { id: string }>> {
+  const session = await getSession();
+
+  const res = await fetch(baseUri + `/coupons`, {
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/json',
+      'X-Source': 'web',
+      'X-UserID': session.userId!,
+      Authorization: `Bearer ${session.accessToken}`,
+    },
+    body: JSON.stringify(payload),
+  });
+
+  if (!res.ok) {
+    try {
+      const errorData = await res.json();
+      return {
+        success: false,
+        message: errorData.errors?.[0] || errorData.status || res.statusText,
+        data: null,
+      };
+    } catch {
+      return { success: false, message: res.statusText, data: null };
+    }
+  }
+
+  const data = await res.json();
+  return { success: true, message: 'success', data };
+}
+
+export async function updateCoupon(
+  id: string,
+  payload: ICouponUpdatePayload
+): Promise<IGlobalResponse<null>> {
+  const session = await getSession();
+
+  const res = await fetch(baseUri + `/coupons/${id}`, {
+    method: 'PATCH',
+    headers: {
+      'Content-Type': 'application/json',
+      'X-Source': 'web',
+      'X-UserID': session.userId!,
+      Authorization: `Bearer ${session.accessToken}`,
+    },
+    body: JSON.stringify(payload),
+  });
+
+  if (!res.ok) {
+    try {
+      const errorData = await res.json();
+      return {
+        success: false,
+        message: errorData.errors?.[0] || errorData.status || res.statusText,
+        data: null,
+      };
+    } catch {
+      return { success: false, message: res.statusText, data: null };
+    }
+  }
+
+  return { success: true, message: 'success', data: null };
+}
+
+export async function deleteCoupon(
+  id: string
+): Promise<IGlobalResponse<null>> {
+  const session = await getSession();
+
+  const res = await fetch(baseUri + `/coupons/${id}`, {
+    method: 'DELETE',
+    headers: {
+      'Content-Type': 'application/json',
+      'X-Source': 'web',
+      'X-UserID': session.userId!,
+      Authorization: `Bearer ${session.accessToken}`,
+    },
+  });
+
+  if (!res.ok) {
+    try {
+      const errorData = await res.json();
+      return {
+        success: false,
+        message: errorData.errors?.[0] || errorData.status || res.statusText,
+        data: null,
+      };
+    } catch {
+      return { success: false, message: res.statusText, data: null };
+    }
+  }
+
+  return { success: true, message: 'success', data: null };
+}
+
+export async function previewCoupon(
+  payload: ICouponPreviewPayload
+): Promise<IGlobalResponse<null | ICouponPreviewResponse>> {
+  const session = await getSession();
+
+  const res = await fetch(baseUri + `/coupons/preview`, {
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/json',
+      'X-Source': 'web',
+      'X-UserID': session.userId!,
+      Authorization: `Bearer ${session.accessToken}`,
+    },
+    body: JSON.stringify(payload),
+  });
+
+  if (!res.ok) {
+    try {
+      const errorData = await res.json();
+      return {
+        success: false,
+        message: errorData.errors?.[0] || errorData.status || res.statusText,
+        data: null,
+      };
+    } catch {
+      return { success: false, message: res.statusText, data: null };
+    }
+  }
+
+  const data = await res.json();
+  return { success: true, message: 'success', data };
 }

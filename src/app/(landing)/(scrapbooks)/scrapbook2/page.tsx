@@ -5,16 +5,14 @@ import NavigationBar from '@/components/ui/navbar';
 import { usePathname } from 'next/navigation';
 
 const ScrapbookResult2 = () => {
-  // Cover images
   const coverImage =
-    'https://res.cloudinary.com/dqipjpy1w/image/upload/v1751193200/images-api/ME202506291033201230.jpg';
+    'https://res.cloudinary.com/daxoobtu4/image/upload/v1766216716/t3c1_rj4byp.png';
   const backCoverImage =
-    'https://res.cloudinary.com/dqipjpy1w/image/upload/v1751193206/images-api/ME202506291033263480.jpg';
-
+    'https://res.cloudinary.com/daxoobtu4/image/upload/v1766216716/t3c5_wuw6op.png';
   const pages = [
-    'https://res.cloudinary.com/dqipjpy1w/image/upload/v1751193202/images-api/ME202506291033220420.jpg',
-    'https://res.cloudinary.com/dqipjpy1w/image/upload/v1751193203/images-api/ME202506291033233460.jpg',
-    'https://res.cloudinary.com/dqipjpy1w/image/upload/v1751193205/images-api/ME202506291033248701.jpg',
+    'https://res.cloudinary.com/daxoobtu4/image/upload/v1766216716/t3c2_juyjfr.png',
+    'https://res.cloudinary.com/daxoobtu4/image/upload/v1766216717/t3c3_gyjkvc.png',
+    'https://res.cloudinary.com/daxoobtu4/image/upload/v1766216716/t3c4_c5ybrj.png',
   ];
 
   const pathname = usePathname();

@@ -5,19 +5,20 @@ import NavigationBar from '@/components/ui/navbar';
 import ClientResult from '../../client-result';
 import ResultWrapper from '../../result-wrapper';
 import { Metadata } from 'next';
+import LockScreen from '@/components/ui/lock-screen';
 // metadata
 export const metadata: Metadata = {
   title:
     'Memoify | AI-Powered Digital Scrapbook Generator - Create Personalized Memory Collections',
   description:
-    'Transform your memories into beautiful digital scrapbooks with Memoify\'s AI technology. Our Memo AI analyzes your photos and stories to generate personalized, stunning scrapbook layouts automatically. Create meaningful digital gifts in minutes!',
+    "Transform your memories into beautiful digital scrapbooks with Memoify's AI technology. Our Memo AI analyzes your photos and stories to generate personalized, stunning scrapbook layouts automatically. Create meaningful digital gifts in minutes!",
   keywords:
     'AI scrapbook generator, AI digital scrapbook, automated scrapbook creation, AI memory book, intelligent photo album, AI-powered gift, digital scrapbook maker, AI photo collection, smart memory book, automated digital gift, AI personalized scrapbook, Memo AI, machine learning scrapbook, AI gift generator, digital memories AI, Memoify AI, hadiah digital AI, scrapbook otomatis, album foto AI',
   openGraph: {
     title:
       'Memoify | AI-Powered Digital Scrapbook Generator - Create Personalized Memory Collections',
     description:
-      'Transform your memories into beautiful digital scrapbooks with Memoify\'s AI technology. Our Memo AI analyzes your photos and stories to generate personalized, stunning scrapbook layouts automatically.',
+      "Transform your memories into beautiful digital scrapbooks with Memoify's AI technology. Our Memo AI analyzes your photos and stories to generate personalized, stunning scrapbook layouts automatically.",
     url: 'https://memoify.live',
     siteName: 'Memoify',
     images: [
@@ -33,10 +34,9 @@ export const metadata: Metadata = {
   },
   twitter: {
     card: 'summary_large_image',
-    title:
-      'Memoify | AI-Powered Digital Scrapbook Generator',
+    title: 'Memoify | AI-Powered Digital Scrapbook Generator',
     description:
-      'Transform your memories into beautiful digital scrapbooks with Memoify\'s AI technology. Our Memo AI analyzes your photos and stories to generate personalized, stunning scrapbook layouts automatically.',
+      "Transform your memories into beautiful digital scrapbooks with Memoify's AI technology. Our Memo AI analyzes your photos and stories to generate personalized, stunning scrapbook layouts automatically.",
     images: [
       'https://res.cloudinary.com/dqipjpy1w/image/upload/v1760783261/Screenshot_2025-10-18_at_17.27.34_zzdgjr.png',
     ],
@@ -76,7 +76,7 @@ const ScrapbookResult = async ({
   // Cover images
   const coverImage = parsedData?.coverImage || '';
   const backCoverImage = parsedData?.backCoverImage || '';
-
+  console.log('data', data.data);
   const structuredPages = parsedData?.pages || [];
 
   return (
@@ -86,13 +86,20 @@ const ScrapbookResult = async ({
       </div>
       <div className="mt-[100px]" />
       <ResultWrapper isNew={isNew === 'true'}>
-        <PageFlipScrapbook
-          pages={structuredPages}
-          coverImage={coverImage}
-          backCoverImage={backCoverImage}
-          coverTitle=""
-          backCoverTitle=""
-        />
+        <LockScreen
+          type="scrapbook"
+          contentId={id}
+          initiallyLocked={
+            data.data.status === 'locked' || data.data.user_type === 'free'
+          }>
+          <PageFlipScrapbook
+            pages={structuredPages}
+            coverImage={coverImage}
+            backCoverImage={backCoverImage}
+            coverTitle=""
+            backCoverTitle=""
+          />
+        </LockScreen>
       </ResultWrapper>
     </div>
   );

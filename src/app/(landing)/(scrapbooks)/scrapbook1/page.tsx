@@ -5,16 +5,22 @@ import NavigationBar from '@/components/ui/navbar';
 import { usePathname } from 'next/navigation';
 
 const ScrapbookResult1 = () => {
-  // Cover images
-  const coverImage =
-    'https://res.cloudinary.com/dqipjpy1w/image/upload/v1750269072/images-api/ME202506181751118631.jpg';
-  const backCoverImage =
-    'https://res.cloudinary.com/dqipjpy1w/image/upload/v1750269079/images-api/ME202506181751195571.jpg';
+  // https://res.cloudinary.com/daxoobtu4/image/upload/v1766216877/t2c1_fczhgo.jpg
 
+  // https://res.cloudinary.com/daxoobtu4/image/upload/v1766216878/t2c2_uf4uwd.png
+  // https://res.cloudinary.com/daxoobtu4/image/upload/v1766216878/t2c3_delood.png
+  // https://res.cloudinary.com/daxoobtu4/image/upload/v1766216878/t2c2_uf4uwd.png
+
+  // https://res.cloudinary.com/daxoobtu4/image/upload/v1766216878/t2c5_v9iex0.png
+
+  const coverImage =
+    'https://res.cloudinary.com/daxoobtu4/image/upload/v1766216877/t2c1_fczhgo.jpg';
+  const backCoverImage =
+    'https://res.cloudinary.com/daxoobtu4/image/upload/v1766216878/t2c5_v9iex0.png';
   const pages = [
-    'https://res.cloudinary.com/dqipjpy1w/image/upload/v1750269074/images-api/ME202506181751142581.jpg',
-    'https://res.cloudinary.com/dqipjpy1w/image/upload/v1750269076/images-api/ME202506181751162240.jpg',
-    'https://res.cloudinary.com/dqipjpy1w/image/upload/v1750269078/images-api/ME202506181751180571.jpg',
+    'https://res.cloudinary.com/daxoobtu4/image/upload/v1766216878/t2c2_uf4uwd.png',
+    'https://res.cloudinary.com/daxoobtu4/image/upload/v1766216878/t2c3_delood.png',
+    'https://res.cloudinary.com/daxoobtu4/image/upload/v1766216878/t2c2_uf4uwd.png',
   ];
 
   const pathname = usePathname();
