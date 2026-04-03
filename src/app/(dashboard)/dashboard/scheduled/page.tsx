@@ -26,13 +26,14 @@ const ScheduledPage = async () => {
   const d = res.data;
 
   const breakdownColumns = [
-    { title: 'Key', dataIndex: 'key', key: 'key' },
-    { title: 'Value', dataIndex: 'value', key: 'value' },
+    { title: 'Date', dataIndex: 'date', key: 'date' },
+    { title: 'Count', dataIndex: 'count', key: 'count' },
   ];
 
   const breakdownData = d.breakdown.map((item, idx) => ({
     key: idx,
-    ...item,
+    date: item.date,
+    count: item.count,
   }));
 
   return (

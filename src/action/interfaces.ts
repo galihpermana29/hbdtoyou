@@ -241,9 +241,14 @@ export interface IDashboardBrevo {
   remaining: number;
 }
 
+export interface IDashboardScheduledBreakdown {
+  date: string;
+  count: number;
+}
+
 export interface IDashboardScheduled {
   total_scheduled: number;
-  breakdown: Array<Record<string, unknown>>;
+  breakdown: IDashboardScheduledBreakdown[];
 }
 
 export interface IDashboardTransactions {
