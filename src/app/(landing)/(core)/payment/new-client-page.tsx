@@ -1,28 +1,29 @@
 'use client';
 
 import {
+  ICouponPreviewResponse,
   IGetDetailPayment,
   IListPackageResponse,
   IQRISPaymentResponse,
 } from '@/action/interfaces';
 import {
+  generatePaypal,
   generateQRIS,
   getDetailPayment,
-  paymentByPaypal,
   getListPackages,
-  generatePaypal,
+  previewCoupon
 } from '@/action/user-api';
 import NavigationBar from '@/components/ui/navbar';
-import { Button, Select, Typography, message } from 'antd';
+import { Button, Input, Select, Typography, message } from 'antd';
+import { motion } from 'framer-motion';
 import Image from 'next/image';
 import Link from 'next/link';
 import { useEffect, useState } from 'react';
-import { motion } from 'framer-motion';
 
+import { useMemoifySession } from '@/app/session-provider';
 import qrisImage from '@/assets/qris-logo.png';
 import CountdownTimer from '@/components/ui/countdown';
 import { useRouter, useSearchParams } from 'next/navigation';
-import { useMemoifySession } from '@/app/session-provider';
 
 const { Title, Text } = Typography;
 
@@ -50,6 +51,10 @@ const NewClientPagePayment = () => {
   const type = query.get('type');
   const planId = query.get('plan_id');
 
+  const [couponCode, setCouponCode] = useState('');
+  const [couponLoading, setCouponLoading] = useState(false);
+  const [couponPreview, setCouponPreview] = useState<ICouponPreviewResponse | null>(null);
+
   const [listPackages, setListPackages] = useState<
     IListPackageResponse[] | null
   >(null);
@@ -72,6 +77,32 @@ const NewClientPagePayment = () => {
   const detailPackages =
     listPackages?.find((item) => item.id === planId) || null;
 
+  const handlePreviewCoupon = async () => {
+    if (!couponCode.trim()) {
+      message.warning('Please enter a coupon code');
+      return;
+    }
+    if (!planId) {
+      message.warning('Please select a package first');
+      return;
+    }
+    setCouponLoading(true);
+    const res = await previewCoupon({ code: couponCode.trim(), package_id: planId });
+    if (res.success && res.data) {
+      setCouponPreview(res.data);
+      message.success('Coupon applied!');
+    } else {
+      setCouponPreview(null);
+      message.error(res.message || 'Invalid coupon code');
+    }
+    setCouponLoading(false);
+  };
+
+  const handleRemoveCoupon = () => {
+    setCouponCode('');
+    setCouponPreview(null);
+  };
+
   const handleGenerateQRIS = async () => {
     setLoading((prev) => ({
       ...prev,
@@ -80,6 +111,7 @@ const NewClientPagePayment = () => {
     const res = await generateQRIS({
       package_id: planId!,
       payment_method: 'qris',
+      ...(couponPreview ? { coupon_code: couponCode } : {}),
     });
     if (res.success) {
       router.replace(
@@ -105,6 +137,7 @@ const NewClientPagePayment = () => {
     const res = await generatePaypal({
       package_id: planId!,
       payment_method: 'paypal',
+      ...(couponPreview ? { coupon_code: couponCode } : {}),
     });
     if (res.success) {
       window.open(
@@ -263,103 +296,147 @@ const NewClientPagePayment = () => {
             </div>
 
             {/* Right side - Payment Options */}
-            <div className="w-full md:w-1/2 p-8">
+            <div className="w-full md:w-1/2 p-8 flex flex-col">
               {(!paymentStats || paymentStats?.status === 'pending') && (
                 <>
-                  <div className="mb-6">
-                    <Title level={4} className="m-0">
-                      Payment details
-                    </Title>
-                    <p className="text-sm">
-                      We are glad that you are interested in our services. To
-                      upgrade your plan, please scan the QRIS code below with
-                      your phone.
-                    </p>
-                    <p className="text-sm mt-[10px]">
-                      If you have any question please visit our FAQ section{' '}
-                      <Link href="/#faq-section" className="text-[#E34013] underline font-medium">
-                        here
-                      </Link>
-                    </p>
-                  </div>
-
-                  {/* Payment Method Options */}
                   {!qrisData ? (
-                    <div className="h-[50%]">
-                      <div className="flex space-x-4 mb-6">
-                        <Button
-                          onClick={() => { }}
-                          type="default"
-                          disabled={true}
-                          className="flex items-center justify-center"
-                          style={{ height: '48px', width: '33%' }}>
-                          <span className="flex items-center">
-                            <svg
-                              className="hidden md:block"
-                              viewBox="0 0 24 24"
-                              width="18"
-                              height="18"
-                              xmlns="http://www.w3.org/2000/svg">
-                              <g transform="matrix(1, 0, 0, 1, 27.009001, -39.238998)">
-                                <path
-                                  fill="#4285F4"
-                                  d="M -3.264 51.509 C -3.264 50.719 -3.334 49.969 -3.454 49.239 L -14.754 49.239 L -14.754 53.749 L -8.284 53.749 C -8.574 55.229 -9.424 56.479 -10.684 57.329 L -10.684 60.329 L -6.824 60.329 C -4.564 58.239 -3.264 55.159 -3.264 51.509 Z"
-                                />
-                                <path
-                                  fill="#34A853"
-                                  d="M -14.754 63.239 C -11.514 63.239 -8.804 62.159 -6.824 60.329 L -10.684 57.329 C -11.764 58.049 -13.134 58.489 -14.754 58.489 C -17.884 58.489 -20.534 56.379 -21.484 53.529 L -25.464 53.529 L -25.464 56.619 C -23.494 60.539 -19.444 63.239 -14.754 63.239 Z"
-                                />
-                                <path
-                                  fill="#FBBC05"
-                                  d="M -21.484 53.529 C -21.734 52.809 -21.864 52.039 -21.864 51.239 C -21.864 50.439 -21.724 49.669 -21.484 48.949 L -21.484 45.859 L -25.464 45.859 C -26.284 47.479 -26.754 49.299 -26.754 51.239 C -26.754 53.179 -26.284 54.999 -25.464 56.619 L -21.484 53.529 Z"
-                                />
-                                <path
-                                  fill="#EA4335"
-                                  d="M -14.754 43.989 C -12.984 43.989 -11.404 44.599 -10.154 45.789 L -6.734 42.369 C -8.804 40.429 -11.514 39.239 -14.754 39.239 C -19.444 39.239 -23.494 41.939 -25.464 45.859 L -21.484 48.949 C -20.534 46.099 -17.884 43.989 -14.754 43.989 Z"
-                                />
-                              </g>
-                            </svg>
-                            <span className="ml-2">Google Pay</span>
-                          </span>
-                        </Button>
+                    <div className="flex flex-col h-full">
+                      {/* Header */}
+                      <div className="mb-5">
+                        <Title level={4} className="!m-0">
+                          Payment details
+                        </Title>
+                        <p className="text-sm text-gray-500 mt-1">
+                          Upgrade your plan to unlock all premium features.{' '}
+                          <Link href="/#faq-section" className="text-[#E34013] underline font-medium">
+                            FAQ
+                          </Link>
+                        </p>
+                      </div>
 
-                        <Button
-                          onClick={() => { }}
-                          type="default"
-                          disabled={true}
-                          className="flex items-center justify-center"
-                          style={{ height: '48px', width: '33%' }}>
-                          <span className="flex items-center">
-                            <svg
-                              className="hidden md:block"
-                              viewBox="0 0 24 24"
-                              width="18"
-                              height="18"
-                              xmlns="http://www.w3.org/2000/svg">
-                              <path d="M17.6 13.8c0-3 2.5-4.5 2.6-4.6-1.4-2.1-3.6-2.3-4.4-2.4-1.9-.2-3.6 1.1-4.6 1.1-.9 0-2.4-1.1-4-1-2 0-3.9 1.2-5 3-2.1 3.7-.5 9.1 1.5 12.1 1 1.5 2.2 3.1 3.8 3 1.5-.1 2.1-1 3.9-1s2.4.9 4 .9 2.7-1.5 3.7-2.9c1.2-1.7 1.6-3.3 1.7-3.4-.1-.1-3.2-1.3-3.2-4.8zm-3.1-8.9c.8-1 1.4-2.4 1.2-3.8-1.2 0-2.7.8-3.5 1.8-.8.9-1.5 2.3-1.3 3.7 1.4.1 2.8-.7 3.6-1.7z" />
-                            </svg>
-                            <span className="ml-2">Apple Pay</span>
-                          </span>
-                        </Button>
+                      {/* Order Summary Card */}
+                      {listPackages && listPackages.length > 0 && (
+                        <div className="border border-gray-200 rounded-xl p-5 mb-5">
+                          <p className="text-xs font-semibold text-gray-400 uppercase tracking-wide mb-3">Order Summary</p>
 
-                        <Button
-                          onClick={handlePaypal}
-                          loading={loading.paypal}
-                          type={
-                            paymentMethod === 'paypal' ? 'primary' : 'default'
-                          }
-                          className="flex items-center justify-center"
-                          style={{ height: '48px', width: '33%' }}>
-                          <span className="flex items-center">
-                            <svg
-                              className="hidden md:block"
-                              viewBox="0 0 24 24"
-                              width="18"
-                              height="18"
-                              xmlns="http://www.w3.org/2000/svg">
+                          <div className="flex justify-between items-center">
+                            <Text className="text-gray-600">Package</Text>
+                            <Select
+                              className="min-w-[150px]"
+                              options={listPackages.map((dx) => ({
+                                value: dx.id,
+                                label: dx.name,
+                              }))}
+                              onChange={(value) => {
+                                setCouponPreview(null);
+                                setCouponCode('');
+                                router.replace(
+                                  `/payment?id=null&type=${type}&plan_id=${value}`
+                                );
+                              }}
+                              value={detailPackages?.id}
+                            />
+                          </div>
+
+                          <div className="flex justify-between items-center mt-3">
+                            <Text className="text-gray-600">Subtotal</Text>
+                            <Text className={couponPreview ? 'line-through text-gray-400' : 'font-semibold'}>
+                              IDR {detailPackages?.price?.toLocaleString()}
+                            </Text>
+                          </div>
+
+                          {/* Coupon Input */}
+                          <div className="mt-4 pt-4 border-t border-dashed border-gray-200">
+                            {!couponPreview ? (
+                              <div className="flex gap-2">
+                                <Input
+                                  placeholder="Coupon code"
+                                  value={couponCode}
+                                  onChange={(e) => setCouponCode(e.target.value.toUpperCase())}
+                                  onPressEnter={handlePreviewCoupon}
+                                  className="flex-1"
+                                />
+                                <Button
+                                  loading={couponLoading}
+                                  onClick={handlePreviewCoupon}
+                                  className="!border-[#E34013] !text-[#E34013]">
+                                  Apply
+                                </Button>
+                              </div>
+                            ) : (
+                              <div className="flex items-center justify-between bg-green-50 rounded-lg px-3 py-2">
+                                <span className="text-green-600 text-sm font-medium">
+                                  {couponCode} ({Math.round((couponPreview.discount_amount / couponPreview.original_price) * 100)}% off)
+                                </span>
+                                <button
+                                  onClick={handleRemoveCoupon}
+                                  className="text-gray-400 hover:text-red-500 text-lg leading-none cursor-pointer">
+                                  &times;
+                                </button>
+                              </div>
+                            )}
+                          </div>
+
+                          {couponPreview && (
+                            <div className="flex justify-between items-center mt-3">
+                              <Text className="text-green-600 text-sm">Discount</Text>
+                              <Text className="text-green-600 text-sm font-medium">
+                                - IDR {couponPreview.discount_amount.toLocaleString()}
+                              </Text>
+                            </div>
+                          )}
+
+                          <div className="border-t border-gray-200 mt-4 pt-3">
+                            <div className="flex justify-between items-center">
+                              <Text strong className="text-base">Total</Text>
+                              <Text strong className="text-xl text-[#E34013]">
+                                IDR {couponPreview
+                                  ? couponPreview.final_price.toLocaleString()
+                                  : detailPackages?.price?.toLocaleString()}
+                              </Text>
+                            </div>
+                          </div>
+                        </div>
+                      )}
+
+                      {/* Pay Buttons */}
+                      <div className="mt-auto">
+                        {planId && planId !== '' && (
+                          <Button
+                            onClick={handleGenerateQRIS}
+                            loading={loading.qris}
+                            type="primary"
+                            block
+                            size="large"
+                            className="!bg-[#E34013] !border-[#E34013] !rounded-lg !h-[48px] !flex !items-center !justify-center !font-semibold">
+                            <Image
+                              src={qrisImage}
+                              alt="QRIS"
+                              width={24}
+                              height={24}
+                              className="mr-2"
+                            />
+                            Pay with QRIS
+                          </Button>
+                        )}
+
+                        <div className="flex items-center my-4">
+                          <div className="flex-1 border-t border-gray-200" />
+                          <span className="mx-3 text-gray-400 text-xs uppercase">or pay with</span>
+                          <div className="flex-1 border-t border-gray-200" />
+                        </div>
+
+                        <div className="flex gap-3">
+                          <Button
+                            onClick={handlePaypal}
+                            loading={loading.paypal}
+                            type={paymentMethod === 'paypal' ? 'primary' : 'default'}
+                            className="flex-1 !h-[44px] !flex !items-center !justify-center !rounded-lg"
+                            style={{ minWidth: 0 }}>
+                            <svg viewBox="0 0 24 24" width="18" height="18" xmlns="http://www.w3.org/2000/svg">
                               <path
                                 fill="#003087"
-                                d="M 7.076 21.337 L 7.515 18.773 L 6.715 18.758 L 3.483 18.758 C 3.284 18.758 3.111 18.624 3.074 18.429 L 1.212 6.471 C 1.186 6.339 1.241 6.206 1.348 6.119 C 1.455 6.032 1.597 5.991 1.734 6.008 L 8.894 6.008 C 10.248 6.008 11.399 6.264 12.212 6.78 C 12.576 6.995 12.861 7.255 13.074 7.555 C 13.293 7.866 13.443 8.222 13.521 8.618 C 13.602 9.023 13.612 9.493 13.549 10.022 C 13.542 10.069 13.534 10.116 13.526 10.164 C 13.349 11.233 12.987 12.109 12.448 12.775 C 11.939 13.406 11.298 13.888 10.545 14.211 C 9.819 14.523 8.993 14.72 8.093 14.798 C 7.773 14.828 7.437 14.844 7.089 14.844 L 6.737 14.844 C 6.395 14.844 6.069 14.95 5.813 15.147 C 5.557 15.344 5.387 15.622 5.329 15.935 L 5.309 16.035 L 4.709 19.764 L 4.694 19.84 C 4.687 19.88 4.677 19.9 4.662 19.915 C 4.648 19.93 4.629 19.938 4.608 19.938 L 4.587 19.938 L 4.587 19.938 Z"
+                                d="M 7.076 21.337 L 7.515 18.773 L 6.715 18.758 L 3.483 18.758 C 3.284 18.758 3.111 18.624 3.074 18.429 L 1.212 6.471 C 1.186 6.339 1.241 6.206 1.348 6.119 C 1.455 6.032 1.597 5.991 1.734 6.008 L 8.894 6.008 C 10.248 6.008 11.399 6.264 12.212 6.78 C 12.576 6.995 12.861 7.255 13.074 7.555 C 13.293 7.866 13.443 8.222 13.521 8.618 C 13.602 9.023 13.612 9.493 13.549 10.022 C 13.542 10.069 13.534 10.116 13.526 10.164 C 13.349 11.233 12.987 12.109 12.448 12.775 C 11.939 13.406 11.298 13.888 10.545 14.211 C 9.819 14.523 8.993 14.72 8.093 14.798 C 7.773 14.828 7.437 14.844 7.089 14.844 L 6.737 14.844 C 6.395 14.844 6.069 14.95 5.813 15.147 C 5.557 15.344 5.387 15.622 5.329 15.935 L 5.309 16.035 L 4.709 19.764 L 4.694 19.84 C 4.687 19.88 4.677 19.9 4.662 19.915 C 4.648 19.93 4.629 19.938 4.608 19.938 L 4.587 19.938 Z"
                               />
                               <path
                                 fill="#003087"
@@ -367,64 +444,34 @@ const NewClientPagePayment = () => {
                               />
                             </svg>
                             <span className="ml-2">PayPal</span>
-                          </span>
-                        </Button>
-                      </div>
+                          </Button>
 
-                      <div className="flex justify-center items-center my-4">
-                        <div className="border-t border-gray-200 w-1/3"></div>
-                        <div className="mx-4 text-gray-500 text-sm">Or</div>
-                        <div className="border-t border-gray-200 w-1/3"></div>
-                      </div>
+                          <Button
+                            disabled
+                            className="flex-1 !h-[44px] !flex !items-center !justify-center !rounded-lg"
+                            style={{ minWidth: 0 }}>
+                            <svg viewBox="0 0 24 24" width="18" height="18" xmlns="http://www.w3.org/2000/svg">
+                              <g transform="matrix(1, 0, 0, 1, 27.009001, -39.238998)">
+                                <path fill="#4285F4" d="M -3.264 51.509 C -3.264 50.719 -3.334 49.969 -3.454 49.239 L -14.754 49.239 L -14.754 53.749 L -8.284 53.749 C -8.574 55.229 -9.424 56.479 -10.684 57.329 L -10.684 60.329 L -6.824 60.329 C -4.564 58.239 -3.264 55.159 -3.264 51.509 Z" />
+                                <path fill="#34A853" d="M -14.754 63.239 C -11.514 63.239 -8.804 62.159 -6.824 60.329 L -10.684 57.329 C -11.764 58.049 -13.134 58.489 -14.754 58.489 C -17.884 58.489 -20.534 56.379 -21.484 53.529 L -25.464 53.529 L -25.464 56.619 C -23.494 60.539 -19.444 63.239 -14.754 63.239 Z" />
+                                <path fill="#FBBC05" d="M -21.484 53.529 C -21.734 52.809 -21.864 52.039 -21.864 51.239 C -21.864 50.439 -21.724 49.669 -21.484 48.949 L -21.484 45.859 L -25.464 45.859 C -26.284 47.479 -26.754 49.299 -26.754 51.239 C -26.754 53.179 -26.284 54.999 -25.464 56.619 L -21.484 53.529 Z" />
+                                <path fill="#EA4335" d="M -14.754 43.989 C -12.984 43.989 -11.404 44.599 -10.154 45.789 L -6.734 42.369 C -8.804 40.429 -11.514 39.239 -14.754 39.239 C -19.444 39.239 -23.494 41.939 -25.464 45.859 L -21.484 48.949 C -20.534 46.099 -17.884 43.989 -14.754 43.989 Z" />
+                              </g>
+                            </svg>
+                            <span className="ml-2">GPay</span>
+                          </Button>
 
-                      {/* QRIS Button */}
-                      {planId && planId !== '' && (
-                        <Button
-                          onClick={handleGenerateQRIS}
-                          loading={loading.qris}
-                          type="primary"
-                          block
-                          size="large"
-                          className="!bg-[#E34013] hover:bg-purple-700 mt-4 flex items-center justify-center">
-                          <Image
-                            src={qrisImage}
-                            alt="QRIS"
-                            width={24}
-                            height={24}
-                            className="mr-2"
-                          />
-                          <span>Pay with QRIS</span>
-                        </Button>
-                      )}
-                      {listPackages?.length > 0 && (
-                        <div className="h-[60%] flex flex-col justify-end mt-[20px]">
-                          <div className="flex justify-between items-center">
-                            <Text strong>Package:</Text>
-                            <Select
-                              className="min-w-[150px]"
-                              options={listPackages?.map((dx) => ({
-                                value: dx.id,
-                                label: dx.name,
-                              }))}
-                              onChange={(value) => {
-                                router.replace(
-                                  `/payment?id=null&type=${type}&plan_id=${value}`
-                                );
-                              }}
-                              value={detailPackages?.id}
-                            />
-                            {/* <Text strong className="text-purple-600 text-xl">
-                            {detailPackages?.name}
-                          </Text> */}
-                          </div>
-                          <div className="flex justify-between items-center">
-                            <Text strong>Total Amount:</Text>
-                            <Text strong className="text-purple-600 text-xl">
-                              IDR {detailPackages?.price}
-                            </Text>
-                          </div>
+                          <Button
+                            disabled
+                            className="flex-1 !h-[44px] !flex !items-center !justify-center !rounded-lg"
+                            style={{ minWidth: 0 }}>
+                            <svg viewBox="0 0 24 24" width="18" height="18" xmlns="http://www.w3.org/2000/svg">
+                              <path d="M17.6 13.8c0-3 2.5-4.5 2.6-4.6-1.4-2.1-3.6-2.3-4.4-2.4-1.9-.2-3.6 1.1-4.6 1.1-.9 0-2.4-1.1-4-1-2 0-3.9 1.2-5 3-2.1 3.7-.5 9.1 1.5 12.1 1 1.5 2.2 3.1 3.8 3 1.5-.1 2.1-1 3.9-1s2.4.9 4 .9 2.7-1.5 3.7-2.9c1.2-1.7 1.6-3.3 1.7-3.4-.1-.1-3.2-1.3-3.2-4.8zm-3.1-8.9c.8-1 1.4-2.4 1.2-3.8-1.2 0-2.7.8-3.5 1.8-.8.9-1.5 2.3-1.3 3.7 1.4.1 2.8-.7 3.6-1.7z" />
+                            </svg>
+                            <span className="ml-2">Apple</span>
+                          </Button>
                         </div>
-                      )}
+                      </div>
                     </div>
                   ) : (
                     <div className="flex flex-col items-center justify-center mt-4">
@@ -464,7 +511,7 @@ const NewClientPagePayment = () => {
                   <Button
                     onClick={() => (window.location.href = '/dashboard')}
                     type="primary"
-                    className="bg-[#E34013] mt-4 text-white rounded-lg h-10 w-full">
+                    className="!bg-[#E34013] mt-4 text-white !rounded-lg !h-10 w-full">
                     Go to Dashboard
                   </Button>
                 </div>

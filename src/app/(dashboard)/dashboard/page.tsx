@@ -1,14 +1,17 @@
-import { getContentByUserId, getContentStatsByUserId } from '@/action/user-api';
+import {
+  getContentByUserId,
+  getContentStatsByUserId,
+  getDashboardOverview,
+} from '@/action/user-api';
 import { mapContentToCard } from '@/lib/utils';
 import { getSession } from '@/store/get-set-session';
-import { Camera, CreditCard, UserRoundPlus } from 'lucide-react';
-import DashboardContentContainer from './view/container/DashboardContentContainer';
+import { Banknote, Camera, CreditCard, UserRoundPlus } from 'lucide-react';
 import CardClient from './view/container/CardClient';
+import DashboardContentContainer from './view/container/DashboardContentContainer';
 
 const DashboardPage = async () => {
   const session = await getSession();
 
-  //check if it's admin email memoify.live@gmail.com
   const isAdmin = session?.email === 'memoify.live@gmail.com';
   const data = await getContentByUserId(
     isAdmin ? null : (session?.userId as string),
@@ -17,11 +20,12 @@ const DashboardPage = async () => {
   );
   const mappedData = data.success
     ? mapContentToCard(data.data, 'dashboard').filter(
-        (show) => show && show?.jumbotronImage && show?.title
-      )
+      (show) => show && show?.jumbotronImage && show?.title
+    )
     : [];
 
   const dataStats = await getContentStatsByUserId();
+  const overview = isAdmin ? await getDashboardOverview() : null;
   return (
     <>
       <div className=" py-[30px] md:py-0 mx-auto max-w-6xl 2xl:max-w-7xl px-[20px]">
@@ -33,7 +37,7 @@ const DashboardPage = async () => {
 
       {/* content */}
       <div className="md:mt-[40px] py-[30px] md:py-0 mx-auto max-w-6xl 2xl:max-w-7xl px-[20px]">
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-[20px]">
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-[20px]">
           <CardClient
             icon={<UserRoundPlus />}
             title="Memories Created"
@@ -81,6 +85,15 @@ const DashboardPage = async () => {
               title="Credit Remaining"
               stats={0}
             />
+          )}
+          {isAdmin && overview?.success && (
+            <>
+              <CardClient
+                icon={<Banknote />}
+                title="Total Payments"
+                stats={overview.data?.total_payments ?? 0}
+              />
+            </>
           )}
         </div>
       </div>
