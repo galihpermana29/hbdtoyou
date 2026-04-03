@@ -138,6 +138,18 @@ export interface IPaypalPaymentResponse {
 export interface IPaymentPayload {
   package_id: string;
   payment_method: 'qris' | 'paypal';
+  coupon_code?: string;
+}
+
+export interface ICouponPreviewPayload {
+  code: string;
+  package_id: string;
+}
+
+export interface ICouponPreviewResponse {
+  original_price: number;
+  discount_amount: number;
+  final_price: number;
 }
 
 export interface IGetDetailPayment {
@@ -184,4 +196,103 @@ export interface IListPackageResponse {
   features: string[];
   is_active: boolean;
   is_popular: boolean;
+}
+
+export interface IPackagePayload {
+  name: string;
+  description: string;
+  price: string;
+  price_paypal: string;
+  price_midtrans: string;
+  quota_basic: number;
+  token_scrapbook: number;
+  duration_days?: number;
+  features: string[];
+  is_active?: boolean;
+  is_popular?: boolean;
+}
+
+export interface IDashboardOverview {
+  total_users: number;
+  total_premium_users: number;
+  total_contents: number;
+  total_payments: number;
+  total_revenue: number;
+}
+
+export interface IDashboardCloudinary {
+  plan: string;
+  last_updated: string;
+  storage_usage: number;
+  storage_limit: number;
+  bandwidth_usage: number;
+  bandwidth_limit: number;
+  transform_usage: number;
+  transform_limit: number;
+  requests: number;
+  resources: number;
+  derived_resources: number;
+}
+
+export interface IDashboardBrevo {
+  provider: string;
+  sent: number;
+  limit: number;
+  remaining: number;
+}
+
+export interface IDashboardScheduled {
+  total_scheduled: number;
+  breakdown: Array<Record<string, unknown>>;
+}
+
+export interface IDashboardTransactions {
+  total_transactions: number;
+  total_amount: number;
+  total_discount: number;
+}
+
+export interface IDashboardTransactionsParams {
+  method?: string;
+  status?: string;
+  date_from?: string;
+  date_to?: string;
+  page?: string;
+  limit?: string;
+}
+
+export interface ICoupon {
+  id: string;
+  code: string;
+  discount_type: string;
+  discount_value: number;
+  max_uses: number;
+  used_count: number;
+  expired_at: string | null;
+  is_active: boolean;
+  create_time: string;
+  update_time: string;
+}
+
+export interface ICouponCreatePayload {
+  code?: string;
+  discount_type: string;
+  discount_value: number;
+  max_uses: number;
+  expired_at?: string | null;
+}
+
+export interface ICouponUpdatePayload {
+  code?: string;
+  discount_type?: string;
+  discount_value?: number;
+  max_uses?: number;
+  is_active?: boolean;
+  expired_at?: string | null;
+}
+
+export interface ICouponListParams {
+  is_active?: string;
+  page?: string;
+  limit?: string;
 }

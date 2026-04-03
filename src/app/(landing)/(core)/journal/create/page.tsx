@@ -8,28 +8,29 @@ import dynamic from 'next/dynamic';
 
 // Dynamically import ReactQuill with SSR disabled
 const ReactQuill = dynamic(() => import('react-quill'), {
-  ssr: false, // This disables server-side rendering for this component
+  ssr: false,
   loading: () => <p>Loading editor...</p>,
 });
 
-// import ReactQuill from 'react-quill';
-
-// Character limit for free users
 const MAXLENGTH = 200;
 
 import 'react-quill/dist/quill.snow.css';
 import { createContent } from '@/action/user-api';
 import { useRouter } from 'next/navigation';
-import { Button, Form, Input, message, Select } from 'antd';
+import { Button, Form, Input, message, Select, Switch } from 'antd';
 import { useMemoifyProfile } from '@/app/session-provider';
 
 const NewEntryPage: React.FC = () => {
   const [form] = Form.useForm();
 
-  const { type } = useMemoifyProfile?.() || {};
+  const profile = useMemoifyProfile();
+  const type = profile?.type;
+  const isFreeAccount = (profile?.quota ?? 0) < 1;
   const router = useRouter();
+  const [loadingSubmit, setLoadingSubmit] = useState(false);
+
   const handleSubmit = async (values: any) => {
-    // 2d4df00e-e773-4391-ad6a-1b6d688950ff
+    setLoadingSubmit(true);
 
     const json_text = {
       title: values.title,
@@ -41,7 +42,7 @@ const NewEntryPage: React.FC = () => {
       keywords: values.keywords,
       preamble: values.preamble,
       introduction: values.introduction,
-      isPublic: true,
+      isPublic: values.isPublic ?? true,
       destinationName: values.destinationName,
     };
 
@@ -50,7 +51,6 @@ const NewEntryPage: React.FC = () => {
       detail_content_json_text: JSON.stringify(json_text),
       title: values.title,
       caption: values.abstract,
-
       date_scheduled: null,
       dest_email: null,
       is_scheduled: false,
@@ -61,10 +61,11 @@ const NewEntryPage: React.FC = () => {
 
     if (res.success) {
       message.success('Journal created successfully');
-      router.push(`/journal`);
+      router.push('/journal');
     } else {
       message.error(res.message);
     }
+    setLoadingSubmit(false);
   };
 
   // Track character counts for each editor
@@ -370,11 +371,32 @@ const NewEntryPage: React.FC = () => {
                   </div>
                 )}
 
-                <div className="flex justify-end">
+                <Form.Item
+                  className="!mb-[5px]"
+                  name="isPublic"
+                  label={
+                    <div className="mt-[10px] mb-[5px]">
+                      <h3 className="text-[15px] font-semibold">
+                        Show on Public Journal Page
+                      </h3>
+                      <p className="text-[13px] text-gray-600 max-w-[400px]">
+                        {isFreeAccount
+                          ? 'In free plan your journal will be shown on the public journal page.'
+                          : 'Toggle to control whether your journal is visible on the public journal page.'}
+                      </p>
+                    </div>
+                  }
+                  initialValue={isFreeAccount ? true : false}
+                  valuePropName="checked">
+                  <Switch disabled={isFreeAccount} />
+                </Form.Item>
+
+                <div className="flex justify-end mt-6">
                   <Button
                     className="!bg-black !rounded-full"
                     type="primary"
                     htmlType="submit"
+                    loading={loadingSubmit}
                     size="large">
                     Create
                   </Button>
