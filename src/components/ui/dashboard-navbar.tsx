@@ -46,6 +46,11 @@ const DashboardNavbar = ({ isAdmin }: { isAdmin: boolean }) => {
               className="text-[#182230] font-[600] text-[16px] hover:bg-[#F9FAFB] rounded-[8px] py-[8px] px-[12px]">
               Plans
             </Link>
+            <Link
+              href={'/dashboard/templates'}
+              className="text-[#182230] font-[600] text-[16px] hover:bg-[#F9FAFB] rounded-[8px] py-[8px] px-[12px]">
+              Templates
+            </Link>
           </>
         )}
       </div>

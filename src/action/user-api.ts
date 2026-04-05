@@ -32,6 +32,7 @@ import {
   IProfileResponse,
   IQRISPaymentResponse,
   IResponsePaypal,
+  ITemplatePayload,
 } from './interfaces';
 
 export interface IOAuthPayload {
@@ -1729,4 +1730,101 @@ export async function previewCoupon(
 
   const data = await res.json();
   return { success: true, message: 'success', data };
+}
+
+export async function createTemplate(
+  payload: ITemplatePayload
+): Promise<IGlobalResponse<null | { id: string }>> {
+  const session = await getSession();
+
+  const res = await fetch(baseUri + `/templates`, {
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/json',
+      'X-Source': 'web',
+      'X-UserID': session.userId!,
+      Authorization: `Bearer ${session.accessToken}`,
+    },
+    body: JSON.stringify(payload),
+  });
+
+  if (!res.ok) {
+    try {
+      const errorData = await res.json();
+      return {
+        success: false,
+        message: errorData.errors?.[0] || errorData.status || res.statusText,
+        data: null,
+      };
+    } catch {
+      return { success: false, message: res.statusText, data: null };
+    }
+  }
+
+  const data = await res.json();
+  return { success: true, message: 'success', data };
+}
+
+export async function updateTemplate(
+  id: string,
+  payload: Partial<ITemplatePayload>
+): Promise<IGlobalResponse<null>> {
+  const session = await getSession();
+
+  const res = await fetch(baseUri + `/templates/${id}`, {
+    method: 'PATCH',
+    headers: {
+      'Content-Type': 'application/json',
+      'X-Source': 'web',
+      'X-UserID': session.userId!,
+      Authorization: `Bearer ${session.accessToken}`,
+    },
+    body: JSON.stringify(payload),
+  });
+
+  if (!res.ok) {
+    try {
+      const errorData = await res.json();
+      return {
+        success: false,
+        message: errorData.errors?.[0] || errorData.status || res.statusText,
+        data: null,
+      };
+    } catch {
+      return { success: false, message: res.statusText, data: null };
+    }
+  }
+
+  return { success: true, message: 'success', data: null };
+}
+
+export async function deleteTemplate(
+  id: string
+): Promise<IGlobalResponse<null>> {
+  const session = await getSession();
+
+  const res = await fetch(baseUri + `/templates/${id}`, {
+    method: 'DELETE',
+    headers: {
+      'Content-Type': 'application/json',
+      'X-Source': 'web',
+      'X-UserID': session.userId!,
+      Authorization: `Bearer ${session.accessToken}`,
+    },
+  });
+
+  if (!res.ok) {
+    try {
+      const errorData = await res.json();
+      return {
+        success: false,
+        message: errorData.errors?.[0] || errorData.status || res.statusText,
+        data: null,
+      };
+    } catch {
+      return { success: false, message: res.statusText, data: null };
+    }
+  }
+
+  return { success: true, message: 'success', data: null };
 }

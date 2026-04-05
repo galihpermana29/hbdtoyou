@@ -23,6 +23,17 @@ export interface IAllTemplateResponse {
   category: string;
 }
 
+export interface ITemplatePayload {
+  name: string;
+  label: string;
+  thumbnail_uri: string;
+  type: string;
+  category: string;
+  slug: string;
+  tag?: string[];
+  frame_data?: Record<string, unknown>;
+}
+
 export interface ILatestContentResponse {
   contents: IContent[];
   total_content: number;

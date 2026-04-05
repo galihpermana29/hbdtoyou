@@ -1,18 +1,18 @@
 import { IAllTemplateResponse } from '@/action/interfaces';
-import Link from 'next/link';
-import netflixv1 from '@/assets/templates/netflixv1.png';
 import disneyplusv1 from '@/assets/templates/disneyv1.png';
-import spotifyv1 from '@/assets/templates/spotifyv1.png';
-import newspaperv1 from '@/assets/templates/newspaperv1.png';
-import newspaperv3 from '@/assets/templates/newspaperv3.png';
-import magazine from '@/assets/templates/magazine.png';
 import formula1 from '@/assets/templates/formula1.png';
 import graduation from '@/assets/templates/graduation.png';
+import magazine from '@/assets/templates/magazine.png';
+import netflixv1 from '@/assets/templates/netflixv1.png';
+import newspaperv1 from '@/assets/templates/newspaperv1.png';
+import newspaperv3 from '@/assets/templates/newspaperv3.png';
 import journal from '@/assets/templates/scopus.png';
 import scrapbookv1 from '@/assets/templates/scrapbookv1.jpg';
+import spotifyv1 from '@/assets/templates/spotifyv1.png';
 import clsx from 'clsx';
-import Image from 'next/image';
 import { ArrowRight } from 'lucide-react';
+import Image from 'next/image';
+import Link from 'next/link';
 
 import checkIcon from '@/assets/check-icon.png';
 import { Badge } from 'antd';
@@ -107,6 +107,11 @@ export const DataToCardColor = {
     color: 'bg-[#D9182133]',
     logo: netflixv1,
     text: 'text-[#D81F26]',
+  },
+  vinylv1: {
+    color: 'bg-[#000000]',
+    logo: newspaperv1,
+    text: 'text-[#000000]',
   },
 };
 

@@ -11,6 +11,7 @@ import NewNetflixForm from '@/components/forms/new/new-netflix-form';
 import NewNewspaper1Form from '@/components/forms/new/new-newspaper1-form';
 import NewNewspaper3Form from '@/components/forms/new/new-newspaper3-form';
 import NewSpotifyForm from '@/components/forms/new/new-spotify-form';
+import NewVinylForm from '@/components/forms/new/new-vinyl-form';
 import DashboardNavbar from '@/components/ui/dashboard-navbar';
 import NavigationBar from '@/components/ui/navbar';
 import { Button, message } from 'antd';
@@ -62,6 +63,7 @@ const EditContentDashboardPage = () => {
     graduationv2: NewGraduation2Form,
     magazinev1: NewMagazineV1Form,
     albumgraduationv1: AlbumGraduationv1,
+    vinylv1: NewVinylForm,
   };
 
   useEffect(() => {

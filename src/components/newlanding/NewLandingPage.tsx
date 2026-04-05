@@ -98,7 +98,7 @@ export default function NewLandingPage() {
                   Get Started
                 </Button>
               </Link>
-              <Link prefetch={true} href={'/scrapbook'}>
+              <Link prefetch={true} href={'/vinylv1'}>
                 <Button
                   size="large"
                   className="!border-[1px] !border-[#E34013] !text-[#E34013] !font-[600] !h-[60px] !w-[150px]">

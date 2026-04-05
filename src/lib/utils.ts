@@ -95,6 +95,15 @@ export function mapContentToCard(contents: IContent[], purpose = 'client') {
           : 'https://res.cloudinary.com/ddlus5qur/image/upload/v1746085724/phu2rbi6fqnp71hytjex.jpg';
       }
 
+      if (
+        ['vinylv1'].includes(show.template_name.split('-')[1].split(' ')[1])
+      ) {
+        return Array.isArray(jsonContent?.memories) &&
+          jsonContent.memories.length > 0
+          ? jsonContent.memories[0].imageUrl
+          : 'https://res.cloudinary.com/ddlus5qur/image/upload/v1746085724/phu2rbi6fqnp71hytjex.jpg';
+      }
+
       if (show.template_name.includes('journal')) {
         return 'journal';
       }

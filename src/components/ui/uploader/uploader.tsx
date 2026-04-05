@@ -23,6 +23,8 @@ interface DraggerUploadI {
   multiple?: boolean;
   openNotification?: OpenNotificationFunction;
   disabled?: boolean;
+  acceptTypes?: string;
+  allowedMimeTypes?: string[];
 }
 
 const DraggerUpload = ({
@@ -34,6 +36,8 @@ const DraggerUpload = ({
   type = AccountType.free,
   openNotification,
   disabled = false,
+  acceptTypes = '.jpg, .jpeg, .png',
+  allowedMimeTypes = ['image/jpeg', 'image/png'],
 }: DraggerUploadI) => {
   const [loadingUpload, setLoadingUpload] = useState(false);
   const [fileList, setFileList] = useState<any[]>([]);
@@ -72,9 +76,9 @@ const DraggerUpload = ({
     // }
 
     // Validate file type
-    const isJpgOrPng = file.type === 'image/jpeg' || file.type === 'image/png';
-    if (!isJpgOrPng) {
-      message.error('You can only upload JPG/PNG file!');
+    const isAllowedType = allowedMimeTypes.includes(file.type);
+    if (!isAllowedType) {
+      message.error(`Unsupported file type. Allowed: ${acceptTypes}`);
       return false;
     }
 
@@ -121,7 +125,7 @@ const DraggerUpload = ({
     <button
       type="button"
       className="flex flex-col justify-center items-center px-[20px] gap-[10px] text-caption-2 text-ny-gray-300">
-      <h1>Drop image here or click to upload</h1>
+      <h1>Drop file here or click to upload</h1>
     </button>
   );
 
@@ -168,7 +172,7 @@ const DraggerUpload = ({
           disabled={disabled}
           maxCount={limit}
           multiple={multiple}
-          accept=".jpg, .jpeg, .png"
+          accept={acceptTypes}
           onRemove={async (file) => {
             const val = await form.getFieldsValue();
             if (limit === 1) {
@@ -220,7 +224,7 @@ const DraggerUpload = ({
         </Upload>
       </LoadingHandler>
       <div className="text-caption-2 text-ny-gray-300 text-center mt-[10px] max-w-max">
-        Supported: JPEG, JPG, PNG, Max size:
+        Supported: {acceptTypes.replace(/\./g, '').toUpperCase()}, Max size:{' '}
         {type === AccountType.free ? 1 : 10} MB
       </div>
     </div>

@@ -26,6 +26,7 @@ import NewNewspaper1Form from '@/components/forms/new/new-newspaper1-form';
 import NewNewspaper3Form from '@/components/forms/new/new-newspaper3-form';
 import NewGraduation1Form from '@/components/forms/new/new-graduation1-form';
 import NewGraduation2Form from '@/components/forms/new/new-graduation2-form';
+import NewVinylForm from '@/components/forms/new/new-vinyl-form';
 
 const StepsCustom = [
   {
@@ -156,6 +157,7 @@ const CreatePage = () => {
     graduationv2: NewGraduation2Form,
     magazinev1: NewMagazineV1Form,
     albumgraduation1: AlbumGraduationv1,
+    vinylv1: NewVinylForm,
   };
 
   useEffect(() => {
