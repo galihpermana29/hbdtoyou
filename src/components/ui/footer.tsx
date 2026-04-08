@@ -59,7 +59,7 @@ export function Footer() {
 
             <li>
               <Link href="/career" className="hover:text-gray-300">
-                Career
+                Program
               </Link>
             </li>
             <li>

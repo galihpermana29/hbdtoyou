@@ -53,8 +53,31 @@ interface AdContent {
   type: 'text' | 'image';
 }
 
+const premiumAds: AdContent[] = [
+  {
+    id: 1,
+    title: '',
+    description: '',
+    ctaText: '',
+    ctaLink: '/career',
+    image:
+      'https://res.cloudinary.com/dztygf08a/image/upload/v1775671149/au_ads_1_kxqtks.png',
+    type: 'image',
+  }
+]
+
 // Array of promotional content
 const promotionalContent: AdContent[] = [
+  {
+    id: 829292,
+    title: '',
+    description: '',
+    ctaText: '',
+    ctaLink: '/career',
+    image:
+      'https://res.cloudinary.com/dztygf08a/image/upload/v1775671149/au_ads_1_kxqtks.png',
+    type: 'image',
+  },
   {
     id: 3,
     title: '',
@@ -130,9 +153,26 @@ const SessionProvider = ({
 
   const [loading, setLoading] = useState(true);
 
-  const isHideAds =
-    ['/create', '/payment'].includes(pathname) ||
-    userProfile?.type === 'premium';
+  const isPremium = userProfile?.type === 'premium';
+  const isHideAds = ['/create', '/payment'].includes(pathname);
+
+  const PREMIUM_ADS_KEY = 'memoify_premium_ads_count';
+  const PREMIUM_ADS_LIMIT = 3;
+
+  const getPremiumAdsCount = (): number => {
+    try {
+      return parseInt(localStorage.getItem(PREMIUM_ADS_KEY) || '0', 10);
+    } catch {
+      return 0;
+    }
+  };
+
+  const incrementPremiumAdsCount = () => {
+    try {
+      const current = getPremiumAdsCount();
+      localStorage.setItem(PREMIUM_ADS_KEY, String(current + 1));
+    } catch { }
+  };
 
   useEffect(() => {
     if (parsedSession.accessToken && queryKey && queryKey !== '') {
@@ -176,25 +216,32 @@ const SessionProvider = ({
     }
   }, [parsedSession.accessToken]);
 
-  // Function to randomly select promotional content
   const selectRandomContent = () => {
-    const randomIndex = Math.floor(Math.random() * promotionalContent.length);
-    return promotionalContent[randomIndex];
+    const pool = isPremium ? premiumAds : promotionalContent;
+    const randomIndex = Math.floor(Math.random() * pool.length);
+    return pool[randomIndex];
   };
 
-  // Show ads modal every 2 minutes
   useEffect(() => {
-    // Set up interval for subsequent ads
     if (isHideAds) return;
+    if (isPremium && getPremiumAdsCount() >= PREMIUM_ADS_LIMIT) return;
+
     const interval = setInterval(() => {
+      if (isPremium) {
+        if (getPremiumAdsCount() >= PREMIUM_ADS_LIMIT) {
+          clearInterval(interval);
+          return;
+        }
+        incrementPremiumAdsCount();
+      }
       setCurrentAdContent(selectRandomContent());
       setAdsModalVisible(true);
-    }, 1000 * 60 * 3);
+    }, 1000 * 60 * 1);
 
     return () => {
       clearInterval(interval);
     };
-  }, [isHideAds]);
+  }, [isHideAds, isPremium]);
 
   return (
     <SessionContext.Provider

@@ -378,7 +378,7 @@ const NavigationBar = () => {
           <Link
             href={'/career'}
             className={`hidden md:block text-[16px] text-[#7B7B7B] font-[500]`}>
-            Career
+            Program
           </Link>
 
           {sidebar && (
@@ -429,7 +429,7 @@ const NavigationBar = () => {
                 <Link
                   href={'/career'}
                   className={`md:block text-[16px] text-[#7B7B7B] font-[500]`}>
-                  Career
+                  Program
                 </Link>
               </div>
             </div>
