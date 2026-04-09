@@ -3,21 +3,21 @@
 import NavigationBar from '@/components/ui/navbar';
 import { motion } from 'framer-motion';
 import {
-  Users,
+  ArrowRight,
+  CheckCircle2,
+  Mail,
+  MessageCircleQuestion,
+  Send,
   Sparkles,
   Star,
-  Send,
-  MessageCircleQuestion,
-  CheckCircle2,
-  ArrowRight,
-  Mail,
+  Users,
 } from 'lucide-react';
 
 const steps = [
   {
     num: '1',
     title: 'Submit Your Portfolio',
-    desc: 'Send an email to memoify@gmail.com with links to your Twitter/TikTok AU works.',
+    desc: 'Send an email to memoify.live@gmail.com with links to your Twitter/TikTok AU works.',
   },
   {
     num: '2',
@@ -225,10 +225,10 @@ const ProgramPage = () => {
             AU unforgettable.
           </p>
           <a
-            href="mailto:memoify@gmail.com?subject=AU%20Program%20Application%20-%20[Your%20Username]"
+            href="mailto:memoify.live@gmail.com?subject=AU%20Program%20Application%20-%20[Your%20Username]"
             className="inline-flex items-center gap-2 bg-white text-[#E34013] font-semibold px-6 py-3 rounded-lg hover:bg-gray-100 transition-colors">
             <Mail size={18} />
-            memoify@gmail.com
+            memoify.live@gmail.com
           </a>
           <p className="text-white/70 text-sm mt-3">
             Subject: AU Program Application - [Your Username]
