@@ -69,7 +69,7 @@ const premiumAds: AdContent[] = [
 // Array of promotional content
 const promotionalContent: AdContent[] = [
   {
-    id: 829292,
+    id: 1,
     title: '',
     description: '',
     ctaText: '',
@@ -78,46 +78,46 @@ const promotionalContent: AdContent[] = [
       'https://res.cloudinary.com/dztygf08a/image/upload/v1775671149/au_ads_1_kxqtks.png',
     type: 'image',
   },
-  {
-    id: 3,
-    title: '',
-    description: '',
-    ctaText: '',
-    ctaLink: '/payment',
-    image:
-      'https://res.cloudinary.com/dztygf08a/image/upload/v1775229734/banner1_d8bvj0.png',
-    type: 'image',
-  },
-  {
-    id: 4,
-    title: '',
-    description: '',
-    ctaText: '',
-    ctaLink: '/payment',
-    image:
-      'https://res.cloudinary.com/dztygf08a/image/upload/v1775229725/banner4_givkxi.png',
-    type: 'image',
-  },
-  {
-    id: 5,
-    title: '',
-    description: '',
-    ctaText: '',
-    ctaLink: '/payment',
-    image:
-      'https://res.cloudinary.com/dztygf08a/image/upload/v1775229730/banner3_bivfgx.png',
-    type: 'image',
-  },
-  {
-    id: 6,
-    title: '',
-    description: '',
-    ctaText: '',
-    ctaLink: '/dashboard',
-    image:
-      'https://res.cloudinary.com/dztygf08a/image/upload/v1775229732/banner2_mgmbp5.png',
-    type: 'image',
-  },
+  // {
+  //   id: 3,
+  //   title: '',
+  //   description: '',
+  //   ctaText: '',
+  //   ctaLink: '/payment',
+  //   image:
+  //     'https://res.cloudinary.com/dztygf08a/image/upload/v1775229734/banner1_d8bvj0.png',
+  //   type: 'image',
+  // },
+  // {
+  //   id: 4,
+  //   title: '',
+  //   description: '',
+  //   ctaText: '',
+  //   ctaLink: '/payment',
+  //   image:
+  //     'https://res.cloudinary.com/dztygf08a/image/upload/v1775229725/banner4_givkxi.png',
+  //   type: 'image',
+  // },
+  // {
+  //   id: 5,
+  //   title: '',
+  //   description: '',
+  //   ctaText: '',
+  //   ctaLink: '/payment',
+  //   image:
+  //     'https://res.cloudinary.com/dztygf08a/image/upload/v1775229730/banner3_bivfgx.png',
+  //   type: 'image',
+  // },
+  // {
+  //   id: 6,
+  //   title: '',
+  //   description: '',
+  //   ctaText: '',
+  //   ctaLink: '/dashboard',
+  //   image:
+  //     'https://res.cloudinary.com/dztygf08a/image/upload/v1775229732/banner2_mgmbp5.png',
+  //   type: 'image',
+  // },
 ];
 
 const SessionProvider = ({
@@ -218,8 +218,8 @@ const SessionProvider = ({
 
   const selectRandomContent = () => {
     const pool = isPremium ? premiumAds : promotionalContent;
-    const randomIndex = Math.floor(Math.random() * pool.length);
-    return pool[randomIndex];
+    // const randomIndex = Math.floor(Math.random() * pool.length);
+    return pool[0];
   };
 
   useEffect(() => {

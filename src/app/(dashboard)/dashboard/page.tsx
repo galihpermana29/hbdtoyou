@@ -5,7 +5,8 @@ import {
 } from '@/action/user-api';
 import { mapContentToCard } from '@/lib/utils';
 import { getSession } from '@/store/get-set-session';
-import { Banknote, Camera, CreditCard, UserRoundPlus } from 'lucide-react';
+import { Banknote, Camera, CreditCard, Megaphone, UserRoundPlus } from 'lucide-react';
+import Link from 'next/link';
 import CardClient from './view/container/CardClient';
 import DashboardContentContainer from './view/container/DashboardContentContainer';
 
@@ -34,6 +35,32 @@ const DashboardPage = async () => {
           Manage your memories, scrapbook, & know your remaining credit
         </p>
       </div>
+
+      {/* AU Program Banner - non-admin only */}
+      {!isAdmin && (
+        <div className="mx-auto max-w-6xl 2xl:max-w-7xl px-[20px] mt-[16px]">
+          <Link href="/career" className="block">
+            <div className="flex items-center gap-3 md:gap-4 bg-gradient-to-r from-[#E34013]/10 to-orange-50 border border-[#E34013]/20 rounded-[10px] px-4 py-3 md:px-5 md:py-4 hover:border-[#E34013]/40 transition-colors cursor-pointer">
+              <div className="w-9 h-9 bg-[#E34013] rounded-full flex items-center justify-center flex-shrink-0">
+                <Megaphone size={16} className="text-white" />
+              </div>
+              <div className="flex-1 min-w-0">
+                <p className="text-[14px] md:text-[15px] text-[#1B1B1B]">
+                  <span className="font-bold">Announcement!</span>{' '} <br />
+                  If you&apos;re an AU author on Twitter/X or TikTok, join our{' '}
+                  <span className="font-semibold text-[#E34013]">
+                    Memoify AU Program
+                  </span>{' '}
+                  and get up to 100% free access to all premium features.
+                </p>
+              </div>
+              <span className="hidden md:inline-flex items-center gap-1 bg-[#E34013] text-white text-[13px] font-semibold px-4 py-2 rounded-[8px] flex-shrink-0 hover:bg-[#c23611] transition-colors">
+                Learn More
+              </span>
+            </div>
+          </Link>
+        </div>
+      )}
 
       {/* content */}
       <div className="md:mt-[40px] py-[30px] md:py-0 mx-auto max-w-6xl 2xl:max-w-7xl px-[20px]">
