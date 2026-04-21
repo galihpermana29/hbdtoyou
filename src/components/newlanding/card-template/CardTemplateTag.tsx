@@ -113,6 +113,11 @@ export const DataToCardColor = {
     logo: newspaperv1,
     text: 'text-[#000000]',
   },
+  tarotv1: {
+    color: 'bg-[#000000]',
+    logo: newspaperv1,
+    text: 'text-[#000000]',
+  },
 };
 
 const CardTemplateTag = ({
