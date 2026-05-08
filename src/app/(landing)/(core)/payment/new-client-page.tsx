@@ -53,7 +53,7 @@ const NewClientPagePayment = () => {
   const type = query.get('type');
   const planId = query.get('plan_id');
 
-  const [couponCode, setCouponCode] = useState('');
+  const [couponCode, setCouponCode] = useState(DEFAULT_COUPON_CODE);
   const [couponLoading, setCouponLoading] = useState(false);
   const [couponPreview, setCouponPreview] = useState<ICouponPreviewResponse | null>(null);
 
@@ -331,7 +331,7 @@ const NewClientPagePayment = () => {
                               }))}
                               onChange={(value) => {
                                 setCouponPreview(null);
-                                setCouponCode('');
+                                setCouponCode(DEFAULT_COUPON_CODE);
                                 router.replace(
                                   `/payment?id=null&type=${type}&plan_id=${value}`
                                 );
