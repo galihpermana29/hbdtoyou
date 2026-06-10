@@ -262,3 +262,47 @@
 .tarot-theme .backface-hidden {
   backface-visibility: hidden;
 }
+
+/* Wedding Invitation landing — auto-scrolling marquees.
+   Render the row of items twice inside the track; the keyframes shift it by
+   -50% so the duplicated half lands exactly where the first started, looping
+   seamlessly. Hovering pauses; reduced-motion users get a static row. */
+@keyframes wedding-marquee-left {
+  from {
+    transform: translateX(0);
+  }
+  to {
+    transform: translateX(-50%);
+  }
+}
+@keyframes wedding-marquee-right {
+  from {
+    transform: translateX(-50%);
+  }
+  to {
+    transform: translateX(0);
+  }
+}
+.wedding-marquee {
+  overflow: hidden;
+}
+.wedding-marquee-track {
+  display: flex;
+  width: max-content;
+  will-change: transform;
+}
+.wedding-marquee-track--left {
+  animation: wedding-marquee-left 45s linear infinite;
+}
+.wedding-marquee-track--right {
+  animation: wedding-marquee-right 45s linear infinite;
+}
+.wedding-marquee:hover .wedding-marquee-track {
+  animation-play-state: paused;
+}
+@media (prefers-reduced-motion: reduce) {
+  .wedding-marquee-track--left,
+  .wedding-marquee-track--right {
+    animation: none;
+  }
+}

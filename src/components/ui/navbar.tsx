@@ -31,6 +31,7 @@ import {
   Book,
   BookA,
   ChevronDown,
+  Heart,
   House,
   LogOut,
   Menu,
@@ -138,6 +139,27 @@ const NavigationBar = () => {
 
   const options = [
     {
+      value: 'wedding',
+      disabled: true,
+      label: (
+        <div className="flex items-start gap-2 opacity-60 cursor-not-allowed">
+          <Heart size={18} className="text-[#E34013] mt-[10px]" />
+          <div>
+            <h1 className="text-[16px] font-[600] text-[#101828] text-ellipsis flex items-center gap-2">
+              Wedding Invitations
+              <span className="text-[10px] font-[600] text-[#E34013] bg-[#FDECE5] rounded-full px-[8px] py-[2px]">
+                Coming soon
+              </span>
+            </h1>
+            <p className="text-[14px] font-[400] text-[#7B7B7B] mt-[2px]">
+              Design beautiful digital wedding <br /> invitations as
+              unforgettable as your “I do!”
+            </p>
+          </div>
+        </div>
+      ),
+    },
+    {
       value: 'gift',
       label: (
         <div
@@ -240,6 +262,26 @@ const NavigationBar = () => {
   ];
 
   const options2 = [
+    {
+      value: 'wedding',
+      disabled: true,
+      label: (
+        <div className="flex items-start gap-2 opacity-60 cursor-not-allowed">
+          <Heart size={18} className="text-[#E34013] mt-[10px]" />
+          <div>
+            <h1 className="text-[14px] font-[600] text-[#101828] text-ellipsis flex items-center gap-2">
+              Wedding Invitations
+              <span className="text-[10px] font-[600] text-[#E34013] bg-[#FDECE5] rounded-full px-[6px] py-[1px]">
+                Coming soon
+              </span>
+            </h1>
+            <p className="text-[12px] font-[400] text-[#7B7B7B] mt-[2px]">
+              Design beautiful digital wedding <br /> invitations in minutes
+            </p>
+          </div>
+        </div>
+      ),
+    },
     {
       value: 'gift',
       label: (

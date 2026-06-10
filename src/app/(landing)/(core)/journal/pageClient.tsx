@@ -1,6 +1,7 @@
 'use client';
 
 import NavigationBar from '@/components/ui/navbar';
+import Reveal from '@/components/ui/reveal';
 // dynamic
 import { IContent } from '@/action/interfaces';
 import { useMemoifySession } from '@/app/session-provider';
@@ -87,6 +88,7 @@ const EJournal = ({ journalsData }: { journalsData: IContent[] }) => {
         <NavigationBar />
       </div>
       <div className="flex flex-col">
+        <Reveal>
         <div className="flex flex-col items-center justify-center pt-12 sm:pt-16 md:pt-24 pb-16 bg-[#FFF6F5] relative">
           <div className="flex flex-col items-center justify-center px-4 sm:px-8 mx-auto w-full">
             <div className="flex flex-col items-center justify-center gap-y-12 max-w-5xl">
@@ -115,6 +117,7 @@ const EJournal = ({ journalsData }: { journalsData: IContent[] }) => {
             </div>
           </div>
         </div>
+        </Reveal>
         {/* <div className="relative w-full h-fit z-20 pb-12 sm:pb-16 md:pb-24">
           <Image
             src="/MacbookProMockup.png"
@@ -137,6 +140,7 @@ const EJournal = ({ journalsData }: { journalsData: IContent[] }) => {
             priority
           />
         </div> */}
+        <Reveal>
         <div
           className="relative w-full h-fit z-20 pb-12 sm:pb-16 md:pb-24"
           style={{
@@ -154,6 +158,8 @@ const EJournal = ({ journalsData }: { journalsData: IContent[] }) => {
             priority
           />
         </div>
+        </Reveal>
+        <Reveal>
         <div className="w-full py-12 sm:py-16 md:py-24 bg-white">
           <div className="max-w-7xl mx-auto px-4 sm:px-8">
             <div className="flex flex-col">
@@ -213,7 +219,9 @@ const EJournal = ({ journalsData }: { journalsData: IContent[] }) => {
             </div>
           </div>
         </div>
+        </Reveal>
       </div>
+      <Reveal>
       <div className="py-[30px] md:py-24 flex flex-col text-center items-center min-h-screen bg-[#F9FAFB] w-full gap-y-12">
         <div className="max-w-7xl mx-auto w-full max-md:px-4 px-8">
           <div className="flex max-md:flex-col items-start gap-x-4 border border-solid border-b-[#EAECF0] border-x-0 border-t-0 self-stretch max-md:pb-4">
@@ -243,6 +251,8 @@ const EJournal = ({ journalsData }: { journalsData: IContent[] }) => {
             : 'No Journals Available'}
         </div>
       </div>
+      </Reveal>
+      <Reveal>
       <div className="w-full py-12 sm:py-16 md:py-24">
         <div className="max-w-4xl mx-auto px-4 sm:px-8 text-center">
           <Typography.Title
@@ -275,6 +285,7 @@ const EJournal = ({ journalsData }: { journalsData: IContent[] }) => {
           </div>
         </div>
       </div>
+      </Reveal>
     </div>
   );
 };

@@ -8,8 +8,6 @@ import {
   Collapse,
   Form,
   Input,
-  Layout,
-  List,
   Row,
   Segmented,
   Space,
@@ -18,10 +16,12 @@ import {
 } from 'antd';
 import { useState } from 'react';
 
-import { ArrowRight, CircleCheck } from 'lucide-react';
+import { ArrowRight } from 'lucide-react';
 import Image from 'next/image';
 import Link from 'next/link';
 import NavigationBar from '../ui/navbar';
+import Reveal from '@/components/ui/reveal';
+import PricingSection from './PricingSection';
 
 import fictional1 from '@/assets/fictional-1.png';
 import fictional3 from '@/assets/fictional-3.png';
@@ -29,38 +29,22 @@ import fictional4 from '@/assets/fictional-4.png';
 import fictional5 from '@/assets/fictional-5.png';
 import fictional2 from '@/assets/fictional2.png';
 
-import { getListPackages } from '@/action/user-api';
-import { useMemoifySession } from '@/app/session-provider';
 import mockup1 from '@/assets/mockup1.png';
 import mockup2 from '@/assets/mockup2.png';
 import mockup3 from '@/assets/mockup3.png';
 import { faqDataEnglish, faqDataIndonesian } from '@/lib/faqData';
-import { useQuery } from '@tanstack/react-query';
-import { signIn } from 'next-auth/react';
-import { useRouter } from 'next/navigation';
 
 import c1 from '@/assets/c1.png';
 import c2 from '@/assets/c2.png';
 import c3 from '@/assets/c3.png';
 import c4 from '@/assets/c4.png';
-const { Footer } = Layout;
-const { Title, Text, Paragraph } = Typography;
+const { Text } = Typography;
 
 export default function NewLandingPage() {
   const [email, setEmail] = useState('');
   const [faqLanguage, setFaqLanguage] = useState<'English' | 'Indonesia'>(
     'English'
   );
-  const router = useRouter();
-  const session = useMemoifySession();
-
-  const { data: packages, isFetching } = useQuery({
-    queryKey: ['packages'],
-    queryFn: async () => {
-      const data = await getListPackages();
-      return data.data;
-    },
-  });
 
   return (
     <div>
@@ -70,6 +54,7 @@ export default function NewLandingPage() {
 
       {/* Hero Section */}
       <div className="mt-[81px]">
+        <Reveal>
         <div className=" py-[30px] md:py-0 flex flex-col-reverse md:flex-row justify-between items-center mx-auto max-w-6xl 2xl:max-w-7xl px-[20px] min-h-screen">
           <div className="max-w-[600px] mr-[20px] flex-1 mt-[20px] md:mt-0">
             <div className="flex gap-[5px] border-[1px] border-[#D0D5DD] rounded-[6px] max-w-max p-[5px] text-[14px] text-[#1B1B1B] font-[500]">
@@ -136,8 +121,10 @@ export default function NewLandingPage() {
             </Carousel>
           </div>
         </div>
+        </Reveal>
 
         {/* Photobox Section */}
+        <Reveal>
         <div style={{ background: '#F9FAFB' }}>
           <div className="flex flex-col lg:flex-row-reverse items-start lg:items-center justify-between gap-[30px] mx-auto max-w-6xl 2xl:max-w-7xl px-[20px] py-[90px]">
             <div style={{ flex: 1, minWidth: '300px' }}>
@@ -167,7 +154,9 @@ export default function NewLandingPage() {
             </div>
           </div>
         </div>
+        </Reveal>
 
+        <Reveal>
         <div className="flex flex-col lg:flex-row-reverse items-start lg:items-center justify-between gap-[30px] mx-auto max-w-6xl 2xl:max-w-7xl px-[20px] py-[90px]">
           <div className="flex-1 w-full">
             <Image
@@ -195,7 +184,9 @@ export default function NewLandingPage() {
             </Link>
           </div>
         </div>
+        </Reveal>
 
+        <Reveal>
         <div style={{ background: '#F9FAFB' }}>
           <div className="flex flex-col lg:flex-row-reverse items-start lg:items-center justify-between gap-[30px] mx-auto max-w-6xl 2xl:max-w-7xl px-[20px] py-[90px]">
             <div style={{ flex: 1, minWidth: '300px' }}>
@@ -225,8 +216,10 @@ export default function NewLandingPage() {
             </div>
           </div>
         </div>
+        </Reveal>
 
         {/* Features Section */}
+        <Reveal>
         <div className="mx-auto max-w-6xl 2xl:max-w-7xl">
           <div className="flex items-center lg:items-center flex-col lg:flex-row justify-between">
             <div className="flex-1 flex flex-col justify-between h-full gap-6 py-24 pl-5 pr-20 gap-y-16">
@@ -312,87 +305,12 @@ export default function NewLandingPage() {
             </div>
           </div>
         </div>
+        </Reveal>
 
         {/* Pricing Section */}
+        <Reveal>
         <div className="">
-          <div className="mx-auto max-w-6xl 2xl:max-w-7xl px-[20px] py-[90px]">
-            <h1 className="mb-[20px] text-center text-[#1B1B1B] font-[700] text-[30px] md:text-[36px]">
-              Pricing plans
-            </h1>
-            <p className="text-[#7b7b7b] text-[16px] md:text-[20px] font-[400] text-center mb-[35px]">
-              Simple, transparent pricing that grows with you. Try any plan free
-              for 30 days.
-            </p>
-
-            <Row gutter={[24, 24]} justify="center">
-              {!isFetching &&
-                packages?.map((dx) => {
-                  return (
-                    <Col xs={24} sm={8} key={dx.id}>
-                      <Card className=" flex flex-col justify-between">
-                        <div
-                          style={{ textAlign: 'center', marginBottom: '24px' }}>
-                          <h1 className="text-[#1B1B1B] font-[700] text-[36px]">
-                            IDR {dx.price}
-                          </h1>
-                          <p className="mt-[16px] text-[20px] font-[600]">
-                            {dx.name}
-                          </p>
-                          <p className="text-[#7B7B7B] text-[16px] font-[400]">
-                            {dx.description}
-                          </p>
-                        </div>
-                        <List
-                          bordered={false}
-                          itemLayout="horizontal"
-                          dataSource={dx.features || []}
-                          renderItem={(item) => (
-                            <List.Item>
-                              <List.Item.Meta
-                                avatar={<CircleCheck color="#079455" />}
-                                title={item}
-                              />
-                            </List.Item>
-                          )}
-                        />
-
-                        <div className="flex justify-center items-end">
-                          <Button
-                            onClick={() => {
-                              if (session.accessToken) {
-                                if (dx.name === 'Free Plan') {
-                                  router.push('/create');
-                                }
-
-                                if (dx.name === 'Premium Plan') {
-                                  router.push(
-                                    `/payment?type=premium&plan_id=${dx.id}`
-                                  );
-                                }
-
-                                if (dx.name === 'Advanced Plan') {
-                                  router.push(
-                                    `/payment?type=advanced&plan_id=${dx.id}`
-                                  );
-                                }
-                              } else {
-                                signIn('google');
-                              }
-                            }}
-                            iconPosition="end"
-                            size="large"
-                            className="!border-[1px] !h-[48px] !bg-[#E34013] !text-[#fff] !font-[400] mt-[40px] !w-[90%] !text-[16px]">
-                            {session?.accessToken
-                              ? 'Try now'
-                              : 'Sign in with Google'}
-                          </Button>
-                        </div>
-                      </Card>
-                    </Col>
-                  );
-                })}
-            </Row>
-          </div>
+          <PricingSection />
 
           <div
             style={{
@@ -437,8 +355,10 @@ export default function NewLandingPage() {
             </div>
           </div>
         </div>
+        </Reveal>
 
         {/* FAQ Section */}
+        <Reveal>
         <div id="faq-section" style={{ background: '#F9FAFB' }}>
           <div className="mx-auto max-w-6xl 2xl:max-w-7xl px-[20px] py-[90px]">
             <div className="max-w-[768px] mx-auto mb-[48px]">
@@ -478,8 +398,10 @@ export default function NewLandingPage() {
             </div>
           </div>
         </div>
+        </Reveal>
 
         {/* Stats Section */}
+        <Reveal>
         <div
           style={{ padding: '60px 50px' }}
           className="bg-[url(/stat-background.jpeg)] bg-no-repeat bg-cover">
@@ -554,8 +476,10 @@ export default function NewLandingPage() {
             </Row>
           </div>
         </div>
+        </Reveal>
 
         {/* Newsletter Section */}
+        <Reveal>
         <div className="">
           <div className="mx-auto max-w-6xl 2xl:max-w-7xl px-[20px] py-[90px] text-center">
             <div className="max-w-[768px] mx-auto">
@@ -592,6 +516,7 @@ export default function NewLandingPage() {
             </Text>
           </div>
         </div>
+        </Reveal>
       </div>
     </div>
   );

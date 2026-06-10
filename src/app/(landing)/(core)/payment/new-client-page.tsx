@@ -27,7 +27,7 @@ import { useRouter, useSearchParams } from 'next/navigation';
 
 const { Title, Text } = Typography;
 
-const DEFAULT_COUPON_CODE = 'MAYDAY15';
+const DEFAULT_COUPON_CODE = 'JUNJUNE';
 
 function isValidUUIDv4(uuid: string): boolean {
   const uuidv4Regex =
