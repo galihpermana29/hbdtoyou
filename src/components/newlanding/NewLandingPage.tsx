@@ -40,6 +40,64 @@ import c3 from '@/assets/c3.png';
 import c4 from '@/assets/c4.png';
 const { Text } = Typography;
 
+// Sample editions shown in the Newspaper Photobox marquee. Alternates the two
+// real templates so visitors see the range (sweet broadsheet + viral satire).
+// TODO: replace the faux clipping cards below with real exported sample PNGs.
+const SAMPLE_EDITIONS = [
+  { masthead: 'Love of The Week', tone: 'broadsheet', tag: 'Memoify' },
+  { masthead: 'Suara Rakyat', tone: 'classic', tag: 'Edisi Politik' },
+  { masthead: 'Love of The Week', tone: 'broadsheet', tag: 'Memoify' },
+  { masthead: 'Suara Rakyat', tone: 'classic', tag: 'Edisi Politik' },
+  { masthead: 'Love of The Week', tone: 'broadsheet', tag: 'Memoify' },
+  { masthead: 'Suara Rakyat', tone: 'classic', tag: 'Edisi Politik' },
+];
+
+const CLIP_ROTATIONS = ['-rotate-2', 'rotate-1', '-rotate-1', 'rotate-2'];
+
+/** A faux mini newspaper front page used as a placeholder marquee clipping. */
+function NewspaperClipping({ edition, index }: { edition: any; index: number }) {
+  const broadsheet = edition.tone === 'broadsheet';
+  const ink = broadsheet ? '#1a1a1a' : '#000000';
+  return (
+    <div
+      className={`shrink-0 w-[260px] ${
+        CLIP_ROTATIONS[index % CLIP_ROTATIONS.length]
+      } transition-transform duration-300 hover:rotate-0 hover:scale-[1.03]`}>
+      <div
+        className="border overflow-hidden shadow-[0_14px_34px_rgba(0,0,0,0.18)]"
+        style={{ backgroundColor: broadsheet ? '#f4f1ea' : '#ffffff', borderColor: ink }}>
+        <div className="px-3 pt-3 pb-2" style={{ borderBottom: `2px solid ${ink}` }}>
+          <div
+            className="flex justify-between text-[7px] uppercase tracking-[0.15em]"
+            style={{ color: ink }}>
+            <span>Special Frame</span>
+            <span>{edition.tag}</span>
+          </div>
+          <h3
+            className="blackletter-font text-center leading-none mt-1 text-[22px]"
+            style={{ color: ink }}>
+            {edition.masthead}
+          </h3>
+        </div>
+        <div
+          className="w-full aspect-[16/9]"
+          style={{
+            background: broadsheet
+              ? 'linear-gradient(135deg,#d8cfbf,#bcae98)'
+              : 'linear-gradient(135deg,#cfcfcf,#9e9e9e)',
+            borderBottom: `2px solid ${ink}`,
+          }}
+        />
+        <div className="px-3 py-2 space-y-1">
+          <div className="h-[5px] w-[92%] rounded" style={{ backgroundColor: `${ink}33` }} />
+          <div className="h-[5px] w-[78%] rounded" style={{ backgroundColor: `${ink}26` }} />
+          <div className="h-[5px] w-[86%] rounded" style={{ backgroundColor: `${ink}26` }} />
+        </div>
+      </div>
+    </div>
+  );
+}
+
 export default function NewLandingPage() {
   const [email, setEmail] = useState('');
   const [faqLanguage, setFaqLanguage] = useState<'English' | 'Indonesia'>(
@@ -54,7 +112,58 @@ export default function NewLandingPage() {
 
       {/* Hero Section */}
       <div className="mt-[81px]">
-        <Reveal>
+        <Carousel
+          autoplay
+          autoplaySpeed={6000}
+          pauseOnHover
+          dots
+          className="hero-carousel">
+        {/* Slide 1 — Newspaper Photobox (inner wrapper so slick styling
+            doesn't override the layout) */}
+        <div>
+        <div
+          className="min-h-screen flex flex-col justify-center py-[60px]"
+          style={{ background: '#f4f1ea' }}>
+            {/* Centered intro */}
+            <div className="mx-auto max-w-3xl px-[20px] text-center">
+              <span className="inline-block text-[12px] font-[700] tracking-[0.2em] text-[#E34013] bg-[#FDECE5] rounded-full px-[14px] py-[6px]">
+                NEW · NEWSPAPER PHOTOBOX
+              </span>
+              <h2 className="text-[#1B1B1B] font-[800] text-[34px] md:text-[48px] leading-tight mt-[20px]">
+                You, hot off the press.
+              </h2>
+              <p className="text-[#5b5b5b] text-[16px] md:text-[19px] font-[400] mt-[16px]">
+                Strike a pose and watch your selfie drop straight onto a vintage
+                front page — sweet broadsheet or viral political satire. Capture,
+                pick your edition, download. No design skills, just main-character
+                energy.
+              </p>
+              <div className="flex items-center justify-center mt-[28px]">
+                <Link href={'/photobox-newspaper'} prefetch={true}>
+                  <Button
+                    iconPosition="end"
+                    size="large"
+                    icon={<ArrowRight size={18} />}
+                    className="!bg-[#E34013] !text-white !font-[600] !h-[46px]">
+                    Try Newspaper Photobox
+                  </Button>
+                </Link>
+              </div>
+            </div>
+
+            {/* Full-bleed auto-scrolling marquee of sample front pages */}
+            <div className="wedding-marquee mt-[50px]">
+              <div className="wedding-marquee-track wedding-marquee-track--left gap-[24px] py-[10px] px-[12px]">
+                {[...SAMPLE_EDITIONS, ...SAMPLE_EDITIONS].map((ed, i) => (
+                  <NewspaperClipping key={i} edition={ed} index={i} />
+                ))}
+              </div>
+            </div>
+          </div>
+        </div>
+
+        {/* Slide 2 — main hero (inner wrapper, same reason) */}
+        <div>
         <div className=" py-[30px] md:py-0 flex flex-col-reverse md:flex-row justify-between items-center mx-auto max-w-6xl 2xl:max-w-7xl px-[20px] min-h-screen">
           <div className="max-w-[600px] mr-[20px] flex-1 mt-[20px] md:mt-0">
             <div className="flex gap-[5px] border-[1px] border-[#D0D5DD] rounded-[6px] max-w-max p-[5px] text-[14px] text-[#1B1B1B] font-[500]">
@@ -95,7 +204,7 @@ export default function NewLandingPage() {
           <div className="flex-1 min-w-[350px] flex justify-center items-center">
             <Carousel
               autoplay
-              autoplaySpeed={5000}
+              autoplaySpeed={9000}
               className="w-[350px] md:w-[500px] lg:w-[600px]">
               <Image
                 src={mockup1}
@@ -121,7 +230,8 @@ export default function NewLandingPage() {
             </Carousel>
           </div>
         </div>
-        </Reveal>
+        </div>
+        </Carousel>
 
         {/* Photobox Section */}
         <Reveal>

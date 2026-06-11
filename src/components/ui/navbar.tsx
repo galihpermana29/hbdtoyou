@@ -35,9 +35,9 @@ import {
   House,
   LogOut,
   Menu,
+  Newspaper,
   Settings,
   Settings2,
-  Sparkles,
   Zap,
 } from 'lucide-react';
 import dynamic from 'next/dynamic';
@@ -160,6 +160,28 @@ const NavigationBar = () => {
       ),
     },
     {
+      value: 'photobox-newspaper',
+      label: (
+        <div
+          className="flex items-start gap-2"
+          onClick={() => router.push('/photobox-newspaper')}>
+          <Newspaper size={18} className="text-[#E34013] mt-[10px]" />
+          <div>
+            <h1 className="text-[16px] font-[600] text-[#101828] text-ellipsis flex items-center gap-2">
+              Newspaper Photobox
+              <span className="text-[10px] font-[600] text-[#E34013] bg-[#FDECE5] rounded-full px-[8px] py-[2px]">
+                New
+              </span>
+            </h1>
+            <p className="text-[14px] font-[400] text-[#7B7B7B] mt-[2px]">
+              Snap a live selfie straight into a <br /> vintage newspaper front
+              page.
+            </p>
+          </div>
+        </div>
+      ),
+    },
+    {
       value: 'gift',
       label: (
         <div
@@ -241,24 +263,25 @@ const NavigationBar = () => {
         </div>
       ),
     },
-    {
-      value: 'photobox',
-      label: (
-        <div
-          className="flex items-start gap-2"
-          onClick={() => router.push('/photobox')}>
-          <Sparkles size={18} className="text-[#E34013] mt-[10px]" />
-          <div>
-            <h1 className="text-[16px] font-[600] text-[#101828] text-ellipsis">
-              Photobox
-            </h1>
-            <p className="text-[14px] font-[400] text-[#7B7B7B] mt-[2px]">
-              Make every picture a keepsake <br /> with Memoify`s Photobox!
-            </p>
-          </div>
-        </div>
-      ),
-    },
+    // Photobox temporarily hidden — superseded by Newspaper Photobox above.
+    // {
+    //   value: 'photobox',
+    //   label: (
+    //     <div
+    //       className="flex items-start gap-2"
+    //       onClick={() => router.push('/photobox')}>
+    //       <Sparkles size={18} className="text-[#E34013] mt-[10px]" />
+    //       <div>
+    //         <h1 className="text-[16px] font-[600] text-[#101828] text-ellipsis">
+    //           Photobox
+    //         </h1>
+    //         <p className="text-[14px] font-[400] text-[#7B7B7B] mt-[2px]">
+    //           Make every picture a keepsake <br /> with Memoify`s Photobox!
+    //         </p>
+    //       </div>
+    //     </div>
+    //   ),
+    // },
   ];
 
   const options2 = [
@@ -277,6 +300,28 @@ const NavigationBar = () => {
             </h1>
             <p className="text-[12px] font-[400] text-[#7B7B7B] mt-[2px]">
               Design beautiful digital wedding <br /> invitations in minutes
+            </p>
+          </div>
+        </div>
+      ),
+    },
+    {
+      value: 'photobox-newspaper',
+      label: (
+        <div
+          className="flex items-start gap-2"
+          onClick={() => router.push('/photobox-newspaper')}>
+          <Newspaper size={18} className="text-[#E34013] mt-[10px]" />
+          <div>
+            <h1 className="text-[14px] font-[600] text-[#101828] text-ellipsis flex items-center gap-2">
+              Newspaper Photobox
+              <span className="text-[10px] font-[600] text-[#E34013] bg-[#FDECE5] rounded-full px-[6px] py-[1px]">
+                New
+              </span>
+            </h1>
+            <p className="text-[12px] font-[400] text-[#7B7B7B] mt-[2px]">
+              Snap a live selfie straight into a <br /> vintage newspaper front
+              page.
             </p>
           </div>
         </div>
@@ -339,24 +384,25 @@ const NavigationBar = () => {
         </div>
       ),
     },
-    {
-      value: 'photobox',
-      label: (
-        <div
-          className="flex items-start gap-2"
-          onClick={() => router.push('/photobox')}>
-          <Sparkles size={18} className="text-[#E34013] mt-[10px]" />
-          <div>
-            <h1 className="text-[14px] font-[600] text-[#101828] text-ellipsis">
-              Photobox
-            </h1>
-            <p className="text-[12px] font-[400] text-[#7B7B7B] mt-[2px]">
-              Make every picture a keepsake <br /> with Memoify`s Photobox!
-            </p>
-          </div>
-        </div>
-      ),
-    },
+    // Photobox temporarily hidden — superseded by Newspaper Photobox above.
+    // {
+    //   value: 'photobox',
+    //   label: (
+    //     <div
+    //       className="flex items-start gap-2"
+    //       onClick={() => router.push('/photobox')}>
+    //       <Sparkles size={18} className="text-[#E34013] mt-[10px]" />
+    //       <div>
+    //         <h1 className="text-[14px] font-[600] text-[#101828] text-ellipsis">
+    //           Photobox
+    //         </h1>
+    //         <p className="text-[12px] font-[400] text-[#7B7B7B] mt-[2px]">
+    //           Make every picture a keepsake <br /> with Memoify`s Photobox!
+    //         </p>
+    //       </div>
+    //     </div>
+    //   ),
+    // },
   ];
 
   const handleGetProfile = async () => {

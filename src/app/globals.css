@@ -3,6 +3,7 @@
 @import url('https://fonts.googleapis.com/css2?family=PT+Serif:ital,wght@0,400;0,700;1,400;1,700&display=swap');
 @import url('https://fonts.googleapis.com/css2?family=Inter:ital,opsz,wght@0,14..32,100..900;1,14..32,100..900&display=swap');
 @import url('https://fonts.googleapis.com/css2?family=Cinzel:wght@400;700&family=Playfair+Display:ital,wght@0,400;0,700;1,400&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=UnifrakturMaguntia&family=Old+Standard+TT:ital,wght@0,400;0,700;1,400&display=swap');
 
 @font-face {
   font-family: 'Formula1 Display';
@@ -77,6 +78,28 @@
   font-family: "Inter", sans-serif;
   font-weight: 400;
   font-style: normal;
+}
+
+/* Two-slide hero carousel on the home page — make the dots visible on the
+   light/cream slide backgrounds and brand the active one. */
+.hero-carousel .slick-dots li button {
+  background: #1b1b1b !important;
+  opacity: 0.35;
+}
+.hero-carousel .slick-dots li.slick-active button {
+  background: #e34013 !important;
+  opacity: 1;
+}
+
+/* Aged-broadsheet type for the photobox-newspaper template. */
+.blackletter-font {
+  font-family: 'UnifrakturMaguntia', 'Playfair Display', serif;
+}
+.np-display {
+  font-family: 'Playfair Display', Georgia, 'Times New Roman', serif;
+}
+.np-body {
+  font-family: 'Old Standard TT', 'PT Serif', Georgia, serif;
 }
 
 @tailwind base;

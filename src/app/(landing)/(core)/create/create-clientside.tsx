@@ -102,19 +102,27 @@ const CreatePage = () => {
     IAllTemplateResponse[] | null
   >(null);
 
+  // The `photobox-newspaper` template only exists on the backend as a hack so
+  // the /photobox-newspaper feature can persist its generated image through the
+  // standard `createContent` flow. It is NOT a real fill-in-a-form digital gift,
+  // so hide it from every /create template list.
+  const HIDDEN_TEMPLATE_SLUGS = ['photobox-newspaper'];
+  const excludeHidden = (list: IAllTemplateResponse[] | null) =>
+    list?.filter((tpl) => !HIDDEN_TEMPLATE_SLUGS.includes(tpl.slug)) ?? null;
+
   const handleGetTemplates = async () => {
     const data = await getOriginalTemplates();
     if (data.success) {
-      setTemplates(data.data);
+      setTemplates(excludeHidden(data.data));
       const dx = await getPopularTemplates();
       if (dx.success) {
-        setPopularTemplates(dx.data);
+        setPopularTemplates(excludeHidden(dx.data));
       } else {
         message.error(dx.message);
       }
       const gx = await getGraduationTemplates();
       if (gx.success) {
-        setGraduationTemplates(gx.data);
+        setGraduationTemplates(excludeHidden(gx.data));
       } else {
         message.error(gx.message);
       }
