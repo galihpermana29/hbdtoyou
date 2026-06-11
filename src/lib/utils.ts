@@ -36,6 +36,14 @@ export function mapContentToCard(contents: IContent[], purpose = 'client') {
     // this function is used to get the jumbotron image from the json content
     //also check if the json content is an array and has at least one item
     const handleJumbotron = () => {
+      // photobox-newspaper stores its composited front page under `image`.
+      // Matched with includes() because its slug contains a dash, which the
+      // split('-')[1].split(' ')[1] extraction below would mangle into just
+      // "photobox" and drop the card.
+      if (show.template_name.includes('photobox-newspaper')) {
+        return jsonContent?.image;
+      }
+
       if (
         ['albumgraduation1'].includes(
           show.template_name.split('-')[1].split(' ')[1]
@@ -133,6 +141,8 @@ export function mapContentToCard(contents: IContent[], purpose = 'client') {
         : 'A title',
       link: show.template_name.includes('journal')
         ? `/journal/${show.id}`
+        : show.template_name.includes('photobox-newspaper')
+        ? `/photobox-newspaper/${show.id}`
         : `/${show.template_name.split('-')[1].split(' ')[1]}/${show.id}`,
       desc: show?.caption
         ? show?.caption
