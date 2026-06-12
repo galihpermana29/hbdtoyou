@@ -17,7 +17,7 @@ export default async function VinylDynamicPage({ params }: any) {
 
   const parsedData = JSON.parse(data.data.detail_content_json_text);
   const lockedContent =
-    data.data.status === 'locked' || data.data.user_type === 'free';
+    data.data.status === 'locked';
 
   const content = (
     <VinylDynamic

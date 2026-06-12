@@ -88,7 +88,7 @@ const Scrapbook6Result = async ({
           type="scrapbook"
           contentId={id}
           initiallyLocked={
-            data.data.status === 'locked' || data.data.user_type === 'free'
+            data.data.status === 'locked'
           }>
           <PageFlipScrapbook
             pages={structuredPages}
