@@ -23,7 +23,7 @@ export default async function PhotoboxNewspaperViewer({
 
   // Same gating logic as the digital gift viewers (e.g. newspaperv3).
   const lockedContent =
-    data.data.status === 'locked' || data.data.user_type === 'free';
+    data.data.status === 'locked';
 
   const content = (
     <main className="min-h-screen bg-[#f4f1ea] flex flex-col items-center gap-8 py-12 px-4">

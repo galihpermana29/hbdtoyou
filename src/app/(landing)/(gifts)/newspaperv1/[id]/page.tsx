@@ -21,7 +21,7 @@ export default async function NewspaperPage({ params }: { params: any }) {
   }
 
   const parsedData = JSON.parse(data.data.detail_content_json_text);
-  const lockedContent = data.data.status === 'locked' || data.data.user_type === 'free';
+  const lockedContent = data.data.status === 'locked';
 
   const content = (
     <main className="min-h-screen bg-white">

@@ -22,7 +22,6 @@ export default async function DynamicDisneyPage({ params }: { params: any }) {
   }
 
   const parsedData = JSON.parse(data.data.detail_content_json_text);
-  // const isFreeUser = data.data.user_type === 'free';
   const lockedContent = data.data.status === 'locked';
 
   const content = (

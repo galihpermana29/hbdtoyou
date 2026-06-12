@@ -78,7 +78,7 @@ const TEMPLATES: Record<
     eyebrowRight: 'Memoify Newspaper',
     masthead: 'Love of The Week',
     quote:
-      'Front-page proof that these two are hopelessly, happily, head-over-heels in love.',
+      '“Front-page proof that these two are hopelessly, happily, head-over-heels in love.”',
     body: [
       `From the very first frame, it was never really about the photos — it was about the way they look at each other when they think no one is watching. Every glance, every laugh, every almost-kiss caught mid-pose told the same quiet little story: these two are completely, helplessly smitten.`,
       `Between the playful poses and the candid in-betweens, they turned an ordinary afternoon into something straight out of a love story. No filters, no fuss — just two people who make each other ridiculously happy, and a front page lucky enough to hold the proof.`,
@@ -100,18 +100,18 @@ const TEMPLATES: Record<
     dateline: false,
     columnDivider: false,
     brand: 'Terbit Sejak 1998',
-    eyebrowLeft: 'Edisi Politik',
+    eyebrowLeft: 'Memoify.live · Edisi Politik',
     eyebrowRight: 'Harga Rp 5.000',
     masthead: 'Suara Rakyat',
-    quote: 'Polemik Makan Bergizi Gratis: Janji Kenyang, Realita Bikin Pusing.',
+    quote: '#MENUJUINDONESIABANGKRUT KARENA MBG',
     body: [
-      `Program Makan Bergizi Gratis yang digadang-gadang menjadi solusi gizi nasional kembali menuai sorotan. Di sejumlah daerah, porsi yang sampai ke tangan siswa disebut tak sesuai janji — sayur layu, lauk seadanya, dan jadwal pengiriman yang kerap terlambat. Warga pun bertanya: ke mana sebenarnya arah anggaran jumbo yang katanya demi masa depan bangsa?`,
-      `Sejumlah vendor mengeluhkan pembayaran yang tersendat, sementara kabar dapur yang tutup di tengah jalan menambah panjang daftar persoalan. Pemerintah berdalih ini sekadar "penyesuaian di lapangan", namun di meja makan rakyat, polemik gizi gratis ini masih terasa jauh dari kata kenyang.`,
+      `Kami datang tanpa senjata. Tak membawa laras yang menganga, tak menyelipkan peluru di saku celana, tak menyusun strategi untuk merebut kuasa. Kami hanya mengenakan almamater semata, selembar kain yang menjelma cita-cita, yang dijahit dari uang orang tua, dan mimpi-mimpi tentang negeri yang lebih manusia. Kami datang dengan poster yang mulai pudar warnanya, dengan tenggorokan yang serak karena bertanya, dengan kaki yang rela menempuh panas kota, demi satu harapan sederhana, didengar suaranya.`,
+      `Bukankah kami seharusnya disambut dengan tawa? Dengan ruang dialog yang terbuka? Dengan tangan yang mengajak berbicara? Bukan dengan pagar besi yang ditinggikan berkali-kali lipatnya. Sebab kami bukan musuh negara. Kita lahir dari rahim yang sama, menghirup udara yang sama, dan tumbuh dari tanah yang sama. Kalau kami berdiri di jalan raya, itu karena terlalu banyak pintu yang terkunci rapat adanya. Kalau suara kami meninggi nadanya, itu karena terlalu lama jawaban disimpan dalam sunyi yang sengaja dipelihara. Maka dengarkanlah, sebelum sunyi itu tumbuh menjadi sesuatu yang tak lagi bisa kalian redam.`,
     ],
   },
 };
 
-const TEMPLATE_ORDER: TemplateKey[] = ['broadsheet', 'classic'];
+const TEMPLATE_ORDER: TemplateKey[] = ['classic', 'broadsheet'];
 
 /** Center-crop a captured frame to the slot's 16:9 ratio (no color change). */
 const cropTo169 = (base64: string): Promise<string> =>
@@ -186,7 +186,7 @@ const PhotoboxNewspaperPage = () => {
   const webcamRef = useRef<Webcam | null>(null);
   const frameRef = useRef<HTMLDivElement | null>(null);
 
-  const [template, setTemplate] = useState<TemplateKey>('broadsheet');
+  const [template, setTemplate] = useState<TemplateKey>('classic');
   const [rawCropped, setRawCropped] = useState<string | null>(null);
   const [capturedImage, setCapturedImage] = useState<string | null>(null);
   const [countdown, setCountdown] = useState<number | null>(null);
@@ -455,7 +455,7 @@ const PhotoboxNewspaperPage = () => {
               style={{ borderBottom: `1px solid ${t.ink}` }}>
               <p
                 className={`${t.displayClass} font-bold text-center text-[32px] leading-tight`}>
-                &ldquo;{t.quote}&rdquo;
+                {t.quote}
               </p>
             </div>
 

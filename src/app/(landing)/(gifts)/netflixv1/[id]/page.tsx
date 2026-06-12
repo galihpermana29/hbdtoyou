@@ -26,7 +26,7 @@ const RootUserPage = async ({ params }: any) => {
   if (!totalItems) return <div className="min-h-screen">No data</div>;
 
   const lockedContent =
-    data.data.status === 'locked' || data.data.user_type === 'free';
+    data.data.status === 'locked';
 
   const content = (
     <div className="bg-black overflow-x-hidden">

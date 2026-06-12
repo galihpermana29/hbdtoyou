@@ -29,7 +29,7 @@ const RootUserPage = async ({ params }: any) => {
   };
 
   const lockedContent =
-    data.data.status === 'locked' || data.data.user_type === 'free';
+    data.data.status === 'locked';
 
   const content = <TarotReader data={tarotData} />;
 
