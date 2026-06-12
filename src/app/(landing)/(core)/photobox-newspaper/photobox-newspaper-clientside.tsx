@@ -28,6 +28,11 @@ const videoConstraints = {
 // and would otherwise stretch a 4:3 frame to fill the 16:9 box on export.
 const SLOT_ASPECT = 16 / 9;
 
+// The newspaper always renders at this fixed desktop width so the live canvas
+// AND the exported image stay identical on every device. On narrow screens it
+// is uniformly scaled down to fit (see `scale`), never responsively reflowed.
+const FRAME_W = 896; // matches Tailwind max-w-4xl
+
 type TemplateKey = 'broadsheet' | 'classic';
 
 // Per-template styling. The frame markup is shared; these tokens + flags drive
@@ -185,6 +190,7 @@ const applyTreatment = (
 const PhotoboxNewspaperPage = () => {
   const webcamRef = useRef<Webcam | null>(null);
   const frameRef = useRef<HTMLDivElement | null>(null);
+  const scaleWrapRef = useRef<HTMLDivElement | null>(null);
 
   const [template, setTemplate] = useState<TemplateKey>('classic');
   const [rawCropped, setRawCropped] = useState<string | null>(null);
@@ -192,6 +198,8 @@ const PhotoboxNewspaperPage = () => {
   const [countdown, setCountdown] = useState<number | null>(null);
   const [loading, setLoading] = useState(false);
   const [grain, setGrain] = useState<string | null>(null);
+  const [scale, setScale] = useState(1);
+  const [frameHeight, setFrameHeight] = useState(0);
 
   const session = useMemoifySession();
   const router = useRouter();
@@ -218,6 +226,28 @@ const PhotoboxNewspaperPage = () => {
     ctx.putImageData(data, 0, 0);
     setGrain(tile.toDataURL());
   }, []);
+
+  // Uniformly scale the fixed-width newspaper to fit the viewport (never above
+  // 1:1). The scale only affects on-screen display — frameRef stays 896px so
+  // the html2canvas export is always the full desktop layout.
+  useEffect(() => {
+    const compute = () =>
+      setScale(Math.min(1, (window.innerWidth - 40) / FRAME_W));
+    compute();
+    window.addEventListener('resize', compute);
+    return () => window.removeEventListener('resize', compute);
+  }, []);
+
+  // Measure the frame's natural (unscaled) height so the scaled wrapper can
+  // reserve the right amount of vertical space.
+  useEffect(() => {
+    const measure = () => {
+      if (frameRef.current) setFrameHeight(frameRef.current.offsetHeight);
+    };
+    measure();
+    const id = requestAnimationFrame(measure);
+    return () => cancelAnimationFrame(id);
+  }, [template, capturedImage, scale, grain]);
 
   // Re-treat the captured photo whenever it changes or the template switches.
   useEffect(() => {
@@ -289,12 +319,23 @@ const PhotoboxNewspaperPage = () => {
       setLoading(true);
 
       // 1. Snapshot the whole designed newspaper to a single PNG.
-      const canvas = await html2canvas(frameRef.current, {
-        scale: 2,
-        useCORS: true,
-        backgroundColor: t.paperBg,
-        logging: false,
-      });
+      //    Temporarily drop the scale-to-fit transform: html2canvas renders
+      //    text doubled/offset when an ancestor has a CSS `transform`, and the
+      //    fullscreen spinner hides the brief jump to full size.
+      const wrap = scaleWrapRef.current;
+      const prevTransform = wrap?.style.transform ?? '';
+      if (wrap) wrap.style.transform = 'none';
+      let canvas;
+      try {
+        canvas = await html2canvas(frameRef.current, {
+          scale: 2,
+          useCORS: true,
+          backgroundColor: t.paperBg,
+          logging: false,
+        });
+      } finally {
+        if (wrap) wrap.style.transform = prevTransform;
+      }
       const base64 = canvas.toDataURL('image/png');
 
       // 2. Upload to Cloudinary.
@@ -372,20 +413,35 @@ const PhotoboxNewspaperPage = () => {
           {/* The newspaper frame. The image slot holds the live camera while
               shooting, then the frozen capture. frameRef is what html2canvas
               snapshots on save. */}
-          <motion.div
-            key={template}
-            initial={{ opacity: 0, y: 12 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.35 }}
-            ref={frameRef}
-            className="w-full max-w-4xl border"
+          {/* Scale-to-fit viewport: reserves the scaled-down footprint and
+              clips overflow; the scale transform lives here, NOT on frameRef. */}
+          <div
             style={{
-              backgroundColor: t.paperBg,
-              color: t.ink,
-              borderColor: t.ink,
-              backgroundImage:
-                t.grainPaper && grain ? `url(${grain})` : undefined,
+              width: FRAME_W * scale,
+              height: frameHeight ? frameHeight * scale : undefined,
+              overflow: 'hidden',
             }}>
+            <div
+              ref={scaleWrapRef}
+              style={{
+                width: FRAME_W,
+                transform: `scale(${scale})`,
+                transformOrigin: 'top left',
+              }}>
+              <motion.div
+                key={template}
+                initial={{ opacity: 0 }}
+                animate={{ opacity: 1 }}
+                transition={{ duration: 0.35 }}
+                ref={frameRef}
+                className="w-[896px] border"
+                style={{
+                  backgroundColor: t.paperBg,
+                  color: t.ink,
+                  borderColor: t.ink,
+                  backgroundImage:
+                    t.grainPaper && grain ? `url(${grain})` : undefined,
+                }}>
             {/* Masthead */}
             <div
               className="px-8 pt-6 pb-5"
@@ -487,7 +543,9 @@ const PhotoboxNewspaperPage = () => {
               <span>Vol. 1 — No. 1</span>
               <span>{dayjs().format('DD MMM YYYY')}</span>
             </div>
-          </motion.div>
+              </motion.div>
+            </div>
+          </div>
         </div>
       </div>
 
