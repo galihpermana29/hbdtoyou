@@ -4,6 +4,7 @@
 @import url('https://fonts.googleapis.com/css2?family=Inter:ital,opsz,wght@0,14..32,100..900;1,14..32,100..900&display=swap');
 @import url('https://fonts.googleapis.com/css2?family=Cinzel:wght@400;700&family=Playfair+Display:ital,wght@0,400;0,700;1,400&display=swap');
 @import url('https://fonts.googleapis.com/css2?family=UnifrakturMaguntia&family=Old+Standard+TT:ital,wght@0,400;0,700;1,400&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Baloo+2:wght@400..800&family=Lilita+One&family=Nunito:ital,wght@0,400..800;1,400..700&display=swap');
 
 @font-face {
   font-family: 'Formula1 Display';
@@ -100,6 +101,18 @@
 }
 .np-body {
   font-family: 'Old Standard TT', 'PT Serif', Georgia, serif;
+}
+
+/* Bright kids'-magazine type (Majalah Bobo–style) for photobox-newspaper. */
+.bobo-masthead {
+  font-family: 'Baloo 2', system-ui, sans-serif;
+  font-weight: 800;
+}
+.bobo-display {
+  font-family: 'Lilita One', 'Baloo 2', system-ui, sans-serif;
+}
+.bobo-body {
+  font-family: 'Nunito', system-ui, sans-serif;
 }
 
 @tailwind base;
