@@ -38,62 +38,35 @@ import c1 from '@/assets/c1.png';
 import c2 from '@/assets/c2.png';
 import c3 from '@/assets/c3.png';
 import c4 from '@/assets/c4.png';
+
+import sampleBobo from '@/assets/sample-bobo.jpeg';
+import sampleBroadsheet from '@/assets/sample-broadsheet.jpeg';
+import sampleClassic from '@/assets/sample-classic.jpeg';
 const { Text } = Typography;
 
-// Sample editions shown in the Newspaper Photobox marquee. Alternates the two
-// real templates so visitors see the range (sweet broadsheet + viral satire).
-// TODO: replace the faux clipping cards below with real exported sample PNGs.
+// Real exported sample front pages shown in the Newspaper Photobox marquee, so
+// visitors see the full range of templates (bright Bobo edition + sweet
+// broadsheet + viral political satire).
 const SAMPLE_EDITIONS = [
-  { masthead: 'Love of The Week', tone: 'broadsheet', tag: 'Memoify' },
-  { masthead: 'Suara Rakyat', tone: 'classic', tag: 'Edisi Politik' },
-  { masthead: 'Love of The Week', tone: 'broadsheet', tag: 'Memoify' },
-  { masthead: 'Suara Rakyat', tone: 'classic', tag: 'Edisi Politik' },
-  { masthead: 'Love of The Week', tone: 'broadsheet', tag: 'Memoify' },
-  { masthead: 'Suara Rakyat', tone: 'classic', tag: 'Edisi Politik' },
+  { src: sampleBobo, alt: 'Belajar Memaafkan — Bobo edition' },
+  { src: sampleBroadsheet, alt: 'Love of The Week — broadsheet edition' },
+  { src: sampleClassic, alt: 'Suara Rakyat — political edition' },
 ];
 
 const CLIP_ROTATIONS = ['-rotate-2', 'rotate-1', '-rotate-1', 'rotate-2'];
 
-/** A faux mini newspaper front page used as a placeholder marquee clipping. */
+/** A real exported front page used as a marquee clipping. */
 function NewspaperClipping({ edition, index }: { edition: any; index: number }) {
-  const broadsheet = edition.tone === 'broadsheet';
-  const ink = broadsheet ? '#1a1a1a' : '#000000';
   return (
     <div
-      className={`shrink-0 w-[260px] ${
+      className={`shrink-0 ${
         CLIP_ROTATIONS[index % CLIP_ROTATIONS.length]
       } transition-transform duration-300 hover:rotate-0 hover:scale-[1.03]`}>
-      <div
-        className="border overflow-hidden shadow-[0_14px_34px_rgba(0,0,0,0.18)]"
-        style={{ backgroundColor: broadsheet ? '#f4f1ea' : '#ffffff', borderColor: ink }}>
-        <div className="px-3 pt-3 pb-2" style={{ borderBottom: `2px solid ${ink}` }}>
-          <div
-            className="flex justify-between text-[7px] uppercase tracking-[0.15em]"
-            style={{ color: ink }}>
-            <span>Special Frame</span>
-            <span>{edition.tag}</span>
-          </div>
-          <h3
-            className="blackletter-font text-center leading-none mt-1 text-[22px]"
-            style={{ color: ink }}>
-            {edition.masthead}
-          </h3>
-        </div>
-        <div
-          className="w-full aspect-[16/9]"
-          style={{
-            background: broadsheet
-              ? 'linear-gradient(135deg,#d8cfbf,#bcae98)'
-              : 'linear-gradient(135deg,#cfcfcf,#9e9e9e)',
-            borderBottom: `2px solid ${ink}`,
-          }}
-        />
-        <div className="px-3 py-2 space-y-1">
-          <div className="h-[5px] w-[92%] rounded" style={{ backgroundColor: `${ink}33` }} />
-          <div className="h-[5px] w-[78%] rounded" style={{ backgroundColor: `${ink}26` }} />
-          <div className="h-[5px] w-[86%] rounded" style={{ backgroundColor: `${ink}26` }} />
-        </div>
-      </div>
+      <Image
+        src={edition.src}
+        alt={edition.alt}
+        className="h-[420px] w-auto border border-black/10 rounded-[6px] shadow-[0_14px_34px_rgba(0,0,0,0.18)]"
+      />
     </div>
   );
 }
@@ -154,7 +127,17 @@ export default function NewLandingPage() {
             {/* Full-bleed auto-scrolling marquee of sample front pages */}
             <div className="wedding-marquee mt-[50px]">
               <div className="wedding-marquee-track wedding-marquee-track--left gap-[24px] py-[10px] px-[12px]">
-                {[...SAMPLE_EDITIONS, ...SAMPLE_EDITIONS].map((ed, i) => (
+                {/* One marquee "half" must be wider than the viewport or the
+                    -50% loop shows a blank gap. We repeat the few editions to
+                    fill a half, then render the half twice for a seamless loop. */}
+                {[
+                  ...SAMPLE_EDITIONS,
+                  ...SAMPLE_EDITIONS,
+                  ...SAMPLE_EDITIONS,
+                  ...SAMPLE_EDITIONS,
+                  ...SAMPLE_EDITIONS,
+                  ...SAMPLE_EDITIONS,
+                ].map((ed, i) => (
                   <NewspaperClipping key={i} edition={ed} index={i} />
                 ))}
               </div>
