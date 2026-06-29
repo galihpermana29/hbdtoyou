@@ -34,7 +34,10 @@ export default async function Home({ params }: { params: any }) {
   }
 
   const parsedData = JSON.parse(data.data.detail_content_json_text);
-  const lockedContent = data.data.status === 'locked';
+  // Gate the viewer when the backend flags content as `locked`, OR when the
+  // gift was created by a free-tier account (`user_type === 'free'`).
+  const lockedContent =
+    data.data.status === 'locked' || data.data.user_type === 'free';
   const selectedSongs = v3Songs.find((dx) => dx.id === parsedData.id);
 
   const contents = splitTextIntoColumns(parsedData.desc1);

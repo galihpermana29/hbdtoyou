@@ -25,8 +25,10 @@ const RootUserPage = async ({ params }: any) => {
 
   if (!totalItems) return <div className="min-h-screen">No data</div>;
 
+  // Gate the viewer when the backend flags content as `locked`, OR when the
+  // gift was created by a free-tier account (`user_type === 'free'`).
   const lockedContent =
-    data.data.status === 'locked';
+    data.data.status === 'locked' || data.data.user_type === 'free';
 
   const content = (
     <div className="bg-black overflow-x-hidden">

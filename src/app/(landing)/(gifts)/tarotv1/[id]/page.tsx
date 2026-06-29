@@ -28,8 +28,10 @@ const RootUserPage = async ({ params }: any) => {
     },
   };
 
+  // Gate the viewer when the backend flags content as `locked`, OR when the
+  // gift was created by a free-tier account (`user_type === 'free'`).
   const lockedContent =
-    data.data.status === 'locked';
+    data.data.status === 'locked' || data.data.user_type === 'free';
 
   const content = <TarotReader data={tarotData} />;
 
