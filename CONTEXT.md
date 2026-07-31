@@ -90,5 +90,7 @@ _Avoid_: domain, subdomain
 ### Quality
 
 **Pixel-perfect**:
-Matching the Figma design exactly at 1440px wide, including copy and its errors.
-It is undefined at any other width, where usability governs instead.
+Matching the Figma design's style and arrangement, not its measurements.
+Colour, typeface, size, weight, border, radius, shadow, spacing and copy must match exactly.
+Widths and heights are free to be dynamic, so an element that is the right style in the right place is correct at any size.
+_Avoid_: pixel-exact, identical
