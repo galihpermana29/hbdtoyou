@@ -1,14 +1,15 @@
 'use client';
 
-import { Breadcrumb, Steps } from 'antd';
 import { useForm } from 'antd/es/form/Form';
 import { ChevronLeft, ChevronRight } from 'lucide-react';
-import Link from 'next/link';
 import { useState } from 'react';
 
+import CreateFlowBreadcrumb from './create-flow-breadcrumb';
+import CreateFlowSteps from './create-flow-steps';
 import useCreateContent from '../usecase/useCreateContent';
 import WeddingInvitationForm from '@/components/forms/wedding/wedding-invitation-form';
 import WeddingInvitationPreview from '@/components/forms/wedding/wedding-invitation-preview';
+import NavigationBar from '@/components/ui/navbar';
 import {
   instrumentSerif,
   luxuriousScript,
@@ -25,42 +26,34 @@ export default function WeddingInvitationCreateClientside() {
   const [isSidebarCollapsed, setIsSidebarCollapsed] = useState(false);
 
   return (
-    <div className={`${fontVars} mt-[80px]`}>
+    <div className={fontVars}>
       {contextHolder}
 
-      <div className="w-full min-h-screen overflow-x-hidden">
-        <div className="mx-auto flex min-h-screen max-w-[1400px] flex-col px-[20px] py-[30px] pb-[50px]">
-          <Breadcrumb
-            className="mb-6"
-            items={[
-              { title: <Link href="/">Home</Link> },
-              { title: <Link href="/wedding-invitation">Wedding Invitation</Link> },
-              { title: 'Create' },
-            ]}
-          />
+      <header>
+        <NavigationBar />
+      </header>
 
-          <div className="mb-8">
-            <h1 className="text-[24px] font-[600] text-[#1B1B1B] md:text-[30px]">
-              Create your wedding invitation
+      <div className="w-full min-h-screen overflow-x-hidden">
+        {/* The same container the site navigation uses, so the breadcrumb and
+            the heading line up with the logo above them. */}
+        <div className="mx-auto flex min-h-screen max-w-6xl flex-col px-[20px] py-[30px] pb-[50px] 2xl:max-w-7xl">
+          <CreateFlowBreadcrumb />
+
+          <div className="mt-[32px]">
+            <h1 className="text-[18px] font-[600] leading-[28px] text-[#1B1B1B]">
+              Create Wedding Invitation
             </h1>
-            <p className="mt-2 max-w-[560px] text-[14px] text-[#7B7B7B]">
-              Fill in each section on the left and watch your invitation update live
-              in the phone preview.
+            <p className="mt-[4px] text-[14px] font-[400] leading-[24px] text-[#7B7B7B]">
+              Create memorable wedding invitation for you &amp; your special
+              person’s big day
             </p>
           </div>
 
-          <Steps
-            current={1}
-            className="mb-8 max-w-[720px]"
-            items={[
-              { title: 'Template' },
-              { title: 'Fill details' },
-              { title: 'Publish' },
-              { title: 'Share' },
-            ]}
-          />
+          <div className="mt-[32px] border-b border-[#EAECF0] pb-[32px]">
+            <CreateFlowSteps current="Fill in the details & story" />
+          </div>
 
-          <div className="relative flex min-h-[calc(100vh-280px)] flex-1 flex-col gap-[24px] lg:flex-row lg:items-stretch">
+          <div className="relative mt-[40px] flex min-h-[calc(100vh-280px)] flex-1 flex-col gap-[24px] lg:flex-row lg:items-stretch">
             <button
               type="button"
               onClick={() => setIsSidebarCollapsed(!isSidebarCollapsed)}
@@ -75,7 +68,7 @@ export default function WeddingInvitationCreateClientside() {
               )}
             </button>
 
-            {/* Form — takes remaining width */}
+            {/* Form - takes remaining width */}
             <div
               className={`flex min-h-0 min-w-0 flex-col rounded-[16px] border border-[#EDEDED] transition-all duration-300 ease-in-out ${
                 isSidebarCollapsed
@@ -87,7 +80,7 @@ export default function WeddingInvitationCreateClientside() {
               </div>
             </div>
 
-            {/* Phone simulator — fixed narrow column, centered */}
+            {/* Phone simulator - fixed narrow column, centered */}
             <div
               className={`flex min-h-0 flex-col transition-all duration-300 ease-in-out lg:sticky lg:top-[96px] lg:max-h-[calc(100vh-120px)] lg:w-[400px] lg:shrink-0 ${
                 isSidebarCollapsed

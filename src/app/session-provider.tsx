@@ -331,7 +331,10 @@ const SessionProvider = ({
         {children}
         {/* {parsedSession.accessToken ? userProfile ? children : <></> : children} */}
       </Provider>
-      {!['/spotify', '/magazinev1', 'journal', '/wedding-template-1', '/create/wedding-invitation'].includes(
+      {/* Routes that are somebody's gift rather than product UI: the site footer
+          would intrude on the page the recipient came to see. The Create Flow
+          that builds one is ordinary product UI and keeps its footer. */}
+      {!['/spotify', '/magazinev1', 'journal', '/wedding-template-1'].includes(
         pathname
       ) && <Footer />}
     </SessionContext.Provider>

@@ -42,10 +42,7 @@ const DraggerUpload = ({
   const [loadingUpload, setLoadingUpload] = useState(false);
   const [fileList, setFileList] = useState<any[]>([]);
 
-  const handleChange: UploadProps['onChange'] = ({
-    fileList: newFileList,
-    file,
-  }) => {
+  const handleChange: UploadProps['onChange'] = () => {
     // if (file.size! > (type === AccountType.free ? 1 : 9) * 1024 * 1024) {
     //   return message.error(
     //     `${
@@ -63,7 +60,7 @@ const DraggerUpload = ({
     // );
   };
 
-  const beforeUpload = async (file: RcFile, fileList: RcFile[]) => {
+  const beforeUpload = async (file: RcFile) => {
     // only allow upload 5 photos at a time
     // if (fileList.length > 5) {
     //   // Find the index of the current file in the list
@@ -114,7 +111,7 @@ const DraggerUpload = ({
         message.error('Your internet connection is poor, try upload one by one photo');
         return false;
       }
-    } catch (error) {
+    } catch {
       setLoadingUpload(false);
       message.error('Your internet connection is poor, try upload one by one photo');
       return false;
@@ -125,7 +122,9 @@ const DraggerUpload = ({
     <button
       type="button"
       className="flex flex-col justify-center items-center px-[20px] gap-[10px] text-caption-2 text-ny-gray-300">
-      <h1>Drop file here or click to upload</h1>
+      {/* A span, not a heading: this is the label on a button, and an h1 here
+          gave every page carrying an uploader a second top-level heading. */}
+      <span>Drop file here or click to upload</span>
     </button>
   );
 
@@ -201,7 +200,7 @@ const DraggerUpload = ({
               }
             }
 
-            const data = await beforeUpload(file, fileList);
+            const data = await beforeUpload(file);
             if (data) {
               if (limit === 1) {
                 form.setFieldValue(formItemName, data);
