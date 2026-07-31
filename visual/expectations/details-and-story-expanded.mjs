@@ -23,8 +23,12 @@
  *   form section                    one per Section, in the designed order
  *   :is(h2, h3) + p                 a Section's name, then its description
  *   label                           one per field, associated with its control
+ *   [role="group"]                  a field built from more than one element
  *   button                          an action
  *   footer                          the site footer
+ *
+ * The chrome above a screen's own content is the same on every step, so it is
+ * written once in `page-chrome.mjs` and spread in below rather than repeated.
  *
  * `withText` is the other handle, for elements whose only distinguishing feature
  * is what they say. Copy is the locator there, so wrong copy reports as a missing
@@ -46,87 +50,23 @@
  * by the beads that build them.
  */
 
-/** The typographic treatments the design uses, each named once. */
-const TYPE = {
-  breadcrumb: {
-    fontSize: '14px',
-    fontWeight: 500,
-    lineHeight: '20px',
-    color: '#7b7b7b',
-  },
-  breadcrumbCurrent: {
-    fontSize: '14px',
-    fontWeight: 600,
-    lineHeight: '20px',
-    color: '#e34013',
-  },
-  pageTitle: {
-    fontSize: '18px',
-    fontWeight: 600,
-    lineHeight: '28px',
-    color: '#1b1b1b',
-  },
-  pageDescription: {
-    fontSize: '14px',
-    fontWeight: 400,
-    lineHeight: '24px',
-    color: '#7b7b7b',
-  },
-  stepTitle: {
-    fontSize: '14px',
-    fontWeight: 600,
-    lineHeight: '20px',
-  },
-  stepDescription: {
-    fontSize: '14px',
-    fontWeight: 400,
-    lineHeight: '20px',
-  },
-  sectionName: {
-    fontSize: '18px',
-    fontWeight: 600,
-    lineHeight: '28px',
-    color: '#1b1b1b',
-  },
-  sectionDescription: {
-    fontSize: '14px',
-    fontWeight: 400,
-    lineHeight: '20px',
-    color: '#475467',
-  },
-  fieldLabel: {
-    fontSize: '14px',
-    fontWeight: 500,
-    lineHeight: '20px',
-    color: '#344054',
-  },
-  fieldHint: {
-    fontSize: '14px',
-    fontWeight: 400,
-    lineHeight: '20px',
-    color: '#475467',
-  },
-  uploadTitle: {
+import { FIELD_SHADOW, pageChrome, siteFooter, TYPE } from './page-chrome.mjs';
+
+/** The two treatments only the photo drop zone uses. */
+const UPLOAD_TYPE = {
+  title: {
     fontSize: '16px',
     fontWeight: 600,
     lineHeight: '22.4px',
     color: '#000000',
   },
-  uploadPrompt: {
+  prompt: {
     fontSize: '14px',
     fontWeight: 400,
     lineHeight: '16.8px',
     color: '#000000',
   },
-  actionLabel: {
-    fontSize: '16px',
-    fontWeight: 700,
-    lineHeight: '24px',
-  },
 };
-
-/** The one drop shadow the design uses on fields and buttons. */
-const FIELD_SHADOW = 'rgba(16, 24, 40, 0.05) 0px 1px 2px 0px';
 
 /** A Section's card: the box every Section is presented in. */
 const SECTION_CARD = {
@@ -198,49 +138,6 @@ const SECTIONS = [
   },
 ];
 
-/** The four steps, with the colours the design gives each in this state. */
-const STEPS = [
-  {
-    title: 'Choose your template',
-    titleColor: '#1b1b1b',
-    description: 'Pick a template design that calls to your dream wedding',
-    descriptionColor: '#7b7b7b',
-  },
-  {
-    title: 'Fill in the details & story',
-    titleColor: '#e34013',
-    description: 'Add photos, music, and story details.',
-    descriptionColor: '#e34013',
-  },
-  {
-    title: 'Guest invites details',
-    titleColor: '#344054',
-    // The design's own wording. Corrections belong in Figma: see ADR 0002.
-    description: 'Config guest details on your the invites',
-    descriptionColor: '#475467',
-  },
-  {
-    title: 'Share with guests',
-    titleColor: '#7b7b7b',
-    description: 'Easily share your invitation to invited guests.',
-    descriptionColor: '#7b7b7b',
-  },
-];
-
-const stepExpectations = () =>
-  STEPS.flatMap((step, index) => [
-    {
-      name: `Step ${index + 1} title`,
-      withText: step.title,
-      style: { ...TYPE.stepTitle, color: step.titleColor },
-    },
-    {
-      name: `Step ${index + 1} description`,
-      withText: step.description,
-      style: { ...TYPE.stepDescription, color: step.descriptionColor },
-    },
-  ]);
-
 /**
  * The nth Section, counted in document order rather than by `:nth-of-type`.
  *
@@ -292,12 +189,12 @@ const coverHeaderFields = [
   {
     name: 'Couples Photos upload title',
     withText: 'Add More Photos',
-    style: TYPE.uploadTitle,
+    style: UPLOAD_TYPE.title,
   },
   {
     name: 'Couples Photos upload prompt',
     withText: 'Drag & drop up to 5 images from your gallery',
-    style: TYPE.uploadPrompt,
+    style: UPLOAD_TYPE.prompt,
   },
   {
     name: 'Couples Photos hint',
@@ -374,50 +271,7 @@ const coverHeaderFields = [
 ];
 
 export const expectations = [
-  {
-    name: 'Site navigation',
-    select: 'header',
-  },
-  {
-    // The design opens the breadcrumb with a home icon and no words, so there
-    // is nothing to assert about it beyond it being there, first.
-    name: 'Breadcrumb, home',
-    select: 'nav[aria-label="Breadcrumb"] a',
-    nth: 0,
-  },
-  {
-    name: 'Breadcrumb, Feature',
-    select: 'nav[aria-label="Breadcrumb"] a',
-    nth: 1,
-    text: 'Feature',
-    style: TYPE.breadcrumb,
-  },
-  {
-    name: 'Breadcrumb, Wedding Invitation',
-    select: 'nav[aria-label="Breadcrumb"] a',
-    nth: 2,
-    text: 'Wedding Invitation',
-    style: TYPE.breadcrumb,
-  },
-  {
-    name: 'Breadcrumb, current page',
-    select: 'nav[aria-label="Breadcrumb"] [aria-current="page"]',
-    text: 'Create Wedding Invitation',
-    style: TYPE.breadcrumbCurrent,
-  },
-  {
-    name: 'Page title',
-    select: 'h1',
-    text: 'Create Wedding Invitation',
-    style: TYPE.pageTitle,
-  },
-  {
-    name: 'Page description',
-    select: 'h1 + p',
-    text: 'Create memorable wedding invitation for you & your special person’s big day',
-    style: TYPE.pageDescription,
-  },
-  ...stepExpectations(),
+  ...pageChrome('Fill in the details & story'),
   ...sectionExpectations(0),
   ...coverHeaderFields,
   ...sectionExpectations(1),
@@ -487,8 +341,5 @@ export const expectations = [
       boxShadow: FIELD_SHADOW,
     },
   },
-  {
-    name: 'Site footer',
-    select: 'footer',
-  },
+  siteFooter,
 ];

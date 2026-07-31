@@ -123,6 +123,18 @@ function checkTheVocabulary() {
   );
   same('gap', '24px', '24px 24px', 'one gap means both gaps');
   same('borderRadius', 8, '8px 8px 8px 8px', 'one radius means four corners');
+  same(
+    'borderColor',
+    '#d0d5dd',
+    'rgb(208, 213, 221) rgb(208, 213, 221) rgb(208, 213, 221) rgb(208, 213, 221)',
+    'one border colour means four sides, even spelled as rgb() with spaces in it'
+  );
+  differ(
+    'borderColor',
+    '#d0d5dd',
+    'rgb(208, 213, 221) rgb(208, 213, 221) rgb(208, 213, 221) rgb(227, 64, 19)',
+    'one side of a border being another colour is a change'
+  );
   differ(
     'padding',
     '24px 12px',

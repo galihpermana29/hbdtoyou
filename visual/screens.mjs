@@ -8,6 +8,7 @@
  */
 
 import { expectations as detailsAndStoryExpanded } from './expectations/details-and-story-expanded.mjs';
+import { expectations as guestInvitesEmpty } from './expectations/guest-invites-empty.mjs';
 
 /** The width the design is defined at. Nothing below this is checked. */
 export const DESIGN_WIDTH = 1440;
@@ -38,12 +39,25 @@ async function expandEverySection(page) {
 }
 
 /**
- * Six of the seven states have no expectations recorded yet.
+ * Advance to the guest invites step.
  *
- * Three have no exported frame at all, and three more have a frame but no route
- * to render. Recording a screen's expectations is the work of the bead that
- * builds it; the baseline image beside this manifest is what those values are
- * read from.
+ * The Create Flow's steps do not each have a URL: every step stays mounted so
+ * that what a couple entered survives moving between them, and the step they are
+ * on is held in the page. Driving the flow is therefore pressing the button a
+ * couple would press, which is also the only way to check that the step is
+ * reachable at all.
+ */
+async function advanceToGuestInvites(page) {
+  await page.getByRole('button', { name: 'Next', exact: true }).click();
+}
+
+/**
+ * Five of the seven states have no expectations recorded yet.
+ *
+ * Three have no exported frame at all, and two more have a frame but nothing
+ * built to render. Recording a screen's expectations is the work of the bead
+ * that builds it; the baseline image beside this manifest is what those values
+ * are read from.
  */
 export const screens = [
   {
@@ -86,10 +100,11 @@ export const screens = [
   {
     id: 'guest-invites-empty',
     title: 'Guest invites details, Guest List still empty',
-    route: null,
+    route: DETAILS_AND_STORY_ROUTE,
     figmaNodeId: '332-12440',
     baseline: 'guest-invites-empty.png',
-    expectations: null,
+    expectations: guestInvitesEmpty,
+    prepare: advanceToGuestInvites,
   },
   {
     id: 'guest-invites-populated',

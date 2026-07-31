@@ -7,7 +7,6 @@ import {
   DatePicker,
   Form,
   Input,
-  message,
   Select,
   Switch,
   TimePicker,
@@ -62,14 +61,6 @@ export default function WeddingInvitationForm({
   const photoShareCover = useWatch('photoShareCover', form);
   const galleryPhotos = useWatch('galleryPhotos', form);
   const tokenPhoto = useWatch('tokenPhoto', form);
-
-  const handleStubSubmit = (action: 'draft' | 'publish') => {
-    message.info(
-      action === 'draft'
-        ? 'Save as draft will be available in the next phase.'
-        : 'Publish will be available in the next phase.'
-    );
-  };
 
   return (
     <Form
@@ -474,22 +465,6 @@ export default function WeddingInvitationForm({
           },
         ]}
       />
-
-      <div className="mt-6 flex flex-col gap-3 sm:flex-row">
-        <Button
-          size="large"
-          className="h-12 flex-1 font-semibold"
-          onClick={() => handleStubSubmit('draft')}>
-          Save as draft
-        </Button>
-        <Button
-          type="primary"
-          size="large"
-          className="h-12 flex-1 border-[#E34013] bg-[#E34013] font-semibold hover:!border-[#c43610] hover:!bg-[#c43610]"
-          onClick={() => handleStubSubmit('publish')}>
-          Publish
-        </Button>
-      </div>
     </Form>
   );
 }

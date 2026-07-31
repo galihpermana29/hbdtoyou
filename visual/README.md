@@ -111,7 +111,9 @@ A colour written by name is refused: a browser never reports one that way, so `w
 Elements are found two ways, and the choice decides what a failure reads like.
 
 A structural selector says where an element sits and lets its copy be checked as a claim, so a typo reports as a `copy` failure with both spellings.
-Those selectors use nothing but ordinary HTML and the standard ARIA patterns - `header`, `nav[aria-label="Breadcrumb"]`, `h1`, `form section`, `label` with its control, `button`, `footer` - and that list is the whole contract a screen has to satisfy.
+Those selectors use nothing but ordinary HTML and the standard ARIA patterns - `header`, `nav[aria-label="Breadcrumb"]`, `h1`, `form section`, `label` with its control, `[role="group"]` for a field the design builds from more than one element, `button`, `footer` - and that list is the whole contract a screen has to satisfy.
+
+The chrome above a screen's own content is the same on all four steps, so it lives in `visual/expectations/page-chrome.mjs` and each screen spreads it in.
 
 `withText` is the other way, for elements whose only distinguishing feature is what they say.
 Copy is the locator there, so wrong copy reports as a missing element rather than as a copy failure.

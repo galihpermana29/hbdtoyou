@@ -150,9 +150,18 @@ export function normaliseLength(input) {
   return value;
 }
 
-/** Every token of a multi-value property, each normalised on its own. */
+/**
+ * Every token of a multi-value property, each normalised on its own.
+ *
+ * The split respects brackets, because the four sides of a border colour reach
+ * this as `rgb(208, 213, 221) rgb(208, 213, 221) ...`, and a plain split on
+ * whitespace would cut each colour into three pieces that are not colours.
+ */
 const normaliseEachToken = (normalise) => (input) =>
-  String(input).trim().split(/\s+/).filter(Boolean).map(normalise).join(' ');
+  splitTokens(String(input)).map(normalise).join(' ');
+
+const splitTokens = (value) =>
+  splitOutsideBrackets(value, (character) => /\s/.test(character));
 
 const normaliseLengthList = normaliseEachToken(normaliseLength);
 const normaliseColourList = normaliseEachToken(normaliseColour);
@@ -323,7 +332,7 @@ export const READABLE_PROPERTIES = [
  * way.
  */
 function expandSides(value, sides) {
-  const tokens = String(value).trim().split(/\s+/).filter(Boolean);
+  const tokens = splitTokens(String(value));
   if (tokens.length >= sides || tokens.length === 0) {
     return tokens.join(' ');
   }
