@@ -28,6 +28,75 @@ export const flowShadow = '[box-shadow:0_1px_2px_0_rgba(16,24,40,0.05)]';
 export const flowFieldBox = `rounded-[8px] border border-[#D0D5DD] bg-white ${flowShadow}`;
 
 /**
+ * A plain text field, box and type together.
+ *
+ * Nothing turns the focus ring off. The design draws no focus state at all, so
+ * the browser's own is what a couple gets, and taking it away would leave a
+ * field somebody navigating by keyboard cannot see they are in.
+ */
+export const flowTextField =
+  `${flowFieldBox} w-full px-[12px] py-[8px] text-[16px] font-[400] ` +
+  'leading-[24px] text-[#101828] placeholder:text-[#667085]';
+
+/** The name the design gives a Section, and the line of guidance under it. */
+export const flowSectionName =
+  'text-[18px] font-[600] leading-[28px] text-[#1B1B1B]';
+
+/** The words above a field. */
+export const flowLabel = 'text-[14px] font-[500] leading-[20px] text-[#344054]';
+
+/**
+ * The grey line of guidance the design prints under a field, and under a
+ * Section's name.
+ *
+ * One treatment rather than two, because the design sets both in the same size,
+ * weight, leading and colour, and writing them separately would invite them to
+ * drift apart for no reason the design gives.
+ */
+export const flowHint = 'text-[14px] font-[400] leading-[20px] text-[#475467]';
+
+/**
+ * The card the design presents every Section of the details-and-story step in.
+ *
+ * The 24px is a gap rather than margins on what it separates, because a Section
+ * holds a header and a body and nothing else, and a collapsed Section drops its
+ * body entirely - a gap disappears with it, where a margin would not.
+ */
+export const flowSectionCard =
+  'flex flex-col gap-[24px] rounded-[8px] border border-[#D0D5DD] px-[12px] py-[24px]';
+
+/**
+ * The dashed area the design draws wherever a file is dropped, and the two
+ * treatments its words wear.
+ *
+ * The same area appears on two steps - photos on the details-and-story step, a
+ * Guest List on the guest invites step - and the design draws one shape for
+ * both. The colours are Ant Design's own, because the design's area is antd's,
+ * drawn at the opacities Figma names on those layers.
+ */
+export const flowDropZone =
+  'flex cursor-pointer flex-col items-center gap-[16px] rounded-[8px] ' +
+  'border border-dashed border-[#D9D9D9] bg-[rgba(0,0,0,0.02)] p-[16px]';
+
+/** What the dashed area invites a couple to do. */
+export const flowDropZoneTitle =
+  'text-[16px] font-[600] leading-[22.4px] text-[rgba(0,0,0,0.88)]';
+
+/** How it says to do it. */
+export const flowDropZonePrompt =
+  'text-[14px] font-[400] leading-[16.8px] text-[rgba(0,0,0,0.45)]';
+
+/** What a couple is told when a field will not take what they gave it. */
+export const flowProblem =
+  'text-[14px] font-[400] leading-[20px] text-[#D92D20]';
+
+/** The distance the design leaves between one field and the next. */
+export const flowFieldStack = 'flex flex-col gap-[24px]';
+
+/** A field's own parts: its label, its guidance, and its control. */
+export const flowFieldParts = 'flex flex-col gap-[6px]';
+
+/**
  * The pair of actions that ends every step.
  *
  * The design draws the same two buttons at the foot of each step - an outlined

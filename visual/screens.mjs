@@ -29,20 +29,29 @@ const DETAILS_AND_STORY_ROUTE = '/create/wedding-invitation';
 /**
  * Expand every Section, top to bottom.
  *
- * The form is currently an antd accordion, so at most one Section can be open and
- * this leaves the last one open rather than all of them. That is not worked
- * around: it is one of the differences from the design, and hiding it here would
- * hide it from the check as well. The screen's `note` says so in the report.
+ * Each Section is a disclosure that opens on its own, so pressing the closed
+ * ones in turn leaves all of them open, which is the state the design draws. The
+ * list is re-read on every pass rather than once, because opening a Section
+ * changes what is on the page beneath it, and a locator captured before the
+ * first press would be pointing at the page as it was.
+ *
+ * One press per Section is all it can take, so that is the bound. A control
+ * that does not open what it says it opens would otherwise be pressed for ever,
+ * and a hung run says far less than a run that stops and reports the screen.
  */
 async function expandEverySection(page) {
-  const headers = page.locator('.ant-collapse-item > .ant-collapse-header');
-  const count = await headers.count();
-  for (let index = 0; index < count; index += 1) {
-    const header = headers.nth(index);
-    const isOpen = (await header.getAttribute('aria-expanded')) === 'true';
-    if (!isOpen) {
-      await header.click();
-    }
+  const sections = await page.locator('form section').count();
+  const closed = page.locator('form section button[aria-expanded="false"]');
+  for (let press = 0; press < sections; press += 1) {
+    if ((await closed.count()) === 0) return;
+    await closed.first().click();
+  }
+  const stillClosed = await closed.count();
+  if (stillClosed > 0) {
+    throw new Error(
+      `${stillClosed} of ${sections} Sections would not open, after pressing ` +
+        'the closed ones once each'
+    );
   }
 }
 
@@ -118,10 +127,6 @@ export const screens = [
     baseline: 'details-and-story-expanded.png',
     expectations: detailsAndStoryExpanded,
     prepare: expandEverySection,
-    note:
-      'the form is an accordion, so only one Section can be open at a time. ' +
-      'The Sections below the open one are collapsed, so their elements are ' +
-      'reported as missing rather than as wrongly styled.',
   },
   {
     id: 'details-and-story-cover-header',

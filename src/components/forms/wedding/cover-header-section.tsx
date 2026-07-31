@@ -1,0 +1,132 @@
+'use client';
+
+import { DatePicker, Form, Select } from 'antd';
+import { Calendar, Music } from 'lucide-react';
+import { useId } from 'react';
+
+import type { OpenNotificationFunction } from '@/app/(landing)/(core)/create/usecase/useCreateContent';
+import CreateFlowSection from './create-flow-section';
+import {
+  flowFieldParts,
+  flowFieldStack,
+  flowHint,
+  flowLabel,
+} from './create-flow-treatment';
+import { fieldTreatment } from './field-treatment';
+import FlowTextField from './flow-text-field';
+import PhotoDropZone from './photo-drop-zone';
+import { DUMMY_BACKGROUND_MUSIC_OPTIONS } from './wedding-invitation-types';
+
+/**
+ * The first Section of the details-and-story step: what a guest sees when the
+ * invitation opens.
+ *
+ * Every word here is the design's, including "Wedding Place Name" for the venue
+ * and the run-on line under Background Track: the design is literal truth, see
+ * `docs/adr/0002-figma-is-literal-truth.md`.
+ *
+ * The design draws every field of this Section empty, with grey placeholder
+ * text, so the form starts empty too and the placeholders are the design's own
+ * examples. The Site Preview is not left blank by that - it falls back to the
+ * sample invitation for anything the couple has not answered yet.
+ *
+ * The two nicknames sit side by side because the design pairs them, bride
+ * first. Everything else takes the full width of the card.
+ */
+
+/** How many photos the design says the cover takes. */
+const COUPLES_PHOTO_LIMIT = 5;
+
+export interface CoverHeaderSectionProps {
+  /** The largest file the couple's plan allows, in megabytes. */
+  maxUploadMb: number;
+  openNotification?: OpenNotificationFunction;
+}
+
+export default function CoverHeaderSection({
+  maxUploadMb,
+  openNotification,
+}: CoverHeaderSectionProps) {
+  const weddingDateId = useId();
+  const backgroundTrackId = useId();
+
+  return (
+    <CreateFlowSection
+      name="Cover Header"
+      description="The general details about the event and what your guests will see when opening the invitation"
+      defaultOpen>
+      <div className={flowFieldStack}>
+        <Form.Item name="heroPhotos" noStyle>
+          <PhotoDropZone
+            label="Couples Photos"
+            limit={COUPLES_PHOTO_LIMIT}
+            hint="We recommend to add more than 2 images in the ratio of 4:3 or 16:9 for more interactivity"
+            maxSizeMb={maxUploadMb}
+            openNotification={openNotification}
+          />
+        </Form.Item>
+
+        <div className="grid grid-cols-2 gap-[24px]">
+          <Form.Item name="brideName" noStyle>
+            <FlowTextField label="Bride Nickname" placeholder="Freya" />
+          </Form.Item>
+          <Form.Item name="groomName" noStyle>
+            <FlowTextField label="Groom Nickname" placeholder="Elias" />
+          </Form.Item>
+        </div>
+
+        <Form.Item name="venueName" noStyle>
+          <FlowTextField
+            label="Wedding Place Name"
+            placeholder="MANDARIN HOTEL, JAKARTA"
+          />
+        </Form.Item>
+
+        <div className={flowFieldParts}>
+          <label htmlFor={weddingDateId} className={flowLabel}>
+            Wedding Date
+          </label>
+          {/* A picker rather than a typed date, so a day that does not exist
+              cannot be entered. The design puts the calendar mark before the
+              date rather than after it, which is what `prefix` is for. */}
+          <Form.Item name="weddingDate" noStyle>
+            <DatePicker
+              id={weddingDateId}
+              size="large"
+              format="DD/MM/YYYY"
+              placeholder="03/05/2026"
+              prefix={<Calendar size={20} aria-hidden="true" />}
+              suffixIcon={null}
+              className={`w-full ${fieldTreatment}`}
+            />
+          </Form.Item>
+        </div>
+
+        <div className={flowFieldParts}>
+          <label htmlFor={backgroundTrackId} className={flowLabel}>
+            Background Track
+          </label>
+          <p className={flowHint}>
+            Add a backtrack that represent you &amp; your partner story or
+            something that you both shared
+          </p>
+          {/* Searched by artist or by song, as the design's placeholder says,
+              against the tracks the product currently offers. */}
+          <Form.Item name="backgroundMusic" noStyle>
+            <Select
+              id={backgroundTrackId}
+              size="large"
+              showSearch
+              optionFilterProp="label"
+              placeholder="Search artist or song name"
+              options={DUMMY_BACKGROUND_MUSIC_OPTIONS}
+              prefix={<Music size={20} aria-hidden="true" />}
+              suffixIcon={null}
+              className={`w-full ${fieldTreatment}`}
+            />
+          </Form.Item>
+        </div>
+      </div>
+    </CreateFlowSection>
+  );
+}

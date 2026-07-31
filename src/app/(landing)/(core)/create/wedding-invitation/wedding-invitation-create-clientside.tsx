@@ -144,12 +144,14 @@ export default function WeddingInvitationCreateClientside() {
                 )}
               </button>
 
-              {/* Form - takes remaining width */}
+              {/* Form - takes remaining width. The design draws no box around
+                  the Sections: each one carries its own card, and they sit on
+                  the page at the same gutter as the heading above them. */}
               <div
-                className={`flex min-h-0 min-w-0 flex-col rounded-[16px] border border-[#EDEDED] transition-all duration-300 ease-in-out ${
+                className={`flex min-h-0 min-w-0 flex-col transition-all duration-300 ease-in-out ${
                   isSidebarCollapsed
                     ? 'w-0 max-w-0 overflow-hidden opacity-0 lg:flex-[0]'
-                    : 'min-w-0 flex-1 p-[24px] lg:pr-[32px]'
+                    : 'min-w-0 flex-1 lg:pr-[32px]'
                 }`}>
                 <div className={isSidebarCollapsed ? 'hidden' : 'block'}>
                   <WeddingInvitationForm

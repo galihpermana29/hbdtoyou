@@ -7,7 +7,14 @@ import {
   flowActionBack,
   flowActionForward,
   flowActionRow,
+  flowDropZone,
+  flowDropZonePrompt,
+  flowDropZoneTitle,
   flowFieldBox,
+  flowHint,
+  flowLabel,
+  flowProblem,
+  flowSectionName,
 } from './create-flow-treatment';
 import GuestInvitesPreview from './guest-invites-preview';
 import {
@@ -39,16 +46,6 @@ import { GUEST_LIST_SIZE_LIMIT, readGuestList, type Guest } from './guest-list';
  * the browser and the guests it names are held in this step's values, so
  * uploading one sends nothing anywhere.
  */
-
-/** The design's field label. */
-const TYPE_LABEL = 'text-[14px] font-[500] leading-[20px] text-[#344054]';
-
-/** The design's hint, the grey line under a field. */
-const TYPE_HINT = 'text-[14px] font-[400] leading-[20px] text-[#475467]';
-
-/** The design's section name and the line under it. */
-const TYPE_SECTION_NAME =
-  'text-[18px] font-[600] leading-[28px] text-[#1B1B1B]';
 
 export interface GuestInvitesStepProps {
   /**
@@ -193,15 +190,15 @@ export default function GuestInvitesStep({
             onConfirm();
           }}>
           <section className="flex flex-col">
-            <h3 className={TYPE_SECTION_NAME}>Customize your invitation</h3>
-            <p className={TYPE_HINT}>
+            <h3 className={flowSectionName}>Customize your invitation</h3>
+            <p className={flowHint}>
               Personalize your invitation domain &amp; message for your guests
               to see
             </p>
 
             <div className="mt-[24px] flex flex-col gap-[24px]">
               <div className="flex flex-col gap-[6px]">
-                <label id={slugLabelId} htmlFor={slugId} className={TYPE_LABEL}>
+                <label id={slugLabelId} htmlFor={slugId} className={flowLabel}>
                   Custom Your Web Domain
                 </label>
                 <div
@@ -226,20 +223,18 @@ export default function GuestInvitesStep({
                     {SLUG_SUFFIX}
                   </span>
                 </div>
-                <p id={`${slugId}-rules`} className={TYPE_HINT}>
+                <p id={`${slugId}-rules`} className={flowHint}>
                   {SLUG_RULES}
                 </p>
                 {showProblem ? (
-                  <p
-                    role="alert"
-                    className="text-[14px] font-[400] leading-[20px] text-[#D92D20]">
+                  <p role="alert" className={flowProblem}>
                     {problem}
                   </p>
                 ) : null}
               </div>
 
               <div className="flex flex-col gap-[6px]">
-                <label htmlFor={messageId} className={TYPE_LABEL}>
+                <label htmlFor={messageId} className={flowLabel}>
                   Invitation Greeting Message
                 </label>
                 <textarea
@@ -256,8 +251,8 @@ export default function GuestInvitesStep({
           </section>
 
           <section className="flex flex-col">
-            <h3 className={TYPE_SECTION_NAME}>Add Guest List</h3>
-            <p className={TYPE_HINT}>
+            <h3 className={flowSectionName}>Add Guest List</h3>
+            <p className={flowHint}>
               Personalize your invitation domain &amp; message for your guests
               to see
             </p>
@@ -272,7 +267,7 @@ export default function GuestInvitesStep({
                 />
               ) : (
                 <>
-                  <p id={guestListLabelId} className={TYPE_LABEL}>
+                  <p id={guestListLabelId} className={flowLabel}>
                     Guest List
                   </p>
                   <div
@@ -285,17 +280,17 @@ export default function GuestInvitesStep({
                       const file = event.dataTransfer.files?.[0];
                       if (file) uploadGuestList(file);
                     }}
-                    className="flex cursor-pointer flex-col items-center gap-[16px] rounded-[8px] border border-dashed border-[#D9D9D9] bg-[rgba(0,0,0,0.02)] p-[16px]">
+                    className={flowDropZone}>
                     <Upload
                       size={32}
                       aria-hidden="true"
                       className="text-[#141414]"
                     />
                     <div className="flex flex-col items-center gap-[4px] text-center">
-                      <p className="text-[16px] font-[600] leading-[22.4px] text-[rgba(0,0,0,0.88)]">
+                      <p className={flowDropZoneTitle}>
                         Drag &amp; drop up your list here
                       </p>
-                      <p className="text-[14px] font-[400] leading-[16.8px] text-[rgba(0,0,0,0.45)]">
+                      <p className={flowDropZonePrompt}>
                         Upload in format .CSV
                       </p>
                     </div>
@@ -308,13 +303,11 @@ export default function GuestInvitesStep({
                       isTheTabStop
                     />
                   </div>
-                  <p className={TYPE_HINT}>{GUEST_LIST_SIZE_LIMIT}</p>
+                  <p className={flowHint}>{GUEST_LIST_SIZE_LIMIT}</p>
                 </>
               )}
               {guestListProblem ? (
-                <p
-                  role="alert"
-                  className="text-[14px] font-[400] leading-[20px] text-[#D92D20]">
+                <p role="alert" className={flowProblem}>
                   {guestListProblem}
                 </p>
               ) : null}

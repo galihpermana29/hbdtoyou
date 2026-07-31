@@ -52,19 +52,30 @@
 
 import { FIELD_SHADOW, pageChrome, siteFooter, TYPE } from './page-chrome.mjs';
 
-/** The two treatments only the photo drop zone uses. */
+/**
+ * The two treatments only the photo drop zone uses.
+ *
+ * Both colours were first recorded as `#000000`, which is the fill Figma names
+ * on those two layers, and neither is what the design paints: the layers carry
+ * an opacity as well, and dropping it made a grey line black and a near-black
+ * one pure. The baseline image settles it: over the area's own (250, 250, 250)
+ * ground, the title's darkest pixel is (30, 30, 30) and the prompt's is
+ * (137, 137, 137), which are 88% and 45% of black. It is the same drop zone the
+ * guest invites step draws, and `guest-invites-empty.mjs` already records those
+ * two values for it.
+ */
 const UPLOAD_TYPE = {
   title: {
     fontSize: '16px',
     fontWeight: 600,
     lineHeight: '22.4px',
-    color: '#000000',
+    color: 'rgba(0, 0, 0, 0.88)',
   },
   prompt: {
     fontSize: '14px',
     fontWeight: 400,
     lineHeight: '16.8px',
-    color: '#000000',
+    color: 'rgba(0, 0, 0, 0.45)',
   },
 };
 

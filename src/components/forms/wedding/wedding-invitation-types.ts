@@ -211,23 +211,29 @@ export function formValuesToContent(
     tokenPhoto: v.tokenPhoto || defaults.tokenPhoto,
     accountHolder: v.accountHolder?.trim() || defaults.accountHolder,
     accountNumber: v.accountNumber?.trim() || defaults.accountNumber,
-    guestMessagesEnabled: v.guestMessagesEnabled ?? defaults.guestMessagesEnabled,
+    guestMessagesEnabled:
+      v.guestMessagesEnabled ?? defaults.guestMessagesEnabled,
   };
 }
 
-/** Initial form values for the creator (prefills preview on first paint). */
+/**
+ * Initial form values for the creator (prefills preview on first paint).
+ *
+ * The Cover Header's fields are deliberately absent. The design draws every one
+ * of them empty, with its example written as grey placeholder text, so filling
+ * them in would put the design's examples into a couple's invitation as if they
+ * had chosen them. Nothing is lost by leaving them out: `formValuesToContent`
+ * falls back to the sample invitation for anything unanswered, so the Site
+ * Preview still has a wedding to show.
+ */
 export function getDefaultFormValues(): WeddingInvitationFormValues {
   const d = DEFAULT_WEDDING_TEMPLATE_1_CONTENT;
   return {
-    groomName: d.groomName,
-    brideName: d.brideName,
     groomFullName: d.groomFullName,
     brideFullName: d.brideFullName,
     groomParents: d.groomParents,
     brideParents: d.brideParents,
     heroPhotos: [],
-    weddingDate: dayjs('2026-05-03'),
-    backgroundMusic: d.backgroundMusicId,
     verseText: d.verseText,
     verseCitation: d.verseCitation,
     loveStoryPhotos: [],
@@ -238,7 +244,6 @@ export function getDefaultFormValues(): WeddingInvitationFormValues {
     eventPhotos: [],
     eventStartTime: dayjs('19:00', 'HH:mm'),
     eventEndTime: dayjs('21:00', 'HH:mm'),
-    venueName: d.venueName,
     address: d.address,
     mapsUrl: d.mapsUrl,
     dressCode: d.dressCode,
