@@ -19,6 +19,7 @@ import type { FormInstance } from 'antd';
 import { useMemoifyProfile } from '@/app/session-provider';
 import type { OpenNotificationFunction } from '@/app/(landing)/(core)/create/usecase/useCreateContent';
 import DraggerUpload, { AccountType } from '@/components/ui/uploader/uploader';
+import { fieldTreatment } from '@/components/forms/wedding/field-treatment';
 import {
   DUMMY_BACKGROUND_MUSIC_OPTIONS,
   getDefaultFormValues,
@@ -108,20 +109,33 @@ export default function WeddingInvitationForm({
                   name="groomName"
                   label="Groom name (short)"
                   rules={[{ required: true, message: 'Please enter groom name' }]}>
-                  <Input size="large" placeholder="Elias" />
+                  <Input
+                    size="large"
+                    className={fieldTreatment}
+                    placeholder="Elias"
+                  />
                 </Form.Item>
                 <Form.Item
                   name="brideName"
                   label="Bride name (short)"
                   rules={[{ required: true, message: 'Please enter bride name' }]}>
-                  <Input size="large" placeholder="Freya" />
+                  <Input
+                    size="large"
+                    className={fieldTreatment}
+                    placeholder="Freya"
+                  />
                 </Form.Item>
                 <Form.Item name="weddingDate" label="Wedding date">
-                  <DatePicker size="large" className="w-full" format="DD MMMM YYYY" />
+                  <DatePicker
+                    size="large"
+                    className={`w-full ${fieldTreatment}`}
+                    format="DD MMMM YYYY"
+                  />
                 </Form.Item>
                 <Form.Item name="backgroundMusic" label="Background music">
                   <Select
                     size="large"
+                    className={fieldTreatment}
                     options={DUMMY_BACKGROUND_MUSIC_OPTIONS}
                     placeholder="Select a song"
                   />
@@ -135,10 +149,18 @@ export default function WeddingInvitationForm({
             children: (
               <>
                 <Form.Item name="verseText" label="Verse text">
-                  <TextArea rows={5} placeholder="Enter the holy verse..." />
+                  <TextArea
+                    rows={5}
+                    className={fieldTreatment}
+                    placeholder="Enter the holy verse..."
+                  />
                 </Form.Item>
                 <Form.Item name="verseCitation" label="Citation">
-                  <Input size="large" placeholder="Q.S Ar-Rum : 21" />
+                  <Input
+                    size="large"
+                    className={fieldTreatment}
+                    placeholder="Q.S Ar-Rum : 21"
+                  />
                 </Form.Item>
               </>
             ),
@@ -152,16 +174,32 @@ export default function WeddingInvitationForm({
             children: (
               <>
                 <Form.Item name="groomFullName" label="Groom full name">
-                  <Input size="large" placeholder="Elias Frank Simanjuntak" />
+                  <Input
+                    size="large"
+                    className={fieldTreatment}
+                    placeholder="Elias Frank Simanjuntak"
+                  />
                 </Form.Item>
                 <Form.Item name="groomParents" label="Groom parents">
-                  <Input size="large" placeholder="Frank & Esther" />
+                  <Input
+                    size="large"
+                    className={fieldTreatment}
+                    placeholder="Frank & Esther"
+                  />
                 </Form.Item>
                 <Form.Item name="brideFullName" label="Bride full name">
-                  <Input size="large" placeholder="Freya Putri Magellan" />
+                  <Input
+                    size="large"
+                    className={fieldTreatment}
+                    placeholder="Freya Putri Magellan"
+                  />
                 </Form.Item>
                 <Form.Item name="brideParents" label="Bride parents">
-                  <Input size="large" placeholder="Ferdinand & Tuti" />
+                  <Input
+                    size="large"
+                    className={fieldTreatment}
+                    placeholder="Ferdinand & Tuti"
+                  />
                 </Form.Item>
               </>
             ),
@@ -197,21 +235,33 @@ export default function WeddingInvitationForm({
                             name={[name, 'year']}
                             label="Year"
                             className="mb-3">
-                            <Input size="large" placeholder="2020" />
+                            <Input
+                              size="large"
+                              className={fieldTreatment}
+                              placeholder="2020"
+                            />
                           </Form.Item>
                           <Form.Item
                             {...restField}
                             name={[name, 'title']}
                             label="Title"
                             className="mb-3">
-                            <Input size="large" placeholder="The meeting" />
+                            <Input
+                              size="large"
+                              className={fieldTreatment}
+                              placeholder="The meeting"
+                            />
                           </Form.Item>
                           <Form.Item
                             {...restField}
                             name={[name, 'body']}
                             label="Story"
                             className="mb-0">
-                            <TextArea rows={3} placeholder="Tell this chapter..." />
+                            <TextArea
+                              rows={3}
+                              className={fieldTreatment}
+                              placeholder="Tell this chapter..."
+                            />
                           </Form.Item>
                           {fields.length > 1 && (
                             <button
@@ -285,22 +335,46 @@ export default function WeddingInvitationForm({
                   />
                 </Form.Item>
                 <Form.Item name="eventStartTime" label="Start time">
-                  <TimePicker size="large" className="w-full" format="HH:mm" />
+                  <TimePicker
+                    size="large"
+                    className={`w-full ${fieldTreatment}`}
+                    format="HH:mm"
+                  />
                 </Form.Item>
                 <Form.Item name="eventEndTime" label="End time">
-                  <TimePicker size="large" className="w-full" format="HH:mm" />
+                  <TimePicker
+                    size="large"
+                    className={`w-full ${fieldTreatment}`}
+                    format="HH:mm"
+                  />
                 </Form.Item>
                 <Form.Item name="venueName" label="Venue name">
-                  <Input size="large" placeholder="Mandarin Hotel, Jakarta" />
+                  <Input
+                    size="large"
+                    className={fieldTreatment}
+                    placeholder="Mandarin Hotel, Jakarta"
+                  />
                 </Form.Item>
                 <Form.Item name="address" label="Address">
-                  <TextArea rows={3} placeholder="Full venue address" />
+                  <TextArea
+                    rows={3}
+                    className={fieldTreatment}
+                    placeholder="Full venue address"
+                  />
                 </Form.Item>
                 <Form.Item name="mapsUrl" label="Google Maps link (optional)">
-                  <Input size="large" placeholder="https://maps.google.com/..." />
+                  <Input
+                    size="large"
+                    className={fieldTreatment}
+                    placeholder="https://maps.google.com/..."
+                  />
                 </Form.Item>
                 <Form.Item name="dressCode" label="Dress code">
-                  <Input size="large" placeholder="Black, white, or both" />
+                  <Input
+                    size="large"
+                    className={fieldTreatment}
+                    placeholder="Black, white, or both"
+                  />
                 </Form.Item>
               </>
             ),
@@ -321,7 +395,11 @@ export default function WeddingInvitationForm({
                   />
                 </Form.Item>
                 <Form.Item name="photoShareUrl" label="Photo share link (optional)">
-                  <Input size="large" placeholder="https://..." />
+                  <Input
+                    size="large"
+                    className={fieldTreatment}
+                    placeholder="https://..."
+                  />
                 </Form.Item>
               </>
             ),
@@ -349,7 +427,11 @@ export default function WeddingInvitationForm({
             children: (
               <>
                 <Form.Item name="tokenMessage" label="Message">
-                  <TextArea rows={4} placeholder="Message for guests..." />
+                  <TextArea
+                    rows={4}
+                    className={fieldTreatment}
+                    placeholder="Message for guests..."
+                  />
                 </Form.Item>
                 <Form.Item name="tokenPhoto" label="Token photo">
                   <DraggerUpload
@@ -362,10 +444,18 @@ export default function WeddingInvitationForm({
                   />
                 </Form.Item>
                 <Form.Item name="accountHolder" label="Account holder">
-                  <Input size="large" placeholder="Name (Bank)" />
+                  <Input
+                    size="large"
+                    className={fieldTreatment}
+                    placeholder="Name (Bank)"
+                  />
                 </Form.Item>
                 <Form.Item name="accountNumber" label="Account number">
-                  <Input size="large" placeholder="0000 0000 0000" />
+                  <Input
+                    size="large"
+                    className={fieldTreatment}
+                    placeholder="0000 0000 0000"
+                  />
                 </Form.Item>
               </>
             ),
