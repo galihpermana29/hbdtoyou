@@ -10,6 +10,10 @@
 import { expectations as detailsAndStoryExpanded } from './expectations/details-and-story-expanded.mjs';
 import { expectations as guestInvitesEmpty } from './expectations/guest-invites-empty.mjs';
 import {
+  DESIGNED_GUEST_LIST,
+  expectations as guestInvitesPopulated,
+} from './expectations/guest-invites-populated.mjs';
+import {
   DESIGNED_SLUG,
   expectations as published,
 } from './expectations/published.mjs';
@@ -56,6 +60,25 @@ async function advanceToGuestInvites(page) {
 }
 
 /**
+ * Advance to the guest invites step and upload the design's Guest List.
+ *
+ * The file is handed to the field rather than to anything the page exports,
+ * because uploading is the only way this state exists: the CSV is read in the
+ * browser and nothing is stored, so a Guest List that was never uploaded is a
+ * Guest List that is not there. Nothing waits for a network, because nothing
+ * reaches one - the table is rendered as soon as the file has been read.
+ */
+async function uploadGuestList(page) {
+  await advanceToGuestInvites(page);
+  await page.locator('input[accept=".csv"]').setInputFiles({
+    name: 'guest-list.csv',
+    mimeType: 'text/csv',
+    buffer: Buffer.from(DESIGNED_GUEST_LIST, 'utf8'),
+  });
+  await page.locator('tbody tr').last().waitFor();
+}
+
+/**
  * Advance to the published step.
  *
  * Confirming is the only way on, and it will not advance while the slug has a
@@ -71,12 +94,12 @@ async function advanceToPublished(page) {
 }
 
 /**
- * Four of the seven states have no expectations recorded yet.
+ * Three of the seven states have no expectations recorded yet.
  *
- * Three have no exported frame at all, and one more has a frame but nothing
- * built to render. Recording a screen's expectations is the work of the bead
- * that builds it; the baseline image beside this manifest is what those values
- * are read from.
+ * None of the three has an exported frame at all, so they are blocked design
+ * side. Recording a screen's expectations is the work of the bead that builds
+ * it; the baseline image beside this manifest is what those values are read
+ * from.
  */
 export const screens = [
   {
@@ -128,10 +151,11 @@ export const screens = [
   {
     id: 'guest-invites-populated',
     title: 'Guest invites details, Guest List uploaded',
-    route: null,
+    route: DETAILS_AND_STORY_ROUTE,
     figmaNodeId: '356-3062',
     baseline: 'guest-invites-populated.png',
-    expectations: null,
+    expectations: guestInvitesPopulated,
+    prepare: uploadGuestList,
   },
   {
     id: 'published',

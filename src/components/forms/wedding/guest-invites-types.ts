@@ -8,12 +8,22 @@
  * answering it here would mean inventing an answer. That is `hbd-byb.17`.
  */
 
+import type { GuestList } from './guest-list';
+
 /** What a couple enters on the guest invites step. */
 export interface GuestInvitesValues {
   /** The Invitation Slug, as typed. Not yet checked for availability. */
   slug: string;
   /** The message a guest receives, with placeholders still in it. */
   greetingMessage: string;
+  /**
+   * The Guest List, as read from the CSV they uploaded and then corrected, or
+   * null until they have uploaded one.
+   *
+   * Which of those it is decides which of the two states the design draws for
+   * this step is showing.
+   */
+  guestList: GuestList | null;
 }
 
 /**

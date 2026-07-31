@@ -18,10 +18,13 @@ import {
   slugProblem,
   type GuestInvitesValues,
 } from './guest-invites-types';
+import GuestListFileInput from './guest-list-file-input';
+import GuestListTable from './guest-list-table';
+import { GUEST_LIST_SIZE_LIMIT, readGuestList, type Guest } from './guest-list';
 
 /**
  * The third step of the Create Flow: a couple names their invitation, writes
- * what their guests will receive, and is offered a Guest List.
+ * what their guests will receive, and uploads a Guest List.
  *
  * Nothing here reaches a network. The product has no per-content slug, no
  * availability check and no fetch-by-slug, so this screen validates a slug's
@@ -30,9 +33,11 @@ import {
  * that cannot be answered truthfully, so it is not answered at all. Availability
  * and publishing are `hbd-byb.17`.
  *
- * The Guest List area is the design's empty state: it says what it takes and
- * how large a file may be. Reading a CSV and listing the guests it names is the
- * populated state, `hbd-byb.11`, which is why nothing here accepts a file yet.
+ * The Guest List has the two states the design draws, and which one is showing
+ * is decided by nothing but whether there is a Guest List: an area saying what
+ * it takes and how large a file may be, or the list itself. The CSV is read in
+ * the browser and the guests it names are held in this step's values, so
+ * uploading one sends nothing anywhere.
  */
 
 /** The design's field label. */
@@ -103,6 +108,7 @@ export default function GuestInvitesStep({
   const slugLabelId = useId();
   const messageId = useId();
   const guestListLabelId = useId();
+  const dropZoneFileRef = useRef<HTMLInputElement>(null);
 
   // The rules stay on the screen the whole time, because the moment a couple is
   // most likely to need them is while they are typing something that breaks
@@ -113,6 +119,49 @@ export default function GuestInvitesStep({
   const showProblem = slugTouched && problem !== null;
 
   const messageRef = useHeightOfContent(values.greetingMessage, isCurrent);
+
+  // What was wrong with the last file a couple chose, so that a file which
+  // cannot be read says so instead of appearing to do nothing.
+  const [guestListProblem, setGuestListProblem] = useState<string | null>(null);
+
+  const { guestList } = values;
+
+  /**
+   * Read a chosen file, and let it replace the whole Guest List.
+   *
+   * Replace rather than merge: the design's only way to change the list wholesale
+   * is to upload again, and a couple doing that after fixing their spreadsheet
+   * means the new file, not the new file added to the old one.
+   */
+  async function uploadGuestList(file: File) {
+    const { guests, problem: fileProblem } = await readGuestList(file);
+    setGuestListProblem(fileProblem);
+    if (guests) {
+      onChange({ ...values, guestList: { guests, uploadedAt: new Date() } });
+    }
+  }
+
+  /** Change who is on the Guest List, keeping the date the file arrived. */
+  function changeGuests(change: (guests: Guest[]) => Guest[]) {
+    if (!guestList) return;
+    const guests = change(guestList.guests);
+    onChange({
+      ...values,
+      // Nobody left is the empty state again rather than a Guest List with
+      // nobody on it: an upload date belongs to a file that still names someone.
+      guestList: guests.length > 0 ? { ...guestList, guests } : null,
+    });
+  }
+
+  function renameGuest(id: string, name: string) {
+    changeGuests((guests) =>
+      guests.map((guest) => (guest.id === id ? { ...guest, name } : guest))
+    );
+  }
+
+  function deleteGuest(id: string) {
+    changeGuests((guests) => guests.filter((guest) => guest.id !== id));
+  }
 
   return (
     <div className="flex gap-[60px]">
@@ -214,28 +263,61 @@ export default function GuestInvitesStep({
             </p>
 
             <div className="mt-[24px] flex flex-col gap-[6px]">
-              <p id={guestListLabelId} className={TYPE_LABEL}>
-                Guest List
-              </p>
-              <div
-                role="group"
-                aria-labelledby={guestListLabelId}
-                className="flex flex-col items-center gap-[16px] rounded-[8px] border border-dashed border-[#D9D9D9] bg-[rgba(0,0,0,0.02)] p-[16px]">
-                <Upload
-                  size={32}
-                  aria-hidden="true"
-                  className="text-[#141414]"
+              {guestList ? (
+                <GuestListTable
+                  guestList={guestList}
+                  onUpload={uploadGuestList}
+                  onRename={renameGuest}
+                  onDelete={deleteGuest}
                 />
-                <div className="flex flex-col items-center gap-[4px] text-center">
-                  <p className="text-[16px] font-[600] leading-[22.4px] text-[rgba(0,0,0,0.88)]">
-                    Drag &amp; drop up your list here
+              ) : (
+                <>
+                  <p id={guestListLabelId} className={TYPE_LABEL}>
+                    Guest List
                   </p>
-                  <p className="text-[14px] font-[400] leading-[16.8px] text-[rgba(0,0,0,0.45)]">
-                    Upload in format .CSV
-                  </p>
-                </div>
-              </div>
-              <p className={TYPE_HINT}>Max file size 5MB</p>
+                  <div
+                    role="group"
+                    aria-labelledby={guestListLabelId}
+                    onClick={() => dropZoneFileRef.current?.click()}
+                    onDragOver={(event) => event.preventDefault()}
+                    onDrop={(event) => {
+                      event.preventDefault();
+                      const file = event.dataTransfer.files?.[0];
+                      if (file) uploadGuestList(file);
+                    }}
+                    className="flex cursor-pointer flex-col items-center gap-[16px] rounded-[8px] border border-dashed border-[#D9D9D9] bg-[rgba(0,0,0,0.02)] p-[16px]">
+                    <Upload
+                      size={32}
+                      aria-hidden="true"
+                      className="text-[#141414]"
+                    />
+                    <div className="flex flex-col items-center gap-[4px] text-center">
+                      <p className="text-[16px] font-[600] leading-[22.4px] text-[rgba(0,0,0,0.88)]">
+                        Drag &amp; drop up your list here
+                      </p>
+                      <p className="text-[14px] font-[400] leading-[16.8px] text-[rgba(0,0,0,0.45)]">
+                        Upload in format .CSV
+                      </p>
+                    </div>
+                    {/* The design draws no control here, only an area, so the
+                        field itself is what a couple arriving by keyboard
+                        reaches. */}
+                    <GuestListFileInput
+                      ref={dropZoneFileRef}
+                      onChoose={uploadGuestList}
+                      isTheTabStop
+                    />
+                  </div>
+                  <p className={TYPE_HINT}>{GUEST_LIST_SIZE_LIMIT}</p>
+                </>
+              )}
+              {guestListProblem ? (
+                <p
+                  role="alert"
+                  className="text-[14px] font-[400] leading-[20px] text-[#D92D20]">
+                  {guestListProblem}
+                </p>
+              ) : null}
             </div>
           </section>
 

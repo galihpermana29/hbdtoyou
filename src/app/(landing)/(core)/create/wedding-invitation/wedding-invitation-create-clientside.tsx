@@ -66,6 +66,7 @@ export default function WeddingInvitationCreateClientside() {
   const [guestInvites, setGuestInvites] = useState<GuestInvitesValues>({
     slug: '',
     greetingMessage: DEFAULT_GUEST_MESSAGE,
+    guestList: null,
   });
 
   const brideNickname = useWatch('brideName', form);
