@@ -49,89 +49,76 @@
 /** The typographic treatments the design uses, each named once. */
 const TYPE = {
   breadcrumb: {
-    fontFamily: 'Plus Jakarta Sans',
     fontSize: '14px',
     fontWeight: 500,
     lineHeight: '20px',
     color: '#7b7b7b',
   },
   breadcrumbCurrent: {
-    fontFamily: 'Plus Jakarta Sans',
     fontSize: '14px',
     fontWeight: 600,
     lineHeight: '20px',
     color: '#e34013',
   },
   pageTitle: {
-    fontFamily: 'Plus Jakarta Sans',
     fontSize: '18px',
     fontWeight: 600,
     lineHeight: '28px',
     color: '#1b1b1b',
   },
   pageDescription: {
-    fontFamily: 'Plus Jakarta Sans',
     fontSize: '14px',
     fontWeight: 400,
     lineHeight: '24px',
     color: '#7b7b7b',
   },
   stepTitle: {
-    fontFamily: 'Plus Jakarta Sans',
     fontSize: '14px',
     fontWeight: 600,
     lineHeight: '20px',
   },
   stepDescription: {
-    fontFamily: 'Plus Jakarta Sans',
     fontSize: '14px',
     fontWeight: 400,
     lineHeight: '20px',
   },
   sectionName: {
-    fontFamily: 'Plus Jakarta Sans',
     fontSize: '18px',
     fontWeight: 600,
     lineHeight: '28px',
     color: '#1b1b1b',
   },
   sectionDescription: {
-    fontFamily: 'Inter',
     fontSize: '14px',
     fontWeight: 400,
     lineHeight: '20px',
     color: '#475467',
   },
   fieldLabel: {
-    fontFamily: 'Inter',
     fontSize: '14px',
     fontWeight: 500,
     lineHeight: '20px',
     color: '#344054',
   },
   fieldHint: {
-    fontFamily: 'Inter',
     fontSize: '14px',
     fontWeight: 400,
     lineHeight: '20px',
     color: '#475467',
   },
   uploadTitle: {
-    fontFamily: 'Plus Jakarta Sans',
     fontSize: '16px',
     fontWeight: 600,
     lineHeight: '22.4px',
     color: '#000000',
   },
   uploadPrompt: {
-    fontFamily: 'Plus Jakarta Sans',
     fontSize: '14px',
     fontWeight: 400,
     lineHeight: '16.8px',
     color: '#000000',
   },
   actionLabel: {
-    fontFamily: 'Plus Jakarta Sans',
     fontSize: '16px',
     fontWeight: 700,
     lineHeight: '24px',
@@ -158,7 +145,6 @@ const SECTION_CARD = {
  * left out rather than asserted from a sample the design never meant as one.
  */
 const TEXT_FIELD = {
-  fontFamily: 'Inter',
   fontSize: '16px',
   fontWeight: 400,
   lineHeight: '24px',
@@ -476,7 +462,6 @@ export const expectations = [
     name: 'Site Preview heading',
     withText: 'Site Preview',
     style: {
-      fontFamily: 'Plus Jakarta Sans',
       fontSize: '18px',
       fontWeight: 600,
       lineHeight: '28px',
@@ -488,7 +473,6 @@ export const expectations = [
     select: 'button',
     withText: 'Play Preview',
     style: {
-      fontFamily: 'Inter',
       fontSize: '14px',
       fontWeight: 600,
       lineHeight: '20px',

@@ -102,19 +102,18 @@ function checkTheVocabulary() {
   same('padding', '0', '0px', 'zero is zero pixels');
   same('fontWeight', 'bold', 700, 'bold is seven hundred');
   same('fontWeight', 'normal', '400', 'normal is four hundred');
-  same(
-    'fontFamily',
-    'Inter',
-    'Inter, "Plus Jakarta Sans", sans-serif',
-    'only the typeface asked for is compared, not the fallbacks'
-  );
-  same('fontFamily', 'inter', '"Inter"', 'quoting and case do not matter');
-  differ(
-    'fontFamily',
-    'Inter',
-    'Plus Jakarta Sans, sans-serif',
-    'a different typeface is a change'
-  );
+  for (const property of ['fontFamily', 'font', 'fontStyle']) {
+    let refused = false;
+    try {
+      normaliseValue(property, 'Inter');
+    } catch (error) {
+      refused = error.message.includes('typeface');
+    }
+    expect(
+      refused,
+      `"${property}" is refused, because the Create Flow keeps the family the application already sets`
+    );
+  }
 
   same(
     'padding',
@@ -172,7 +171,6 @@ function matchingPair() {
       select: 'form section h2',
       text: 'Cover Header',
       style: {
-        fontFamily: 'Plus Jakarta Sans',
         fontSize: '18px',
         fontWeight: 600,
         color: '#1b1b1b',
@@ -193,7 +191,6 @@ function matchingPair() {
       describe: '<h2>',
       text: 'Cover Header',
       style: {
-        fontFamily: 'Plus Jakarta Sans, sans-serif',
         fontSize: '18px',
         fontWeight: '600',
         color: 'rgb(27, 27, 27)',

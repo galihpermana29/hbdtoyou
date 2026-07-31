@@ -91,6 +91,6 @@ _Avoid_: domain, subdomain
 
 **Pixel-perfect**:
 Matching the Figma design's style and arrangement, not its measurements.
-Colour, typeface, size, weight, border, radius, shadow, spacing and copy must match exactly.
-Widths and heights are free to be dynamic, so an element that is the right style in the right place is correct at any size.
+Colour, size, weight, line height, border, radius, shadow, spacing and copy must match exactly.
+Two things are deliberately free: widths and heights, so an element is correct at any size, and the typeface family, which stays whatever the application already sets.
 _Avoid_: pixel-exact, identical

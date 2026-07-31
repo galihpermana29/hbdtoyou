@@ -9,8 +9,15 @@ Fixing the wording in the design rather than in the code keeps one source of tru
 ## What matching means
 
 Matching is a claim about style and arrangement, not about measurements.
-Colour, typeface, size, weight, border, radius, shadow, spacing and copy must match exactly.
+Colour, size, weight, line height, border, radius, shadow, spacing and copy must match exactly.
+
+Two things are deliberately not matched.
+
 Widths and heights may be dynamic, because a form field that stretches to its container is correct at any size.
+
+The typeface family stays whatever the application already sets globally, rather than the family the design was drawn in.
+Everything else about type is still matched, including size, weight, line height and letter spacing.
+Loading a second family for one flow would leave the product in two typefaces for the sake of a difference the couple filling in the form will never notice.
 
 This distinction matters because it decides how the work is verified.
 Comparing rendered screenshots pixel by pixel would fail a correct screen whose input happens to be a different width, which is noise rather than signal.

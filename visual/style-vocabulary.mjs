@@ -35,6 +35,16 @@ const DIMENSION_PROPERTIES = new Set([
   'flexBasis',
 ]);
 
+/**
+ * Properties that name which typeface an element is set in.
+ *
+ * The application sets one family globally and the Create Flow keeps it, so the
+ * design's typeface is deliberately not matched. Everything else about type is:
+ * size, weight, line height and letter spacing are all asserted. Only the family
+ * is free. See `docs/adr/0002-figma-is-literal-truth.md`.
+ */
+const TYPEFACE_PROPERTIES = new Set(['fontFamily', 'font', 'fontStyle']);
+
 const HEX = /^#([0-9a-f]{3}|[0-9a-f]{4}|[0-9a-f]{6}|[0-9a-f]{8})$/i;
 const FUNCTIONAL_COLOUR = /^rgba?\(([^)]*)\)$/i;
 
@@ -246,7 +256,6 @@ function splitOutsideBrackets(value, isSeparator) {
  * disagree.
  */
 export const ASSERTABLE_PROPERTIES = {
-  fontFamily: { normalise: normaliseFontFamily, read: ['fontFamily'] },
   fontSize: { normalise: normaliseLength, read: ['fontSize'] },
   fontWeight: { normalise: normaliseFontWeight, read: ['fontWeight'] },
   lineHeight: { normalise: normaliseLength, read: ['lineHeight'] },
@@ -348,6 +357,13 @@ export function unknownPropertyMessage(property) {
     return (
       `"${property}" is a dimension, and dimensions are never asserted: a field ` +
       'that stretches to its container is correct at any size'
+    );
+  }
+  if (TYPEFACE_PROPERTIES.has(property)) {
+    return (
+      `"${property}" names a typeface, and the typeface is never asserted: the ` +
+      'Create Flow keeps the family the application already sets. Size, weight, ' +
+      'line height and letter spacing are still asserted'
     );
   }
   return (
