@@ -171,7 +171,7 @@ export default function WeddingInvitationPage() {
 
         <div className="mx-auto max-w-6xl 2xl:max-w-7xl px-[20px] mt-[48px] flex flex-col sm:flex-row gap-[16px] justify-center items-center">
           <Link
-            href="/create"
+            href="/create/wedding-invitation"
             className="flex items-center justify-center gap-2 h-[60px] w-full sm:w-auto px-[40px] rounded-[8px] bg-[#E34013] text-white font-[600] text-[16px]">
             Start My Invitation <ArrowRight size={18} />
           </Link>
