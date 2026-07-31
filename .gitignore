@@ -9,6 +9,9 @@
 # testing
 /coverage
 
+# visual comparison harness: captures and diffs are regenerated on every run
+/visual/output/
+
 # next.js
 /.next/
 /out/

@@ -13,8 +13,11 @@ Memoify (package name `xollet-fe`) — a Next.js 14 App Router frontend for crea
 - `npm run start` — run the production build
 - `npm run lint` — `next lint`
 - `npm run prepare` — Husky install (runs automatically)
+- `npm run visual` — compare the wedding invitation Create Flow against the Figma design (see `visual/README.md`)
+- `npm run visual:baselines` — print how to re-export the design baselines
+- `npm run visual:self-check` — check the comparator itself, no browser needed
 
-No test runner is configured; there are no `test`/`spec` scripts.
+No test runner is configured; there are no `test`/`spec` scripts. The only automated check is `npm run visual`, a screenshot comparison scoped to the wedding invitation Create Flow. It drives a real browser and needs Chromium downloaded once: `npx playwright install chromium`. It exits 1 while that flow still differs from the design, which is expected until that epic lands.
 
 Pre-commit (Husky + lint-staged, see `.husky/pre-commit` and `package.json`): runs `eslint src/` on staged `*.{js,jsx,ts,tsx}` files. Prettier config is enforced via editor — see `.prettierrc` (single quotes, semi, 2-space, trailing commas `es5`).
 
