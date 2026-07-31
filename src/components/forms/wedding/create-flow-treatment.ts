@@ -38,6 +38,16 @@ export const flowTextField =
   `${flowFieldBox} w-full px-[12px] py-[8px] text-[16px] font-[400] ` +
   'leading-[24px] text-[#101828] placeholder:text-[#667085]';
 
+/**
+ * The same field given over to a long answer.
+ *
+ * Box and type are the plain field's, because the design draws them the same.
+ * What differs is the browser's resize grip, which is turned off: the design
+ * draws no grip in the corner of the box, and nothing is lost by removing it
+ * because a verse longer than the box scrolls inside it.
+ */
+export const flowTextArea = `${flowTextField} block resize-none`;
+
 /** The name the design gives a Section, and the line of guidance under it. */
 export const flowSectionName =
   'text-[18px] font-[600] leading-[28px] text-[#1B1B1B]';
@@ -95,6 +105,15 @@ export const flowFieldStack = 'flex flex-col gap-[24px]';
 
 /** A field's own parts: its label, its guidance, and its control. */
 export const flowFieldParts = 'flex flex-col gap-[6px]';
+
+/**
+ * The row the design puts two related fields in, split evenly.
+ *
+ * The design pairs a bride's answer with a groom's, and a father with a mother,
+ * and draws every such row the same way. Written once so a pair added later
+ * cannot end up a few pixels from the pairs beside it.
+ */
+export const flowFieldPair = 'grid grid-cols-2 gap-[24px]';
 
 /**
  * The pair of actions that ends every step.

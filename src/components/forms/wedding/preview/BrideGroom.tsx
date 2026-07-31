@@ -26,6 +26,7 @@ import { AutoFitText } from './AutoFitText';
 
 import {
   DEFAULT_WEDDING_TEMPLATE_1_CONTENT,
+  joinParents,
   type WeddingTemplate1Content,
 } from '../wedding-invitation-types';
 
@@ -112,7 +113,7 @@ export default function BrideGroom({
             Daughter of
           </p>
           <p className="w-full font-[family-name:var(--font-wt1-mono)] text-[10px] font-semibold">
-            {content.brideParents}
+            {joinParents(content.brideFatherName, content.brideMotherName)}
           </p>
         </div>
       </motion.div>
@@ -199,7 +200,7 @@ export default function BrideGroom({
             Son of
           </p>
           <p className="w-full font-[family-name:var(--font-wt1-mono)] text-[10px] font-semibold">
-            {content.groomParents}
+            {joinParents(content.groomFatherName, content.groomMotherName)}
           </p>
         </div>
       </motion.div>

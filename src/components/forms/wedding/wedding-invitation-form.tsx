@@ -9,8 +9,10 @@ import type { FormInstance } from 'antd';
 import { useMemoifyProfile } from '@/app/session-provider';
 import type { OpenNotificationFunction } from '@/app/(landing)/(core)/create/usecase/useCreateContent';
 import DraggerUpload, { AccountType } from '@/components/ui/uploader/uploader';
+import BrideGroomIntroductionSection from '@/components/forms/wedding/bride-groom-introduction-section';
 import CoverHeaderSection from '@/components/forms/wedding/cover-header-section';
 import CreateFlowSection from '@/components/forms/wedding/create-flow-section';
+import HolyVerseSection from '@/components/forms/wedding/holy-verse-section';
 import { fieldTreatment } from '@/components/forms/wedding/field-treatment';
 import {
   getDefaultFormValues,
@@ -80,57 +82,9 @@ export default function WeddingInvitationForm({
           openNotification={openNotification}
         />
 
-        <CreateFlowSection
-          name="Holy Verse"
-          description="Opening verse and citation.">
-          <Form.Item name="verseText" label="Verse text">
-            <TextArea
-              rows={5}
-              className={fieldTreatment}
-              placeholder="Enter the holy verse..."
-            />
-          </Form.Item>
-          <Form.Item name="verseCitation" label="Citation">
-            <Input
-              size="large"
-              className={fieldTreatment}
-              placeholder="Q.S Ar-Rum : 21"
-            />
-          </Form.Item>
-        </CreateFlowSection>
+        <HolyVerseSection />
 
-        <CreateFlowSection
-          name="Bride & Groom"
-          description="Full names and parents. Nicknames come from Cover Header.">
-          <Form.Item name="groomFullName" label="Groom full name">
-            <Input
-              size="large"
-              className={fieldTreatment}
-              placeholder="Elias Frank Simanjuntak"
-            />
-          </Form.Item>
-          <Form.Item name="groomParents" label="Groom parents">
-            <Input
-              size="large"
-              className={fieldTreatment}
-              placeholder="Frank & Esther"
-            />
-          </Form.Item>
-          <Form.Item name="brideFullName" label="Bride full name">
-            <Input
-              size="large"
-              className={fieldTreatment}
-              placeholder="Freya Putri Magellan"
-            />
-          </Form.Item>
-          <Form.Item name="brideParents" label="Bride parents">
-            <Input
-              size="large"
-              className={fieldTreatment}
-              placeholder="Ferdinand & Tuti"
-            />
-          </Form.Item>
-        </CreateFlowSection>
+        <BrideGroomIntroductionSection />
 
         <CreateFlowSection
           name="Love Story"

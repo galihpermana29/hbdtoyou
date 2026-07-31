@@ -45,9 +45,9 @@
  * screen's design, so the panel's heading and controls are asserted and what it
  * renders inside is not.
  *
- * Only the Cover Header Section's fields are enumerated. Every Section's card,
- * name and description is asserted, and the fields of the other seven are added
- * by the beads that build them.
+ * The first three Sections' fields are enumerated. Every Section's card, name
+ * and description is asserted, and the fields of the other five are added by the
+ * beads that build them.
  */
 
 import { FIELD_SHADOW, pageChrome, siteFooter, TYPE } from './page-chrome.mjs';
@@ -184,19 +184,62 @@ const sectionExpectations = (index) => {
 };
 
 /**
- * The Cover Header's fields, the one Section this screen enumerates in full.
+ * Every field label the form draws, in the order the design stacks them.
  *
- * The Cover Header is the first Section, so its labels are also the form's first
- * labels, and counting them down the page needs no scoping selector.
+ * A label is found by counting down the whole form rather than within its
+ * Section, because scoping to a Section would need a selector the implementation
+ * has to provide, and everything this manifest asks of the page is ordinary
+ * HTML. Counting by hand is what that costs, so the count is derived from this
+ * one list instead: adding a field to an earlier Section moves every later
+ * label, and putting it in its place here is the whole edit.
  */
-const coverHeaderFields = [
-  {
-    name: 'Couples Photos label',
+const LABELS_IN_ORDER = [
+  'Couples Photos',
+  'Bride Nickname',
+  'Groom Nickname',
+  'Wedding Place Name',
+  'Wedding Date',
+  'Background Track',
+  'Verse Name',
+  'Verse',
+  'Bride Name',
+  'Bride’s Father',
+  'Bride’s Mother',
+  'Groom Name',
+  'Groom’s Father',
+  'Groom’s Mother',
+];
+
+/**
+ * The words above a field, wherever they fall among the form's labels.
+ *
+ * A label this list has never heard of throws rather than resolving to `-1`,
+ * which would silently become "the last label on the page" and fail somewhere
+ * else entirely.
+ */
+const labelFor = (label) => {
+  const nth = LABELS_IN_ORDER.indexOf(label);
+  if (nth === -1) {
+    throw new Error(`"${label}" is not one of the form's labels`);
+  }
+  return {
+    name: `${label} label`,
     select: 'form label',
-    nth: 0,
-    text: 'Couples Photos',
+    nth,
+    text: label,
     style: TYPE.fieldLabel,
-  },
+  };
+};
+
+/** A label and the text box under it, which is most of what the design draws. */
+const textField = (label) => [
+  labelFor(label),
+  { name: `${label} field`, control: label, style: TEXT_FIELD },
+];
+
+/** The Cover Header's fields, the first Section this screen enumerates in full. */
+const coverHeaderFields = [
+  labelFor('Couples Photos'),
   {
     name: 'Couples Photos upload title',
     withText: 'Add More Photos',
@@ -213,61 +256,11 @@ const coverHeaderFields = [
       'We recommend to add more than 2 images in the ratio of 4:3 or 16:9 for more interactivity',
     style: TYPE.fieldHint,
   },
-  {
-    name: 'Bride Nickname label',
-    select: 'form label',
-    nth: 1,
-    text: 'Bride Nickname',
-    style: TYPE.fieldLabel,
-  },
-  {
-    name: 'Bride Nickname field',
-    control: 'Bride Nickname',
-    style: TEXT_FIELD,
-  },
-  {
-    name: 'Groom Nickname label',
-    select: 'form label',
-    nth: 2,
-    text: 'Groom Nickname',
-    style: TYPE.fieldLabel,
-  },
-  {
-    name: 'Groom Nickname field',
-    control: 'Groom Nickname',
-    style: TEXT_FIELD,
-  },
-  {
-    name: 'Wedding Place Name label',
-    select: 'form label',
-    nth: 3,
-    text: 'Wedding Place Name',
-    style: TYPE.fieldLabel,
-  },
-  {
-    name: 'Wedding Place Name field',
-    control: 'Wedding Place Name',
-    style: TEXT_FIELD,
-  },
-  {
-    name: 'Wedding Date label',
-    select: 'form label',
-    nth: 4,
-    text: 'Wedding Date',
-    style: TYPE.fieldLabel,
-  },
-  {
-    name: 'Wedding Date field',
-    control: 'Wedding Date',
-    style: TEXT_FIELD,
-  },
-  {
-    name: 'Background Track label',
-    select: 'form label',
-    nth: 5,
-    text: 'Background Track',
-    style: TYPE.fieldLabel,
-  },
+  ...textField('Bride Nickname'),
+  ...textField('Groom Nickname'),
+  ...textField('Wedding Place Name'),
+  ...textField('Wedding Date'),
+  labelFor('Background Track'),
   {
     name: 'Background Track hint',
     withText:
@@ -281,12 +274,39 @@ const coverHeaderFields = [
   },
 ];
 
+/**
+ * The Holy Verse Section's fields.
+ *
+ * The design puts the citation above the verse itself, and the check asserts
+ * that order rather than only that both are present.
+ */
+const holyVerseFields = [...textField('Verse Name'), ...textField('Verse')];
+
+/**
+ * The Bride & Groom's Introduction Section's fields.
+ *
+ * Each partner is asked for in the same shape - their own name across the card,
+ * then their father and their mother side by side - and the bride comes first.
+ * A father and a mother are two fields because they are two people; the
+ * invitation joins them for display.
+ */
+const brideGroomIntroductionFields = [
+  ...textField('Bride Name'),
+  ...textField('Bride’s Father'),
+  ...textField('Bride’s Mother'),
+  ...textField('Groom Name'),
+  ...textField('Groom’s Father'),
+  ...textField('Groom’s Mother'),
+];
+
 export const expectations = [
   ...pageChrome('Fill in the details & story'),
   ...sectionExpectations(0),
   ...coverHeaderFields,
   ...sectionExpectations(1),
+  ...holyVerseFields,
   ...sectionExpectations(2),
+  ...brideGroomIntroductionFields,
   ...sectionExpectations(3),
   ...sectionExpectations(4),
   ...sectionExpectations(5),

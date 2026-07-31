@@ -17,8 +17,10 @@ export interface WeddingTemplate1Content {
   brideName: string;
   groomFullName: string;
   brideFullName: string;
-  groomParents: string;
-  brideParents: string;
+  groomFatherName: string;
+  groomMotherName: string;
+  brideFatherName: string;
+  brideMotherName: string;
   heroPhotos: string[];
   weddingDateIso: string;
   backgroundMusicId: string;
@@ -53,8 +55,10 @@ export interface WeddingInvitationFormValues {
   brideName?: string;
   groomFullName?: string;
   brideFullName?: string;
-  groomParents?: string;
-  brideParents?: string;
+  groomFatherName?: string;
+  groomMotherName?: string;
+  brideFatherName?: string;
+  brideMotherName?: string;
   weddingDate?: Dayjs;
   backgroundMusic?: string;
   verseText?: string;
@@ -93,8 +97,10 @@ export const DEFAULT_WEDDING_TEMPLATE_1_CONTENT: WeddingTemplate1Content = {
   brideName: 'Freya',
   groomFullName: 'Elias Frank Simanjuntak',
   brideFullName: 'Freya Putri Magellan',
-  groomParents: 'Frank Simajuntak & Esther Triasningsih',
-  brideParents: 'Ferdinand Magellan & Tuti Pudjiastuti',
+  groomFatherName: 'Frank Simajuntak',
+  groomMotherName: 'Esther Triasningsih',
+  brideFatherName: 'Ferdinand Magellan',
+  brideMotherName: 'Tuti Pudjiastuti',
   heroPhotos: [],
   weddingDateIso: '2026-05-03T19:00:00+07:00',
   backgroundMusicId: 'sal-priadi-mencintaimu',
@@ -145,6 +151,27 @@ const DEFAULT_MILESTONES: WeddingMilestone[] = [
   { year: '', title: '', body: '' },
 ];
 
+/**
+ * A partner's parents on the one line the invitation prints them on.
+ *
+ * The couple names a father and a mother separately, because they are two
+ * people, and the invitation has room for one line. Joining happens here, at the
+ * point of display, so that the two names stay two names everywhere else.
+ *
+ * A record that carries only one of the two names prints that one name, without
+ * a stranded ampersand beside it. The Create Flow cannot produce such a record -
+ * `formValuesToContent` falls back to the sample invitation for anything a
+ * couple leaves blank - but the viewer also renders content it was handed rather
+ * than content it built, and half an answer is not a reason to print punctuation
+ * for a person who is not there.
+ */
+export function joinParents(father?: string, mother?: string): string {
+  return [father, mother]
+    .map((name) => name?.trim() ?? '')
+    .filter((name) => name.length > 0)
+    .join(' & ');
+}
+
 function formatTime(value?: Dayjs, fallback = '19:00'): string {
   if (!value || !value.isValid()) return fallback;
   return value.format('HH:mm');
@@ -185,8 +212,10 @@ export function formValuesToContent(
     brideName: v.brideName?.trim() || defaults.brideName,
     groomFullName: v.groomFullName?.trim() || defaults.groomFullName,
     brideFullName: v.brideFullName?.trim() || defaults.brideFullName,
-    groomParents: v.groomParents?.trim() || defaults.groomParents,
-    brideParents: v.brideParents?.trim() || defaults.brideParents,
+    groomFatherName: v.groomFatherName?.trim() || defaults.groomFatherName,
+    groomMotherName: v.groomMotherName?.trim() || defaults.groomMotherName,
+    brideFatherName: v.brideFatherName?.trim() || defaults.brideFatherName,
+    brideMotherName: v.brideMotherName?.trim() || defaults.brideMotherName,
     heroPhotos: v.heroPhotos ?? defaults.heroPhotos,
     weddingDateIso: weddingDateToIso(v.weddingDate, v.eventStartTime),
     backgroundMusicId: v.backgroundMusic || defaults.backgroundMusicId,
@@ -219,23 +248,20 @@ export function formValuesToContent(
 /**
  * Initial form values for the creator (prefills preview on first paint).
  *
- * The Cover Header's fields are deliberately absent. The design draws every one
- * of them empty, with its example written as grey placeholder text, so filling
- * them in would put the design's examples into a couple's invitation as if they
- * had chosen them. Nothing is lost by leaving them out: `formValuesToContent`
- * falls back to the sample invitation for anything unanswered, so the Site
- * Preview still has a wedding to show.
+ * The fields of the Cover Header, the Holy Verse and the Bride & Groom's
+ * Introduction are deliberately absent. The design draws every one of them
+ * empty, with its example written as grey placeholder text, so filling them in
+ * would put the design's examples into a couple's invitation as if they had
+ * chosen them. Nothing is lost by leaving them out: `formValuesToContent` falls
+ * back to the sample invitation for anything unanswered, so the Site Preview
+ * still has a wedding to show.
+ *
+ * The remaining Sections' defaults stand until their own beads reach them.
  */
 export function getDefaultFormValues(): WeddingInvitationFormValues {
   const d = DEFAULT_WEDDING_TEMPLATE_1_CONTENT;
   return {
-    groomFullName: d.groomFullName,
-    brideFullName: d.brideFullName,
-    groomParents: d.groomParents,
-    brideParents: d.brideParents,
     heroPhotos: [],
-    verseText: d.verseText,
-    verseCitation: d.verseCitation,
     loveStoryPhotos: [],
     milestones: d.milestones.map((m) => ({ ...m })),
     polaroidPhoto: '',

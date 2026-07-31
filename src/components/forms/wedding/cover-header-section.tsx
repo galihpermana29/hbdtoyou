@@ -7,6 +7,7 @@ import { useId } from 'react';
 import type { OpenNotificationFunction } from '@/app/(landing)/(core)/create/usecase/useCreateContent';
 import CreateFlowSection from './create-flow-section';
 import {
+  flowFieldPair,
   flowFieldParts,
   flowFieldStack,
   flowHint,
@@ -66,7 +67,7 @@ export default function CoverHeaderSection({
           />
         </Form.Item>
 
-        <div className="grid grid-cols-2 gap-[24px]">
+        <div className={flowFieldPair}>
           <Form.Item name="brideName" noStyle>
             <FlowTextField label="Bride Nickname" placeholder="Freya" />
           </Form.Item>
