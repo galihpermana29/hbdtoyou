@@ -61,6 +61,13 @@ export interface GuestInvitesStepProps {
   groomNickname: string;
   /** Go back to the details and story step. */
   onPreviousStep: () => void;
+  /**
+   * Go on to the published step.
+   *
+   * Only called once the slug is well formed, so the screen after this one can
+   * be sure it has a link to show.
+   */
+  onConfirm: () => void;
 }
 
 /**
@@ -90,6 +97,7 @@ export default function GuestInvitesStep({
   brideNickname,
   groomNickname,
   onPreviousStep,
+  onConfirm,
 }: GuestInvitesStepProps) {
   const slugId = useId();
   const slugLabelId = useId();
@@ -123,14 +131,17 @@ export default function GuestInvitesStep({
         <form
           className="flex flex-col gap-[24px]"
           onSubmit={(event) => {
-            // Confirming has nowhere to go until the published screen exists
-            // (hbd-byb.12), so this validates and stops rather than pretending
-            // to publish something.
+            // Confirming goes on to the published screen and nowhere else:
+            // nothing is sent, because there is nothing to send it to yet.
+            // A slug with a problem keeps the couple here, on the field that
+            // has it, rather than carrying a broken address forward.
             event.preventDefault();
             setSlugTouched(true);
             if (problem) {
               document.getElementById(slugId)?.focus();
+              return;
             }
+            onConfirm();
           }}>
           <section className="flex flex-col">
             <h3 className={TYPE_SECTION_NAME}>Customize your invitation</h3>

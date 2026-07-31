@@ -6,15 +6,15 @@
  * The iOS status bar in the mockup (9:41 / battery) is intentionally omitted:
  * a real device renders its own, so a faux bar would double up.
  *
- * Interaction: on load the two cards are tucked DOWN inside the envelope pocket
- * (behind the pocket front, z-index below it) and the page is scroll-locked.
+ * Interaction: while the invitation is sealed, the two cards are tucked DOWN
+ * inside the envelope pocket (behind the pocket front, z-index below it).
  * Clicking "Open Invitation" slides the cards up and out (z-index above the
- * pocket) and unlocks scrolling. NOTE: the flap does not literally unfold — that
- * needs a "closed envelope" asset that Figma export is currently rate-limited on.
+ * pocket). NOTE: the flap does not literally unfold - that needs a "closed
+ * envelope" asset that Figma export is currently rate-limited on.
  */
 
 import { motion, useReducedMotion } from 'framer-motion';
-import { useEffect, useState } from 'react';
+import { useState } from 'react';
 
 import {
   DEFAULT_WEDDING_TEMPLATE_1_CONTENT,
@@ -99,7 +99,9 @@ function EnvelopeCard({
               ease: EASE,
               delay: reduce ? 0 : 0.25,
             }}>
-            <div className="relative h-[177.944px] w-[264.046px]" style={cardShadow}>
+            <div
+              className="relative h-[177.944px] w-[264.046px]"
+              style={cardShadow}>
               <img
                 alt=""
                 className="pointer-events-none absolute inset-0 size-full max-w-none object-cover"
@@ -131,7 +133,9 @@ function EnvelopeCard({
               ease: EASE,
               delay: reduce ? 0 : 0.4,
             }}>
-            <div className="relative h-[177.944px] w-[264.046px]" style={cardShadow}>
+            <div
+              className="relative h-[177.944px] w-[264.046px]"
+              style={cardShadow}>
               <img
                 alt=""
                 className="pointer-events-none absolute inset-0 size-full max-w-none object-cover"
@@ -221,17 +225,11 @@ export default function Hero({
   const reduce = useReducedMotion();
   const [opened, setOpened] = useState(!recipientMode);
 
-  // Published-only: lock page scroll until the invitation is opened.
-  useEffect(() => {
-    if (!recipientMode || opened) return;
-    const prev = document.body.style.overflow;
-    document.body.style.overflow = 'hidden';
-    window.scrollTo(0, 0);
-    return () => {
-      document.body.style.overflow = prev;
-    };
-  }, [opened, recipientMode]);
-
+  // The page's own scroll is deliberately left alone, unlike the published
+  // viewer this composition mirrors. This copy of the template is only ever
+  // shown inside something else - the panel beside the Create Flow, or the
+  // player over it - and a preview that locked the page it sits on would take
+  // the whole flow hostage until someone opened an envelope in a phone.
   const envelopeOpened = recipientMode ? opened : true;
 
   const fadeUpMount = (delay: number) => ({
@@ -309,8 +307,8 @@ export default function Hero({
           <div className="absolute left-0 top-[74px] h-[0.5px] w-[343px] bg-[#fafafa]" />
         </div>
         <p className="w-full text-center font-[family-name:var(--font-wt1-mono)] text-[12px] leading-normal text-white">
-          As we begin our journey together, we&rsquo;d love for you to join us in
-          celebrating our big day.
+          As we begin our journey together, we&rsquo;d love for you to join us
+          in celebrating our big day.
         </p>
       </motion.div>
     </section>

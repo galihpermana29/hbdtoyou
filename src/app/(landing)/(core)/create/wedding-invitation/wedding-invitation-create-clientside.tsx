@@ -14,6 +14,7 @@ import {
   flowActionRow,
 } from '@/components/forms/wedding/create-flow-treatment';
 import GuestInvitesStep from '@/components/forms/wedding/guest-invites-step';
+import PublishedStep from '@/components/forms/wedding/published-step';
 import WeddingInvitationForm from '@/components/forms/wedding/wedding-invitation-form';
 import WeddingInvitationPreview from '@/components/forms/wedding/wedding-invitation-preview';
 import NavigationBar from '@/components/ui/navbar';
@@ -25,6 +26,7 @@ import {
 } from '@/components/wedding/wedding-template-1/fonts';
 import {
   DEFAULT_GUEST_MESSAGE,
+  invitationLinkFor,
   type GuestInvitesValues,
 } from '@/components/forms/wedding/guest-invites-types';
 import {
@@ -48,6 +50,10 @@ const CHOOSE_TEMPLATE_ROUTE = '/wedding-invitation';
  * Hidden is `display: none` rather than a visual trick, so a step a couple
  * cannot see is also a step nothing else can find - including the style and
  * structure check, which skips anything the browser does not render.
+ *
+ * The published step is the exception. The design gives it no way back, so
+ * nothing a couple typed can return to it, and it is mounted when it is reached
+ * rather than kept alive behind the others.
  */
 export default function WeddingInvitationCreateClientside() {
   const router = useRouter();
@@ -66,6 +72,28 @@ export default function WeddingInvitationCreateClientside() {
   const groomNickname = useWatch('groomName', form);
 
   const isDetailsAndStory = step === 'Fill in the details & story';
+  const isGuestInvites = step === 'Guest invites details';
+  const isPublished = step === 'Share with guests';
+
+  // Composed here rather than passed up from the step that owns the slug, so
+  // that the address the couple is shown and the one their guests are shown are
+  // the same function of the same value.
+  const invitationLink = invitationLinkFor(guestInvites.slug);
+
+  /**
+   * Move to another step, from the top of it.
+   *
+   * A couple presses the action at the foot of a long step, and the step that
+   * replaces it is shorter, so without this they arrive at whatever happens to
+   * be at that height - on the published step, that is the footer, with the news
+   * that their invitation is published somewhere above them. Instantly rather
+   * than smoothly, because the content underneath has already changed and
+   * scrolling it past them says nothing.
+   */
+  function goToStep(next: CreateFlowStep) {
+    setStep(next);
+    window.scrollTo({ top: 0, behavior: 'instant' });
+  }
 
   return (
     <div className={fontVars}>
@@ -152,16 +180,16 @@ export default function WeddingInvitationCreateClientside() {
               </button>
               <button
                 type="button"
-                onClick={() => setStep('Guest invites details')}
+                onClick={() => goToStep('Guest invites details')}
                 className={flowActionForward}>
                 Next
               </button>
             </div>
           </div>
 
-          <div className={isDetailsAndStory ? 'hidden' : 'mt-[60px]'}>
+          <div className={isGuestInvites ? 'mt-[60px]' : 'hidden'}>
             <GuestInvitesStep
-              isCurrent={!isDetailsAndStory}
+              isCurrent={isGuestInvites}
               values={guestInvites}
               onChange={setGuestInvites}
               brideNickname={
@@ -172,9 +200,19 @@ export default function WeddingInvitationCreateClientside() {
                 groomNickname?.trim() ||
                 DEFAULT_WEDDING_TEMPLATE_1_CONTENT.groomName
               }
-              onPreviousStep={() => setStep('Fill in the details & story')}
+              onPreviousStep={() => goToStep('Fill in the details & story')}
+              onConfirm={() => goToStep('Share with guests')}
             />
           </div>
+
+          {/* The link is never missing here: Confirm Create is the only way on
+              to this step, and it does not advance while the slug has a problem.
+              Asking is how that stays true rather than a fallback for it. */}
+          {isPublished && invitationLink !== null ? (
+            <div className="mt-[60px]">
+              <PublishedStep form={form} invitationLink={invitationLink} />
+            </div>
+          ) : null}
         </div>
       </div>
     </div>

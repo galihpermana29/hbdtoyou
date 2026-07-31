@@ -3,6 +3,7 @@
 import { Eye } from 'lucide-react';
 import { Fragment } from 'react';
 
+import { flowPreviewTray } from './create-flow-treatment';
 import {
   renderGuestMessage,
   SAMPLE_GUEST_NAME,
@@ -75,7 +76,7 @@ export default function GuestInvitesPreview({
         </p>
       </div>
 
-      <div className="rounded-[12px] bg-[#F7F7F7] p-[14px]">
+      <div className={flowPreviewTray}>
         <div className="flex min-h-[812px] flex-col overflow-hidden rounded-[8px] border border-[#E5E7EB]">
           <div className="flex h-[60px] shrink-0 items-center gap-[12px] bg-[#075E54] px-[16px]">
             <span

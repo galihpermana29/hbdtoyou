@@ -9,6 +9,10 @@
 
 import { expectations as detailsAndStoryExpanded } from './expectations/details-and-story-expanded.mjs';
 import { expectations as guestInvitesEmpty } from './expectations/guest-invites-empty.mjs';
+import {
+  DESIGNED_SLUG,
+  expectations as published,
+} from './expectations/published.mjs';
 
 /** The width the design is defined at. Nothing below this is checked. */
 export const DESIGN_WIDTH = 1440;
@@ -52,9 +56,24 @@ async function advanceToGuestInvites(page) {
 }
 
 /**
- * Five of the seven states have no expectations recorded yet.
+ * Advance to the published step.
  *
- * Three have no exported frame at all, and two more have a frame but nothing
+ * Confirming is the only way on, and it will not advance while the slug has a
+ * problem, so the slug is chosen first. It is the design's own name, so that the
+ * link the screen shows is the link the frame was drawn with.
+ */
+async function advanceToPublished(page) {
+  await advanceToGuestInvites(page);
+  await page
+    .getByRole('textbox', { name: 'Custom Your Web Domain' })
+    .fill(DESIGNED_SLUG);
+  await page.getByRole('button', { name: 'Confirm Create' }).click();
+}
+
+/**
+ * Four of the seven states have no expectations recorded yet.
+ *
+ * Three have no exported frame at all, and one more has a frame but nothing
  * built to render. Recording a screen's expectations is the work of the bead
  * that builds it; the baseline image beside this manifest is what those values
  * are read from.
@@ -117,10 +136,11 @@ export const screens = [
   {
     id: 'published',
     title: 'Published, with the link to share',
-    route: null,
+    route: DETAILS_AND_STORY_ROUTE,
     figmaNodeId: '305-8972',
     baseline: 'published.png',
-    expectations: null,
+    expectations: published,
+    prepare: advanceToPublished,
   },
 ];
 

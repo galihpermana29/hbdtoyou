@@ -1,0 +1,281 @@
+'use client';
+
+import { Form, type FormInstance } from 'antd';
+import { Check, Copy, Home, PlayCircle, X } from 'lucide-react';
+import Link from 'next/link';
+import { useEffect, useRef, useState } from 'react';
+
+import {
+  flowActionHome,
+  flowActionPlay,
+  flowFieldBox,
+  flowPreviewTray,
+} from './create-flow-treatment';
+import WeddingInvitationPreviewView from './wedding-invitation-preview-view';
+import {
+  formValuesToContent,
+  type WeddingInvitationFormValues,
+  type WeddingTemplate1Content,
+} from './wedding-invitation-types';
+
+/**
+ * The fourth and last step of the Create Flow: the invitation is published, and
+ * here is the link to send.
+ *
+ * Nothing is published from here, and nothing is fetched. The product has no
+ * per-content slug and no publish call, so this screen says what the couple has
+ * just done and shows them the address it would live at, composed from the slug
+ * they chose. Making that address real is `hbd-byb.17`.
+ *
+ * There is no way back. The design gives this step no Previous step action, so
+ * it is the one step that is mounted when it is reached rather than kept alive
+ * behind the others: it holds nothing the couple typed, so there is nothing here
+ * for leaving to lose.
+ *
+ * ## Spacing hangs off elements rather than off the boxes between them
+ *
+ * The design's 60px between the two columns, its 24px under the heading and its
+ * 48px above the link and the actions are written as margins on the elements the
+ * check can name, rather than as gaps on the containers it cannot. They render
+ * identically, and this way every distance the design states is one the check
+ * reads back.
+ */
+
+/** How long the Copy action says it worked before returning to rest. */
+const COPIED_FOR_MS = 2000;
+
+/** The design's confirmation, which is the whole point of the screen. */
+const SUPPORTING_TEXT =
+  "We've created your wedding invitation website and it's now ready for your " +
+  'final touches. Personalize your domain, review your details, and send it ' +
+  'to the people who matter most.';
+
+/** Whether the last attempt to copy the link worked, or has not happened yet. */
+type CopyState = 'resting' | 'copied' | 'failed';
+
+export interface PublishedStepProps {
+  /**
+   * The form the couple filled in, so the invitation they are shown is theirs.
+   *
+   * Watched here rather than above, so that a keystroke on the details step does
+   * not re-render this one: this step only exists once that step is behind them.
+   */
+  form: FormInstance<WeddingInvitationFormValues>;
+  /** The address the couple sends, built from the Invitation Slug they chose. */
+  invitationLink: string;
+}
+
+/**
+ * The couple's own invitation, played the way a guest will receive it.
+ *
+ * The panel beside the copy shows the same invitation at the same size, and this
+ * gives it the screen: the whole width, and nothing of the flow around it. It is
+ * the couple's own content either way, never the sample template.
+ *
+ * It behaves as a dialog rather than as a page that happens to be on top. The
+ * page behind it does not scroll while it is open, Escape closes it, the close
+ * control takes focus when it opens, and Tab stays inside it - which is what
+ * `aria-modal` promises anything reading the page aloud.
+ */
+function InvitationPlayer({
+  content,
+  onClose,
+}: {
+  content: WeddingTemplate1Content;
+  onClose: () => void;
+}) {
+  const dialogRef = useRef<HTMLDivElement>(null);
+  const closeRef = useRef<HTMLButtonElement>(null);
+
+  useEffect(() => {
+    closeRef.current?.focus();
+  }, []);
+
+  useEffect(() => {
+    const previous = document.body.style.overflow;
+    document.body.style.overflow = 'hidden';
+    return () => {
+      document.body.style.overflow = previous;
+    };
+  }, []);
+
+  useEffect(() => {
+    const onKeyDown = (event: KeyboardEvent) => {
+      if (event.key === 'Escape') {
+        onClose();
+        return;
+      }
+      if (event.key !== 'Tab') return;
+
+      const dialog = dialogRef.current;
+      if (!dialog) return;
+      const focusable = Array.from(
+        dialog.querySelectorAll<HTMLElement>(
+          'a[href], button:not([disabled]), input, textarea, select, [tabindex]:not([tabindex="-1"])'
+        )
+      ).filter((element) => element.offsetParent !== null);
+      if (focusable.length === 0) return;
+
+      const first = focusable[0];
+      const last = focusable[focusable.length - 1];
+      const active = document.activeElement;
+
+      // Tab off either end of the dialog wraps to the other, so focus can never
+      // wander onto the flow behind something that says the flow is inert.
+      if (!event.shiftKey && (active === last || !dialog.contains(active))) {
+        event.preventDefault();
+        first.focus();
+      } else if (
+        event.shiftKey &&
+        (active === first || !dialog.contains(active))
+      ) {
+        event.preventDefault();
+        last.focus();
+      }
+    };
+
+    window.addEventListener('keydown', onKeyDown);
+    return () => window.removeEventListener('keydown', onKeyDown);
+  }, [onClose]);
+
+  return (
+    <div
+      ref={dialogRef}
+      role="dialog"
+      aria-modal="true"
+      aria-label="Your wedding invitation"
+      className="fixed inset-0 z-[100] overflow-y-auto overscroll-contain bg-black/80 py-[40px]">
+      <div className="relative mx-auto w-[375px] max-w-full">
+        <button
+          ref={closeRef}
+          type="button"
+          onClick={onClose}
+          aria-label="Close the invitation"
+          className="absolute right-[8px] top-[8px] z-[10] flex h-[36px] w-[36px] items-center justify-center rounded-full bg-black/60 text-white">
+          <X size={20} aria-hidden="true" />
+        </button>
+        <WeddingInvitationPreviewView content={content} recipientMode />
+      </div>
+    </div>
+  );
+}
+
+export default function PublishedStep({
+  form,
+  invitationLink,
+}: PublishedStepProps) {
+  const content = formValuesToContent(Form.useWatch([], form));
+
+  const [copyState, setCopyState] = useState<CopyState>('resting');
+  const [isPlaying, setIsPlaying] = useState(false);
+  const playRef = useRef<HTMLButtonElement>(null);
+
+  useEffect(() => {
+    if (copyState !== 'copied') return;
+    const timer = window.setTimeout(
+      () => setCopyState('resting'),
+      COPIED_FOR_MS
+    );
+    return () => window.clearTimeout(timer);
+  }, [copyState]);
+
+  async function copyLink() {
+    try {
+      await navigator.clipboard.writeText(invitationLink);
+      setCopyState('copied');
+    } catch {
+      // A browser that refuses the clipboard is not a browser this screen can
+      // argue with. Saying so leaves the couple somewhere to go; a Copy action
+      // that quietly did nothing would not.
+      setCopyState('failed');
+    }
+  }
+
+  return (
+    <div className="flex">
+      <aside
+        className={`mr-[60px] w-[405px] shrink-0 ${flowPreviewTray}`}
+        aria-label="Your invitation">
+        <div className="h-[812px] overflow-hidden rounded-[10px]">
+          <div className="h-full overflow-y-auto overscroll-contain">
+            {/* Sealed, because the frame draws the Open Invitation control in
+                this panel and a sealed invitation is what a guest is sent. The
+                frame draws the cards out of the envelope as well, which is the
+                other end of the same interaction: a still cannot show both, and
+                an element the design has weighs more than a state it caught. */}
+            <WeddingInvitationPreviewView content={content} recipientMode />
+          </div>
+        </div>
+      </aside>
+
+      <div className="flex min-w-0 flex-1 flex-col">
+        <h2 className="text-[36px] font-[600] leading-[50px] text-[#1B1B1B]">
+          Yeyyy!!, <br />
+          Your wedding invitation is published!
+        </h2>
+        <p className="mt-[24px] text-[20px] font-[400] leading-[30px] text-[#7B7B7B]">
+          {SUPPORTING_TEXT}
+        </p>
+
+        <div
+          role="group"
+          aria-label="Your invitation link"
+          className={`mt-[48px] flex items-stretch ${flowFieldBox}`}>
+          <p className="min-w-0 flex-1 break-all rounded-l-[8px] bg-[#F9FAFB] px-[14px] py-[12px] text-[16px] font-[400] leading-[24px] text-[#E34013]">
+            {invitationLink}
+          </p>
+          <button
+            type="button"
+            onClick={copyLink}
+            className="flex shrink-0 items-center gap-[6px] rounded-r-[8px] border-l border-[#D0D5DD] bg-white px-[20px] py-[14px] text-[14px] font-[600] leading-[20px] text-[#E34013]">
+            {copyState === 'copied' ? (
+              <Check size={20} aria-hidden="true" />
+            ) : (
+              <Copy size={20} aria-hidden="true" />
+            )}
+            {copyState === 'copied' ? 'Copied' : 'Copy'}
+          </button>
+          <p role="status" className="sr-only">
+            {copyState === 'copied' ? 'Invitation link copied' : ''}
+          </p>
+        </div>
+
+        {copyState === 'failed' ? (
+          <p
+            role="alert"
+            className="mt-[6px] text-[14px] font-[400] leading-[20px] text-[#D92D20]">
+            This browser would not let us copy the link. Select it and copy it
+            yourself.
+          </p>
+        ) : null}
+
+        <div className="flex">
+          <button
+            ref={playRef}
+            type="button"
+            onClick={() => setIsPlaying(true)}
+            className={`mr-[20px] mt-[48px] ${flowActionPlay}`}>
+            Play My Invite
+            <PlayCircle size={20} aria-hidden="true" />
+          </button>
+          {/* A link rather than a button: home is a place, and a couple who is
+              finished should be able to open it in a tab of its own. */}
+          <Link href="/" className={`mt-[48px] ${flowActionHome}`}>
+            Back to home
+            <Home size={20} aria-hidden="true" />
+          </Link>
+        </div>
+      </div>
+
+      {isPlaying ? (
+        <InvitationPlayer
+          content={content}
+          onClose={() => {
+            setIsPlaying(false);
+            playRef.current?.focus();
+          }}
+        />
+      ) : null}
+    </div>
+  );
+}

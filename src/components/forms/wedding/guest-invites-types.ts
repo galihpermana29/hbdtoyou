@@ -102,20 +102,32 @@ export const DEFAULT_GUEST_MESSAGE = [
 export const SAMPLE_GUEST_NAME = 'Johnny';
 
 /**
- * The link one guest would receive, or null while the slug is not usable yet.
+ * Where a published invitation lives, or null while the slug is not usable yet.
  *
- * Null rather than a link built from an empty slug: a preview showing
- * `https://memoify.live/w/?name=johnny` would be telling the couple something
- * untrue about what their guests get. The placeholder stays in place instead.
+ * Null rather than a link built from an empty slug: an address showing
+ * `https://memoify.live/w/` would be telling the couple something untrue about
+ * what they are about to send.
  *
  * The shape is a path, per `docs/adr/0001-path-urls-not-subdomains.md`, even
- * though the field beside it is suffixed as a subdomain.
+ * though the field the couple types into is suffixed as a subdomain. The two
+ * disagreeing is `hbd-byb.18`, and it is decided in one place so that whichever
+ * way it is settled is one edit.
+ */
+export function invitationLinkFor(slug: string): string | null {
+  if (slugProblem(slug)) return null;
+  return `https://memoify.live/w/${slug.trim()}`;
+}
+
+/**
+ * The link one guest would receive, or null while the slug is not usable yet.
+ *
+ * The same address as the invitation itself, naming the guest it was written
+ * for, so the invitation can greet them.
  */
 export function guestLinkFor(slug: string, guestName: string): string | null {
-  if (slugProblem(slug)) return null;
-  return `https://memoify.live/w/${slug.trim()}?name=${guestName
-    .trim()
-    .toLowerCase()}`;
+  const invitation = invitationLinkFor(slug);
+  if (!invitation) return null;
+  return `${invitation}?name=${guestName.trim().toLowerCase()}`;
 }
 
 export interface GuestMessageSubstitutions {
