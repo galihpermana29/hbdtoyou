@@ -1,10 +1,28 @@
-# Visual comparison harness
+# Visual check harness
 
-Renders a Create Flow screen in a real browser at 1440px wide, captures the full page, and compares it against an image exported from the Figma design.
+Renders a Create Flow screen in a real browser at 1440px wide, drives it into its designed state, and asks it what it is: the copy each element renders, where it sits in the document, and how it is styled.
+That is compared against values taken from the Figma design.
 
-It exists so that "pixel-perfect" is a result rather than an opinion.
+It exists so that "matches the design" is a result rather than an opinion.
 The design is the source of truth at 1440px, taken literally, including its copy errors.
 See `docs/adr/0002-figma-is-literal-truth.md`.
+
+## What is asserted, and what is never asserted
+
+For each element the design describes, the check asserts typeface, size, weight, line height, letter spacing, colour, background, border colour, width and style, corner radius, shadow, padding, margin and gap, together with the exact copy the element renders and where it sits in the document relative to every other element.
+
+It never asserts a width or a height.
+That is the whole point.
+A field that stretches to its container is correct at any size, so measuring one would fail correct work and train everyone to ignore the check.
+The property list is an allow-list, and a dimension is refused by name with an explanation, so one cannot arrive by accident.
+
+Screenshots are still captured on every run and written beside the report.
+They exist so a person can see what the check saw.
+They decide nothing.
+
+Comparing rendered screenshots pixel by pixel was tried first and removed.
+It failed a correct screen whose input happened to be a few pixels wider than the design's, and on a mostly white page it barely noticed a genuine fault: a capture missing four fifths of the page scored as only twelve percent different, which reads as almost right.
+A missing element now fails outright, named.
 
 ## Setup, once
 
@@ -23,12 +41,11 @@ npm run visual
 ```
 
 That is the whole command.
-It starts the app on port 3210 if nothing is already serving there, drives a headless Chromium to each screen, captures, compares, and stops the server again.
+It starts the app on port 3210 if nothing is already serving there, drives a headless Chromium to each screen, checks it, and stops the server again.
 An app already serving that port is reused, so iterating on one screen does not pay the dev server's start-up every time.
 
 ```sh
 npm run visual -- --screen=details-and-story-expanded   # one screen
-npm run visual -- --threshold=0.01                      # a looser gate for one run
 npm run visual -- --base-url=http://127.0.0.1:3000      # an app you started yourself
 ```
 
@@ -36,76 +53,96 @@ Exit codes carry the verdict:
 
 | Code | Meaning |
 | ---- | ------- |
-| 0 | every comparable screen is within its threshold |
-| 1 | at least one screen differs from the design by more than its threshold |
-| 2 | the harness could not run: no server, a capture that never settled, a missing baseline |
+| 0 | every checkable screen matches the design |
+| 1 | at least one screen differs from the design |
+| 2 | the harness could not run: no server, a capture that never settled, a broken manifest |
 
 Every run writes to `visual/output/`, which is not committed:
 
-- `<screen>.actual.png` - what the browser rendered
-- `<screen>.diff.png` - the same page with every counted difference marked red, and antialiasing marked yellow
-- `report.json` - the numbers, for anything that wants to read them
+- `<screen>.actual.png` - what the browser rendered, as evidence
+- `report.json` - every failure, for anything that wants to read them
 
 ## Reading a result
 
 ```
-DIFFERS details-and-story-expanded: 11.803% of pixels (985,974), threshold 0.200%
-        size: design 1440x5801, page 1440x1197
-        differs across: 1440x5781 at (0, 20)
+DIFFERS details-and-story-expanded: 3 failure(s) across 59 checked elements
+        Page title - copy
+          expected: Create Wedding Invitation
+          actual:   Create your wedding invitation
+        Page title - fontSize
+          expected: 18px
+          actual:   30px
+        Cover Header Section card - presence
+          expected: one element matching "form section:nth-of-type(1)"
+          actual:   nothing matched
 ```
 
-`size` comes first for a reason.
-When the two heights disagree the page is a different length from the design, and every difference below the first divergence is a consequence of that rather than a separate problem.
-Fix the height, then read the percentage again.
+Every line names one element and one property, with what the design says and what the page did.
+There is no percentage, because a percentage cannot be acted on.
 
-`differs across` is the rectangle enclosing every counted difference.
-Antialiasing marks are excluded from it, so a screen that passes does not report a full-page rectangle just for having text on it.
-A small rectangle points straight at the problem.
-A rectangle the size of the page means something near the top has shifted everything below it.
+`presence` means the element is not there at all.
+When the element was looked for by its copy, the failure also names the nearest copy the page does render - the one sharing the most words with it, ignoring case - which turns a typo into two spellings side by side rather than a hunt.
+When a position was asked for, the failure says how many were found instead, which separates "the element is missing" from "there are fewer of them than the design has".
+
+`position` means the element exists but the design puts it somewhere else in the document relative to the others.
 
 ## Screens
 
 `visual/screens.mjs` is the list, and it is the only place a screen is defined.
 Seven screens are covered: the details-and-story step in each of its four designed states, the guest invites step empty and populated, and the published screen.
 
-A screen is `SKIPPED` when the thing it would compare does not exist yet, either because the route has not been built or because no frame has been exported for that state.
+A screen is `SKIPPED` when the thing it would check does not exist yet, and the reason says which.
+`route not built yet` is code-side work.
+`nothing recorded from the design yet` is the expectations file, which is the work of the bead that builds that screen - except for the three details-and-story states that have no exported frame at all, which are blocked design-side until someone exports them.
+
 Skipping is not failing.
 It keeps a red run meaning "this screen does not match the design" rather than "this screen has not been built".
 
-Only four of the seven states have an exported frame today.
-The three remaining details-and-story states need exporting from the design before they can ever be compared; that is design-side work, and until it happens those screens stay skipped.
+## Expectations
 
-## The threshold
+`visual/expectations/<screen>.mjs` holds what the design says one screen is, in the order the design arranges it.
+Every value there was read from the Figma frame named at the top of the file.
 
-The default is **0.2% of pixels**, set in `visual/screens.mjs` next to the reasoning.
-Equality is not an option: Figma's rasteriser and Chromium never agree on glyph edges, so a screen that is genuinely correct still differs.
-Pixelmatch's antialiasing detection absorbs most of that, and 0.2% covers the residue while still failing on anything the size of a single form field.
+An expectation is written in ordinary CSS syntax and compared against whatever spelling the browser reports, so `#e34013` matches `rgb(227, 64, 19)`, `24` matches `24px`, and `bold` matches `700`.
+Failures show the normal form, where a see-through colour reads as `#101828@0.05`.
+Only the first family of a font stack is compared, because the fallbacks are the implementation's business and not a design decision.
+A colour written by name is refused: a browser never reports one that way, so `white` could only ever fail against the `#ffffff` the page reports.
 
-The threshold starts strict and may only be relaxed with a recorded reason.
-`--threshold` exists for exploring a screen you are working on, not for landing one: it leaves no record.
-A value a screen actually needs belongs on that screen in `screens.mjs`, as `maxDiffRatio`, with a comment saying why, where a reviewer will see it.
+Elements are found two ways, and the choice decides what a failure reads like.
 
-What the comparison cannot catch is worth knowing.
+A structural selector says where an element sits and lets its copy be checked as a claim, so a typo reports as a `copy` failure with both spellings.
+Those selectors use nothing but ordinary HTML and the standard ARIA patterns - `header`, `nav[aria-label="Breadcrumb"]`, `h1`, `form section`, `label` with its control, `button`, `footer` - and that list is the whole contract a screen has to satisfy.
+
+`withText` is the other way, for elements whose only distinguishing feature is what they say.
+Copy is the locator there, so wrong copy reports as a missing element rather than as a copy failure.
+
+An expectation that cannot be checked - no name, no way to find its element, a repeated name, a property this harness does not compare - stops the run before a browser starts, with exit code 2.
+That is the harness being broken rather than a screen differing from the design, and it is never silently skipped: a rule nobody notices was dropped is worse than one that fails loudly.
+
+What the check cannot catch is worth knowing.
 A field stored under the wrong name, a slug validated by the wrong rule, or two parents joined in the wrong order all look correct.
 Human sign-off is still the final gate.
 
 ## Determinism
 
 The Site Preview renders the live invitation, so it animates and it loads remote imagery.
-Three things hold it still, and the panel is frozen rather than masked so the comparison still sees it:
+Three things hold it still, and the panel is frozen rather than masked so the check still sees it:
 
 - the browser runs with reduced motion, and captures with animations disabled
 - a stylesheet pauses every animation and collapses every transition
-- the page is screenshotted repeatedly until two consecutive captures are byte-identical
+- the page is screenshotted repeatedly until two consecutive captures are byte-identical, and only then is it inspected
 
 The third is the one that matters, because it covers animation driven from JavaScript and images that arrive late.
-If the page never stops changing the capture fails loudly rather than comparing an arbitrary frame.
+If the page never stops changing the run fails loudly rather than inspecting an arbitrary frame.
 
-## Regenerating the baselines
+## Regenerating the design images
 
 ```sh
 FIGMA_FILE_KEY=<key> npm run visual:baselines
 ```
+
+`visual/baseline/` holds the frames exported from Figma.
+Nothing reads them automatically: they are what a person reads design values from when writing or revising an expectations file, and what a run's screenshot is held up against by eye.
 
 The file key is not stored anywhere in this repository, and the script refuses to run without one.
 The design is read through the Figma plugin bridge rather than the REST API, because the account's plan rate-limits the API partway through a session, and the key the bridge reports **changes between sessions**.
@@ -113,8 +150,8 @@ A key committed today is a silently wrong export tomorrow, so it is read at the 
 
 To find the current key: open the bridge plugin in the Figma desktop application, then ask it to list its files.
 
-The command prints which Figma node becomes which baseline file, and which states have no frame to export yet.
-Both come from `visual/screens.mjs`, the same manifest the comparison reads, so the export list and the screen list cannot drift apart.
+The command prints which Figma node becomes which image, and which states have no frame to export yet.
+Both come from `visual/screens.mjs`, the same manifest the check reads, so the export list and the screen list cannot drift apart.
 
 ## Checking the harness itself
 
@@ -123,6 +160,8 @@ npm run visual:self-check
 ```
 
 Every screen reports red until this epic is finished, and a permanently red command is one nobody trusts.
-This compares each baseline against itself, expecting no difference; then against a copy with a patch inverted, expecting a difference in exactly that place; then a pair that differs only in antialiasing, expecting no difference and no region.
+This checks that a value is read the way a browser spells it, that a matching screen passes, and that each kind of fault - a missing element, an ambiguous one, wrong copy, a wrong property, an element in the wrong place - fails with the element and the property named.
+It also refuses an expectation that measures something, and validates every expectations file this repository has recorded.
+
 It needs no browser and no server.
 When it passes, a red screen means the screen.

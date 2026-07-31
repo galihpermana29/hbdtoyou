@@ -74,16 +74,26 @@ async function captureWhenSettled(page, { attempts = 8, quietMs = 400 } = {}) {
 }
 
 /**
- * Open a browser once, hand a capture function to the caller, and always close it.
+ * Open a browser once, hand a visit function to the caller, and always close it.
  *
  * One browser serves every screen in a run, because launching Chromium costs
- * more than every comparison in this harness put together.
+ * more than every check in this harness put together.
  */
 export async function withBrowser(run) {
   const browser = await chromium.launch();
 
-  /** Capture one screen at the design width, full page. */
-  async function capture({ url, prepare }) {
+  /**
+   * Drive one screen into its designed state at the design width.
+   *
+   * The screenshot is taken first, once the page has stopped changing, and then
+   * `use` is handed the settled page to ask it whatever else is needed. The
+   * screenshot is evidence a person can look at; it decides nothing.
+   *
+   * A failure inside `use` is returned rather than thrown, so the evidence
+   * survives it. A run that went wrong is exactly when someone wants to see
+   * what the page looked like.
+   */
+  async function visit({ url, prepare }, use) {
     const context = await browser.newContext({
       viewport: { width: DESIGN_WIDTH, height: 900 },
       deviceScaleFactor: 1,
@@ -100,14 +110,19 @@ export async function withBrowser(run) {
         await page.addStyleTag({ content: FREEZE_STYLES });
       }
       await waitForPaintedAssets(page);
-      return await captureWhenSettled(page);
+      const screenshot = await captureWhenSettled(page);
+      try {
+        return { screenshot, observed: use ? await use(page) : null };
+      } catch (error) {
+        return { screenshot, observed: null, failure: error };
+      }
     } finally {
       await context.close();
     }
   }
 
   try {
-    return await run(capture);
+    return await run(visit);
   } finally {
     await browser.close();
   }

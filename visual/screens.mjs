@@ -1,45 +1,18 @@
 /**
  * The Create Flow screens the visual harness knows about.
  *
- * Each entry names one designed screen, the Figma node it was exported from,
- * and how to drive a browser into that state. The Figma file key is deliberately
- * absent: it changes between plugin bridge sessions and is read at run time.
- * See `visual/README.md`.
+ * Each entry names one designed screen, the Figma node it was taken from, how to
+ * drive a browser into that state, and what the design says the screen is. The
+ * Figma file key is deliberately absent: it changes between plugin bridge
+ * sessions and is read at run time. See `visual/README.md`.
  */
 
-/**
- * Fraction of pixels allowed to differ before a screen is reported as failing.
- *
- * Default 0.002 (0.2%). Reason, per the epic's requirement that the threshold
- * start strict and only be relaxed with a recorded justification:
- *
- *   Figma's rasteriser and Chromium never agree on glyph edges, so a screen that
- *   is genuinely correct still differs. `COLOUR_TOLERANCE` plus pixelmatch's
- *   antialiasing detection absorbs most of that noise, leaving a residue well
- *   under a tenth of a percent on a text-heavy page.
- *
- *   0.2% of the tallest baseline (1440x5801) is roughly 16,700 pixels, about the
- *   area of one form field. So the gate passes rasteriser noise and fails on
- *   anything the size of a misplaced field or larger.
- *
- * A screen that genuinely needs more room gets its own `maxDiffRatio` here, with
- * a comment saying why, where a reviewer will see it. `--threshold` on the
- * command line is for exploring a screen you are working on; it leaves no record,
- * so it is not a way to land one.
- */
-export const DEFAULT_MAX_DIFF_RATIO = 0.002;
+import { expectations as detailsAndStoryExpanded } from './expectations/details-and-story-expanded.mjs';
 
-/**
- * Per-pixel colour distance below which two pixels count as the same, on
- * pixelmatch's 0-1 scale. Its own default, which is tuned for exactly this
- * problem: absorbing rasteriser differences without hiding real colour changes.
- */
-export const COLOUR_TOLERANCE = 0.1;
-
-/** The width the design is defined at. Nothing below this is pixel-checked. */
+/** The width the design is defined at. Nothing below this is checked. */
 export const DESIGN_WIDTH = 1440;
 
-/** The Figma file the baselines come from, for the regeneration instructions. */
+/** The Figma file the design is read from, for the export instructions. */
 export const FIGMA_FILE_NAME = 'Wedding Invitations';
 
 const DETAILS_AND_STORY_ROUTE = '/create/wedding-invitation';
@@ -50,7 +23,7 @@ const DETAILS_AND_STORY_ROUTE = '/create/wedding-invitation';
  * The form is currently an antd accordion, so at most one Section can be open and
  * this leaves the last one open rather than all of them. That is not worked
  * around: it is one of the differences from the design, and hiding it here would
- * hide it from the diff as well. The screen's `note` says so in the report.
+ * hide it from the check as well. The screen's `note` says so in the report.
  */
 async function expandEverySection(page) {
   const headers = page.locator('.ant-collapse-item > .ant-collapse-header');
@@ -65,10 +38,12 @@ async function expandEverySection(page) {
 }
 
 /**
- * Three of the seven states have no `figmaNodeId` because no frame has been
- * exported for them. Only four frames accompany the spec. Exporting the missing
- * three is design-side work; add the node id here once they exist and the screen
- * stops being skipped.
+ * Six of the seven states have no expectations recorded yet.
+ *
+ * Three have no exported frame at all, and three more have a frame but no route
+ * to render. Recording a screen's expectations is the work of the bead that
+ * builds it; the baseline image beside this manifest is what those values are
+ * read from.
  */
 export const screens = [
   {
@@ -77,6 +52,7 @@ export const screens = [
     route: DETAILS_AND_STORY_ROUTE,
     figmaNodeId: null,
     baseline: null,
+    expectations: null,
   },
   {
     id: 'details-and-story-expanded',
@@ -84,11 +60,12 @@ export const screens = [
     route: DETAILS_AND_STORY_ROUTE,
     figmaNodeId: '332-14392',
     baseline: 'details-and-story-expanded.png',
+    expectations: detailsAndStoryExpanded,
     prepare: expandEverySection,
     note:
       'the form is an accordion, so only one Section can be open at a time. ' +
-      'The capture is the page trying to reach this state and failing, which is ' +
-      'part of what the percentage above measures.',
+      'The Sections below the open one are collapsed, so their elements are ' +
+      'reported as missing rather than as wrongly styled.',
   },
   {
     id: 'details-and-story-cover-header',
@@ -96,6 +73,7 @@ export const screens = [
     route: DETAILS_AND_STORY_ROUTE,
     figmaNodeId: null,
     baseline: null,
+    expectations: null,
   },
   {
     id: 'details-and-story-section',
@@ -103,6 +81,7 @@ export const screens = [
     route: DETAILS_AND_STORY_ROUTE,
     figmaNodeId: null,
     baseline: null,
+    expectations: null,
   },
   {
     id: 'guest-invites-empty',
@@ -110,6 +89,7 @@ export const screens = [
     route: null,
     figmaNodeId: '332-12440',
     baseline: 'guest-invites-empty.png',
+    expectations: null,
   },
   {
     id: 'guest-invites-populated',
@@ -117,6 +97,7 @@ export const screens = [
     route: null,
     figmaNodeId: '356-3062',
     baseline: 'guest-invites-populated.png',
+    expectations: null,
   },
   {
     id: 'published',
@@ -124,25 +105,26 @@ export const screens = [
     route: null,
     figmaNodeId: '305-8972',
     baseline: 'published.png',
+    expectations: null,
   },
 ];
 
 /**
- * Why a screen cannot be compared yet, or null when it can be.
+ * Why a screen cannot be checked yet, or null when it can be.
  *
- * A screen is skipped rather than failed when the thing it would compare does
- * not exist yet. That keeps a run's red output meaning "this screen does not
- * match the design" rather than "this screen has not been built".
+ * A screen is skipped rather than failed when the thing it would check does not
+ * exist yet. That keeps a run's red output meaning "this screen does not match
+ * the design" rather than "this screen has not been built".
  */
 export function skipReason(screen) {
-  if (!screen.route && !screen.baseline) {
-    return 'no route and no baseline yet';
+  if (!screen.route && !screen.expectations) {
+    return 'no route and nothing recorded from the design yet';
   }
   if (!screen.route) {
     return 'route not built yet';
   }
-  if (!screen.baseline) {
-    return 'no baseline exported from Figma yet';
+  if (!screen.expectations) {
+    return 'nothing recorded from the design yet';
   }
   return null;
 }

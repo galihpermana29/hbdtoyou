@@ -1,30 +1,31 @@
 #!/usr/bin/env node
 /**
- * Compare the Create Flow against the design.
+ * Check the Create Flow against the design.
  *
  *   npm run visual
  *   npm run visual -- --screen=details-and-story-expanded
- *   npm run visual -- --threshold=0.01 --base-url=http://127.0.0.1:3000
+ *   npm run visual -- --base-url=http://127.0.0.1:3000
+ *
+ * Each screen is rendered in a real browser at the design width, driven into its
+ * designed state, and asked what it is: the copy each element renders, where it
+ * sits in the document, and how it is styled. That is compared against values
+ * taken from the design. Nothing is measured, and nothing is scored.
  *
  * Exit codes are the whole point of this command, so they are kept distinct:
- *   0  every comparable screen is within its threshold
- *   1  at least one screen differs from the design by more than its threshold
+ *   0  every checkable screen matches the design
+ *   1  at least one screen differs from the design
  *   2  the harness itself could not run
  */
 
-import { mkdir, readFile, rm, writeFile } from 'node:fs/promises';
+import { mkdir, rm, writeFile } from 'node:fs/promises';
 import { join } from 'node:path';
 
 import { withBrowser } from './capture.mjs';
-import { compare } from './compare.mjs';
+import { check, validateExpectations } from './check.mjs';
 import { ensureAppServed, HARNESS_BASE_URL } from './dev-server.mjs';
-import { asRepoPath, BASELINE_DIR, OUTPUT_DIR } from './paths.mjs';
-import {
-  DEFAULT_MAX_DIFF_RATIO,
-  DESIGN_WIDTH,
-  screens,
-  skipReason,
-} from './screens.mjs';
+import { observe } from './inspect.mjs';
+import { asRepoPath, OUTPUT_DIR } from './paths.mjs';
+import { DESIGN_WIDTH, screens, skipReason } from './screens.mjs';
 
 const EXIT_MATCHES = 0;
 const EXIT_DIFFERS = 1;
@@ -33,7 +34,6 @@ const EXIT_HARNESS_BROKEN = 2;
 function parseArguments(argv) {
   const options = {
     screen: null,
-    threshold: null,
     baseUrl: process.env.VISUAL_BASE_URL || HARNESS_BASE_URL,
   };
 
@@ -42,14 +42,6 @@ function parseArguments(argv) {
     switch (flag) {
       case '--screen':
         options.screen = value;
-        break;
-      case '--threshold':
-        options.threshold = Number(value);
-        if (!Number.isFinite(options.threshold) || options.threshold < 0) {
-          throw new Error(
-            `--threshold must be a fraction between 0 and 1, got "${value}"`
-          );
-        }
         break;
       case '--base-url':
         options.baseUrl = value;
@@ -62,71 +54,38 @@ function parseArguments(argv) {
   return options;
 }
 
-const asPercent = (ratio) => `${(ratio * 100).toFixed(3)}%`;
-
-function describeRegion(region) {
-  if (!region) {
-    return 'nowhere';
-  }
-  return `${region.width}x${region.height} at (${region.x}, ${region.y})`;
-}
-
-function describeSizes({ baselineSize, actualSize }) {
-  if (
-    baselineSize.width === actualSize.width &&
-    baselineSize.height === actualSize.height
-  ) {
-    return `both ${baselineSize.width}x${baselineSize.height}`;
-  }
-  return (
-    `design ${baselineSize.width}x${baselineSize.height}, ` +
-    `page ${actualSize.width}x${actualSize.height}`
+async function checkScreen(screen, { visit, baseUrl }) {
+  const { screenshot, observed, failure } = await visit(
+    {
+      url: new URL(screen.route, baseUrl).href,
+      prepare: screen.prepare,
+    },
+    (page) => observe(page, screen.expectations)
   );
-}
 
-/**
- * The threshold a screen is judged against.
- *
- * An explicit `--threshold` wins over everything, because someone typed it on
- * purpose for this run. Otherwise a screen's own recorded allowance applies, and
- * failing that the default.
- */
-function thresholdFor(screen, requested) {
-  return requested ?? screen.maxDiffRatio ?? DEFAULT_MAX_DIFF_RATIO;
-}
+  // The evidence is written before anything can go wrong with the verdict. A
+  // run that failed is exactly when someone wants to see what the page was.
+  await writeFile(join(OUTPUT_DIR, `${screen.id}.actual.png`), screenshot);
+  if (failure) {
+    throw failure;
+  }
 
-async function compareScreen(screen, { capture, baseUrl, threshold }) {
-  const baselineBuffer = await readFile(join(BASELINE_DIR, screen.baseline));
-  const actualBuffer = await capture({
-    url: new URL(screen.route, baseUrl).href,
-    prepare: screen.prepare,
-  });
-
-  const result = compare(baselineBuffer, actualBuffer);
-  const maxDiffRatio = thresholdFor(screen, threshold);
-
-  await writeFile(join(OUTPUT_DIR, `${screen.id}.actual.png`), actualBuffer);
-  await writeFile(join(OUTPUT_DIR, `${screen.id}.diff.png`), result.diffImage);
+  const failures = check(screen.expectations, observed);
 
   return {
     id: screen.id,
     title: screen.title,
     note: screen.note ?? null,
-    status: result.diffRatio <= maxDiffRatio ? 'matches' : 'differs',
-    diffRatio: result.diffRatio,
-    differingPixels: result.differingPixels,
-    maxDiffRatio,
-    sizes: describeSizes(result),
-    region: result.region,
-    baseline: asRepoPath('baseline', screen.baseline),
-    actual: asRepoPath('output', `${screen.id}.actual.png`),
-    diff: asRepoPath('output', `${screen.id}.diff.png`),
+    status: failures.length === 0 ? 'matches' : 'differs',
+    checked: screen.expectations.length,
+    failures,
+    screenshot: asRepoPath('output', `${screen.id}.actual.png`),
   };
 }
 
-/** Split the chosen screens into the ones that can be compared and the rest. */
+/** Split the chosen screens into the ones that can be checked and the rest. */
 function partition(chosen) {
-  const comparable = [];
+  const checkable = [];
   const skipped = [];
   for (const screen of chosen) {
     const reason = skipReason(screen);
@@ -138,10 +97,10 @@ function partition(chosen) {
         reason,
       });
     } else {
-      comparable.push(screen);
+      checkable.push(screen);
     }
   }
-  return { comparable, skipped };
+  return { checkable, skipped };
 }
 
 function chooseScreens(requestedId) {
@@ -158,7 +117,7 @@ function chooseScreens(requestedId) {
   }
   const reason = skipReason(screen);
   if (reason) {
-    throw new Error(`"${requestedId}" cannot be compared yet: ${reason}`);
+    throw new Error(`"${requestedId}" cannot be checked yet: ${reason}`);
   }
   return [screen];
 }
@@ -170,15 +129,23 @@ function report(results, skipped) {
       console.log(`ERROR   ${result.id}: ${result.reason}`);
       continue;
     }
-    const verdict = result.status === 'matches' ? 'MATCHES' : 'DIFFERS';
-    console.log(
-      `${verdict} ${result.id}: ${asPercent(result.diffRatio)} of pixels ` +
-        `(${result.differingPixels.toLocaleString('en-US')}), ` +
-        `threshold ${asPercent(result.maxDiffRatio)}`
-    );
-    console.log(`        size: ${result.sizes}`);
-    console.log(`        differs across: ${describeRegion(result.region)}`);
-    console.log(`        diff image: ${result.diff}`);
+    if (result.status === 'matches') {
+      console.log(
+        `MATCHES ${result.id}: all ${result.checked} elements match the design`
+      );
+    } else {
+      console.log(
+        `DIFFERS ${result.id}: ${result.failures.length} failure(s) across ` +
+          `${result.checked} checked elements`
+      );
+      for (const failure of result.failures) {
+        const found = failure.found ? ` ${failure.found}` : '';
+        console.log(`        ${failure.element}${found} - ${failure.property}`);
+        console.log(`          expected: ${failure.expected}`);
+        console.log(`          actual:   ${failure.actual}`);
+      }
+    }
+    console.log(`        screenshot: ${result.screenshot}`);
     if (result.note) {
       console.log(`        note: ${result.note}`);
     }
@@ -191,12 +158,30 @@ function report(results, skipped) {
 
 async function main() {
   const options = parseArguments(process.argv.slice(2));
-  const { comparable, skipped } = partition(chooseScreens(options.screen));
+  const { checkable, skipped } = partition(chooseScreens(options.screen));
 
-  if (comparable.length === 0) {
+  if (checkable.length === 0) {
     throw new Error(
-      'nothing to compare: every screen is missing its route or its baseline'
+      'nothing to check: every screen is missing its route or its expectations'
     );
+  }
+
+  // A manifest that cannot be checked is the harness being broken, not a screen
+  // differing from the design, so it stops the run here rather than reporting a
+  // red screen - and it stops before a dev server is started for nothing.
+  for (const screen of checkable) {
+    const authoring = validateExpectations(screen.expectations);
+    if (authoring.length > 0) {
+      throw new Error(
+        `${screen.id} has expectations that cannot be checked:\n` +
+          authoring
+            .map(
+              (entry) =>
+                `  ${entry.element} - ${entry.property}: ${entry.actual}`
+            )
+            .join('\n')
+      );
+    }
   }
 
   await rm(OUTPUT_DIR, { recursive: true, force: true });
@@ -211,17 +196,20 @@ async function main() {
 
   let results;
   try {
-    results = await withBrowser(async (capture) => {
+    results = await withBrowser(async (visit) => {
       const collected = [];
-      for (const screen of comparable) {
-        process.stdout.write(`Capturing ${screen.id}... `);
+      for (const screen of checkable) {
+        process.stdout.write(`Checking ${screen.id}... `);
         try {
-          const result = await compareScreen(screen, {
-            capture,
+          const result = await checkScreen(screen, {
+            visit,
             baseUrl: options.baseUrl,
-            threshold: options.threshold,
           });
-          console.log(asPercent(result.diffRatio));
+          console.log(
+            result.status === 'matches'
+              ? 'matches'
+              : `${result.failures.length} failure(s)`
+          );
           collected.push(result);
         } catch (error) {
           console.log('failed');
@@ -244,8 +232,6 @@ async function main() {
     `${JSON.stringify(
       {
         designWidth: DESIGN_WIDTH,
-        defaultMaxDiffRatio: DEFAULT_MAX_DIFF_RATIO,
-        thresholdOverride: options.threshold,
         screens: [...results, ...skipped],
       },
       null,
