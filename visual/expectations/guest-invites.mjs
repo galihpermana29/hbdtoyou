@@ -106,7 +106,7 @@ export const guestInvitesIntroduction = [
     style: TYPE.fieldLabel,
   },
   {
-    // The field is the input and the suffix together, in one box: the box
+    // The field is the prefix and the input together, in one box: the box
     // carries the border, the radius and the shadow, and the two things inside
     // it carry their own type.
     name: 'Invitation Slug field',
@@ -115,13 +115,11 @@ export const guestInvitesIntroduction = [
     style: FIELD_BOX,
   },
   {
-    name: 'Invitation Slug input',
-    control: 'Custom Your Web Domain',
-    style: { ...FIELD_VALUE, backgroundColor: '#ffffff', padding: '12px 14px' },
-  },
-  {
-    name: 'Invitation Slug suffix',
-    withText: '.memoify.live',
+    // Ahead of the box, not after it. The design draws a subdomain suffix; the
+    // product serves a path, so the fixed part of the address is read first.
+    // See `docs/adr/0001-path-urls-not-subdomains.md`.
+    name: 'Invitation Slug prefix',
+    withText: 'memoify.live/wedding/',
     style: {
       fontSize: '14px',
       fontWeight: 600,
@@ -129,9 +127,14 @@ export const guestInvitesIntroduction = [
       color: '#e34013',
       backgroundColor: '#ffffff',
       borderColor: '#d0d5dd',
-      borderWidth: '0px 0px 0px 1px',
+      borderWidth: '0px 1px 0px 0px',
       padding: '10px 20px',
     },
+  },
+  {
+    name: 'Invitation Slug input',
+    control: 'Custom Your Web Domain',
+    style: { ...FIELD_VALUE, backgroundColor: '#ffffff', padding: '12px 14px' },
   },
   {
     // Not in the design. See the note at the top of this file.

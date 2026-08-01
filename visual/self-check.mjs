@@ -439,10 +439,58 @@ function checkTheManifest() {
   }
 }
 
+/**
+ * The example a field shows while it is empty.
+ *
+ * The design writes one into every empty field, so a wrong one is a wrong piece
+ * of the design and has to fail rather than pass unread.
+ */
+function checkThePlaceholder() {
+  console.log('the example a field shows while it is empty');
+
+  const expectations = [
+    { name: 'A field', select: 'input', placeholder: 'Freya' },
+  ];
+  const observed = (placeholder) => [
+    {
+      name: 'A field',
+      matched: 1,
+      documentIndex: 1,
+      describe: '<input>',
+      placeholder,
+      style: {},
+    },
+  ];
+
+  expect(
+    check(expectations, observed('Freya')).length === 0,
+    'the example the design asked for is not a failure'
+  );
+
+  const [wrong] = check(expectations, observed('Freyaa'));
+  expect(
+    wrong && wrong.property === 'placeholder',
+    'a different example is a failure, named as a placeholder rather than as copy'
+  );
+
+  const [absent] = check(expectations, observed(''));
+  expect(
+    absent && absent.actual === 'no placeholder',
+    'a field showing no example says so, rather than reporting an empty string'
+  );
+
+  expect(
+    check([{ name: 'A field', select: 'input' }], observed('anything'))
+      .length === 0,
+    'an expectation that claims no example ignores whatever the field shows'
+  );
+}
+
 function main() {
   checkTheVocabulary();
   checkTheVerdict();
   checkTheAuthoring();
+  checkThePlaceholder();
   checkTheManifest();
 
   if (failures.length > 0) {

@@ -65,7 +65,7 @@ Where the account is held, asked for on its own rather than written into the hol
 Two answers, joined for display, the same way a father and a mother are.
 _Avoid_: bank
 
-**Photo Showcase**:
+**Photo Collection**:
 The section collecting the pre-wedding photos the invitation ends on.
 _Avoid_: Gallery, which is what the invitation calls the block this section fills in
 

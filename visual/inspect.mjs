@@ -93,14 +93,71 @@ export async function observe(page, expectations) {
             documentIndexes.get(left) - documentIndexes.get(right)
         );
 
+      /**
+       * The element a field's appearance is drawn on.
+       *
+       * A plain text input is the bordered box itself, so a label pointing at it
+       * points at the thing worth measuring. Antd's date picker and select are
+       * built differently: a bordered box wrapping a bare input, with the label
+       * pointing at the input. That input has no border, corner, padding or
+       * shadow of its own, so measuring it reports every one of those as absent
+       * however correct the field looks on screen.
+       *
+       * Climb to the box instead. The picker draws its own border; the select
+       * draws it on the inner selector, which is where `field-treatment.css`
+       * puts it too.
+       */
+      const styledField = (control) => {
+        if (!control) {
+          return control;
+        }
+        const picker = control.closest('.ant-picker');
+        if (picker) {
+          return picker;
+        }
+        const select = control.closest('.ant-select');
+        if (select) {
+          return select.querySelector('.ant-select-selector') ?? select;
+        }
+        return control;
+      };
+
+      /**
+       * The example a field shows while it is empty.
+       *
+       * The design writes one into every empty field, so it is design copy like
+       * any other and a typo in it should fail rather than pass unread.
+       *
+       * Three places to look, because a field is not always the element holding
+       * the attribute: a plain input carries its own, a date picker wraps one,
+       * and a select draws its example as text rather than as a placeholder at
+       * all.
+       */
+      const placeholderOf = (element) => {
+        if (typeof element.placeholder === 'string' && element.placeholder) {
+          return element.placeholder;
+        }
+        const inner = element.querySelector?.(
+          'input[placeholder], textarea[placeholder]'
+        );
+        if (inner) {
+          return inner.placeholder;
+        }
+        const drawn = element.querySelector?.(
+          '.ant-select-selection-placeholder'
+        );
+        return drawn ? normaliseCopy(drawn.textContent) : '';
+      };
+
       /** The form control a label of this copy is for. */
       const controlsLabelled = (copy) =>
         Array.from(document.querySelectorAll('label'))
           .filter((label) => normaliseCopy(label.textContent) === copy)
-          .map(
-            (label) =>
+          .map((label) =>
+            styledField(
               label.control ??
-              (label.htmlFor ? document.getElementById(label.htmlFor) : null)
+                (label.htmlFor ? document.getElementById(label.htmlFor) : null)
+            )
           )
           .filter(Boolean);
 
@@ -214,6 +271,7 @@ export async function observe(page, expectations) {
           documentIndex: documentIndexes.get(element),
           describe: describe(element),
           text: normaliseCopy(element.textContent),
+          placeholder: placeholderOf(element),
           style,
         };
       });

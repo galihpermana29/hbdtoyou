@@ -76,8 +76,6 @@ export interface WeddingTemplate1Content {
   venueName: string;
   address: string;
   mapsUrl: string;
-  dressCode: string;
-  photoShareCover: string;
   photoShareUrl: string;
   galleryPhotos: string[];
   tokenMessage: string;
@@ -86,7 +84,6 @@ export interface WeddingTemplate1Content {
   accountHolder: string;
   bankProvider: string;
   accountNumber: string;
-  guestMessagesEnabled: boolean;
   /** Whether guests are invited to send back their own photographs of the day. */
   memoRollEnabled: boolean;
 }
@@ -116,10 +113,14 @@ export interface WeddingInvitationFormValues {
   eventStartTime?: string;
   eventEndTime?: string;
   venueName?: string;
+  /** The venue's street address, printed on the invitation. */
+  address?: string;
   mapsUrl?: string;
   galleryPhotos?: string[];
   /** The gift section's photo, held as the one-photo list its field hands back. */
   tokenPhoto?: string[];
+  /** The words above the account, as the couple writes them. */
+  tokenMessage?: string;
   accountHolder?: string;
   bankProvider?: string;
   accountNumber?: string;
@@ -201,8 +202,6 @@ export const DEFAULT_WEDDING_TEMPLATE_1_CONTENT: WeddingTemplate1Content = {
   address:
     'Jl. Imam Bonjol, Menteng, Kec. Menteng, Kota Jakarta Pusat, Daerah Khusus Ibukota Jakarta 10310',
   mapsUrl: '',
-  dressCode: 'Exclusively in black, white, or a combination of both',
-  photoShareCover: '',
   photoShareUrl: '',
   galleryPhotos: [],
   tokenMessage:
@@ -211,7 +210,6 @@ export const DEFAULT_WEDDING_TEMPLATE_1_CONTENT: WeddingTemplate1Content = {
   accountHolder: 'Elias Frank Simanjuntak',
   bankProvider: 'BRI',
   accountNumber: '3331 0908 1766',
-  guestMessagesEnabled: true,
   memoRollEnabled: true,
 };
 
@@ -330,33 +328,26 @@ export function formValuesToContent(
     loveStoryPhotos: v.loveStoryPhotos ?? defaults.loveStoryPhotos,
     milestones,
     polaroidPhoto: pickPhoto(v.polaroidPhoto, 0, defaults.polaroidPhoto),
-    // The design asks for no map keepsake, no street address and no dress code
-    // anywhere in the flow, so the invitation prints the sample's. Filed as
-    // `hbd-byb.20` rather than answered here by adding fields the design does
-    // not draw.
-    mapPhoto: defaults.mapPhoto,
+    // The map keepsake is the venue, so it is the first of the photos the
+    // Venue Details Section already collects rather than a field of its own.
+    mapPhoto: pickPhoto(v.eventPhotos, 0, defaults.mapPhoto),
     loveStoryVideo: v.loveStoryVideo || defaults.loveStoryVideo,
     eventPhotos: v.eventPhotos ?? defaults.eventPhotos,
     eventStartTime: formatTime(v.eventStartTime, defaults.eventStartTime),
     eventEndTime: formatTime(v.eventEndTime, defaults.eventEndTime),
     venueName: v.venueName?.trim() || defaults.venueName,
-    address: defaults.address,
+    address: v.address?.trim() || defaults.address,
     mapsUrl: v.mapsUrl?.trim() || defaults.mapsUrl,
-    dressCode: defaults.dressCode,
-    // The design asks for no card for the photo sharing block, no link under
-    // it, and no message above the account, though the invitation prints all
-    // three, so it prints the sample's. Filed as `hbd-byb.22` rather than
-    // answered here by adding fields the design does not draw - and the same
-    // issue covers the Guest Messages the design offers no way to turn off.
-    photoShareCover: defaults.photoShareCover,
+    // The photo sharing block's card is product art rather than a couple's
+    // choice, so the block draws it itself and it is no longer content. The
+    // link under it is still the sample's: see `hbd-byb.22`.
     photoShareUrl: defaults.photoShareUrl,
     galleryPhotos: v.galleryPhotos ?? defaults.galleryPhotos,
-    tokenMessage: defaults.tokenMessage,
+    tokenMessage: v.tokenMessage?.trim() || defaults.tokenMessage,
     tokenPhoto: pickPhoto(v.tokenPhoto, 0, defaults.tokenPhoto),
     accountHolder: v.accountHolder?.trim() || defaults.accountHolder,
     bankProvider: v.bankProvider || defaults.bankProvider,
     accountNumber: v.accountNumber?.trim() || defaults.accountNumber,
-    guestMessagesEnabled: defaults.guestMessagesEnabled,
     memoRollEnabled: v.memoRollEnabled ?? defaults.memoRollEnabled,
   };
 }

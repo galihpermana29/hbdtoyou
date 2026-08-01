@@ -21,7 +21,7 @@ import {
   guestLinkFor,
   SAMPLE_GUEST_NAME,
   SLUG_RULES,
-  SLUG_SUFFIX,
+  SLUG_PREFIX,
   slugProblem,
   type GuestInvitesValues,
 } from './guest-invites-types';
@@ -205,23 +205,29 @@ export default function GuestInvitesStep({
                   role="group"
                   aria-labelledby={slugLabelId}
                   className={`flex items-stretch ${flowFieldBox}`}>
+                  {/* The address reads left to right as one line, so the part
+                      the product fixes comes before the part a couple chooses.
+                      The design draws it the other way round, as a subdomain
+                      suffix, which the product cannot serve: see
+                      `docs/adr/0001-path-urls-not-subdomains.md`. */}
+                  <span className="flex items-center rounded-l-[8px] border-r border-[#D0D5DD] bg-white px-[20px] py-[10px] text-[14px] font-[600] leading-[20px] text-[#E34013]">
+                    {SLUG_PREFIX}
+                  </span>
                   <input
                     id={slugId}
                     type="text"
                     value={values.slug}
                     aria-invalid={showProblem}
                     aria-describedby={`${slugId}-rules`}
-                    placeholder="FreeAtLastWithElias"
+                    placeholder="galihpermana"
                     onChange={(event) => {
                       setSlugTouched(true);
                       onChange({ ...values, slug: event.target.value });
                     }}
                     onBlur={() => setSlugTouched(true)}
-                    className="min-w-0 flex-1 rounded-l-[8px] bg-white px-[14px] py-[12px] text-[16px] font-[400] leading-[24px] text-[#101828] outline-none placeholder:text-[#667085]"
+                    className="min-w-0 flex-1 rounded-r-[8px] bg-white px-[14px] py-[12px] text-[16px] font-[400] leading-[24px] text-[#101828] outline-none placeholder:text-[#667085]"
                   />
-                  <span className="flex items-center rounded-r-[8px] border-l border-[#D0D5DD] bg-white px-[20px] py-[10px] text-[14px] font-[600] leading-[20px] text-[#E34013]">
-                    {SLUG_SUFFIX}
-                  </span>
+
                 </div>
                 <p id={`${slugId}-rules`} className={flowHint}>
                   {SLUG_RULES}

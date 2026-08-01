@@ -51,6 +51,14 @@ export default function GiftRegistrySection({
           />
         </Form.Item>
 
+        {/* The words printed above the account on the invitation. */}
+        <Form.Item name="tokenMessage" noStyle>
+          <FlowTextField
+            label="Gift Headline"
+            placeholder="Your presence is the greatest gift of all"
+          />
+        </Form.Item>
+
         <Form.Item name="bankProvider" noStyle>
           <FlowChoiceField
             label="Bank/e-Wallet Provider"

@@ -13,6 +13,7 @@ import {
   flowLabel,
 } from './create-flow-treatment';
 import FlowMarkedField from './flow-marked-field';
+import FlowTextField from './flow-text-field';
 import PhotoDropZone from './photo-drop-zone';
 import WeddingLocationField from './wedding-location-field';
 
@@ -127,6 +128,15 @@ export default function VenueDetailsSection({
             </Form.Item>
           </div>
         </div>
+
+        {/* The address the invitation prints. The location link below it is
+            for directions; a guest still needs somewhere written down. */}
+        <Form.Item name="address" noStyle>
+          <FlowTextField
+            label="Wedding Address"
+            placeholder="Jl. Imam Bonjol, Menteng"
+          />
+        </Form.Item>
 
         <Form.Item name="mapsUrl" noStyle>
           <WeddingLocationField />

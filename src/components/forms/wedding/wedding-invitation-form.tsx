@@ -11,7 +11,7 @@ import GiftRegistrySection from '@/components/forms/wedding/gift-registry-sectio
 import HolyVerseSection from '@/components/forms/wedding/holy-verse-section';
 import LoveStorySection from '@/components/forms/wedding/love-story-section';
 import MemoRollSection from '@/components/forms/wedding/memo-roll-section';
-import PhotoShowcaseSection from '@/components/forms/wedding/photo-showcase-section';
+import PhotoCollectionSection from '@/components/forms/wedding/photo-collection-section';
 import VenueDetailsSection from '@/components/forms/wedding/venue-details-section';
 import {
   getDefaultFormValues,
@@ -67,7 +67,7 @@ export default function WeddingInvitationForm({
           openNotification={openNotification}
         />
 
-        <PhotoShowcaseSection
+        <PhotoCollectionSection
           maxUploadMb={maxUploadMb}
           openNotification={openNotification}
         />

@@ -34,7 +34,7 @@ export interface GuestInvitesValues {
  * the design's suffix, because that is what the couple was shown; only the link
  * the preview composes follows the ADR.
  */
-export const SLUG_SUFFIX = '.memoify.live';
+export const SLUG_PREFIX = 'memoify.live/wedding/';
 
 export const SLUG_MIN_LENGTH = 3;
 export const SLUG_MAX_LENGTH = 63;
@@ -115,17 +115,17 @@ export const SAMPLE_GUEST_NAME = 'Johnny';
  * Where a published invitation lives, or null while the slug is not usable yet.
  *
  * Null rather than a link built from an empty slug: an address showing
- * `https://memoify.live/w/` would be telling the couple something untrue about
- * what they are about to send.
+ * `https://memoify.live/wedding/` would be telling the couple something untrue
+ * about what they are about to send.
  *
- * The shape is a path, per `docs/adr/0001-path-urls-not-subdomains.md`, even
- * though the field the couple types into is suffixed as a subdomain. The two
- * disagreeing is `hbd-byb.18`, and it is decided in one place so that whichever
- * way it is settled is one edit.
+ * The shape is a path, per `docs/adr/0001-path-urls-not-subdomains.md`, and the
+ * field the couple types into shows the same path ahead of the box rather than a
+ * subdomain after it. The design draws a subdomain, which the product cannot
+ * serve; showing it would promise an address that does not resolve.
  */
 export function invitationLinkFor(slug: string): string | null {
   if (slugProblem(slug)) return null;
-  return `https://memoify.live/w/${slug.trim()}`;
+  return `https://${SLUG_PREFIX}${slug.trim()}`;
 }
 
 /**

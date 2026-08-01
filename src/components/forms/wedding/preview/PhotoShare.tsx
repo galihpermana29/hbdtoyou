@@ -11,22 +11,12 @@ import { motion } from 'framer-motion';
 
 import { fadeUpCenter } from '@/components/wedding/wedding-template-1/variants';
 import { useWeddingReveal } from './use-wedding-reveal';
-import {
-  DEFAULT_WEDDING_TEMPLATE_1_CONTENT,
-  type WeddingTemplate1Content,
-} from '../wedding-invitation-types';
 
 const ASSET = '/templates/wedding-template-1';
 
-export default function PhotoShare({
-  content = DEFAULT_WEDDING_TEMPLATE_1_CONTENT,
-}: {
-  content?: WeddingTemplate1Content;
-}) {
+export default function PhotoShare() {
   const reveal = useWeddingReveal(fadeUpCenter);
 
-  const cover =
-    content.photoShareCover || `${ASSET}/photoshare-card.jpg`;
 
   return (
     <section className="relative h-[257px] w-full overflow-hidden bg-[#292929]">
@@ -46,7 +36,7 @@ export default function PhotoShare({
             <img
               alt=""
               className="pointer-events-none absolute inset-0 size-full max-w-none rounded-[2px] object-cover"
-              src={cover}
+              src={`${ASSET}/photoshare-card.jpg`}
             />
             <div className="relative flex w-full items-center justify-center border border-solid border-[#fafafa] bg-black p-[10px]">
               <p className="whitespace-nowrap font-[family-name:var(--font-wt1-mono)] text-[12px] leading-normal text-[#fafafa]">

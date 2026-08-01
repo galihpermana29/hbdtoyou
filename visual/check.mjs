@@ -335,6 +335,22 @@ export function check(expectations, observations) {
       }
     }
 
+    if (typeof expectation.placeholder === 'string') {
+      const shown = normaliseCopy(observation.placeholder ?? '');
+      const wanted = normaliseCopy(expectation.placeholder);
+      if (shown !== wanted) {
+        failures.push(
+          failure(
+            expectation.name,
+            'placeholder',
+            wanted,
+            shown || 'no placeholder',
+            observation.describe
+          )
+        );
+      }
+    }
+
     failures.push(...checkStyle(expectation, observation));
   });
 

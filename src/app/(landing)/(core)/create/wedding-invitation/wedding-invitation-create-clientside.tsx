@@ -130,7 +130,7 @@ export default function WeddingInvitationCreateClientside() {
                 actions belong to the left column rather than to the page, which
                 is both what the design draws and what puts them ahead of the
                 panel in reading order. */}
-            <div className="mt-[40px] flex flex-col gap-[24px] lg:flex-row lg:items-start lg:gap-[40px]">
+            <div className="mt-[40px] flex flex-col gap-[24px] lg:flex-row lg:items-stretch lg:gap-[40px]">
               {/* The design draws no box around the Sections: each one carries
                   its own card, and they sit on the page at the same gutter as
                   the heading above them. */}
@@ -162,10 +162,27 @@ export default function WeddingInvitationCreateClientside() {
               {/* The control travels with the panel rather than with the page,
                   so it is still there to bring the panel back after a couple
                   has scrolled down a form this long. The design leaves 120px
-                  between the two columns and draws nothing in it; the control
-                  sits in the middle of that, 40px from each side. */}
-              <div className="flex w-full items-start lg:sticky lg:top-[96px] lg:w-auto lg:shrink-0">
-                <button
+                  between the two columns; the control sits in the middle of
+                  that, 40px from each side, over the rule below. */}
+              <div className="relative flex w-full items-start lg:w-auto lg:shrink-0">
+                {/* The design rules a hairline down the middle of the 120px
+                    gutter, which is the middle of the control that sits in it:
+                    20px across, the control being 40px wide and first in this
+                    column.
+
+                    The design draws it 966px tall, which is neither column's
+                    height, so it runs the full height of the row instead. A
+                    fixed stub down a form thousands of pixels long would read
+                    as a mistake rather than as a division.
+
+                    Hidden below lg, where the columns stack and there is no
+                    gutter left to divide. */}
+                <div
+                  aria-hidden="true"
+                  className="pointer-events-none absolute inset-y-0 left-[20px] hidden w-px bg-[#EAECF0] lg:block"
+                />
+                <div className="flex w-full items-start lg:sticky lg:top-[96px] lg:w-auto">
+                  <button
                   type="button"
                   onClick={() => setIsPreviewCollapsed(!isPreviewCollapsed)}
                   aria-expanded={!isPreviewCollapsed}
@@ -190,7 +207,8 @@ export default function WeddingInvitationCreateClientside() {
                   className={`w-full min-w-0 lg:w-auto ${
                     isPreviewCollapsed ? 'lg:hidden' : 'lg:ml-[40px]'
                   }`}>
-                  <WeddingInvitationPreview form={form} />
+                    <WeddingInvitationPreview form={form} />
+                  </div>
                 </div>
               </div>
             </div>

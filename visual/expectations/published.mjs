@@ -72,7 +72,7 @@ const STEP_TYPE = {
 export const DESIGNED_SLUG = 'FreeAtLastWithElias';
 
 /** What that slug makes, which is what this screen has to show. */
-const INVITATION_LINK = `https://memoify.live/w/${DESIGNED_SLUG}`;
+const INVITATION_LINK = `https://memoify.live/wedding/${DESIGNED_SLUG}`;
 
 export const expectations = [
   ...pageChrome('Share with guests'),

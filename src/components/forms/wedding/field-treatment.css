@@ -44,3 +44,40 @@
   .ant-select-selector {
   border-color: #d0d5dd;
 }
+
+/*
+ * Corner, type and padding, for the controls antd does not already draw the way
+ * the design does.
+ *
+ * A plain Input already matches, which is why the treatment left these alone at
+ * first. A date picker, a time picker and a select do not: antd gives them a
+ * 6px corner, 14px type and a pixel less padding on every side. The design
+ * draws every field of this flow the same, so the difference is antd's rather
+ * than the design's.
+ *
+ * These are stated without excluding hover or focus, unlike the border above.
+ * Antd does not change a corner, a type size or padding when a field is hovered
+ * or focused, so there is no state for these to fight.
+ */
+.wedding-field-treatment.ant-picker,
+.ant-select-single.ant-select-outlined.wedding-field-treatment:not(
+    .ant-select-customize-input
+  )
+  .ant-select-selector {
+  border-radius: 8px;
+  padding: 8px 12px;
+}
+
+.wedding-field-treatment.ant-picker,
+.wedding-field-treatment.ant-picker input,
+.ant-select-outlined.wedding-field-treatment:not(.ant-select-customize-input)
+  .ant-select-selector,
+.ant-select-outlined.wedding-field-treatment:not(.ant-select-customize-input)
+  :is(
+    .ant-select-selection-search-input,
+    .ant-select-selection-item,
+    .ant-select-selection-placeholder
+  ) {
+  font-size: 16px;
+  line-height: 24px;
+}

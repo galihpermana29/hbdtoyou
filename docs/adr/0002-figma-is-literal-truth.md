@@ -37,12 +37,30 @@ The three that draw the step mostly closed stack Venue Details above Love Story 
 "Expanded All", node 332-14392, stacks Love Story above Venue Details and names that Section "Photo Showcase".
 A screen cannot restack itself when a Section opens, so this too cannot be followed literally.
 
-"Expanded All" is the frame of record for that step, and where the other three differ from it, they lose.
-It is the frame this work was commissioned against, it is the only one that draws every Section's contents, and it is the most recently added of the four.
-So the Sections stack Love Story above Venue Details, and the seventh is named "Photo Showcase".
+The Love Story asks for three chapters and offers no way to add a fourth or remove one.
 
-That one was chosen by whoever built the states rather than agreed with the designer, unlike step 4's title.
-It is out for confirmation as `hbd-7p5`, and a design change that settles it the other way is welcome and flows back to us as any other change does.
+The form it replaced let a couple add and remove milestones freely, and this ticket was written expecting that to continue.
+The design says otherwise: it draws three chapters, each with its own words - how they met, how they grew closer, and the proposal - and each has its own place on the finished invitation.
+There is nothing a fourth could be called and nowhere for it to go, so the absence is the design rather than an omission in it.
+
+Two fields are drawn that the design does not draw at all, because the invitation prints things the form had no way to ask for.
+
+"Wedding Address" in Venue Details, above the location link.
+The invitation prints a written street address, and the design asks only for a Google Maps link.
+A link gives directions; a guest still needs somewhere written down, and without the field every invitation printed the sample's address.
+
+"Gift Headline" in Gift Registry, above the account.
+The invitation prints a line of the couple's own words there, and without the field every invitation printed the sample's.
+
+Both are recorded in the expectations beside the fields the design does draw, so the check covers them rather than ignoring them.
+Three other values the invitation printed were resolved without new fields: the map keepsake is the first of the photos Venue Details already collects, the photo sharing block's card is product art the block draws itself, and the Guest Messages block is always shown because guests write those on the invitation rather than the couple enabling them.
+
+The designer settled it, one answer each way, rather than making either frame win outright.
+The Sections stack Love Story above Venue Details, following "Expanded All".
+The seventh Section is named "Photo Collection", following the other three.
+
+So there is no frame of record for that step.
+Each disagreement was decided on its own, and neither frame can be trusted wholesale where they differ again.
 
 This rule holds at desktop width, where the design exists.
 Below that there is no design, so usability governs and the rule does not apply.

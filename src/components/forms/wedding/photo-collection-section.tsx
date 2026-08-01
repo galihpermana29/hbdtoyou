@@ -27,19 +27,19 @@ import PhotoDropZone from './photo-drop-zone';
 /** How many photos the design says this Section takes. */
 const PHOTO_GALLERY_LIMIT = 20;
 
-export interface PhotoShowcaseSectionProps {
+export interface PhotoCollectionSectionProps {
   /** The largest file the couple's plan allows, in megabytes. */
   maxUploadMb: number;
   openNotification?: OpenNotificationFunction;
 }
 
-export default function PhotoShowcaseSection({
+export default function PhotoCollectionSection({
   maxUploadMb,
   openNotification,
-}: PhotoShowcaseSectionProps) {
+}: PhotoCollectionSectionProps) {
   return (
     <CreateFlowSection
-      name="Photo Showcase"
+      name="Photo Collection"
       description="Showcase all your pre-wedding photos">
       <Form.Item name="galleryPhotos" noStyle>
         <PhotoDropZone

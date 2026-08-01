@@ -25,8 +25,12 @@
  * The three collapsed frames stack Venue Details above Love Story and name the
  * seventh Section "Photo Collection"; "Expanded All" stacks Love Story above
  * Venue Details and names it "Photo Showcase". A screen cannot restack itself
- * when a Section opens, so the two cannot both be followed. "Expanded All" wins,
- * for the reasons recorded in `docs/adr/0002-figma-is-literal-truth.md`.
+ * when a Section opens, so the two cannot both be followed.
+ *
+ * Settled by the designer, one answer each way: the stack follows "Expanded
+ * All", so Love Story sits above Venue Details, and the name follows the other
+ * three, so the seventh Section is "Photo Collection". Recorded in
+ * `docs/adr/0002-figma-is-literal-truth.md`.
  *
  * ## How an element is found
  *
@@ -420,7 +424,7 @@ const SECTIONS = [
   {
     name: 'Venue Details',
     description: 'Details on the wedding venue location & reception time',
-    labels: ['More Photos', 'Wedding Location'],
+    labels: ['More Photos', 'Wedding Address', 'Wedding Location'],
     groups: ['Wedding Reception Time', 'Start', 'End', 'Wedding Location'],
     // The reception's start and its end share one name, so they are a group with
     // a name over a pair of boxes rather than two labelled fields - which is
@@ -451,6 +455,9 @@ const SECTIONS = [
         nth: form.groupNth('End'),
         style: MARKED_FIELD,
       },
+      // Added beyond the design: the invitation prints a written address, and
+      // the design draws only a link. See `docs/adr/0002-figma-is-literal-truth.md`.
+      ...form.textField('Wedding Address', 'Jl. Imam Bonjol, Menteng'),
       form.labelFor('Wedding Location'),
       {
         name: 'Wedding Location hint',
@@ -491,6 +498,7 @@ const SECTIONS = [
       'Include Bank Account/e-Wallet Information for gift collection',
     labels: [
       'Gift Section Photo',
+      'Gift Headline',
       'Bank/e-Wallet Provider',
       'Account Number',
       'Account Holder Name',
@@ -503,13 +511,17 @@ const SECTIONS = [
     // example rather than anybody's account.
     fields: (form) => [
       ...form.uploadArea('Gift Section Photo'),
+      // Added beyond the design: the invitation prints words above the account,
+      // and the design draws no field for them. See
+      // `docs/adr/0002-figma-is-literal-truth.md`.
+      ...form.textField('Gift Headline', 'Your presence is the greatest gift of all'),
       ...form.markedField('Bank/e-Wallet Provider', CHOSEN_ANSWER),
-      ...form.textField('Account Number'),
+      ...form.textField('Account Number', '3331 0908 1766'),
       ...form.textField('Account Holder Name'),
     ],
   },
   {
-    name: 'Photo Showcase',
+    name: 'Photo Collection',
     description: 'Showcase all your pre-wedding photos',
     labels: ['Photo Gallery'],
     groups: [],
@@ -643,10 +655,21 @@ function positionsWithin(openSections) {
     groupNth,
     everythingWasAskedFor,
 
-    /** A label and the text box under it, which is most of what the design draws. */
-    textField: (label) => [
+    /**
+     * A label and the text box under it, which is most of what the design draws.
+     *
+     * `placeholder` is the example the design writes into the empty box. It is
+     * design copy like any other, so where it is given it is claimed, and a typo
+     * in it fails rather than passing unread.
+     */
+    textField: (label, placeholder) => [
       labelFor(label),
-      { name: `${label} field`, control: label, style: TEXT_FIELD },
+      {
+        name: `${label} field`,
+        control: label,
+        ...(placeholder === undefined ? {} : { placeholder }),
+        style: TEXT_FIELD,
+      },
     ],
 
     /**
