@@ -8,8 +8,9 @@
  *
  * Two things are checked. The Create Flow, which is the seven screens a couple
  * fills their invitation in, and Wedding Template 1, which is the invitation
- * itself: once sealed, the way a guest is sent it, and then once opened at each
- * of the three sets of Example Content.
+ * itself: once sealed, the way a guest is sent it, then once opened at each of
+ * the three sets of Example Content, and once more with the RSVP a guest
+ * replies on open over it.
  */
 
 import { expectations as detailsAndStoryCollapsed } from './expectations/details-and-story-collapsed.mjs';
@@ -25,6 +26,7 @@ import {
   DESIGNED_SLUG,
   expectations as published,
 } from './expectations/published.mjs';
+import { expectations as weddingTemplate1Rsvp } from './expectations/wedding-template-1-rsvp.mjs';
 import {
   expectations as weddingTemplate1,
   sealed as weddingTemplate1Sealed,
@@ -222,14 +224,27 @@ const openTheInvitation = (page) =>
   page.getByRole('button', { name: 'Open invitation' }).click();
 
 /**
- * The eleven designed screens.
+ * Open the invitation and then the RSVP a guest replies on.
+ *
+ * The card is reached the way a guest reaches it, by pressing RSVP Now down in
+ * Venue & Details, rather than by asking for a URL: it has none. Nothing waits
+ * for it afterwards, because the capture only screenshots once two consecutive
+ * frames are identical and the card is on one of them.
+ */
+async function openTheRsvp(page) {
+  await openTheInvitation(page);
+  await page.getByRole('button', { name: 'RSVP Now' }).click();
+}
+
+/**
+ * The twelve designed screens.
  *
  * Seven are the Create Flow, in the order a couple reaches them, and the
  * details-and-story step is four of those - the same screen with a different set
- * of Sections open. The last four are the invitation the flow produces: the one
- * a guest is sent, sealed, and then the opened one rendered with each set of
- * Example Content. Each names the frame it was read from and how to drive the
- * page into it.
+ * of Sections open. The last five are the invitation the flow produces: the one
+ * a guest is sent, sealed, then the opened one rendered with each set of Example
+ * Content, and finally the RSVP a guest replies on. Each names the frame it was
+ * read from and how to drive the page into it.
  */
 export const screens = [
   {
@@ -323,6 +338,20 @@ export const screens = [
     expectations: weddingTemplate1,
     prepare: openTheInvitation,
   })),
+  // The card a guest replies on, which the design draws as a frame of its own
+  // and which has no URL: it is reached by pressing RSVP Now on the invitation
+  // above, the same way the Create Flow's editing states are reached by
+  // pressing what a couple presses.
+  {
+    id: 'wedding-template-1-rsvp',
+    title: 'Wedding Template 1, the RSVP a guest replies with',
+    route: '/wedding-template-1',
+    figmaNodeId: '312-3846',
+    designWidth: TEMPLATE_DESIGN_WIDTH,
+    baseline: 'wedding-template-1-rsvp.png',
+    expectations: weddingTemplate1Rsvp,
+    prepare: openTheRsvp,
+  },
 ];
 
 /**

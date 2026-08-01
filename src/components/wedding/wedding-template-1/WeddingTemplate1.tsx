@@ -1,5 +1,7 @@
 'use client';
 
+import { useState } from 'react';
+
 import BrideGroom from './BrideGroom';
 import EventDetails from './EventDetails';
 import Footer from './Footer';
@@ -9,6 +11,7 @@ import HolyVerse from './HolyVerse';
 import LoveStory from './LoveStory';
 import Messages from './Messages';
 import PhotoShare from './PhotoShare';
+import RsvpCard, { type Rsvp } from './RsvpCard';
 import TokenOfLove from './TokenOfLove';
 import VinylWidget from './VinylWidget';
 import { SealedProvider } from './sealed-context';
@@ -57,6 +60,27 @@ export default function WeddingTemplate1({
   locksPage = false,
   showVinylWidget = false,
 }: WeddingTemplate1Props) {
+  /**
+   * Every reply this page has taken, which is as far as one gets.
+   *
+   * The invitation is what a guest replies on, so it is what holds the replies
+   * until somebody has somewhere to send them: `RsvpCard.tsx` says why that is
+   * not here. Attendance and a plus one are held and drawn nowhere, because
+   * they are the couple's to read and no screen shows them to anybody yet.
+   *
+   * Every invitation can be replied to, including the two drawn as panels
+   * inside the Create Flow, where pressing RSVP Now puts the card over the
+   * whole window rather than over the panel. That is deliberate, and it is not
+   * the thing the Sealed lock must not do to a preview: a lock a couple cannot
+   * see and did not ask for would strand them in a form, and a modal they
+   * opened and can close is neither. The alternative was a control that looks
+   * pressable in a panel and does nothing, which is worse. It is also how the
+   * panel's other live controls already behave - the copy button, the polaroid
+   * that turns over - because there is one template rather than two.
+   */
+  const [rsvps, setRsvps] = useState<Rsvp[]>([]);
+  const [replying, setReplying] = useState(false);
+
   return (
     <SealedProvider sealed={sealed}>
       <main className="relative mx-auto w-full max-w-[375px] overflow-x-hidden bg-[#090909] text-[#fafafa]">
@@ -64,13 +88,23 @@ export default function WeddingTemplate1({
         <HolyVerse content={content} />
         <BrideGroom content={content} />
         <LoveStory content={content} />
-        <EventDetails content={content} />
-        <Messages />
+        <EventDetails content={content} onReply={() => setReplying(true)} />
+        <Messages rsvps={rsvps} />
         <TokenOfLove content={content} />
         {content.memoRollEnabled && <PhotoShare />}
         <Gallery content={content} />
         <Footer />
       </main>
+
+      {replying && (
+        <RsvpCard
+          onClose={() => setReplying(false)}
+          onSubmit={(rsvp) => {
+            setRsvps((taken) => [...taken, rsvp]);
+            setReplying(false);
+          }}
+        />
+      )}
 
       {showVinylWidget && (
         <div className="pointer-events-none fixed inset-x-0 bottom-0 z-50 mx-auto flex max-w-[375px] justify-end p-4">

@@ -484,8 +484,12 @@ const SECTIONS = [
       ),
       invitation.paragraph('Reception time', type('12px', 400, '#ffffff')),
       {
+        // A button rather than a box, unlike View Location above it: this one
+        // is the only control on the invitation that does something, and it
+        // opens the RSVP a guest replies with. `wedding-template-1-rsvp.mjs`
+        // is what that opens onto.
         name: 'RSVP control',
-        select: 'div',
+        select: 'button',
         withText: 'RSVP Now',
         style: CONTROL_BOX,
       },
@@ -496,9 +500,11 @@ const SECTIONS = [
     name: 'Messages',
     figmaNodeId: '312-1742',
     background: '#090909',
-    // Five wishes, and every word of them is the design's own example: nobody
-    // has left one yet, because there is nothing to leave one with. The RSVP
-    // that replaces them is `hbd-a09.9`, and this list changes when it lands.
+    // Five Guest Messages, and every word of them is the design's own example.
+    // A guest can leave one now - `hbd-a09.9` - and it is put above these
+    // rather than in place of them, so this is still what the section says on
+    // an invitation nobody has replied to yet. What it says after a reply is
+    // the RSVP screen's to claim, not this one's.
     paragraphs: [
       'Messages heading',
       ...WISHES.flatMap((wish) => [

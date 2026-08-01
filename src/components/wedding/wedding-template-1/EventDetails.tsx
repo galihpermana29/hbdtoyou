@@ -2,7 +2,8 @@
 
 /**
  * Wedding Template 1 — Event Details ("Venue & Details"). Figma node 312:1651.
- * Venue info, a tilted polaroid, a LIVE countdown, and an RSVP button.
+ * Venue info, a tilted polaroid, a LIVE countdown, and the RSVP Now control a
+ * guest replies to the invitation from.
  * The countdown ticks every second toward May 3rd 2026, 19:00 Asia/Jakarta
  * (UTC+7) and clamps to 0 once past. To avoid an SSR/client hydration mismatch
  * the digits render the design's "08" placeholders until mounted, then go live.
@@ -51,8 +52,17 @@ function formatEventDateLabel(iso: string): string {
 
 export default function EventDetails({
   content = DEFAULT_WEDDING_TEMPLATE_1_CONTENT,
+  onReply,
 }: {
   content?: WeddingTemplate1Content;
+  /**
+   * Open the RSVP a guest replies with.
+   *
+   * Required, unlike everything else here, because RSVP Now is the one control
+   * on the invitation that does something: left unwired it would be a button
+   * that says it takes a reply and takes none, and nothing would report it.
+   */
+  onReply: () => void;
 }) {
   const fadeUpCenterReveal = useWeddingReveal(fadeUpCenter);
   const fadeUpReveal = useWeddingReveal(fadeUp);
@@ -191,11 +201,15 @@ export default function EventDetails({
         </div>
 
         {/* RSVP button */}
-        <div className="flex items-center justify-center border border-solid border-[#fafafa] p-[10px]">
+        <button
+          type="button"
+          onClick={onReply}
+          aria-haspopup="dialog"
+          className="flex items-center justify-center border border-solid border-[#fafafa] p-[10px]">
           <p className="whitespace-nowrap font-[family-name:var(--font-wt1-mono)] text-[12px] font-normal leading-normal text-[#fafafa]">
             RSVP Now
           </p>
-        </div>
+        </button>
       </motion.div>
     </section>
   );

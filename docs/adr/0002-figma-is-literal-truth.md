@@ -70,5 +70,12 @@ The seventh Section is named "Photo Collection", following the other three.
 So there is no frame of record for that step.
 Each disagreement was decided on its own, and neither frame can be trusted wholesale where they differ again.
 
+The RSVP prints one line the design does not draw, above the Submit control: "Nothing is saved yet. Your reply stays on this page and goes when you reload it."
+
+An RSVP is held in the page and lost on reload, because persisting one is integration work and is not built.
+The design was drawn for the finished thing and so says nothing about that.
+A card that took a guest's reply and quietly dropped it would be worse than one that says so, so the card says so, in the small grey setting the design already uses for the Optional beside a question.
+It is claimed in `visual/expectations/wedding-template-1-rsvp.mjs` so that it cannot quietly become something vaguer, and it goes when the reply is actually saved.
+
 This rule holds at desktop width, where the design exists.
 Below that there is no design, so usability governs and the rule does not apply.

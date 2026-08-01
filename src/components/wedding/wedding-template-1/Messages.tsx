@@ -2,10 +2,14 @@
 
 /**
  * Wedding Template 1 - Messages. Figma node 312:1742.
- * A scrollable list of guest wishes on paper-textured cards with a fade-out
+ * A scrollable list of Guest Messages on paper-textured cards with a fade-out
  * gradient at the bottom and a scrollbar to the right that says where in the
  * list a guest has reached and scrolls it when dragged.
- * Animation: the title and each wish card fade up in a gentle stagger on scroll.
+ * Animation: the title and each card fade up in a gentle stagger on scroll.
+ *
+ * The five the design draws are its own example wedding's. A guest who replies
+ * to the invitation adds theirs to the top of them, and it is there until the
+ * page is reloaded: see `RsvpCard.tsx` for why it goes no further than that.
  */
 
 import { motion } from 'framer-motion';
@@ -19,6 +23,7 @@ import {
 
 import { fadeUp, fadeUpCenter, staggerContainer } from './variants';
 import { useWeddingReveal } from './use-wedding-reveal';
+import type { Rsvp } from './RsvpCard';
 
 const ASSET = '/templates/wedding-template-1';
 
@@ -27,7 +32,7 @@ const ASSET = '/templates/wedding-template-1';
  * beside it: Figma node 312:1746, 509 tall at y=131 in a 695-tall section.
  *
  * It is the design's height rather than the content's. The design draws five
- * wishes and they fill it exactly, so a sixth wish is below the fold and is
+ * messages and they fill it exactly, so a sixth is below the fold and is
  * reached by scrolling - which is the whole of what this section does.
  */
 const LIST_HEIGHT = 509;
@@ -38,20 +43,26 @@ const LIST_HEIGHT = 509;
  */
 const MIN_THUMB_HEIGHT = 24;
 
-type Wish = {
+/** One guest's message, as the invitation prints it. */
+export type GuestMessage = {
   name: string;
   date: string;
   message: string;
-  bordered?: boolean;
 };
 
-const wishes: Wish[] = [
+/**
+ * The five the design draws, which are its own example wedding's.
+ *
+ * They stay: they are what the section looks like before anybody has replied,
+ * and what a couple is shown when they choose the template. A guest's own
+ * message joins them rather than replacing them.
+ */
+const DESIGNED_MESSAGES: GuestMessage[] = [
   {
     name: 'Anin',
     date: '05-04-2026 00:21',
     message:
       'So happy to celebrate your big day! Wishing you both a lifetime of love and laughter.',
-    bordered: true,
   },
   {
     name: 'John',
@@ -79,7 +90,55 @@ const wishes: Wish[] = [
   },
 ];
 
-function WishCard({ name, date, message, bordered }: Wish) {
+/**
+ * How the design dates a Guest Message: `05-04-2026 00:21`, node 312:1749.
+ * Day, month, year, then the hour and minute the guest replied at.
+ */
+function formatGuestMessageDate(at: Date): string {
+  const two = (part: number) => String(part).padStart(2, '0');
+  return (
+    `${two(at.getDate())}-${two(at.getMonth() + 1)}-${at.getFullYear()} ` +
+    `${two(at.getHours())}:${two(at.getMinutes())}`
+  );
+}
+
+/**
+ * Every Guest Message the invitation has, newest first.
+ *
+ * A guest who has just replied is put at the top rather than at the end,
+ * because the list is 509 tall and holds the design's five exactly: a sixth
+ * appended below the fold would be a reply a guest was told had arrived and
+ * then could not see. An RSVP with nothing written in it is not a Guest
+ * Message at all - the design marks that field Optional, and a card with a
+ * name and no words would be a stranger saying nothing.
+ */
+function guestMessagesIn(rsvps: Rsvp[]): GuestMessage[] {
+  const written = rsvps
+    .filter((rsvp) => rsvp.message !== '')
+    .map((rsvp) => ({
+      name: rsvp.name,
+      date: formatGuestMessageDate(rsvp.repliedAt),
+      message: rsvp.message,
+    }))
+    .reverse();
+
+  return [...written, ...DESIGNED_MESSAGES];
+}
+
+/**
+ * One Guest Message on its paper card.
+ *
+ * `bordered` is the white outline the design draws around the first card and
+ * no other, node 312:1747. It is drawn by where a message sits rather than
+ * carried by the message, so it stays on the newest one once a guest has left
+ * theirs - which is the same card the design put it on.
+ */
+function GuestMessageCard({
+  name,
+  date,
+  message,
+  bordered,
+}: GuestMessage & { bordered: boolean }) {
   return (
     <motion.div
       variants={fadeUp}
@@ -124,7 +183,7 @@ type Thumb = { height: number; top: number };
  * A thumb filling its track, which is what a list with nothing to scroll has.
  *
  * It is what the server renders too, because nothing on the server knows how
- * tall a wish sets. The list is measured for real before the first paint.
+ * tall a message sets. The list is measured for real before the first paint.
  */
 const NOTHING_TO_SCROLL: Thumb = { height: LIST_HEIGHT, top: 0 };
 
@@ -153,11 +212,11 @@ function scrollbarFor(box: HTMLDivElement) {
 }
 
 /**
- * Keeps the scrollbar reporting where the list of wishes actually is, and
- * scrolls the list when the thumb is dragged - which is what separates a
+ * Keeps the scrollbar reporting where the list of Guest Messages actually is,
+ * and scrolls the list when the thumb is dragged - which is what separates a
  * scrollbar from a picture of one.
  */
-function useWishesScrollbar() {
+function useMessagesScrollbar() {
   const viewport = useRef<HTMLDivElement>(null);
   const list = useRef<HTMLDivElement>(null);
   const [thumb, setThumb] = useState<Thumb>(NOTHING_TO_SCROLL);
@@ -170,8 +229,8 @@ function useWishesScrollbar() {
 
   useLayoutEffect(() => {
     const box = viewport.current;
-    const wishes = list.current;
-    if (!box || !wishes) return;
+    const messages = list.current;
+    if (!box || !messages) return;
 
     // Measured here rather than left to the observer's first callback, which
     // arrives after a frame has been painted: a guest would see the thumb
@@ -179,12 +238,12 @@ function useWishesScrollbar() {
     measure();
 
     // Both are watched. The box a guest reads through changes size with the
-    // window, and the list inside it changes size when a wish is left, when a
-    // long one wraps to another line, and when the template's fonts land and
+    // window, and the list inside it changes size when a message is left, when
+    // a long one wraps to another line, and when the template's fonts land and
     // every card reflows under them.
     const observer = new ResizeObserver(measure);
     observer.observe(box);
-    observer.observe(wishes);
+    observer.observe(messages);
     return () => observer.disconnect();
   }, [measure]);
 
@@ -201,7 +260,7 @@ function useWishesScrollbar() {
     const box = viewport.current;
     if (!held || !box) return;
 
-    // One pixel of thumb is worth however many pixels of wishes are hidden.
+    // One pixel of thumb is worth however many pixels of messages are hidden.
     const { scrollable, travel } = scrollbarFor(box);
     if (travel <= 0 || scrollable <= 0) return;
 
@@ -220,11 +279,17 @@ function useWishesScrollbar() {
   return { viewport, list, thumb, measure, startDrag, dragTo, endDrag };
 }
 
-export default function Messages() {
+export default function Messages({
+  rsvps = [],
+}: {
+  /** The replies this page has taken, which the invitation prints on its own. */
+  rsvps?: Rsvp[];
+}) {
   const fadeUpCenterReveal = useWeddingReveal(fadeUpCenter);
   const staggerReveal = useWeddingReveal(staggerContainer);
   const { viewport, list, thumb, measure, startDrag, dragTo, endDrag } =
-    useWishesScrollbar();
+    useMessagesScrollbar();
+  const messages = guestMessagesIn(rsvps);
 
   return (
     <section className="relative h-[695px] w-full overflow-hidden bg-[#090909]">
@@ -239,7 +304,7 @@ export default function Messages() {
         <div className="absolute left-0 top-[50px] h-px w-[142px] bg-[#fafafa]" />
       </motion.div>
 
-      {/* wishes list + scrollbar */}
+      {/* Guest Messages list + scrollbar */}
       <div
         className="absolute left-[16px] top-[131px] flex w-[343px] items-start gap-[4px]"
         style={{ height: LIST_HEIGHT }}>
@@ -248,7 +313,7 @@ export default function Messages() {
           its own scrollbar is hidden: the design draws one beside the list
           rather than over it, 4px wide, which no browser can be asked for.
           `tabIndex` is what lets a guest who is not holding a mouse reach the
-          wishes past the fold.
+          messages past the fold.
         */}
         <motion.div
           ref={viewport}
@@ -263,8 +328,8 @@ export default function Messages() {
           className="h-full min-w-px flex-[1_0_0] overflow-y-auto [scrollbar-width:none] [&::-webkit-scrollbar]:hidden"
           {...staggerReveal}>
           <div ref={list} className="flex flex-col items-start gap-[16px]">
-            {wishes.map((wish, i) => (
-              <WishCard key={i} {...wish} />
+            {messages.map((message, i) => (
+              <GuestMessageCard key={i} {...message} bordered={i === 0} />
             ))}
           </div>
         </motion.div>
