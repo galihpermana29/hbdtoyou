@@ -1,12 +1,8 @@
 'use client';
 
-import {
-  useLayoutEffect,
-  useRef,
-  useState,
-  type CSSProperties,
-  type ReactNode,
-} from 'react';
+import { type CSSProperties, type ReactNode } from 'react';
+
+import { useFitFontSize } from './use-fit-font-size';
 
 /**
  * Renders text that wraps at WORD boundaries only (never mid-word) and steps its
@@ -21,13 +17,15 @@ import {
  * prints and the check finds every one of those as `main p`. A bare `div` left
  * the two partners' Nicknames the one thing on the invitation nothing could
  * name. So `children` has to be words rather than blocks.
+ *
+ * Use `AutoFitBlock` where the words are blocks, and where several of them
+ * share one box rather than each having their own.
  */
 export function AutoFitText({
   children,
   maxFontSize,
   minFontSize = 11,
   maxHeight,
-  step = 0.5,
   className,
   style,
 }: {
@@ -35,33 +33,17 @@ export function AutoFitText({
   maxFontSize: number;
   minFontSize?: number;
   maxHeight?: number;
-  step?: number;
   className?: string;
   style?: CSSProperties;
 }) {
-  const ref = useRef<HTMLParagraphElement>(null);
-  const [fontSize, setFontSize] = useState(maxFontSize);
-
-  useLayoutEffect(() => {
-    const el = ref.current;
-    if (!el) return;
-    const fit = () => {
-      let size = maxFontSize;
-      el.style.fontSize = `${size}px`;
-      const fits = () =>
-        el.scrollWidth <= el.clientWidth + 0.5 &&
-        (maxHeight == null || el.scrollHeight <= maxHeight + 0.5);
-      while (size > minFontSize && !fits()) {
-        size = Math.max(minFontSize, size - step);
-        el.style.fontSize = `${size}px`;
-      }
-      setFontSize(size);
-    };
-    fit();
-    if (typeof document !== 'undefined' && document.fonts?.ready) {
-      document.fonts.ready.then(fit).catch(() => {});
-    }
-  }, [children, maxFontSize, minFontSize, maxHeight, step]);
+  const { ref, fontSize } = useFitFontSize<HTMLParagraphElement>({
+    maxFontSize,
+    minFontSize,
+    fits: (line) =>
+      line.scrollWidth <= line.clientWidth + 0.5 &&
+      (maxHeight == null || line.scrollHeight <= maxHeight + 0.5),
+    refitOn: [children, maxHeight],
+  });
 
   return (
     <p

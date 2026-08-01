@@ -10,18 +10,68 @@
  */
 
 import { useState } from 'react';
-import { motion, useReducedMotion } from 'framer-motion';
+import { motion, useReducedMotion, type MotionProps } from 'framer-motion';
 
+import { AutoFitBlock } from './AutoFitBlock';
 import { EASE, fadeUp, fadeUpCenter, staggerContainer } from './variants';
 import { useSealed } from './sealed-context';
 import { useWeddingReveal } from './use-wedding-reveal';
 import {
   DEFAULT_WEDDING_TEMPLATE_1_CONTENT,
   pickPhoto,
+  type WeddingMilestone,
   type WeddingTemplate1Content,
 } from '@/components/forms/wedding/wedding-invitation-types';
 
 const ASSET = '/templates/wedding-template-1';
+
+/**
+ * The largest and the smallest a chapter's story may be printed at.
+ *
+ * The ceiling is the 10px the design sets one in, and it is a ceiling rather
+ * than a size because a chapter is the couple's own words: a wedding with more
+ * to say is set a little smaller rather than printed over the artwork. The
+ * floor is the 8px the design sets the smallest words on the invitation in, and
+ * it is the same floor the Bride & Groom's Introduction stops at - below it a
+ * chapter stops being readable, and a story nobody can read is the failure this
+ * fitting exists to avoid.
+ */
+const CHAPTER_CEILING = 10;
+const CHAPTER_FLOOR = 8;
+
+/**
+ * How much of the page the two chapters down the right-hand side may fill.
+ *
+ * They start 187px into the section and the polaroid's Frame begins at 540, so
+ * the column the design gives them is 353px tall. That is the whole of it: the
+ * design leaves them no margin at the bottom, because at its own leading its
+ * own two chapters end 6px above the polaroid. A chapter that ran past 540
+ * would be printed across the photograph, which is what the build did at all
+ * three sets of Example Content.
+ *
+ * The number covers both chapters, their two headings and the gaps between,
+ * because all of that is what shares the column. `AutoFitBlock` says why it is
+ * one number rather than half of it each.
+ */
+const SIDE_CHAPTERS_MAX_HEIGHT = 353;
+
+/**
+ * How much of the page the chapter in the middle of the paper may fill.
+ *
+ * It starts 548px into the section, and what would swallow it is the map
+ * keepsake below. That keepsake's box begins at 738.86, but its top 55px are
+ * the transparent margin of the photograph rather than the photograph: the
+ * camera itself begins at 794, and the design's own chapter runs to 771, well
+ * past the box and well short of the camera. So the bound is the camera, at
+ * 794 - 548 = 246, and not the box, which the design itself crosses.
+ *
+ * Both this and the 353 above are figured at the 1.5 leading the build sets
+ * today, which is `hbd-a09.13`. Neither number changes when that lands - they
+ * are distances on the page rather than counts of lines - but what fits inside
+ * them does: at the design's own leading, the design's own three chapters fit
+ * both boxes at the full 10px and nothing steps down at all.
+ */
+const CENTRE_CHAPTER_MAX_HEIGHT = 246;
 
 /** Torn-paper crop used along the long (147px) edges. */
 function TornEdgeLong() {
@@ -174,6 +224,47 @@ function Polaroid({ content }: { content: WeddingTemplate1Content }) {
   );
 }
 
+/**
+ * One chapter: the year it happened, what the invitation calls it, and the
+ * couple's account of it.
+ *
+ * The design prints one chapter in the middle of the paper and two down the
+ * right-hand side, and the three are the same three lines, so they are one
+ * component rather than two copies of it. `reveal` is how the column it is in
+ * brings it onto the page: alone in the middle, or one after the other down the
+ * side.
+ *
+ * The story states no size, so it takes the one its column has settled on. The
+ * heading states the design's own two, because it is not fitted and it cannot
+ * grow: the form takes a year as at most four digits and the three titles are
+ * the design's own words, so the widest heading the invitation can print is the
+ * one it is drawn with - 141px against the 145 the middle column has, and 135
+ * against the side column's 159. Nothing measures that, here or in the check,
+ * because there is nothing a couple could type to change it.
+ */
+function Chapter({
+  milestone,
+  reveal,
+}: {
+  milestone?: WeddingMilestone;
+  reveal: MotionProps;
+}) {
+  return (
+    <motion.div
+      className="flex w-full flex-col items-start gap-[4px]"
+      {...reveal}>
+      <div className="flex w-full items-center gap-[4px] whitespace-nowrap font-[family-name:var(--font-wt1-mono)] font-semibold">
+        <p className="shrink-0 text-[12px]">{milestone?.year}</p>
+        <p className="shrink-0 text-[14px]">-</p>
+        <p className="shrink-0 text-[12px]">{milestone?.title}</p>
+      </div>
+      <p className="w-full font-[family-name:var(--font-wt1-mono)]">
+        {milestone?.body}
+      </p>
+    </motion.div>
+  );
+}
+
 export default function LoveStory({
   content = DEFAULT_WEDDING_TEMPLATE_1_CONTENT,
 }: {
@@ -277,19 +368,14 @@ export default function LoveStory({
 
         <Polaroid content={content} />
 
-        {/* 2023 milestone copy */}
-        <motion.div
-          className="absolute left-[53px] top-[397px] flex w-[145px] flex-col items-start gap-[4px] leading-normal text-[#090909]"
-          {...fadeUpReveal}>
-          <div className="flex w-full items-center gap-[4px] whitespace-nowrap font-[family-name:var(--font-wt1-mono)] font-semibold">
-            <p className="shrink-0 text-[12px]">{centerMilestone?.year}</p>
-            <p className="shrink-0 text-[14px]">-</p>
-            <p className="shrink-0 text-[12px]">{centerMilestone?.title}</p>
-          </div>
-          <p className="w-full font-[family-name:var(--font-wt1-mono)] text-[10px]">
-            {centerMilestone?.body}
-          </p>
-        </motion.div>
+        {/* The chapter printed in the middle of the paper */}
+        <AutoFitBlock
+          className="absolute left-[53px] top-[397px] w-[145px] leading-normal text-[#090909]"
+          maxFontSize={CHAPTER_CEILING}
+          minFontSize={CHAPTER_FLOOR}
+          maxHeight={CENTRE_CHAPTER_MAX_HEIGHT}>
+          <Chapter milestone={centerMilestone} reveal={fadeUpReveal} />
+        </AutoFitBlock>
       </div>
 
       {/* Map keepsake at the bottom */}
@@ -319,26 +405,24 @@ export default function LoveStory({
         </div>
       </motion.div>
 
-      {/* Right-side timeline: 2020 & 2022 milestones */}
-      <motion.div
-        className="absolute left-[197px] top-[187px] flex w-[159px] flex-col items-start gap-[12px] leading-normal text-[#090909]"
-        {...staggerReveal}>
-        {rightMilestones.map((milestone, index) => (
-          <motion.div
-            key={`${milestone.year}-${index}`}
-            variants={fadeUp}
-            className="flex w-full flex-col items-start gap-[4px]">
-            <div className="flex items-center gap-[4px] whitespace-nowrap font-[family-name:var(--font-wt1-mono)] font-semibold">
-              <p className="shrink-0 text-[12px]">{milestone.year}</p>
-              <p className="shrink-0 text-[14px]">-</p>
-              <p className="shrink-0 text-[12px]">{milestone.title}</p>
-            </div>
-            <p className="w-full font-[family-name:var(--font-wt1-mono)] text-[10px]">
-              {milestone.body}
-            </p>
-          </motion.div>
-        ))}
-      </motion.div>
+      {/* The two chapters printed down the right-hand side */}
+      <AutoFitBlock
+        className="absolute left-[197px] top-[187px] w-[159px] leading-normal text-[#090909]"
+        maxFontSize={CHAPTER_CEILING}
+        minFontSize={CHAPTER_FLOOR}
+        maxHeight={SIDE_CHAPTERS_MAX_HEIGHT}>
+        <motion.div
+          className="flex flex-col items-start gap-[12px]"
+          {...staggerReveal}>
+          {rightMilestones.map((milestone, index) => (
+            <Chapter
+              key={`${milestone.year}-${index}`}
+              milestone={milestone}
+              reveal={{ variants: fadeUp }}
+            />
+          ))}
+        </motion.div>
+      </AutoFitBlock>
     </section>
   );
 }
