@@ -1,10 +1,14 @@
 /**
- * The Create Flow screens the visual harness knows about.
+ * The screens the visual harness knows about.
  *
  * Each entry names one designed screen, the Figma node it was taken from, how to
  * drive a browser into that state, and what the design says the screen is. The
  * Figma file key is deliberately absent: it changes between plugin bridge
  * sessions and is read at run time. See `visual/README.md`.
+ *
+ * Two things are checked. The Create Flow, which is the seven screens a couple
+ * fills their invitation in, and Wedding Template 1's Showcase, which is the
+ * invitation itself, checked once at each of the three sets of Example Content.
  */
 
 import { expectations as detailsAndStoryCollapsed } from './expectations/details-and-story-collapsed.mjs';
@@ -20,14 +24,46 @@ import {
   DESIGNED_SLUG,
   expectations as published,
 } from './expectations/published.mjs';
+import { expectations as weddingTemplate1 } from './expectations/wedding-template-1.mjs';
 
 /** The width the design is defined at. Nothing below this is checked. */
 export const DESIGN_WIDTH = 1440;
+
+/**
+ * The width the invitation itself is designed at.
+ *
+ * The template is drawn as a phone and renders as a fixed column at any window
+ * width, so the browser is still driven at `DESIGN_WIDTH` and only the export of
+ * its frames needs to know this.
+ */
+export const TEMPLATE_DESIGN_WIDTH = 375;
 
 /** The Figma file the design is read from, for the export instructions. */
 export const FIGMA_FILE_NAME = 'Wedding Invitations';
 
 const DETAILS_AND_STORY_ROUTE = '/create/wedding-invitation';
+
+/**
+ * The three sets of Example Content the Showcase can render, and how each one
+ * is asked for.
+ *
+ * The flattering set is asked for by asking for nothing, because that is the
+ * URL a visitor lands on: the Showcase renders it to anybody who does not say
+ * otherwise, and a screen that named it in a query would be checking a page
+ * nobody visits. It is also the only one the design has a frame for - the
+ * design draws the invitation once, with its own example wedding - and the
+ * whole point of the other two is that they are content it was never drawn
+ * against, so there is no image to export for them and there could not be one.
+ */
+const EXAMPLE_CONTENT_SETS = [
+  {
+    set: 'flattering',
+    route: '/wedding-template-1',
+    baseline: 'wedding-template-1.png',
+  },
+  { set: 'realistic', route: '/wedding-template-1?content=realistic' },
+  { set: 'hostile', route: '/wedding-template-1?content=hostile' },
+];
 
 /**
  * Press every Section control that is still in one state, top to bottom, until
@@ -169,11 +205,26 @@ async function advanceToPublished(page) {
 }
 
 /**
- * The seven designed screens, in the order a couple reaches them.
+ * Open the invitation, the way a guest does.
  *
- * The details-and-story step is four of them, and they are the same screen with
- * a different set of Sections open. Each names the frame it was read from and
- * how to drive the page into it.
+ * An invitation arrives Sealed, so nothing below the envelope is on the screen
+ * until somebody opens it. Every screen of the template therefore starts by
+ * pressing the control a guest would press, which makes the seal load-bearing
+ * for all of them: if it stops releasing, all three fail at once rather than
+ * only the Hero. That is a fair trade, because it means the seal is genuinely
+ * exercised on every run.
+ */
+const openTheInvitation = (page) =>
+  page.getByRole('button', { name: 'Open invitation' }).click();
+
+/**
+ * The ten designed screens.
+ *
+ * Seven are the Create Flow, in the order a couple reaches them, and the
+ * details-and-story step is four of those - the same screen with a different set
+ * of Sections open. The last three are the invitation the flow produces, which
+ * is one screen rendered with each set of Example Content. Each names the frame
+ * it was read from and how to drive the page into it.
  */
 export const screens = [
   {
@@ -239,6 +290,20 @@ export const screens = [
     expectations: published,
     prepare: advanceToPublished,
   },
+  // One screen, rendered with each set of Example Content. They share a
+  // manifest, because what the design owns is the type its words are set in,
+  // the order they come in and the words around a couple's answers rather than
+  // the answers - so the same list is the design's claim at all three lengths.
+  ...EXAMPLE_CONTENT_SETS.map(({ set, route, baseline }) => ({
+    id: `wedding-template-1-${set}`,
+    title: `Wedding Template 1, opened, at the ${set} Example Content`,
+    route,
+    figmaNodeId: '312-1631',
+    designWidth: TEMPLATE_DESIGN_WIDTH,
+    ...(baseline ? { baseline } : {}),
+    expectations: weddingTemplate1,
+    prepare: openTheInvitation,
+  })),
 ];
 
 /**

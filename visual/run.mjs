@@ -1,6 +1,6 @@
 #!/usr/bin/env node
 /**
- * Check the Create Flow against the design.
+ * Check the Create Flow and the wedding invitation it makes against the design.
  *
  *   npm run visual
  *   npm run visual -- --screen=details-and-story-expanded

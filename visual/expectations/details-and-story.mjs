@@ -106,6 +106,7 @@
  * the wrong mark in the right colour is left to review.
  */
 
+import { declaredPositions } from './declared-positions.mjs';
 import { FIELD_SHADOW, pageChrome, siteFooter, TYPE } from './page-chrome.mjs';
 
 /**
@@ -514,7 +515,10 @@ const SECTIONS = [
       // Added beyond the design: the invitation prints words above the account,
       // and the design draws no field for them. See
       // `docs/adr/0002-figma-is-literal-truth.md`.
-      ...form.textField('Gift Headline', 'Your presence is the greatest gift of all'),
+      ...form.textField(
+        'Gift Headline',
+        'Your presence is the greatest gift of all'
+      ),
       ...form.markedField('Bank/e-Wallet Provider', CHOSEN_ANSWER),
       ...form.textField('Account Number', '3331 0908 1766'),
       ...form.textField('Account Holder Name'),
@@ -593,9 +597,8 @@ const nthByCopy = (copies, index) =>
  * The positions everything on one state of this screen is counted at.
  *
  * Every number here is derived from which Sections that state draws open,
- * because the check cannot see inside a closed one. A field named by a Section
- * that is not open throws rather than resolving to `-1`, which would silently
- * become "the last one on the page" and fail somewhere else entirely.
+ * because the check cannot see inside a closed one. The counting itself, and
+ * both of the mistakes it guards against, are `declared-positions.mjs`.
  */
 function positionsWithin(openSections) {
   const labels = openSections.flatMap((section) => section.labels);
@@ -605,42 +608,14 @@ function positionsWithin(openSections) {
   const prompts = uploads.map((field) => UPLOAD_AREAS[field].prompt);
   const hints = uploads.map((field) => UPLOAD_AREAS[field].hint);
 
-  /**
-   * What has been asked for, so that what has not can be reported.
-   *
-   * A Section declares its labels and its groups in one list and asks for them
-   * in another, and nothing in the language reconciles the two. Left alone, a
-   * name declared but never asked for would not throw: it would shift every
-   * later position by one, and the failures would be reported against the wrong
-   * elements entirely. `everythingWasAskedFor` is what turns that into one
-   * error naming the name.
-   */
-  const askedFor = new Set();
+  const { at, everythingWasAskedFor } = declaredPositions({
+    labels,
+    groups,
+    'upload areas': uploads,
+  });
 
-  const at = (list, name, kind) => {
-    const nth = list.indexOf(name);
-    if (nth === -1) {
-      throw new Error(`"${name}" is not one of this screen's open ${kind}`);
-    }
-    askedFor.add(`${kind}: ${name}`);
-    return nth;
-  };
-
-  const labelNth = (label) => at(labels, label, 'labels');
-  const groupNth = (group) => at(groups, group, 'groups');
-
-  const everythingWasAskedFor = () => {
-    const unasked = [
-      ...labels.map((label) => `labels: ${label}`),
-      ...groups.map((group) => `groups: ${group}`),
-    ].filter((declared) => !askedFor.has(declared));
-    if (unasked.length > 0) {
-      throw new Error(
-        `${unasked.join(', ')} - declared by an open Section and never asked ` +
-          'for, so every position after it would be counted one too far'
-      );
-    }
-  };
+  const labelNth = (label) => at('labels', label);
+  const groupNth = (group) => at('groups', group);
 
   const labelFor = (label) => ({
     name: `${label} label`,
@@ -693,7 +668,7 @@ function positionsWithin(openSections) {
 
     /** One dashed area: its label, the words inside it, and the guidance under it. */
     uploadArea: (field) => {
-      const index = at(uploads, field, 'upload areas');
+      const index = at('upload areas', field);
       const area = UPLOAD_AREAS[field];
       return [
         labelFor(field),

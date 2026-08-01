@@ -13,11 +13,11 @@ Memoify (package name `xollet-fe`) — a Next.js 14 App Router frontend for crea
 - `npm run start` — run the production build
 - `npm run lint` — `next lint`
 - `npm run prepare` — Husky install (runs automatically)
-- `npm run visual` — check the wedding invitation Create Flow against the Figma design (see `visual/README.md`)
+- `npm run visual` — check the wedding invitation Create Flow and Wedding Template 1 against the Figma design (see `visual/README.md`)
 - `npm run visual:baselines` — print how to re-export the design images
 - `npm run visual:self-check` — check the checker itself, no browser needed
 
-No test runner is configured; there are no `test`/`spec` scripts. The only automated check is `npm run visual`, scoped to the wedding invitation Create Flow. It renders each designed screen in a real browser and asserts computed style, copy and document order against values taken from Figma, never a width or a height. Screenshots are captured as evidence and decide nothing. It needs Chromium downloaded once: `npx playwright install chromium`. It exits 1 while that flow still differs from the design, which is expected until that epic lands; `npm run visual:self-check` is the browser-free check that the harness itself still behaves, and that one must stay green.
+No test runner is configured; there are no `test`/`spec` scripts. The only automated check is `npm run visual`, scoped to the wedding invitation Create Flow and to Wedding Template 1, the invitation it makes. It renders each designed screen in a real browser and asserts computed style, copy and document order against values taken from Figma, never a width or a height. Screenshots are captured as evidence and decide nothing. It needs Chromium downloaded once: `npx playwright install chromium`. It exits 1 while any screen still differs from the design, and `visual/README.md` records which do and why. `npm run visual:self-check` is the browser-free check that the harness itself still behaves, and that one must stay green.
 
 Pre-commit (Husky + lint-staged, see `.husky/pre-commit` and `package.json`): runs `eslint src/` on staged `*.{js,jsx,ts,tsx}` files. Prettier config is enforced via editor — see `.prettierrc` (single quotes, semi, 2-space, trailing commas `es5`).
 

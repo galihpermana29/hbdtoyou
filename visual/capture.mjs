@@ -27,6 +27,28 @@ const FREEZE_STYLES = `
   nextjs-portal { display: none !important; }
 `;
 
+/**
+ * The instant every screen is rendered at, and where it is read from.
+ *
+ * The invitation counts down to the wedding, a second at a time, so a page that
+ * reads the real clock never holds still and every capture of it would fail as
+ * "the page never stopped changing". Fixing the clock is what makes a live
+ * countdown a still image. Timers keep running; only what they read is held, so
+ * nothing that waits for a tick waits for ever.
+ *
+ * The date is before all three Example Content weddings, so the countdown counts
+ * down on each of them rather than clamping at zero - though what it says is the
+ * couple's rather than the design's and nothing asserts it. The hour is 9:41 in
+ * Jakarta, which is the hour every mockup in the design is drawn at.
+ *
+ * The zone is fixed for the same reason the instant is. A wedding is stored with
+ * its Jakarta offset and the invitation prints the day it falls on wherever the
+ * browser happens to be, so a machine far enough west prints the day before -
+ * which would make two runs of the same commit produce different evidence.
+ */
+const DESIGN_INSTANT = new Date('2026-01-05T02:41:00Z');
+const DESIGN_TIME_ZONE = 'Asia/Jakarta';
+
 /** Wait until every font and image the page asked for has arrived. */
 async function waitForPaintedAssets(page) {
   await page.evaluate(() => document.fonts.ready);
@@ -99,8 +121,10 @@ export async function withBrowser(run) {
       deviceScaleFactor: 1,
       reducedMotion: 'reduce',
       colorScheme: 'light',
+      timezoneId: DESIGN_TIME_ZONE,
     });
     try {
+      await context.clock.setFixedTime(DESIGN_INSTANT);
       const page = await context.newPage();
       await page.goto(url, { waitUntil: 'load', timeout: 120000 });
       await page.addStyleTag({ content: FREEZE_STYLES });

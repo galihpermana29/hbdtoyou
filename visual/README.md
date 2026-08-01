@@ -1,11 +1,15 @@
 # Visual check harness
 
-Renders a Create Flow screen in a real browser at 1440px wide, drives it into its designed state, and asks it what it is: the copy each element renders, where it sits in the document, and how it is styled.
+Renders a designed screen in a real browser, drives it into its designed state, and asks it what it is: the copy each element renders, where it sits in the document, and how it is styled.
 That is compared against values taken from the Figma design.
 
 It exists so that "matches the design" is a result rather than an opinion.
-The design is the source of truth at 1440px, taken literally, including its copy errors.
+The design is the source of truth, taken literally, including its copy errors.
 See `docs/adr/0002-figma-is-literal-truth.md`.
+
+Two things are checked.
+The Create Flow, which is the seven screens a couple fills their invitation in, drawn at 1440px.
+And Wedding Template 1, which is the invitation itself, drawn as a phone: it renders as a fixed column at any window width, so it is driven at the same 1440px and its own frames are 375px wide.
 
 ## What is asserted, and what is never asserted
 
@@ -89,7 +93,20 @@ When a position was asked for, the failure says how many were found instead, whi
 ## Screens
 
 `visual/screens.mjs` is the list, and it is the only place a screen is defined.
-Seven screens are covered: the details-and-story step in each of its four designed states, the guest invites step empty and populated, and the published screen.
+Ten screens are covered.
+Seven are the Create Flow: the details-and-story step in each of its four designed states, the guest invites step empty and populated, and the published screen.
+Three are Wedding Template 1's Showcase, which is one screen rendered with each of the three sets of Example Content - flattering, realistic and hostile.
+
+The three template screens share one manifest, because the design owns the type, the order and the words around a couple's answers rather than the answers themselves.
+Checking that one manifest at three lengths of answer is how a section that cannot hold a real couple's content is caught by a command rather than by somebody looking.
+Each of them opens the envelope first, the way a guest does, so the seal is exercised on every run: if it stops releasing, all three fail at once.
+
+### Where it stands
+
+The seven Create Flow screens match the design.
+The three template screens report the same failures as each other, and they are two differences rather than the many lines they take: every line of the template is set 1.5 loose where the design lets the typeface decide (`hbd-a09.13`), and the five bordered controls omit the 10px the design puts inside them (`hbd-a09.14`).
+Nothing is missing, misspelled, mis-set or out of order at any of the three sets, which is the claim those screens exist to make.
+So `npm run visual` exits 1 today, and it goes green when those two land.
 
 A screen is `SKIPPED` when the thing it would check does not exist yet, and the reason says which.
 `route not built yet` is code-side work.
@@ -131,15 +148,19 @@ Human sign-off is still the final gate.
 
 ## Determinism
 
-The Site Preview renders the live invitation, so it animates and it loads remote imagery.
-Three things hold it still, and the panel is frozen rather than masked so the check still sees it:
+The invitation animates, counts down to the wedding a second at a time, and loads remote imagery, and the Site Preview renders it live inside the Create Flow.
+Four things hold it still, and it is frozen rather than masked so the check still sees it:
 
 - the browser runs with reduced motion, and captures with animations disabled
 - a stylesheet pauses every animation and collapses every transition
+- the clock is fixed, so the countdown is a still image rather than a page that changes every second
 - the page is screenshotted repeatedly until two consecutive captures are byte-identical, and only then is it inspected
 
-The third is the one that matters, because it covers animation driven from JavaScript and images that arrive late.
+The last is the one that matters most, because it covers animation driven from JavaScript and images that arrive late.
 If the page never stops changing the run fails loudly rather than inspecting an arbitrary frame.
+
+The fixed clock keeps timers running and only holds what they read, so nothing that waits for a tick waits for ever.
+The instant is before all three Example Content weddings, so the countdown counts down rather than clamping at zero - though what it counts is the couple's and nothing asserts it.
 
 ## Regenerating the design images
 
@@ -156,8 +177,10 @@ A key committed today is a silently wrong export tomorrow, so it is read at the 
 
 To find the current key: open the bridge plugin in the Figma desktop application, then ask it to list its files.
 
-The command prints which Figma node becomes which image, and which states have no frame to export yet.
-Both come from `visual/screens.mjs`, the same manifest the check reads, so the export list and the screen list cannot drift apart.
+The command prints which Figma node becomes which image, at what width, which states share another state's frame, and which have no frame to export yet.
+All of it comes from `visual/screens.mjs`, the same manifest the check reads, so the export list and the screen list cannot drift apart.
+
+The realistic and hostile sets of Example Content share the flattering set's frame, and always will: the design draws the invitation once, with its own example wedding, and the whole point of the other two is that they are content the design was never drawn against.
 
 ## Checking the harness itself
 
@@ -165,7 +188,7 @@ Both come from `visual/screens.mjs`, the same manifest the check reads, so the e
 npm run visual:self-check
 ```
 
-Every screen reports red until this epic is finished, and a permanently red command is one nobody trusts.
+A screen reports red until the work it describes is finished, and a permanently red command is one nobody trusts.
 This checks that a value is read the way a browser spells it, that a matching screen passes, and that each kind of fault - a missing element, an ambiguous one, wrong copy, a wrong property, an element in the wrong place - fails with the element and the property named.
 It also refuses an expectation that measures something, and validates every expectations file this repository has recorded.
 

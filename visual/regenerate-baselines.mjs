@@ -49,13 +49,32 @@ function main() {
   console.log(
     `Export from "${FIGMA_FILE_NAME}" (${fileKey}) through the Figma plugin bridge.\n` +
       'Open the bridge plugin in the Figma desktop application first: it cannot read the\n' +
-      `file otherwise. Export each frame at 1x, ${DESIGN_WIDTH}px wide, over the path shown.\n`
+      'file otherwise. Export each frame at 1x, at the width shown, over the path shown.\n'
   );
   for (const screen of exportable) {
+    const width = screen.designWidth ?? DESIGN_WIDTH;
     console.log(
-      `  node ${screen.figmaNodeId}  ->  ${asRepoPath('baseline', screen.baseline)}`
+      `  node ${screen.figmaNodeId}  ->  ${asRepoPath('baseline', screen.baseline)}  (${width}px wide)`
     );
     console.log(`    ${screen.title}`);
+  }
+
+  // A screen with a frame but no image of its own is checked against the same
+  // frame as another screen, which is what the three sets of Example Content
+  // are: one design, rendered with content the design was never drawn against.
+  // Saying so is the difference between a state nobody exported and a state
+  // nobody could.
+  const shared = screens.filter(
+    (screen) => screen.figmaNodeId && !screen.baseline
+  );
+  if (shared.length > 0) {
+    console.log(
+      `\n${shared.length} state(s) have no image of their own, and are read from a frame\n` +
+        'exported above:'
+    );
+    for (const screen of shared) {
+      console.log(`  ${screen.id}: node ${screen.figmaNodeId}`);
+    }
   }
 
   const missing = screens.filter((screen) => !screen.figmaNodeId);
