@@ -47,6 +47,8 @@ Other envs in use: `NEXT_PUBLIC_CLOUDINARY_API_SECRET`, `NEXT_PUBLIC_GEMINI_API_
 - `src/app/(dashboard)/dashboard/` — authenticated admin/user dashboard (templates, transactions, plans, coupons, feedbacks, brevo-usage, cloudinary-usage, scheduled, edit, view). Admin gating is a hard-coded email check in `dashboard/layout.tsx` (`memoify.live@gmail.com`).
 - `src/app/api/` — Next API routes: `auth/[...nextauth]` (NextAuth + Google), `session` (reads iron-session), `generateSignature` (Cloudinary signed uploads), `upload` (server-side Cloudinary upload), `userData`, `top-10`.
 
+`(gifts)/` and `(scrapbooks)/` are load-bearing at runtime, not just tidy: `drawsAGift` in `src/lib/gift-routes.ts` reads the route group a page is nested in to decide whether the page is somebody's gift, and the site footer stays off one. A gift route put anywhere else keeps the footer. See `docs/adr/0003-the-route-group-says-whether-a-page-is-a-gift.md`.
+
 ### Creator → content record → viewer flow
 
 This is the single most important thing to internalize:

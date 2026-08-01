@@ -4,12 +4,17 @@ import { IProfileResponse } from '@/action/interfaces';
 import { getSpotifyAccessToken } from '@/action/spotify-api';
 import { getUserProfile } from '@/action/user-api';
 import { Footer } from '@/components/ui/footer';
+import { drawsAGift } from '@/lib/gift-routes';
 import { store } from '@/lib/store';
 import { setSessionSpecific } from '@/store/get-set-session';
 import { SessionData } from '@/store/iron-session';
 import { Button, Image, Modal, Space } from 'antd';
 import dayjs from 'dayjs';
-import { usePathname } from 'next/navigation';
+import {
+  useParams,
+  usePathname,
+  useSelectedLayoutSegments,
+} from 'next/navigation';
 import React, { createContext, useContext, useEffect, useState } from 'react';
 import { Provider } from 'react-redux';
 
@@ -140,6 +145,8 @@ const SessionProvider = ({
   });
 
   const pathname = usePathname();
+  const segments = useSelectedLayoutSegments();
+  const { id: contentId } = useParams();
 
   const [uploadStateLoading, setUploadStateLoading] = useState(false);
 
@@ -331,12 +338,10 @@ const SessionProvider = ({
         {children}
         {/* {parsedSession.accessToken ? userProfile ? children : <></> : children} */}
       </Provider>
-      {/* Routes that are somebody's gift rather than product UI: the site footer
-          would intrude on the page the recipient came to see. The Create Flow
-          that builds one is ordinary product UI and keeps its footer. */}
-      {!['/spotify', '/magazinev1', 'journal', '/wedding-template-1'].includes(
-        pathname
-      ) && <Footer />}
+      {/* The site footer would intrude on the page a recipient came to see, so
+          it stays off a gift. The Create Flow that builds one is ordinary
+          product UI and keeps it. */}
+      {!drawsAGift(segments, contentId) && <Footer />}
     </SessionContext.Provider>
   );
 };
