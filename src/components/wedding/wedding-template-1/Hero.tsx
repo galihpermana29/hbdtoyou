@@ -28,6 +28,7 @@ import {
   type WeddingTemplate1Content,
 } from '@/components/forms/wedding/wedding-invitation-types';
 import { FitText } from './FitText';
+import { AutoFitText } from './AutoFitText';
 import { useSealed } from './sealed-context';
 import { EASE } from './variants';
 
@@ -108,6 +109,25 @@ const OPENING = {
 const OPENING_SECONDS = Math.max(
   ...Object.values(OPENING).map(({ delay, duration }) => delay + duration)
 );
+
+/**
+ * What an addressee may grow to before it steps down.
+ *
+ * Measured off the paper rather than off the photograph's box. The image ends
+ * at 452.8, but its lower 46px are transparent and the envelope inside it is
+ * tilted, so the paper itself ends at 413.5 under the left of the line and
+ * 422.5 under the right. The design draws the line at 374, so the tighter side
+ * gives 39.5px, and keeping 8 clear of the edge leaves 32.
+ *
+ * Writing 64 here instead, which is what the image's box suggests, put a third
+ * line of a long name off the bottom of the envelope onto the black behind it.
+ *
+ * It is fitted rather than trusted, because this is the one line on the
+ * invitation a guest supplies and nobody reviews: "Bhadrakumara & Keluarga
+ * Besar Sastrowardoyo Poerbonegoro" is an ordinary way to address an Indonesian
+ * family and three times the length the design drew.
+ */
+const ADDRESSEE_MAX_HEIGHT = 32;
 
 /** One step of the opening, or no movement at all where none is wanted. */
 const step = (
@@ -346,9 +366,15 @@ function EnvelopeCard({
             be carrying somebody else's name.
           */}
           {addressee ? (
-            <p className="absolute left-[115px] top-[374px] w-[152px] font-[family-name:var(--font-wt1-mono)] text-[16px] leading-[normal] text-[#090909]">
-              {addressee}
-            </p>
+            <div className="absolute left-[115px] top-[374px] w-[152px]">
+              <AutoFitText
+                maxFontSize={16}
+                minFontSize={8}
+                maxHeight={ADDRESSEE_MAX_HEIGHT}
+                className="w-full font-[family-name:var(--font-wt1-mono)] leading-[normal] text-[#090909]">
+                {addressee}
+              </AutoFitText>
+            </div>
           ) : null}
 
           {/* The seal only lifts. Fading it out here as well would take it off
