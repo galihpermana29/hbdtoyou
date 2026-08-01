@@ -6,7 +6,7 @@ import { useFitFontSize } from './use-fit-font-size';
 
 /**
  * Renders text that wraps at WORD boundaries only (never mid-word) and steps its
- * font size down just enough to fit its box — both width (so no single word
+ * font size down just enough to fit its box - both width (so no single word
  * overflows) and an optional maxHeight (so it doesn't grow past the available
  * vertical space). Short values stay at maxFontSize; longer ones wrap by word
  * and/or shrink a little. Re-fits after web fonts load.

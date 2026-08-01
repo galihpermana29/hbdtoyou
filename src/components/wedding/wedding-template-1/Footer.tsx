@@ -1,7 +1,7 @@
 'use client';
 
 /**
- * Wedding Template 1 — Footer. Figma node 312:1813.
+ * Wedding Template 1 - Footer. Figma node 312:1813.
  * A slim orange band crediting Memoify with the small logo mark.
  * Fixed 375-wide mobile composition, 30px tall.
  * Animation: a plain opacity fade on scroll (opacity-only so the centering

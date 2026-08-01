@@ -1,7 +1,7 @@
 'use client';
 
 /**
- * Wedding Template 1 — Event Details ("Venue & Details"). Figma node 312:1651.
+ * Wedding Template 1 - Event Details ("Venue & Details"). Figma node 312:1651.
  * Venue info, a tilted polaroid, a LIVE countdown, and the RSVP Now control a
  * guest replies to the invitation from.
  * The countdown ticks every second toward the wedding's own date and time and

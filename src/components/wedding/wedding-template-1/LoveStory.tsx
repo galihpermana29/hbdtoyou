@@ -1,7 +1,7 @@
 'use client';
 
 /**
- * Wedding Template 1 — Love Story. Figma node 312:1687.
+ * Wedding Template 1 - Love Story. Figma node 312:1687.
  * A timeline of the couple's story: torn-paper framed film strip, a
  * "tap to reveal" polaroid, dated milestones and a map keepsake.
  * Fixed 1081px-tall mobile composition, built pixel-accurate to the design.

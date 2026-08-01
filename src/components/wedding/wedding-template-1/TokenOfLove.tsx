@@ -1,7 +1,7 @@
 'use client';
 
 /**
- * Wedding Template 1 — Send a Token of Love (gift / Thank You card). Figma node 312:1786.
+ * Wedding Template 1 - Send a Token of Love (gift / Thank You card). Figma node 312:1786.
  * Dark band with a paper-textured "Thank You" photo card, a bank-transfer card
  * with a working copy button, and a torn-paper decorative strip.
  * Animation: heading + content fade up on scroll. The copy button writes the

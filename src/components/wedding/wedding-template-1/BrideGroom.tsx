@@ -1,9 +1,9 @@
 /**
- * Wedding Template 1 — Bride & Groom. Figma node 312:1650.
+ * Wedding Template 1 - Bride & Groom. Figma node 312:1650.
  * Fixed 375-wide mobile composition, 708px tall, built pixel-accurate to the design.
  * Alternating rows: Freya (name left / photo right), Elias (photo left / name right).
  * NOTE: the Figma component's portraits are authored at off-canvas offsets (each
- * pushed ~its own width past an edge) — those are animation START positions. For the
+ * pushed ~its own width past an edge) - those are animation START positions. For the
  * static layout they're placed at their visible resting state: bride flush-right,
  * groom flush-left.
  *
@@ -21,7 +21,7 @@
  * Animation: on scroll, the bride portrait slides in from off-canvas right
  * (x:230 -> 0, settling at its left-[157px] resting spot) and the groom from
  * off-canvas left (x:-230 -> 0, settling at left-[-12px]); names/parents fade up.
- * The left-[...] values are untouched — motion is a pure additive x-transform.
+ * The left-[...] values are untouched - motion is a pure additive x-transform.
  */
 
 'use client';

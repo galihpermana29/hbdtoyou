@@ -1,7 +1,7 @@
 'use client';
 
 /**
- * Wedding Template 1 — Gallery. Figma node 312:1807.
+ * Wedding Template 1 - Gallery. Figma node 312:1807.
  * A photo collage: five images absolutely positioned and cropped by the
  * frame's overflow. Fixed 375-wide mobile composition, 570px tall.
  * Animation: the five photos fade up in a subtle stagger on scroll; their

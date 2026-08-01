@@ -1,7 +1,7 @@
 'use client';
 
 /**
- * Wedding Template 1 — Holy Verse. Figma node 312:1645.
+ * Wedding Template 1 - Holy Verse. Figma node 312:1645.
  * Paper-textured band with a centered scripture, fitted to the band: a couple
  * whose verse is longer than the designer's keeps all of it, at a smaller size,
  * rather than losing the end of it to the section's edge.

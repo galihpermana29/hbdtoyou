@@ -1,7 +1,7 @@
 'use client';
 
 /**
- * Wedding Template 1 — Photo Sharing block ("We want your perspective..."). Figma node 312:1734.
+ * Wedding Template 1 - Photo Sharing block ("We want your perspective..."). Figma node 312:1734.
  * Dark band inviting guests to submit their wedding photos via a paper-textured
  * card with a "Get My Disposable Camera" button.
  * Animation: the centered content fades up on scroll (centre preserved via x:-50%).

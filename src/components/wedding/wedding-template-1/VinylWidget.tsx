@@ -1,7 +1,7 @@
 'use client';
 
 /**
- * Wedding Template 1 — Vinyl Widget. Figma node 312:1817.
+ * Wedding Template 1 - Vinyl Widget. Figma node 312:1817.
  * A 67x67 spinning-record music toggle: the vinyl record masked into a ring
  * with the cover-art label at its centre.
  * Animation: only the record ring spins continuously (linear, ~10s/turn); the

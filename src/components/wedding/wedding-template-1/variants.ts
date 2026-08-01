@@ -35,7 +35,7 @@ export const fadeUpCenter: Variants = {
   },
 };
 
-/** Opacity-only fade — safe for elements whose position relies on a transform. */
+/** Opacity-only fade - safe for elements whose position relies on a transform. */
 export const fade: Variants = {
   hidden: { opacity: 0 },
   show: {
