@@ -110,6 +110,9 @@ export interface WeddingInvitationFormValues {
   groomMotherName?: string;
   brideFatherName?: string;
   brideMotherName?: string;
+  /** Each partner's portrait, held as the one-photo list its field hands back. */
+  bridePhoto?: string[];
+  groomPhoto?: string[];
   weddingDate?: Dayjs;
   backgroundMusic?: string;
   verseText?: string;
@@ -367,8 +370,8 @@ export function formValuesToContent(
     heroPhotos: v.heroPhotos ?? defaults.heroPhotos,
     // The two portraits are the sample's, because the Create Flow has no
     // question that hands back either of them yet: `hbd-a09.20`.
-    bridePhoto: defaults.bridePhoto,
-    groomPhoto: defaults.groomPhoto,
+    bridePhoto: pickPhoto(v.bridePhoto, 0, defaults.bridePhoto),
+    groomPhoto: pickPhoto(v.groomPhoto, 0, defaults.groomPhoto),
     weddingDateIso: weddingDateToIso(v.weddingDate, v.eventStartTime),
     backgroundMusicId: v.backgroundMusic || defaults.backgroundMusicId,
     verseText: v.verseText?.trim() || defaults.verseText,

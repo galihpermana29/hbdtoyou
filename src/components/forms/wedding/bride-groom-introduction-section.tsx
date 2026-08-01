@@ -2,9 +2,14 @@
 
 import { Form } from 'antd';
 
+import type { OpenNotificationFunction } from '@/app/(landing)/(core)/create/usecase/useCreateContent';
 import CreateFlowSection from './create-flow-section';
 import { flowFieldPair, flowFieldStack } from './create-flow-treatment';
 import FlowTextField from './flow-text-field';
+import PhotoDropZone from './photo-drop-zone';
+
+/** One portrait each, because the invitation prints one portrait each. */
+const PORTRAIT_LIMIT = 1;
 
 /**
  * The third Section of the details-and-story step: who the couple are, and who
@@ -20,6 +25,11 @@ import FlowTextField from './flow-text-field';
  * people is not. `joinParents` in `wedding-invitation-types.ts` is where that
  * joining lives, so the viewer and the form agree on it.
  *
+ * Each partner is also asked for a portrait, which the design does not draw a
+ * field for. The invitation prints one of each beside their names, and without
+ * these two questions every couple published with the designer's two models in
+ * their own frames. See `docs/adr/0002-figma-is-literal-truth.md`.
+ *
  * Every field is drawn empty in the design, with grey placeholder text, so the
  * form starts empty and the names below are the design's examples rather than
  * the couple's answers. "Frank Simajuntak" is the design's spelling of the
@@ -27,12 +37,28 @@ import FlowTextField from './flow-text-field';
  * literal truth, see `docs/adr/0002-figma-is-literal-truth.md`.
  */
 
-export default function BrideGroomIntroductionSection() {
+export default function BrideGroomIntroductionSection({
+  maxUploadMb,
+  openNotification,
+}: {
+  maxUploadMb: number;
+  openNotification?: OpenNotificationFunction;
+}) {
   return (
     <CreateFlowSection
       name="Bride & Groom’s Introduction"
       description="Introduction to the Bride & Groom’s family and/or education background">
       <div className={flowFieldStack}>
+        <Form.Item name="bridePhoto" noStyle>
+          <PhotoDropZone
+            label="Bride Photo"
+            limit={PORTRAIT_LIMIT}
+            hint="One portrait of the bride, in the ratio of 4:3"
+            maxSizeMb={maxUploadMb}
+            openNotification={openNotification}
+          />
+        </Form.Item>
+
         <Form.Item name="brideFullName" noStyle>
           <FlowTextField
             label="Bride Name"
@@ -54,6 +80,16 @@ export default function BrideGroomIntroductionSection() {
             />
           </Form.Item>
         </div>
+
+        <Form.Item name="groomPhoto" noStyle>
+          <PhotoDropZone
+            label="Groom Photo"
+            limit={PORTRAIT_LIMIT}
+            hint="One portrait of the groom, in the ratio of 4:3"
+            maxSizeMb={maxUploadMb}
+            openNotification={openNotification}
+          />
+        </Form.Item>
 
         <Form.Item name="groomFullName" noStyle>
           <FlowTextField

@@ -50,7 +50,10 @@ export default function WeddingInvitationForm({
 
         <HolyVerseSection />
 
-        <BrideGroomIntroductionSection />
+        <BrideGroomIntroductionSection
+          maxUploadMb={maxUploadMb}
+          openNotification={openNotification}
+        />
 
         <LoveStorySection
           maxUploadMb={maxUploadMb}

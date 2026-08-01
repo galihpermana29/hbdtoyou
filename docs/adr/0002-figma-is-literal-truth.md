@@ -71,7 +71,10 @@ A link gives directions; a guest still needs somewhere written down, and without
 "Gift Headline" in Gift Registry, above the account.
 The invitation prints a line of the couple's own words there, and without the field every invitation printed the sample's.
 
-Both are recorded in the expectations beside the fields the design does draw, so the check covers them rather than ignoring them.
+"Bride Photo" and "Groom Photo" in the Bride & Groom's Introduction, one above each partner's name.
+The invitation prints a portrait of each beside their names and the design asks for neither, so every couple who published carried the designer's two models in their own frames.
+
+All four are recorded in the expectations beside the fields the design does draw, so the check covers them rather than ignoring them.
 Three other values the invitation printed were resolved without new fields: the map keepsake is the first of the photos Venue Details already collects, the photo sharing block's card is product art the block draws itself, and the Guest Messages block is always shown because guests write those on the invitation rather than the couple enabling them.
 
 The designer settled it, one answer each way, rather than making either frame win outright.

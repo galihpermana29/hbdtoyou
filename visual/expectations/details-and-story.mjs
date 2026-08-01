@@ -269,6 +269,21 @@ const UPLOAD_AREAS = {
     prompt: 'Drag & drop up to 1 images from your gallery',
     hint: null,
   },
+  // The two areas the design draws no field for at all. The invitation prints a
+  // portrait of each partner and the design never asks for either, so these two
+  // are ours: see `docs/adr/0002-figma-is-literal-truth.md`. They take the same
+  // words every other single-photo area takes, because the drop zone writes them
+  // rather than the design, and they carry the guidance the field itself states.
+  'Bride Photo': {
+    title: 'Add More Photos',
+    prompt: 'Drag & drop up to 1 images from your gallery',
+    hint: 'One portrait of the bride, in the ratio of 4:3',
+  },
+  'Groom Photo': {
+    title: 'Add More Photos',
+    prompt: 'Drag & drop up to 1 images from your gallery',
+    hint: 'One portrait of the groom, in the ratio of 4:3',
+  },
   'Wedding Teaser Video': {
     title: 'Add a Video',
     prompt: 'Drag & drop video file from your gallery',
@@ -366,22 +381,30 @@ const SECTIONS = [
     description:
       'Introduction to the Bride & Groom’s family and/or education background',
     labels: [
+      'Bride Photo',
       'Bride Name',
       'Bride’s Father',
       'Bride’s Mother',
+      'Groom Photo',
       'Groom Name',
       'Groom’s Father',
       'Groom’s Mother',
     ],
     groups: [],
-    // Each partner is asked for in the same shape - their own name across the
-    // card, then their father and their mother side by side - and the bride
-    // comes first. A father and a mother are two fields because they are two
-    // people; the invitation joins them for display.
+    // Each partner is asked for in the same shape - a portrait, their own name
+    // across the card, then their father and their mother side by side - and
+    // the bride comes first. A father and a mother are two fields because they
+    // are two people; the invitation joins them for display.
+    //
+    // The two portraits are beyond the design, which draws no field for either
+    // while the invitation prints both. See
+    // `docs/adr/0002-figma-is-literal-truth.md`.
     fields: (form) => [
+      ...form.uploadArea('Bride Photo'),
       ...form.textField('Bride Name'),
       ...form.textField('Bride’s Father'),
       ...form.textField('Bride’s Mother'),
+      ...form.uploadArea('Groom Photo'),
       ...form.textField('Groom Name'),
       ...form.textField('Groom’s Father'),
       ...form.textField('Groom’s Mother'),
