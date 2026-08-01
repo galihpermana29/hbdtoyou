@@ -112,8 +112,15 @@ export default function PublishedStep({
               the panel draws the envelope closed over its cards, and a couple
               presses the control to see what a guest sees.
 
-              Sealed but not locking the page: this is a phone-sized panel with
-              the rest of the step beside it, not the page itself. */}
+              Sealed all the way, which is the panel taking its own comment
+              seriously: nothing below the envelope is part of it until the
+              control is pressed, exactly as on the invitation a guest is sent.
+              The panel is 812px, the height the envelope is drawn in, so a
+              sealed one fills it and there is nothing under it to scroll to.
+
+              It is handed no scroller, because it has none to speak of: this is
+              a phone-sized panel with the rest of the step beside it, and what
+              scrolls around it is the step, which is the couple's. */}
           <WeddingTemplate1 content={content} sealed />
         </div>
       </aside>

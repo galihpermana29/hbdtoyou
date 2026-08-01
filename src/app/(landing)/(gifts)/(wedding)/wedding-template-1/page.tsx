@@ -39,8 +39,8 @@ export const metadata = {
  * belong. Sorting a Frame from a photograph, and moving the photographs into
  * Example Content behind it, is `hbd-a09.10`.
  *
- * Sealed, and it holds the page still while it is: this route is the invitation
- * and has the window to itself, so nothing below the envelope is reachable
+ * Sealed, and the page is what it scrolls: this route is the invitation and has
+ * the window to itself, so nothing below the envelope is part of the page
  * before somebody opens it.
  */
 export default function WeddingTemplate1ShowcasePage({
@@ -56,7 +56,7 @@ export default function WeddingTemplate1ShowcasePage({
         content={exampleContent(searchParams[EXAMPLE_CONTENT_PARAM])}
         addressee={addresseeFrom(searchParams[ADDRESSEE_PARAM])}
         sealed
-        holdsStill="page"
+        scrollsInside="page"
         showVinylWidget
       />
     </div>

@@ -313,8 +313,8 @@ export const screens = [
   // The invitation as a guest is sent it, which is the only screen here that
   // is not driven anywhere first: sealed is how it arrives. It renders the
   // flattering set, because that is the URL a guest lands on, and it is the one
-  // screen whose expectations claim the page itself - a sealed invitation holds
-  // it still, and the three below prove it lets go again.
+  // screen whose expectations claim everything below the envelope is contained
+  // out of the page - the three below prove it lets go again.
   {
     id: 'wedding-template-1-sealed',
     title: 'Wedding Template 1, sealed, as a guest is sent it',

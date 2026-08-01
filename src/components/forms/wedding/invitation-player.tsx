@@ -22,10 +22,11 @@ import type { WeddingTemplate1Content } from './wedding-invitation-types';
  * `aria-modal` promises anything reading the page aloud.
  *
  * Being a dialog is also what the invitation inside has to be told about. The
- * dialog is the scroller here rather than the page, so it is the dialog the
- * sealed invitation holds still: a couple who could scroll past the envelope
- * would not be seeing what a guest sees, which is the whole of what this is
- * for.
+ * dialog is the scroller here rather than the page, so it is the dialog a
+ * sealed invitation begins at the top of. What it may not scroll past is the
+ * envelope, and that is the invitation's own doing rather than the dialog's: a
+ * couple who could scroll past it would not be seeing what a guest sees, which
+ * is the whole of what this is for.
  */
 export default function InvitationPlayer({
   content,
@@ -41,9 +42,10 @@ export default function InvitationPlayer({
     closeRef.current?.focus();
   }, []);
 
-  // Not the invitation's own `useScrollLock`, which also puts what it locks
-  // back to the top: this holds still a form the couple is in the middle of
-  // filling in, and would throw away where they had got to in it.
+  // The page behind the dialog, held still because a dialog is open over it.
+  // Not the invitation's own `useBeginAtTheTop`, which puts a scroller back to
+  // the top: this one is a form the couple is in the middle of filling in, and
+  // sending it to the top would throw away where they had got to in it.
   useEffect(() => {
     const previous = document.body.style.overflow;
     document.body.style.overflow = 'hidden';
@@ -116,10 +118,10 @@ export default function InvitationPlayer({
           <X size={20} aria-hidden="true" />
         </button>
         {/* The dialog is what scrolls here, not the page, so it is the dialog
-            the sealed invitation is given to hold still. The page behind is
+            the sealed invitation is given as its scroller. The page behind is
             held still separately above, for the different reason that a dialog
             is open over it. */}
-        <WeddingTemplate1 content={content} sealed holdsStill={dialogRef} />
+        <WeddingTemplate1 content={content} sealed scrollsInside={dialogRef} />
       </div>
     </div>
   );

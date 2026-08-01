@@ -28,13 +28,17 @@
  * and its markup is paragraphs inside sections. So there are four handles here
  * rather than the Create Flow's list of landmarks:
  *
- *   body               the page, which is what a sealed invitation holds still
+ *   body               the page, which a sealed invitation leaves the guest to
+ *                      scroll because the envelope is the whole of it
  *   main section       one per section, in the order a guest scrolls them
  *   main p             every line of words the invitation prints, in order
  *   main span          a line the template scales down to fit its box
  *   main [role=region] the one box inside the invitation a guest scrolls on its
  *                      own, which is the Messages section's list of wishes
  *   main [inert]       everything below the envelope, while it is closed
+ *   main > div         the same region once it is open, found by its place in
+ *                      the markup because the attribute saying "not yet" is
+ *                      exactly what an opened invitation no longer has
  *
  * `main section` is a descendant rather than a child on purpose. Everything
  * below the Hero is wrapped in one region so that a sealed invitation can put
@@ -739,21 +743,51 @@ function positions(paragraphs, fitted) {
 }
 
 /**
- * The page itself, which is where Sealed is either held or let go.
+ * Everything below the envelope, which is where Sealed is either held or let go.
  *
  * The one thing about this template that is a behaviour rather than an
- * appearance, and the only part of it a computed style can hold: an invitation
- * that has the page to itself does not scroll while the envelope is closed, and
- * scrolls freely once a guest has opened it. It is asserted on `body` because
- * that is the element the lock is put on, and it is written first on every
- * screen because it is the earliest element in the document - anywhere else and
- * the order check would read it as an element that had moved.
+ * appearance, and it is one region: while the envelope is closed that region is
+ * contained out of the page, so a sealed invitation is exactly as long as its
+ * envelope and there is nothing past it to scroll to, and once a guest has
+ * opened it the containment is gone and the invitation is theirs.
+ *
+ * It is claimed on every screen here, and it is claimed straight after the Hero,
+ * because that is where it opens: the region wraps the nine sections below the
+ * envelope, so it comes before every one of them in the document even though
+ * everything it holds comes after. Written anywhere later, the order check would
+ * read it as an element that had moved.
+ *
+ * A sealed invitation finds it by the `inert` marking it out of reach; an opened
+ * one has no such mark left, by definition, so it is found by its place in the
+ * markup instead. Both are the same `<div>`, the only one `main` has of its own.
+ * A second one added there would not slip past: an ambiguous selector fails the
+ * run by name rather than quietly claiming the wrong element.
  */
-const thePage = (name, overflow) => ({
-  name,
-  select: 'body',
-  style: { overflow },
+const belowTheEnvelope = (sealed) => ({
+  name: sealed
+    ? 'Everything below the envelope, out of reach and out of the scroll'
+    : 'Everything below the envelope, let go',
+  select: sealed ? 'main [inert]' : 'main > div',
+  style: sealed
+    ? { contain: 'size', overflow: 'hidden' }
+    : { contain: 'none', overflow: 'visible' },
 });
+
+/**
+ * The page a sealed invitation is drawn on, which is the guest's own to scroll.
+ *
+ * It reads as a claim about nothing until one remembers what it replaced. This
+ * page used to be held still while the envelope was closed, and a window shorter
+ * than the envelope then had no way to reach the Open Invitation control 527px
+ * down it: `hbd-du8`. What holds a guest to the envelope now is the envelope
+ * being the whole of the page, above, which leaves the scrolling to them - so
+ * this says the lock has not come back.
+ */
+const THE_PAGE_IS_THE_GUEST_S = {
+  name: 'The page, which a sealed invitation leaves the guest to scroll',
+  select: 'body',
+  style: { overflow: 'visible' },
+};
 
 function invitationExpectations() {
   const invitation = positions(
@@ -761,20 +795,24 @@ function invitationExpectations() {
     SECTIONS.flatMap((section) => section.fitted ?? [])
   );
 
+  const sectionParts = (section, index) => [
+    {
+      name: `${section.name} section`,
+      select: 'main section',
+      nth: index,
+      style:
+        section.background === null
+          ? {}
+          : { backgroundColor: section.background },
+    },
+    ...section.parts(invitation),
+  ];
+
+  const [hero, ...belowIt] = SECTIONS;
   const expectations = [
-    thePage('The page, once the invitation is open', 'visible'),
-    ...SECTIONS.flatMap((section, index) => [
-      {
-        name: `${section.name} section`,
-        select: 'main section',
-        nth: index,
-        style:
-          section.background === null
-            ? {}
-            : { backgroundColor: section.background },
-      },
-      ...section.parts(invitation),
-    ]),
+    ...sectionParts(hero, 0),
+    belowTheEnvelope(false),
+    ...belowIt.flatMap((section, index) => sectionParts(section, index + 1)),
   ];
 
   invitation.everythingWasAskedFor();
@@ -810,16 +848,25 @@ const SEALED_PARAGRAPHS = [
  * Only the Hero is claimed here. The nine sections below it are the same nine
  * the opened screens already assert, three times over, and a fourth copy of that
  * list would say nothing this screen exists to say. What it exists to say is the
- * three things only a sealed invitation has: the page is held still, the
- * envelope is closed over its cards, and everything below it is out of reach.
+ * three things only a sealed invitation has: the envelope is closed over its
+ * cards, everything below it is out of the invitation, and the page is still the
+ * guest's own to scroll.
  *
- * The last of those is claimed as a region carrying `inert`, which is the whole
- * of what "out of reach" is in a browser - out of the focus order and out of
- * the accessibility tree at once. Holding the page still stops the wheel and
- * nothing else, so without this claim a build that let a guest Tab down to the
- * RSVP would pass every screen here. That the region lets go again is not a
- * claim a computed style can hold: the three opened screens assert the sections
- * below are there, and `inert` does not change any of that.
+ * The second of those is one region and two claims, because "not yet" has two
+ * halves. `inert` is the whole of what "out of reach" is in a browser - out of
+ * the focus order and out of the accessibility tree at once - and without it a
+ * build that let a guest Tab down to the RSVP would pass every screen here.
+ * `contain: size` is "out of the scroll": the region takes up no room, so the
+ * page ends where the envelope does and a guest cannot wheel past it. The three
+ * opened screens claim the same region with the containment gone, which is how
+ * a run says the invitation let go again.
+ *
+ * The third is what makes the second the right way round. Holding the page still
+ * would keep a guest to the envelope too, and used to, but it also strands
+ * anybody whose window is shorter than the envelope: the Open Invitation control
+ * is 527px down an 812px Hero and a held page cannot be scrolled to it
+ * (`hbd-du8`). Containing the invitation rather than the guest is what lets a
+ * short window reach the control, so a run says the page is free.
  *
  * The addressee the design writes across the closed envelope - "Galih &
  * Keluarga", node 332:30838 - is not drawn and is not claimed. The design hides
@@ -831,7 +878,7 @@ function sealedExpectations() {
   const invitation = positions(SEALED_PARAGRAPHS, []);
 
   const expectations = [
-    thePage('The page, while the invitation is sealed', 'hidden'),
+    THE_PAGE_IS_THE_GUEST_S,
     {
       name: 'Hero section',
       select: 'main section',
@@ -864,10 +911,7 @@ function sealedExpectations() {
     ),
     // Last, because it is last: everything below the envelope is one region and
     // the region begins after every line the Hero prints.
-    {
-      name: 'Everything below the envelope, out of reach',
-      select: 'main [inert]',
-    },
+    belowTheEnvelope(true),
   ];
 
   invitation.everythingWasAskedFor();

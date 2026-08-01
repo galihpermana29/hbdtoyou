@@ -15,9 +15,10 @@ And Wedding Template 1, which is the invitation itself, drawn as a phone: it ren
 
 For each element the design describes, the check asserts typeface, size, weight, line height, letter spacing, colour, background, border colour, width and style, corner radius, shadow, padding, margin and gap, together with the exact copy the element renders and where it sits in the document relative to every other element.
 
-One property carries a behaviour rather than an appearance: `overflow`.
-It is asserted in three places, each of them something defined by the behaviour rather than by how it looks.
-On `body`, which is how a sealed invitation is held still and how it is let go again.
+Two properties carry a behaviour rather than an appearance: `overflow` and `contain`.
+They are asserted in four places, each of them something defined by the behaviour rather than by how it looks.
+On everything below the envelope, which a sealed invitation contains out of the page and an opened one lets go - the difference between an envelope a guest has to open and one they can scroll past.
+On `body` while the invitation is sealed, which says the page is still the guest's own to scroll: an envelope taller than the window has to be scrolled down before its one control can be pressed.
 On `body` again while the RSVP is open, because the invitation does not scroll under a guest who is replying to it.
 And on the Messages section's list of Guest Messages, which the design draws as a box shorter than the list inside it, so a list a guest cannot scroll is not that section.
 It is the only part of any of them that a computed style can hold.
@@ -111,22 +112,22 @@ Checking that one manifest at three lengths of answer is how a section that cann
 Each of them opens the envelope first, the way a guest does, so the seal is exercised on every run: if it stops releasing, all three fail at once.
 
 The sealed screen is the only one driven nowhere first, because sealed is how an invitation arrives.
-It claims the Hero and nothing below it, and it is where the three things only a sealed invitation has are asserted: the page does not scroll, the envelope is closed over its cards, and everything below the envelope is out of reach.
-The second of those is a claim about counting rather than about a style - the design draws a closed envelope with the cards not drawn at all, so the first line of words on the page is the one asking a guest to open it, and a build that still drew them would report the wrong copy three lines running.
-The third is a claim about presence: everything below the envelope is one region carrying `inert`, which is what takes a subtree out of the focus order and out of the accessibility tree at once.
-Holding the page still stops the wheel and nothing else, so without that claim a build a guest could Tab down to the RSVP on would pass every screen here.
+It claims the Hero and nothing below it, and it is where the three things only a sealed invitation has are asserted: the envelope is closed over its cards, everything below the envelope is out of the invitation, and the page is still the guest's own to scroll.
+The first of those is a claim about counting rather than about a style - the design draws a closed envelope with the cards not drawn at all, so the first line of words on the page is the one asking a guest to open it, and a build that still drew them would report the wrong copy three lines running.
+The second is one region and two marks, because "not yet" has two halves.
+`inert` takes a subtree out of the focus order and out of the accessibility tree at once, so without it a build a guest could Tab down to the RSVP on would pass every screen here.
+`contain: size` takes it out of the page's layout, so the page ends where the envelope does and there is nothing past it to wheel to.
+The three opened screens claim the same region with both gone, which is how a run says the invitation let go again.
+The third claim is what makes the second the right way round: holding the page still would keep a guest to the envelope too, and did until `hbd-du8`, but it also stranded anybody whose window was shorter than the envelope, with the one control 527px down an 812px Hero and no way to scroll to it.
 
 The RSVP screen opens the envelope and then presses RSVP Now, which is how a guest reaches the card: the design draws it as a frame of its own and it has no URL.
 It claims the card and not the invitation behind it, since three screens already assert that, and it claims the page as well - the invitation does not scroll while a guest is replying.
 
 ### Where it stands
 
-The seven Create Flow screens match the design.
-The five template screens report the same two differences as each other, rather than the many lines they take: every line of the template is set 1.5 loose where the design lets the typeface decide (`hbd-a09.13`), and the five bordered controls on the invitation omit the 10px the design puts inside them (`hbd-a09.14`).
-The sealed screen shows both, on three lines and one control, which is every element it claims that either could touch.
-The RSVP screen shows only the first, on every line it claims: its boxes, colours, copy and order all match.
-Nothing is missing, misspelled, mis-set or out of order on any of them, which is the claim those screens exist to make.
-So `npm run visual` exits 1 today, and it goes green when those two land.
+All twelve screens match the design, so `npm run visual` exits 0.
+It last went red on the two differences every template screen shared - every line set 1.5 loose where the design lets the typeface decide (`hbd-a09.13`), and the five bordered controls omitting the 10px the design puts inside them (`hbd-a09.14`) - and both have landed.
+A red run now means a screen has moved away from the design.
 
 A screen is `SKIPPED` when the thing it would check does not exist yet, and the reason says which.
 `route not built yet` is code-side work.
@@ -153,6 +154,8 @@ Elements are found two ways, and the choice decides what a failure reads like.
 
 A structural selector says where an element sits and lets its copy be checked as a claim, so a typo reports as a `copy` failure with both spellings.
 Those selectors use nothing but ordinary HTML and the standard ARIA patterns - `header`, `nav[aria-label="Breadcrumb"]`, `h1`, `form section`, `label` with its control, `[role="group"]` for a field the design builds from more than one element, `button`, `button[aria-expanded]` for the one that opens a Section, `inert` for a region nobody may reach yet, `footer` - and that list is the whole contract a screen has to satisfy.
+The invitation adds one plain `main > div`, for the region below the envelope once it has been opened: `inert` is what marks it out of reach and is exactly what an opened one no longer has, so there is nothing left to find it by but its place in the markup.
+It is the only `div` `main` owns, and a second one would fail the run as an ambiguous selector rather than quietly claim the wrong element.
 
 The chrome above a screen's own content is the same on all four steps, so it lives in `visual/expectations/page-chrome.mjs` and each screen spreads it in.
 

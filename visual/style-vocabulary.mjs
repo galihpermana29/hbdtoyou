@@ -319,18 +319,31 @@ export const ASSERTABLE_PROPERTIES = {
   gap: { normalise: normaliseLengthList, read: ['rowGap', 'columnGap'] },
 
   /**
-   * Whether an element's content can be scrolled to.
+   * Whether what is inside an element is drawn outside it.
    *
-   * The one property here that carries a behaviour rather than an appearance,
-   * and it earns its place because a sealed invitation is defined by it: the
-   * page holds still until a guest opens the envelope, and is theirs to scroll
-   * afterwards. Read from both axes, so `hidden` is a claim about the page
-   * rather than about one direction of it.
+   * One of the two properties here that carry a behaviour rather than an
+   * appearance, and it earns its place because a sealed invitation is defined
+   * by it: everything below the envelope is clipped away until a guest opens
+   * it, and drawn afterwards. Read from both axes, so `hidden` is a claim about
+   * the region rather than about one direction of it.
    */
   overflow: {
     normalise: normaliseKeywordList,
     read: ['overflowX', 'overflowY'],
   },
+
+  /**
+   * Whether an element is taken out of the page it sits in.
+   *
+   * The other behavioural property, and the other half of what a sealed
+   * invitation is: `size` says a region takes up no room at all, so the page a
+   * guest can scroll ends where the envelope does. It is here rather than a
+   * height because it is not one - `max-height: 0` would say the same thing and
+   * would be refused, along with every other dimension, for the good reason
+   * that a dimension is a measurement of a screen and this is a decision about
+   * a page.
+   */
+  contain: { normalise: normaliseKeywordList, read: ['contain'] },
 };
 
 /** The longhands a browser has to be asked for to cover every property above. */

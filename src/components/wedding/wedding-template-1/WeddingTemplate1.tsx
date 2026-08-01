@@ -15,7 +15,7 @@ import RsvpCard, { type Rsvp } from './RsvpCard';
 import TokenOfLove from './TokenOfLove';
 import VinylWidget from './VinylWidget';
 import { SealedProvider } from './sealed-context';
-import { useScrollLock, type Scroller } from './use-scroll-lock';
+import { useBeginAtTheTop, type Scroller } from './use-begin-at-the-top';
 import {
   DEFAULT_WEDDING_TEMPLATE_1_CONTENT,
   type WeddingTemplate1Content,
@@ -45,16 +45,15 @@ export interface WeddingTemplate1Props {
    */
   addressee?: string;
   /**
-   * What this invitation may hold still while it is sealed, which is whatever
-   * it is scrolling inside: `'page'` where it has the window to itself, and a
+   * What this invitation is scrolling inside, so that a sealed one begins at
+   * the top of its envelope: `'page'` where it has the window to itself, and a
    * ref to the scroller where something else does the scrolling - `Scroller`
    * says which is which.
    *
-   * Left out by the panels inside the Create Flow, which draw a sealed
-   * invitation in a phone-sized frame with a form beside it and hold nothing
-   * still.
+   * Left out by the panels inside the Create Flow, which draw an invitation as
+   * a picture beside a form and are never scrolled through.
    */
-  holdsStill?: Scroller;
+  scrollsInside?: Scroller;
   /** Draw the Background Track control over the invitation. */
   showVinylWidget?: boolean;
 }
@@ -72,7 +71,7 @@ export default function WeddingTemplate1({
   content = DEFAULT_WEDDING_TEMPLATE_1_CONTENT,
   sealed = false,
   addressee,
-  holdsStill,
+  scrollsInside,
   showVinylWidget = false,
 }: WeddingTemplate1Props) {
   /**
@@ -107,7 +106,7 @@ export default function WeddingTemplate1({
   const reveal = useCallback(() => setRevealed(true), []);
   const unopened = sealed && !revealed;
 
-  useScrollLock(unopened, holdsStill);
+  useBeginAtTheTop(sealed, scrollsInside);
 
   /**
    * Put everything below the envelope out of reach until it is opened.
@@ -129,14 +128,41 @@ export default function WeddingTemplate1({
     <SealedProvider sealed={sealed}>
       <main className="relative mx-auto w-full max-w-[375px] overflow-x-hidden bg-[#090909] text-[#fafafa]">
         <Hero content={content} addressee={addressee} onOpened={reveal} />
-        {/* Everything below the envelope, out of reach until it is opened.
-            Holding the scroller still stops the wheel and nothing else: without
-            this a guest presses Tab and walks straight down to View Location
-            and RSVP Now, reading the ending before the beginning and replying
-            to an invitation they have not opened. `inert` is what takes a whole
-            region out of the focus order and out of the accessibility tree at
-            once, which is both halves of "not reachable yet". */}
-        <div ref={belowTheEnvelope}>
+        {/* Everything below the envelope, out of the invitation until it is
+            opened. Two marks, because "not yet" has two halves.
+
+            `inert` takes the whole region out of the focus order and out of the
+            accessibility tree at once, which is what stops a guest pressing Tab
+            and walking straight down to View Location and RSVP Now, reading the
+            ending before the beginning and replying to an invitation they have
+            not opened.
+
+            `contain: size` takes it out of the page's layout, so a sealed
+            invitation is exactly as long as the envelope is drawn and there is
+            nothing past it to scroll to. Holding the scroller still would do
+            that too, and used to: what it also did was strand anybody whose
+            window is shorter than the envelope, because the Open Invitation
+            control is 527px down an 812px Hero and a held page cannot be
+            scrolled to it. Contained rather than held, a short window - a phone
+            turned on its side, most of all - scrolls down the envelope to the
+            control and no further. `overflow-hidden` is the other half of that:
+            a contained region is no longer tall enough to hold what is inside
+            it, so what is inside it has to be clipped rather than drawn over
+            the page below.
+
+            Contained rather than unmounted, so the sections are laid out and
+            their photographs fetched while a guest is still looking at the
+            envelope: opening it should reveal an invitation that is ready, not
+            one that starts loading.
+
+            A browser too old for `contain` would let a guest wheel past the
+            envelope. That is the same era of browser as one too old for
+            `inert`, which is what the line above already rests on, so the seal
+            is no more fragile than it was: both arrived in Safari 15, and
+            neither leaves a guest unable to read the invitation. */}
+        <div
+          ref={belowTheEnvelope}
+          className={unopened ? 'overflow-hidden [contain:size]' : undefined}>
           <HolyVerse content={content} />
           <BrideGroom content={content} />
           <LoveStory content={content} />

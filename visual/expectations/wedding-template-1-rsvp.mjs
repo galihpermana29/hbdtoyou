@@ -41,7 +41,8 @@
  *
  * Anything a reply does. That a Guest Message joins the invitation's own, that
  * closing the card changes nothing, and that nothing reaches a network are
- * behaviours, and the only behaviour this harness can hold is `overflow`.
+ * behaviours, and the only behaviours this harness can hold are `overflow` and
+ * `contain`.
  */
 
 import { declaredPositions } from './declared-positions.mjs';
