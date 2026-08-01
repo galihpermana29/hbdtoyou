@@ -53,7 +53,7 @@ export default function TokenOfLove({
       <motion.div
         className="absolute left-[calc(50%+0.5px)] top-[60px] h-[31px] w-[196px]"
         {...fadeUpCenterReveal}>
-        <p className="absolute left-[calc(50%-145px)] top-0 w-[290px] font-[family-name:var(--font-wt1-script)] text-[48px] leading-normal text-[rgba(250,250,250,0.98)]">
+        <p className="absolute left-[calc(50%-145px)] top-0 w-[290px] font-[family-name:var(--font-wt1-script)] text-[48px] leading-[normal] text-[rgba(250,250,250,0.98)]">
           Send a Token of Love
         </p>
         <div className="absolute left-[-49px] top-[50px] h-px w-[298px] bg-[#fafafa]" />
@@ -63,7 +63,7 @@ export default function TokenOfLove({
       <motion.div
         className="absolute left-1/2 top-[131px] flex w-[343px] flex-col items-center gap-[24px]"
         {...fadeUpCenterReveal}>
-        <p className="w-full text-center font-[family-name:var(--font-wt1-mono)] text-[12px] leading-normal text-white">
+        <p className="w-full text-center font-[family-name:var(--font-wt1-mono)] text-[12px] leading-[normal] text-white">
           {content.tokenMessage}
         </p>
 
@@ -80,7 +80,7 @@ export default function TokenOfLove({
               </div>
             </div>
             <div className="absolute left-[6.1px] top-[6.1px] h-[217.934px] w-[331.815px] border-[1.356px] border-solid border-[#201e1f]" />
-            <p className="absolute left-[calc(50%-45.5px)] top-[185.72px] whitespace-nowrap font-[family-name:var(--font-wt1-script)] text-[32px] leading-normal text-black">
+            <p className="absolute left-[calc(50%-45.5px)] top-[185.72px] whitespace-nowrap font-[family-name:var(--font-wt1-script)] text-[32px] leading-[normal] text-black">
               Thank You
             </p>
             <div className="absolute left-1/2 top-[15.25px] h-[171.5px] w-[302.328px] -translate-x-1/2">
@@ -101,7 +101,7 @@ export default function TokenOfLove({
             />
             <div className="relative flex w-full items-center gap-[8px]">
               <div className="relative flex min-w-px flex-[1_0_0] items-start">
-                <div className="relative flex min-w-px flex-[1_0_0] flex-col items-start gap-[2px] leading-normal text-black">
+                <div className="relative flex min-w-px flex-[1_0_0] flex-col items-start gap-[2px] leading-[normal] text-black">
                   <p className="w-full font-[family-name:var(--font-wt1-mono)] text-[12px] font-medium">
                     {joinAccountHolder(
                       content.accountHolder,
@@ -116,8 +116,8 @@ export default function TokenOfLove({
               <button
                 type="button"
                 onClick={handleCopy}
-                className="relative flex cursor-pointer items-center justify-center border border-solid border-[#fafafa] bg-black p-[10px]">
-                <p className="whitespace-nowrap font-[family-name:var(--font-wt1-mono)] text-[12px] leading-normal text-[#fafafa]">
+                className="relative flex cursor-pointer items-center justify-center border border-solid border-[#fafafa] bg-black gap-[10px] p-[10px]">
+                <p className="whitespace-nowrap font-[family-name:var(--font-wt1-mono)] text-[12px] leading-[normal] text-[#fafafa]">
                   {copied ? 'copied' : 'copy'}
                 </p>
               </button>

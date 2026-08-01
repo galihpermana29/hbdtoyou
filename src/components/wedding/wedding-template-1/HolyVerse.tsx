@@ -45,7 +45,7 @@ export default function HolyVerse({
       </div>
 
       <motion.div
-        className="absolute left-1/2 top-[24px] flex w-[343px] flex-col items-center gap-[20px] text-center leading-normal text-[#090909]"
+        className="absolute left-1/2 top-[24px] flex w-[343px] flex-col items-center gap-[20px] text-center leading-[normal] text-[#090909]"
         {...reveal}>
         <p className="w-full font-[family-name:var(--font-wt1-mono)] text-[12px]">
           &ldquo;{content.verseText}&rdquo;

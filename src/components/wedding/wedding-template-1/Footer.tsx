@@ -23,7 +23,7 @@ export default function Footer() {
       <motion.div
         className="absolute left-1/2 top-[calc(50%+0.5px)] flex -translate-x-1/2 -translate-y-1/2 items-center gap-[12px]"
         {...reveal}>
-        <p className="whitespace-nowrap font-[family-name:var(--font-wt1-mono)] text-[10px] leading-normal text-[#fafafa]">
+        <p className="whitespace-nowrap font-[family-name:var(--font-wt1-mono)] text-[10px] leading-[normal] text-[#fafafa]">
           Created by Memoify.live
         </p>
         <div className="relative size-[18px] shrink-0">

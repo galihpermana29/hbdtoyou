@@ -217,7 +217,7 @@ export const DEFAULT_WEDDING_TEMPLATE_1_CONTENT: WeddingTemplate1Content = {
     {
       year: '2020',
       title: 'The meeting',
-      body: 'Elias and Freya met during a summer volunteering program at a local wildlife sanctuary. Elias, always quiet and meticulous, found himself fascinated by Freya\u2019s contagious energy and deep empathy for every animal in her care. A shared task repairing an aviary roof led to hours of conversation that flowed with surprising ease.',
+      body: 'Elias and Freya met during a summer volunteering program at a wildlife sanctuary. Elias, always quiet and meticulous, found himself fascinated by Freya\u2019s contagious energy and deep empathy for every animal in her care. A shared task repairing an aviary roof led to hours of conversation that flowed with surprising ease.',
     },
     {
       year: '2022',
@@ -227,7 +227,7 @@ export const DEFAULT_WEDDING_TEMPLATE_1_CONTENT: WeddingTemplate1Content = {
     {
       year: '2023',
       title: 'On his one knee!',
-      body: 'Five years later, they are each other\u2019s anchor and wildest adventure. Freya still makes Elias laugh until his sides ache, and Elias\u2019s calm presence remains her haven. Now, they are excited to begin their next chapter together, celebrating not just their love, but the unique path they\u2019ve carved side by side\u2014surrounded by the family and friends who mean the most.',
+      body: 'Five years later, they are each other\u2019s anchor and wildest adventure. Freya still makes Elias laugh until his sides ache, and Elias\u2019s calm presence remains her haven. Now, they are excited to begin their next chapter together, surrounded by the family and friends who mean the most.',
     },
   ],
   polaroidPhoto: `${TEMPLATE_1_ASSET}/lovestory-polaroid-photo.jpg`,

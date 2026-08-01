@@ -5,12 +5,22 @@
  * NOTE: the Figma component's portraits are authored at off-canvas offsets (each
  * pushed ~its own width past an edge) — those are animation START positions. For the
  * static layout they're placed at their visible resting state: bride flush-right,
- * groom flush-left. Exact resting offset pending a Figma screenshot re-check
- * (Figma API was rate-limited at build time). These offsets become the animate-to
- * targets in the animation phase (slide bride in from right, groom from left).
+ * groom flush-left.
+ *
+ * The design gives no resting offset to read. Node 312:1650 parks the bride at
+ * x 375.75 on a 375-wide section and the groom at x -225.66, both entirely past
+ * an edge of a frame that clips its contents, so neither portrait is drawn in
+ * the design at all. Those are where the slide starts, not where it ends, and
+ * where it ends is ours to choose.
+ *
+ * The rule chosen: each portrait sits 10px clear of the names beside it. The
+ * design pins both text frames - the bride's ends at x 147, the groom's begins
+ * at x 215.89 - so the portraits are the only free variable. 10px was already
+ * the bride's gap; the groom's was 0.64px, which read as the name touching the
+ * polaroid. These offsets become the animate-to targets.
  * Animation: on scroll, the bride portrait slides in from off-canvas right
  * (x:230 -> 0, settling at its left-[157px] resting spot) and the groom from
- * off-canvas left (x:-230 -> 0, settling at left-[-3px]); names/parents fade up.
+ * off-canvas left (x:-230 -> 0, settling at left-[-12px]); names/parents fade up.
  * The left-[...] values are untouched — motion is a pure additive x-transform.
  */
 
@@ -64,10 +74,13 @@ const SAMPLE = DEFAULT_WEDDING_TEMPLATE_1_CONTENT;
  * the budget, because a family nobody can read is the failure this section
  * exists to avoid.
  *
- * Both this and the 72px line box below are figured at the 1.5 leading the
- * build sets today, which is `hbd-a09.13`. When that lands and the leading
- * becomes the typeface's own, both numbers mean a different number of lines and
- * have to be figured again.
+ * Both this and the 72px line box below were figured at the 1.5 leading the
+ * build used to set, which `hbd-a09.13` has since corrected to the typeface's
+ * own. At the design's leading these hold more lines than they did, not fewer,
+ * so nothing they bound has got tighter: the hostile set's families still fit
+ * and the section still matches at all three sets of Example Content. They are
+ * budgets rather than measurements, and re-figuring them would change nothing
+ * anybody can see.
  */
 const ANSWER_MAX_HEIGHT = 45;
 
@@ -105,7 +118,7 @@ function Partner({
 
   return (
     <motion.div
-      className={`absolute flex flex-col items-start gap-[16px] leading-normal text-white ${className}`}
+      className={`absolute flex flex-col items-start gap-[16px] leading-[normal] text-white ${className}`}
       {...fadeUpReveal}>
       <div className="flex w-full flex-col items-start">
         {/*
@@ -129,7 +142,7 @@ function Partner({
             maxFontSize={48}
             minFontSize={20}
             maxHeight={72}
-            className="w-full text-center font-[family-name:var(--font-wt1-script)] leading-normal text-[rgba(250,250,250,0.98)]">
+            className="w-full text-center font-[family-name:var(--font-wt1-script)] leading-[normal] text-[rgba(250,250,250,0.98)]">
             {nickname}
           </AutoFitText>
         </div>
@@ -181,9 +194,15 @@ export default function BrideGroom({
   // themselves: at their start offset they sit outside the section's
   // overflow-hidden box, so the IntersectionObserver never sees them enter.
   // Drive the slide from the section's own in-view state instead.
+  // Reduced motion still has to say where the portrait rests, rather than
+  // saying nothing. `useReducedMotion()` is false on the first render, so the
+  // start offset is applied before it flips true; a motion component handed no
+  // animate prop keeps the transform it already has rather than returning to
+  // its CSS position, and the portrait stays frozen off-canvas. A guest who
+  // asks for less motion would read this section with no photographs in it.
   const slideIn = (from: number) =>
     reduce
-      ? {}
+      ? { initial: { x: 0 }, animate: { x: 0 } }
       : {
           initial: { x: from },
           animate: seen ? { x: 0 } : { x: from },
@@ -213,11 +232,11 @@ export default function BrideGroom({
       <motion.div
         className="absolute left-[16px] top-[102px] flex w-[230px] flex-col items-start gap-[4px]"
         {...fadeUpReveal}>
-        <p className="w-full text-left font-[family-name:var(--font-wt1-mono)] text-[20px] leading-normal text-white">
+        <p className="w-full text-left font-[family-name:var(--font-wt1-mono)] text-[20px] leading-[normal] text-white">
           The
         </p>
         <div className="w-full">
-          <p className="pl-[12px] text-left font-[family-name:var(--font-wt1-script)] text-[48px] leading-normal text-[rgba(250,250,250,0.98)]">
+          <p className="pl-[12px] text-left font-[family-name:var(--font-wt1-script)] text-[48px] leading-[normal] text-[rgba(250,250,250,0.98)]">
             Bride &amp; Groom
           </p>
           <div className="mt-[-10px] h-[0.5px] w-[230px] bg-[#fafafa]" />
@@ -263,7 +282,7 @@ export default function BrideGroom({
 
       {/* Groom portrait (resting flush-left; animates in from off-canvas left) */}
       <motion.div
-        className="absolute left-[-3px] top-[461.4px] flex h-[176.896px] w-[222.321px] items-center justify-center"
+        className="absolute left-[-12px] top-[461.4px] flex h-[176.896px] w-[222.321px] items-center justify-center"
         {...slideIn(-230)}>
         <div className="flex-none rotate-[-1.38deg]">
           <div className="relative h-[171.69px] w-[218.25px]">

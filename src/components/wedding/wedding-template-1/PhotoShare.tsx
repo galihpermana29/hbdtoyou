@@ -22,11 +22,11 @@ export default function PhotoShare() {
       <motion.div
         className="absolute left-1/2 top-[41px] flex w-[343px] flex-col items-center gap-[24px]"
         {...reveal}>
-        <p className="w-full text-center font-[family-name:var(--font-wt1-mono)] text-[12px] leading-normal text-white">
+        <p className="w-full text-center font-[family-name:var(--font-wt1-mono)] text-[12px] leading-[normal] text-white">
           We want your perspective from our wedding! Join through the link below
           to submit all the moments once the wedding concludes
         </p>
-        <p className="w-full text-center font-[family-name:var(--font-wt1-mono)] text-[12px] font-medium leading-normal text-white">
+        <p className="w-full text-center font-[family-name:var(--font-wt1-mono)] text-[12px] font-medium leading-[normal] text-white">
           No app download required
         </p>
 
@@ -37,8 +37,8 @@ export default function PhotoShare() {
               className="pointer-events-none absolute inset-0 size-full max-w-none rounded-[2px] object-cover"
               src={`${ASSET}/paper.jpg`}
             />
-            <div className="relative flex w-full items-center justify-center border border-solid border-[#fafafa] bg-black p-[10px]">
-              <p className="whitespace-nowrap font-[family-name:var(--font-wt1-mono)] text-[12px] leading-normal text-[#fafafa]">
+            <div className="relative flex w-full items-center justify-center border border-solid border-[#fafafa] bg-black gap-[10px] p-[10px]">
+              <p className="whitespace-nowrap font-[family-name:var(--font-wt1-mono)] text-[12px] leading-[normal] text-[#fafafa]">
                 Get My Disposable Camera
               </p>
             </div>

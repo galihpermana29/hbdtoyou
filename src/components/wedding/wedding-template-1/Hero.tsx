@@ -214,7 +214,7 @@ function EnvelopeCard({
                   other line a couple owns on these cards carries, and the
                   alternative is one line held inside the card by arithmetic
                   nobody wrote down. */}
-              <div className="absolute left-[136.91px] top-[147.16px] -translate-x-1/2 font-[family-name:var(--font-wt1-script)] text-[16.699px] leading-normal text-black">
+              <div className="absolute left-[136.91px] top-[147.16px] -translate-x-1/2 font-[family-name:var(--font-wt1-script)] text-[16.699px] leading-[normal] text-black">
                 <FitText maxWidth={CARD_LINE_MAX_WIDTH}>{dateLabel}</FitText>
               </div>
             </div>
@@ -243,7 +243,7 @@ function EnvelopeCard({
               <div className="absolute left-[4.7px] top-[4.7px] h-[167.769px] w-[255.436px] border-[1.044px] border-solid border-[#201e1f]" />
 
               {/* SAVE THE DATE lettering */}
-              <div className="absolute left-[calc(50%-0.26px)] top-[-0.26px] flex -translate-x-1/2 flex-col items-center leading-normal text-black">
+              <div className="absolute left-[calc(50%-0.26px)] top-[-0.26px] flex -translate-x-1/2 flex-col items-center leading-[normal] text-black">
                 <div className="relative mb-[-3.131px] h-[64.968px] w-[98.626px] whitespace-nowrap">
                   <p className="absolute left-0 top-[2.61px] font-[family-name:var(--font-wt1-script)] text-[62.62px]">
                     S
@@ -269,12 +269,12 @@ function EnvelopeCard({
                   sized by the font of the box it is in, so a wrapper left at
                   the inherited face would put a script line four pixels below
                   where the design draws it. */}
-              <div className="absolute left-1/2 top-[133.59px] -translate-x-1/2 font-[family-name:var(--font-wt1-script)] text-[26.092px] text-black">
+              <div className="absolute left-1/2 top-[133.59px] -translate-x-1/2 font-[family-name:var(--font-wt1-script)] text-[26.092px] leading-[normal] text-black">
                 <FitText maxWidth={CARD_LINE_MAX_WIDTH}>
                   {content.groomName} &amp; {content.brideName}
                 </FitText>
               </div>
-              <div className="absolute left-1/2 top-[118.98px] -translate-x-1/2 font-[family-name:var(--font-wt1-sans)] text-[6.262px] uppercase tracking-[0.1252px] text-black">
+              <div className="absolute left-1/2 top-[118.98px] -translate-x-1/2 font-[family-name:var(--font-wt1-sans)] text-[6.262px] uppercase leading-[normal] tracking-[0.1252px] text-black">
                 <FitText maxWidth={CARD_LINE_MAX_WIDTH}>
                   {content.venueName}
                 </FitText>
@@ -468,12 +468,12 @@ export default function Hero({
             type="button"
             onClick={() => setOpened(true)}
             aria-label="Open invitation"
-            className="flex items-center justify-center border border-solid border-[#fafafa] p-[10px]"
+            className="flex items-center justify-center border border-solid border-[#fafafa] gap-[10px] p-[10px]"
             initial={false}
             animate={{ opacity: opened ? 0 : 1 }}
             transition={step(reduce, OPENING.seal)}
             style={{ pointerEvents: opened ? 'none' : 'auto' }}>
-            <p className="whitespace-nowrap font-[family-name:var(--font-wt1-mono)] text-[12px] leading-normal text-[#fafafa]">
+            <p className="whitespace-nowrap font-[family-name:var(--font-wt1-mono)] text-[12px] leading-[normal] text-[#fafafa]">
               Open Invitation
             </p>
           </motion.button>
@@ -485,12 +485,12 @@ export default function Hero({
         className="absolute left-[16px] top-[545px] flex w-[343px] flex-col items-start gap-[2px]"
         {...fadeUpMount(0.35)}>
         <div className="relative h-[82px] w-full">
-          <p className="absolute left-[43px] top-0 whitespace-nowrap font-[family-name:var(--font-wt1-script)] text-[64px] leading-normal text-[rgba(250,250,250,0.98)]">
+          <p className="absolute left-[43px] top-0 whitespace-nowrap font-[family-name:var(--font-wt1-script)] text-[64px] leading-[normal] text-[rgba(250,250,250,0.98)]">
             You&rsquo;re Invited
           </p>
           <div className="absolute left-0 top-[74px] h-[0.5px] w-[343px] bg-[#fafafa]" />
         </div>
-        <p className="w-full text-center font-[family-name:var(--font-wt1-mono)] text-[12px] leading-normal text-white">
+        <p className="w-full text-center font-[family-name:var(--font-wt1-mono)] text-[12px] leading-[normal] text-white">
           As we begin our journey together, we&rsquo;d love for you to join us
           in celebrating our big day.
         </p>

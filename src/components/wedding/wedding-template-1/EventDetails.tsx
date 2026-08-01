@@ -100,7 +100,7 @@ export default function EventDetails({
       <motion.div
         className="absolute left-1/2 top-[60px] h-[31px] w-[245px]"
         {...fadeUpCenterReveal}>
-        <p className="absolute left-[12px] top-0 w-[228px] font-[family-name:var(--font-wt1-script)] text-[48px] leading-normal text-[rgba(250,250,250,0.98)]">
+        <p className="absolute left-[12px] top-0 w-[228px] font-[family-name:var(--font-wt1-script)] text-[48px] leading-[normal] text-[rgba(250,250,250,0.98)]">
           Venue &amp; Details
         </p>
         <div className="absolute left-0 top-[50px] h-px w-[245px] bg-[#fafafa]" />
@@ -114,7 +114,7 @@ export default function EventDetails({
           {/* Venue text + polaroid row */}
           <div className="flex w-full items-center gap-[8px]">
             <div className="flex w-[147px] flex-col items-start gap-[16px]">
-              <div className="flex w-full flex-col items-start gap-[6px] leading-normal text-white [word-break:break-word]">
+              <div className="flex w-full flex-col items-start gap-[6px] leading-[normal] text-white [word-break:break-word]">
                 <p className="w-full font-[family-name:var(--font-wt1-mono)] text-[12px] font-semibold">
                   {content.venueName}
                 </p>
@@ -127,14 +127,14 @@ export default function EventDetails({
                   href={content.mapsUrl}
                   target="_blank"
                   rel="noopener noreferrer"
-                  className="flex items-center justify-center border border-solid border-[#fafafa] p-[10px]">
-                  <p className="whitespace-nowrap font-[family-name:var(--font-wt1-mono)] text-[12px] font-normal leading-normal text-[#fafafa]">
+                  className="flex items-center justify-center border border-solid border-[#fafafa] gap-[10px] p-[10px]">
+                  <p className="whitespace-nowrap font-[family-name:var(--font-wt1-mono)] text-[12px] font-normal leading-[normal] text-[#fafafa]">
                     View Location
                   </p>
                 </a>
               ) : (
-                <div className="flex items-center justify-center border border-solid border-[#fafafa] p-[10px]">
-                  <p className="whitespace-nowrap font-[family-name:var(--font-wt1-mono)] text-[12px] font-normal leading-normal text-[#fafafa]">
+                <div className="flex items-center justify-center border border-solid border-[#fafafa] gap-[10px] p-[10px]">
+                  <p className="whitespace-nowrap font-[family-name:var(--font-wt1-mono)] text-[12px] font-normal leading-[normal] text-[#fafafa]">
                     View Location
                   </p>
                 </div>
@@ -167,7 +167,7 @@ export default function EventDetails({
           </div>
 
           {/* Countdown + reception details */}
-          <div className="flex w-full flex-col items-start gap-[10px] p-[10px] leading-normal text-white [word-break:break-word]">
+          <div className="flex w-full flex-col items-start gap-[10px] p-[10px] leading-[normal] text-white [word-break:break-word]">
             <div className="flex w-full items-center justify-between py-[8px] text-center font-[family-name:var(--font-wt1-mono)] font-semibold">
               <div className="relative flex min-w-px flex-[1_0_0] flex-col items-center gap-[2px]">
                 <p className="w-full text-[24px]">{cd(days)}</p>
@@ -205,8 +205,8 @@ export default function EventDetails({
           type="button"
           onClick={onReply}
           aria-haspopup="dialog"
-          className="flex items-center justify-center border border-solid border-[#fafafa] p-[10px]">
-          <p className="whitespace-nowrap font-[family-name:var(--font-wt1-mono)] text-[12px] font-normal leading-normal text-[#fafafa]">
+          className="flex items-center justify-center border border-solid border-[#fafafa] gap-[10px] p-[10px]">
+          <p className="whitespace-nowrap font-[family-name:var(--font-wt1-mono)] text-[12px] font-normal leading-[normal] text-[#fafafa]">
             RSVP Now
           </p>
         </button>

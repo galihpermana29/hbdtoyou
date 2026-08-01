@@ -210,7 +210,7 @@ function Choice({
 }) {
   return (
     <label
-      className={`relative flex items-center gap-[10px] rounded-[2px] border border-solid border-[#000000] px-[12px] py-[8px] font-[family-name:var(--font-wt1-mono)] text-[10px] font-normal leading-normal text-[#000000] has-[:focus-visible]:outline has-[:focus-visible]:outline-1 has-[:focus-visible]:outline-offset-[3px] has-[:focus-visible]:outline-[#000000] ${
+      className={`relative flex items-center gap-[10px] rounded-[2px] border border-solid border-[#000000] px-[12px] py-[8px] font-[family-name:var(--font-wt1-mono)] text-[10px] font-normal leading-[normal] text-[#000000] has-[:focus-visible]:outline has-[:focus-visible]:outline-1 has-[:focus-visible]:outline-offset-[3px] has-[:focus-visible]:outline-[#000000] ${
         chosen ? 'bg-[#d9d8d6]' : ''
       } ${className}`}>
       <input
@@ -238,7 +238,7 @@ function Question({
 }) {
   return (
     <fieldset className="flex flex-col gap-[12px]">
-      <legend className="font-[family-name:var(--font-wt1-mono)] text-[12px] font-normal leading-normal text-[#000000]">
+      <legend className="font-[family-name:var(--font-wt1-mono)] text-[12px] font-normal leading-[normal] text-[#000000]">
         {legend}
       </legend>
       <div className={`flex gap-[10px] ${className}`}>{children}</div>
@@ -385,7 +385,7 @@ export default function RsvpCard({
           <div className="relative ml-[40px] h-[51px] w-[206px]">
             <p
               id={titleId}
-              className="absolute left-[12px] top-0 w-[184px] font-[family-name:var(--font-wt1-script)] text-[48px] font-normal leading-normal text-[#090909]">
+              className="absolute left-[12px] top-0 w-[184px] font-[family-name:var(--font-wt1-script)] text-[48px] font-normal leading-[normal] text-[#090909]">
               Kindly Reply
             </p>
             <div className="absolute left-0 top-[50px] h-[0.5px] w-[200px] bg-[#090909]" />
@@ -396,7 +396,7 @@ export default function RsvpCard({
             <div className="flex flex-col gap-[12px]">
               <label
                 htmlFor={nameId}
-                className="font-[family-name:var(--font-wt1-mono)] text-[12px] font-normal leading-normal text-[#000000]">
+                className="font-[family-name:var(--font-wt1-mono)] text-[12px] font-normal leading-[normal] text-[#000000]">
                 Name
               </label>
               <input
@@ -406,7 +406,7 @@ export default function RsvpCard({
                 onChange={(event) => setName(event.target.value)}
                 required
                 autoComplete="name"
-                className="w-full rounded-[2px] border border-solid border-[#000000] bg-[#d9d8d6] px-[12px] py-[8px] font-[family-name:var(--font-wt1-mono)] text-[10px] font-normal leading-normal text-[#000000] outline-1 outline-offset-[3px] outline-[#090909] focus-visible:outline"
+                className="w-full rounded-[2px] border border-solid border-[#000000] bg-[#d9d8d6] px-[12px] py-[8px] font-[family-name:var(--font-wt1-mono)] text-[10px] font-normal leading-[normal] text-[#000000] outline-1 outline-offset-[3px] outline-[#090909] focus-visible:outline"
               />
             </div>
 
@@ -454,12 +454,12 @@ export default function RsvpCard({
               <div className="flex items-center gap-[12px]">
                 <label
                   htmlFor={messageId}
-                  className="font-[family-name:var(--font-wt1-mono)] text-[12px] font-normal leading-normal text-[#000000]">
+                  className="font-[family-name:var(--font-wt1-mono)] text-[12px] font-normal leading-[normal] text-[#000000]">
                   Message to the happy couple?
                 </label>
                 <p
                   id={optionalId}
-                  className="font-[family-name:var(--font-wt1-mono)] text-[10px] font-semibold leading-normal text-[#898989]">
+                  className="font-[family-name:var(--font-wt1-mono)] text-[10px] font-semibold leading-[normal] text-[#898989]">
                   Optional
                 </p>
               </div>
@@ -469,20 +469,20 @@ export default function RsvpCard({
                 onChange={(event) => setMessage(event.target.value)}
                 aria-describedby={optionalId}
                 rows={3}
-                className="w-full resize-none rounded-[2px] border border-solid border-[#000000] bg-transparent px-[12px] py-[8px] font-[family-name:var(--font-wt1-mono)] text-[10px] font-normal leading-normal text-[#000000] outline-1 outline-offset-[3px] outline-[#090909] focus-visible:outline"
+                className="w-full resize-none rounded-[2px] border border-solid border-[#000000] bg-transparent px-[12px] py-[8px] font-[family-name:var(--font-wt1-mono)] text-[10px] font-normal leading-[normal] text-[#000000] outline-1 outline-offset-[3px] outline-[#090909] focus-visible:outline"
               />
             </div>
 
             {/* Submit and Close. Figma `Frame 44`, node 312:3880. */}
             <div className="flex flex-col gap-[12px]">
-              <p className="font-[family-name:var(--font-wt1-mono)] text-[10px] font-semibold leading-normal text-[#898989]">
+              <p className="font-[family-name:var(--font-wt1-mono)] text-[10px] font-semibold leading-[normal] text-[#898989]">
                 Nothing is saved yet. Your reply stays on this page and goes
                 when you reload it.
               </p>
               <button
                 type="submit"
                 className="flex items-center justify-center gap-[10px] border border-solid border-[#fafafa] bg-[#000000] p-[10px]">
-                <p className="whitespace-nowrap font-[family-name:var(--font-wt1-mono)] text-[12px] font-normal leading-normal text-[#fafafa]">
+                <p className="whitespace-nowrap font-[family-name:var(--font-wt1-mono)] text-[12px] font-normal leading-[normal] text-[#fafafa]">
                   Submit
                 </p>
               </button>
@@ -490,7 +490,7 @@ export default function RsvpCard({
                 type="button"
                 onClick={onClose}
                 className="flex items-center justify-center gap-[10px] border border-solid border-[#000000] p-[10px]">
-                <p className="whitespace-nowrap font-[family-name:var(--font-wt1-mono)] text-[12px] font-normal leading-normal text-[#000000]">
+                <p className="whitespace-nowrap font-[family-name:var(--font-wt1-mono)] text-[12px] font-normal leading-[normal] text-[#000000]">
                   Close
                 </p>
               </button>

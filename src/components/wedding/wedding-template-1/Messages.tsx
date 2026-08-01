@@ -160,7 +160,7 @@ function GuestMessageCard({
             src={`${ASSET}/messages-avatar.png`}
           />
         </div>
-        <div className="relative flex min-w-px flex-[1_0_0] flex-col items-start gap-[2px] leading-normal text-black [word-break:break-word]">
+        <div className="relative flex min-w-px flex-[1_0_0] flex-col items-start gap-[2px] leading-[normal] text-black [word-break:break-word]">
           <p className="relative w-full shrink-0 font-[family-name:var(--font-wt1-mono)] text-[16px] font-semibold">
             {name}
           </p>
@@ -169,7 +169,7 @@ function GuestMessageCard({
           </p>
         </div>
       </div>
-      <p className="relative w-full shrink-0 font-[family-name:var(--font-wt1-mono)] text-[12px] font-normal leading-normal text-black [word-break:break-word]">
+      <p className="relative w-full shrink-0 font-[family-name:var(--font-wt1-mono)] text-[12px] font-normal leading-[normal] text-black [word-break:break-word]">
         {message}
       </p>
     </motion.div>
@@ -298,7 +298,7 @@ export default function Messages({
         className="absolute left-[calc(50%+0.5px)] top-[60px] h-[31px] w-[142px]"
         {...fadeUpCenterReveal}
       >
-        <p className="absolute left-[12px] top-0 w-[123px] font-[family-name:var(--font-wt1-script)] text-[48px] leading-normal text-[rgba(250,250,250,0.98)]">
+        <p className="absolute left-[12px] top-0 w-[123px] font-[family-name:var(--font-wt1-script)] text-[48px] leading-[normal] text-[rgba(250,250,250,0.98)]">
           Messages
         </p>
         <div className="absolute left-0 top-[50px] h-px w-[142px] bg-[#fafafa]" />

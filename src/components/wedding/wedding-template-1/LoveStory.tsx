@@ -223,7 +223,7 @@ function Polaroid({ content }: { content: WeddingTemplate1Content }) {
         className="absolute left-[40.15px] top-[72.27px] flex h-[19.202px] w-[76.799px] items-center justify-center"
         {...coverAnim}>
         <div className="flex-none rotate-[-5.48deg]">
-          <p className="whitespace-nowrap font-[family-name:var(--font-wt1-mono)] text-[10px] font-semibold leading-normal text-white">
+          <p className="whitespace-nowrap font-[family-name:var(--font-wt1-mono)] text-[10px] font-semibold leading-[normal] text-white">
             tap to reveal
           </p>
         </div>
@@ -291,11 +291,11 @@ export default function LoveStory({
       <motion.div
         className="absolute left-[calc(50%+0.5px)] top-[34px] flex w-[176px] flex-col items-center gap-[4px]"
         {...fadeUpCenterReveal}>
-        <p className="w-full text-center font-[family-name:var(--font-wt1-mono)] text-[20px] leading-normal text-white">
+        <p className="w-full text-center font-[family-name:var(--font-wt1-mono)] text-[20px] leading-[normal] text-white">
           Our
         </p>
         <div className="flex flex-col items-center">
-          <p className="whitespace-nowrap font-[family-name:var(--font-wt1-script)] text-[48px] leading-normal text-[rgba(250,250,250,0.98)]">
+          <p className="whitespace-nowrap font-[family-name:var(--font-wt1-script)] text-[48px] leading-[normal] text-[rgba(250,250,250,0.98)]">
             Love Story
           </p>
           <div className="mt-[-10px] h-[0.5px] w-[180px] bg-[#fafafa]" />
@@ -378,7 +378,7 @@ export default function LoveStory({
 
         {/* The chapter printed in the middle of the paper */}
         <AutoFitBlock
-          className="absolute left-[53px] top-[397px] w-[145px] leading-normal text-[#090909]"
+          className="absolute left-[53px] top-[397px] w-[145px] leading-[normal] text-[#090909]"
           maxFontSize={CHAPTER_CEILING}
           minFontSize={CHAPTER_FLOOR}
           maxHeight={CENTRE_CHAPTER_MAX_HEIGHT}>
@@ -415,7 +415,7 @@ export default function LoveStory({
 
       {/* The two chapters printed down the right-hand side */}
       <AutoFitBlock
-        className="absolute left-[197px] top-[187px] w-[159px] leading-normal text-[#090909]"
+        className="absolute left-[197px] top-[187px] w-[159px] leading-[normal] text-[#090909]"
         maxFontSize={CHAPTER_CEILING}
         minFontSize={CHAPTER_FLOOR}
         maxHeight={SIDE_CHAPTERS_MAX_HEIGHT}>
