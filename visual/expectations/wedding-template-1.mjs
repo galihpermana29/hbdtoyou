@@ -55,13 +55,14 @@
  *
  * The size of any line the template fits to its box. The design states 48px for
  * a partner's Nickname, 10px for their full name and for their parents, and
- * 26.092px for the couple on the Save the Date card, and every one of those is
- * a ceiling rather than a size: a longer answer is meant to step down. The two
- * on the card are scaled rather than resized, so their size is stated and the
- * scale is what changes; the Introduction's six are resized, and asserting a
- * size on one of them would fail the very fitting the spec asks for. What is
- * still claimed for them is weight, leading, colour, and where they sit in the
- * document, which is what catches one going missing or changing face.
+ * 26.092px, 6.262px and 16.699px for the couple, the venue and the wedding's
+ * date on the Hero's two cards; every one of those is a ceiling rather than a
+ * size, because a longer answer is meant to step down. The Hero's three are
+ * scaled rather than resized, so their size is stated below and the scale is
+ * what changes; the Introduction's six are resized, and asserting a size on one
+ * of them would fail the very fitting the spec asks for. What is still claimed
+ * for those six is weight, leading, colour, and where they sit in the document,
+ * which is what catches one going missing or changing face.
  *
  * Something real is given up with those sizes: nothing here now fails an answer
  * drawn far smaller than the design draws it. What bounds it instead is the
@@ -257,7 +258,6 @@ const SECTIONS = [
     figmaNodeId: '312-1632',
     background: NIGHT,
     paragraphs: [
-      'Save the Date date',
       'Save the Date S',
       'Save the Date AVE',
       'Save the Date THE DATE',
@@ -265,14 +265,22 @@ const SECTIONS = [
       'Invitation heading',
       'Invitation welcome',
     ],
-    fitted: ['Save the Date couple', 'Save the Date venue'],
+    // The three lines a couple owns on these two cards, all of them scaled down
+    // to the card rather than allowed to run off it. The wedding's date is the
+    // first of them because the card it captions is drawn first, in front of
+    // the one the other two are printed on.
+    fitted: [
+      'Save the Date date',
+      'Save the Date couple',
+      'Save the Date venue',
+    ],
     // The design's frame draws the control to open the invitation and the cards
     // already out of the envelope at once, which no single state can be. These
     // three screens have opened it, so the control has faded out where a guest
     // is concerned - it is still drawn, and the check compares no opacity. That
     // it is the only thing on a sealed invitation is `hbd-a09.7`'s to assert.
     parts: (invitation) => [
-      invitation.paragraph(
+      invitation.fittedLine(
         'Save the Date date',
         type('16.699px', 400, '#000000')
       ),

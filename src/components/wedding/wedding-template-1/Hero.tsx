@@ -58,6 +58,23 @@ const cardShadow = {
 const TUCK = 58;
 
 /**
+ * The widest a line of the couple's own words may be drawn on the Hero's cards,
+ * in the 264.046px of the card it is printed on.
+ *
+ * The design states no width for any of the three lines a couple owns here. All
+ * of them are auto-width text layers hugging whatever the designer's own wedding
+ * happened to need, and a frame says nothing about a longer one. What bounds
+ * them instead is the rule the design draws 4.7px inside each card. A line this
+ * wide centred on its card stops 22px short of that rule; the date, which is
+ * centred where the design's own date is rather than on the middle of its card,
+ * stops 18px short on the closer side. The design's own SAVE THE DATE lockup is
+ * narrower still, at 163.855px, so a line long enough to reach this is already
+ * the widest thing on its card - about as far as one can go and still look like
+ * the design drew it.
+ */
+const CARD_LINE_MAX_WIDTH = 210;
+
+/**
  * The opening, step by step, in seconds.
  *
  * Each step says when it starts and how long it runs, so the sequence the design
@@ -172,9 +189,29 @@ function EnvelopeCard({
                   src={couplePhoto}
                 />
               </div>
-              <p className="absolute left-[105.41px] top-[147.16px] whitespace-nowrap font-[family-name:var(--font-wt1-script)] text-[16.699px] leading-normal text-black">
-                {dateLabel}
-              </p>
+              {/* The wedding day, captioning the photograph above it.
+
+                  The design writes one date and leaves the line where that date
+                  happened to end: Figma hugs "May 3rd, 2026" in a box at
+                  x 105.409 and says nothing about a longer one. Left anchored
+                  there, a couple married in September prints a line 27px longer
+                  that can only grow rightwards, and it ends up visibly off the
+                  middle of the picture it captions. It is centred here on the
+                  point the design's own line is centred on, which leaves the
+                  designer's wedding within a quarter of a pixel of where the
+                  design draws it and grows a longer one into both margins
+                  rather than one.
+
+                  It is fitted like the two lines on the card in front of it.
+                  The longest date this can print, "September 30th, 2026", is
+                  90px against a 210px ceiling, so the fitting is a guarantee
+                  rather than a rescue - but it is the same guarantee every
+                  other line a couple owns on these cards carries, and the
+                  alternative is one line held inside the card by arithmetic
+                  nobody wrote down. */}
+              <div className="absolute left-[136.91px] top-[147.16px] -translate-x-1/2 font-[family-name:var(--font-wt1-script)] text-[16.699px] leading-normal text-black">
+                <FitText maxWidth={CARD_LINE_MAX_WIDTH}>{dateLabel}</FitText>
+              </div>
             </div>
           </motion.div>
         </div>
@@ -228,12 +265,14 @@ function EnvelopeCard({
                   the inherited face would put a script line four pixels below
                   where the design draws it. */}
               <div className="absolute left-1/2 top-[133.59px] -translate-x-1/2 font-[family-name:var(--font-wt1-script)] text-[26.092px] text-black">
-                <FitText maxWidth={210}>
+                <FitText maxWidth={CARD_LINE_MAX_WIDTH}>
                   {content.groomName} &amp; {content.brideName}
                 </FitText>
               </div>
               <div className="absolute left-1/2 top-[118.98px] -translate-x-1/2 font-[family-name:var(--font-wt1-sans)] text-[6.262px] uppercase tracking-[0.1252px] text-black">
-                <FitText maxWidth={210}>{content.venueName}</FitText>
+                <FitText maxWidth={CARD_LINE_MAX_WIDTH}>
+                  {content.venueName}
+                </FitText>
               </div>
             </div>
           </motion.div>
