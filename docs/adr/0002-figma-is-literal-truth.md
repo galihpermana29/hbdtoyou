@@ -84,6 +84,21 @@ The seventh Section is named "Photo Collection", following the other three.
 So there is no frame of record for that step.
 Each disagreement was decided on its own, and neither frame can be trusted wholesale where they differ again.
 
+The fade over the foot of the Guest Messages is drawn as the design draws it, and lets go as a guest scrolls to the end of the list.
+
+The design draws that band, node 312:1785, as one still: 105px of gradient reaching rgba(0,0,0,0.8) at the bottom of a 509px list.
+A still cannot say what it does once the list is scrolled, and the list scrolls now, so the frame has to be read as one state of something rather than as all of it.
+A fade at the foot of a list says there is more below it.
+At the end of the list that is no longer true, and the band is then dimming the last wish a guest came to read in order to say something untrue, so it lets go over the last 105px of the scroll.
+
+Every frame the design does draw is untouched by that.
+A list nobody has scrolled is always at the band's full strength, including one with nothing to scroll at all - which the design's own five messages come within 2px of being, since they were drawn to fill the box exactly.
+Reading the rule as "no messages below, no band" instead would take the band out of the very frame the design draws, and `hbd-a09.8` settled that the design's fade stays.
+
+No run verifies this.
+`visual/style-vocabulary.mjs` carries no `backgroundImage`, so a gradient can be neither asserted nor found by the check, and the band has neither copy nor border to be found by instead.
+What settles it is a browser driven to the end of the list, asserting that the bottom of it renders identically with the band taken away, and at rest that it does not.
+
 The RSVP prints one line the design does not draw, above the Submit control: "Nothing is saved yet. Your reply stays on this page and goes when you reload it."
 
 An RSVP is held in the page and lost on reload, because persisting one is integration work and is not built.

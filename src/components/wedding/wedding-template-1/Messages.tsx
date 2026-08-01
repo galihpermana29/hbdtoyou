@@ -3,8 +3,9 @@
 /**
  * Wedding Template 1 - Messages. Figma node 312:1742.
  * A scrollable list of Guest Messages on paper-textured cards with a fade-out
- * gradient at the bottom and a scrollbar to the right that says where in the
- * list a guest has reached and scrolls it when dragged.
+ * gradient at the bottom, which lets go as the list reaches its end, and a
+ * scrollbar to the right that says where in the list a guest has reached and
+ * scrolls it when dragged.
  * Animation: the title and each card fade up in a gentle stagger on scroll.
  *
  * The five the design draws are its own example wedding's. A guest who replies
@@ -42,6 +43,51 @@ const LIST_HEIGHT = 509;
  * still has a scrollbar somebody can see and take hold of.
  */
 const MIN_THUMB_HEIGHT = 24;
+
+/**
+ * The height of the fade the design lays over the foot of the list: Figma node
+ * 312:1785, 105 tall.
+ *
+ * It is also how far from the end the fade begins letting go, because the two
+ * are the same distance. A fade at the foot of a list says there is more below
+ * it; the messages it says that about are the ones under the band, so once
+ * fewer than 105px of list are left below the fold the band is partly lying
+ * over the last wish and nothing else, and by the end it is lying entirely.
+ */
+const FADE_HEIGHT = 105;
+
+/**
+ * How near an end counts as being at it.
+ *
+ * A pixel, because that is the resolution the list is reported at: `scrollTop`
+ * is fractional and `scrollHeight` is a whole number rounded from something
+ * that was not, so a list scrolled all the way down can still read as having a
+ * fraction of a pixel to go. Without this the fade would park just short of
+ * letting go and never quite arrive.
+ */
+const AT_AN_END = 1;
+
+/**
+ * The strength of that fade for a list scrolled this far, from 1 where the
+ * design draws it to 0 at the end of the list.
+ *
+ * `below` is how much list is left under the fold and `scrollable` is how much
+ * there was to begin with. It lets go over the last `FADE_HEIGHT` of the
+ * scroll, or over the whole of it where there is less than that to scroll,
+ * which is what keeps a list at rest at the design's own full strength whatever
+ * the couple's wishes are: the design's five all but fill the box - they leave
+ * 2px to scroll - so a band that let go over a fixed 105 would be gone from the
+ * very frame the design draws, and `hbd-a09.8` says the design's fade stays.
+ *
+ * A list with nothing to scroll is that frame and nothing else. It is drawn as
+ * the design draws it: what the band is dimming there is the design's own
+ * decision about its own content, which this is not the bead to overturn.
+ */
+function fadeStrength(below: number, scrollable: number): number {
+  if (scrollable <= AT_AN_END) return 1;
+  if (below <= AT_AN_END) return 0;
+  return Math.min(1, below / Math.min(FADE_HEIGHT, scrollable));
+}
 
 /** One guest's message, as the invitation prints it. */
 export type GuestMessage = {
@@ -179,52 +225,72 @@ function GuestMessageCard({
 /** Where the scrollbar's thumb is drawn in its track, in pixels. */
 type Thumb = { height: number; top: number };
 
-/**
- * A thumb filling its track, which is what a list with nothing to scroll has.
- *
- * It is what the server renders too, because nothing on the server knows how
- * tall a message sets. The list is measured for real before the first paint.
- */
-const NOTHING_TO_SCROLL: Thumb = { height: LIST_HEIGHT, top: 0 };
+/** How far down the list is, as the two marks that report it draw themselves. */
+type Reading = { thumb: Thumb; fade: number };
 
 /**
- * What the list's own measurements say its scrollbar is.
+ * A list nobody has scrolled: a thumb filling its track, and the fade at its
+ * full strength, which is the design's own frame.
+ *
+ * It is what the server renders too, because nothing on the server knows how
+ * tall a message sets. The list is measured for real before the first paint, so
+ * this is a frame the design draws rather than a guess a guest ever reads
+ * through - and a guest whose JavaScript never runs is left with it.
+ */
+const AT_REST: Reading = { thumb: { height: LIST_HEIGHT, top: 0 }, fade: 1 };
+
+/**
+ * What the list's own measurements say its scrollbar and its fade are.
  *
  * The design draws the thumb as a rectangle in a track and says nothing about
  * how it moves, so what it says here is the ordinary thing: the thumb takes as
  * much of the track as the visible list takes of the whole list, and sits as
  * far down the track as the list is scrolled.
  *
+ * `fade` is the strength of the band over the foot of the list, and it follows
+ * the same reading: full while a fade's worth of messages is still below the
+ * fold, then letting go in step with what is left, and gone once nothing is -
+ * because a band at the foot of a list promises more below, and at the end of
+ * the list there is none to promise.
+ *
  * `travel` is how far the thumb has to move to say all of that, and `scrollable`
  * is how much list it is saying it about. Both come from here rather than from
  * wherever they are wanted, because a drag that scaled them differently from the
  * way the thumb is drawn would slide out from under the finger holding it.
  */
-function scrollbarFor(box: HTMLDivElement) {
+function readingFor(box: HTMLDivElement) {
   const track = box.clientHeight;
   const visible = box.scrollHeight > 0 ? track / box.scrollHeight : 1;
   const height = Math.max(MIN_THUMB_HEIGHT, Math.min(track, track * visible));
   const scrollable = box.scrollHeight - track;
   const travel = track - height;
   const top = scrollable > 0 ? (travel * box.scrollTop) / scrollable : 0;
+  const below = Math.max(0, scrollable - box.scrollTop);
 
-  return { thumb: { height, top }, scrollable, travel };
+  return {
+    thumb: { height, top },
+    fade: fadeStrength(below, scrollable),
+    scrollable,
+    travel,
+  };
 }
 
 /**
- * Keeps the scrollbar reporting where the list of Guest Messages actually is,
- * and scrolls the list when the thumb is dragged - which is what separates a
- * scrollbar from a picture of one.
+ * Keeps the scrollbar and the fade reporting where the list of Guest Messages
+ * actually is, and scrolls the list when the thumb is dragged - which is what
+ * separates a scrollbar from a picture of one.
  */
 function useMessagesScrollbar() {
   const viewport = useRef<HTMLDivElement>(null);
   const list = useRef<HTMLDivElement>(null);
-  const [thumb, setThumb] = useState<Thumb>(NOTHING_TO_SCROLL);
+  const [reading, setReading] = useState<Reading>(AT_REST);
   const grab = useRef<{ atClientY: number; scrolledTo: number } | null>(null);
 
   const measure = useCallback(() => {
     const box = viewport.current;
-    if (box) setThumb(scrollbarFor(box).thumb);
+    if (!box) return;
+    const { thumb, fade } = readingFor(box);
+    setReading({ thumb, fade });
   }, []);
 
   useLayoutEffect(() => {
@@ -261,7 +327,7 @@ function useMessagesScrollbar() {
     if (!held || !box) return;
 
     // One pixel of thumb is worth however many pixels of messages are hidden.
-    const { scrollable, travel } = scrollbarFor(box);
+    const { scrollable, travel } = readingFor(box);
     if (travel <= 0 || scrollable <= 0) return;
 
     box.scrollTop =
@@ -276,7 +342,16 @@ function useMessagesScrollbar() {
     }
   }, []);
 
-  return { viewport, list, thumb, measure, startDrag, dragTo, endDrag };
+  return {
+    viewport,
+    list,
+    thumb: reading.thumb,
+    fade: reading.fade,
+    measure,
+    startDrag,
+    dragTo,
+    endDrag,
+  };
 }
 
 export default function Messages({
@@ -287,7 +362,7 @@ export default function Messages({
 }) {
   const fadeUpCenterReveal = useWeddingReveal(fadeUpCenter);
   const staggerReveal = useWeddingReveal(staggerContainer);
-  const { viewport, list, thumb, measure, startDrag, dragTo, endDrag } =
+  const { viewport, list, thumb, fade, measure, startDrag, dragTo, endDrag } =
     useMessagesScrollbar();
   const messages = guestMessagesIn(rsvps);
 
@@ -296,8 +371,7 @@ export default function Messages({
       {/* section title */}
       <motion.div
         className="absolute left-[calc(50%+0.5px)] top-[60px] h-[31px] w-[142px]"
-        {...fadeUpCenterReveal}
-      >
+        {...fadeUpCenterReveal}>
         <p className="absolute left-[12px] top-0 w-[123px] font-[family-name:var(--font-wt1-script)] text-[48px] leading-[normal] text-[rgba(250,250,250,0.98)]">
           Messages
         </p>
@@ -370,12 +444,27 @@ export default function Messages({
         rather than the stop's own 0.8. Dropping the first stop's minus sign
         clamps it back to 0.8 and darkens that edge. Nothing the check can find
         draws this box, so the sign is guarded by this comment alone.
+
+        `opacity` is what keeps it honest now that the list scrolls: the band
+        promises more below, and at the end of the list there is none, so it
+        would be dimming the last wish to say something untrue. A guest still
+        meets the section in the design's own frame, because a list at rest is
+        always at full strength - see `fadeStrength`.
+
+        The transition is for the shortest scroll rather than the longest. A
+        list with 2px to go, which is what the design's own five leave, hands
+        the band its whole range in one notch of a wheel, and the band should
+        lift off the last wish rather than blink off it. Over a longer scroll it
+        is short enough to read as the band keeping up.
       */}
       <div
-        className="pointer-events-none absolute left-[16px] top-[536px] h-[105px] w-[335px]"
+        className="pointer-events-none absolute left-[16px] top-[536px] w-[335px]"
         style={{
+          height: FADE_HEIGHT,
           background:
             'linear-gradient(to top, rgba(0,0,0,0.8) -6.67%, rgba(102,102,102,0) 194.29%)',
+          opacity: fade,
+          transition: 'opacity 150ms ease-out',
         }}
       />
     </section>
