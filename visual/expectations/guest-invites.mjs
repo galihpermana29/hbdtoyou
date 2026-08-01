@@ -25,7 +25,8 @@
  * web domain field, and a couple who cannot see what characters a slug may
  * contain can only discover the rules by failing. It is asserted rather than
  * left out so that it cannot quietly disappear, and it wears the design's own
- * hint treatment so it belongs to the screen it was added to.
+ * hint treatment so it belongs to the screen it was added to. The deviation is
+ * agreed and recorded in `docs/adr/0002-figma-is-literal-truth.md`.
  */
 
 import { FIELD_SHADOW, TYPE } from './page-chrome.mjs';

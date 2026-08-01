@@ -84,6 +84,17 @@ The seventh Section is named "Photo Collection", following the other three.
 So there is no frame of record for that step.
 Each disagreement was decided on its own, and neither frame can be trusted wholesale where they differ again.
 
+One addition is agreed and recorded: the guest invites step prints a line under the web domain field that the design does not draw, stating the rules a slug is held to.
+
+The frame draws the field and nothing beneath it, and a slug has rules all the same.
+A couple who cannot see them can only find them by being refused, which is what user story 34 on `hbd-byb` exists to prevent.
+The design is silent on the rules rather than saying there are none, so following it literally would ship a field that explains itself only once it has been got wrong.
+
+The line reads "Letters, numbers and hyphens only, 3 to 63 characters, starting and ending with a letter or a number".
+It is always shown, above the message that names whatever is actually wrong with what has been typed, and it wears the design's own field hint treatment so it belongs to the screen it was added to.
+Its lengths are interpolated from the same two constants `slugProblem` enforces, in `SLUG_RULES` in `src/components/forms/wedding/guest-invites-types.ts`, so the hint cannot come to disagree with the lengths a slug is actually held to.
+It is claimed in `visual/expectations/guest-invites.mjs`, which both of the step's states spread in, so that it cannot quietly disappear or become something vaguer.
+
 The fade over the foot of the Guest Messages is drawn as the design draws it, and lets go as a guest scrolls to the end of the list.
 
 The design draws that band, node 312:1785, as one still: 105px of gradient reaching rgba(0,0,0,0.8) at the bottom of a 509px list.

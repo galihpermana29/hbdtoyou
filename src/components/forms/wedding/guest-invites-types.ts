@@ -44,7 +44,8 @@ export const SLUG_MAX_LENGTH = 63;
  *
  * The design shows no hint under this field. It is here because a couple who
  * cannot see the rules can only discover them by failing, which is the whole
- * point of user story 34 on the epic.
+ * point of user story 34 on the epic. The deviation is agreed and recorded in
+ * `docs/adr/0002-figma-is-literal-truth.md`.
  */
 export const SLUG_RULES =
   `Letters, numbers and hyphens only, ${SLUG_MIN_LENGTH} to ${SLUG_MAX_LENGTH} ` +
