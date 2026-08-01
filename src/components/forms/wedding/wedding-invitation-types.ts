@@ -82,9 +82,13 @@ export interface WeddingTemplate1Content {
   galleryPhotos: string[];
   tokenMessage: string;
   tokenPhoto: string;
+  /** Who the account is in, and where it is held. Two answers, joined for display. */
   accountHolder: string;
+  bankProvider: string;
   accountNumber: string;
   guestMessagesEnabled: boolean;
+  /** Whether guests are invited to send back their own photographs of the day. */
+  memoRollEnabled: boolean;
 }
 
 /** Ant Design form field values for the wedding invitation creator. */
@@ -113,15 +117,39 @@ export interface WeddingInvitationFormValues {
   eventEndTime?: string;
   venueName?: string;
   mapsUrl?: string;
-  photoShareCover?: string;
-  photoShareUrl?: string;
   galleryPhotos?: string[];
-  tokenMessage?: string;
-  tokenPhoto?: string;
+  /** The gift section's photo, held as the one-photo list its field hands back. */
+  tokenPhoto?: string[];
   accountHolder?: string;
+  bankProvider?: string;
   accountNumber?: string;
-  guestMessagesEnabled?: boolean;
+  memoRollEnabled?: boolean;
 }
+
+/**
+ * Where a couple can be sent a gift.
+ *
+ * The design draws BRI as its example and offers no list, so this is the one
+ * the product serves: Indonesia's largest banks and the e-wallets most guests
+ * already have. The chosen name is what the invitation prints, so an entry is
+ * its own value rather than a code standing for one.
+ */
+export const BANK_PROVIDER_OPTIONS = [
+  'BCA',
+  'BNI',
+  'BRI',
+  'BSI',
+  'BTN',
+  'CIMB Niaga',
+  'Danamon',
+  'Mandiri',
+  'Permata',
+  'DANA',
+  'GoPay',
+  'LinkAja',
+  'OVO',
+  'ShopeePay',
+];
 
 /** Placeholder music options until the internal API is ready. */
 export const DUMMY_BACKGROUND_MUSIC_OPTIONS = [
@@ -180,9 +208,11 @@ export const DEFAULT_WEDDING_TEMPLATE_1_CONTENT: WeddingTemplate1Content = {
   tokenMessage:
     'While we wish you could be here with us, your presence in our lives is the greatest gift of all. Should you wish to send a token of your love, please follow the link below.',
   tokenPhoto: '',
-  accountHolder: 'Elias Frank Simanjuntak (BRI)',
+  accountHolder: 'Elias Frank Simanjuntak',
+  bankProvider: 'BRI',
   accountNumber: '3331 0908 1766',
   guestMessagesEnabled: true,
+  memoRollEnabled: true,
 };
 
 /**
@@ -204,6 +234,23 @@ export function joinParents(father?: string, mother?: string): string {
     .map((name) => name?.trim() ?? '')
     .filter((name) => name.length > 0)
     .join(' & ');
+}
+
+/**
+ * An account on the one line the invitation prints it on.
+ *
+ * The couple names the holder and the provider separately, because a name and a
+ * bank are two answers, and the invitation has room for one line. Joining
+ * happens here, at the point of display, for the same reason `joinParents` does.
+ *
+ * A record carrying only one of the two prints that one, without empty brackets
+ * beside it.
+ */
+export function joinAccountHolder(holder?: string, provider?: string): string {
+  const name = holder?.trim() ?? '';
+  const bank = provider?.trim() ?? '';
+  if (bank.length === 0) return name;
+  return name.length > 0 ? `${name} (${bank})` : bank;
 }
 
 /**
@@ -296,30 +343,37 @@ export function formValuesToContent(
     address: defaults.address,
     mapsUrl: v.mapsUrl?.trim() || defaults.mapsUrl,
     dressCode: defaults.dressCode,
-    photoShareCover: v.photoShareCover || defaults.photoShareCover,
-    photoShareUrl: v.photoShareUrl?.trim() || defaults.photoShareUrl,
+    // The design asks for no card for the photo sharing block, no link under
+    // it, and no message above the account, though the invitation prints all
+    // three, so it prints the sample's. Filed as `hbd-byb.22` rather than
+    // answered here by adding fields the design does not draw - and the same
+    // issue covers the Guest Messages the design offers no way to turn off.
+    photoShareCover: defaults.photoShareCover,
+    photoShareUrl: defaults.photoShareUrl,
     galleryPhotos: v.galleryPhotos ?? defaults.galleryPhotos,
-    tokenMessage: v.tokenMessage?.trim() || defaults.tokenMessage,
-    tokenPhoto: v.tokenPhoto || defaults.tokenPhoto,
+    tokenMessage: defaults.tokenMessage,
+    tokenPhoto: pickPhoto(v.tokenPhoto, 0, defaults.tokenPhoto),
     accountHolder: v.accountHolder?.trim() || defaults.accountHolder,
+    bankProvider: v.bankProvider || defaults.bankProvider,
     accountNumber: v.accountNumber?.trim() || defaults.accountNumber,
-    guestMessagesEnabled:
-      v.guestMessagesEnabled ?? defaults.guestMessagesEnabled,
+    guestMessagesEnabled: defaults.guestMessagesEnabled,
+    memoRollEnabled: v.memoRollEnabled ?? defaults.memoRollEnabled,
   };
 }
 
 /**
  * Initial form values for the creator (prefills preview on first paint).
  *
- * The fields of the Cover Header, the Holy Verse, the Bride & Groom's
- * Introduction, the Love Story and the Venue Details are deliberately absent.
- * The design draws every one of them empty, with its example written as grey
- * placeholder text, so filling them in would put the design's examples into a
- * couple's invitation as if they had chosen them. Nothing is lost by leaving
- * them out: `formValuesToContent` falls back to the sample invitation for
- * anything unanswered, so the Site Preview still has a wedding to show.
+ * Every field a couple types in or chooses is deliberately absent. The design
+ * draws all of them empty, with its example written as grey placeholder text,
+ * so filling them in would put the design's examples into a couple's invitation
+ * as if they had chosen them. Nothing is lost by leaving them out:
+ * `formValuesToContent` falls back to the sample invitation for anything
+ * unanswered, so the Site Preview still has a wedding to show.
  *
- * The remaining Sections' defaults stand until their own beads reach them.
+ * What is here is the state a field cannot start without: an empty list for
+ * every field that holds files, and the MemoRoll switch, which the design draws
+ * on.
  */
 export function getDefaultFormValues(): WeddingInvitationFormValues {
   const d = DEFAULT_WEDDING_TEMPLATE_1_CONTENT;
@@ -329,14 +383,9 @@ export function getDefaultFormValues(): WeddingInvitationFormValues {
     polaroidPhoto: [],
     loveStoryVideo: '',
     eventPhotos: [],
-    photoShareCover: '',
-    photoShareUrl: '',
     galleryPhotos: [],
-    tokenMessage: d.tokenMessage,
-    tokenPhoto: '',
-    accountHolder: d.accountHolder,
-    accountNumber: d.accountNumber,
-    guestMessagesEnabled: d.guestMessagesEnabled,
+    tokenPhoto: [],
+    memoRollEnabled: d.memoRollEnabled,
   };
 }
 

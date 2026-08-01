@@ -46,7 +46,7 @@ export default function WeddingInvitationPreviewView({
         <EventDetails content={content} />
         {content.guestMessagesEnabled && <Messages />}
         <TokenOfLove content={content} />
-        <PhotoShare content={content} />
+        {content.memoRollEnabled && <PhotoShare content={content} />}
         <Gallery content={content} />
         <Footer />
       </main>

@@ -56,6 +56,24 @@ _Avoid_: parents
 The song playing behind the invitation.
 _Avoid_: music, backtrack
 
+**Gift Registry**:
+The section collecting where a gift can be sent: the account, its number, and the bank or e-wallet holding it.
+_Avoid_: Token of Love, which is what the invitation titles the block this section fills in
+
+**Bank/e-Wallet Provider**:
+Where the account is held, asked for on its own rather than written into the holder's name.
+Two answers, joined for display, the same way a father and a mother are.
+_Avoid_: bank
+
+**Photo Showcase**:
+The section collecting the pre-wedding photos the invitation ends on.
+_Avoid_: Gallery, which is what the invitation calls the block this section fills in
+
+**MemoRoll**:
+The collective photo experience: guests photograph the day and send it back afterwards.
+One switch in step 2 turns it on, and it is what the invitation's photo sharing block offers.
+_Avoid_: Photo Share, disposable camera
+
 ### Preview
 
 **Site Preview**:

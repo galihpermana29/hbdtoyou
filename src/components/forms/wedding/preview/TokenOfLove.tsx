@@ -16,6 +16,7 @@ import { useWeddingReveal } from './use-wedding-reveal';
 
 import {
   DEFAULT_WEDDING_TEMPLATE_1_CONTENT,
+  joinAccountHolder,
   type WeddingTemplate1Content,
 } from '../wedding-invitation-types';
 
@@ -28,8 +29,7 @@ export default function TokenOfLove({
 }) {
   const fadeUpCenterReveal = useWeddingReveal(fadeUpCenter);
   const [copied, setCopied] = useState(false);
-  const tokenPhoto =
-    content.tokenPhoto || `${ASSET}/token-photo.jpg`;
+  const tokenPhoto = content.tokenPhoto || `${ASSET}/token-photo.jpg`;
 
   const handleCopy = () => {
     navigator.clipboard?.writeText(content.accountNumber).then(() => {
@@ -94,7 +94,10 @@ export default function TokenOfLove({
               <div className="relative flex min-w-px flex-[1_0_0] items-start">
                 <div className="relative flex min-w-px flex-[1_0_0] flex-col items-start gap-[2px] leading-normal text-black">
                   <p className="w-full font-[family-name:var(--font-wt1-mono)] text-[12px] font-medium">
-                    {content.accountHolder}
+                    {joinAccountHolder(
+                      content.accountHolder,
+                      content.bankProvider
+                    )}
                   </p>
                   <p className="w-full font-[family-name:var(--font-wt1-mono)] text-[16px] font-semibold">
                     {content.accountNumber}

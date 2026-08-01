@@ -45,9 +45,11 @@
  * screen's design, so the panel's heading and controls are asserted and what it
  * renders inside is not.
  *
- * The first five Sections' fields are enumerated. Every Section's card, name
- * and description is asserted, and the fields of the other three are added by
- * the beads that build them.
+ * The MemoRoll Section's card is washed with a gradient and has a camera printed
+ * behind its words. Neither is asserted, because the harness compares background
+ * colours rather than background images and has no way to describe an
+ * illustration at all. Both are the design's and both are drawn; they are
+ * covered by review rather than by this manifest.
  */
 
 import { FIELD_SHADOW, pageChrome, siteFooter, TYPE } from './page-chrome.mjs';
@@ -87,6 +89,23 @@ const SECTION_CARD = {
   borderRadius: '8px',
   padding: '24px 12px',
   gap: '24px',
+};
+
+/**
+ * The one Section whose card the design draws differently.
+ *
+ * MemoRoll asks a single question rather than holding a card of fields, and the
+ * design pads it 12px all round instead of 24px and 12px - measured off the
+ * baseline as 19px from the card's top edge to the cap of its name, against the
+ * 31px every other Section's name sits at. It has no body to be kept apart from
+ * its header either, so there is no gap to assert.
+ */
+const MEMO_ROLL_CARD = {
+  borderStyle: 'solid',
+  borderWidth: '1px',
+  borderColor: '#d0d5dd',
+  borderRadius: '8px',
+  padding: '12px',
 };
 
 /**
@@ -134,6 +153,17 @@ const MARKED_ANSWER = {
   fontWeight: 400,
   lineHeight: '24px',
 };
+
+/**
+ * The answer a couple chooses instead of typing.
+ *
+ * Colour is asserted here where the typed fields leave it out, and the
+ * difference is real rather than an oversight. A `<input>`'s example is painted
+ * by the placeholder, which no computed style of the element reports; a
+ * `<select>` showing its example is wearing that grey itself, so it is the one
+ * field on the screen whose unanswered colour can be claimed at all.
+ */
+const CHOSEN_ANSWER = { ...MARKED_ANSWER, color: '#667085' };
 
 /**
  * How many earlier elements in a list say exactly what the one at `index` says.
@@ -184,6 +214,7 @@ const SECTIONS = [
     name: 'Enable MemoRoll?',
     description:
       "Create a collective photo experience for the wedding. Capture your wedding through every guest's lens.",
+    card: MEMO_ROLL_CARD,
   },
 ];
 
@@ -202,7 +233,7 @@ const sectionExpectations = (index) => {
       name: `${section.name} Section card`,
       select: 'form section',
       nth: index,
-      style: SECTION_CARD,
+      style: section.card ?? SECTION_CARD,
     },
     {
       name: `${section.name} Section name`,
@@ -257,15 +288,22 @@ const LABELS_IN_ORDER = [
   'Wedding Teaser Video',
   'More Photos',
   'Wedding Location',
+  'Gift Section Photo',
+  'Bank/e-Wallet Provider',
+  'Account Number',
+  'Account Holder Name',
+  'Photo Gallery',
 ];
 
 /**
  * Every box the form marks as a group, in the order the design stacks them.
  *
- * A group is a field built from more than one element, and there are two kinds
+ * A group is a field built from more than one element, and there are three kinds
  * here. Most are a box with a mark and an answer in it. One is the reception
  * time, which is a name over two such boxes - it comes before both of them,
- * because it contains them.
+ * because it contains them. The last is the gift provider, whose mark is a
+ * chevron after the answer rather than before it, because the answer is chosen
+ * from a list rather than typed.
  */
 const GROUPS_IN_ORDER = [
   'The year when you first met',
@@ -275,6 +313,7 @@ const GROUPS_IN_ORDER = [
   'Start',
   'End',
   'Wedding Location',
+  'Bank/e-Wallet Provider',
 ];
 
 /** Where a group falls among the form's groups, counted down the page. */
@@ -313,8 +352,14 @@ const textField = (label) => [
   { name: `${label} field`, control: label, style: TEXT_FIELD },
 ];
 
-/** A label, the box the design marks, and the answer a couple types in it. */
-const markedField = (label) => [
+/**
+ * A label, the box the design marks, and the answer a couple gives in it.
+ *
+ * `answer` is what the design says about the answer itself, which is the same
+ * for every field of this shape but one: the gift provider is chosen from a list
+ * rather than typed, and that is the one whose colour can be claimed.
+ */
+const markedField = (label, answer = MARKED_ANSWER) => [
   labelFor(label),
   {
     name: `${label} field`,
@@ -322,7 +367,7 @@ const markedField = (label) => [
     nth: groupNth(label),
     style: MARKED_FIELD,
   },
-  { name: `${label} answer`, control: label, style: MARKED_ANSWER },
+  { name: `${label} answer`, control: label, style: answer },
 ];
 
 /** The ratios the design recommends for a Section that shows several photos. */
@@ -373,6 +418,21 @@ const UPLOAD_AREAS = [
     title: 'Add More Photos',
     prompt: 'Drag & drop up to 5 images from your gallery',
     hint: WIDE_PHOTO_HINT,
+  },
+  {
+    // A second area that takes one photo and still says "up to 1 images", and
+    // this one is given the guidance for three underneath it. Both are read off
+    // the frame: see `docs/adr/0002-figma-is-literal-truth.md`.
+    field: 'Gift Section Photo',
+    title: 'Add More Photos',
+    prompt: 'Drag & drop up to 1 images from your gallery',
+    hint: 'We recommend to add more than 3 images in the ratio of 4:3 for more interactivity',
+  },
+  {
+    field: 'Photo Gallery',
+    title: 'Add More Photos',
+    prompt: 'Drag & drop up to 20 images from your gallery',
+    hint: 'We recommend to add more than 5 images in the ratio of 4:3 for more interactivity',
   },
 ];
 
@@ -573,6 +633,61 @@ const venueDetailsFields = [
   },
 ];
 
+/**
+ * The Gift Registry Section's fields.
+ *
+ * The provider is asked for on its own, above the account, and it is the one
+ * answer in the flow that is chosen rather than typed - a box with the answer in
+ * it and a chevron after, which is a group for the same reason a marked field
+ * is. The design draws all three empty, so the grey in each box is its example
+ * rather than anybody's account.
+ */
+const giftRegistryFields = [
+  ...uploadArea(5),
+  ...markedField('Bank/e-Wallet Provider', CHOSEN_ANSWER),
+  ...textField('Account Number'),
+  ...textField('Account Holder Name'),
+];
+
+/** The Photo Showcase Section's one field. */
+const photoShowcaseFields = [...uploadArea(6)];
+
+/**
+ * The MemoRoll Section's own parts.
+ *
+ * It has no fields: the design asks one question and draws a switch to answer
+ * it, with a line under the description offering to explain it. The switch is
+ * found by the standard ARIA pattern rather than by copy, because it says
+ * nothing - a switch is a shape and a colour, and the words beside it are the
+ * Section's name.
+ *
+ * The distance under the description is written as the link's own margin rather
+ * than as a gap on the box around them, because the harness can only assert
+ * spacing it can name an element for.
+ */
+const memoRollFields = [
+  {
+    name: 'MemoRoll Learn more',
+    withText: 'Learn more',
+    style: {
+      fontSize: '14px',
+      fontWeight: 600,
+      lineHeight: '20px',
+      color: '#e34013',
+      margin: '6px 0px 0px 0px',
+    },
+  },
+  {
+    name: 'MemoRoll switch',
+    select: 'form [role="switch"]',
+    style: {
+      backgroundColor: '#e34013',
+      borderRadius: '9999px',
+      padding: '2px',
+    },
+  },
+];
+
 export const expectations = [
   ...pageChrome('Fill in the details & story'),
   ...sectionExpectations(0),
@@ -586,8 +701,11 @@ export const expectations = [
   ...sectionExpectations(4),
   ...venueDetailsFields,
   ...sectionExpectations(5),
+  ...giftRegistryFields,
   ...sectionExpectations(6),
+  ...photoShowcaseFields,
   ...sectionExpectations(7),
+  ...memoRollFields,
   {
     name: 'Previous step action',
     select: 'button',

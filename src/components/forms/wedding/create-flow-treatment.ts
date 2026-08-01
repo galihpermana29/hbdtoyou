@@ -64,9 +64,25 @@ export const flowTextArea = `${flowTextField} block resize-none`;
 export const flowMarkedField = `flex items-center gap-[8px] px-[12px] py-[8px] ${flowFieldBox}`;
 
 /** The answer inside such a box, which has no box of its own to draw. */
-export const flowMarkedFieldAnswer =
-  'min-w-0 flex-1 bg-transparent text-[16px] font-[400] leading-[24px] ' +
-  'text-[#101828] outline-none placeholder:text-[#667085]';
+const ANSWER =
+  'min-w-0 flex-1 bg-transparent text-[16px] font-[400] leading-[24px] outline-none';
+
+export const flowMarkedFieldAnswer = `${ANSWER} text-[#101828] placeholder:text-[#667085]`;
+
+/**
+ * The same answer when it is chosen from a list rather than typed.
+ *
+ * A `<select>` has no placeholder to colour, so the colour is left out here and
+ * named at the call site by whether anything has been chosen yet. Writing both
+ * colours on the element and letting one win would not work: two Tailwind
+ * utilities for one property are settled by the order they were written into the
+ * stylesheet rather than by the order they appear on the element.
+ */
+export const flowChoiceAnswer = `${ANSWER} cursor-pointer appearance-none`;
+
+/** The colour of an answer a couple has given, and of the example standing in for one. */
+export const flowAnswered = 'text-[#101828]';
+export const flowUnanswered = 'text-[#667085]';
 
 /** The mark before the answer, in the grey the design also writes examples in. */
 export const flowFieldMark = 'shrink-0 text-[#667085]';
