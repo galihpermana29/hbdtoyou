@@ -88,6 +88,16 @@ _Avoid_: Full Preview
 The recipient-facing page a guest actually opens.
 Distinct from Site Preview, which only ever shows it to the couple.
 
+**Showcase**:
+The template rendered with example content, so a couple can see what it looks like before choosing it.
+Nobody's invitation, and the one place example photographs are the right answer.
+_Avoid_: sample, demo
+
+**Example Content**:
+A named set of content the Showcase and the check render the template with.
+Three exist: one flattering, one realistic and awkward, one deliberately hostile.
+They are how the template's handling of unpredictable input is judged.
+
 ### Guests
 
 The word "guest" covers two unrelated concepts.
@@ -96,14 +106,29 @@ They are never interchangeable.
 **Guest List**:
 The roster of people the couple intends to invite, uploaded as a CSV in step 3.
 
+**RSVP**:
+A guest's reply to the invitation: their name, whether they are coming, whether they bring someone, and an optional Guest Message.
+Collected in a modal on the invitation itself, never in the Create Flow.
+
 **Guest Message**:
-A wish written by a visitor and displayed on the invitation.
+A wish a guest writes in their RSVP and the invitation displays.
 Belongs to the invitation's content, not to the Guest List.
 _Avoid_: wishes
 
 **Invitation Slug**:
 The couple-chosen identifier that makes their invitation's link unique.
 _Avoid_: domain, subdomain
+
+### The template's parts
+
+**Sealed**:
+The invitation before a guest opens it: the envelope closed, the page locked, nothing below reachable.
+Opening it is a guest's deliberate act rather than something that happens on load.
+
+**Frame**:
+Artwork the template draws whatever the couple supplies: an envelope, a polaroid border, a torn edge, a wax seal.
+A Frame is never content, and is the same on every invitation.
+Distinct from the photograph inside it, which is always the couple's.
 
 ### Quality
 
