@@ -20,6 +20,12 @@ import type { WeddingTemplate1Content } from './wedding-invitation-types';
  * page behind it does not scroll while it is open, Escape closes it, the close
  * control takes focus when it opens, and Tab stays inside it - which is what
  * `aria-modal` promises anything reading the page aloud.
+ *
+ * Being a dialog is also what the invitation inside has to be told about. The
+ * dialog is the scroller here rather than the page, so it is the dialog the
+ * sealed invitation holds still: a couple who could scroll past the envelope
+ * would not be seeing what a guest sees, which is the whole of what this is
+ * for.
  */
 export default function InvitationPlayer({
   content,
@@ -35,6 +41,9 @@ export default function InvitationPlayer({
     closeRef.current?.focus();
   }, []);
 
+  // Not the invitation's own `useScrollLock`, which also puts what it locks
+  // back to the top: this holds still a form the couple is in the middle of
+  // filling in, and would throw away where they had got to in it.
   useEffect(() => {
     const previous = document.body.style.overflow;
     document.body.style.overflow = 'hidden';
@@ -53,11 +62,19 @@ export default function InvitationPlayer({
 
       const dialog = dialogRef.current;
       if (!dialog) return;
+      // Drawn, and reachable. A sealed invitation puts everything below the
+      // envelope out of reach while leaving it in the DOM and laid out, so an
+      // inert control counted here would put the end of the dialog on an
+      // element focus can never land on - and Tab off the real last one would
+      // walk out onto the page behind instead of wrapping.
       const focusable = Array.from(
         dialog.querySelectorAll<HTMLElement>(
           'a[href], button:not([disabled]), input, textarea, select, [tabindex]:not([tabindex="-1"])'
         )
-      ).filter((element) => element.offsetParent !== null);
+      ).filter(
+        (element) =>
+          element.offsetParent !== null && !element.closest('[inert]')
+      );
       if (focusable.length === 0) return;
 
       const first = focusable[0];
@@ -98,9 +115,11 @@ export default function InvitationPlayer({
           className="absolute right-[8px] top-[8px] z-[10] flex h-[36px] w-[36px] items-center justify-center rounded-full bg-black/60 text-white">
           <X size={20} aria-hidden="true" />
         </button>
-        {/* The dialog holds the page still itself, so the invitation inside it
-            does not also reach for the page's scroll. */}
-        <WeddingTemplate1 content={content} sealed />
+        {/* The dialog is what scrolls here, not the page, so it is the dialog
+            the sealed invitation is given to hold still. The page behind is
+            held still separately above, for the different reason that a dialog
+            is open over it. */}
+        <WeddingTemplate1 content={content} sealed holdsStill={dialogRef} />
       </div>
     </div>
   );

@@ -20,7 +20,7 @@
  */
 
 import { motion, useReducedMotion } from 'framer-motion';
-import { useEffect, useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 
 import {
   DEFAULT_WEDDING_TEMPLATE_1_CONTENT,
@@ -366,50 +366,47 @@ function WaxSeal() {
 
 export default function Hero({
   content = DEFAULT_WEDDING_TEMPLATE_1_CONTENT,
-  locksPage = false,
+  onOpened,
 }: {
   content?: WeddingTemplate1Content;
-  /** This invitation has the page to itself, so a sealed one holds it still. */
-  locksPage?: boolean;
+  /**
+   * Say that the opening is over and the rest of the invitation is the guest's.
+   *
+   * The Hero runs the opening, so the Hero is what knows when it has finished;
+   * what the rest of the invitation does until then is not the Hero's to decide
+   * and is decided by whoever draws it.
+   */
+  onOpened?: () => void;
 }) {
   const sealed = useSealed();
   const reduce = useReducedMotion();
   const [opened, setOpened] = useState(!sealed);
-  const [revealed, setRevealed] = useState(!sealed);
   const envelopeOpened = sealed ? opened : true;
 
-  // The page is handed back at the end of the opening rather than at the start
-  // of it, so a guest is not scrolling past the envelope while it is still
-  // moving. Nothing waits when nothing moves: a guest who has asked for reduced
-  // motion is given the invitation at once.
+  // Held rather than depended on, so that the opening is timed once. A caller
+  // writing the callback inline would otherwise hand over a new one on every
+  // render, restart the clock each time, and leave the invitation shut.
+  const report = useRef(onOpened);
   useEffect(() => {
-    if (!envelopeOpened || revealed) return;
+    report.current = onOpened;
+  }, [onOpened]);
+
+  // The invitation is handed over at the end of the opening rather than at the
+  // start of it, so a guest is not scrolling past the envelope while it is
+  // still moving. Nothing waits when nothing moves: a guest who has asked for
+  // reduced motion is given the invitation at once.
+  useEffect(() => {
+    if (!sealed || !envelopeOpened) return;
     if (reduce) {
-      setRevealed(true);
+      report.current?.();
       return;
     }
     const opening = window.setTimeout(
-      () => setRevealed(true),
+      () => report.current?.(),
       OPENING_SECONDS * 1000
     );
     return () => window.clearTimeout(opening);
-  }, [envelopeOpened, revealed, reduce]);
-
-  // Nothing below the envelope is reachable until a guest opens it, which is
-  // half of what Sealed means and cannot be drawn. Only an invitation that has
-  // the page to itself may do this: the panels inside the Create Flow show a
-  // sealed invitation in a phone-sized frame, and one of those locking the page
-  // it sits on would take the whole flow hostage until somebody opened an
-  // envelope in a picture.
-  useEffect(() => {
-    if (!locksPage || revealed) return;
-    const previous = document.body.style.overflow;
-    document.body.style.overflow = 'hidden';
-    window.scrollTo(0, 0);
-    return () => {
-      document.body.style.overflow = previous;
-    };
-  }, [locksPage, revealed]);
+  }, [sealed, envelopeOpened, reduce]);
 
   const fadeUpMount = (delay: number) => ({
     initial: reduce ? false : { opacity: 0, y: 16 },

@@ -29,11 +29,17 @@
  * rather than the Create Flow's list of landmarks:
  *
  *   body               the page, which is what a sealed invitation holds still
- *   main > section     one per section, in the order a guest scrolls them
+ *   main section       one per section, in the order a guest scrolls them
  *   main p             every line of words the invitation prints, in order
  *   main span          a line the template scales down to fit its box
  *   main [role=region] the one box inside the invitation a guest scrolls on its
  *                      own, which is the Messages section's list of wishes
+ *   main [inert]       everything below the envelope, while it is closed
+ *
+ * `main section` is a descendant rather than a child on purpose. Everything
+ * below the Hero is wrapped in one region so that a sealed invitation can put
+ * it out of a guest's reach, and a child combinator would find the Hero alone
+ * and report the other nine as missing.
  *
  * A position counted down the page is never written as a number below. Each
  * section declares the paragraphs it prints, in its own order, and every `nth`
@@ -760,7 +766,7 @@ function invitationExpectations() {
     ...SECTIONS.flatMap((section, index) => [
       {
         name: `${section.name} section`,
-        select: 'main > section',
+        select: 'main section',
         nth: index,
         style:
           section.background === null
@@ -800,8 +806,16 @@ const SEALED_PARAGRAPHS = [
  * Only the Hero is claimed here. The nine sections below it are the same nine
  * the opened screens already assert, three times over, and a fourth copy of that
  * list would say nothing this screen exists to say. What it exists to say is the
- * two things only a sealed invitation has: the page is held still, and the
- * envelope is closed over its cards.
+ * three things only a sealed invitation has: the page is held still, the
+ * envelope is closed over its cards, and everything below it is out of reach.
+ *
+ * The last of those is claimed as a region carrying `inert`, which is the whole
+ * of what "out of reach" is in a browser - out of the focus order and out of
+ * the accessibility tree at once. Holding the page still stops the wheel and
+ * nothing else, so without this claim a build that let a guest Tab down to the
+ * RSVP would pass every screen here. That the region lets go again is not a
+ * claim a computed style can hold: the three opened screens assert the sections
+ * below are there, and `inert` does not change any of that.
  *
  * The addressee the design writes across the closed envelope - "Galih &
  * Keluarga", node 332:30838 - is not drawn and is not claimed. The design hides
@@ -816,7 +830,7 @@ function sealedExpectations() {
     thePage('The page, while the invitation is sealed', 'hidden'),
     {
       name: 'Hero section',
-      select: 'main > section',
+      select: 'main section',
       nth: 0,
       style: { backgroundColor: NIGHT },
     },
@@ -836,6 +850,12 @@ function sealedExpectations() {
       INVITATION_WELCOME_TYPE,
       INVITATION_WELCOME
     ),
+    // Last, because it is last: everything below the envelope is one region and
+    // the region begins after every line the Hero prints.
+    {
+      name: 'Everything below the envelope, out of reach',
+      select: 'main [inert]',
+    },
   ];
 
   invitation.everythingWasAskedFor();

@@ -111,8 +111,10 @@ Checking that one manifest at three lengths of answer is how a section that cann
 Each of them opens the envelope first, the way a guest does, so the seal is exercised on every run: if it stops releasing, all three fail at once.
 
 The sealed screen is the only one driven nowhere first, because sealed is how an invitation arrives.
-It claims the Hero and nothing below it, and it is where the two things only a sealed invitation has are asserted: the page does not scroll, and the envelope is closed over its cards.
+It claims the Hero and nothing below it, and it is where the three things only a sealed invitation has are asserted: the page does not scroll, the envelope is closed over its cards, and everything below the envelope is out of reach.
 The second of those is a claim about counting rather than about a style - the design draws a closed envelope with the cards not drawn at all, so the first line of words on the page is the one asking a guest to open it, and a build that still drew them would report the wrong copy three lines running.
+The third is a claim about presence: everything below the envelope is one region carrying `inert`, which is what takes a subtree out of the focus order and out of the accessibility tree at once.
+Holding the page still stops the wheel and nothing else, so without that claim a build a guest could Tab down to the RSVP on would pass every screen here.
 
 The RSVP screen opens the envelope and then presses RSVP Now, which is how a guest reaches the card: the design draws it as a frame of its own and it has no URL.
 It claims the card and not the invitation behind it, since three screens already assert that, and it claims the page as well - the invitation does not scroll while a guest is replying.
@@ -150,7 +152,7 @@ A colour written by name is refused: a browser never reports one that way, so `w
 Elements are found two ways, and the choice decides what a failure reads like.
 
 A structural selector says where an element sits and lets its copy be checked as a claim, so a typo reports as a `copy` failure with both spellings.
-Those selectors use nothing but ordinary HTML and the standard ARIA patterns - `header`, `nav[aria-label="Breadcrumb"]`, `h1`, `form section`, `label` with its control, `[role="group"]` for a field the design builds from more than one element, `button`, `button[aria-expanded]` for the one that opens a Section, `footer` - and that list is the whole contract a screen has to satisfy.
+Those selectors use nothing but ordinary HTML and the standard ARIA patterns - `header`, `nav[aria-label="Breadcrumb"]`, `h1`, `form section`, `label` with its control, `[role="group"]` for a field the design builds from more than one element, `button`, `button[aria-expanded]` for the one that opens a Section, `inert` for a region nobody may reach yet, `footer` - and that list is the whole contract a screen has to satisfy.
 
 The chrome above a screen's own content is the same on all four steps, so it lives in `visual/expectations/page-chrome.mjs` and each screen spreads it in.
 

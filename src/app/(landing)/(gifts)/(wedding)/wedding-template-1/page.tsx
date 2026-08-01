@@ -37,8 +37,9 @@ export const metadata = {
  * belong. Sorting a Frame from a photograph, and moving the photographs into
  * Example Content behind it, is `hbd-a09.10`.
  *
- * Sealed, and it locks the page while it is: this route is the invitation, so
- * nothing below the envelope should be reachable before somebody opens it.
+ * Sealed, and it holds the page still while it is: this route is the invitation
+ * and has the window to itself, so nothing below the envelope is reachable
+ * before somebody opens it.
  */
 export default function WeddingTemplate1ShowcasePage({
   searchParams,
@@ -52,7 +53,7 @@ export default function WeddingTemplate1ShowcasePage({
       <WeddingTemplate1
         content={exampleContent(searchParams[EXAMPLE_CONTENT_PARAM])}
         sealed
-        locksPage
+        holdsStill="page"
         showVinylWidget
       />
     </div>
