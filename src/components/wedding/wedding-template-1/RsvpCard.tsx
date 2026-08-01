@@ -19,9 +19,18 @@
  * `src/hooks/use-dialog-behaviour.ts`.
  */
 
-import { useId, useRef, useState, type FormEvent, type ReactNode } from 'react';
+import {
+  useId,
+  useRef,
+  useState,
+  type ComponentProps,
+  type FormEvent,
+  type ReactNode,
+} from 'react';
 
 import { useDialogBehaviour } from '@/hooks/use-dialog-behaviour';
+
+import { PaperGround, TornEdge } from './TornPaper';
 
 const ASSET = '/templates/wedding-template-1';
 
@@ -63,114 +72,70 @@ const PLUS_ONE = [
  * the Love Story's. The crops themselves are identical, to the last decimal.
  */
 const TORN = 0.9504556;
-const LONG_WIDTH = 147 * TORN;
-const LONG_HEIGHT = 375 * TORN;
-const SHORT_WIDTH = 52 * TORN;
-const SHORT_HEIGHT = 290 * TORN;
 
 /**
- * One piece of the card's torn edge.
+ * One piece of this card's torn edge.
  *
- * `box` places the piece's rotated bounding box against the card, `spin` turns
- * and mirrors the crop inside it, and the two sizes are the crop's own, before
- * it is turned. The design lays ten of these around the card at fixed offsets
- * down a 534-tall paper; they are anchored to the card's four edges here
- * instead, because this card is a line of copy taller than the design's and a
- * guest's own answer can make it taller still.
+ * The size is said here rather than on each of the eight below, because it is a
+ * fact about the card and not about any one tear: a ninth piece that forgot it
+ * would be drawn at the Love Story's size in the middle of the card's.
  */
-function TornEdge({
-  box,
-  spin,
-  long = true,
-}: {
-  box: string;
-  spin: string;
-  long?: boolean;
-}) {
-  const width = long ? LONG_WIDTH : SHORT_WIDTH;
-  const height = long ? LONG_HEIGHT : SHORT_HEIGHT;
-  const crop = long
-    ? 'absolute left-[-81.51%] top-[-13.38%] h-[134.36%] w-[192.99%] max-w-none'
-    : 'absolute left-[-413.1%] top-[-6.61%] h-[173.74%] w-[545.57%] max-w-none';
-
-  return (
-    <div className={`absolute flex items-center justify-center ${box}`}>
-      <div className={`flex-none ${spin}`}>
-        <div className="relative" style={{ width, height }}>
-          <div className="pointer-events-none absolute inset-0 overflow-hidden">
-            <img alt="" className={crop} src={`${ASSET}/torn-paper.png`} />
-          </div>
-        </div>
-      </div>
-    </div>
-  );
+function CardEdge(props: Omit<ComponentProps<typeof TornEdge>, 'scale'>) {
+  return <TornEdge {...props} scale={TORN} />;
 }
 
 /**
- * The paper the reply is written on: a flat ground of `paper.jpg` under the
- * design's two tints, with torn edges hanging off all four sides of it.
+ * The paper the reply is written on: the invitation's own ground with torn
+ * edges hanging off all four sides of it.
  *
- * The tints are Figma's own two fills over the image on `Rectangle 1`, in the
- * order it stacks them - cream at 30% and then black at 4%, which CSS writes
- * topmost first.
+ * The design lays ten pieces around the card at fixed offsets down a 534-tall
+ * paper; they are anchored to the card's four edges here instead, because this
+ * card is a line of copy taller than the design's and a guest's own answer can
+ * make it taller still.
  */
 function Paper() {
   return (
     <div aria-hidden className="pointer-events-none absolute inset-0">
       {/* Along the top, a long piece and a short one. */}
-      <TornEdge
+      <CardEdge
         box="left-[-22px] top-[-45px] h-[139.72px] w-[356.42px]"
         spin="-rotate-90 -scale-y-100"
       />
-      <TornEdge
+      <CardEdge
         box="left-[-48px] top-[-45px] h-[49.42px] w-[275.63px]"
         spin="-rotate-90"
         long={false}
       />
 
       {/* The same pair along the bottom, turned the other way. */}
-      <TornEdge
+      <CardEdge
         box="bottom-[-33px] left-[-22px] h-[139.72px] w-[356.42px]"
         spin="rotate-90"
       />
-      <TornEdge
+      <CardEdge
         box="bottom-[-33px] left-[-48px] h-[49.42px] w-[275.63px]"
         spin="rotate-90 -scale-y-100"
         long={false}
       />
 
       {/* Down the left, one piece from the top and one from the bottom. */}
-      <TornEdge
+      <CardEdge
         box="left-[-40px] top-0 h-[356.42px] w-[139.72px]"
         spin="rotate-180 -scale-y-100"
       />
-      <TornEdge
+      <CardEdge
         box="bottom-0 left-[-36px] h-[356.42px] w-[139.72px]"
         spin="rotate-180"
       />
 
       {/* And the mirror of those two down the right. */}
-      <TornEdge box="right-[-40px] top-0 h-[356.42px] w-[139.72px]" spin="" />
-      <TornEdge
+      <CardEdge box="right-[-40px] top-0 h-[356.42px] w-[139.72px]" spin="" />
+      <CardEdge
         box="bottom-0 right-[-36px] h-[356.42px] w-[139.72px]"
         spin="-scale-y-100"
       />
 
-      <div className="absolute inset-0 overflow-hidden">
-        <img
-          alt=""
-          className="absolute left-0 top-[-67.47%] h-[247.47%] w-[307.6%] max-w-none"
-          src={`${ASSET}/paper.jpg`}
-        />
-      </div>
-      <div
-        className="absolute inset-0"
-        style={{
-          backgroundImage:
-            'linear-gradient(90deg, rgba(0,0,0,0.04) 0%, rgba(0,0,0,0.04) 100%), ' +
-            'linear-gradient(90deg, rgba(239,233,226,0.3) 0%, rgba(239,233,226,0.3) 100%)',
-        }}
-      />
+      <PaperGround />
     </div>
   );
 }

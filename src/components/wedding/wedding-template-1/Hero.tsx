@@ -29,6 +29,7 @@ import {
 } from '@/components/forms/wedding/wedding-invitation-types';
 import { FitText } from './FitText';
 import { AutoFitText } from './AutoFitText';
+import { TornEdge } from './TornPaper';
 import { useSealed } from './sealed-context';
 import { EASE } from './variants';
 
@@ -499,19 +500,10 @@ export default function Hero({
       />
 
       {/* torn paper edge at the bottom */}
-      <div className="absolute left-1/2 top-[666px] flex h-[147px] w-[375px] -translate-x-1/2 items-center justify-center">
-        <div className="flex-none -rotate-90">
-          <div className="relative h-[375px] w-[147px]">
-            <div className="pointer-events-none absolute inset-0 overflow-hidden">
-              <img
-                alt=""
-                className="absolute left-[-81.51%] top-[-13.38%] h-[134.36%] w-[192.99%] max-w-none"
-                src={`${ASSET}/torn-paper.png`}
-              />
-            </div>
-          </div>
-        </div>
-      </div>
+      <TornEdge
+        box="left-1/2 top-[666px] h-[147px] w-[375px] -translate-x-1/2"
+        spin="-rotate-90"
+      />
 
       {/* Open Invitation - only a sealed invitation has anything to open */}
       {sealed && (

@@ -13,6 +13,7 @@ import { useState } from 'react';
 import { motion, useReducedMotion, type MotionProps } from 'framer-motion';
 
 import { AutoFitBlock } from './AutoFitBlock';
+import { PaperGround, TornEdge } from './TornPaper';
 import { EASE, fadeUp, fadeUpCenter, staggerContainer } from './variants';
 import { useSealed } from './sealed-context';
 import { useWeddingReveal } from './use-wedding-reveal';
@@ -82,36 +83,6 @@ const SIDE_CHAPTERS_MAX_HEIGHT = 353;
  * both boxes at the full 10px and nothing steps down at all.
  */
 const CENTRE_CHAPTER_MAX_HEIGHT = 246;
-
-/** Torn-paper crop used along the long (147px) edges. */
-function TornEdgeLong() {
-  return (
-    <div className="relative h-[375px] w-[147px]">
-      <div className="pointer-events-none absolute inset-0 overflow-hidden">
-        <img
-          alt=""
-          className="absolute left-[-81.51%] top-[-13.38%] h-[134.36%] w-[192.99%] max-w-none"
-          src={`${ASSET}/torn-paper.png`}
-        />
-      </div>
-    </div>
-  );
-}
-
-/** Torn-paper crop used along the short (52px) edges. */
-function TornEdgeShort() {
-  return (
-    <div className="relative h-[290px] w-[52px]">
-      <div className="pointer-events-none absolute inset-0 overflow-hidden">
-        <img
-          alt=""
-          className="absolute left-[-413.1%] top-[-6.61%] h-[173.74%] w-[545.57%] max-w-none"
-          src={`${ASSET}/torn-paper.png`}
-        />
-      </div>
-    </div>
-  );
-}
 
 /** The film-strip of three photos, tilted -4.83deg. */
 function FilmStrip({ content }: { content: WeddingTemplate1Content }) {
@@ -305,60 +276,40 @@ export default function LoveStory({
       {/* Main story block: torn-paper frame, paper card, film strip, polaroid, milestone */}
       <div className="absolute left-[15px] top-[151px] h-[696px] w-[360px]">
         {/* Torn-paper border pieces (behind the paper card) */}
-        <div className="absolute left-[calc(50%+34.5px)] top-[8px] flex h-[147px] w-[375px] -translate-x-1/2 items-center justify-center">
-          <div className="flex-none -rotate-90 -scale-y-100">
-            <TornEdgeLong />
-          </div>
-        </div>
-        <div className="absolute left-[calc(50%+34.5px)] top-[549px] flex h-[147px] w-[375px] -translate-x-1/2 items-center justify-center">
-          <div className="flex-none rotate-90">
-            <TornEdgeLong />
-          </div>
-        </div>
-        <div className="absolute left-[calc(50%-35px)] top-[8px] flex h-[52px] w-[290px] -translate-x-1/2 items-center justify-center">
-          <div className="flex-none -rotate-90">
-            <TornEdgeShort />
-          </div>
-        </div>
-        <div className="absolute left-[calc(50%-35px)] top-[644px] flex h-[52px] w-[290px] -translate-x-1/2 items-center justify-center">
-          <div className="flex-none rotate-90 -scale-y-100">
-            <TornEdgeShort />
-          </div>
-        </div>
-        <div className="absolute left-[calc(50%-98.5px)] top-[55px] flex h-[375px] w-[147px] -translate-x-1/2 items-center justify-center">
-          <div className="flex-none rotate-180 -scale-y-100">
-            <TornEdgeLong />
-          </div>
-        </div>
-        <div className="absolute left-[calc(50%-94.5px)] top-[229px] flex h-[375px] w-[147px] -translate-x-1/2 items-center justify-center">
-          <div className="flex-none rotate-180 -scale-y-100">
-            <TornEdgeLong />
-          </div>
-        </div>
-        <div className="absolute left-[calc(50%-94.5px)] top-[286px] flex h-[375px] w-[147px] -translate-x-1/2 items-center justify-center">
-          <div className="flex-none rotate-180">
-            <TornEdgeLong />
-          </div>
-        </div>
+        <TornEdge
+          box="left-[calc(50%+34.5px)] top-[8px] h-[147px] w-[375px] -translate-x-1/2"
+          spin="-rotate-90 -scale-y-100"
+        />
+        <TornEdge
+          box="left-[calc(50%+34.5px)] top-[549px] h-[147px] w-[375px] -translate-x-1/2"
+          spin="rotate-90"
+        />
+        <TornEdge
+          box="left-[calc(50%-35px)] top-[8px] h-[52px] w-[290px] -translate-x-1/2"
+          spin="-rotate-90"
+          long={false}
+        />
+        <TornEdge
+          box="left-[calc(50%-35px)] top-[644px] h-[52px] w-[290px] -translate-x-1/2"
+          spin="rotate-90 -scale-y-100"
+          long={false}
+        />
+        <TornEdge
+          box="left-[calc(50%-98.5px)] top-[55px] h-[375px] w-[147px] -translate-x-1/2"
+          spin="rotate-180 -scale-y-100"
+        />
+        <TornEdge
+          box="left-[calc(50%-94.5px)] top-[229px] h-[375px] w-[147px] -translate-x-1/2"
+          spin="rotate-180 -scale-y-100"
+        />
+        <TornEdge
+          box="left-[calc(50%-94.5px)] top-[286px] h-[375px] w-[147px] -translate-x-1/2"
+          spin="rotate-180"
+        />
 
         {/* Paper card background + cream tint overlay */}
         <div className="absolute left-[50px] top-[55px] h-[606px] w-[329px]">
-          <div aria-hidden className="pointer-events-none absolute inset-0">
-            <div className="absolute inset-0 overflow-hidden">
-              <img
-                alt=""
-                className="absolute left-0 top-[-67.47%] h-[247.47%] w-[307.6%] max-w-none"
-                src={`${ASSET}/paper.jpg`}
-              />
-            </div>
-            <div
-              className="absolute inset-0"
-              style={{
-                backgroundImage:
-                  'linear-gradient(90deg, rgba(0,0,0,0.04) 0%, rgba(0,0,0,0.04) 100%), linear-gradient(90deg, rgba(239,233,226,0.3) 0%, rgba(239,233,226,0.3) 100%)',
-              }}
-            />
-          </div>
+          <PaperGround />
         </div>
 
         <FilmStrip content={content} />
