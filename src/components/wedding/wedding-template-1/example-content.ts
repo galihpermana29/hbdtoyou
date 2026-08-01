@@ -37,6 +37,22 @@ const DEFAULT_EXAMPLE_CONTENT_NAME: ExampleContentName = 'flattering';
 export const EXAMPLE_CONTENT_PARAM = 'content';
 
 /**
+ * Who a Showcase invitation is addressed to, supplied while nothing else can.
+ *
+ * The name belongs to the Guest List the Create Flow collects, and reaching it
+ * needs a link per guest, which is `hbd-a09.21`. Until then this is how the
+ * closed envelope gets a name to draw, the same scaffolding shape as the
+ * parameter above, and it comes out when that lands.
+ */
+export const ADDRESSEE_PARAM = 'guest';
+
+/** The addressee a query gave, or none, in which case none is drawn. */
+export function addresseeFrom(value: string | string[] | undefined) {
+  const name = Array.isArray(value) ? value[0] : value;
+  return name?.trim() || undefined;
+}
+
+/**
  * The designer's photographs, which every set shares.
  *
  * Read off the sample invitation rather than written out again, so the three

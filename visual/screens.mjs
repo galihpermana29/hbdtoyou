@@ -318,7 +318,10 @@ export const screens = [
   {
     id: 'wedding-template-1-sealed',
     title: 'Wedding Template 1, sealed, as a guest is sent it',
-    route: '/wedding-template-1',
+    // Addressed, because a sealed envelope is the one screen that carries a
+    // guest's own name. The parameter is scaffolding until a link per guest
+    // exists: `hbd-a09.21`.
+    route: '/wedding-template-1?guest=Galih%20%26%20Partner',
     figmaNodeId: '332-30919',
     designWidth: TEMPLATE_DESIGN_WIDTH,
     baseline: 'wedding-template-1-sealed.png',

@@ -1,5 +1,7 @@
 import {
   EXAMPLE_CONTENT_PARAM,
+  addresseeFrom,
+  ADDRESSEE_PARAM,
   exampleContent,
 } from '@/components/wedding/wedding-template-1/example-content';
 import WeddingTemplate1 from '@/components/wedding/wedding-template-1/WeddingTemplate1';
@@ -52,6 +54,7 @@ export default function WeddingTemplate1ShowcasePage({
     <div className={`${fontVars} bg-black`}>
       <WeddingTemplate1
         content={exampleContent(searchParams[EXAMPLE_CONTENT_PARAM])}
+        addressee={addresseeFrom(searchParams[ADDRESSEE_PARAM])}
         sealed
         holdsStill="page"
         showVinylWidget

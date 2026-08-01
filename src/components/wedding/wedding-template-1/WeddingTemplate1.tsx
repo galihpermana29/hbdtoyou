@@ -37,6 +37,14 @@ export interface WeddingTemplate1Props {
    */
   sealed?: boolean;
   /**
+   * Who this invitation was sent to, drawn on the closed envelope.
+   *
+   * A guest's name rather than the couple's, so it is not part of the content
+   * the Create Flow collects: one wedding is sent to many guests. Where it
+   * comes from for real is `hbd-a09.21`, which needs a link per guest.
+   */
+  addressee?: string;
+  /**
    * What this invitation may hold still while it is sealed, which is whatever
    * it is scrolling inside: `'page'` where it has the window to itself, and a
    * ref to the scroller where something else does the scrolling - `Scroller`
@@ -63,6 +71,7 @@ export interface WeddingTemplate1Props {
 export default function WeddingTemplate1({
   content = DEFAULT_WEDDING_TEMPLATE_1_CONTENT,
   sealed = false,
+  addressee,
   holdsStill,
   showVinylWidget = false,
 }: WeddingTemplate1Props) {
@@ -119,7 +128,7 @@ export default function WeddingTemplate1({
   return (
     <SealedProvider sealed={sealed}>
       <main className="relative mx-auto w-full max-w-[375px] overflow-x-hidden bg-[#090909] text-[#fafafa]">
-        <Hero content={content} onOpened={reveal} />
+        <Hero content={content} addressee={addressee} onOpened={reveal} />
         {/* Everything below the envelope, out of reach until it is opened.
             Holding the scroller still stops the wheel and nothing else: without
             this a guest presses Tab and walks straight down to View Location

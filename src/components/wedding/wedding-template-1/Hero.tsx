@@ -118,12 +118,15 @@ const step = (
 /** The envelope with the two cards (save-the-date + couple photo) tucked inside. */
 function EnvelopeCard({
   sealed,
+  addressee,
   opened,
   reduce,
   content,
 }: {
   /** Whether this invitation has a closed envelope to open at all. */
   sealed: boolean;
+  /** Who this invitation was sent to, drawn on the closed envelope. */
+  addressee?: string;
   opened: boolean;
   reduce: boolean | null;
   content: WeddingTemplate1Content;
@@ -326,6 +329,28 @@ function EnvelopeCard({
             className="absolute left-[-0.026px] top-[184.063px] h-[268.744px] w-[384.566px] max-w-none"
             src={`${ASSET}/envelope-closed.png`}
           />
+          {/*
+            Who the invitation was sent to, drawn on the face of the envelope
+            where a guest can read it.
+
+            The design puts it here - node 332:30838, 152x19 at 115,374, clear
+            of the seal above it - and then draws the envelope's own photograph
+            over the top, where nobody can read a word of it. That is the frame
+            stating a line of copy and hiding it in the same breath rather than
+            a decision, so the line is kept and the hiding is not:
+            `docs/adr/0002-figma-is-literal-truth.md`.
+
+            Nothing is drawn when there is no addressee. An envelope addressed
+            to a placeholder is worse than an unaddressed one, because the one
+            surface of the invitation that is supposed to be a guest's own would
+            be carrying somebody else's name.
+          */}
+          {addressee ? (
+            <p className="absolute left-[115px] top-[374px] w-[152px] font-[family-name:var(--font-wt1-mono)] text-[16px] leading-[normal] text-[#090909]">
+              {addressee}
+            </p>
+          ) : null}
+
           {/* The seal only lifts. Fading it out here as well would take it off
               the envelope before the lift could be seen, and it is part of the
               closed envelope: the cross-fade above carries it away. */}
@@ -366,9 +391,12 @@ function WaxSeal() {
 
 export default function Hero({
   content = DEFAULT_WEDDING_TEMPLATE_1_CONTENT,
+  addressee,
   onOpened,
 }: {
   content?: WeddingTemplate1Content;
+  /** Who this invitation was sent to, drawn on the closed envelope. */
+  addressee?: string;
   /**
    * Say that the opening is over and the rest of the invitation is the guest's.
    *
@@ -438,6 +466,7 @@ export default function Hero({
 
       <EnvelopeCard
         sealed={sealed}
+        addressee={addressee}
         opened={envelopeOpened}
         reduce={reduce}
         content={content}

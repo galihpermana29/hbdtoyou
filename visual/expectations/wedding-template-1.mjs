@@ -353,12 +353,12 @@ const SECTIONS = [
     // colour, so there is nothing here a computed style could be held against.
     background: null,
     paragraphs: ['Holy Verse scripture', 'Holy Verse citation'],
+    // Both are fitted to the band, so the 12px and 14px the design states are
+    // ceilings rather than sizes and are deliberately absent. A couple whose
+    // verse is longer than the designer's keeps all of it at a smaller size.
     parts: (invitation) => [
-      invitation.paragraph(
-        'Holy Verse scripture',
-        type('12px', 400, '#090909')
-      ),
-      invitation.paragraph('Holy Verse citation', type('14px', 600, '#090909')),
+      invitation.paragraph('Holy Verse scripture', setting(400, '#090909')),
+      invitation.paragraph('Holy Verse citation', setting(600, '#090909')),
     ],
   },
   {
@@ -794,6 +794,10 @@ export const expectations = invitationExpectations();
  * and fail on its copy.
  */
 const SEALED_PARAGRAPHS = [
+  // First, because the envelope is drawn over everything while it is sealed and
+  // the addressee is drawn on it: it is the first line of the Hero a guest can
+  // read. Only a sealed invitation has one, so it appears in this list alone.
+  'Envelope addressee',
   'Open Invitation label',
   'Invitation heading',
   'Invitation welcome',
@@ -834,6 +838,14 @@ function sealedExpectations() {
       nth: 0,
       style: { backgroundColor: NIGHT },
     },
+    // Who the invitation was sent to, in the design's own place on the face of
+    // the envelope rather than under the photograph the design hides it beneath.
+    // See `docs/adr/0002-figma-is-literal-truth.md`.
+    invitation.paragraph(
+      'Envelope addressee',
+      type('16px', 400, '#090909'),
+      'Galih & Partner'
+    ),
     OPEN_INVITATION_CONTROL,
     invitation.paragraph(
       'Open Invitation label',

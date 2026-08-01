@@ -37,13 +37,24 @@ The three that draw the step mostly closed stack Venue Details above Love Story 
 "Expanded All", node 332-14392, stacks Love Story above Venue Details and names that Section "Photo Showcase".
 A screen cannot restack itself when a Section opens, so this too cannot be followed literally.
 
-The closed envelope is not addressed to anybody.
+The closed envelope is addressed to the guest it was sent to, which the design both asks for and hides.
 
 The design writes a guest's name across the front of it - "Galih & Keluarga", node 332:30838 inside the sealed Hero 332-30920 - and then draws the envelope's own photograph over the top, where the name cannot be read.
 So the frame cannot be followed literally: it states a line of copy and hides it in the same breath.
 It could not be followed anyway, because there is nowhere for the name to come from.
 A guest's name belongs to the Guest List the Create Flow collects, and the template is handed one wedding rather than one guest, so an invitation would first have to know which guest opened it.
-Both questions are `hbd-a09.17`; until they are answered the envelope arrives unaddressed, and the sealed screen's expectations claim no such line.
+Both questions are answered now, one each way.
+
+The line is kept and the hiding is not.
+The addressee is drawn in the design's own place, node 332:30838, 152x19 at 115,374 in 16px Sometype Mono, which sits on the face of the envelope clear of the seal above it.
+It is drawn over the photograph rather than under it, because a line of copy the design states and then covers is the frame contradicting itself rather than an instruction.
+
+Where the name comes from is still not answered.
+A guest's name belongs to the Guest List, and reaching it needs a link per guest, which is `hbd-a09.21` and waits on the Create Flow being wired to a backend at all.
+Until then a query parameter supplies one, the same scaffolding shape the Showcase already uses to choose its Example Content, and it comes out when that lands.
+
+An invitation with no addressee draws none.
+A placeholder would be worse than nothing, because the one surface of the invitation that is supposed to be a guest's own would carry somebody else's name.
 
 The Love Story asks for three chapters and offers no way to add a fourth or remove one.
 
