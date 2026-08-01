@@ -65,7 +65,7 @@ function WishCard({ name, date, message, bordered }: Wish) {
       <img
         alt=""
         className="pointer-events-none absolute inset-0 size-full max-w-none rounded-[2px] object-cover"
-        src={`${ASSET}/messages-card-bg.jpg`}
+        src={`${ASSET}/paper.jpg`}
       />
       <div className="relative flex w-full shrink-0 items-start gap-[12px]">
         <div className="relative size-[24px] shrink-0">

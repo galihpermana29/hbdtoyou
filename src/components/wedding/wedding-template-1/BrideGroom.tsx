@@ -33,6 +33,14 @@ import {
 const ASSET = '/templates/wedding-template-1';
 
 /**
+ * The sample invitation, which is what an unanswered photograph falls back to.
+ *
+ * The section names the torn edge, the portrait frame and the emblem, which are
+ * the template's on every invitation, and it names neither partner's face.
+ */
+const SAMPLE = DEFAULT_WEDDING_TEMPLATE_1_CONTENT;
+
+/**
  * The height either of a partner's two written answers steps down towards.
  *
  * Three lines of the 10px the design sets them in, which at this leading is 45.
@@ -162,6 +170,13 @@ export default function BrideGroom({
   const seen = sealed ? scrolledIntoView : true;
   const fadeUpReveal = useWeddingReveal(fadeUp);
 
+  // Two faces, so two photographs the couple owns. The frame around each is the
+  // template's and is drawn on every invitation; who is inside it is not, and a
+  // couple who has not given theirs is shown the sample's rather than a picture
+  // baked into this section.
+  const bridePhoto = content.bridePhoto || SAMPLE.bridePhoto;
+  const groomPhoto = content.groomPhoto || SAMPLE.groomPhoto;
+
   // The portraits slide in from off-canvas. They can't use whileInView on
   // themselves: at their start offset they sit outside the section's
   // overflow-hidden box, so the IntersectionObserver never sees them enter.
@@ -187,7 +202,7 @@ export default function BrideGroom({
               <img
                 alt=""
                 className="absolute left-[-27.17%] top-[-13.38%] h-[134.36%] w-[298.63%] max-w-none"
-                src={`${ASSET}/bridegroom-513.png`}
+                src={`${ASSET}/torn-paper.png`}
               />
             </div>
           </div>
@@ -227,7 +242,7 @@ export default function BrideGroom({
             <img
               alt=""
               className="absolute left-0 top-[-9%] h-[159.43%] w-full max-w-none"
-              src={`${ASSET}/bridegroom-rect8.jpg`}
+              src={bridePhoto}
             />
           </div>
         </div>
@@ -238,7 +253,7 @@ export default function BrideGroom({
                 <img
                   alt=""
                   className="absolute left-[-10.9%] top-[-11.27%] h-[155.74%] w-[122.52%] max-w-none"
-                  src={`${ASSET}/bridegroom-523.png`}
+                  src={`${ASSET}/portrait-frame.png`}
                 />
               </div>
             </div>
@@ -257,7 +272,7 @@ export default function BrideGroom({
                 <img
                   alt=""
                   className="absolute left-[-0.18%] top-[-0.07%] h-[159.43%] w-full max-w-none"
-                  src={`${ASSET}/bridegroom-rect9.jpg`}
+                  src={groomPhoto}
                 />
               </div>
             </div>
@@ -268,7 +283,7 @@ export default function BrideGroom({
                     <img
                       alt=""
                       className="absolute left-[-10.9%] top-[-11.27%] h-[155.74%] w-[122.52%] max-w-none"
-                      src={`${ASSET}/bridegroom-523.png`}
+                      src={`${ASSET}/portrait-frame.png`}
                     />
                   </div>
                 </div>
@@ -292,7 +307,7 @@ export default function BrideGroom({
         <img
           alt=""
           className="pointer-events-none absolute inset-0 size-full max-w-none object-cover"
-          src={`${ASSET}/bridegroom-533.png`}
+          src={`${ASSET}/bridegroom-emblem.png`}
         />
       </div>
     </section>

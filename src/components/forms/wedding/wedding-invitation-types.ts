@@ -61,6 +61,17 @@ export interface WeddingTemplate1Content {
   brideFatherName: string;
   brideMotherName: string;
   heroPhotos: string[];
+  /**
+   * Each partner's own portrait, inside the frame the Bride & Groom's
+   * Introduction draws around it.
+   *
+   * These are two faces, so they are the couple's rather than the template's,
+   * and they are content for the same reason the photograph inside a polaroid
+   * is. The Create Flow does not ask for them yet - `hbd-a09.20` - so
+   * `formValuesToContent` takes both from the sample whatever a couple answers.
+   */
+  bridePhoto: string;
+  groomPhoto: string;
   weddingDateIso: string;
   backgroundMusicId: string;
   verseText: string;
@@ -159,6 +170,27 @@ export const DUMMY_BACKGROUND_MUSIC_OPTIONS = [
   { label: 'Nadhif Basalamah - Penjaga Hati', value: 'nadhif-penjaga-hati' },
 ];
 
+/** Where Wedding Template 1's artwork is served from. */
+const TEMPLATE_1_ASSET = '/templates/wedding-template-1';
+
+/**
+ * The photographs of the designer's own example wedding.
+ *
+ * Every one of these is somebody's picture, taken at somebody's wedding, and
+ * none of them is the couple's. They are content, not artwork: the template
+ * draws the polaroid's border on every invitation, but the photograph inside it
+ * belongs to whoever is getting married. So they are held here, in the sample
+ * invitation, rather than inside the sections - a section with a photograph
+ * baked into it would put a stranger's face on a published invitation and look
+ * deliberate doing it, and no section can now do that because none of them
+ * names a photograph at all.
+ *
+ * They are still what an unanswered photo falls back to, exactly as an
+ * unanswered name falls back to "Elias": a draft has to look like something
+ * before it is finished. What changes is that the fallback is one nameable
+ * wedding rather than a path buried in a component, so a published invitation
+ * can be given nothing to fall back to.
+ */
 export const DEFAULT_WEDDING_TEMPLATE_1_CONTENT: WeddingTemplate1Content = {
   groomName: 'Elias',
   brideName: 'Freya',
@@ -168,13 +200,19 @@ export const DEFAULT_WEDDING_TEMPLATE_1_CONTENT: WeddingTemplate1Content = {
   groomMotherName: 'Esther Triasningsih',
   brideFatherName: 'Ferdinand Magellan',
   brideMotherName: 'Tuti Pudjiastuti',
-  heroPhotos: [],
+  heroPhotos: [`${TEMPLATE_1_ASSET}/couple-photo.png`],
+  bridePhoto: `${TEMPLATE_1_ASSET}/bride-photo.jpg`,
+  groomPhoto: `${TEMPLATE_1_ASSET}/groom-photo.jpg`,
   weddingDateIso: '2026-05-03T19:00:00+07:00',
   backgroundMusicId: 'sal-priadi-mencintaimu',
   verseText:
     'Dan di antara tanda-tanda (kebesaran)-Nya ialah Dia menciptakan pasangan-pasangan untukmu dari jenismu sendiri, agar kamu cenderung dan merasa tenteram kepadanya, dan Dia menjadikan di antaramu rasa cinta dan kasih sayang. Sesungguhnya pada yang demikian itu benar-benar terdapat tanda-tanda (kebesaran Allah) bagi kaum yang berpikir',
   verseCitation: 'Q.S Ar-Rum : 21',
-  loveStoryPhotos: [],
+  loveStoryPhotos: [
+    `${TEMPLATE_1_ASSET}/lovestory-photo-1.png`,
+    `${TEMPLATE_1_ASSET}/lovestory-photo-2.png`,
+    `${TEMPLATE_1_ASSET}/lovestory-photo-3.png`,
+  ],
   milestones: [
     {
       year: '2020',
@@ -192,10 +230,10 @@ export const DEFAULT_WEDDING_TEMPLATE_1_CONTENT: WeddingTemplate1Content = {
       body: 'Five years later, they are each other\u2019s anchor and wildest adventure. Freya still makes Elias laugh until his sides ache, and Elias\u2019s calm presence remains her haven. Now, they are excited to begin their next chapter together, celebrating not just their love, but the unique path they\u2019ve carved side by side\u2014surrounded by the family and friends who mean the most.',
     },
   ],
-  polaroidPhoto: '',
-  mapPhoto: '',
+  polaroidPhoto: `${TEMPLATE_1_ASSET}/lovestory-polaroid-photo.jpg`,
+  mapPhoto: `${TEMPLATE_1_ASSET}/lovestory-map-photo.png`,
   loveStoryVideo: '',
-  eventPhotos: [],
+  eventPhotos: [`${TEMPLATE_1_ASSET}/event-photo.png`],
   eventStartTime: '19:00',
   eventEndTime: '21:00',
   venueName: 'Mandarin Hotel, Jakarta',
@@ -203,10 +241,16 @@ export const DEFAULT_WEDDING_TEMPLATE_1_CONTENT: WeddingTemplate1Content = {
     'Jl. Imam Bonjol, Menteng, Kec. Menteng, Kota Jakarta Pusat, Daerah Khusus Ibukota Jakarta 10310',
   mapsUrl: '',
   photoShareUrl: '',
-  galleryPhotos: [],
+  galleryPhotos: [
+    `${TEMPLATE_1_ASSET}/gallery-1.png`,
+    `${TEMPLATE_1_ASSET}/gallery-2.png`,
+    `${TEMPLATE_1_ASSET}/gallery-3.png`,
+    `${TEMPLATE_1_ASSET}/gallery-4.png`,
+    `${TEMPLATE_1_ASSET}/gallery-5.png`,
+  ],
   tokenMessage:
     'While we wish you could be here with us, your presence in our lives is the greatest gift of all. Should you wish to send a token of your love, please follow the link below.',
-  tokenPhoto: '',
+  tokenPhoto: `${TEMPLATE_1_ASSET}/token-photo.jpg`,
   accountHolder: 'Elias Frank Simanjuntak',
   bankProvider: 'BRI',
   accountNumber: '3331 0908 1766',
@@ -321,6 +365,10 @@ export function formValuesToContent(
     brideFatherName: v.brideFatherName?.trim() || defaults.brideFatherName,
     brideMotherName: v.brideMotherName?.trim() || defaults.brideMotherName,
     heroPhotos: v.heroPhotos ?? defaults.heroPhotos,
+    // The two portraits are the sample's, because the Create Flow has no
+    // question that hands back either of them yet: `hbd-a09.20`.
+    bridePhoto: defaults.bridePhoto,
+    groomPhoto: defaults.groomPhoto,
     weddingDateIso: weddingDateToIso(v.weddingDate, v.eventStartTime),
     backgroundMusicId: v.backgroundMusic || defaults.backgroundMusicId,
     verseText: v.verseText?.trim() || defaults.verseText,

@@ -22,6 +22,15 @@ import {
 
 const ASSET = '/templates/wedding-template-1';
 
+/**
+ * The sample invitation, which is what an unanswered photograph falls back to.
+ *
+ * The section names artwork and never a photograph, because a photograph
+ * belongs to whoever is getting married. Where a couple has not given one, the
+ * one the sample holds stands in, the same as an unanswered name does.
+ */
+const SAMPLE = DEFAULT_WEDDING_TEMPLATE_1_CONTENT;
+
 export default function TokenOfLove({
   content = DEFAULT_WEDDING_TEMPLATE_1_CONTENT,
 }: {
@@ -29,7 +38,7 @@ export default function TokenOfLove({
 }) {
   const fadeUpCenterReveal = useWeddingReveal(fadeUpCenter);
   const [copied, setCopied] = useState(false);
-  const tokenPhoto = content.tokenPhoto || `${ASSET}/token-photo.jpg`;
+  const tokenPhoto = content.tokenPhoto || SAMPLE.tokenPhoto;
 
   const handleCopy = () => {
     navigator.clipboard?.writeText(content.accountNumber).then(() => {
@@ -66,7 +75,7 @@ export default function TokenOfLove({
                 <img
                   alt=""
                   className="absolute left-0 top-[-57.5%] h-[210.91%] w-full max-w-none"
-                  src={`${ASSET}/token-paper.jpg`}
+                  src={`${ASSET}/paper.jpg`}
                 />
               </div>
             </div>
@@ -88,7 +97,7 @@ export default function TokenOfLove({
             <img
               alt=""
               className="pointer-events-none absolute inset-0 size-full max-w-none rounded-[2px] object-cover"
-              src={`${ASSET}/token-paper.jpg`}
+              src={`${ASSET}/paper.jpg`}
             />
             <div className="relative flex w-full items-center gap-[8px]">
               <div className="relative flex min-w-px flex-[1_0_0] items-start">

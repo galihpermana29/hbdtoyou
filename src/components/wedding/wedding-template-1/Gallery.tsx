@@ -19,15 +19,22 @@ import {
   type WeddingTemplate1Content,
 } from '@/components/forms/wedding/wedding-invitation-types';
 
-const ASSET = '/templates/wedding-template-1';
+/**
+ * The sample invitation, which is what an unanswered photograph falls back to.
+ *
+ * The section draws no artwork of its own at all - it is five photographs in
+ * five boxes - so it names none, and the whole of it is the couple's.
+ */
+const SAMPLE = DEFAULT_WEDDING_TEMPLATE_1_CONTENT;
 
-const GALLERY_FALLBACKS = [
-  `${ASSET}/gallery-1.png`,
-  `${ASSET}/gallery-2.png`,
-  `${ASSET}/gallery-3.png`,
-  `${ASSET}/gallery-4.png`,
-  `${ASSET}/gallery-5.png`,
-];
+/**
+ * How many photographs the design lays out, which is five boxes drawn below.
+ *
+ * Written down rather than counted off the sample's list: the design decides
+ * how many boxes there are, and a sample that happened to hold four would
+ * otherwise leave the fifth box with no photograph at all and say nothing.
+ */
+const GALLERY_PHOTO_COUNT = 5;
 
 export default function Gallery({
   content = DEFAULT_WEDDING_TEMPLATE_1_CONTENT,
@@ -35,8 +42,8 @@ export default function Gallery({
   content?: WeddingTemplate1Content;
 }) {
   const staggerReveal = useWeddingReveal(staggerContainer);
-  const photos = GALLERY_FALLBACKS.map((fallback, index) =>
-    pickPhoto(content.galleryPhotos, index, fallback)
+  const photos = Array.from({ length: GALLERY_PHOTO_COUNT }, (_, index) =>
+    pickPhoto(content.galleryPhotos, index, SAMPLE.galleryPhotos[index])
   );
 
   return (

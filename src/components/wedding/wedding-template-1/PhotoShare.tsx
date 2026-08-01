@@ -35,7 +35,7 @@ export default function PhotoShare() {
             <img
               alt=""
               className="pointer-events-none absolute inset-0 size-full max-w-none rounded-[2px] object-cover"
-              src={`${ASSET}/photoshare-card.jpg`}
+              src={`${ASSET}/paper.jpg`}
             />
             <div className="relative flex w-full items-center justify-center border border-solid border-[#fafafa] bg-black p-[10px]">
               <p className="whitespace-nowrap font-[family-name:var(--font-wt1-mono)] text-[12px] leading-normal text-[#fafafa]">

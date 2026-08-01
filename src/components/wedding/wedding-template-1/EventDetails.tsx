@@ -24,6 +24,15 @@ import {
 
 const ASSET = '/templates/wedding-template-1';
 
+/**
+ * The sample invitation, which is what an unanswered photograph falls back to.
+ *
+ * The section names artwork and never a photograph, because a photograph
+ * belongs to whoever is getting married. Where a couple has not given one, the
+ * one the sample holds stands in, the same as an unanswered name does.
+ */
+const SAMPLE = DEFAULT_WEDDING_TEMPLATE_1_CONTENT;
+
 function formatEventDateLabel(iso: string): string {
   const d = new Date(iso);
   if (Number.isNaN(d.getTime())) return 'May 3rd 2026';
@@ -70,7 +79,7 @@ export default function EventDetails({
   const polaroidPhoto = pickPhoto(
     content.eventPhotos,
     0,
-    `${ASSET}/event-polaroid-frame.png`
+    SAMPLE.eventPhotos[0]
   );
   const dateLabel = formatEventDateLabel(content.weddingDateIso);
   const timeLabel = `${content.eventStartTime.replace(':', '.')} - ${content.eventEndTime.replace(':', '.')} WIB`;
@@ -132,7 +141,7 @@ export default function EventDetails({
                     <img
                       alt=""
                       className="pointer-events-none absolute inset-0 size-full max-w-none object-cover"
-                      src={`${ASSET}/event-polaroid.png`}
+                      src={`${ASSET}/polaroid-frame.png`}
                     />
                   </div>
                   <div className="absolute left-[9.43px] top-[10.34px] h-[163.363px] w-[146.022px]">

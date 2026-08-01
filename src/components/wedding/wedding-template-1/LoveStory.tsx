@@ -26,6 +26,16 @@ import {
 const ASSET = '/templates/wedding-template-1';
 
 /**
+ * The sample invitation, which is what an unanswered photograph falls back to.
+ *
+ * The section names artwork - the film strip, the polaroid's border, the map
+ * keepsake - and never a photograph, because a photograph belongs to whoever is
+ * getting married. Where a couple has not given one, the one the sample holds
+ * stands in, the same as an unanswered name does.
+ */
+const SAMPLE = DEFAULT_WEDDING_TEMPLATE_1_CONTENT;
+
+/**
  * The largest and the smallest a chapter's story may be printed at.
  *
  * The ceiling is the 10px the design sets one in, and it is a ceiling rather
@@ -81,7 +91,7 @@ function TornEdgeLong() {
         <img
           alt=""
           className="absolute left-[-81.51%] top-[-13.38%] h-[134.36%] w-[192.99%] max-w-none"
-          src={`${ASSET}/lovestory-torn-paper.png`}
+          src={`${ASSET}/torn-paper.png`}
         />
       </div>
     </div>
@@ -96,7 +106,7 @@ function TornEdgeShort() {
         <img
           alt=""
           className="absolute left-[-413.1%] top-[-6.61%] h-[173.74%] w-[545.57%] max-w-none"
-          src={`${ASSET}/lovestory-torn-paper.png`}
+          src={`${ASSET}/torn-paper.png`}
         />
       </div>
     </div>
@@ -106,12 +116,11 @@ function TornEdgeShort() {
 /** The film-strip of three photos, tilted -4.83deg. */
 function FilmStrip({ content }: { content: WeddingTemplate1Content }) {
   const reveal = useWeddingReveal(fadeUp);
+  // Three, because the design draws three slots in the strip below and the
+  // Love Story asks a couple three questions. Counting the sample's list
+  // instead would leave a slot empty and silent if the sample ever held fewer.
   const photos = [0, 1, 2].map((i) =>
-    pickPhoto(
-      content.loveStoryPhotos,
-      i,
-      `${ASSET}/lovestory-photo-${i + 1}.png`
-    )
+    pickPhoto(content.loveStoryPhotos, i, SAMPLE.loveStoryPhotos[i])
   );
 
   return (
@@ -168,8 +177,7 @@ function Polaroid({ content }: { content: WeddingTemplate1Content }) {
   const reveal = useWeddingReveal(fadeUp);
   const [revealed, setRevealed] = useState(false);
   const isRevealed = !sealed || revealed;
-  const polaroidPhoto =
-    content.polaroidPhoto || `${ASSET}/lovestory-polaroid-photo.png`;
+  const polaroidPhoto = content.polaroidPhoto || SAMPLE.polaroidPhoto;
 
   const coverAnim = {
     animate: { opacity: isRevealed ? 0 : 1, scale: isRevealed ? 1.05 : 1 },
@@ -198,7 +206,7 @@ function Polaroid({ content }: { content: WeddingTemplate1Content }) {
         <img
           alt=""
           className="pointer-events-none absolute inset-0 size-full max-w-none object-cover"
-          src={`${ASSET}/lovestory-polaroid-frame.png`}
+          src={`${ASSET}/polaroid-frame.png`}
         />
       </div>
       <motion.div
@@ -275,7 +283,7 @@ export default function LoveStory({
   const staggerReveal = useWeddingReveal(staggerContainer);
   const centerMilestone = content.milestones[2] ?? content.milestones[0];
   const rightMilestones = content.milestones.slice(0, 2);
-  const mapPhoto = content.mapPhoto || `${ASSET}/lovestory-map-photo.png`;
+  const mapPhoto = content.mapPhoto || SAMPLE.mapPhoto;
 
   return (
     <section className="relative h-[1081px] w-full overflow-hidden bg-[#090909]">
@@ -340,7 +348,7 @@ export default function LoveStory({
               <img
                 alt=""
                 className="absolute left-0 top-[-67.47%] h-[247.47%] w-[307.6%] max-w-none"
-                src={`${ASSET}/lovestory-paper-bg.jpg`}
+                src={`${ASSET}/paper.jpg`}
               />
             </div>
             <div
@@ -361,7 +369,7 @@ export default function LoveStory({
             <img
               alt=""
               className="absolute left-[-145.77%] top-[-32.79%] h-[169.98%] w-[366.17%] max-w-none"
-              src={`${ASSET}/lovestory-image-520.png`}
+              src={`${ASSET}/lovestory-torn-strip.png`}
             />
           </div>
         </div>

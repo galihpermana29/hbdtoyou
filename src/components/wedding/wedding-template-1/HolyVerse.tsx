@@ -33,7 +33,7 @@ export default function HolyVerse({
         <img
           alt=""
           className="absolute inset-0 size-full max-w-none object-cover"
-          src={`${ASSET}/holy-verse-bg.jpg`}
+          src={`${ASSET}/paper.jpg`}
         />
         <div
           className="absolute inset-0"

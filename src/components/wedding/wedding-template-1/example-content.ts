@@ -14,12 +14,13 @@
  *
  * Two things are deliberately the same in all three sets, because varying them
  * would be varying something other than length. The photographs are the
- * designer's example wedding, which is the one place they are the right answer;
- * they are still the fallback each section holds rather than content, and
- * moving them here is `hbd-a09.10`. And `mapsUrl` is empty everywhere, because
- * the Venue Details Section draws its View Location control as a link when
- * there is a URL and as plain artwork when there is not - a set that filled it
- * in would differ from the others in structure rather than in length.
+ * designer's example wedding, which is the one place they are the right answer,
+ * and they are the same fifteen in every set: a chapter that overruns its film
+ * strip has to be the only thing that changed. And `mapsUrl` is empty
+ * everywhere, because the Venue Details Section draws its View Location control
+ * as a link when there is a URL and as plain artwork when there is not - a set
+ * that filled it in would differ from the others in structure rather than in
+ * length.
  */
 import {
   DEFAULT_WEDDING_TEMPLATE_1_CONTENT,
@@ -34,6 +35,33 @@ const DEFAULT_EXAMPLE_CONTENT_NAME: ExampleContentName = 'flattering';
 
 /** The query parameter the Showcase reads a set's name from. */
 export const EXAMPLE_CONTENT_PARAM = 'content';
+
+/**
+ * The designer's photographs, which every set shares.
+ *
+ * Read off the sample invitation rather than written out again, so the three
+ * sets differ in exactly one thing - how long the words are - and a photograph
+ * swapped in the sample reaches all three.
+ *
+ * The lists are copied rather than pointed at. A set is meant to be a complete
+ * wedding of its own, and three sets holding one array between them would let
+ * anything that sorted or appended to one silently rewrite the other two and
+ * the sample with them.
+ */
+function exampleWeddingPhotographs() {
+  const sample = DEFAULT_WEDDING_TEMPLATE_1_CONTENT;
+  return {
+    heroPhotos: [...sample.heroPhotos],
+    bridePhoto: sample.bridePhoto,
+    groomPhoto: sample.groomPhoto,
+    loveStoryPhotos: [...sample.loveStoryPhotos],
+    polaroidPhoto: sample.polaroidPhoto,
+    mapPhoto: sample.mapPhoto,
+    eventPhotos: [...sample.eventPhotos],
+    galleryPhotos: [...sample.galleryPhotos],
+    tokenPhoto: sample.tokenPhoto,
+  };
+}
 
 /**
  * Awkward but plausible.
@@ -53,13 +81,12 @@ const REALISTIC: WeddingTemplate1Content = {
   groomMotherName: 'Sri Wahyuningsih Nugroho',
   brideFatherName: 'Bambang Kusumaningrat',
   brideMotherName: 'Endang Retno Sulistyowati',
-  heroPhotos: [],
+  ...exampleWeddingPhotographs(),
   weddingDateIso: '2026-08-22T16:30:00+07:00',
   backgroundMusicId: 'raim-laode-komang',
   verseText:
     'Wahai manusia! Bertakwalah kepada Tuhanmu yang telah menciptakan kamu dari diri yang satu (Adam), dan (Allah) menciptakan pasangannya (Hawa) dari (diri)-nya; dan dari keduanya Allah memperkembangbiakkan laki-laki dan perempuan yang banyak. Bertakwalah kepada Allah yang dengan nama-Nya kamu saling meminta, dan (peliharalah) hubungan kekeluargaan. Sesungguhnya Allah selalu menjaga dan mengawasimu.',
   verseCitation: 'Q.S An-Nisa : 1',
-  loveStoryPhotos: [],
   milestones: [
     {
       year: '2019',
@@ -77,10 +104,7 @@ const REALISTIC: WeddingTemplate1Content = {
       body: 'He asked in the garden of her parents’ house, after dinner, with both families pretending very badly not to be watching from the window. She had known for a week. She let him finish the speech anyway, because he had clearly worked on it.',
     },
   ],
-  polaroidPhoto: '',
-  mapPhoto: '',
   loveStoryVideo: '',
-  eventPhotos: [],
   eventStartTime: '16:30',
   eventEndTime: '21:30',
   venueName: 'Gedung Balai Kartini, Jakarta Selatan',
@@ -88,10 +112,8 @@ const REALISTIC: WeddingTemplate1Content = {
     'Jl. Jenderal Gatot Subroto Kav. 37, RT.1/RW.4, Kuningan Timur, Kecamatan Setiabudi, Kota Jakarta Selatan, Daerah Khusus Ibukota Jakarta 12950',
   mapsUrl: '',
   photoShareUrl: '',
-  galleryPhotos: [],
   tokenMessage:
     'Your presence at our celebration is the only gift we have asked anybody for, and we mean that. If you would still like to send something to mark the day, the details below are here for that, and no part of us will count who used them.',
-  tokenPhoto: '',
   accountHolder: 'Prameswari Ayu Kusumaningrum',
   bankProvider: 'BCA',
   accountNumber: '8720 1145 9032',
@@ -127,13 +149,12 @@ const HOSTILE: WeddingTemplate1Content = {
   groomMotherName: 'Nyi Raden Ayu Siti Rahayuningtyas',
   brideFatherName: 'Kanjeng Raden Haryo Widyanto Notonegoro',
   brideMotherName: 'Retno Wulandari Hapsariningtyas',
-  heroPhotos: [],
+  ...exampleWeddingPhotographs(),
   weddingDateIso: '2026-09-30T11:00:00+07:00',
   backgroundMusicId: 'nadhif-penjaga-hati',
   verseText:
     'Dan di antara tanda-tanda (kebesaran)-Nya ialah Dia menciptakan pasangan-pasangan untukmu dari jenismu sendiri, agar kamu cenderung dan merasa tenteram kepadanya, dan Dia menjadikan di antaramu rasa cinta dan kasih sayang. Sesungguhnya pada yang demikian itu benar-benar terdapat tanda-tanda (kebesaran Allah) bagi kaum yang berpikir. Dan Allah menjadikan bagimu pasangan (suami atau istri) dari jenis kamu sendiri dan menjadikan anak dan cucu bagimu dari pasanganmu, serta memberimu rezeki dari yang baik. Mengapa mereka beriman kepada yang batil dan mengingkari nikmat Allah?',
   verseCitation: 'Q.S Ar-Rum : 21 dan Q.S An-Nahl : 72',
-  loveStoryPhotos: [],
   milestones: [
     {
       year: '2018',
@@ -151,10 +172,7 @@ const HOSTILE: WeddingTemplate1Content = {
       body: 'He proposed on the platform at Gambir station, an hour before her train, with a ring he had carried in his jacket for eleven weeks while waiting for a moment quiet enough. It was not quiet, an announcement drowned out half of what he said, and she said yes before he had finished asking. They missed that train together.',
     },
   ],
-  polaroidPhoto: '',
-  mapPhoto: '',
   loveStoryVideo: '',
-  eventPhotos: [],
   eventStartTime: '11:00',
   eventEndTime: '23:00',
   venueName: 'Grand Ballroom Hotel Borobudur, Jakarta Pusat',
@@ -162,10 +180,8 @@ const HOSTILE: WeddingTemplate1Content = {
     'Jl. Lapangan Banteng Selatan No. 1, RT.2/RW.3, Pasar Baru, Kecamatan Sawah Besar, Kota Jakarta Pusat, Daerah Khusus Ibukota Jakarta 10710, seberang Lapangan Banteng, pintu masuk melalui lobi utama',
   mapsUrl: '',
   photoShareUrl: '',
-  galleryPhotos: [],
   tokenMessage:
     'Having you with us on the day is the whole of what we wanted, and we would not have asked for anything else. If you would nevertheless like to send a token of your love, whether that is on the day itself or long after everybody has gone home and the photographs have been printed, the account below belongs to us both and the details are here for that.',
-  tokenPhoto: '',
   accountHolder: 'Muhammad Bhadrakumara Adhiwangsa Prawiranegara Sastrowardoyo',
   bankProvider: 'CIMB Niaga',
   accountNumber: '1234 5678 9012 3456 7890',
