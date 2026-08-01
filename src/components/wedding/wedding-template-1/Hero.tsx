@@ -32,6 +32,7 @@ import { AutoFitText } from './AutoFitText';
 import { TornEdge } from './TornPaper';
 import { useSealed } from './sealed-context';
 import { EASE } from './variants';
+import { formatWeddingDateLabel } from './wedding-date-label';
 
 const ASSET = '/templates/wedding-template-1';
 
@@ -43,22 +44,6 @@ const ASSET = '/templates/wedding-template-1';
  * one the sample holds stands in, the same as an unanswered name does.
  */
 const SAMPLE = DEFAULT_WEDDING_TEMPLATE_1_CONTENT;
-
-function formatWeddingDateLabel(iso: string): string {
-  const d = new Date(iso);
-  if (Number.isNaN(d.getTime())) return 'May 3rd, 2026';
-  const day = d.getDate();
-  const suffix =
-    day % 10 === 1 && day !== 11
-      ? 'st'
-      : day % 10 === 2 && day !== 12
-        ? 'nd'
-        : day % 10 === 3 && day !== 13
-          ? 'rd'
-          : 'th';
-  const month = d.toLocaleString('en-US', { month: 'long' });
-  return `${month} ${day}${suffix}, ${d.getFullYear()}`;
-}
 
 const cardShadow = {
   filter:
@@ -153,7 +138,9 @@ function EnvelopeCard({
   content: WeddingTemplate1Content;
 }) {
   const couplePhoto = pickPhoto(content.heroPhotos, 0, SAMPLE.heroPhotos[0]);
-  const dateLabel = formatWeddingDateLabel(content.weddingDateIso);
+  const dateLabel = formatWeddingDateLabel(content.weddingDateIso, {
+    beforeYear: ', ',
+  });
   const coupleLabel = `${content.groomName} & ${content.brideName}`;
 
   return (

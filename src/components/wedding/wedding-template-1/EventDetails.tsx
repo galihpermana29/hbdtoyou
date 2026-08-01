@@ -25,6 +25,7 @@ import { motion } from 'framer-motion';
 import { fadeUp, fadeUpCenter } from './variants';
 import { useWeddingReveal } from './use-wedding-reveal';
 import { AutoFitText } from './AutoFitText';
+import { formatWeddingDateLabel } from './wedding-date-label';
 
 import {
   DEFAULT_WEDDING_TEMPLATE_1_CONTENT,
@@ -94,22 +95,6 @@ const VENUE_NAME_CEILING = 12;
 const VENUE_ADDRESS_CEILING = 10;
 const VENUE_FLOOR = 8;
 
-function formatEventDateLabel(iso: string): string {
-  const d = new Date(iso);
-  if (Number.isNaN(d.getTime())) return 'May 3rd 2026';
-  const day = d.getDate();
-  const suffix =
-    day % 10 === 1 && day !== 11
-      ? 'st'
-      : day % 10 === 2 && day !== 12
-        ? 'nd'
-        : day % 10 === 3 && day !== 13
-          ? 'rd'
-          : 'th';
-  const month = d.toLocaleString('en-US', { month: 'long' });
-  return `${month} ${day}${suffix} ${d.getFullYear()}`;
-}
-
 export default function EventDetails({
   content = DEFAULT_WEDDING_TEMPLATE_1_CONTENT,
   onReply,
@@ -151,7 +136,9 @@ export default function EventDetails({
     0,
     SAMPLE.eventPhotos[0]
   );
-  const dateLabel = formatEventDateLabel(content.weddingDateIso);
+  const dateLabel = formatWeddingDateLabel(content.weddingDateIso, {
+    beforeYear: ' ',
+  });
   const timeLabel = `${content.eventStartTime.replace(':', '.')} - ${content.eventEndTime.replace(':', '.')} WIB`;
 
   return (
