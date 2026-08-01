@@ -11,7 +11,7 @@
  * including its copy errors: see `docs/adr/0002-figma-is-literal-truth.md`.
  *
  * How an element is found is written out once in
- * `details-and-story-expanded.mjs` and not repeated here.
+ * `details-and-story.mjs` and not repeated here.
  *
  * ## What is deliberately not asserted here
  *

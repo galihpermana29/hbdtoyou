@@ -11,7 +11,7 @@ import Link from 'next/link';
  * The last item is the page itself, so it is a `span` with `aria-current`
  * rather than a link to where you already are. That is the standard ARIA
  * breadcrumb pattern, and it is also how the style and structure check finds
- * these items: see `visual/expectations/details-and-story-expanded.mjs`.
+ * these items: see `visual/expectations/details-and-story.mjs`.
  */
 
 /** The links before the current page, in the order the design reads them. */

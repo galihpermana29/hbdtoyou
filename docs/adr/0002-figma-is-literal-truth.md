@@ -32,5 +32,17 @@ Corrections belong in Figma, and flow back to us as a design change.
 One deviation is agreed and recorded: step 4 is titled "Share with guests", not "Share with communities".
 The design uses both across different frames, so it cannot be followed literally, and the wedding-specific wording won.
 
+The details-and-story step is drawn as four frames - every Section closed, the Cover Header open, the Love Story open, and every Section open - and they disagree with each other in two places.
+The three that draw the step mostly closed stack Venue Details above Love Story and name the seventh Section "Photo Collection".
+"Expanded All", node 332-14392, stacks Love Story above Venue Details and names that Section "Photo Showcase".
+A screen cannot restack itself when a Section opens, so this too cannot be followed literally.
+
+"Expanded All" is the frame of record for that step, and where the other three differ from it, they lose.
+It is the frame this work was commissioned against, it is the only one that draws every Section's contents, and it is the most recently added of the four.
+So the Sections stack Love Story above Venue Details, and the seventh is named "Photo Showcase".
+
+That one was chosen by whoever built the states rather than agreed with the designer, unlike step 4's title.
+It is out for confirmation as `hbd-7p5`, and a design change that settles it the other way is welcome and flows back to us as any other change does.
+
 This rule holds at desktop width, where the design exists.
 Below that there is no design, so usability governs and the rule does not apply.

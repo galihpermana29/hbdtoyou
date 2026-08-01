@@ -1,0 +1,878 @@
+/**
+ * What the design says the details-and-story step is, in each of its four
+ * states.
+ *
+ * The step has four designed frames, and they are the same screen with a
+ * different set of Sections open:
+ *
+ *   304-6174   "Collapsed"           every Section closed
+ *   332-10572  "Edit Cover"          the Cover Header open
+ *   332-11752  "Edit Other Section"  the Love Story open
+ *   332-14392  "Expanded All"        every Section open
+ *
+ * Everything but which Sections are open is the same frame four times, so it is
+ * written here once and each state's file names the Sections its frame draws
+ * open. Every value below was read from those frames. The design is literal
+ * truth, including its copy errors: see
+ * `docs/adr/0002-figma-is-literal-truth.md`.
+ *
+ * The order of the list this builds is the order the design arranges the screen
+ * in, and the check asserts it. Nothing here says how wide or how tall anything
+ * is.
+ *
+ * ## Where the four frames disagree
+ *
+ * The three collapsed frames stack Venue Details above Love Story and name the
+ * seventh Section "Photo Collection"; "Expanded All" stacks Love Story above
+ * Venue Details and names it "Photo Showcase". A screen cannot restack itself
+ * when a Section opens, so the two cannot both be followed. "Expanded All" wins,
+ * for the reasons recorded in `docs/adr/0002-figma-is-literal-truth.md`.
+ *
+ * ## How an element is found
+ *
+ * Two handles are used, and the choice matters for what a failure reads like.
+ *
+ * A structural selector says where an element sits, and lets its copy be checked
+ * as a claim, so a typo reports as the copy it should have said against the copy
+ * it did. Those selectors use nothing but ordinary HTML and the standard ARIA
+ * patterns, which is the whole contract this screen has to satisfy:
+ *
+ *   header                          the site navigation
+ *   nav[aria-label="Breadcrumb"]    the breadcrumb, its last item aria-current
+ *   h1                              the page title, its description the p after
+ *   form section                    one per Section, in the designed order
+ *   :is(h2, h3) + p                 a Section's name, then its description
+ *   button[aria-expanded]           the control that opens and closes a Section
+ *   label                           one per field, associated with its control
+ *   [role="group"]                  a field built from more than one element
+ *   button                          an action
+ *   aside                           the Site Preview, beside the form
+ *   figure                          the phone, holding the glass as its one child
+ *   footer                          the site footer
+ *
+ * The chrome above a screen's own content is the same on every step, so it is
+ * written once in `page-chrome.mjs` and spread in below rather than repeated.
+ *
+ * `withText` is the other handle, for elements whose only distinguishing feature
+ * is what they say. Copy is the locator there, so wrong copy reports as a missing
+ * element - naming the copy that was looked for, and the nearest copy the page
+ * does render.
+ *
+ * ## Why a closed Section takes so much of this file's shape
+ *
+ * An element nobody can see is not an element the design placed there, so the
+ * check skips hidden markup. A closed Section's fields are therefore not on the
+ * page as far as anything here is concerned - which is what makes a closed
+ * Section read as closed rather than as a screen full of wrongly placed fields.
+ *
+ * The cost is that every position counted down the page is counted among the
+ * OPEN Sections only. The nth of a label, of a group, and of a repeated piece of
+ * copy all move when a Section closes. Nothing below writes such a number down:
+ * each Section declares the labels and the groups it holds, and the numbers are
+ * derived from whichever Sections a state draws open.
+ *
+ * ## What is deliberately not asserted here
+ *
+ * The site navigation and the footer are checked for presence only. Their design
+ * is out of scope for this epic and the existing components win, so asserting
+ * their type would contradict the spec.
+ *
+ * The Site Preview's contents are the live invitation rather than part of this
+ * screen's design, so the panel, its heading, its control and the phone they
+ * stand over are asserted and what is drawn on the phone's glass is not. The
+ * design's mockup adds phone furniture of its own - a status bar reading 9:41 -
+ * which is Figma's furniture rather than a decision about this screen and is
+ * neither asserted nor drawn. `published.mjs` draws the same line.
+ *
+ * The panel comes after the two actions here because the design's left column
+ * holds the Sections and the actions together, and the panel is the column
+ * beside it. The design also rules a hairline down the middle of the 120px
+ * between the two columns, which is not drawn yet: `hbd-byb.25`.
+ *
+ * The MemoRoll Section's card is washed with a gradient and has a camera printed
+ * behind its words. Neither is asserted, because the harness compares background
+ * colours rather than background images and has no way to describe an
+ * illustration at all. Both are the design's and both are drawn; they are
+ * covered by review rather than by this manifest.
+ *
+ * A Section's control is asserted for its colour and its insets rather than for
+ * the shape drawn inside it. The design draws two different marks - a pencil on
+ * a closed Section, a chevron on an open one - and no computed style can tell
+ * one path from another. The colours can, and they differ, so a control showing
+ * the wrong mark in the right colour is left to review.
+ */
+
+import { FIELD_SHADOW, pageChrome, siteFooter, TYPE } from './page-chrome.mjs';
+
+/**
+ * The two treatments only the photo drop zone uses.
+ *
+ * Both colours were first recorded as `#000000`, which is the fill Figma names
+ * on those two layers, and neither is what the design paints: the layers carry
+ * an opacity as well, and dropping it made a grey line black and a near-black
+ * one pure. The baseline image settles it: over the area's own (250, 250, 250)
+ * ground, the title's darkest pixel is (30, 30, 30) and the prompt's is
+ * (137, 137, 137), which are 88% and 45% of black. It is the same drop zone the
+ * guest invites step draws, and `guest-invites-empty.mjs` already records those
+ * two values for it.
+ */
+const UPLOAD_TYPE = {
+  title: {
+    fontSize: '16px',
+    fontWeight: 600,
+    lineHeight: '22.4px',
+    color: 'rgba(0, 0, 0, 0.88)',
+  },
+  prompt: {
+    fontSize: '14px',
+    fontWeight: 400,
+    lineHeight: '16.8px',
+    color: 'rgba(0, 0, 0, 0.45)',
+  },
+};
+
+/** A Section's card: the box every Section is presented in. */
+const SECTION_CARD = {
+  borderStyle: 'solid',
+  borderWidth: '1px',
+  borderColor: '#d0d5dd',
+  borderRadius: '8px',
+  padding: '24px 12px',
+  gap: '24px',
+};
+
+/**
+ * The one Section whose card the design draws differently.
+ *
+ * MemoRoll asks a single question rather than holding a card of fields, and the
+ * design pads it 12px all round instead of 24px and 12px - measured off the
+ * baseline as 19px from the card's top edge to the cap of its name, against the
+ * 31px every other Section's name sits at. It has no body to be kept apart from
+ * its header either, so there is no gap to assert.
+ */
+const MEMO_ROLL_CARD = {
+  borderStyle: 'solid',
+  borderWidth: '1px',
+  borderColor: '#d0d5dd',
+  borderRadius: '8px',
+  padding: '12px',
+};
+
+/**
+ * The control at the end of a Section's header, in each of its two states.
+ *
+ * The design pads it 10px around a 20px mark in both, and colours it by what
+ * pressing it would do: the flow's orange on a closed Section, inviting a couple
+ * to edit it, and the grey the design gives every chevron on an open one.
+ */
+const SECTION_TOGGLE = {
+  open: { color: '#98a2b3', padding: '10px' },
+  closed: { color: '#e34013', padding: '10px' },
+};
+
+/**
+ * A text field.
+ *
+ * The design's field colour is the placeholder's, not the value's, so `color` is
+ * left out rather than asserted from a sample the design never meant as one.
+ */
+const TEXT_FIELD = {
+  fontSize: '16px',
+  fontWeight: 400,
+  lineHeight: '24px',
+  backgroundColor: '#ffffff',
+  borderStyle: 'solid',
+  borderWidth: '1px',
+  borderColor: '#d0d5dd',
+  borderRadius: '8px',
+  padding: '8px 12px',
+  boxShadow: FIELD_SHADOW,
+};
+
+/**
+ * The same field once the design draws a mark inside it.
+ *
+ * A calendar before a year, a clock before a time, a pin before a place: the
+ * box then holds more than one thing, so the box is what carries the border and
+ * the insets, and the answer inside carries the type. The two are asserted
+ * separately for that reason, and the box is found by `role="group"` because a
+ * `<label>` points at the control rather than at what is drawn around it.
+ */
+const MARKED_FIELD = {
+  backgroundColor: '#ffffff',
+  borderStyle: 'solid',
+  borderWidth: '1px',
+  borderColor: '#d0d5dd',
+  borderRadius: '8px',
+  padding: '8px 12px',
+  gap: '8px',
+  boxShadow: FIELD_SHADOW,
+};
+
+/** The answer a couple types inside such a box. */
+const MARKED_ANSWER = {
+  fontSize: '16px',
+  fontWeight: 400,
+  lineHeight: '24px',
+};
+
+/**
+ * The answer a couple chooses instead of typing.
+ *
+ * Colour is asserted here where the typed fields leave it out, and the
+ * difference is real rather than an oversight. A `<input>`'s example is painted
+ * by the placeholder, which no computed style of the element reports; a
+ * `<select>` showing its example is wearing that grey itself, so it is the one
+ * field on the screen whose unanswered colour can be claimed at all.
+ */
+const CHOSEN_ANSWER = { ...MARKED_ANSWER, color: '#667085' };
+
+/** The ratios the design recommends for a Section that shows several photos. */
+const WIDE_PHOTO_HINT =
+  'We recommend to add more than 2 images in the ratio of 4:3 or 16:9 for more interactivity';
+
+/** The ratios it recommends for a Section that shows them in a stack. */
+const TALL_PHOTO_HINT =
+  'We recommend to add more than 3 images in the ratio of 4:3 for more interactivity';
+
+/**
+ * Every dashed area the form takes a file in, keyed by the field it belongs to,
+ * with the words the design writes in and under each.
+ *
+ * Four of the seven invite a couple to "Add More Photos" and two recommend the
+ * same ratios, so copy alone cannot say which one an expectation is about.
+ * Whichever of them a state draws are counted down the page at build time.
+ */
+const UPLOAD_AREAS = {
+  'Couples Photos': {
+    title: 'Add More Photos',
+    prompt: 'Drag & drop up to 5 images from your gallery',
+    hint: WIDE_PHOTO_HINT,
+  },
+  'Polaroid Photos': {
+    title: 'Add More Photos',
+    prompt: 'Drag & drop up to 12 images from your gallery',
+    hint: TALL_PHOTO_HINT,
+  },
+  // The one area the design prints no guidance under: it takes a single photo,
+  // and the prompt inside it already says so. It says it in the design's own
+  // words, which do not change for a field that takes one - "Add More Photos"
+  // over "up to 1 images", both read off the frame. See
+  // `docs/adr/0002-figma-is-literal-truth.md`.
+  'Proposal Photo': {
+    title: 'Add More Photos',
+    prompt: 'Drag & drop up to 1 images from your gallery',
+    hint: null,
+  },
+  'Wedding Teaser Video': {
+    title: 'Add a Video',
+    prompt: 'Drag & drop video file from your gallery',
+    hint: 'Max video size 15MB',
+  },
+  'More Photos': {
+    title: 'Add More Photos',
+    prompt: 'Drag & drop up to 5 images from your gallery',
+    hint: WIDE_PHOTO_HINT,
+  },
+  // A second area that takes one photo and still says "up to 1 images", and this
+  // one is given the guidance for three underneath it. Both are read off the
+  // frame: see `docs/adr/0002-figma-is-literal-truth.md`.
+  'Gift Section Photo': {
+    title: 'Add More Photos',
+    prompt: 'Drag & drop up to 1 images from your gallery',
+    hint: TALL_PHOTO_HINT,
+  },
+  'Photo Gallery': {
+    title: 'Add More Photos',
+    prompt: 'Drag & drop up to 20 images from your gallery',
+    hint: 'We recommend to add more than 5 images in the ratio of 4:3 for more interactivity',
+  },
+};
+
+/** What the design asks in each of the Love Story's three chapters. */
+const LOVE_STORY_YEARS = [
+  'The year when you first met',
+  'The year you both getting closer',
+  'The year they asked the BIG question!',
+];
+const LOVE_STORY_STORIES = [
+  'How you first met?',
+  'How you both getting closer?',
+  'Finally, the happy ending',
+];
+
+/**
+ * The eight Sections, in the order the design stacks them.
+ *
+ * Each one declares the labels and the groups it holds, in its own order, and
+ * what to expect of its contents once it is open. `labels` and `groups` are what
+ * every position counted down the page is derived from, so a field added to a
+ * Section is one line in that Section's list rather than a renumbering of every
+ * field under it.
+ */
+const SECTIONS = [
+  {
+    name: 'Cover Header',
+    description:
+      'The general details about the event and what your guests will see when opening the invitation',
+    labels: [
+      'Couples Photos',
+      'Bride Nickname',
+      'Groom Nickname',
+      'Wedding Place Name',
+      'Wedding Date',
+      'Background Track',
+    ],
+    groups: [],
+    fields: (form) => [
+      ...form.uploadArea('Couples Photos'),
+      ...form.textField('Bride Nickname'),
+      ...form.textField('Groom Nickname'),
+      ...form.textField('Wedding Place Name'),
+      ...form.textField('Wedding Date'),
+      form.labelFor('Background Track'),
+      {
+        name: 'Background Track hint',
+        withText:
+          'Add a backtrack that represent you & your partner story or something that you both shared',
+        style: TYPE.fieldHint,
+      },
+      {
+        name: 'Background Track field',
+        control: 'Background Track',
+        style: TEXT_FIELD,
+      },
+    ],
+  },
+  {
+    name: 'Holy Verse',
+    description: 'Verses or prayers you and your partner love',
+    labels: ['Verse Name', 'Verse'],
+    groups: [],
+    // The design puts the citation above the verse itself, and the check asserts
+    // that order rather than only that both are present.
+    fields: (form) => [
+      ...form.textField('Verse Name'),
+      ...form.textField('Verse'),
+    ],
+  },
+  {
+    name: 'Bride & Groom’s Introduction',
+    description:
+      'Introduction to the Bride & Groom’s family and/or education background',
+    labels: [
+      'Bride Name',
+      'Bride’s Father',
+      'Bride’s Mother',
+      'Groom Name',
+      'Groom’s Father',
+      'Groom’s Mother',
+    ],
+    groups: [],
+    // Each partner is asked for in the same shape - their own name across the
+    // card, then their father and their mother side by side - and the bride
+    // comes first. A father and a mother are two fields because they are two
+    // people; the invitation joins them for display.
+    fields: (form) => [
+      ...form.textField('Bride Name'),
+      ...form.textField('Bride’s Father'),
+      ...form.textField('Bride’s Mother'),
+      ...form.textField('Groom Name'),
+      ...form.textField('Groom’s Father'),
+      ...form.textField('Groom’s Mother'),
+    ],
+  },
+  {
+    name: 'Love Story',
+    description:
+      'Tell the world how you & your partner’s met and what leads your both to this lifetime commitment (in short, ofc)',
+    labels: [
+      'Polaroid Photos',
+      LOVE_STORY_YEARS[0],
+      LOVE_STORY_STORIES[0],
+      LOVE_STORY_YEARS[1],
+      LOVE_STORY_STORIES[1],
+      'Proposal Photo',
+      LOVE_STORY_YEARS[2],
+      LOVE_STORY_STORIES[2],
+      'Wedding Teaser Video',
+    ],
+    groups: LOVE_STORY_YEARS,
+    // Three chapters, each a year and the story of it, with the Proposal Photo
+    // between the second and the third where the design puts it and the teaser
+    // video at the end. The design offers no way to add a chapter or remove one,
+    // and this list is the whole of what it draws.
+    fields: (form) => [
+      ...form.uploadArea('Polaroid Photos'),
+      ...form.markedField(LOVE_STORY_YEARS[0]),
+      ...form.textField(LOVE_STORY_STORIES[0]),
+      form.storyCount(0),
+      ...form.markedField(LOVE_STORY_YEARS[1]),
+      ...form.textField(LOVE_STORY_STORIES[1]),
+      form.storyCount(1),
+      ...form.uploadArea('Proposal Photo'),
+      ...form.markedField(LOVE_STORY_YEARS[2]),
+      ...form.textField(LOVE_STORY_STORIES[2]),
+      form.storyCount(2),
+      ...form.uploadArea('Wedding Teaser Video'),
+    ],
+  },
+  {
+    name: 'Venue Details',
+    description: 'Details on the wedding venue location & reception time',
+    labels: ['More Photos', 'Wedding Location'],
+    groups: ['Wedding Reception Time', 'Start', 'End', 'Wedding Location'],
+    // The reception's start and its end share one name, so they are a group with
+    // a name over a pair of boxes rather than two labelled fields - which is
+    // exactly what the design draws. The Wedding Location carries an action
+    // inside its box, divided off by a hairline the design draws full height.
+    fields: (form) => [
+      ...form.uploadArea('More Photos'),
+      {
+        name: 'Wedding Reception Time field',
+        select: 'form [role="group"]',
+        nth: form.groupNth('Wedding Reception Time'),
+        style: { gap: '6px' },
+      },
+      {
+        name: 'Wedding Reception Time label',
+        withText: 'Wedding Reception Time',
+        style: TYPE.fieldLabel,
+      },
+      {
+        name: 'Reception start field',
+        select: 'form [role="group"]',
+        nth: form.groupNth('Start'),
+        style: MARKED_FIELD,
+      },
+      {
+        name: 'Reception end field',
+        select: 'form [role="group"]',
+        nth: form.groupNth('End'),
+        style: MARKED_FIELD,
+      },
+      form.labelFor('Wedding Location'),
+      {
+        name: 'Wedding Location hint',
+        withText:
+          'Go to Google Maps, find your wedding venue then copy the direction link',
+        style: TYPE.fieldHint,
+      },
+      {
+        name: 'Wedding Location field',
+        select: 'form [role="group"]',
+        nth: form.groupNth('Wedding Location'),
+        style: MARKED_FIELD,
+      },
+      {
+        name: 'Wedding Location answer',
+        control: 'Wedding Location',
+        style: MARKED_ANSWER,
+      },
+      {
+        name: 'Save Location action',
+        select: 'button',
+        withText: 'Save Location',
+        style: {
+          fontSize: '14px',
+          fontWeight: 600,
+          lineHeight: '20px',
+          color: '#344054',
+          borderColor: '#d0d5dd',
+          borderWidth: '0px 0px 0px 1px',
+          padding: '0px 16px',
+        },
+      },
+    ],
+  },
+  {
+    name: 'Gift Registry',
+    description:
+      'Include Bank Account/e-Wallet Information for gift collection',
+    labels: [
+      'Gift Section Photo',
+      'Bank/e-Wallet Provider',
+      'Account Number',
+      'Account Holder Name',
+    ],
+    groups: ['Bank/e-Wallet Provider'],
+    // The provider is asked for on its own, above the account, and it is the one
+    // answer in the flow that is chosen rather than typed - a box with the answer
+    // in it and a chevron after, which is a group for the same reason a marked
+    // field is. The design draws all three empty, so the grey in each box is its
+    // example rather than anybody's account.
+    fields: (form) => [
+      ...form.uploadArea('Gift Section Photo'),
+      ...form.markedField('Bank/e-Wallet Provider', CHOSEN_ANSWER),
+      ...form.textField('Account Number'),
+      ...form.textField('Account Holder Name'),
+    ],
+  },
+  {
+    name: 'Photo Showcase',
+    description: 'Showcase all your pre-wedding photos',
+    labels: ['Photo Gallery'],
+    groups: [],
+    fields: (form) => form.uploadArea('Photo Gallery'),
+  },
+  {
+    name: 'Enable MemoRoll?',
+    description:
+      "Create a collective photo experience for the wedding. Capture your wedding through every guest's lens.",
+    card: MEMO_ROLL_CARD,
+    labels: [],
+    groups: [],
+    /**
+     * The one Section with nothing to open.
+     *
+     * The design asks one question and draws a switch to answer it, with a line
+     * under the description offering to explain it, and no control to expand.
+     * Its parts are therefore always on the page rather than only when it is
+     * open.
+     *
+     * The switch is found by the standard ARIA pattern rather than by copy,
+     * because it says nothing - a switch is a shape and a colour, and the words
+     * beside it are the Section's name. The distance under the description is
+     * written as the link's own margin rather than as a gap on the box around
+     * them, because the harness can only assert spacing it can name an element
+     * for.
+     */
+    withoutToggle: true,
+    always: [
+      {
+        name: 'MemoRoll Learn more',
+        withText: 'Learn more',
+        style: {
+          fontSize: '14px',
+          fontWeight: 600,
+          lineHeight: '20px',
+          color: '#e34013',
+          margin: '6px 0px 0px 0px',
+        },
+      },
+      {
+        name: 'MemoRoll switch',
+        select: 'form [role="switch"]',
+        style: {
+          backgroundColor: '#e34013',
+          borderRadius: '9999px',
+          padding: '2px',
+        },
+      },
+    ],
+  },
+];
+
+/** Every Section by name, which is the state "Expanded All" draws. */
+export const EVERY_SECTION = SECTIONS.map((section) => section.name);
+
+/**
+ * How many earlier copies in a list say exactly what the one at `index` says.
+ *
+ * The design writes the same words in more than one place - four fields invite
+ * a couple to "Add More Photos", and two recommend the same ratios - and copy
+ * is the only handle those elements have. Counting the repeats is what keeps
+ * each expectation about one of them rather than about all of them at once.
+ */
+const nthByCopy = (copies, index) =>
+  copies.slice(0, index).filter((copy) => copy === copies[index]).length;
+
+/**
+ * The positions everything on one state of this screen is counted at.
+ *
+ * Every number here is derived from which Sections that state draws open,
+ * because the check cannot see inside a closed one. A field named by a Section
+ * that is not open throws rather than resolving to `-1`, which would silently
+ * become "the last one on the page" and fail somewhere else entirely.
+ */
+function positionsWithin(openSections) {
+  const labels = openSections.flatMap((section) => section.labels);
+  const groups = openSections.flatMap((section) => section.groups);
+  const uploads = labels.filter((label) => label in UPLOAD_AREAS);
+  const titles = uploads.map((field) => UPLOAD_AREAS[field].title);
+  const prompts = uploads.map((field) => UPLOAD_AREAS[field].prompt);
+  const hints = uploads.map((field) => UPLOAD_AREAS[field].hint);
+
+  /**
+   * What has been asked for, so that what has not can be reported.
+   *
+   * A Section declares its labels and its groups in one list and asks for them
+   * in another, and nothing in the language reconciles the two. Left alone, a
+   * name declared but never asked for would not throw: it would shift every
+   * later position by one, and the failures would be reported against the wrong
+   * elements entirely. `everythingWasAskedFor` is what turns that into one
+   * error naming the name.
+   */
+  const askedFor = new Set();
+
+  const at = (list, name, kind) => {
+    const nth = list.indexOf(name);
+    if (nth === -1) {
+      throw new Error(`"${name}" is not one of this screen's open ${kind}`);
+    }
+    askedFor.add(`${kind}: ${name}`);
+    return nth;
+  };
+
+  const labelNth = (label) => at(labels, label, 'labels');
+  const groupNth = (group) => at(groups, group, 'groups');
+
+  const everythingWasAskedFor = () => {
+    const unasked = [
+      ...labels.map((label) => `labels: ${label}`),
+      ...groups.map((group) => `groups: ${group}`),
+    ].filter((declared) => !askedFor.has(declared));
+    if (unasked.length > 0) {
+      throw new Error(
+        `${unasked.join(', ')} - declared by an open Section and never asked ` +
+          'for, so every position after it would be counted one too far'
+      );
+    }
+  };
+
+  const labelFor = (label) => ({
+    name: `${label} label`,
+    select: 'form label',
+    nth: labelNth(label),
+    text: label,
+    style: TYPE.fieldLabel,
+  });
+
+  return {
+    labelFor,
+    groupNth,
+    everythingWasAskedFor,
+
+    /** A label and the text box under it, which is most of what the design draws. */
+    textField: (label) => [
+      labelFor(label),
+      { name: `${label} field`, control: label, style: TEXT_FIELD },
+    ],
+
+    /**
+     * A label, the box the design marks, and the answer a couple gives in it.
+     *
+     * `answer` is what the design says about the answer itself, which is the
+     * same for every field of this shape but one: the gift provider is chosen
+     * from a list rather than typed, and that is the one whose colour can be
+     * claimed.
+     */
+    markedField: (label, answer = MARKED_ANSWER) => [
+      labelFor(label),
+      {
+        name: `${label} field`,
+        select: 'form [role="group"]',
+        nth: groupNth(label),
+        style: MARKED_FIELD,
+      },
+      { name: `${label} answer`, control: label, style: answer },
+    ],
+
+    /** One dashed area: its label, the words inside it, and the guidance under it. */
+    uploadArea: (field) => {
+      const index = at(uploads, field, 'upload areas');
+      const area = UPLOAD_AREAS[field];
+      return [
+        labelFor(field),
+        {
+          name: `${field} upload title`,
+          withText: area.title,
+          nth: nthByCopy(titles, index),
+          style: UPLOAD_TYPE.title,
+        },
+        {
+          name: `${field} upload prompt`,
+          withText: area.prompt,
+          nth: nthByCopy(prompts, index),
+          style: UPLOAD_TYPE.prompt,
+        },
+        ...(area.hint === null
+          ? []
+          : [
+              {
+                name: `${field} hint`,
+                withText: area.hint,
+                nth: nthByCopy(hints, index),
+                style: TYPE.fieldHint,
+              },
+            ]),
+      ];
+    },
+
+    /**
+     * The count the design prints under one of the Love Story's long answers.
+     *
+     * The design draws its own sample counted - 320 of 320 characters, then 250 -
+     * and a couple's field is empty, so what the same line says on the screen
+     * this check drives is zero of the same limit. The sentence and the limit are
+     * the design's; the number in front of the slash is whoever is typing. All
+     * three are in one Section, so an open Love Story is the only thing their
+     * positions depend on.
+     */
+    storyCount: (index) => ({
+      name: `${LOVE_STORY_STORIES[index]} character count`,
+      withText:
+        'We know it’s hard, but keep it short please. (0/320 characters)',
+      nth: index,
+      style: TYPE.fieldHint,
+    }),
+  };
+}
+
+/**
+ * One Section's card, its name, its description and the control that opens it.
+ *
+ * `nth` counts matches down the page rather than using `:nth-of-type`, which
+ * counts among an element's siblings and would silently mean something else the
+ * moment the Sections were wrapped in anything.
+ */
+function sectionHeader(section, index, isOpen) {
+  const header = [
+    {
+      name: `${section.name} Section card`,
+      select: 'form section',
+      nth: index,
+      style: section.card ?? SECTION_CARD,
+    },
+    {
+      name: `${section.name} Section name`,
+      select: 'form section :is(h2, h3)',
+      nth: index,
+      text: section.name,
+      style: TYPE.sectionName,
+    },
+    {
+      name: `${section.name} Section description`,
+      select: 'form section :is(h2, h3) + p',
+      nth: index,
+      text: section.description,
+      style: TYPE.sectionDescription,
+    },
+  ];
+
+  if (section.withoutToggle) return header;
+
+  return [
+    ...header,
+    {
+      name: `${section.name} Section control`,
+      select: 'form section button[aria-expanded]',
+      nth: SECTIONS.slice(0, index).filter((earlier) => !earlier.withoutToggle)
+        .length,
+      style: isOpen ? SECTION_TOGGLE.open : SECTION_TOGGLE.closed,
+    },
+  ];
+}
+
+/**
+ * What the design says the details-and-story step is, with `open` drawn open.
+ *
+ * `open` is the Sections a state's frame shows expanded, named exactly as the
+ * design names them. Anything else is closed, and a closed Section is its header
+ * and nothing more.
+ */
+export function detailsAndStory(open) {
+  const isOpen = (section) => open.includes(section.name);
+
+  for (const name of open) {
+    if (!EVERY_SECTION.includes(name)) {
+      throw new Error(`"${name}" is not one of the step's Sections`);
+    }
+  }
+
+  const form = positionsWithin(SECTIONS.filter(isOpen));
+
+  const sections = SECTIONS.flatMap((section, index) => [
+    ...sectionHeader(section, index, isOpen(section)),
+    ...(section.always ?? []),
+    // A Section with no control has nothing to open, so its parts are the ones
+    // it always draws and there are no fields under them.
+    ...(section.withoutToggle || !isOpen(section) ? [] : section.fields(form)),
+  ]);
+  form.everythingWasAskedFor();
+
+  return [
+    ...pageChrome('Fill in the details & story'),
+    ...sections,
+    {
+      name: 'Previous step action',
+      select: 'button',
+      withText: 'Previous step',
+      style: {
+        ...TYPE.actionLabel,
+        color: '#e34013',
+        backgroundColor: '#ffffff',
+        borderStyle: 'solid',
+        borderWidth: '1px',
+        borderColor: '#e34013',
+        borderRadius: '8px',
+        padding: '12px 18px',
+        gap: '6px',
+        boxShadow: FIELD_SHADOW,
+      },
+    },
+    {
+      name: 'Next action',
+      select: 'button',
+      withText: 'Next',
+      style: {
+        ...TYPE.actionLabel,
+        color: '#ffffff',
+        backgroundColor: '#e34013',
+        borderRadius: '8px',
+        padding: '12px 18px',
+        gap: '6px',
+        boxShadow: FIELD_SHADOW,
+      },
+    },
+    {
+      // The design stands the panel in the column beside the form, with 24px
+      // between its heading and the phone under it.
+      name: 'Site Preview panel',
+      select: 'aside',
+      style: { gap: '24px' },
+    },
+    {
+      name: 'Site Preview heading',
+      withText: 'Site Preview',
+      style: TYPE.panelHeading,
+    },
+    {
+      name: 'Play Preview action',
+      select: 'button',
+      withText: 'Play Preview',
+      style: {
+        fontSize: '14px',
+        fontWeight: 600,
+        lineHeight: '20px',
+        color: '#e34013',
+        backgroundColor: '#ffffff',
+        borderStyle: 'solid',
+        borderWidth: '1px',
+        borderColor: '#e34013',
+        borderRadius: '8px',
+        padding: '10px 14px',
+        gap: '4px',
+        boxShadow: FIELD_SHADOW,
+      },
+    },
+    {
+      name: 'Site Preview phone frame',
+      select: 'figure',
+      style: {
+        backgroundColor: '#f7f7f7',
+        borderRadius: '12px',
+        padding: '14px',
+      },
+    },
+    {
+      // The phone's glass, which is the one thing the tray holds. Its height is
+      // the design's where a window is tall enough for it and less where it is
+      // not, so only its corner is stated here.
+      name: 'Site Preview screen',
+      select: 'figure > div',
+      style: { borderRadius: '10px' },
+    },
+    siteFooter,
+  ];
+}

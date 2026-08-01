@@ -9,7 +9,7 @@
  * check asserts it. Nothing here says how wide or how tall anything is.
  *
  * How an element is found is written out once in
- * `details-and-story-expanded.mjs` and not repeated here. This screen adds two
+ * `details-and-story.mjs` and not repeated here. This screen adds two
  * things to the contract described there: `aside` is the panel the invitation is
  * shown in, and `a` is an action that is a destination rather than a decision.
  * Everything above this step's own content is the same on all four steps and

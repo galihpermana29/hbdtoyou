@@ -93,7 +93,7 @@ Seven screens are covered: the details-and-story step in each of its four design
 
 A screen is `SKIPPED` when the thing it would check does not exist yet, and the reason says which.
 `route not built yet` is code-side work.
-`nothing recorded from the design yet` is the expectations file, which is the work of the bead that builds that screen - except for the three details-and-story states that have no exported frame at all, which are blocked design-side until someone exports them.
+`nothing recorded from the design yet` is the expectations file, which is the work of the bead that builds that screen.
 
 Skipping is not failing.
 It keeps a red run meaning "this screen does not match the design" rather than "this screen has not been built".
@@ -103,6 +103,10 @@ It keeps a red run meaning "this screen does not match the design" rather than "
 `visual/expectations/<screen>.mjs` holds what the design says one screen is, in the order the design arranges it.
 Every value there was read from the Figma frame named at the top of the file.
 
+Where several screens are the same screen in different states, that file names the state and the values live in one file beside it.
+The details-and-story step is drawn as four frames differing only in which Sections are open, so `details-and-story.mjs` says what the step is and each of the four names the Sections its frame draws open.
+`guest-invites.mjs` does the same for the two states of the guest invites step, and `page-chrome.mjs` for what every step shares above its own content.
+
 An expectation is written in ordinary CSS syntax and compared against whatever spelling the browser reports, so `#e34013` matches `rgb(227, 64, 19)`, `24` matches `24px`, and `bold` matches `700`.
 Failures show the normal form, where a see-through colour reads as `#101828@0.05`.
 Only the first family of a font stack is compared, because the fallbacks are the implementation's business and not a design decision.
@@ -111,7 +115,7 @@ A colour written by name is refused: a browser never reports one that way, so `w
 Elements are found two ways, and the choice decides what a failure reads like.
 
 A structural selector says where an element sits and lets its copy be checked as a claim, so a typo reports as a `copy` failure with both spellings.
-Those selectors use nothing but ordinary HTML and the standard ARIA patterns - `header`, `nav[aria-label="Breadcrumb"]`, `h1`, `form section`, `label` with its control, `[role="group"]` for a field the design builds from more than one element, `button`, `footer` - and that list is the whole contract a screen has to satisfy.
+Those selectors use nothing but ordinary HTML and the standard ARIA patterns - `header`, `nav[aria-label="Breadcrumb"]`, `h1`, `form section`, `label` with its control, `[role="group"]` for a field the design builds from more than one element, `button`, `button[aria-expanded]` for the one that opens a Section, `footer` - and that list is the whole contract a screen has to satisfy.
 
 The chrome above a screen's own content is the same on all four steps, so it lives in `visual/expectations/page-chrome.mjs` and each screen spreads it in.
 

@@ -1,6 +1,6 @@
 'use client';
 
-import { ChevronDown, ChevronUp } from 'lucide-react';
+import { ChevronUp, Pencil } from 'lucide-react';
 import { useId, useState, type ReactNode } from 'react';
 
 import {
@@ -25,9 +25,14 @@ import {
  * and structure check instead of as a screen full of wrongly placed fields.
  *
  * The header is a heading and a description side by side with the control that
- * opens it, laid out as a grid so the chevron can sit centred against both lines
+ * opens it, laid out as a grid so the mark can sit centred against both lines
  * without the description having to live inside the button. The button is the
  * only interactive part, which is what the design draws.
+ *
+ * The design draws that control as two different things, and the difference is
+ * what it offers rather than which way it points. A closed Section carries a
+ * pencil in the flow's orange, offering to be edited; an open one carries a grey
+ * chevron, offering to be put away again. Both are 20px inside 10px of padding.
  */
 
 export interface CreateFlowSectionProps {
@@ -48,7 +53,7 @@ export default function CreateFlowSection({
 }: CreateFlowSectionProps) {
   const fieldsId = useId();
   const [isOpen, setIsOpen] = useState(defaultOpen);
-  const Chevron = isOpen ? ChevronUp : ChevronDown;
+  const Mark = isOpen ? ChevronUp : Pencil;
 
   return (
     <section className={flowSectionCard}>
@@ -61,8 +66,10 @@ export default function CreateFlowSection({
           aria-expanded={isOpen}
           aria-controls={fieldsId}
           onClick={() => setIsOpen(!isOpen)}
-          className="col-start-2 row-span-2 row-start-1 self-center p-[8px] text-[#1B1B1B]">
-          <Chevron size={24} aria-hidden="true" />
+          className={`col-start-2 row-span-2 row-start-1 self-center p-[10px] ${
+            isOpen ? 'text-[#98A2B3]' : 'text-[#E34013]'
+          }`}>
+          <Mark size={20} aria-hidden="true" />
         </button>
       </div>
 

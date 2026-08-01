@@ -7,7 +7,10 @@
  * sessions and is read at run time. See `visual/README.md`.
  */
 
+import { expectations as detailsAndStoryCollapsed } from './expectations/details-and-story-collapsed.mjs';
+import { expectations as detailsAndStoryCoverHeader } from './expectations/details-and-story-cover-header.mjs';
 import { expectations as detailsAndStoryExpanded } from './expectations/details-and-story-expanded.mjs';
+import { expectations as detailsAndStorySection } from './expectations/details-and-story-section.mjs';
 import { expectations as guestInvitesEmpty } from './expectations/guest-invites-empty.mjs';
 import {
   DESIGNED_GUEST_LIST,
@@ -27,32 +30,95 @@ export const FIGMA_FILE_NAME = 'Wedding Invitations';
 const DETAILS_AND_STORY_ROUTE = '/create/wedding-invitation';
 
 /**
- * Expand every Section, top to bottom.
+ * Press every Section control that is still in one state, top to bottom, until
+ * none is left in it.
  *
- * Each Section is a disclosure that opens on its own, so pressing the closed
- * ones in turn leaves all of them open, which is the state the design draws. The
- * list is re-read on every pass rather than once, because opening a Section
+ * `open` is the state to press out of: `false` opens every closed Section,
+ * `true` closes every open one. The value is also how the page spells it, since
+ * a disclosure says which it is in `aria-expanded`.
+ *
+ * The list is re-read on every pass rather than once, because opening a Section
  * changes what is on the page beneath it, and a locator captured before the
  * first press would be pointing at the page as it was.
  *
- * One press per Section is all it can take, so that is the bound. A control
- * that does not open what it says it opens would otherwise be pressed for ever,
- * and a hung run says far less than a run that stops and reports the screen.
+ * One press per Section is all it can take, so that is the bound. A control that
+ * does not do what it says it does would otherwise be pressed for ever, and a
+ * hung run says far less than a run that stops and reports the screen.
  */
-async function expandEverySection(page) {
+async function pressEverySection(page, open) {
   const sections = await page.locator('form section').count();
-  const closed = page.locator('form section button[aria-expanded="false"]');
+  const remaining = page.locator(
+    `form section button[aria-expanded="${open}"]`
+  );
   for (let press = 0; press < sections; press += 1) {
-    if ((await closed.count()) === 0) return;
-    await closed.first().click();
+    if ((await remaining.count()) === 0) return;
+    await remaining.first().click();
   }
-  const stillClosed = await closed.count();
-  if (stillClosed > 0) {
+  const stuck = await remaining.count();
+  if (stuck > 0) {
     throw new Error(
-      `${stillClosed} of ${sections} Sections would not open, after pressing ` +
-        'the closed ones once each'
+      `${stuck} of ${sections} Sections would not ${open ? 'close' : 'open'}, ` +
+        `after pressing every Section that was still ${
+          open ? 'open' : 'closed'
+        } once each`
     );
   }
+}
+
+/**
+ * Expand every Section, which is the state the design draws every field in.
+ *
+ * Each Section is a disclosure that opens on its own, so pressing the closed
+ * ones in turn leaves all of them open. An accordion could not reach this state
+ * at all.
+ */
+const expandEverySection = (page) => pressEverySection(page, false);
+
+/**
+ * Close every Section, which is where the step's two editing states start from.
+ *
+ * The flow opens with the Cover Header expanded, so that is the only state a
+ * couple lands on. Closing everything first is what makes the others reachable
+ * from the same starting point whatever the flow opens with, and it is the
+ * all-collapsed state in its own right.
+ */
+const collapseEverySection = (page) => pressEverySection(page, true);
+
+/**
+ * Press one Section's control, by the Section's name.
+ *
+ * A Section's control is named for the Section, so the button a couple would
+ * press is the button this presses.
+ */
+const pressSection = (page, name) =>
+  page.getByRole('button', { name, exact: true }).click();
+
+/** Leave the Cover Header open and every other Section closed. */
+async function editTheCoverHeader(page) {
+  await collapseEverySection(page);
+  await pressSection(page, 'Cover Header');
+}
+
+/**
+ * Leave the Love Story open and every other Section closed.
+ *
+ * The long way round is the point. The design draws this state with a Section
+ * open and the Section above it closed, and the shortest route there - close
+ * everything, open the Love Story - would be reached just as well by an
+ * accordion, so it would say nothing about the thing this state exists to say.
+ *
+ * Opening the Cover Header first and closing it last exercises both halves of
+ * that instead. The Love Story is opened while the Cover Header is still open,
+ * which an accordion would answer by closing the Cover Header; the Cover Header
+ * is then closed, which an accordion would answer by opening it again. Either
+ * would leave two Sections in the wrong state, and the check would see the Cover
+ * Header's fields on a screen the design draws without them.
+ */
+async function editTheLoveStory(page) {
+  await collapseEverySection(page);
+  await pressSection(page, 'Cover Header');
+  await pressSection(page, 'Love Story');
+  await pressSection(page, 'Cover Header');
 }
 
 /**
@@ -103,21 +169,21 @@ async function advanceToPublished(page) {
 }
 
 /**
- * Three of the seven states have no expectations recorded yet.
+ * The seven designed screens, in the order a couple reaches them.
  *
- * None of the three has an exported frame at all, so they are blocked design
- * side. Recording a screen's expectations is the work of the bead that builds
- * it; the baseline image beside this manifest is what those values are read
- * from.
+ * The details-and-story step is four of them, and they are the same screen with
+ * a different set of Sections open. Each names the frame it was read from and
+ * how to drive the page into it.
  */
 export const screens = [
   {
     id: 'details-and-story-collapsed',
     title: 'Fill in the details & story, every Section collapsed',
     route: DETAILS_AND_STORY_ROUTE,
-    figmaNodeId: null,
-    baseline: null,
-    expectations: null,
+    figmaNodeId: '304-6174',
+    baseline: 'details-and-story-collapsed.png',
+    expectations: detailsAndStoryCollapsed,
+    prepare: collapseEverySection,
   },
   {
     id: 'details-and-story-expanded',
@@ -132,17 +198,19 @@ export const screens = [
     id: 'details-and-story-cover-header',
     title: 'Fill in the details & story, Cover Header being edited',
     route: DETAILS_AND_STORY_ROUTE,
-    figmaNodeId: null,
-    baseline: null,
-    expectations: null,
+    figmaNodeId: '332-10572',
+    baseline: 'details-and-story-cover-header.png',
+    expectations: detailsAndStoryCoverHeader,
+    prepare: editTheCoverHeader,
   },
   {
     id: 'details-and-story-section',
     title: 'Fill in the details & story, a later Section being edited',
     route: DETAILS_AND_STORY_ROUTE,
-    figmaNodeId: null,
-    baseline: null,
-    expectations: null,
+    figmaNodeId: '332-11752',
+    baseline: 'details-and-story-section.png',
+    expectations: detailsAndStorySection,
+    prepare: editTheLoveStory,
   },
   {
     id: 'guest-invites-empty',
