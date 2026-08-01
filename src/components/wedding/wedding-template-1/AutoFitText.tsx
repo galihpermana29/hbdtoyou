@@ -16,6 +16,11 @@ import {
  * and/or shrink a little. Re-fits after web fonts load.
  *
  * The container must have a defined width (set one via `className`, e.g. w-[228px]).
+ *
+ * It draws a paragraph, because what it holds is a line of words the invitation
+ * prints and the check finds every one of those as `main p`. A bare `div` left
+ * the two partners' Nicknames the one thing on the invitation nothing could
+ * name. So `children` has to be words rather than blocks.
  */
 export function AutoFitText({
   children,
@@ -34,7 +39,7 @@ export function AutoFitText({
   className?: string;
   style?: CSSProperties;
 }) {
-  const ref = useRef<HTMLDivElement>(null);
+  const ref = useRef<HTMLParagraphElement>(null);
   const [fontSize, setFontSize] = useState(maxFontSize);
 
   useLayoutEffect(() => {
@@ -59,12 +64,12 @@ export function AutoFitText({
   }, [children, maxFontSize, minFontSize, maxHeight, step]);
 
   return (
-    <div
+    <p
       ref={ref}
       className={className}
       // normal word wrapping; keep-all prevents mid-word breaks in all cases
       style={{ fontSize: `${fontSize}px`, wordBreak: 'keep-all', ...style }}>
       {children}
-    </div>
+    </p>
   );
 }

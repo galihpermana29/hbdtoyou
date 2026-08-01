@@ -47,18 +47,22 @@
  * compares computed style. Whether an asset is the one the design draws is a
  * judgement and it stays a person's.
  *
- * The two partners' first names in the Introduction. They are the one thing the
- * invitation prints that nothing here can name: the behaviour that fits them to
- * their box draws them in a bare `div`, which is neither a paragraph nor copy
- * the design owns. Giving them a handle belongs with `hbd-a09.6`, the bead that
- * rewrites that section.
- *
  * The size of any line the template fits to its box. The design states 48px for
- * a partner's name and 26.092px for the couple on the Save the Date card, and
- * both are ceilings rather than sizes: a longer name is meant to step down. The
- * two on the card are scaled rather than resized, so their size is stated; the
- * Introduction's are resized, and asserting a size there would fail the fitting
- * behaviour the spec asks for.
+ * a partner's Nickname, 10px for their full name and for their parents, and
+ * 26.092px for the couple on the Save the Date card, and every one of those is
+ * a ceiling rather than a size: a longer answer is meant to step down. The two
+ * on the card are scaled rather than resized, so their size is stated and the
+ * scale is what changes; the Introduction's six are resized, and asserting a
+ * size on one of them would fail the very fitting the spec asks for. What is
+ * still claimed for them is weight, leading, colour, and where they sit in the
+ * document, which is what catches one going missing or changing face.
+ *
+ * Something real is given up with those sizes: nothing here now fails an answer
+ * drawn far smaller than the design draws it. What bounds it instead is the
+ * floor the section fits to, which is the 8px the design sets the smallest
+ * words on the invitation in, and the screenshots beside a run. If this harness
+ * ever learns to claim a ceiling rather than a value, these six want their
+ * sizes back.
  *
  * The countdown's digits, the reception's times, the wedding's date. All are
  * derived from the couple's answers, so only their type is the design's.
@@ -103,16 +107,33 @@ const LEADING = 'normal';
 /** The near-white the design sets every script heading in. */
 const HEADING_WHITE = 'rgba(250, 250, 250, 0.98)';
 
-/** One line of type, which is all the design says about most of its words. */
-const type = (fontSize, fontWeight, color) => ({
-  fontSize,
+/** Everything the design says about a line of words apart from its size. */
+const setting = (fontWeight, color) => ({
   fontWeight,
   lineHeight: LEADING,
   color,
 });
 
+/** One line of type, which is all the design says about most of its words. */
+const type = (fontSize, fontWeight, color) => ({
+  fontSize,
+  ...setting(fontWeight, color),
+});
+
 /** A section's name, in the script face, over its rule. */
 const SECTION_HEADING = type('48px', 400, HEADING_WHITE);
+
+/**
+ * The three answers a partner's column prints, each without its size.
+ *
+ * All three are the couple's own words and all three are fitted to the box the
+ * design draws them in, so the size the design states for each is a ceiling
+ * rather than a size and is deliberately absent. See the note at the top of
+ * this file.
+ */
+const PARTNER_NICKNAME = setting(400, HEADING_WHITE);
+const PARTNER_FULL_NAME = setting(400, '#ffffff');
+const PARTNER_PARENTS = setting(600, '#ffffff');
 
 /** The small word above a section's name: "The", "Our". */
 const SECTION_LEAD = type('20px', 400, '#ffffff');
@@ -286,16 +307,18 @@ const SECTIONS = [
     paragraphs: [
       'Bride & Groom lead',
       'Bride & Groom heading',
+      'Bride Nickname',
       'Bride full name',
       'Bride parents lead',
       'Bride parents',
+      'Groom Nickname',
       'Groom full name',
       'Groom parents lead',
       'Groom parents',
     ],
-    // The bride first and the groom second, each their name over their parents.
-    // Both partners' first names are drawn between the two, and are the one
-    // thing here nothing can name: see the note at the top of this file.
+    // The bride first and the groom second, each their Nickname over their
+    // full name over their parents. Their portraits are drawn between the two
+    // columns and are artwork, so nothing here claims them.
     parts: (invitation) => [
       invitation.paragraph('Bride & Groom lead', SECTION_LEAD, 'The'),
       invitation.paragraph(
@@ -303,20 +326,22 @@ const SECTIONS = [
         SECTION_HEADING,
         'Bride & Groom'
       ),
-      invitation.paragraph('Bride full name', type('10px', 400, '#ffffff')),
+      invitation.paragraph('Bride Nickname', PARTNER_NICKNAME),
+      invitation.paragraph('Bride full name', PARTNER_FULL_NAME),
       invitation.paragraph(
         'Bride parents lead',
         type('8px', 400, '#ffffff'),
         'Daughter of'
       ),
-      invitation.paragraph('Bride parents', type('10px', 600, '#ffffff')),
-      invitation.paragraph('Groom full name', type('10px', 400, '#ffffff')),
+      invitation.paragraph('Bride parents', PARTNER_PARENTS),
+      invitation.paragraph('Groom Nickname', PARTNER_NICKNAME),
+      invitation.paragraph('Groom full name', PARTNER_FULL_NAME),
       invitation.paragraph(
         'Groom parents lead',
         type('8px', 400, '#ffffff'),
         'Son of'
       ),
-      invitation.paragraph('Groom parents', type('10px', 600, '#ffffff')),
+      invitation.paragraph('Groom parents', PARTNER_PARENTS),
     ],
   },
   {

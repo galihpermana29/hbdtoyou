@@ -32,6 +32,124 @@ import {
 
 const ASSET = '/templates/wedding-template-1';
 
+/**
+ * The height either of a partner's two written answers steps down towards.
+ *
+ * Three lines of the 10px the design sets them in, which at this leading is 45.
+ * The design draws the full name on one line and the family on two, and neither
+ * is capped, so what this really says is how much of the space around the
+ * column a longer answer may take before it stops growing and starts stepping
+ * down instead.
+ *
+ * Three, because of what is below each column. The bride's begins 198px above
+ * the groom's portrait and the groom's 214px above the foot of the section, and
+ * a column spends 100 of either on furniture the design fixes - the Nickname's
+ * line box, the rule under it, the two gaps and the "Daughter of". So the two
+ * answers have 98px between them in the tighter of the two columns, and three
+ * lines each is 90.
+ *
+ * It is a target rather than a guarantee, and deliberately: `AutoFitText` stops
+ * at its floor and lets the box grow rather than shrinking words past reading.
+ * The hostile set's bride already spends that - her parents reach the 8px floor
+ * at 48px tall - and the column still ends 7px clear of the groom's portrait,
+ * on the slack the design left rather than on this number. Legibility wins over
+ * the budget, because a family nobody can read is the failure this section
+ * exists to avoid.
+ *
+ * Both this and the 72px line box below are figured at the 1.5 leading the
+ * build sets today, which is `hbd-a09.13`. When that lands and the leading
+ * becomes the typeface's own, both numbers mean a different number of lines and
+ * have to be figured again.
+ */
+const ANSWER_MAX_HEIGHT = 45;
+
+/**
+ * One partner's column: their Nickname over its rule, their full name, and
+ * their parents under it.
+ *
+ * The two partners are the same column twice, differing only in where it sits
+ * and which edge it reads from, so they are one component rather than two
+ * copies - a family the invitation cannot hold is a fault in both or in
+ * neither.
+ *
+ * `className` carries what the design places: the column's corner, its width,
+ * and the edge its words align to. The width is the design's own (Figma node
+ * 312:1650, `Frame 29` at 119 and `Frame 30` at 134), and it is the whole of
+ * what keeps a real family on the invitation. Everything here is drawn inside
+ * it: the design leaves 10px between the bride's column and her portrait and
+ * 25px between the groom's and the edge of the page, and text that sized itself
+ * to its own words instead would cross both.
+ */
+function Partner({
+  className,
+  nickname,
+  fullName,
+  lead,
+  parents,
+}: {
+  className: string;
+  nickname: string;
+  fullName: string;
+  lead: string;
+  parents: string;
+}) {
+  const fadeUpReveal = useWeddingReveal(fadeUp);
+
+  return (
+    <motion.div
+      className={`absolute flex flex-col items-start gap-[16px] leading-normal text-white ${className}`}
+      {...fadeUpReveal}>
+      <div className="flex w-full flex-col items-start">
+        {/*
+          The design's line box for a Nickname, kept whatever the Nickname is.
+          48px at this leading is 72px tall, the rule sits 10px up from the
+          bottom of it, and the full name and the family are placed against
+          that. So the Nickname is fitted inside those 72px and sits on the
+          bottom of them: one that has stepped down draws smaller on the same
+          rule rather than dragging the rule and their whole family up the page.
+
+          It is fitted to the rule's own 100px rather than to the column, so a
+          long Nickname is never wider than the line drawn under it, and centred
+          on it. Centred because the design centres both of its own: in Figma
+          node 312:1650 "Freya" is 80 wide at x 10 of that 100, and "Elias" is
+          68 wide and carries a horizontal CENTER constraint. The build had each
+          of those two offsets written out as a left pad instead, which drew the
+          design's own two names and nothing else.
+        */}
+        <div className="flex h-[72px] w-[100px] items-end">
+          <AutoFitText
+            maxFontSize={48}
+            minFontSize={20}
+            maxHeight={72}
+            className="w-full text-center font-[family-name:var(--font-wt1-script)] leading-normal text-[rgba(250,250,250,0.98)]">
+            {nickname}
+          </AutoFitText>
+        </div>
+        <div className="mt-[-10px] h-[0.5px] w-[100px] bg-[#fafafa]" />
+        <AutoFitText
+          maxFontSize={10}
+          minFontSize={8}
+          maxHeight={ANSWER_MAX_HEIGHT}
+          className="mt-[6px] w-full font-[family-name:var(--font-wt1-mono)]">
+          {fullName}
+        </AutoFitText>
+      </div>
+      <div className="flex w-full flex-col items-start gap-[4px]">
+        <p className="w-full font-[family-name:var(--font-wt1-mono)] text-[8px]">
+          {lead}
+        </p>
+        <AutoFitText
+          maxFontSize={10}
+          minFontSize={8}
+          maxHeight={ANSWER_MAX_HEIGHT}
+          className="w-full font-[family-name:var(--font-wt1-mono)] font-semibold">
+          {parents}
+        </AutoFitText>
+      </div>
+    </motion.div>
+  );
+}
+
 export default function BrideGroom({
   content = DEFAULT_WEDDING_TEMPLATE_1_CONTENT,
 }: {
@@ -91,36 +209,14 @@ export default function BrideGroom({
         </div>
       </motion.div>
 
-      {/* Bride — Freya (name + parents) */}
-      <motion.div
-        className="absolute left-[28px] top-[263px] flex flex-col items-start gap-[16px]"
-        {...fadeUpReveal}>
-        <div className="flex flex-col items-start">
-          {/* The design's own line box for this name, kept whatever the name
-              is: 48px at leading-normal is 72px tall, and everything under it
-              is placed against that. A longer name wraps and steps down inside
-              those 72px rather than moving the underline and the full name. */}
-          <AutoFitText
-            maxFontSize={48}
-            minFontSize={20}
-            maxHeight={72}
-            className="w-[125px] pl-[10px] font-[family-name:var(--font-wt1-script)] leading-normal text-[rgba(250,250,250,0.98)]">
-            {content.brideName}
-          </AutoFitText>
-          <div className="mt-[-10px] h-[0.5px] w-[100px] bg-[#fafafa]" />
-          <p className="mt-[6px] max-w-[140px] font-[family-name:var(--font-wt1-mono)] text-[10px] leading-normal text-white">
-            {content.brideFullName}
-          </p>
-        </div>
-        <div className="flex w-full flex-col items-start gap-[4px] text-left leading-normal text-white">
-          <p className="w-full font-[family-name:var(--font-wt1-mono)] text-[8px]">
-            Daughter of
-          </p>
-          <p className="w-full font-[family-name:var(--font-wt1-mono)] text-[10px] font-semibold">
-            {joinParents(content.brideFatherName, content.brideMotherName)}
-          </p>
-        </div>
-      </motion.div>
+      {/* Bride - her name, her full name, her parents */}
+      <Partner
+        className="left-[28px] top-[263px] w-[119px] text-left"
+        nickname={content.brideName}
+        fullName={content.brideFullName}
+        lead="Daughter of"
+        parents={joinParents(content.brideFatherName, content.brideMotherName)}
+      />
 
       {/* Bride portrait (resting flush-right; animates in from off-canvas right) */}
       <motion.div
@@ -182,33 +278,14 @@ export default function BrideGroom({
         </div>
       </motion.div>
 
-      {/* Groom — Elias (name + parents) */}
-      <motion.div
-        className="absolute left-[215.89px] top-[493.85px] flex flex-col items-start gap-[16px]"
-        {...fadeUpReveal}>
-        <div className="flex flex-col items-start">
-          {/* The design's own line box, as on the bride's name above. */}
-          <AutoFitText
-            maxFontSize={48}
-            minFontSize={20}
-            maxHeight={72}
-            className="w-[150px] pl-[8px] font-[family-name:var(--font-wt1-script)] leading-normal text-[rgba(250,250,250,0.98)]">
-            {content.groomName}
-          </AutoFitText>
-          <div className="mt-[-10px] h-[0.5px] w-[100px] bg-[#fafafa]" />
-          <p className="mt-[6px] max-w-[150px] font-[family-name:var(--font-wt1-mono)] text-[10px] leading-normal text-white">
-            {content.groomFullName}
-          </p>
-        </div>
-        <div className="flex w-full flex-col items-start gap-[4px] text-right leading-normal text-white">
-          <p className="w-full font-[family-name:var(--font-wt1-mono)] text-[8px]">
-            Son of
-          </p>
-          <p className="w-full font-[family-name:var(--font-wt1-mono)] text-[10px] font-semibold">
-            {joinParents(content.groomFatherName, content.groomMotherName)}
-          </p>
-        </div>
-      </motion.div>
+      {/* Groom - his name, his full name, his parents */}
+      <Partner
+        className="left-[215.89px] top-[493.85px] w-[134px] text-right"
+        nickname={content.groomName}
+        fullName={content.groomFullName}
+        lead="Son of"
+        parents={joinParents(content.groomFatherName, content.groomMotherName)}
+      />
 
       {/* decorative square emblem, top-center-right */}
       <div className="absolute left-[246px] top-[-7px] size-[172px]">
