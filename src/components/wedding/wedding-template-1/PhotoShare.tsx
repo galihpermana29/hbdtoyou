@@ -7,20 +7,21 @@
  * Animation: the centered content fades up on scroll (centre preserved via x:-50%).
  */
 
-import { motion, useReducedMotion } from 'framer-motion';
+import { motion } from 'framer-motion';
 
-import { fadeUpCenter, inView } from './variants';
+import { fadeUpCenter } from './variants';
+import { useWeddingReveal } from './use-wedding-reveal';
 
 const ASSET = '/templates/wedding-template-1';
 
 export default function PhotoShare() {
-  const reduce = useReducedMotion();
+  const reveal = useWeddingReveal(fadeUpCenter);
 
   return (
     <section className="relative h-[257px] w-full overflow-hidden bg-[#292929]">
       <motion.div
         className="absolute left-1/2 top-[41px] flex w-[343px] flex-col items-center gap-[24px]"
-        {...inView(reduce, fadeUpCenter)}>
+        {...reveal}>
         <p className="w-full text-center font-[family-name:var(--font-wt1-mono)] text-[12px] leading-normal text-white">
           We want your perspective from our wedding! Join through the link below
           to submit all the moments once the wedding concludes

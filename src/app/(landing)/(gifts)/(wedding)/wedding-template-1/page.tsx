@@ -1,14 +1,5 @@
-import BrideGroom from '@/components/wedding/wedding-template-1/BrideGroom';
-import EventDetails from '@/components/wedding/wedding-template-1/EventDetails';
-import Footer from '@/components/wedding/wedding-template-1/Footer';
-import Gallery from '@/components/wedding/wedding-template-1/Gallery';
-import Hero from '@/components/wedding/wedding-template-1/Hero';
-import HolyVerse from '@/components/wedding/wedding-template-1/HolyVerse';
-import LoveStory from '@/components/wedding/wedding-template-1/LoveStory';
-import Messages from '@/components/wedding/wedding-template-1/Messages';
-import PhotoShare from '@/components/wedding/wedding-template-1/PhotoShare';
-import TokenOfLove from '@/components/wedding/wedding-template-1/TokenOfLove';
-import VinylWidget from '@/components/wedding/wedding-template-1/VinylWidget';
+import { DEFAULT_WEDDING_TEMPLATE_1_CONTENT } from '@/components/forms/wedding/wedding-invitation-types';
+import WeddingTemplate1 from '@/components/wedding/wedding-template-1/WeddingTemplate1';
 import {
   instrumentSerif,
   luxuriousScript,
@@ -21,32 +12,31 @@ export const metadata = {
 };
 
 /**
- * Wedding Template 1 ("BNW") — sample/preview viewer.
- * Figma: node 312:1631 (375px mobile design).
+ * The Showcase for Wedding Template 1 ("BNW"). Figma node 312:1631.
+ *
+ * It renders the same template a guest opens, with Example Content passed in
+ * rather than written into the sections. Nobody's invitation.
+ *
+ * The words are handed over here; the photographs are not yet. The designer's
+ * example photographs are still the fallback inside each section, so they reach
+ * a couple's own invitation too, when the Showcase is the one place they
+ * belong. Sorting a Frame from a photograph is `hbd-a09.10`, and putting the
+ * photographs into Example Content is `hbd-a09.2`.
+ *
+ * Sealed, and it locks the page while it is: this route is the invitation, so
+ * nothing below the envelope should be reachable before somebody opens it.
  */
-export default function WeddingTemplate1Page() {
+export default function WeddingTemplate1ShowcasePage() {
   const fontVars = `${luxuriousScript.variable} ${sometypeMono.variable} ${instrumentSerif.variable} ${publicSans.variable}`;
 
   return (
     <div className={`${fontVars} bg-black`}>
-      <main className="relative mx-auto w-full max-w-[375px] overflow-hidden bg-[#090909]">
-        <Hero />
-        <HolyVerse />
-        <BrideGroom />
-        <LoveStory />
-        <EventDetails />
-        <Messages />
-        <TokenOfLove />
-        <PhotoShare />
-        <Gallery />
-        <Footer />
-      </main>
-
-      <div className="pointer-events-none fixed inset-x-0 bottom-0 z-50 mx-auto flex max-w-[375px] justify-end p-4">
-        <div className="pointer-events-auto">
-          <VinylWidget />
-        </div>
-      </div>
+      <WeddingTemplate1
+        content={DEFAULT_WEDDING_TEMPLATE_1_CONTENT}
+        sealed
+        locksPage
+        showVinylWidget
+      />
     </div>
   );
 }

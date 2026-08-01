@@ -7,9 +7,10 @@
  * Animation: the title and each wish card fade up in a gentle stagger on scroll.
  */
 
-import { motion, useReducedMotion } from 'framer-motion';
+import { motion } from 'framer-motion';
 
-import { fadeUp, fadeUpCenter, inView, staggerContainer } from './variants';
+import { fadeUp, fadeUpCenter, staggerContainer } from './variants';
+import { useWeddingReveal } from './use-wedding-reveal';
 
 const ASSET = '/templates/wedding-template-1';
 
@@ -93,14 +94,15 @@ function WishCard({ name, date, message, bordered }: Wish) {
 }
 
 export default function Messages() {
-  const reduce = useReducedMotion();
+  const fadeUpCenterReveal = useWeddingReveal(fadeUpCenter);
+  const staggerReveal = useWeddingReveal(staggerContainer);
 
   return (
     <section className="relative h-[695px] w-full overflow-hidden bg-[#090909]">
       {/* section title */}
       <motion.div
         className="absolute left-[calc(50%+0.5px)] top-[60px] h-[31px] w-[142px]"
-        {...inView(reduce, fadeUpCenter)}>
+        {...fadeUpCenterReveal}>
         <p className="absolute left-[12px] top-0 w-[123px] font-[family-name:var(--font-wt1-script)] text-[48px] leading-normal text-[rgba(250,250,250,0.98)]">
           Messages
         </p>
@@ -111,7 +113,7 @@ export default function Messages() {
       <div className="absolute left-[16px] top-[131px] flex w-[343px] items-start gap-[4px]">
         <motion.div
           className="flex min-w-px flex-[1_0_0] flex-col items-start gap-[16px]"
-          {...inView(reduce, staggerContainer)}>
+          {...staggerReveal}>
           {wishes.map((wish, i) => (
             <WishCard key={i} {...wish} />
           ))}

@@ -11,28 +11,53 @@
  */
 
 import { useEffect, useState } from 'react';
-import { motion, useReducedMotion } from 'framer-motion';
+import { motion } from 'framer-motion';
 
-import { fadeUp, fadeUpCenter, inView } from './variants';
+import { fadeUp, fadeUpCenter } from './variants';
+import { useWeddingReveal } from './use-wedding-reveal';
+
+import {
+  DEFAULT_WEDDING_TEMPLATE_1_CONTENT,
+  pickPhoto,
+  type WeddingTemplate1Content,
+} from '@/components/forms/wedding/wedding-invitation-types';
 
 const ASSET = '/templates/wedding-template-1';
 
-const WEDDING_TARGET = new Date('2026-05-03T19:00:00+07:00').getTime();
+function formatEventDateLabel(iso: string): string {
+  const d = new Date(iso);
+  if (Number.isNaN(d.getTime())) return 'May 3rd 2026';
+  const day = d.getDate();
+  const suffix =
+    day % 10 === 1 && day !== 11
+      ? 'st'
+      : day % 10 === 2 && day !== 12
+        ? 'nd'
+        : day % 10 === 3 && day !== 13
+          ? 'rd'
+          : 'th';
+  const month = d.toLocaleString('en-US', { month: 'long' });
+  return `${month} ${day}${suffix} ${d.getFullYear()}`;
+}
 
-export default function EventDetails() {
-  const reduce = useReducedMotion();
-  const fadeUpCenterReveal = inView(reduce, fadeUpCenter);
-  const fadeUpReveal = inView(reduce, fadeUp);
+export default function EventDetails({
+  content = DEFAULT_WEDDING_TEMPLATE_1_CONTENT,
+}: {
+  content?: WeddingTemplate1Content;
+}) {
+  const fadeUpCenterReveal = useWeddingReveal(fadeUpCenter);
+  const fadeUpReveal = useWeddingReveal(fadeUp);
   const [mounted, setMounted] = useState(false);
   const [remaining, setRemaining] = useState(0);
+  const target = new Date(content.weddingDateIso).getTime();
 
   useEffect(() => {
-    const tick = () => setRemaining(Math.max(0, WEDDING_TARGET - Date.now()));
+    const tick = () => setRemaining(Math.max(0, target - Date.now()));
     tick();
     setMounted(true);
     const id = setInterval(tick, 1000);
     return () => clearInterval(id);
-  }, []);
+  }, [target]);
 
   const totalSeconds = Math.floor(remaining / 1000);
   const days = Math.floor(totalSeconds / 86400);
@@ -42,6 +67,13 @@ export default function EventDetails() {
   const pad = (n: number) => String(n).padStart(2, '0');
   // Placeholder "08" (matching the design) until the client clock is live.
   const cd = (n: number) => (mounted ? pad(n) : '08');
+  const polaroidPhoto = pickPhoto(
+    content.eventPhotos,
+    0,
+    `${ASSET}/event-polaroid-frame.png`
+  );
+  const dateLabel = formatEventDateLabel(content.weddingDateIso);
+  const timeLabel = `${content.eventStartTime.replace(':', '.')} - ${content.eventEndTime.replace(':', '.')} WIB`;
 
   return (
     <section className="relative h-[648px] w-full overflow-hidden bg-[#292929]">
@@ -65,18 +97,29 @@ export default function EventDetails() {
             <div className="flex w-[147px] flex-col items-start gap-[16px]">
               <div className="flex w-full flex-col items-start gap-[6px] leading-normal text-white [word-break:break-word]">
                 <p className="w-full font-[family-name:var(--font-wt1-mono)] text-[12px] font-semibold">
-                  Mandarin Hotel, Jakarta
+                  {content.venueName}
                 </p>
                 <p className="w-full font-[family-name:var(--font-wt1-mono)] text-[10px] font-normal">
-                  Jl. Imam Bonjol, Menteng, Kec. Menteng, Kota Jakarta Pusat,
-                  Daerah Khusus Ibukota Jakarta 10310
+                  {content.address}
                 </p>
               </div>
-              <div className="flex items-center justify-center border border-solid border-[#fafafa] p-[10px]">
-                <p className="whitespace-nowrap font-[family-name:var(--font-wt1-mono)] text-[12px] font-normal leading-normal text-[#fafafa]">
-                  View Location
-                </p>
-              </div>
+              {content.mapsUrl ? (
+                <a
+                  href={content.mapsUrl}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="flex items-center justify-center border border-solid border-[#fafafa] p-[10px]">
+                  <p className="whitespace-nowrap font-[family-name:var(--font-wt1-mono)] text-[12px] font-normal leading-normal text-[#fafafa]">
+                    View Location
+                  </p>
+                </a>
+              ) : (
+                <div className="flex items-center justify-center border border-solid border-[#fafafa] p-[10px]">
+                  <p className="whitespace-nowrap font-[family-name:var(--font-wt1-mono)] text-[12px] font-normal leading-normal text-[#fafafa]">
+                    View Location
+                  </p>
+                </div>
+              )}
             </div>
 
             {/* Tilted polaroid */}
@@ -96,7 +139,7 @@ export default function EventDetails() {
                     <img
                       alt=""
                       className="pointer-events-none absolute inset-0 block size-full max-w-none object-cover"
-                      src={`${ASSET}/event-polaroid-frame.png`}
+                      src={polaroidPhoto}
                     />
                   </div>
                 </div>
@@ -125,14 +168,14 @@ export default function EventDetails() {
               </div>
             </div>
             <p className="w-full text-center font-[family-name:var(--font-wt1-mono)] text-[14px] font-normal">
-              May 3rd 2026
+              {dateLabel}
             </p>
             <div className="flex w-full items-start justify-center gap-[6px] text-[12px]">
               <p className="w-[113px] font-[family-name:var(--font-wt1-mono)] font-semibold">
                 Reception Starts
               </p>
               <p className="whitespace-nowrap font-[family-name:var(--font-wt1-mono)] font-normal">
-                19.00 - 21.00 WIB
+                {timeLabel}
               </p>
             </div>
           </div>

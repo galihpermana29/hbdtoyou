@@ -53,18 +53,3 @@ export const staggerContainer: Variants = {
 
 /** Default whileInView viewport config so sections reveal once, a bit before fully on-screen. */
 export const revealViewport = { once: true, amount: 0.35 } as const;
-
-/**
- * Motion props for a scroll-revealed element. Respects reduced motion by
- * rendering straight at the resting ("show") state with no animation.
- */
-export function inView(reduce: boolean | null, variants: Variants) {
-  return reduce
-    ? { variants, initial: false as const, animate: 'show' as const }
-    : {
-        variants,
-        initial: 'hidden',
-        whileInView: 'show',
-        viewport: revealViewport,
-      };
-}

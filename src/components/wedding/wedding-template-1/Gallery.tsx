@@ -8,13 +8,20 @@
  * absolute left/top positions are untouched (motion adds only opacity + y).
  */
 
-import { motion, useReducedMotion } from 'framer-motion';
+import { motion } from 'framer-motion';
 
-import { fadeUp, inView, staggerContainer } from './variants';
+import { fadeUp, staggerContainer } from './variants';
+import { useWeddingReveal } from './use-wedding-reveal';
+
+import {
+  DEFAULT_WEDDING_TEMPLATE_1_CONTENT,
+  pickPhoto,
+  type WeddingTemplate1Content,
+} from '@/components/forms/wedding/wedding-invitation-types';
 
 const ASSET = '/templates/wedding-template-1';
 
-const photos = [
+const GALLERY_FALLBACKS = [
   `${ASSET}/gallery-1.png`,
   `${ASSET}/gallery-2.png`,
   `${ASSET}/gallery-3.png`,
@@ -22,13 +29,20 @@ const photos = [
   `${ASSET}/gallery-5.png`,
 ];
 
-export default function Gallery() {
-  const reduce = useReducedMotion();
+export default function Gallery({
+  content = DEFAULT_WEDDING_TEMPLATE_1_CONTENT,
+}: {
+  content?: WeddingTemplate1Content;
+}) {
+  const staggerReveal = useWeddingReveal(staggerContainer);
+  const photos = GALLERY_FALLBACKS.map((fallback, index) =>
+    pickPhoto(content.galleryPhotos, index, fallback)
+  );
 
   return (
     <motion.section
       className="relative h-[570px] w-full overflow-hidden bg-[#fafafa]"
-      {...inView(reduce, staggerContainer)}>
+      {...staggerReveal}>
       <motion.div
         variants={fadeUp}
         className="absolute left-[-3px] top-[-83px] h-[279px] w-[186px]">

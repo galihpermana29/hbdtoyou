@@ -3,7 +3,8 @@
 import { X } from 'lucide-react';
 import { useEffect, useRef } from 'react';
 
-import WeddingInvitationPreviewView from './wedding-invitation-preview-view';
+import WeddingTemplate1 from '@/components/wedding/wedding-template-1/WeddingTemplate1';
+
 import type { WeddingTemplate1Content } from './wedding-invitation-types';
 
 /**
@@ -97,7 +98,9 @@ export default function InvitationPlayer({
           className="absolute right-[8px] top-[8px] z-[10] flex h-[36px] w-[36px] items-center justify-center rounded-full bg-black/60 text-white">
           <X size={20} aria-hidden="true" />
         </button>
-        <WeddingInvitationPreviewView content={content} recipientMode />
+        {/* The dialog holds the page still itself, so the invitation inside it
+            does not also reach for the page's scroll. */}
+        <WeddingTemplate1 content={content} sealed />
       </div>
     </div>
   );

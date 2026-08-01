@@ -7,17 +7,24 @@
  * `-translate-x-1/2` centre is preserved via fadeUpCenter (x stays -50%).
  */
 
-import { motion, useReducedMotion } from 'framer-motion';
+import { motion } from 'framer-motion';
 
-import { fadeUpCenter, inView } from './variants';
+import { fadeUpCenter } from './variants';
+import { useWeddingReveal } from './use-wedding-reveal';
+
+import {
+  DEFAULT_WEDDING_TEMPLATE_1_CONTENT,
+  type WeddingTemplate1Content,
+} from '@/components/forms/wedding/wedding-invitation-types';
 
 const ASSET = '/templates/wedding-template-1';
 
-const VERSE_TEXT =
-  'Dan di antara tanda-tanda (kebesaran)-Nya ialah Dia menciptakan pasangan-pasangan untukmu dari jenismu sendiri, agar kamu cenderung dan merasa tenteram kepadanya, dan Dia menjadikan di antaramu rasa cinta dan kasih sayang. Sesungguhnya pada yang demikian itu benar-benar terdapat tanda-tanda (kebesaran Allah) bagi kaum yang berpikir';
-
-export default function HolyVerse() {
-  const reduce = useReducedMotion();
+export default function HolyVerse({
+  content = DEFAULT_WEDDING_TEMPLATE_1_CONTENT,
+}: {
+  content?: WeddingTemplate1Content;
+}) {
+  const reveal = useWeddingReveal(fadeUpCenter);
 
   return (
     <section className="relative h-[206px] w-full overflow-hidden">
@@ -39,12 +46,12 @@ export default function HolyVerse() {
 
       <motion.div
         className="absolute left-1/2 top-[24px] flex w-[343px] flex-col items-center gap-[20px] text-center leading-normal text-[#090909]"
-        {...inView(reduce, fadeUpCenter)}>
+        {...reveal}>
         <p className="w-full font-[family-name:var(--font-wt1-mono)] text-[12px]">
-          &ldquo;{VERSE_TEXT}&rdquo;
+          &ldquo;{content.verseText}&rdquo;
         </p>
         <p className="w-full font-[family-name:var(--font-wt1-mono)] text-[14px] font-semibold">
-          Q.S Ar-Rum : 21
+          {content.verseCitation}
         </p>
       </motion.div>
     </section>

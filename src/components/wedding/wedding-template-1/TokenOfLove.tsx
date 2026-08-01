@@ -9,20 +9,30 @@
  */
 
 import { useState } from 'react';
-import { motion, useReducedMotion } from 'framer-motion';
+import { motion } from 'framer-motion';
 
-import { fadeUpCenter, inView } from './variants';
+import { fadeUpCenter } from './variants';
+import { useWeddingReveal } from './use-wedding-reveal';
+
+import {
+  DEFAULT_WEDDING_TEMPLATE_1_CONTENT,
+  joinAccountHolder,
+  type WeddingTemplate1Content,
+} from '@/components/forms/wedding/wedding-invitation-types';
 
 const ASSET = '/templates/wedding-template-1';
 
-const ACCOUNT_NUMBER = '3331 0908 1766';
-
-export default function TokenOfLove() {
-  const reduce = useReducedMotion();
+export default function TokenOfLove({
+  content = DEFAULT_WEDDING_TEMPLATE_1_CONTENT,
+}: {
+  content?: WeddingTemplate1Content;
+}) {
+  const fadeUpCenterReveal = useWeddingReveal(fadeUpCenter);
   const [copied, setCopied] = useState(false);
+  const tokenPhoto = content.tokenPhoto || `${ASSET}/token-photo.jpg`;
 
   const handleCopy = () => {
-    navigator.clipboard?.writeText(ACCOUNT_NUMBER).then(() => {
+    navigator.clipboard?.writeText(content.accountNumber).then(() => {
       setCopied(true);
       setTimeout(() => setCopied(false), 1500);
     });
@@ -33,7 +43,7 @@ export default function TokenOfLove() {
       {/* heading + underline */}
       <motion.div
         className="absolute left-[calc(50%+0.5px)] top-[60px] h-[31px] w-[196px]"
-        {...inView(reduce, fadeUpCenter)}>
+        {...fadeUpCenterReveal}>
         <p className="absolute left-[calc(50%-145px)] top-0 w-[290px] font-[family-name:var(--font-wt1-script)] text-[48px] leading-normal text-[rgba(250,250,250,0.98)]">
           Send a Token of Love
         </p>
@@ -43,11 +53,9 @@ export default function TokenOfLove() {
       {/* content column */}
       <motion.div
         className="absolute left-1/2 top-[131px] flex w-[343px] flex-col items-center gap-[24px]"
-        {...inView(reduce, fadeUpCenter)}>
+        {...fadeUpCenterReveal}>
         <p className="w-full text-center font-[family-name:var(--font-wt1-mono)] text-[12px] leading-normal text-white">
-          While we wish you could be here with us, your presence in our lives is
-          the greatest gift of all. Should you wish to send a token of your love,
-          please follow the link below.
+          {content.tokenMessage}
         </p>
 
         <div className="relative flex w-full flex-col items-start gap-[16px]">
@@ -70,7 +78,7 @@ export default function TokenOfLove() {
               <img
                 alt="Couple"
                 className="pointer-events-none absolute inset-0 size-full max-w-none object-cover"
-                src={`${ASSET}/token-photo.jpg`}
+                src={tokenPhoto}
               />
             </div>
           </div>
@@ -86,10 +94,13 @@ export default function TokenOfLove() {
               <div className="relative flex min-w-px flex-[1_0_0] items-start">
                 <div className="relative flex min-w-px flex-[1_0_0] flex-col items-start gap-[2px] leading-normal text-black">
                   <p className="w-full font-[family-name:var(--font-wt1-mono)] text-[12px] font-medium">
-                    Elias Frank Simanjuntak (BRI)
+                    {joinAccountHolder(
+                      content.accountHolder,
+                      content.bankProvider
+                    )}
                   </p>
                   <p className="w-full font-[family-name:var(--font-wt1-mono)] text-[16px] font-semibold">
-                    {ACCOUNT_NUMBER}
+                    {content.accountNumber}
                   </p>
                 </div>
               </div>

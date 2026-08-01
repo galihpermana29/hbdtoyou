@@ -19,15 +19,30 @@
 import { motion, useInView, useReducedMotion } from 'framer-motion';
 import { useRef } from 'react';
 
-import { EASE, fadeUp, inView } from './variants';
+import { EASE, fadeUp } from './variants';
+import { useSealed } from './sealed-context';
+import { useWeddingReveal } from './use-wedding-reveal';
+import { AutoFitText } from './AutoFitText';
+
+import {
+  DEFAULT_WEDDING_TEMPLATE_1_CONTENT,
+  joinParents,
+  type WeddingTemplate1Content,
+} from '@/components/forms/wedding/wedding-invitation-types';
 
 const ASSET = '/templates/wedding-template-1';
 
-export default function BrideGroom() {
+export default function BrideGroom({
+  content = DEFAULT_WEDDING_TEMPLATE_1_CONTENT,
+}: {
+  content?: WeddingTemplate1Content;
+}) {
+  const sealed = useSealed();
   const reduce = useReducedMotion();
   const sectionRef = useRef<HTMLElement>(null);
   const scrolledIntoView = useInView(sectionRef, { once: true, amount: 0.2 });
-  const seen = scrolledIntoView;
+  const seen = sealed ? scrolledIntoView : true;
+  const fadeUpReveal = useWeddingReveal(fadeUp);
 
   // The portraits slide in from off-canvas. They can't use whileInView on
   // themselves: at their start offset they sit outside the section's
@@ -64,7 +79,7 @@ export default function BrideGroom() {
       {/* "The Bride & Groom" heading */}
       <motion.div
         className="absolute left-[16px] top-[102px] flex w-[230px] flex-col items-start gap-[4px]"
-        {...inView(reduce, fadeUp)}>
+        {...fadeUpReveal}>
         <p className="w-full text-left font-[family-name:var(--font-wt1-mono)] text-[20px] leading-normal text-white">
           The
         </p>
@@ -79,14 +94,22 @@ export default function BrideGroom() {
       {/* Bride — Freya (name + parents) */}
       <motion.div
         className="absolute left-[28px] top-[263px] flex flex-col items-start gap-[16px]"
-        {...inView(reduce, fadeUp)}>
+        {...fadeUpReveal}>
         <div className="flex flex-col items-start">
-          <p className="pl-[10px] font-[family-name:var(--font-wt1-script)] text-[48px] leading-normal text-[rgba(250,250,250,0.98)]">
-            Freya
-          </p>
+          {/* The design's own line box for this name, kept whatever the name
+              is: 48px at leading-normal is 72px tall, and everything under it
+              is placed against that. A longer name wraps and steps down inside
+              those 72px rather than moving the underline and the full name. */}
+          <AutoFitText
+            maxFontSize={48}
+            minFontSize={20}
+            maxHeight={72}
+            className="w-[125px] pl-[10px] font-[family-name:var(--font-wt1-script)] leading-normal text-[rgba(250,250,250,0.98)]">
+            {content.brideName}
+          </AutoFitText>
           <div className="mt-[-10px] h-[0.5px] w-[100px] bg-[#fafafa]" />
-          <p className="mt-[6px] font-[family-name:var(--font-wt1-mono)] text-[10px] leading-normal text-white">
-            Freya Putri Magellan
+          <p className="mt-[6px] max-w-[140px] font-[family-name:var(--font-wt1-mono)] text-[10px] leading-normal text-white">
+            {content.brideFullName}
           </p>
         </div>
         <div className="flex w-full flex-col items-start gap-[4px] text-left leading-normal text-white">
@@ -94,7 +117,7 @@ export default function BrideGroom() {
             Daughter of
           </p>
           <p className="w-full font-[family-name:var(--font-wt1-mono)] text-[10px] font-semibold">
-            Ferdinand Magellan & Tuti Pudjiastuti
+            {joinParents(content.brideFatherName, content.brideMotherName)}
           </p>
         </div>
       </motion.div>
@@ -162,14 +185,19 @@ export default function BrideGroom() {
       {/* Groom — Elias (name + parents) */}
       <motion.div
         className="absolute left-[215.89px] top-[493.85px] flex flex-col items-start gap-[16px]"
-        {...inView(reduce, fadeUp)}>
+        {...fadeUpReveal}>
         <div className="flex flex-col items-start">
-          <p className="pl-[8px] font-[family-name:var(--font-wt1-script)] text-[48px] leading-normal text-[rgba(250,250,250,0.98)]">
-            Elias
-          </p>
+          {/* The design's own line box, as on the bride's name above. */}
+          <AutoFitText
+            maxFontSize={48}
+            minFontSize={20}
+            maxHeight={72}
+            className="w-[150px] pl-[8px] font-[family-name:var(--font-wt1-script)] leading-normal text-[rgba(250,250,250,0.98)]">
+            {content.groomName}
+          </AutoFitText>
           <div className="mt-[-10px] h-[0.5px] w-[100px] bg-[#fafafa]" />
-          <p className="mt-[6px] whitespace-nowrap font-[family-name:var(--font-wt1-mono)] text-[10px] leading-normal text-white">
-            Elias Frank Simanjuntak
+          <p className="mt-[6px] max-w-[150px] font-[family-name:var(--font-wt1-mono)] text-[10px] leading-normal text-white">
+            {content.groomFullName}
           </p>
         </div>
         <div className="flex w-full flex-col items-start gap-[4px] text-right leading-normal text-white">
@@ -177,7 +205,7 @@ export default function BrideGroom() {
             Son of
           </p>
           <p className="w-full font-[family-name:var(--font-wt1-mono)] text-[10px] font-semibold">
-            Frank Simajuntak & Esther Triasningsih
+            {joinParents(content.groomFatherName, content.groomMotherName)}
           </p>
         </div>
       </motion.div>

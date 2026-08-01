@@ -1,12 +1,6 @@
 'use client';
 
-import {
-  useLayoutEffect,
-  useRef,
-  useState,
-  type CSSProperties,
-  type ReactNode,
-} from 'react';
+import { useLayoutEffect, useRef, useState, type ReactNode } from 'react';
 
 /**
  * Renders a single line of text that is always horizontally centered and scaled
@@ -15,20 +9,21 @@ import {
  * centered and inside the card instead of overflowing.
  *
  * Re-measures after web fonts load, since the script/serif faces change width.
+ *
+ * Typography belongs to the box a caller puts this in, not to this. Both spans
+ * take their face and size from that box, so the line lands on the y the box
+ * states rather than on a line box sized by some other font. This is why there
+ * is no `className`: `globals.css` names a face on `*`, which reaches any
+ * element no class of its own targets, so both spans have to say `inherit` in a
+ * style attribute to get out of its way - and a style attribute would then beat
+ * anything a caller passed as a class.
  */
 export function FitText({
   children,
   maxWidth,
-  className,
-  style,
-  origin = 'center',
 }: {
   children: ReactNode;
   maxWidth: number;
-  className?: string;
-  style?: CSSProperties;
-  /** Anchor the down-scaling: 'center' (default), 'left', or 'right'. */
-  origin?: 'center' | 'left' | 'right';
 }) {
   const innerRef = useRef<HTMLSpanElement>(null);
   const [scale, setScale] = useState(1);
@@ -42,7 +37,7 @@ export function FitText({
       setScale(natural > maxWidth && natural > 0 ? maxWidth / natural : 1);
     };
     measure();
-    // Custom fonts reflow the text once loaded — re-measure then.
+    // Custom fonts reflow the text once loaded - re-measure then.
     if (typeof document !== 'undefined' && document.fonts?.ready) {
       document.fonts.ready.then(measure).catch(() => {});
     }
@@ -52,19 +47,17 @@ export function FitText({
     <span
       style={{
         display: 'inline-block',
+        fontFamily: 'inherit',
         transform: `scale(${scale})`,
-        transformOrigin:
-          origin === 'left'
-            ? 'left center'
-            : origin === 'right'
-              ? 'right center'
-              : 'center',
-        ...style,
+        transformOrigin: 'center',
       }}>
       <span
         ref={innerRef}
-        className={className}
-        style={{ display: 'inline-block', whiteSpace: 'nowrap' }}>
+        style={{
+          display: 'inline-block',
+          fontFamily: 'inherit',
+          whiteSpace: 'nowrap',
+        }}>
         {children}
       </span>
     </span>

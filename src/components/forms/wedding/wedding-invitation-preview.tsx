@@ -12,8 +12,9 @@ import {
   flowPreviewScreen,
   flowPreviewTray,
 } from './create-flow-treatment';
+import WeddingTemplate1 from '@/components/wedding/wedding-template-1/WeddingTemplate1';
+
 import InvitationPlayer from './invitation-player';
-import WeddingInvitationPreviewView from './wedding-invitation-preview-view';
 import { formValuesToContent } from './wedding-invitation-types';
 import type { WeddingInvitationFormValues } from './wedding-invitation-types';
 
@@ -74,7 +75,7 @@ export default function WeddingInvitationPreview({
           hanging past the bottom of the window where nothing can reach it. */}
       <figure className={flowPreviewTray}>
         <div className={`${flowPreviewScreen} lg:max-h-[calc(100vh-200px)]`}>
-          <WeddingInvitationPreviewView content={content} />
+          <WeddingTemplate1 content={content} />
         </div>
       </figure>
 

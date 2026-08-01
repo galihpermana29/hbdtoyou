@@ -12,8 +12,9 @@ import {
   flowPreviewScreen,
   flowPreviewTray,
 } from './create-flow-treatment';
+import WeddingTemplate1 from '@/components/wedding/wedding-template-1/WeddingTemplate1';
+
 import InvitationPlayer from './invitation-player';
-import WeddingInvitationPreviewView from './wedding-invitation-preview-view';
 import {
   formValuesToContent,
   type WeddingInvitationFormValues,
@@ -107,8 +108,11 @@ export default function PublishedStep({
               this panel and a sealed invitation is what a guest is sent. The
               frame draws the cards out of the envelope as well, which is the
               other end of the same interaction: a still cannot show both, and
-              an element the design has weighs more than a state it caught. */}
-          <WeddingInvitationPreviewView content={content} recipientMode />
+              an element the design has weighs more than a state it caught.
+
+              Sealed but not locking the page: this is a phone-sized panel with
+              the rest of the step beside it, not the page itself. */}
+          <WeddingTemplate1 content={content} sealed />
         </div>
       </aside>
 

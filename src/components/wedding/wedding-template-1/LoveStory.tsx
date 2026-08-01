@@ -12,27 +12,16 @@
 import { useState } from 'react';
 import { motion, useReducedMotion } from 'framer-motion';
 
-import { EASE, fadeUp, fadeUpCenter, inView, staggerContainer } from './variants';
+import { EASE, fadeUp, fadeUpCenter, staggerContainer } from './variants';
+import { useSealed } from './sealed-context';
+import { useWeddingReveal } from './use-wedding-reveal';
+import {
+  DEFAULT_WEDDING_TEMPLATE_1_CONTENT,
+  pickPhoto,
+  type WeddingTemplate1Content,
+} from '@/components/forms/wedding/wedding-invitation-types';
 
 const ASSET = '/templates/wedding-template-1';
-
-const MILESTONE_2020 = {
-  year: '2020',
-  title: 'The meeting',
-  body: 'Elias and Freya met during a summer volunteering program at a local wildlife sanctuary. Elias, always quiet and meticulous, found himself fascinated by Freya\u2019s contagious energy and deep empathy for every animal in her care. A shared task repairing an aviary roof led to hours of conversation that flowed with surprising ease.',
-};
-
-const MILESTONE_2022 = {
-  year: '2022',
-  title: 'Getting serious',
-  body: 'They discovered a mutual love for hiking, old maps, and the kind of late-night calls that make time stand still. Over the years, they\u2019ve built a relationship grounded in shared values, unwavering respect, and a genuine delight in each other\u2019s success.',
-};
-
-const MILESTONE_2023 = {
-  year: '2023',
-  title: 'On his one knee!',
-  body: 'Five years later, they are each other\u2019s anchor and wildest adventure. Freya still makes Elias laugh until his sides ache, and Elias\u2019s calm presence remains her haven. Now, they are excited to begin their next chapter together, celebrating not just their love, but the unique path they\u2019ve carved side by side\u2014surrounded by the family and friends who mean the most.',
-};
 
 /** Torn-paper crop used along the long (147px) edges. */
 function TornEdgeLong() {
@@ -65,11 +54,20 @@ function TornEdgeShort() {
 }
 
 /** The film-strip of three photos, tilted -4.83deg. */
-function FilmStrip({ reduce }: { reduce: boolean | null }) {
+function FilmStrip({ content }: { content: WeddingTemplate1Content }) {
+  const reveal = useWeddingReveal(fadeUp);
+  const photos = [0, 1, 2].map((i) =>
+    pickPhoto(
+      content.loveStoryPhotos,
+      i,
+      `${ASSET}/lovestory-photo-${i + 1}.png`
+    )
+  );
+
   return (
     <motion.div
       className="absolute left-[25px] top-[30px] flex h-[343.24px] w-[157.601px] items-center justify-center"
-      {...inView(reduce, fadeUp)}>
+      {...reveal}>
       <div className="flex-none rotate-[-4.83deg]">
         <div
           className="relative h-[333.484px] w-[130.002px]"
@@ -81,21 +79,21 @@ function FilmStrip({ reduce }: { reduce: boolean | null }) {
             <img
               alt=""
               className="pointer-events-none absolute inset-0 size-full max-w-none object-cover"
-              src={`${ASSET}/lovestory-photo-1.png`}
+              src={photos[0]}
             />
           </div>
           <div className="absolute left-[9.69px] top-[117.08px] h-[99.318px] w-[108.201px]">
             <img
               alt=""
               className="pointer-events-none absolute inset-0 size-full max-w-none object-cover"
-              src={`${ASSET}/lovestory-photo-2.png`}
+              src={photos[1]}
             />
           </div>
           <div className="absolute left-[9.69px] top-[223.67px] h-[99.318px] w-[108.201px]">
             <img
               alt=""
               className="pointer-events-none absolute inset-0 size-full max-w-none object-cover"
-              src={`${ASSET}/lovestory-photo-3.png`}
+              src={photos[2]}
             />
           </div>
           <div className="absolute left-0 top-0 h-[333.888px] w-[129.845px]">
@@ -114,11 +112,17 @@ function FilmStrip({ reduce }: { reduce: boolean | null }) {
 }
 
 /** The hidden-photo polaroid with a "tap to reveal" cover, tilted slightly. */
-function Polaroid({ reduce }: { reduce: boolean | null }) {
+function Polaroid({ content }: { content: WeddingTemplate1Content }) {
+  const reduce = useReducedMotion();
+  const sealed = useSealed();
+  const reveal = useWeddingReveal(fadeUp);
   const [revealed, setRevealed] = useState(false);
+  const isRevealed = !sealed || revealed;
+  const polaroidPhoto =
+    content.polaroidPhoto || `${ASSET}/lovestory-polaroid-photo.png`;
 
   const coverAnim = {
-    animate: { opacity: revealed ? 0 : 1, scale: revealed ? 1.05 : 1 },
+    animate: { opacity: isRevealed ? 0 : 1, scale: isRevealed ? 1.05 : 1 },
     transition: { duration: reduce ? 0 : 0.4, ease: EASE },
   };
 
@@ -132,12 +136,12 @@ function Polaroid({ reduce }: { reduce: boolean | null }) {
         if (e.key === 'Enter' || e.key === ' ') setRevealed(true);
       }}
       className="absolute left-[191px] top-[389px] flex h-[219.836px] w-[178.439px] cursor-pointer items-center justify-center"
-      {...inView(reduce, fadeUp)}>
+      {...reveal}>
       <div className="absolute left-[9.02px] top-[9.9px] h-[156.339px] w-[139.745px]">
         <img
           alt=""
           className="pointer-events-none absolute inset-0 block size-full max-w-none"
-          src={`${ASSET}/lovestory-polaroid-photo.png`}
+          src={polaroidPhoto}
         />
       </div>
       <div className="absolute left-[0.01px] top-0 h-[205.649px] w-[159.458px] shadow-[0px_1.914px_2.967px_0px_rgba(0,0,0,0.17)]">
@@ -149,7 +153,7 @@ function Polaroid({ reduce }: { reduce: boolean | null }) {
       </div>
       <motion.div
         className="absolute left-[9.03px] top-[9.9px] h-[156.339px] w-[139.745px]"
-        style={{ pointerEvents: revealed ? 'none' : undefined }}
+        style={{ pointerEvents: isRevealed ? 'none' : undefined }}
         {...coverAnim}>
         <img
           alt=""
@@ -170,15 +174,24 @@ function Polaroid({ reduce }: { reduce: boolean | null }) {
   );
 }
 
-export default function LoveStory() {
-  const reduce = useReducedMotion();
+export default function LoveStory({
+  content = DEFAULT_WEDDING_TEMPLATE_1_CONTENT,
+}: {
+  content?: WeddingTemplate1Content;
+}) {
+  const fadeUpCenterReveal = useWeddingReveal(fadeUpCenter);
+  const fadeUpReveal = useWeddingReveal(fadeUp);
+  const staggerReveal = useWeddingReveal(staggerContainer);
+  const centerMilestone = content.milestones[2] ?? content.milestones[0];
+  const rightMilestones = content.milestones.slice(0, 2);
+  const mapPhoto = content.mapPhoto || `${ASSET}/lovestory-map-photo.png`;
 
   return (
     <section className="relative h-[1081px] w-full overflow-hidden bg-[#090909]">
       {/* Section heading */}
       <motion.div
         className="absolute left-[calc(50%+0.5px)] top-[34px] flex w-[176px] flex-col items-center gap-[4px]"
-        {...inView(reduce, fadeUpCenter)}>
+        {...fadeUpCenterReveal}>
         <p className="w-full text-center font-[family-name:var(--font-wt1-mono)] text-[20px] leading-normal text-white">
           Our
         </p>
@@ -249,7 +262,7 @@ export default function LoveStory() {
           </div>
         </div>
 
-        <FilmStrip reduce={reduce} />
+        <FilmStrip content={content} />
 
         {/* Small torn strip accent */}
         <div className="absolute left-[56px] top-0 h-[74px] w-[34px]">
@@ -262,19 +275,19 @@ export default function LoveStory() {
           </div>
         </div>
 
-        <Polaroid reduce={reduce} />
+        <Polaroid content={content} />
 
         {/* 2023 milestone copy */}
         <motion.div
           className="absolute left-[53px] top-[397px] flex w-[145px] flex-col items-start gap-[4px] leading-normal text-[#090909]"
-          {...inView(reduce, fadeUp)}>
+          {...fadeUpReveal}>
           <div className="flex w-full items-center gap-[4px] whitespace-nowrap font-[family-name:var(--font-wt1-mono)] font-semibold">
-            <p className="shrink-0 text-[12px]">{MILESTONE_2023.year}</p>
+            <p className="shrink-0 text-[12px]">{centerMilestone?.year}</p>
             <p className="shrink-0 text-[14px]">-</p>
-            <p className="shrink-0 text-[12px]">{MILESTONE_2023.title}</p>
+            <p className="shrink-0 text-[12px]">{centerMilestone?.title}</p>
           </div>
           <p className="w-full font-[family-name:var(--font-wt1-mono)] text-[10px]">
-            {MILESTONE_2023.body}
+            {centerMilestone?.body}
           </p>
         </motion.div>
       </div>
@@ -282,7 +295,7 @@ export default function LoveStory() {
       {/* Map keepsake at the bottom */}
       <motion.div
         className="absolute left-[27px] top-[738.86px] h-[336.142px] w-[354px]"
-        {...inView(reduce, fadeUp)}>
+        {...fadeUpReveal}>
         <div className="absolute left-0 top-0 h-[336.022px] w-[354.127px]">
           <img
             alt=""
@@ -294,7 +307,7 @@ export default function LoveStory() {
           <img
             alt=""
             className="pointer-events-none absolute inset-0 size-full max-w-none rounded-[4.202px] object-cover"
-            src={`${ASSET}/lovestory-map-photo.png`}
+            src={mapPhoto}
           />
         </div>
         <div className="absolute left-[111.35px] top-[127.1px] size-[27.307px]">
@@ -309,10 +322,10 @@ export default function LoveStory() {
       {/* Right-side timeline: 2020 & 2022 milestones */}
       <motion.div
         className="absolute left-[197px] top-[187px] flex w-[159px] flex-col items-start gap-[12px] leading-normal text-[#090909]"
-        {...inView(reduce, staggerContainer)}>
-        {[MILESTONE_2020, MILESTONE_2022].map((milestone) => (
+        {...staggerReveal}>
+        {rightMilestones.map((milestone, index) => (
           <motion.div
-            key={milestone.year}
+            key={`${milestone.year}-${index}`}
             variants={fadeUp}
             className="flex w-full flex-col items-start gap-[4px]">
             <div className="flex items-center gap-[4px] whitespace-nowrap font-[family-name:var(--font-wt1-mono)] font-semibold">

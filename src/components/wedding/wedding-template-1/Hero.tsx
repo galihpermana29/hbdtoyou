@@ -6,19 +6,42 @@
  * The iOS status bar in the mockup (9:41 / battery) is intentionally omitted:
  * a real device renders its own, so a faux bar would double up.
  *
- * Interaction: on load the two cards are tucked DOWN inside the envelope pocket
- * (behind the pocket front, z-index below it) and the page is scroll-locked.
+ * Interaction: while the invitation is sealed, the two cards are tucked DOWN
+ * inside the envelope pocket (behind the pocket front, z-index below it).
  * Clicking "Open Invitation" slides the cards up and out (z-index above the
- * pocket) and unlocks scrolling. NOTE: the flap does not literally unfold — that
- * needs a "closed envelope" asset that Figma export is currently rate-limited on.
+ * pocket). NOTE: the flap does not literally unfold - that needs a "closed
+ * envelope" asset that Figma export is currently rate-limited on.
  */
 
 import { motion, useReducedMotion } from 'framer-motion';
 import { useEffect, useState } from 'react';
 
+import {
+  DEFAULT_WEDDING_TEMPLATE_1_CONTENT,
+  pickPhoto,
+  type WeddingTemplate1Content,
+} from '@/components/forms/wedding/wedding-invitation-types';
+import { FitText } from './FitText';
+import { useSealed } from './sealed-context';
 import { EASE } from './variants';
 
 const ASSET = '/templates/wedding-template-1';
+
+function formatWeddingDateLabel(iso: string): string {
+  const d = new Date(iso);
+  if (Number.isNaN(d.getTime())) return 'May 3rd, 2026';
+  const day = d.getDate();
+  const suffix =
+    day % 10 === 1 && day !== 11
+      ? 'st'
+      : day % 10 === 2 && day !== 12
+        ? 'nd'
+        : day % 10 === 3 && day !== 13
+          ? 'rd'
+          : 'th';
+  const month = d.toLocaleString('en-US', { month: 'long' });
+  return `${month} ${day}${suffix}, ${d.getFullYear()}`;
+}
 
 const cardShadow = {
   filter:
@@ -32,10 +55,19 @@ const TUCK = 58;
 function EnvelopeCard({
   opened,
   reduce,
+  content,
 }: {
   opened: boolean;
   reduce: boolean | null;
+  content: WeddingTemplate1Content;
 }) {
+  const couplePhoto = pickPhoto(
+    content.heroPhotos,
+    0,
+    `${ASSET}/couple-photo.png`
+  );
+  const dateLabel = formatWeddingDateLabel(content.weddingDateIso);
+  const coupleLabel = `${content.groomName} & ${content.brideName}`;
   return (
     <div className="absolute left-1/2 top-[31px] h-[442px] w-[387px] -translate-x-1/2">
       {/* envelope flap (back layer) */}
@@ -67,7 +99,9 @@ function EnvelopeCard({
               ease: EASE,
               delay: reduce ? 0 : 0.25,
             }}>
-            <div className="relative h-[177.944px] w-[264.046px]" style={cardShadow}>
+            <div
+              className="relative h-[177.944px] w-[264.046px]"
+              style={cardShadow}>
               <img
                 alt=""
                 className="pointer-events-none absolute inset-0 size-full max-w-none object-cover"
@@ -76,13 +110,13 @@ function EnvelopeCard({
               <div className="absolute left-[4.7px] top-[4.7px] h-[167.769px] w-[255.436px] border-[1.044px] border-solid border-[#201e1f]" />
               <div className="absolute left-1/2 top-[11.74px] h-[132.023px] w-[232.736px] -translate-x-1/2">
                 <img
-                  alt="Elias & Freya"
+                  alt={coupleLabel}
                   className="pointer-events-none absolute inset-0 size-full max-w-none object-cover"
-                  src={`${ASSET}/couple-photo.png`}
+                  src={couplePhoto}
                 />
               </div>
               <p className="absolute left-[105.41px] top-[147.16px] whitespace-nowrap font-[family-name:var(--font-wt1-script)] text-[16.699px] leading-normal text-black">
-                May 3rd, 2026
+                {dateLabel}
               </p>
             </div>
           </motion.div>
@@ -99,7 +133,9 @@ function EnvelopeCard({
               ease: EASE,
               delay: reduce ? 0 : 0.4,
             }}>
-            <div className="relative h-[177.944px] w-[264.046px]" style={cardShadow}>
+            <div
+              className="relative h-[177.944px] w-[264.046px]"
+              style={cardShadow}>
               <img
                 alt=""
                 className="pointer-events-none absolute inset-0 size-full max-w-none object-cover"
@@ -122,12 +158,26 @@ function EnvelopeCard({
                 </p>
               </div>
 
-              <p className="absolute left-[calc(50%-51.14px)] top-[133.59px] whitespace-nowrap font-[family-name:var(--font-wt1-script)] text-[26.092px] text-black">
-                Elias & Freya
-              </p>
-              <p className="absolute left-[calc(50%-44.88px)] top-[118.98px] whitespace-nowrap font-[family-name:var(--font-wt1-sans)] text-[6.262px] uppercase tracking-[0.1252px] text-black">
-                Mandarin Hotel, Jakarta
-              </p>
+              {/* Venue and the couple, each centred on its own line where the
+                  design draws it. One line each, because the card's lower left
+                  is where the photograph card in front of it sits: a second
+                  line of black script lands on a dark photograph and is gone.
+                  A long venue or a long pair of names is scaled down to the
+                  card instead of wrapping into it.
+
+                  Each line's typeface and size sit on the box holding it rather
+                  than on the text, and the text inherits them. A line box is
+                  sized by the font of the box it is in, so a wrapper left at
+                  the inherited face would put a script line four pixels below
+                  where the design draws it. */}
+              <div className="absolute left-1/2 top-[133.59px] -translate-x-1/2 font-[family-name:var(--font-wt1-script)] text-[26.092px] text-black">
+                <FitText maxWidth={210}>
+                  {content.groomName} &amp; {content.brideName}
+                </FitText>
+              </div>
+              <div className="absolute left-1/2 top-[118.98px] -translate-x-1/2 font-[family-name:var(--font-wt1-sans)] text-[6.262px] uppercase tracking-[0.1252px] text-black">
+                <FitText maxWidth={210}>{content.venueName}</FitText>
+              </div>
             </div>
           </motion.div>
         </div>
@@ -162,19 +212,34 @@ function EnvelopeCard({
   );
 }
 
-export default function Hero() {
+export default function Hero({
+  content = DEFAULT_WEDDING_TEMPLATE_1_CONTENT,
+  locksPage = false,
+}: {
+  content?: WeddingTemplate1Content;
+  /** This invitation has the page to itself, so a sealed one holds it still. */
+  locksPage?: boolean;
+}) {
+  const sealed = useSealed();
   const reduce = useReducedMotion();
-  const [opened, setOpened] = useState(false);
+  const [opened, setOpened] = useState(!sealed);
+  const envelopeOpened = sealed ? opened : true;
 
+  // Nothing below the envelope is reachable until a guest opens it, which is
+  // half of what Sealed means and cannot be drawn. Only an invitation that has
+  // the page to itself may do this: the panels inside the Create Flow show a
+  // sealed invitation in a phone-sized frame, and one of those locking the page
+  // it sits on would take the whole flow hostage until somebody opened an
+  // envelope in a picture.
   useEffect(() => {
-    if (opened) return;
-    const prev = document.body.style.overflow;
+    if (!locksPage || envelopeOpened) return;
+    const previous = document.body.style.overflow;
     document.body.style.overflow = 'hidden';
     window.scrollTo(0, 0);
     return () => {
-      document.body.style.overflow = prev;
+      document.body.style.overflow = previous;
     };
-  }, [opened]);
+  }, [locksPage, envelopeOpened]);
 
   const fadeUpMount = (delay: number) => ({
     initial: reduce ? false : { opacity: 0, y: 16 },
@@ -204,7 +269,7 @@ export default function Hero() {
         />
       </div>
 
-      <EnvelopeCard opened={opened} reduce={reduce} />
+      <EnvelopeCard opened={envelopeOpened} reduce={reduce} content={content} />
 
       {/* torn paper edge at the bottom */}
       <div className="absolute left-1/2 top-[666px] flex h-[147px] w-[375px] -translate-x-1/2 items-center justify-center">
@@ -221,22 +286,24 @@ export default function Hero() {
         </div>
       </div>
 
-      {/* Open Invitation */}
-      <div className="absolute left-1/2 top-[487px] z-40 -translate-x-1/2">
-        <motion.button
-          type="button"
-          onClick={() => setOpened(true)}
-          aria-label="Open invitation"
-          className="flex items-center justify-center border border-solid border-[#fafafa] p-[10px]"
-          initial={false}
-          animate={{ opacity: opened ? 0 : 1 }}
-          transition={reduce ? undefined : { duration: 0.5, ease: EASE }}
-          style={{ pointerEvents: opened ? 'none' : 'auto' }}>
-          <p className="whitespace-nowrap font-[family-name:var(--font-wt1-mono)] text-[12px] leading-normal text-[#fafafa]">
-            Open Invitation
-          </p>
-        </motion.button>
-      </div>
+      {/* Open Invitation - only a sealed invitation has anything to open */}
+      {sealed && (
+        <div className="absolute left-1/2 top-[487px] z-40 -translate-x-1/2">
+          <motion.button
+            type="button"
+            onClick={() => setOpened(true)}
+            aria-label="Open invitation"
+            className="flex items-center justify-center border border-solid border-[#fafafa] p-[10px]"
+            initial={false}
+            animate={{ opacity: opened ? 0 : 1 }}
+            transition={reduce ? undefined : { duration: 0.5, ease: EASE }}
+            style={{ pointerEvents: opened ? 'none' : 'auto' }}>
+            <p className="whitespace-nowrap font-[family-name:var(--font-wt1-mono)] text-[12px] leading-normal text-[#fafafa]">
+              Open Invitation
+            </p>
+          </motion.button>
+        </div>
+      )}
 
       {/* You're Invited heading + subtitle */}
       <motion.div
@@ -249,8 +316,8 @@ export default function Hero() {
           <div className="absolute left-0 top-[74px] h-[0.5px] w-[343px] bg-[#fafafa]" />
         </div>
         <p className="w-full text-center font-[family-name:var(--font-wt1-mono)] text-[12px] leading-normal text-white">
-          As we begin our journey together, we&rsquo;d love for you to join us in
-          celebrating our big day.
+          As we begin our journey together, we&rsquo;d love for you to join us
+          in celebrating our big day.
         </p>
       </motion.div>
     </section>
