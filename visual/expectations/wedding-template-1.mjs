@@ -32,6 +32,8 @@
  *   main > section     one per section, in the order a guest scrolls them
  *   main p             every line of words the invitation prints, in order
  *   main span          a line the template scales down to fit its box
+ *   main [role=region] the one box inside the invitation a guest scrolls on its
+ *                      own, which is the Messages section's list of wishes
  *
  * A position counted down the page is never written as a number below. Each
  * section declares the paragraphs it prints, in its own order, and every `nth`
@@ -507,6 +509,20 @@ const SECTIONS = [
     ],
     parts: (invitation) => [
       invitation.paragraph('Messages heading', SECTION_HEADING, 'Messages'),
+      {
+        // The second behaviour this harness claims, and for the same reason as
+        // the first: the design draws this section as a 509-tall box with a
+        // scrollbar beside it, node 312:1746, so a list a guest cannot scroll
+        // is not this section. Only `overflow` can hold that, and the height it
+        // is true of is never asserted - see the note above on dimensions.
+        //
+        // Found by the scrollable region the invitation has exactly one of,
+        // because the box is drawn rather than written: it has no copy of its
+        // own, and the copy inside it belongs to the wishes.
+        name: 'Wishes list',
+        select: 'main [role="region"]',
+        style: { overflow: 'auto' },
+      },
       ...WISHES.flatMap((wish) => [
         invitation.paragraph(`${wish.who}'s name`, WISH_NAME, wish.who),
         invitation.paragraph(`${wish.who}'s date`, WISH_DATE, EVERY_WISH_DATED),

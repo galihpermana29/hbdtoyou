@@ -15,8 +15,11 @@ And Wedding Template 1, which is the invitation itself, drawn as a phone: it ren
 
 For each element the design describes, the check asserts typeface, size, weight, line height, letter spacing, colour, background, border colour, width and style, corner radius, shadow, padding, margin and gap, together with the exact copy the element renders and where it sits in the document relative to every other element.
 
-One property carries a behaviour rather than an appearance: `overflow`, asserted on `body`, which is how a sealed invitation is held still and how it is let go again.
-It is there because a sealed invitation is defined by it, and it is the only part of that a computed style can hold.
+One property carries a behaviour rather than an appearance: `overflow`.
+It is asserted twice, in both cases on something defined by the behaviour rather than by how it looks.
+On `body`, which is how a sealed invitation is held still and how it is let go again.
+And on the Messages section's list of wishes, which the design draws as a box shorter than the list inside it, so a list a guest cannot scroll is not that section.
+It is the only part of either that a computed style can hold.
 
 It never asserts a width or a height.
 That is the whole point.
