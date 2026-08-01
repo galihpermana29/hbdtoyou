@@ -1,5 +1,4 @@
 import type { Dayjs } from 'dayjs';
-import dayjs from 'dayjs';
 
 /** A single love-story timeline entry shown in the viewer. */
 export interface WeddingMilestone {
@@ -7,6 +6,46 @@ export interface WeddingMilestone {
   title: string;
   body: string;
 }
+
+/**
+ * One chapter of the Love Story, as the design asks for it.
+ *
+ * The design does not offer a couple a list to add to. It asks three questions
+ * with three sets of words of its own - how they met, how they grew closer, and
+ * the proposal - and the invitation has room for exactly those three, one in
+ * the middle of the page and two down the side. So a chapter is not something a
+ * couple creates; it is something they answer, and what it is called is the
+ * design's to say rather than theirs.
+ */
+export interface WeddingLoveStoryChapter {
+  /** What the invitation prints beside the year. */
+  title: string;
+  /** What the form asks for the year, as the design writes it. */
+  yearLabel: string;
+  /** What the form asks for the story, as the design writes it. */
+  storyLabel: string;
+}
+
+export const LOVE_STORY_CHAPTERS: WeddingLoveStoryChapter[] = [
+  {
+    title: 'The meeting',
+    yearLabel: 'The year when you first met',
+    storyLabel: 'How you first met?',
+  },
+  {
+    title: 'Getting serious',
+    yearLabel: 'The year you both getting closer',
+    storyLabel: 'How you both getting closer?',
+  },
+  {
+    title: 'On his one knee!',
+    yearLabel: 'The year they asked the BIG question!',
+    storyLabel: 'Finally, the happy ending',
+  },
+];
+
+/** How many characters the design gives each chapter's story room for. */
+export const LOVE_STORY_LIMIT = 320;
 
 /**
  * Normalized content shape for the BNW wedding invitation viewer.
@@ -65,16 +104,15 @@ export interface WeddingInvitationFormValues {
   verseCitation?: string;
   loveStoryPhotos?: string[];
   milestones?: WeddingMilestone[];
-  polaroidPhoto?: string;
-  mapPhoto?: string;
+  /** The proposal photo, held as the one-photo list its field hands back. */
+  polaroidPhoto?: string[];
   loveStoryVideo?: string;
   eventPhotos?: string[];
-  eventStartTime?: Dayjs;
-  eventEndTime?: Dayjs;
+  /** The reception's start and end, each as the `HH:mm` a couple typed. */
+  eventStartTime?: string;
+  eventEndTime?: string;
   venueName?: string;
-  address?: string;
   mapsUrl?: string;
-  dressCode?: string;
   photoShareCover?: string;
   photoShareUrl?: string;
   galleryPhotos?: string[];
@@ -147,10 +185,6 @@ export const DEFAULT_WEDDING_TEMPLATE_1_CONTENT: WeddingTemplate1Content = {
   guestMessagesEnabled: true,
 };
 
-const DEFAULT_MILESTONES: WeddingMilestone[] = [
-  { year: '', title: '', body: '' },
-];
-
 /**
  * A partner's parents on the one line the invitation prints them on.
  *
@@ -172,17 +206,27 @@ export function joinParents(father?: string, mother?: string): string {
     .join(' & ');
 }
 
-function formatTime(value?: Dayjs, fallback = '19:00'): string {
-  if (!value || !value.isValid()) return fallback;
-  return value.format('HH:mm');
+/**
+ * A time of day the invitation can print, or the sample's when there is none.
+ *
+ * The field a couple types into keeps them to four digits and to a real hour
+ * and minute as they go, so what arrives here is either `HH:mm` or half of one.
+ * Half of one is an answer still being given rather than an answer, and the
+ * invitation shows the sample's time until it is finished.
+ */
+function formatTime(value: string | undefined, fallback: string): string {
+  return value && /^([01]\d|2[0-3]):[0-5]\d$/.test(value) ? value : fallback;
 }
 
-function weddingDateToIso(value?: Dayjs, startTime?: Dayjs): string {
+function weddingDateToIso(value?: Dayjs, startTime?: string): string {
   if (!value || !value.isValid()) {
     return DEFAULT_WEDDING_TEMPLATE_1_CONTENT.weddingDateIso;
   }
   const date = value.format('YYYY-MM-DD');
-  const time = formatTime(startTime, '19:00');
+  const time = formatTime(
+    startTime,
+    DEFAULT_WEDDING_TEMPLATE_1_CONTENT.eventStartTime
+  );
   return `${date}T${time}:00+07:00`;
 }
 
@@ -202,10 +246,25 @@ export function formValuesToContent(
   const defaults = DEFAULT_WEDDING_TEMPLATE_1_CONTENT;
   const v = values ?? {};
 
-  const milestones =
-    v.milestones && v.milestones.length > 0
-      ? v.milestones.filter((m) => m.year || m.title || m.body)
-      : defaults.milestones;
+  // One entry per chapter the design asks about, always, because the invitation
+  // draws three and a couple cannot add a fourth or take one away. A chapter
+  // they have not answered falls back to the sample's, the same as every other
+  // field, and its title is the design's rather than anything they typed. The
+  // sample is asked for by chapter rather than by position, so a chapter added
+  // to one list and not the other reads as unanswered instead of throwing.
+  const milestones: WeddingMilestone[] = LOVE_STORY_CHAPTERS.map(
+    (chapter, index) => {
+      const answered = v.milestones?.[index];
+      const sample = defaults.milestones.find(
+        (milestone) => milestone.title === chapter.title
+      );
+      return {
+        year: answered?.year?.trim() || sample?.year || '',
+        title: chapter.title,
+        body: answered?.body?.trim() || sample?.body || '',
+      };
+    }
+  );
 
   return {
     groomName: v.groomName?.trim() || defaults.groomName,
@@ -222,17 +281,21 @@ export function formValuesToContent(
     verseText: v.verseText?.trim() || defaults.verseText,
     verseCitation: v.verseCitation?.trim() || defaults.verseCitation,
     loveStoryPhotos: v.loveStoryPhotos ?? defaults.loveStoryPhotos,
-    milestones: milestones.length > 0 ? milestones : defaults.milestones,
-    polaroidPhoto: v.polaroidPhoto || defaults.polaroidPhoto,
-    mapPhoto: v.mapPhoto || defaults.mapPhoto,
+    milestones,
+    polaroidPhoto: pickPhoto(v.polaroidPhoto, 0, defaults.polaroidPhoto),
+    // The design asks for no map keepsake, no street address and no dress code
+    // anywhere in the flow, so the invitation prints the sample's. Filed as
+    // `hbd-byb.20` rather than answered here by adding fields the design does
+    // not draw.
+    mapPhoto: defaults.mapPhoto,
     loveStoryVideo: v.loveStoryVideo || defaults.loveStoryVideo,
     eventPhotos: v.eventPhotos ?? defaults.eventPhotos,
     eventStartTime: formatTime(v.eventStartTime, defaults.eventStartTime),
     eventEndTime: formatTime(v.eventEndTime, defaults.eventEndTime),
     venueName: v.venueName?.trim() || defaults.venueName,
-    address: v.address?.trim() || defaults.address,
+    address: defaults.address,
     mapsUrl: v.mapsUrl?.trim() || defaults.mapsUrl,
-    dressCode: v.dressCode?.trim() || defaults.dressCode,
+    dressCode: defaults.dressCode,
     photoShareCover: v.photoShareCover || defaults.photoShareCover,
     photoShareUrl: v.photoShareUrl?.trim() || defaults.photoShareUrl,
     galleryPhotos: v.galleryPhotos ?? defaults.galleryPhotos,
@@ -248,13 +311,13 @@ export function formValuesToContent(
 /**
  * Initial form values for the creator (prefills preview on first paint).
  *
- * The fields of the Cover Header, the Holy Verse and the Bride & Groom's
- * Introduction are deliberately absent. The design draws every one of them
- * empty, with its example written as grey placeholder text, so filling them in
- * would put the design's examples into a couple's invitation as if they had
- * chosen them. Nothing is lost by leaving them out: `formValuesToContent` falls
- * back to the sample invitation for anything unanswered, so the Site Preview
- * still has a wedding to show.
+ * The fields of the Cover Header, the Holy Verse, the Bride & Groom's
+ * Introduction, the Love Story and the Venue Details are deliberately absent.
+ * The design draws every one of them empty, with its example written as grey
+ * placeholder text, so filling them in would put the design's examples into a
+ * couple's invitation as if they had chosen them. Nothing is lost by leaving
+ * them out: `formValuesToContent` falls back to the sample invitation for
+ * anything unanswered, so the Site Preview still has a wedding to show.
  *
  * The remaining Sections' defaults stand until their own beads reach them.
  */
@@ -263,16 +326,9 @@ export function getDefaultFormValues(): WeddingInvitationFormValues {
   return {
     heroPhotos: [],
     loveStoryPhotos: [],
-    milestones: d.milestones.map((m) => ({ ...m })),
-    polaroidPhoto: '',
-    mapPhoto: '',
+    polaroidPhoto: [],
     loveStoryVideo: '',
     eventPhotos: [],
-    eventStartTime: dayjs('19:00', 'HH:mm'),
-    eventEndTime: dayjs('21:00', 'HH:mm'),
-    address: d.address,
-    mapsUrl: d.mapsUrl,
-    dressCode: d.dressCode,
     photoShareCover: '',
     photoShareUrl: '',
     galleryPhotos: [],
@@ -284,4 +340,4 @@ export function getDefaultFormValues(): WeddingInvitationFormValues {
   };
 }
 
-export { pickPhoto, DEFAULT_MILESTONES };
+export { pickPhoto };

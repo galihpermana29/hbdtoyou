@@ -45,9 +45,9 @@
  * screen's design, so the panel's heading and controls are asserted and what it
  * renders inside is not.
  *
- * The first three Sections' fields are enumerated. Every Section's card, name
- * and description is asserted, and the fields of the other five are added by the
- * beads that build them.
+ * The first five Sections' fields are enumerated. Every Section's card, name
+ * and description is asserted, and the fields of the other three are added by
+ * the beads that build them.
  */
 
 import { FIELD_SHADOW, pageChrome, siteFooter, TYPE } from './page-chrome.mjs';
@@ -107,6 +107,44 @@ const TEXT_FIELD = {
   padding: '8px 12px',
   boxShadow: FIELD_SHADOW,
 };
+
+/**
+ * The same field once the design draws a mark inside it.
+ *
+ * A calendar before a year, a clock before a time, a pin before a place: the
+ * box then holds more than one thing, so the box is what carries the border and
+ * the insets, and the answer inside carries the type. The two are asserted
+ * separately for that reason, and the box is found by `role="group"` because a
+ * `<label>` points at the control rather than at what is drawn around it.
+ */
+const MARKED_FIELD = {
+  backgroundColor: '#ffffff',
+  borderStyle: 'solid',
+  borderWidth: '1px',
+  borderColor: '#d0d5dd',
+  borderRadius: '8px',
+  padding: '8px 12px',
+  gap: '8px',
+  boxShadow: FIELD_SHADOW,
+};
+
+/** The answer a couple types inside such a box. */
+const MARKED_ANSWER = {
+  fontSize: '16px',
+  fontWeight: 400,
+  lineHeight: '24px',
+};
+
+/**
+ * How many earlier elements in a list say exactly what the one at `index` says.
+ *
+ * The design writes the same words in more than one place - four fields invite
+ * a couple to "Add More Photos", and two recommend the same ratios - and copy
+ * is the only handle those elements have. Counting the repeats is what keeps
+ * each expectation about one of them rather than about all of them at once.
+ */
+const nthByCopy = (copies, index) =>
+  copies.slice(0, index).filter((copy) => copy === copies[index]).length;
 
 /** The eight Sections, in the order the design stacks them. */
 const SECTIONS = [
@@ -208,7 +246,45 @@ const LABELS_IN_ORDER = [
   'Groom Name',
   'Groom’s Father',
   'Groom’s Mother',
+  'Polaroid Photos',
+  'The year when you first met',
+  'How you first met?',
+  'The year you both getting closer',
+  'How you both getting closer?',
+  'Proposal Photo',
+  'The year they asked the BIG question!',
+  'Finally, the happy ending',
+  'Wedding Teaser Video',
+  'More Photos',
+  'Wedding Location',
 ];
+
+/**
+ * Every box the form marks as a group, in the order the design stacks them.
+ *
+ * A group is a field built from more than one element, and there are two kinds
+ * here. Most are a box with a mark and an answer in it. One is the reception
+ * time, which is a name over two such boxes - it comes before both of them,
+ * because it contains them.
+ */
+const GROUPS_IN_ORDER = [
+  'The year when you first met',
+  'The year you both getting closer',
+  'The year they asked the BIG question!',
+  'Wedding Reception Time',
+  'Start',
+  'End',
+  'Wedding Location',
+];
+
+/** Where a group falls among the form's groups, counted down the page. */
+const groupNth = (name) => {
+  const nth = GROUPS_IN_ORDER.indexOf(name);
+  if (nth === -1) {
+    throw new Error(`"${name}" is not one of the form's groups`);
+  }
+  return nth;
+};
 
 /**
  * The words above a field, wherever they fall among the form's labels.
@@ -237,25 +313,106 @@ const textField = (label) => [
   { name: `${label} field`, control: label, style: TEXT_FIELD },
 ];
 
+/** A label, the box the design marks, and the answer a couple types in it. */
+const markedField = (label) => [
+  labelFor(label),
+  {
+    name: `${label} field`,
+    select: 'form [role="group"]',
+    nth: groupNth(label),
+    style: MARKED_FIELD,
+  },
+  { name: `${label} answer`, control: label, style: MARKED_ANSWER },
+];
+
+/** The ratios the design recommends for a Section that shows several photos. */
+const WIDE_PHOTO_HINT =
+  'We recommend to add more than 2 images in the ratio of 4:3 or 16:9 for more interactivity';
+
+/**
+ * Every dashed area the form takes a file in, in the order the design stacks
+ * them, with the words it writes in and under each.
+ *
+ * Four of the five invite a couple to "Add More Photos" and two recommend the
+ * same ratios, so copy alone cannot say which one an expectation is about. The
+ * repeats are counted from this list rather than written out, so adding an area
+ * to an earlier Section is one line here.
+ */
+const UPLOAD_AREAS = [
+  {
+    field: 'Couples Photos',
+    title: 'Add More Photos',
+    prompt: 'Drag & drop up to 5 images from your gallery',
+    hint: WIDE_PHOTO_HINT,
+  },
+  {
+    field: 'Polaroid Photos',
+    title: 'Add More Photos',
+    prompt: 'Drag & drop up to 12 images from your gallery',
+    hint: 'We recommend to add more than 3 images in the ratio of 4:3 for more interactivity',
+  },
+  {
+    // The one area the design prints no guidance under: it takes a single
+    // photo, and the prompt inside it already says so. It says it in the
+    // design's own words, which do not change for a field that takes one -
+    // "Add More Photos" over "up to 1 images", both read off the frame. See
+    // `docs/adr/0002-figma-is-literal-truth.md`.
+    field: 'Proposal Photo',
+    title: 'Add More Photos',
+    prompt: 'Drag & drop up to 1 images from your gallery',
+    hint: null,
+  },
+  {
+    field: 'Wedding Teaser Video',
+    title: 'Add a Video',
+    prompt: 'Drag & drop video file from your gallery',
+    hint: 'Max video size 15MB',
+  },
+  {
+    field: 'More Photos',
+    title: 'Add More Photos',
+    prompt: 'Drag & drop up to 5 images from your gallery',
+    hint: WIDE_PHOTO_HINT,
+  },
+];
+
+const UPLOAD_TITLES = UPLOAD_AREAS.map((area) => area.title);
+const UPLOAD_PROMPTS = UPLOAD_AREAS.map((area) => area.prompt);
+const UPLOAD_HINTS = UPLOAD_AREAS.map((area) => area.hint);
+
+/** One dashed area: its label, the words inside it, and the guidance under it. */
+const uploadArea = (index) => {
+  const area = UPLOAD_AREAS[index];
+  return [
+    labelFor(area.field),
+    {
+      name: `${area.field} upload title`,
+      withText: area.title,
+      nth: nthByCopy(UPLOAD_TITLES, index),
+      style: UPLOAD_TYPE.title,
+    },
+    {
+      name: `${area.field} upload prompt`,
+      withText: area.prompt,
+      nth: nthByCopy(UPLOAD_PROMPTS, index),
+      style: UPLOAD_TYPE.prompt,
+    },
+    ...(area.hint === null
+      ? []
+      : [
+          {
+            name: `${area.field} hint`,
+            withText: area.hint,
+            nth: nthByCopy(UPLOAD_HINTS, index),
+            style: TYPE.fieldHint,
+          },
+        ]),
+  ];
+};
+
 /** The Cover Header's fields, the first Section this screen enumerates in full. */
 const coverHeaderFields = [
-  labelFor('Couples Photos'),
-  {
-    name: 'Couples Photos upload title',
-    withText: 'Add More Photos',
-    style: UPLOAD_TYPE.title,
-  },
-  {
-    name: 'Couples Photos upload prompt',
-    withText: 'Drag & drop up to 5 images from your gallery',
-    style: UPLOAD_TYPE.prompt,
-  },
-  {
-    name: 'Couples Photos hint',
-    withText:
-      'We recommend to add more than 2 images in the ratio of 4:3 or 16:9 for more interactivity',
-    style: TYPE.fieldHint,
-  },
+  ...uploadArea(0),
   ...textField('Bride Nickname'),
   ...textField('Groom Nickname'),
   ...textField('Wedding Place Name'),
@@ -299,6 +456,123 @@ const brideGroomIntroductionFields = [
   ...textField('Groom’s Mother'),
 ];
 
+/** What the design asks in each of the three chapters, in its own words. */
+const LOVE_STORY_YEARS = [
+  'The year when you first met',
+  'The year you both getting closer',
+  'The year they asked the BIG question!',
+];
+const LOVE_STORY_STORIES = [
+  'How you first met?',
+  'How you both getting closer?',
+  'Finally, the happy ending',
+];
+
+/**
+ * The count the design prints under each of the Love Story's long answers.
+ *
+ * The design draws its own sample counted - 320 of 320 characters, then 250 -
+ * and a couple's field is empty, so what the same line says on the screen this
+ * check drives is zero of the same limit. The sentence and the limit are the
+ * design's; the number in front of the slash is whoever is typing.
+ */
+const storyCount = (index) => ({
+  name: `${LOVE_STORY_STORIES[index]} character count`,
+  withText: 'We know it’s hard, but keep it short please. (0/320 characters)',
+  nth: index,
+  style: TYPE.fieldHint,
+});
+
+/**
+ * The Love Story Section's fields.
+ *
+ * Three chapters, each a year and the story of it, with the Proposal Photo
+ * between the second and the third where the design puts it and the teaser
+ * video at the end. The design offers no way to add a chapter or remove one,
+ * and this list is the whole of what it draws.
+ */
+const loveStoryFields = [
+  ...uploadArea(1),
+  ...markedField(LOVE_STORY_YEARS[0]),
+  ...textField(LOVE_STORY_STORIES[0]),
+  storyCount(0),
+  ...markedField(LOVE_STORY_YEARS[1]),
+  ...textField(LOVE_STORY_STORIES[1]),
+  storyCount(1),
+  ...uploadArea(2),
+  ...markedField(LOVE_STORY_YEARS[2]),
+  ...textField(LOVE_STORY_STORIES[2]),
+  storyCount(2),
+  ...uploadArea(3),
+];
+
+/**
+ * The Venue Details Section's fields.
+ *
+ * The reception's start and its end share one name, so they are a group with a
+ * name over a pair of boxes rather than two labelled fields - which is exactly
+ * what the design draws. The Wedding Location carries an action inside its box,
+ * divided off by a hairline the design draws full height.
+ */
+const venueDetailsFields = [
+  ...uploadArea(4),
+  {
+    name: 'Wedding Reception Time field',
+    select: 'form [role="group"]',
+    nth: groupNth('Wedding Reception Time'),
+    style: { gap: '6px' },
+  },
+  {
+    name: 'Wedding Reception Time label',
+    withText: 'Wedding Reception Time',
+    style: TYPE.fieldLabel,
+  },
+  {
+    name: 'Reception start field',
+    select: 'form [role="group"]',
+    nth: groupNth('Start'),
+    style: MARKED_FIELD,
+  },
+  {
+    name: 'Reception end field',
+    select: 'form [role="group"]',
+    nth: groupNth('End'),
+    style: MARKED_FIELD,
+  },
+  labelFor('Wedding Location'),
+  {
+    name: 'Wedding Location hint',
+    withText:
+      'Go to Google Maps, find your wedding venue then copy the direction link',
+    style: TYPE.fieldHint,
+  },
+  {
+    name: 'Wedding Location field',
+    select: 'form [role="group"]',
+    nth: groupNth('Wedding Location'),
+    style: MARKED_FIELD,
+  },
+  {
+    name: 'Wedding Location answer',
+    control: 'Wedding Location',
+    style: MARKED_ANSWER,
+  },
+  {
+    name: 'Save Location action',
+    select: 'button',
+    withText: 'Save Location',
+    style: {
+      fontSize: '14px',
+      fontWeight: 600,
+      lineHeight: '20px',
+      color: '#344054',
+      borderColor: '#d0d5dd',
+      borderWidth: '0px 0px 0px 1px',
+      padding: '0px 16px',
+    },
+  },
+];
+
 export const expectations = [
   ...pageChrome('Fill in the details & story'),
   ...sectionExpectations(0),
@@ -308,7 +582,9 @@ export const expectations = [
   ...sectionExpectations(2),
   ...brideGroomIntroductionFields,
   ...sectionExpectations(3),
+  ...loveStoryFields,
   ...sectionExpectations(4),
+  ...venueDetailsFields,
   ...sectionExpectations(5),
   ...sectionExpectations(6),
   ...sectionExpectations(7),

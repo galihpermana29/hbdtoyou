@@ -48,6 +48,41 @@ export const flowTextField =
  */
 export const flowTextArea = `${flowTextField} block resize-none`;
 
+/**
+ * The box the design draws around more than one thing: a mark, the answer, and
+ * sometimes an action attached to the end of it.
+ *
+ * The border, the radius, the shadow and the insets belong to the box, and what
+ * sits inside carries its own type - the same division the guest invites step's
+ * web domain field is built on. It matters beyond tidiness. A `<label>` points
+ * at a control, so when the control is the bordered box the two are the same
+ * element and everything can find the field by its label; when the box is
+ * around the control they cannot be, which is the whole of `hbd-byb.16`. A box
+ * of this shape is therefore marked `role="group"` and named by its label, and
+ * the style and structure check looks it up that way.
+ */
+export const flowMarkedField = `flex items-center gap-[8px] px-[12px] py-[8px] ${flowFieldBox}`;
+
+/** The answer inside such a box, which has no box of its own to draw. */
+export const flowMarkedFieldAnswer =
+  'min-w-0 flex-1 bg-transparent text-[16px] font-[400] leading-[24px] ' +
+  'text-[#101828] outline-none placeholder:text-[#667085]';
+
+/** The mark before the answer, in the grey the design also writes examples in. */
+export const flowFieldMark = 'shrink-0 text-[#667085]';
+
+/**
+ * An action the design attaches to the end of a field, inside the field's box.
+ *
+ * The negative margins are what let one hairline divide the box full height:
+ * the box insets everything it holds by 8px and 12px, and this reaches back out
+ * over those so its left border runs from the top of the box to the bottom.
+ */
+export const flowFieldAction =
+  'flex shrink-0 items-center self-stretch -my-[8px] -mr-[12px] ' +
+  'border-l border-[#D0D5DD] px-[16px] text-[14px] font-[600] ' +
+  'leading-[20px] text-[#344054]';
+
 /** The name the design gives a Section, and the line of guidance under it. */
 export const flowSectionName =
   'text-[18px] font-[600] leading-[28px] text-[#1B1B1B]';
@@ -114,6 +149,16 @@ export const flowFieldParts = 'flex flex-col gap-[6px]';
  * cannot end up a few pixels from the pairs beside it.
  */
 export const flowFieldPair = 'grid grid-cols-2 gap-[24px]';
+
+/**
+ * The row the design puts a start and an end in.
+ *
+ * Closer together than `flowFieldPair`, and deliberately so: a bride's nickname
+ * and a groom's are two answers that happen to be related, where a reception's
+ * start and its end are two halves of one answer, and the design draws that
+ * difference as 6px against 24px.
+ */
+export const flowFieldRange = 'grid grid-cols-2 gap-[6px]';
 
 /**
  * The pair of actions that ends every step.

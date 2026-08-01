@@ -4,6 +4,7 @@ import { useId, type ChangeEvent } from 'react';
 
 import {
   flowFieldParts,
+  flowHint,
   flowLabel,
   flowTextArea,
   flowTextField,
@@ -39,6 +40,21 @@ export interface FlowTextFieldProps {
    */
   rows?: number;
   /**
+   * The most characters the design gives this answer room for.
+   *
+   * A field that names one counts what is written against it, under the box,
+   * and will not take more. A field that names none is not counted, which is
+   * every short answer in the flow.
+   */
+  limit?: number;
+  /**
+   * What the design says beside that count.
+   *
+   * The whole line is this and the count together, because the design writes it
+   * as one sentence rather than as a number in a corner.
+   */
+  guidance?: string;
+  /**
    * The field's identifier.
    *
    * Supplied by `Form.Item` from the field's name, so the fallback is only ever
@@ -55,6 +71,8 @@ export default function FlowTextField({
   label,
   placeholder,
   rows,
+  limit,
+  guidance,
   id,
   value,
   onChange,
@@ -78,6 +96,7 @@ export default function FlowTextField({
           type="text"
           value={answer}
           onChange={onChange}
+          maxLength={limit}
           placeholder={placeholder}
           className={flowTextField}
         />
@@ -87,10 +106,19 @@ export default function FlowTextField({
           rows={rows}
           value={answer}
           onChange={onChange}
+          maxLength={limit}
           placeholder={placeholder}
           className={flowTextArea}
         />
       )}
+      {/* The count is of what a couple has written, not of the example printed
+          in the empty box: the design shows its own sample counted, and a
+          couple's field starts at nothing because their field is empty. */}
+      {limit !== undefined ? (
+        <p className={flowHint}>
+          {guidance ? `${guidance} ` : ''}({answer.length}/{limit} characters)
+        </p>
+      ) : null}
     </div>
   );
 }

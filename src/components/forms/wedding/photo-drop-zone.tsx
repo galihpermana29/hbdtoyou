@@ -1,20 +1,11 @@
 'use client';
 
-import { Upload, X } from 'lucide-react';
+import { X } from 'lucide-react';
 import Image from 'next/image';
 import { useId, useRef, useState } from 'react';
 
 import type { OpenNotificationFunction } from '@/app/(landing)/(core)/create/usecase/useCreateContent';
-import { newUploadImageWithAPI } from '@/lib/upload';
-import {
-  flowDropZone,
-  flowDropZonePrompt,
-  flowDropZoneTitle,
-  flowFieldParts,
-  flowHint,
-  flowLabel,
-  flowProblem,
-} from './create-flow-treatment';
+import FlowFileField, { uploadFile } from './flow-file-field';
 
 /**
  * The area the design hands a couple to add photos to a Section.
@@ -28,10 +19,6 @@ import {
  * Photos are uploaded as they are chosen and the field holds the addresses they
  * came back as, so what a couple sees after choosing is the photo itself rather
  * than a promise to upload it later.
- *
- * The file field sits beside the dashed area rather than inside it. Inside, the
- * click the area sends it would bubble straight back into the area's own
- * handler and send another.
  */
 
 /** What the design says a couple may add here, and what the backend accepts. */
@@ -43,8 +30,13 @@ export interface PhotoDropZoneProps {
   label: string;
   /** How many photos the design says belong here. */
   limit: number;
-  /** The line of guidance the design prints under the area. */
-  hint: string;
+  /**
+   * The line of guidance the design prints under the area.
+   *
+   * Optional because the design does not print one everywhere: the Proposal
+   * Photo takes a single photo and is left to say so in its prompt.
+   */
+  hint?: string;
   /** The largest file the couple's plan allows, in megabytes. */
   maxSizeMb: number;
   /**
@@ -68,7 +60,6 @@ export default function PhotoDropZone({
 }: PhotoDropZoneProps) {
   const fallbackId = useId();
   const fieldId = id ?? fallbackId;
-  const fileRef = useRef<HTMLInputElement>(null);
 
   const [isUploading, setIsUploading] = useState(false);
   // What was wrong with the last files chosen, so a photo that cannot be added
@@ -132,14 +123,7 @@ export default function PhotoDropZone({
     const added: string[] = [];
     const failed: string[] = [];
     for (const file of acceptable) {
-      const body = new FormData();
-      body.append('file', file);
-      const result = await newUploadImageWithAPI(
-        body,
-        openNotification,
-        file.name
-      );
-      const address = result.success ? result.data?.data : null;
+      const address = await uploadFile(file, openNotification);
       if (address) {
         added.push(address);
       } else {
@@ -157,50 +141,16 @@ export default function PhotoDropZone({
   }
 
   return (
-    <div className={flowFieldParts}>
-      <label htmlFor={fieldId} className={flowLabel}>
-        {label}
-      </label>
-
-      {/* The field itself, and the only tab stop here: the design draws no
-          control inside the area, so the area is a click target rather than a
-          second way to reach the same thing. */}
-      <input
-        ref={fileRef}
-        id={fieldId}
-        type="file"
-        multiple={limit > 1}
-        accept={ACCEPTED_TYPES}
-        className="sr-only"
-        onChange={(event) => {
-          const chosen = Array.from(event.target.files ?? []);
-          // A file field holds on to what was chosen last, so choosing the same
-          // file again would be no change at all and fire nothing.
-          event.target.value = '';
-          if (chosen.length > 0) add(chosen);
-        }}
-      />
-
-      <div
-        onClick={() => fileRef.current?.click()}
-        onDragOver={(event) => event.preventDefault()}
-        onDrop={(event) => {
-          event.preventDefault();
-          const dropped = Array.from(event.dataTransfer.files ?? []);
-          if (dropped.length > 0) add(dropped);
-        }}
-        className={flowDropZone}>
-        <Upload size={32} aria-hidden="true" className="text-[#141414]" />
-        <div className="flex flex-col items-center gap-[4px] text-center">
-          <p className={flowDropZoneTitle}>
-            {isUploading ? 'Adding Your Photos' : 'Add More Photos'}
-          </p>
-          <p className={flowDropZonePrompt}>
-            Drag &amp; drop up to {limit} images from your gallery
-          </p>
-        </div>
-      </div>
-
+    <FlowFileField
+      label={label}
+      id={fieldId}
+      accept={ACCEPTED_TYPES}
+      multiple={limit > 1}
+      title={isUploading ? 'Adding Your Photos' : 'Add More Photos'}
+      prompt={`Drag & drop up to ${limit} images from your gallery`}
+      hint={hint}
+      problem={problem}
+      onFiles={add}>
       {/* Counted by position rather than keyed on the address, because the same
           photo uploaded twice comes back as the same address twice, and
           removing "the one with that address" would remove both of them. */}
@@ -230,14 +180,6 @@ export default function PhotoDropZone({
           ))}
         </ul>
       ) : null}
-
-      <p className={flowHint}>{hint}</p>
-
-      {problem ? (
-        <p role="alert" className={flowProblem}>
-          {problem}
-        </p>
-      ) : null}
-    </div>
+    </FlowFileField>
   );
 }
