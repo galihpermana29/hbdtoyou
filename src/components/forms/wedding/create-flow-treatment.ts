@@ -210,6 +210,21 @@ export const flowActionForward = `${FILLED} px-[18px] py-[12px] font-[700]`;
 /** The published screen's Play My Invite, outlined as the back action is. */
 export const flowActionPlay = `${OUTLINED} py-[10px] pl-[18px] pr-[16px] font-[600]`;
 
+/**
+ * The Site Preview's Play Preview, which is the small version of that action.
+ *
+ * Written out rather than composed from `OUTLINED`, because the design sets it
+ * a size smaller - 14px over 20px where every other action is 16px over 24px,
+ * and 4px between the words and the mark where the others leave 6px. Adding
+ * those as overrides would put two Tailwind utilities for one property on one
+ * element, and which of them wins is decided by the order they were written
+ * into the stylesheet rather than the order they appear here.
+ */
+export const flowActionPlayPreview =
+  'inline-flex items-center justify-center gap-[4px] rounded-[8px] ' +
+  'border border-[#E34013] bg-white px-[14px] py-[10px] text-[14px] ' +
+  `font-[600] leading-[20px] text-[#E34013] ${flowShadow}`;
+
 /** The published screen's Back to home, filled as the forward action is. */
 export const flowActionHome = `${FILLED} py-[12px] pl-[20px] pr-[18px] font-[700]`;
 
@@ -217,7 +232,36 @@ export const flowActionHome = `${FILLED} py-[12px] pl-[20px] pr-[18px] font-[700
 export const flowActionRow = 'flex justify-end gap-[20px]';
 
 /**
+ * The column a preview panel stands in, on both screens that show one.
+ *
+ * The width is the design's and it is a maximum rather than a floor, because
+ * below the width the design is drawn at there is not always 405px to give it,
+ * and a panel wider than the page it is on is a panel nobody can scroll to.
+ */
+export const flowPreviewPanel = 'flex w-[405px] max-w-full flex-col gap-[24px]';
+
+/** What the design titles such a panel, above the phone it stands over. */
+export const flowPreviewHeading =
+  'text-[18px] font-[600] leading-[28px] text-[#1B1B1B]';
+
+/**
  * The tray the design rests a phone-shaped preview in, on every screen that
  * shows one: a soft grey card with the invitation inset in it.
  */
 export const flowPreviewTray = 'rounded-[12px] bg-[#F7F7F7] p-[14px]';
+
+/**
+ * The screen inside that tray: the phone's own glass, and the only thing the
+ * design's mockup puts on it.
+ *
+ * It scrolls and clips on the one element, so the invitation runs under a
+ * rounded corner rather than past a square one.
+ *
+ * The design's mockup adds phone furniture as well - a status bar reading 9:41 -
+ * and none of it is drawn here. That is Figma's furniture rather than a decision
+ * about either screen, and a fabricated clock over the top of a couple's live
+ * preview would cost them 44px of the thing the panel exists to show. The same
+ * line is drawn in `published.mjs`.
+ */
+export const flowPreviewScreen =
+  'h-[812px] overflow-y-auto overflow-x-hidden overscroll-contain rounded-[10px]';

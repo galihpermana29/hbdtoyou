@@ -25,6 +25,8 @@
  *   label                           one per field, associated with its control
  *   [role="group"]                  a field built from more than one element
  *   button                          an action
+ *   aside                           the Site Preview, beside the form
+ *   figure                          the phone, holding the glass as its one child
  *   footer                          the site footer
  *
  * The chrome above a screen's own content is the same on every step, so it is
@@ -42,8 +44,16 @@
  * their type would contradict the spec.
  *
  * The Site Preview's contents are the live invitation rather than part of this
- * screen's design, so the panel's heading and controls are asserted and what it
- * renders inside is not.
+ * screen's design, so the panel, its heading, its control and the phone they
+ * stand over are asserted and what is drawn on the phone's glass is not. The
+ * design's mockup adds phone furniture of its own - a status bar reading 9:41 -
+ * which is Figma's furniture rather than a decision about this screen and is
+ * neither asserted nor drawn. `published.mjs` draws the same line.
+ *
+ * The panel comes after the two actions here because the design's left column
+ * holds the Sections and the actions together, and the panel is the column
+ * beside it. The design also rules a hairline down the middle of the 120px
+ * between the two columns, which is not drawn yet: `hbd-byb.25`.
  *
  * The MemoRoll Section's card is washed with a gradient and has a camera printed
  * behind its words. Neither is asserted, because the harness compares background
@@ -738,14 +748,16 @@ export const expectations = [
     },
   },
   {
+    // The design stands the panel in the column beside the form, with 24px
+    // between its heading and the phone under it.
+    name: 'Site Preview panel',
+    select: 'aside',
+    style: { gap: '24px' },
+  },
+  {
     name: 'Site Preview heading',
     withText: 'Site Preview',
-    style: {
-      fontSize: '18px',
-      fontWeight: 600,
-      lineHeight: '28px',
-      color: '#1b1b1b',
-    },
+    style: TYPE.panelHeading,
   },
   {
     name: 'Play Preview action',
@@ -765,6 +777,23 @@ export const expectations = [
       gap: '4px',
       boxShadow: FIELD_SHADOW,
     },
+  },
+  {
+    name: 'Site Preview phone frame',
+    select: 'figure',
+    style: {
+      backgroundColor: '#f7f7f7',
+      borderRadius: '12px',
+      padding: '14px',
+    },
+  },
+  {
+    // The phone's glass, which is the one thing the tray holds. Its height is
+    // the design's where a window is tall enough for it and less where it is
+    // not, so only its corner is stated here.
+    name: 'Site Preview screen',
+    select: 'figure > div',
+    style: { borderRadius: '10px' },
   },
   siteFooter,
 ];

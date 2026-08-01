@@ -59,7 +59,7 @@ export default function WeddingInvitationCreateClientside() {
   const router = useRouter();
   const { contextHolder, openNotification } = useCreateContent();
   const [form] = useForm<WeddingInvitationFormValues>();
-  const [isSidebarCollapsed, setIsSidebarCollapsed] = useState(false);
+  const [isPreviewCollapsed, setIsPreviewCollapsed] = useState(false);
   const [step, setStep] = useState<CreateFlowStep>(
     'Fill in the details & story'
   );
@@ -125,68 +125,74 @@ export default function WeddingInvitationCreateClientside() {
           </div>
 
           <div className={isDetailsAndStory ? 'contents' : 'hidden'}>
-            <div className="relative mt-[40px] flex min-h-[calc(100vh-280px)] flex-1 flex-col gap-[24px] lg:flex-row lg:items-stretch">
-              <button
-                type="button"
-                onClick={() => setIsSidebarCollapsed(!isSidebarCollapsed)}
-                className={`absolute top-1/2 z-[10] hidden -translate-y-1/2 rounded-full border border-[#EDEDED] bg-white p-3 shadow-lg transition-all duration-200 hover:border-[#007AFF] hover:shadow-xl lg:block ${
-                  isSidebarCollapsed
-                    ? 'left-[20px]'
-                    : 'right-[calc(400px+12px)]'
-                }`}
-                aria-label={
-                  isSidebarCollapsed ? 'Expand form' : 'Collapse form'
-                }>
-                {isSidebarCollapsed ? (
-                  <ChevronRight className="h-5 w-5" />
-                ) : (
-                  <ChevronLeft className="h-5 w-5" />
-                )}
-              </button>
+            {/* Two columns, as the design arranges them: everything the couple
+                fills in on the left, the Site Preview on the right. The two
+                actions belong to the left column rather than to the page, which
+                is both what the design draws and what puts them ahead of the
+                panel in reading order. */}
+            <div className="mt-[40px] flex flex-col gap-[24px] lg:flex-row lg:items-start lg:gap-[40px]">
+              {/* The design draws no box around the Sections: each one carries
+                  its own card, and they sit on the page at the same gutter as
+                  the heading above them. */}
+              <div className="min-w-0 flex-1">
+                <WeddingInvitationForm
+                  form={form}
+                  openNotification={openNotification}
+                />
 
-              {/* Form - takes remaining width. The design draws no box around
-                  the Sections: each one carries its own card, and they sit on
-                  the page at the same gutter as the heading above them. */}
-              <div
-                className={`flex min-h-0 min-w-0 flex-col transition-all duration-300 ease-in-out ${
-                  isSidebarCollapsed
-                    ? 'w-0 max-w-0 overflow-hidden opacity-0 lg:flex-[0]'
-                    : 'min-w-0 flex-1 lg:pr-[32px]'
-                }`}>
-                <div className={isSidebarCollapsed ? 'hidden' : 'block'}>
-                  <WeddingInvitationForm
-                    form={form}
-                    openNotification={openNotification}
-                  />
+                <div className={`mt-[40px] ${flowActionRow}`}>
+                  {/* A button rather than a link, because the design draws the
+                      two actions as a pair and only one of them can be a
+                      destination. */}
+                  <button
+                    type="button"
+                    onClick={() => router.push(CHOOSE_TEMPLATE_ROUTE)}
+                    className={flowActionBack}>
+                    Previous step
+                  </button>
+                  <button
+                    type="button"
+                    onClick={() => goToStep('Guest invites details')}
+                    className={flowActionForward}>
+                    Next
+                  </button>
                 </div>
               </div>
 
-              {/* Phone simulator - fixed narrow column, centered */}
-              <div
-                className={`flex min-h-0 flex-col transition-all duration-300 ease-in-out lg:sticky lg:top-[96px] lg:max-h-[calc(100vh-120px)] lg:w-[400px] lg:shrink-0 ${
-                  isSidebarCollapsed
-                    ? 'w-full flex-1 items-center px-[24px] py-[16px]'
-                    : 'w-full items-center px-[16px] py-[16px]'
-                }`}>
-                <WeddingInvitationPreview form={form} />
-              </div>
-            </div>
+              {/* The control travels with the panel rather than with the page,
+                  so it is still there to bring the panel back after a couple
+                  has scrolled down a form this long. The design leaves 120px
+                  between the two columns and draws nothing in it; the control
+                  sits in the middle of that, 40px from each side. */}
+              <div className="flex w-full items-start lg:sticky lg:top-[96px] lg:w-auto lg:shrink-0">
+                <button
+                  type="button"
+                  onClick={() => setIsPreviewCollapsed(!isPreviewCollapsed)}
+                  aria-expanded={!isPreviewCollapsed}
+                  aria-label={
+                    isPreviewCollapsed
+                      ? 'Show the Site Preview'
+                      : 'Hide the Site Preview'
+                  }
+                  className="hidden h-[40px] w-[40px] shrink-0 items-center justify-center rounded-full border border-[#EDEDED] bg-white text-[#1B1B1B] shadow-lg hover:border-[#E34013] lg:flex">
+                  {isPreviewCollapsed ? (
+                    <ChevronLeft className="h-5 w-5" aria-hidden="true" />
+                  ) : (
+                    <ChevronRight className="h-5 w-5" aria-hidden="true" />
+                  )}
+                </button>
 
-            <div className={`mt-[40px] ${flowActionRow}`}>
-              {/* A button rather than a link, because the design draws the two
-                  actions as a pair and only one of them can be a destination. */}
-              <button
-                type="button"
-                onClick={() => router.push(CHOOSE_TEMPLATE_ROUTE)}
-                className={flowActionBack}>
-                Previous step
-              </button>
-              <button
-                type="button"
-                onClick={() => goToStep('Guest invites details')}
-                className={flowActionForward}>
-                Next
-              </button>
+                {/* Collapsed only where there is a control to bring it back:
+                    below lg the two columns stack, the control is gone, and a
+                    panel hidden by a decision taken on a wider screen would be
+                    hidden with no way to ask for it. */}
+                <div
+                  className={`w-full min-w-0 lg:w-auto ${
+                    isPreviewCollapsed ? 'lg:hidden' : 'lg:ml-[40px]'
+                  }`}>
+                  <WeddingInvitationPreview form={form} />
+                </div>
+              </div>
             </div>
           </div>
 
