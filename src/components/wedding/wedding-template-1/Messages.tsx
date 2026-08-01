@@ -360,12 +360,22 @@ export default function Messages({
         />
       </div>
 
-      {/* bottom fade-out gradient */}
+      {/*
+        The fade the design lays over the foot of the list, node 312:1785. Both
+        its stops sit OUTSIDE the box: solving the node's gradientTransform puts
+        the first at normalised y=1.0667, just below the bottom edge, and the
+        second at y=-0.9429, above the top edge. Measured up from the bottom
+        edge, the way `to top` measures, that is -6.67% and 194.29% - so the
+        bottom edge is itself already a little way into the fade, at 0.773 alpha
+        rather than the stop's own 0.8. Dropping the first stop's minus sign
+        clamps it back to 0.8 and darkens that edge. Nothing the check can find
+        draws this box, so the sign is guarded by this comment alone.
+      */}
       <div
         className="pointer-events-none absolute left-[16px] top-[536px] h-[105px] w-[335px]"
         style={{
           background:
-            'linear-gradient(to top, rgba(0,0,0,0.8) 6.667%, rgba(102,102,102,0) 194.29%)',
+            'linear-gradient(to top, rgba(0,0,0,0.8) -6.67%, rgba(102,102,102,0) 194.29%)',
         }}
       />
     </section>
