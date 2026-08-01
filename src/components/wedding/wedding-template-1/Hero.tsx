@@ -1,16 +1,22 @@
 'use client';
 
 /**
- * Wedding Template 1 — Hero ("You're Invited to"). Figma node 312:1632.
- * Fixed 375x812 mobile composition, built pixel-accurate to the design.
- * The iOS status bar in the mockup (9:41 / battery) is intentionally omitted:
- * a real device renders its own, so a faux bar would double up.
+ * Wedding Template 1 - Hero ("You're Invited to"). Figma nodes 312:1632 open
+ * and 332:30920 sealed. Fixed 375x812 mobile composition, built pixel-accurate
+ * to the design. The iOS status bar in the mockup (9:41 / battery) is
+ * intentionally omitted: a real device renders its own, so a faux bar would
+ * double up.
  *
- * Interaction: while the invitation is sealed, the two cards are tucked DOWN
- * inside the envelope pocket (behind the pocket front, z-index below it).
- * Clicking "Open Invitation" slides the cards up and out (z-index above the
- * pocket). NOTE: the flap does not literally unfold - that needs a "closed
- * envelope" asset that Figma export is currently rate-limited on.
+ * Interaction: a sealed invitation arrives with the closed envelope drawn, its
+ * seal unbroken and the cards not drawn at all, and opening it is a guest's own
+ * act. It runs in the order the design gives it - the seal lifts, the closed
+ * envelope cross-fades to the open one, the cards rise out of the pocket, and
+ * only then does the page become the guest's to scroll.
+ *
+ * The two envelopes are separate photographs, each with its own baked lighting
+ * and shadow, so the flap is never rotated: a cross-fade conceals that they are
+ * two images where a rotation would advertise it. Both hang off the same 387x442
+ * box, at the offsets the design gives each, or the fade would jump.
  */
 
 import { motion, useReducedMotion } from 'framer-motion';
@@ -51,12 +57,47 @@ const cardShadow = {
 /** How far (px) the cards are tucked down into the envelope when closed. */
 const TUCK = 58;
 
+/**
+ * The opening, step by step, in seconds.
+ *
+ * Each step says when it starts and how long it runs, so the sequence the design
+ * describes is one object rather than delays scattered down the composition. The
+ * page unlocks when the last of them has finished, which is what makes opening
+ * feel like one act rather than a lock that lets go while the envelope is still
+ * moving.
+ */
+const OPENING = {
+  seal: { delay: 0, duration: 0.3 },
+  envelope: { delay: 0.3, duration: 0.6 },
+  cards: { delay: 0.75, duration: 0.95 },
+};
+
+/**
+ * When the whole opening is over, which is when the page is the guest's.
+ *
+ * Read off every step rather than off the last one written down, so that
+ * lengthening any of them moves the unlock with it instead of letting the page
+ * go while something is still moving.
+ */
+const OPENING_SECONDS = Math.max(
+  ...Object.values(OPENING).map(({ delay, duration }) => delay + duration)
+);
+
+/** One step of the opening, or no movement at all where none is wanted. */
+const step = (
+  reduce: boolean | null,
+  { delay, duration }: { delay: number; duration: number }
+) => (reduce ? { duration: 0 } : { duration, delay, ease: EASE });
+
 /** The envelope with the two cards (save-the-date + couple photo) tucked inside. */
 function EnvelopeCard({
+  sealed,
   opened,
   reduce,
   content,
 }: {
+  /** Whether this invitation has a closed envelope to open at all. */
+  sealed: boolean;
   opened: boolean;
   reduce: boolean | null;
   content: WeddingTemplate1Content;
@@ -68,10 +109,15 @@ function EnvelopeCard({
   );
   const dateLabel = formatWeddingDateLabel(content.weddingDateIso);
   const coupleLabel = `${content.groomName} & ${content.brideName}`;
+
   return (
     <div className="absolute left-1/2 top-[31px] h-[442px] w-[387px] -translate-x-1/2">
-      {/* envelope flap (back layer) */}
-      <div className="absolute left-[7px] top-[25px] z-0 h-[171.869px] w-[370.514px]">
+      {/* envelope flap (back layer), of the open envelope */}
+      <motion.div
+        className="absolute left-[7px] top-[25px] z-0 h-[171.869px] w-[370.514px]"
+        initial={false}
+        animate={{ opacity: opened ? 1 : 0 }}
+        transition={step(reduce, OPENING.envelope)}>
         <div className="pointer-events-none absolute inset-0 overflow-hidden">
           <img
             alt=""
@@ -79,15 +125,26 @@ function EnvelopeCard({
             src={`${ASSET}/envelope.png`}
           />
         </div>
-      </div>
+      </motion.div>
 
-      {/* cards group — tucked inside when closed, slides up/out when opened */}
+      {/* Cards group - tucked inside when closed, rising up and out when
+          opened. A closed envelope is drawn with them not drawn at all rather
+          than merely covered (Figma gives Frame 18 opacity 0), so a guest who
+          has not opened it has nothing to read yet - and neither has anything
+          reading the page. */}
       <motion.div
         className="absolute left-[21px] top-[41.67px] h-[356.062px] w-[345px]"
-        style={{ zIndex: opened ? 30 : -1 }}
+        style={{
+          zIndex: opened ? 30 : -1,
+          visibility: opened ? 'visible' : 'hidden',
+        }}
         initial={false}
-        animate={{ y: opened ? 0 : TUCK, scale: opened ? 1 : 0.82 }}
-        transition={{ duration: reduce ? 0 : 0.95, ease: EASE }}>
+        animate={{
+          opacity: opened ? 1 : 0,
+          y: opened ? 0 : TUCK,
+          scale: opened ? 1 : 0.82,
+        }}
+        transition={step(reduce, OPENING.cards)}>
         {/* couple photo card (tilted -8.41deg) */}
         <div className="absolute left-0 top-[141.41px] flex h-[214.646px] w-[287.231px] items-center justify-center">
           <motion.div
@@ -183,8 +240,12 @@ function EnvelopeCard({
         </div>
       </motion.div>
 
-      {/* envelope body (front pocket) — hides the tucked cards */}
-      <div className="absolute left-[7px] top-[194.87px] z-10 h-[247.13px] w-[370.514px]">
+      {/* envelope body (front pocket) - hides the tucked cards */}
+      <motion.div
+        className="absolute left-[7px] top-[194.87px] z-10 h-[247.13px] w-[370.514px]"
+        initial={false}
+        animate={{ opacity: opened ? 1 : 0 }}
+        transition={step(reduce, OPENING.envelope)}>
         <div className="pointer-events-none absolute inset-0 overflow-hidden">
           <img
             alt=""
@@ -192,21 +253,68 @@ function EnvelopeCard({
             src={`${ASSET}/envelope.png`}
           />
         </div>
-      </div>
+      </motion.div>
 
-      {/* wax seal (front-most) */}
-      <div className="absolute left-[17.91px] top-[101.04px] z-40 flex h-[69.913px] w-[69.18px] items-center justify-center">
+      {/* the broken wax seal, where the design leaves it once the flap is open */}
+      <motion.div
+        className="absolute left-[17.91px] top-[101.04px] z-40 flex h-[69.913px] w-[69.18px] items-center justify-center"
+        initial={false}
+        animate={{ opacity: opened ? 1 : 0 }}
+        transition={step(reduce, OPENING.envelope)}>
         <div className="flex-none rotate-[-13.79deg]">
-          <div className="relative h-[58px] w-[57px]">
-            <div className="pointer-events-none absolute inset-0 overflow-hidden">
-              <img
-                alt=""
-                className="absolute left-[-21.14%] top-[-36.63%] h-[174.45%] w-[142.11%] max-w-none"
-                src={`${ASSET}/wax-seal.png`}
-              />
-            </div>
-          </div>
+          <WaxSeal />
         </div>
+      </motion.div>
+
+      {/* The closed envelope, and the seal still holding it shut. Figma node
+          394:3061 with 332:30839, both offset from the same box the open
+          envelope hangs off, so the cross-fade between them does not jump.
+          Drawn over everything while it lasts, so the open envelope is
+          uncovered rather than laid on top. */}
+      {sealed && (
+        <motion.div
+          className="pointer-events-none absolute inset-0 z-50"
+          initial={false}
+          animate={{ opacity: opened ? 0 : 1 }}
+          transition={step(reduce, OPENING.envelope)}>
+          <img
+            alt=""
+            className="absolute left-[-0.026px] top-[184.063px] h-[268.744px] w-[384.566px] max-w-none"
+            src={`${ASSET}/envelope-closed.png`}
+          />
+          {/* The seal only lifts. Fading it out here as well would take it off
+              the envelope before the lift could be seen, and it is part of the
+              closed envelope: the cross-fade above carries it away. */}
+          <motion.div
+            className="absolute left-[164px] top-[307px] h-[58px] w-[57px]"
+            initial={false}
+            animate={{ y: opened ? -22 : 0 }}
+            transition={step(reduce, OPENING.seal)}>
+            <WaxSeal />
+          </motion.div>
+        </motion.div>
+      )}
+    </div>
+  );
+}
+
+/**
+ * The wax seal, at the 57x58 the design draws it in both of its places.
+ *
+ * One photograph, cropped the same way on the closed envelope and on the open
+ * one - the design gives both the same fill and moves only where it sits and
+ * whether it is turned - so the two would drift apart if each wrote the crop
+ * out for itself.
+ */
+function WaxSeal() {
+  return (
+    <div className="relative h-[58px] w-[57px]">
+      <div className="pointer-events-none absolute inset-0 overflow-hidden">
+        <img
+          alt=""
+          className="absolute left-[-21.14%] top-[-36.63%] h-[174.45%] w-[142.11%] max-w-none"
+          src={`${ASSET}/wax-seal.png`}
+        />
       </div>
     </div>
   );
@@ -223,7 +331,25 @@ export default function Hero({
   const sealed = useSealed();
   const reduce = useReducedMotion();
   const [opened, setOpened] = useState(!sealed);
+  const [revealed, setRevealed] = useState(!sealed);
   const envelopeOpened = sealed ? opened : true;
+
+  // The page is handed back at the end of the opening rather than at the start
+  // of it, so a guest is not scrolling past the envelope while it is still
+  // moving. Nothing waits when nothing moves: a guest who has asked for reduced
+  // motion is given the invitation at once.
+  useEffect(() => {
+    if (!envelopeOpened || revealed) return;
+    if (reduce) {
+      setRevealed(true);
+      return;
+    }
+    const opening = window.setTimeout(
+      () => setRevealed(true),
+      OPENING_SECONDS * 1000
+    );
+    return () => window.clearTimeout(opening);
+  }, [envelopeOpened, revealed, reduce]);
 
   // Nothing below the envelope is reachable until a guest opens it, which is
   // half of what Sealed means and cannot be drawn. Only an invitation that has
@@ -232,14 +358,14 @@ export default function Hero({
   // it sits on would take the whole flow hostage until somebody opened an
   // envelope in a picture.
   useEffect(() => {
-    if (!locksPage || envelopeOpened) return;
+    if (!locksPage || revealed) return;
     const previous = document.body.style.overflow;
     document.body.style.overflow = 'hidden';
     window.scrollTo(0, 0);
     return () => {
       document.body.style.overflow = previous;
     };
-  }, [locksPage, envelopeOpened]);
+  }, [locksPage, revealed]);
 
   const fadeUpMount = (delay: number) => ({
     initial: reduce ? false : { opacity: 0, y: 16 },
@@ -269,7 +395,12 @@ export default function Hero({
         />
       </div>
 
-      <EnvelopeCard opened={envelopeOpened} reduce={reduce} content={content} />
+      <EnvelopeCard
+        sealed={sealed}
+        opened={envelopeOpened}
+        reduce={reduce}
+        content={content}
+      />
 
       {/* torn paper edge at the bottom */}
       <div className="absolute left-1/2 top-[666px] flex h-[147px] w-[375px] -translate-x-1/2 items-center justify-center">
@@ -296,7 +427,7 @@ export default function Hero({
             className="flex items-center justify-center border border-solid border-[#fafafa] p-[10px]"
             initial={false}
             animate={{ opacity: opened ? 0 : 1 }}
-            transition={reduce ? undefined : { duration: 0.5, ease: EASE }}
+            transition={step(reduce, OPENING.seal)}
             style={{ pointerEvents: opened ? 'none' : 'auto' }}>
             <p className="whitespace-nowrap font-[family-name:var(--font-wt1-mono)] text-[12px] leading-normal text-[#fafafa]">
               Open Invitation

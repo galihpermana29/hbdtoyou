@@ -317,6 +317,20 @@ export const ASSERTABLE_PROPERTIES = {
     read: ['marginTop', 'marginRight', 'marginBottom', 'marginLeft'],
   },
   gap: { normalise: normaliseLengthList, read: ['rowGap', 'columnGap'] },
+
+  /**
+   * Whether an element's content can be scrolled to.
+   *
+   * The one property here that carries a behaviour rather than an appearance,
+   * and it earns its place because a sealed invitation is defined by it: the
+   * page holds still until a guest opens the envelope, and is theirs to scroll
+   * afterwards. Read from both axes, so `hidden` is a claim about the page
+   * rather than about one direction of it.
+   */
+  overflow: {
+    normalise: normaliseKeywordList,
+    read: ['overflowX', 'overflowY'],
+  },
 };
 
 /** The longhands a browser has to be asked for to cover every property above. */

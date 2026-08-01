@@ -108,7 +108,9 @@ export default function PublishedStep({
               this panel and a sealed invitation is what a guest is sent. The
               frame draws the cards out of the envelope as well, which is the
               other end of the same interaction: a still cannot show both, and
-              an element the design has weighs more than a state it caught.
+              an element the design has weighs more than a state it caught. So
+              the panel draws the envelope closed over its cards, and a couple
+              presses the control to see what a guest sees.
 
               Sealed but not locking the page: this is a phone-sized panel with
               the rest of the step beside it, not the page itself. */}

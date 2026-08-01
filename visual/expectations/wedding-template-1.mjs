@@ -7,6 +7,11 @@
  * design is literal truth, including its copy errors: see
  * `docs/adr/0002-figma-is-literal-truth.md`.
  *
+ * Two things are exported. `expectations` is the invitation opened, which is
+ * what the ten frames draw. `sealed` is the same invitation before anybody has
+ * opened it, which the design draws once more as node 332-30919 and which is
+ * only its Hero: see the note above that export for why it claims no more.
+ *
  * Positions are counted by `declared-positions.mjs`, which the Create Flow's
  * manifest uses too.
  *
@@ -20,9 +25,10 @@
  * ## How an element is found
  *
  * The invitation is one composition per section, positioned rather than flowed,
- * and its markup is paragraphs inside sections. So there are three handles here
+ * and its markup is paragraphs inside sections. So there are four handles here
  * rather than the Create Flow's list of landmarks:
  *
+ *   body               the page, which is what a sealed invitation holds still
  *   main > section     one per section, in the order a guest scrolls them
  *   main p             every line of words the invitation prints, in order
  *   main span          a line the template scales down to fit its box
@@ -156,6 +162,39 @@ const FILLED_CONTROL_BOX = { ...CONTROL_BOX, backgroundColor: '#000000' };
 /** The words inside any of those boxes. */
 const CONTROL_LABEL = type('12px', 400, '#fafafa');
 
+/**
+ * The three lines the Hero prints outside the envelope.
+ *
+ * Named here rather than written where they are asserted, because the sealed
+ * screen and the three opened ones claim the same words - a guest reads them
+ * before opening the invitation and still afterwards - and two spellings of one
+ * line of the design would be a difference nothing would report.
+ */
+const OPEN_INVITATION = 'Open Invitation';
+const INVITATION_HEADING = 'You’re Invited';
+const INVITATION_WELCOME =
+  'As we begin our journey together, we’d love for you to join us in ' +
+  'celebrating our big day.';
+const INVITATION_HEADING_TYPE = type('64px', 400, HEADING_WHITE);
+const INVITATION_WELCOME_TYPE = type('12px', 400, '#ffffff');
+
+/**
+ * The control a guest presses, which both states of the invitation draw.
+ *
+ * The design leaves it on the page after the envelope is open - the opened
+ * frames still draw it - so it is one element claimed by two screens rather
+ * than two elements that happen to say the same thing.
+ */
+const OPEN_INVITATION_CONTROL = {
+  name: 'Open Invitation control',
+  select: 'button',
+  withText: OPEN_INVITATION,
+  style: CONTROL_BOX,
+};
+
+/** What the design paints behind the Hero, and behind most of the invitation. */
+const NIGHT = '#090909';
+
 /** One chapter of the Love Story, printed on the paper ground. */
 const CHAPTER_YEAR = type('12px', 600, '#090909');
 const CHAPTER_DASH = type('14px', 600, '#090909');
@@ -216,7 +255,7 @@ const SECTIONS = [
   {
     name: 'Hero',
     figmaNodeId: '312-1632',
-    background: '#090909',
+    background: NIGHT,
     paragraphs: [
       'Save the Date date',
       'Save the Date S',
@@ -261,27 +300,21 @@ const SECTIONS = [
         // The one line in the invitation the design tracks out: 2% of its size.
         letterSpacing: '0.1252px',
       }),
-      {
-        name: 'Open Invitation control',
-        select: 'button',
-        withText: 'Open Invitation',
-        style: CONTROL_BOX,
-      },
+      OPEN_INVITATION_CONTROL,
       invitation.paragraph(
         'Open Invitation label',
         CONTROL_LABEL,
-        'Open Invitation'
+        OPEN_INVITATION
       ),
       invitation.paragraph(
         'Invitation heading',
-        type('64px', 400, HEADING_WHITE),
-        'You’re Invited'
+        INVITATION_HEADING_TYPE,
+        INVITATION_HEADING
       ),
       invitation.paragraph(
         'Invitation welcome',
-        type('12px', 400, '#ffffff'),
-        'As we begin our journey together, we’d love for you to join us in ' +
-          'celebrating our big day.'
+        INVITATION_WELCOME_TYPE,
+        INVITATION_WELCOME
       ),
     ],
   },
@@ -605,13 +638,17 @@ const wordsOfFittedLine = (line) => line * 2 + 1;
 /**
  * Where everything the invitation prints is counted from.
  *
- * Every `nth` below is an index into one of two lists gathered from the
- * sections, in the order the sections declare them. The counting itself, and
- * both of the mistakes it guards against, are `declared-positions.mjs`.
+ * Every `nth` below is an index into one of two lists, in the order the page
+ * draws them. The counting itself, and both of the mistakes it guards against,
+ * are `declared-positions.mjs`.
+ *
+ * The lists are given rather than gathered here, because the invitation prints
+ * one set of lines opened and a shorter set sealed, and the two states have to
+ * count their own. What they must not do is find an element two ways: the same
+ * factory serves both, so a line claimed on one screen is claimed by the same
+ * rule on the other.
  */
-function positions() {
-  const paragraphs = SECTIONS.flatMap((section) => section.paragraphs);
-  const fitted = SECTIONS.flatMap((section) => section.fitted ?? []);
+function positions(paragraphs, fitted) {
   const { at, everythingWasAskedFor } = declaredPositions({
     paragraphs,
     'fitted lines': fitted,
@@ -653,24 +690,114 @@ function positions() {
   };
 }
 
-function invitationExpectations() {
-  const invitation = positions();
+/**
+ * The page itself, which is where Sealed is either held or let go.
+ *
+ * The one thing about this template that is a behaviour rather than an
+ * appearance, and the only part of it a computed style can hold: an invitation
+ * that has the page to itself does not scroll while the envelope is closed, and
+ * scrolls freely once a guest has opened it. It is asserted on `body` because
+ * that is the element the lock is put on, and it is written first on every
+ * screen because it is the earliest element in the document - anywhere else and
+ * the order check would read it as an element that had moved.
+ */
+const thePage = (name, overflow) => ({
+  name,
+  select: 'body',
+  style: { overflow },
+});
 
-  const expectations = SECTIONS.flatMap((section, index) => [
-    {
-      name: `${section.name} section`,
-      select: 'main > section',
-      nth: index,
-      style:
-        section.background === null
-          ? {}
-          : { backgroundColor: section.background },
-    },
-    ...section.parts(invitation),
-  ]);
+function invitationExpectations() {
+  const invitation = positions(
+    SECTIONS.flatMap((section) => section.paragraphs),
+    SECTIONS.flatMap((section) => section.fitted ?? [])
+  );
+
+  const expectations = [
+    thePage('The page, once the invitation is open', 'visible'),
+    ...SECTIONS.flatMap((section, index) => [
+      {
+        name: `${section.name} section`,
+        select: 'main > section',
+        nth: index,
+        style:
+          section.background === null
+            ? {}
+            : { backgroundColor: section.background },
+      },
+      ...section.parts(invitation),
+    ]),
+  ];
 
   invitation.everythingWasAskedFor();
   return expectations;
 }
 
 export const expectations = invitationExpectations();
+
+/**
+ * The three lines a Sealed invitation prints, in the order it prints them.
+ *
+ * Everything else the Hero has is inside the envelope, and the design draws a
+ * closed envelope with the cards not drawn at all - Figma gives Frame 18
+ * opacity 0 on node 332-30920. So the first words on a sealed invitation are the
+ * ones asking a guest to open it, and this list is what makes that a claim: were
+ * the cards still drawn, the label below would be counted six lines too early
+ * and fail on its copy.
+ */
+const SEALED_PARAGRAPHS = [
+  'Open Invitation label',
+  'Invitation heading',
+  'Invitation welcome',
+];
+
+/**
+ * What the design says the invitation is before anybody has opened it.
+ * Figma node 332-30919, whose Hero is 332-30920.
+ *
+ * Only the Hero is claimed here. The nine sections below it are the same nine
+ * the opened screens already assert, three times over, and a fourth copy of that
+ * list would say nothing this screen exists to say. What it exists to say is the
+ * two things only a sealed invitation has: the page is held still, and the
+ * envelope is closed over its cards.
+ *
+ * The addressee the design writes across the closed envelope - "Galih &
+ * Keluarga", node 332:30838 - is not drawn and is not claimed. The design hides
+ * it behind the envelope's own photograph, where it cannot be read, and there is
+ * nowhere for it to come from: a guest's name is the Guest List's, and the
+ * template is handed one wedding rather than one guest. `hbd-a09.17`.
+ */
+function sealedExpectations() {
+  const invitation = positions(SEALED_PARAGRAPHS, []);
+
+  const expectations = [
+    thePage('The page, while the invitation is sealed', 'hidden'),
+    {
+      name: 'Hero section',
+      select: 'main > section',
+      nth: 0,
+      style: { backgroundColor: NIGHT },
+    },
+    OPEN_INVITATION_CONTROL,
+    invitation.paragraph(
+      'Open Invitation label',
+      CONTROL_LABEL,
+      OPEN_INVITATION
+    ),
+    invitation.paragraph(
+      'Invitation heading',
+      INVITATION_HEADING_TYPE,
+      INVITATION_HEADING
+    ),
+    invitation.paragraph(
+      'Invitation welcome',
+      INVITATION_WELCOME_TYPE,
+      INVITATION_WELCOME
+    ),
+  ];
+
+  invitation.everythingWasAskedFor();
+  return expectations;
+}
+
+export const sealed = sealedExpectations();

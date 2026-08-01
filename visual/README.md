@@ -15,6 +15,9 @@ And Wedding Template 1, which is the invitation itself, drawn as a phone: it ren
 
 For each element the design describes, the check asserts typeface, size, weight, line height, letter spacing, colour, background, border colour, width and style, corner radius, shadow, padding, margin and gap, together with the exact copy the element renders and where it sits in the document relative to every other element.
 
+One property carries a behaviour rather than an appearance: `overflow`, asserted on `body`, which is how a sealed invitation is held still and how it is let go again.
+It is there because a sealed invitation is defined by it, and it is the only part of that a computed style can hold.
+
 It never asserts a width or a height.
 That is the whole point.
 A field that stretches to its container is correct at any size, so measuring one would fail correct work and train everyone to ignore the check.
@@ -93,19 +96,25 @@ When a position was asked for, the failure says how many were found instead, whi
 ## Screens
 
 `visual/screens.mjs` is the list, and it is the only place a screen is defined.
-Ten screens are covered.
+Eleven screens are covered.
 Seven are the Create Flow: the details-and-story step in each of its four designed states, the guest invites step empty and populated, and the published screen.
-Three are Wedding Template 1's Showcase, which is one screen rendered with each of the three sets of Example Content - flattering, realistic and hostile.
+One is Wedding Template 1 sealed, which is the invitation as a guest is sent it.
+Three are its Showcase opened, which is one screen rendered with each of the three sets of Example Content - flattering, realistic and hostile.
 
-The three template screens share one manifest, because the design owns the type, the order and the words around a couple's answers rather than the answers themselves.
+The three opened screens share one manifest, because the design owns the type, the order and the words around a couple's answers rather than the answers themselves.
 Checking that one manifest at three lengths of answer is how a section that cannot hold a real couple's content is caught by a command rather than by somebody looking.
 Each of them opens the envelope first, the way a guest does, so the seal is exercised on every run: if it stops releasing, all three fail at once.
+
+The sealed screen is the only one driven nowhere first, because sealed is how an invitation arrives.
+It claims the Hero and nothing below it, and it is where the two things only a sealed invitation has are asserted: the page does not scroll, and the envelope is closed over its cards.
+The second of those is a claim about counting rather than about a style - the design draws a closed envelope with the cards not drawn at all, so the first line of words on the page is the one asking a guest to open it, and a build that still drew them would report the wrong copy three lines running.
 
 ### Where it stands
 
 The seven Create Flow screens match the design.
-The three template screens report the same failures as each other, and they are two differences rather than the many lines they take: every line of the template is set 1.5 loose where the design lets the typeface decide (`hbd-a09.13`), and the five bordered controls omit the 10px the design puts inside them (`hbd-a09.14`).
-Nothing is missing, misspelled, mis-set or out of order at any of the three sets, which is the claim those screens exist to make.
+The four template screens report the same two differences as each other, rather than the many lines they take: every line of the template is set 1.5 loose where the design lets the typeface decide (`hbd-a09.13`), and the five bordered controls omit the 10px the design puts inside them (`hbd-a09.14`).
+The sealed screen shows both, on three lines and one control, which is every element it claims that either could touch.
+Nothing is missing, misspelled, mis-set or out of order on any of them, which is the claim those screens exist to make.
 So `npm run visual` exits 1 today, and it goes green when those two land.
 
 A screen is `SKIPPED` when the thing it would check does not exist yet, and the reason says which.

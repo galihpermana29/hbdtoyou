@@ -148,6 +148,14 @@ function checkTheVocabulary() {
     'rgba(16, 24, 40, 0.05) 0px 1px 2px 0px',
     'a shadow written as CSS is the shadow the browser reports'
   );
+  same('overflow', 'hidden', 'hidden hidden', 'one overflow means both axes');
+  differ(
+    'overflow',
+    'hidden',
+    'visible visible',
+    'a page that scrolls is not a page that is held still'
+  );
+
   same('boxShadow', 'none', 'NONE', 'no shadow is no shadow');
   differ(
     'boxShadow',

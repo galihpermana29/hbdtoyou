@@ -37,6 +37,14 @@ The three that draw the step mostly closed stack Venue Details above Love Story 
 "Expanded All", node 332-14392, stacks Love Story above Venue Details and names that Section "Photo Showcase".
 A screen cannot restack itself when a Section opens, so this too cannot be followed literally.
 
+The closed envelope is not addressed to anybody.
+
+The design writes a guest's name across the front of it - "Galih & Keluarga", node 332:30838 inside the sealed Hero 332-30920 - and then draws the envelope's own photograph over the top, where the name cannot be read.
+So the frame cannot be followed literally: it states a line of copy and hides it in the same breath.
+It could not be followed anyway, because there is nowhere for the name to come from.
+A guest's name belongs to the Guest List the Create Flow collects, and the template is handed one wedding rather than one guest, so an invitation would first have to know which guest opened it.
+Both questions are `hbd-a09.17`; until they are answered the envelope arrives unaddressed, and the sealed screen's expectations claim no such line.
+
 The Love Story asks for three chapters and offers no way to add a fourth or remove one.
 
 The form it replaced let a couple add and remove milestones freely, and this ticket was written expecting that to continue.

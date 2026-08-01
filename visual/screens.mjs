@@ -7,8 +7,9 @@
  * sessions and is read at run time. See `visual/README.md`.
  *
  * Two things are checked. The Create Flow, which is the seven screens a couple
- * fills their invitation in, and Wedding Template 1's Showcase, which is the
- * invitation itself, checked once at each of the three sets of Example Content.
+ * fills their invitation in, and Wedding Template 1, which is the invitation
+ * itself: once sealed, the way a guest is sent it, and then once opened at each
+ * of the three sets of Example Content.
  */
 
 import { expectations as detailsAndStoryCollapsed } from './expectations/details-and-story-collapsed.mjs';
@@ -24,7 +25,10 @@ import {
   DESIGNED_SLUG,
   expectations as published,
 } from './expectations/published.mjs';
-import { expectations as weddingTemplate1 } from './expectations/wedding-template-1.mjs';
+import {
+  expectations as weddingTemplate1,
+  sealed as weddingTemplate1Sealed,
+} from './expectations/wedding-template-1.mjs';
 
 /** The width the design is defined at. Nothing below this is checked. */
 export const DESIGN_WIDTH = 1440;
@@ -218,13 +222,14 @@ const openTheInvitation = (page) =>
   page.getByRole('button', { name: 'Open invitation' }).click();
 
 /**
- * The ten designed screens.
+ * The eleven designed screens.
  *
  * Seven are the Create Flow, in the order a couple reaches them, and the
  * details-and-story step is four of those - the same screen with a different set
- * of Sections open. The last three are the invitation the flow produces, which
- * is one screen rendered with each set of Example Content. Each names the frame
- * it was read from and how to drive the page into it.
+ * of Sections open. The last four are the invitation the flow produces: the one
+ * a guest is sent, sealed, and then the opened one rendered with each set of
+ * Example Content. Each names the frame it was read from and how to drive the
+ * page into it.
  */
 export const screens = [
   {
@@ -289,6 +294,20 @@ export const screens = [
     baseline: 'published.png',
     expectations: published,
     prepare: advanceToPublished,
+  },
+  // The invitation as a guest is sent it, which is the only screen here that
+  // is not driven anywhere first: sealed is how it arrives. It renders the
+  // flattering set, because that is the URL a guest lands on, and it is the one
+  // screen whose expectations claim the page itself - a sealed invitation holds
+  // it still, and the three below prove it lets go again.
+  {
+    id: 'wedding-template-1-sealed',
+    title: 'Wedding Template 1, sealed, as a guest is sent it',
+    route: '/wedding-template-1',
+    figmaNodeId: '332-30919',
+    designWidth: TEMPLATE_DESIGN_WIDTH,
+    baseline: 'wedding-template-1-sealed.png',
+    expectations: weddingTemplate1Sealed,
   },
   // One screen, rendered with each set of Example Content. They share a
   // manifest, because what the design owns is the type its words are set in,
