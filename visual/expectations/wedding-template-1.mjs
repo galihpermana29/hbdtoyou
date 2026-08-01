@@ -66,16 +66,18 @@
  * judgement and it stays a person's.
  *
  * The size of any line the template fits to its box. The design states 48px for
- * a partner's Nickname, 10px for their full name and for their parents, 10px
- * for each of the Love Story's three chapters, and 26.092px, 6.262px and
- * 16.699px for the couple, the venue and the wedding's date on the Hero's two
- * cards; every one of those is a ceiling rather than a size, because a longer
- * answer is meant to step down. The Hero's three are scaled rather than
- * resized, so their size is stated below and the scale is what changes; the
- * Introduction's six and the Love Story's three are resized, and asserting a
- * size on one of them would fail the very fitting the spec asks for. What is
- * still claimed for those nine is weight, leading, colour, and where they sit
- * in the document, which is what catches one going missing or changing face.
+ * a partner's Nickname, 10px for their full name and for their parents, 12px
+ * and 14px for the Holy Verse and its citation, 10px for each of the Love
+ * Story's three chapters, 12px and 10px for the venue's name and its written
+ * address, and 26.092px, 6.262px and 16.699px for the couple, the venue and the
+ * wedding's date on the Hero's two cards; every one of those is a ceiling
+ * rather than a size, because a longer answer is meant to step down. The Hero's
+ * three are scaled rather than resized, so their size is stated below and the
+ * scale is what changes; the Introduction's six, the Holy Verse's two, the Love
+ * Story's three and the Venue's two are resized, and asserting a size on one of
+ * them would fail the very fitting the spec asks for. What is still claimed for
+ * those thirteen is weight, leading, colour, and where they sit in the
+ * document, which is what catches one going missing or changing face.
  *
  * A chapter's year and its title keep their sizes, because neither is fitted
  * and neither can grow: a year is at most four digits and a title is the
@@ -86,7 +88,7 @@
  * drawn far smaller than the design draws it. What bounds it instead is the
  * floor the section fits to, which is the 8px the design sets the smallest
  * words on the invitation in, and the screenshots beside a run. If this harness
- * ever learns to claim a ceiling rather than a value, these nine want their
+ * ever learns to claim a ceiling rather than a value, these thirteen want their
  * sizes back.
  *
  * The countdown's digits, the reception's times, the wedding's date. All are
@@ -465,8 +467,12 @@ const SECTIONS = [
         SECTION_HEADING,
         'Venue & Details'
       ),
-      invitation.paragraph('Venue name', type('12px', 600, '#ffffff')),
-      invitation.paragraph('Venue address', type('10px', 400, '#ffffff')),
+      // The venue and its address are the couple's own words and are fitted to
+      // the 94px the design draws them in, so the 12px and 10px it states are
+      // ceilings rather than sizes and are deliberately absent. See the note at
+      // the top of this file.
+      invitation.paragraph('Venue name', setting(600, '#ffffff')),
+      invitation.paragraph('Venue address', setting(400, '#ffffff')),
       {
         name: 'View Location control',
         select: 'div',

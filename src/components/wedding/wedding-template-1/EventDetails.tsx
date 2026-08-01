@@ -4,11 +4,19 @@
  * Wedding Template 1 — Event Details ("Venue & Details"). Figma node 312:1651.
  * Venue info, a tilted polaroid, a LIVE countdown, and the RSVP Now control a
  * guest replies to the invitation from.
- * The countdown ticks every second toward May 3rd 2026, 19:00 Asia/Jakarta
- * (UTC+7) and clamps to 0 once past. To avoid an SSR/client hydration mismatch
- * the digits render the design's "08" placeholders until mounted, then go live.
- * Visual markup/classes are unchanged — only the digit text becomes dynamic —
- * plus a subtle fade-up reveal on scroll.
+ * The countdown ticks every second toward the wedding's own date and time and
+ * clamps to 0 once past. To avoid an SSR/client hydration mismatch the digits
+ * render the design's "08" placeholders until mounted, then go live.
+ *
+ * The venue's name and its written address are the couple's own words and are
+ * fitted to the box the design draws them in rather than set at a fixed size:
+ * see `VENUE_NAME_BOX_HEIGHT` below for why that box is the whole section's
+ * business and not only theirs. Everything else here is the design's - the
+ * countdown's units, the reception's lead, the two controls - or is derived
+ * from an answer whose shape cannot vary, which is what the date and the
+ * reception's times are.
+ *
+ * Animation: a subtle fade-up reveal on scroll, per section.
  */
 
 import { useEffect, useState } from 'react';
@@ -16,6 +24,7 @@ import { motion } from 'framer-motion';
 
 import { fadeUp, fadeUpCenter } from './variants';
 import { useWeddingReveal } from './use-wedding-reveal';
+import { AutoFitText } from './AutoFitText';
 
 import {
   DEFAULT_WEDDING_TEMPLATE_1_CONTENT,
@@ -33,6 +42,57 @@ const ASSET = '/templates/wedding-template-1';
  * one the sample holds stands in, the same as an unanswered name does.
  */
 const SAMPLE = DEFAULT_WEDDING_TEMPLATE_1_CONTENT;
+
+/**
+ * The two boxes the design draws the venue's name and its written address in.
+ *
+ * Each is both the height its words are fitted to and the height its box is
+ * held at, which is why one number says both rather than a maximum and a
+ * minimum saying it twice. A line that has stepped down draws smaller inside
+ * the same box rather than dragging everything under it up the page.
+ *
+ * The design draws the two of them in one 147px-wide frame 94px tall - 28 for
+ * the name, 6 between, 60 for the address - and hangs that, the 16px under it
+ * and the 34px View Location box off a column 144px tall, which it then centres
+ * against the polaroid beside it (Figma node 312:1651, `Frame 32` inside
+ * `Frame 33` inside `Frame 35`).
+ *
+ * Centring is why these two numbers are the whole section's business rather
+ * than only their own. A column that changes height takes half of the change
+ * upwards and half down, so before this the venue whose address ran to seven
+ * lines had its name 31px higher up the page than the design draws it and its
+ * View Location control 31px lower, and a column that merely stepped *down* a
+ * size and came up short of its box moved everything the other way by 5. Both
+ * are invisible to the check, which never asserts a position within a section,
+ * and nothing overflowed to say so either.
+ *
+ * Held at 28 and 60, the column is the 144 the design draws whatever the couple
+ * answered - unless a line has reached the floor below and its box has had to
+ * grow, which is the one case that still moves anything and is deliberate.
+ */
+const VENUE_NAME_BOX_HEIGHT = 28;
+const VENUE_ADDRESS_BOX_HEIGHT = 60;
+
+/**
+ * The largest either line is ever set in, and the smallest.
+ *
+ * The ceilings are the 12px and 10px the design sets them in, and they are
+ * ceilings rather than sizes because both are the couple's own words: a venue
+ * with a longer name or a longer address is set a little smaller rather than
+ * shifted or cut. The floor is the 8px the design sets the smallest words on
+ * the invitation in, and it is the same floor the Bride & Groom's Introduction
+ * and the Love Story stop at.
+ *
+ * The floor is what makes the boxes above targets rather than guarantees.
+ * `AutoFitText` stops there and lets the box grow rather than shrinking an
+ * address past reading, because a guest who cannot read where to go cannot
+ * come. The hostile set spends it: its address is still 3px over 60 at 8px, so
+ * that column is 149 where the design draws 146, and legibility is what those
+ * 3px bought.
+ */
+const VENUE_NAME_CEILING = 12;
+const VENUE_ADDRESS_CEILING = 10;
+const VENUE_FLOOR = 8;
 
 function formatEventDateLabel(iso: string): string {
   const d = new Date(iso);
@@ -114,13 +174,23 @@ export default function EventDetails({
           {/* Venue text + polaroid row */}
           <div className="flex w-full items-center gap-[8px]">
             <div className="flex w-[147px] flex-col items-start gap-[16px]">
-              <div className="flex w-full flex-col items-start gap-[6px] leading-[normal] text-white [word-break:break-word]">
-                <p className="w-full font-[family-name:var(--font-wt1-mono)] text-[12px] font-semibold">
+              <div className="flex w-full flex-col items-start gap-[6px] leading-[normal] text-white">
+                <AutoFitText
+                  maxFontSize={VENUE_NAME_CEILING}
+                  minFontSize={VENUE_FLOOR}
+                  maxHeight={VENUE_NAME_BOX_HEIGHT}
+                  style={{ minHeight: VENUE_NAME_BOX_HEIGHT }}
+                  className="w-full font-[family-name:var(--font-wt1-mono)] font-semibold">
                   {content.venueName}
-                </p>
-                <p className="w-full font-[family-name:var(--font-wt1-mono)] text-[10px] font-normal">
+                </AutoFitText>
+                <AutoFitText
+                  maxFontSize={VENUE_ADDRESS_CEILING}
+                  minFontSize={VENUE_FLOOR}
+                  maxHeight={VENUE_ADDRESS_BOX_HEIGHT}
+                  style={{ minHeight: VENUE_ADDRESS_BOX_HEIGHT }}
+                  className="w-full font-[family-name:var(--font-wt1-mono)] font-normal">
                   {content.address}
-                </p>
+                </AutoFitText>
               </div>
               {content.mapsUrl ? (
                 <a
