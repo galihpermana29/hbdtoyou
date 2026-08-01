@@ -184,13 +184,14 @@ export default function PublishedStep({
         </div>
       </div>
 
+      {/* Play My Invite is named rather than focused by hand: giving focus back
+          is `useDialogBehaviour`'s doing, and it is the same answer for every
+          dialog rather than one each caller has to remember. */}
       {isPlaying ? (
         <InvitationPlayer
           content={content}
-          onClose={() => {
-            setIsPlaying(false);
-            playRef.current?.focus();
-          }}
+          onClose={() => setIsPlaying(false)}
+          openerRef={playRef}
         />
       ) : null}
     </div>

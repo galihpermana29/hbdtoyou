@@ -14,21 +14,14 @@
  * `docs/adr/0002-figma-is-literal-truth.md`. Persisting a reply is integration
  * work and is deliberately not attempted.
  *
- * It behaves as a dialog rather than as a card that happens to be on top, the
- * same way `src/components/forms/wedding/invitation-player.tsx` does: the page
- * behind it does not scroll, Escape closes it, the first field takes focus when
- * it opens, and Tab stays inside it - which is what `aria-modal` promises
- * anything reading the page aloud.
+ * It behaves as a dialog rather than as a card that happens to be on top, and
+ * it shares the whole of how with the Create Flow's Play Preview - see
+ * `src/hooks/use-dialog-behaviour.ts`.
  */
 
-import {
-  useEffect,
-  useId,
-  useRef,
-  useState,
-  type FormEvent,
-  type ReactNode,
-} from 'react';
+import { useId, useRef, useState, type FormEvent, type ReactNode } from 'react';
+
+import { useDialogBehaviour } from '@/hooks/use-dialog-behaviour';
 
 const ASSET = '/templates/wedding-template-1';
 
@@ -266,80 +259,16 @@ export default function RsvpCard({
   const [plusOne, setPlusOne] = useState<boolean | null>(null);
   const [message, setMessage] = useState('');
 
-  // The card takes focus itself rather than handing it to the Name field. It
-  // is read on a phone, where focusing a text field raises the keyboard over
-  // half of what a guest has just opened, and the first thing they should see
-  // is the question rather than the answer box.
+  // The card takes focus itself rather than handing it to the Name field, which
+  // is what leaving `initialFocus` out asks for: it is read on a phone, where
+  // focusing a text field raises the keyboard over half of what a guest has
+  // just opened, and the first thing they should see is the question rather
+  // than the answer box.
   //
-  // Whatever had focus gets it back when the card goes, which is RSVP Now: a
-  // guest who reached the card from the keyboard would otherwise be put at the
-  // top of a five-thousand-pixel invitation for having closed it.
-  useEffect(() => {
-    const opener = document.activeElement;
-    dialogRef.current?.focus();
-    return () => {
-      if (opener instanceof HTMLElement) opener.focus();
-    };
-  }, []);
-
-  useEffect(() => {
-    const previous = document.body.style.overflow;
-    document.body.style.overflow = 'hidden';
-    return () => {
-      document.body.style.overflow = previous;
-    };
-  }, []);
-
-  // Escape and Tab are listened for on the card rather than on the window, and
-  // stopped there.
-  //
-  // Play Preview draws this invitation inside a dialog of its own, which is
-  // watching the window for Escape too, and a key that reached both would close
-  // the card and throw the couple out of the whole preview behind it in the
-  // same press. Stopping propagation on the window would not help - both
-  // listeners would be on the same target - so the card takes the key first,
-  // which it can do because focus never leaves it while it is open.
-  useEffect(() => {
-    const dialog = dialogRef.current;
-    if (!dialog) return;
-
-    const onKeyDown = (event: KeyboardEvent) => {
-      if (event.key === 'Escape') {
-        event.stopPropagation();
-        onClose();
-        return;
-      }
-      if (event.key !== 'Tab') return;
-      event.stopPropagation();
-
-      const focusable = Array.from(
-        dialog.querySelectorAll<HTMLElement>(
-          'a[href], button:not([disabled]), input, textarea, select, [tabindex]:not([tabindex="-1"])'
-        )
-      ).filter((element) => element.offsetParent !== null);
-      if (focusable.length === 0) return;
-
-      const first = focusable[0];
-      const last = focusable[focusable.length - 1];
-      const active = document.activeElement;
-      // The card itself is focusable and is where focus starts, so it counts
-      // as being at neither end rather than as one of the fields.
-      const onAField = active !== dialog && dialog.contains(active);
-
-      // Tab off either end of the card wraps to the other, so focus can never
-      // wander onto the invitation behind something that says it is inert.
-      if (!event.shiftKey && (!onAField || active === last)) {
-        event.preventDefault();
-        first.focus();
-      } else if (event.shiftKey && (!onAField || active === first)) {
-        event.preventDefault();
-        last.focus();
-      }
-    };
-
-    dialog.addEventListener('keydown', onKeyDown);
-    return () => dialog.removeEventListener('keydown', onKeyDown);
-  }, [onClose]);
+  // What gets focus back when the card goes is RSVP Now, the control that
+  // opened it: a guest who reached the card from the keyboard would otherwise
+  // be put at the top of a five-thousand-pixel invitation for having closed it.
+  useDialogBehaviour(dialogRef, onClose);
 
   const reply = (event: FormEvent<HTMLFormElement>) => {
     event.preventDefault();

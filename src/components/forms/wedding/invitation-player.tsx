@@ -1,9 +1,10 @@
 'use client';
 
 import { X } from 'lucide-react';
-import { useEffect, useRef } from 'react';
+import { useRef, type RefObject } from 'react';
 
 import WeddingTemplate1 from '@/components/wedding/wedding-template-1/WeddingTemplate1';
+import { useDialogBehaviour } from '@/hooks/use-dialog-behaviour';
 
 import type { WeddingTemplate1Content } from './wedding-invitation-types';
 
@@ -16,10 +17,12 @@ import type { WeddingTemplate1Content } from './wedding-invitation-types';
  * and open; this gives it the screen, sealed, with nothing of the flow around
  * it. It is the couple's own content either way, never the sample template.
  *
- * It behaves as a dialog rather than as a page that happens to be on top. The
- * page behind it does not scroll while it is open, Escape closes it, the close
- * control takes focus when it opens, and Tab stays inside it - which is what
- * `aria-modal` promises anything reading the page aloud.
+ * It behaves as a dialog rather than as a page that happens to be on top, and
+ * `useDialogBehaviour` is the whole of how: the flow behind it does not scroll
+ * while it is open, Escape closes it, the close control takes focus when it
+ * opens, Play Preview takes focus back when it goes, and Tab stays inside it in
+ * between - which is what `aria-modal` promises anything reading the page
+ * aloud.
  *
  * Being a dialog is also what the invitation inside has to be told about. The
  * dialog is the scroller here rather than the page, so it is the dialog a
@@ -31,75 +34,32 @@ import type { WeddingTemplate1Content } from './wedding-invitation-types';
 export default function InvitationPlayer({
   content,
   onClose,
+  openerRef,
 }: {
   content: WeddingTemplate1Content;
   onClose: () => void;
+  /**
+   * The control that opened this, which takes focus back when it closes. Both
+   * of the two that open it can name their own, and naming it is better than
+   * the dialog guessing: a browser that does not focus a button when it is
+   * pressed, which is Safari, would leave it nothing to guess from.
+   */
+  openerRef?: RefObject<HTMLElement>;
 }) {
   const dialogRef = useRef<HTMLDivElement>(null);
   const closeRef = useRef<HTMLButtonElement>(null);
 
-  useEffect(() => {
-    closeRef.current?.focus();
-  }, []);
-
-  // The page behind the dialog, held still because a dialog is open over it.
-  // Not the invitation's own `useBeginAtTheTop`, which puts a scroller back to
-  // the top: this one is a form the couple is in the middle of filling in, and
-  // sending it to the top would throw away where they had got to in it.
-  useEffect(() => {
-    const previous = document.body.style.overflow;
-    document.body.style.overflow = 'hidden';
-    return () => {
-      document.body.style.overflow = previous;
-    };
-  }, []);
-
-  useEffect(() => {
-    const onKeyDown = (event: KeyboardEvent) => {
-      if (event.key === 'Escape') {
-        onClose();
-        return;
-      }
-      if (event.key !== 'Tab') return;
-
-      const dialog = dialogRef.current;
-      if (!dialog) return;
-      // Drawn, and reachable. A sealed invitation puts everything below the
-      // envelope out of reach while leaving it in the DOM and laid out, so an
-      // inert control counted here would put the end of the dialog on an
-      // element focus can never land on - and Tab off the real last one would
-      // walk out onto the page behind instead of wrapping.
-      const focusable = Array.from(
-        dialog.querySelectorAll<HTMLElement>(
-          'a[href], button:not([disabled]), input, textarea, select, [tabindex]:not([tabindex="-1"])'
-        )
-      ).filter(
-        (element) =>
-          element.offsetParent !== null && !element.closest('[inert]')
-      );
-      if (focusable.length === 0) return;
-
-      const first = focusable[0];
-      const last = focusable[focusable.length - 1];
-      const active = document.activeElement;
-
-      // Tab off either end of the dialog wraps to the other, so focus can never
-      // wander onto the flow behind something that says the flow is inert.
-      if (!event.shiftKey && (active === last || !dialog.contains(active))) {
-        event.preventDefault();
-        first.focus();
-      } else if (
-        event.shiftKey &&
-        (active === first || !dialog.contains(active))
-      ) {
-        event.preventDefault();
-        last.focus();
-      }
-    };
-
-    window.addEventListener('keydown', onKeyDown);
-    return () => window.removeEventListener('keydown', onKeyDown);
-  }, [onClose]);
+  // The close control is what takes focus, rather than the dialog itself: it is
+  // the one thing a couple who opened this by accident is looking for, and it
+  // is the top of the dialog either way.
+  //
+  // What is held still here is the flow behind, not the invitation's own
+  // scroller - `useBeginAtTheTop` puts that back to the top, and this is a form
+  // the couple is in the middle of filling in.
+  useDialogBehaviour(dialogRef, onClose, {
+    initialFocus: closeRef,
+    opener: openerRef,
+  });
 
   return (
     <div
