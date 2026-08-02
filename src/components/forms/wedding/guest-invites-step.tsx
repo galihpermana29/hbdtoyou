@@ -40,9 +40,10 @@ import {
  * The third step of the Create Flow: a couple reads their invitation's address,
  * writes what their guests will receive, and uploads a Guest List.
  *
- * One thing here reaches a network, and it is the one control the design does
- * not draw: Save as draft hands what the couple has entered to the flow above,
- * which keeps it. Everything else on the step is composed from what the flow
+ * Two things here reach a network, and both are presses: Save as draft, the one
+ * control the design does not draw, hands what the couple has entered to the
+ * flow above, which keeps it; Confirm Create asks the flow to publish, which the
+ * backend may refuse. Everything else on the step is composed from what the flow
  * already holds.
  *
  * The address is not one of the things a couple fills in. The design draws the
@@ -74,7 +75,14 @@ export interface GuestInvitesStepProps {
   groomNickname: string;
   /** Go back to the details and story step. */
   onPreviousStep: () => void;
-  /** Go on to the published step. */
+  /**
+   * Publish the invitation, and go on to the published step if it went out.
+   *
+   * Whether it did is not this step's to decide: the backend is asked first,
+   * and a couple whose invitation is not ready stays here with `outstanding`
+   * naming what is left. So this step draws the press and prints the answer,
+   * and the flow above it decides where the couple ends up.
+   */
   onConfirm: () => void;
   /**
    * Keep what the couple has entered, without going anywhere.
@@ -85,10 +93,19 @@ export interface GuestInvitesStepProps {
    * `docs/adr/0002-figma-is-literal-truth.md`.
    */
   onSaveAsDraft: () => void;
-  /** Whether a save is in flight, so nothing is pressed twice into one. */
-  isSaving: boolean;
-  /** What a couple is told about the last save, or nothing to tell them. */
-  saveProblem: string | null;
+  /**
+   * Whether something the couple pressed is still in flight, so that nothing is
+   * pressed twice into one save and nothing is published while a save is on its
+   * way to the same invitation.
+   */
+  isBusy: boolean;
+  /** What a couple is told about the last press, or nothing to tell them. */
+  problem: string | null;
+  /**
+   * What the backend says is still missing before this invitation can go out,
+   * in its own words, or nothing.
+   */
+  outstanding: string[] | null;
 }
 
 /**
@@ -120,8 +137,9 @@ export default function GuestInvitesStep({
   onPreviousStep,
   onConfirm,
   onSaveAsDraft,
-  isSaving,
-  saveProblem,
+  isBusy,
+  problem,
+  outstanding,
 }: GuestInvitesStepProps) {
   const slugId = useId();
   const slugLabelId = useId();
@@ -192,8 +210,8 @@ export default function GuestInvitesStep({
         <form
           className="flex flex-col gap-[24px]"
           onSubmit={(event) => {
-            // Confirming goes on to the published screen and nowhere else:
-            // nothing is sent, because there is nothing to send it to yet.
+            // Confirming publishes, which is a request rather than a step: the
+            // browser's own submit would reload the page out from under it.
             event.preventDefault();
             onConfirm();
           }}>
@@ -354,12 +372,19 @@ export default function GuestInvitesStep({
             <button
               type="button"
               onClick={onSaveAsDraft}
-              disabled={isSaving}
-              aria-busy={isSaving}
+              disabled={isBusy}
+              aria-busy={isBusy}
               className={`${flowActionAside} disabled:opacity-60`}>
               Save as draft
             </button>
-            <button type="submit" className={flowActionForward}>
+            {/* Dimmed while something is in flight, as its neighbour is: this
+                one asks the backend two questions in turn, and a couple who
+                cannot tell a slow press from a dead one presses again. */}
+            <button
+              type="submit"
+              disabled={isBusy}
+              aria-busy={isBusy}
+              className={`${flowActionForward} disabled:opacity-60`}>
               Confirm Create
             </button>
           </div>
@@ -367,10 +392,31 @@ export default function GuestInvitesStep({
           {/* Under the row rather than over it, so a couple reads it where they
               have just pressed. Nothing is drawn while there is nothing to say,
               which is every screen the design draws. */}
-          {saveProblem ? (
+          {problem ? (
             <p role="alert" className={`text-right ${flowProblem}`}>
-              {saveProblem}
+              {problem}
             </p>
+          ) : null}
+
+          {/* What the backend named, listed rather than run together, because a
+              couple has to go back and fix each one. Its words are printed as
+              they arrived: see `docs/adr/0002-figma-is-literal-truth.md`. */}
+          {outstanding ? (
+            <div role="alert" className={`text-right ${flowProblem}`}>
+              <p>
+                Your invitation is not ready to publish yet. It is still a draft,
+                and nothing has been sent to your guests.
+              </p>
+              {/* By position, because the backend names a field and a fault
+                  separately and only the fault is printed: two fields can be
+                  wrong in the same words, and the same words twice is a list of
+                  one as far as React is concerned. */}
+              <ul className="mt-[6px] flex flex-col gap-[4px]">
+                {outstanding.map((issue, position) => (
+                  <li key={position}>{issue}</li>
+                ))}
+              </ul>
+            </div>
           ) : null}
         </form>
       </div>

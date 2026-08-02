@@ -167,5 +167,18 @@ A save that fails prints one line under that row, in the red the flow already gi
 The line names what the backend said and tells the couple nothing has been lost, and a step whose save failed does not advance.
 It is not asserted, because it is drawn only when there is something to say and every screen the design draws has nothing.
 
+Confirm Create prints in that same place, and in the same red, when the invitation is not ready to go out.
+
+The design draws Confirm Create as a step, so its frame goes straight from the guest invites screen to the published one.
+Publishing is a request, and one the backend can refuse: it runs no check of its own on publish, so the flow asks first and a couple whose invitation is missing something is told rather than carried on to a screen announcing an invitation that never went.
+What is drawn is one line saying the invitation is still a draft and that nothing has reached their guests, and under it a list of what the backend named, in the backend's own words.
+
+Its words rather than ours.
+The only issue the contract documents is an empty title, which this flow hardcodes and a couple cannot cause, so every other string is one nobody here has read.
+Translating an unknown into reassuring product copy would mean inventing a description of a fault we cannot see, and the couple would then be told something nobody has checked is true.
+The one line written here is for the case where the check refuses and names nothing at all, which is the contract being broken rather than a state the product has.
+
+Nothing about this is asserted, for the reason the failed save is not: it is drawn only when there is something to say, and every screen the design draws has nothing.
+
 This rule holds at desktop width, where the design exists.
 Below that there is no design, so usability governs and the rule does not apply.

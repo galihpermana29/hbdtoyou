@@ -15,7 +15,7 @@ import {
   flowActionRow,
   flowProblem,
 } from '@/components/forms/wedding/create-flow-treatment';
-import { useInvitationSave } from '@/components/forms/wedding/use-invitation-save';
+import { useInvitation } from '@/components/forms/wedding/use-invitation';
 import GuestInvitesStep from '@/components/forms/wedding/guest-invites-step';
 import PublishedStep from '@/components/forms/wedding/published-step';
 import WeddingInvitationForm from '@/components/forms/wedding/wedding-invitation-form';
@@ -87,8 +87,16 @@ export default function WeddingInvitationCreateClientside({
     guestList: null,
   });
 
-  const { save, isSaving, problem, sayThereIsNobodyToSaveFor, forgetProblem } =
-    useInvitationSave(form);
+  const {
+    save,
+    isSaving,
+    publish,
+    isPublishing,
+    problem,
+    outstanding,
+    sayThereIsNobodyToSaveFor,
+    forgetWhatWentWrong,
+  } = useInvitation(form);
 
   const brideNickname = useWatch('brideName', form);
   const groomNickname = useWatch('groomName', form);
@@ -113,10 +121,10 @@ export default function WeddingInvitationCreateClientside({
    * scrolling it past them says nothing.
    */
   function goToStep(next: CreateFlowStep) {
-    // Whatever the last save had to say belonged to the step being left. It is
+    // Whatever the last press had to say belonged to the step being left. It is
     // printed at the foot of whichever step is showing, so carrying it along
     // would put a message about one press under a row a couple has not pressed.
-    forgetProblem();
+    forgetWhatWentWrong();
     setStep(next);
     window.scrollTo({ top: 0, behavior: 'instant' });
   }
@@ -128,7 +136,7 @@ export default function WeddingInvitationCreateClientside({
    * values stay in the form, the reason is printed under the row, and pressing
    * Next again retries. A retry after a first save that failed creates rather
    * than updates, because there is still no invitation - see
-   * `use-invitation-save.ts`.
+   * `use-invitation.ts`.
    */
   async function goOnToGuestInvites() {
     if ((await save()) === 'FAILED') return;
@@ -148,6 +156,26 @@ export default function WeddingInvitationCreateClientside({
     const outcome = await save();
     if (outcome === 'SAVED') message.success('Your invitation is saved.');
     if (outcome === 'NOT_SIGNED_IN') sayThereIsNobodyToSaveFor();
+  }
+
+  /**
+   * Publish the invitation, if the backend says it may go out, and then show
+   * the couple the screen that says it has.
+   *
+   * The check is what makes this press finished, so anything outstanding stops
+   * it: what came back is printed under the row, the invitation stays the draft
+   * it already was, and the couple can go back, fix what was named and press
+   * again. A refused call is the same, for the same reason a refused save is.
+   *
+   * Somebody with no account never had an invitation to publish, so there is
+   * nothing to ask about and they are carried on exactly as Next carries them -
+   * see `use-invitation.ts`.
+   */
+  async function confirmCreate() {
+    const outcome = await publish();
+    if (outcome === 'PUBLISHED' || outcome === 'NOTHING_TO_PUBLISH') {
+      goToStep('Share with guests');
+    }
   }
 
   return (
@@ -300,10 +328,11 @@ export default function WeddingInvitationCreateClientside({
                 DEFAULT_WEDDING_TEMPLATE_1_CONTENT.groomName
               }
               onPreviousStep={() => goToStep('Fill in the details & story')}
-              onConfirm={() => goToStep('Share with guests')}
+              onConfirm={confirmCreate}
               onSaveAsDraft={saveAsDraft}
-              isSaving={isSaving}
-              saveProblem={problem}
+              isBusy={isSaving || isPublishing}
+              problem={problem}
+              outstanding={outstanding}
             />
           </div>
 
