@@ -312,3 +312,92 @@ export interface ICouponListParams {
   page?: string;
   limit?: string;
 }
+
+// The wedding invitation is its own backend domain at /v1/wedding rather than a
+// row in the generic content table, so it has its own payloads and responses.
+// Field names below are the wire format the backend actually sends: snake_case
+// for the invitation, PascalCase wherever the Go struct carries no JSON tag
+// (the guest row and the publish check).
+
+export interface IWeddingInvitationPayload {
+  template_id: string;
+  title: string;
+  caption?: string;
+  detail_content_json_text: string;
+  // Left out, the backend generates one from the title.
+  invitation_slug?: string;
+  rsvp_enabled?: boolean;
+  digital_gift_enabled?: boolean;
+  pov_guest_photo_enabled?: boolean;
+  song_request_enabled?: boolean;
+  photo_storage_limit_mb?: number;
+}
+
+// An update sends only what changed, and cannot move an invitation to another
+// template.
+export type IWeddingInvitationUpdatePayload = Partial<
+  Omit<IWeddingInvitationPayload, 'template_id'>
+>;
+
+export interface IWeddingCreatedResponse {
+  id: string;
+}
+
+export interface IWeddingPublishIssue {
+  Field: string;
+  Message: string;
+}
+
+// Publishing is not gated on this check by the backend: the caller runs it,
+// shows the couple what is still missing, and only then publishes.
+export interface IWeddingPublishCheckResponse {
+  OK: boolean;
+  Issues: IWeddingPublishIssue[] | null;
+}
+
+export interface IWeddingPublishResponse {
+  status: string;
+}
+
+export interface IWeddingGuestPayload {
+  name: string;
+  group_label?: string;
+  phone?: string;
+  email?: string;
+  max_plus_ones?: number;
+  notes?: string;
+}
+
+// Token is the guest's personal link. The backend mints it; nothing here does.
+export interface IWeddingGuestResponse {
+  ID: string;
+  WeddingID: string;
+  Name: string;
+  GroupLabel?: string | null;
+  Phone?: string | null;
+  Email?: string | null;
+  Token: string;
+  MaxPlusOnes: number;
+  RSVPStatus: string;
+  OpenCount?: number;
+  CreateTime: string;
+}
+
+// What a wedding guest sees. Only ever answered for a published invitation.
+export interface IPublicWeddingInvitationResponse {
+  id: string;
+  invitation_slug: string;
+  status: string;
+  rsvp_enabled: boolean;
+  pov_guest_photo_enabled: boolean;
+  view_count: number;
+  title: string;
+  detail_content_json_text: string;
+}
+
+export interface IWeddingRsvpPayload {
+  is_attending: boolean;
+  plus_one_count?: number;
+  plus_one_names?: string;
+  message?: string;
+}
