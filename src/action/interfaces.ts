@@ -427,3 +427,10 @@ export interface IWeddingRsvpPayload {
   plus_one_names?: string;
   message?: string;
 }
+
+// What the backend refuses a second reply with, carried on the message of an
+// unsuccessful result. One guest may answer once - the table holds a unique
+// constraint on the guest - and this is the other refusal a caller can act on
+// rather than only report: a guest who has already replied has not failed at
+// anything, and telling them so is different from telling them it went wrong.
+export const GUEST_ALREADY_RESPONDED = 'GUEST_ALREADY_RESPONDED';

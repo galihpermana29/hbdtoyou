@@ -7,12 +7,21 @@
  * control, asking a guest their name, whether they are coming, whether they
  * bring somebody, and a Guest Message the design marks Optional.
  *
- * Nothing here reaches a network. A reply is handed to whoever opened the card
- * and lives in the page's state until it is reloaded. The card says so above
- * the Submit control rather than letting a guest find out afterwards, which is
- * the one line of copy on it the design does not draw - see
- * `docs/adr/0002-figma-is-literal-truth.md`. Persisting a reply is integration
- * work and is deliberately not attempted.
+ * A reply goes to the couple when there is a guest to sign it with, and stays
+ * in the page when there is not. Which of those it is is the whole of what
+ * `guest` decides: a personal link resolves to somebody on the Guest List and
+ * their reply is posted against the invitation, while the Showcase and the
+ * Create Flow's previews are pictures of an invitation that nobody was sent, so
+ * a reply left on one has nowhere to go and the card says so above the Submit
+ * control rather than letting a guest find out afterwards.
+ *
+ * A guest is identified by their token, so their name is read out of the Guest
+ * List rather than typed: the design draws a Name field, so it stays drawn and
+ * becomes read-only wherever the list holds a name, because a guest confirming
+ * who they are is truer than typing a name the backend discards.
+ *
+ * The lines this card prints about what became of a reply are copy the design
+ * does not draw - see `docs/adr/0002-figma-is-literal-truth.md`.
  *
  * It behaves as a dialog rather than as a card that happens to be on top, and
  * it shares the whole of how with the Create Flow's Play Preview - see
@@ -28,6 +37,8 @@ import {
   type ReactNode,
 } from 'react';
 
+import { GUEST_ALREADY_RESPONDED } from '@/action/interfaces';
+import { submitWeddingRsvp } from '@/action/wedding-api';
 import { useDialogBehaviour } from '@/hooks/use-dialog-behaviour';
 
 import { PaperGround, TornEdge } from './TornPaper';
@@ -47,6 +58,75 @@ export interface Rsvp {
   /** When they replied, which is what their Guest Message is dated by. */
   repliedAt: Date;
 }
+
+/**
+ * The guest a reply is signed with, and the invitation it is posted against.
+ *
+ * Present only where the invitation is somebody's and the link that opened it
+ * was one guest's: the Showcase and the Create Flow's previews have neither, and
+ * a published invitation opened at its bare address has an invitation but no
+ * guest on the end of it.
+ */
+export interface ReplyingGuest {
+  /** The invitation's public address, which the reply is posted against. */
+  slug: string;
+  /** The half of the personal link that says which guest is replying. */
+  token: string;
+  /**
+   * Their name as the Guest List holds it, or empty where the row carries
+   * none. The token is what says who they are, so a nameless row is still a
+   * guest who can reply - it is only the name that has to be asked for.
+   */
+  name: string;
+}
+
+/** What became of a reply, in the shape a save's outcome is told in. */
+type ReplyOutcome =
+  /** The couple has it. */
+  | 'SENT'
+  /** The couple already had one from this guest, and keeps that first one. */
+  | 'ALREADY_REPLIED'
+  /** It was refused or never arrived, and `problem` says so. */
+  | 'FAILED';
+
+/**
+ * What a guest is told for the two outcomes that are nobody's fault.
+ *
+ * Already replied is a refusal rather than a failure: a guest may answer once,
+ * the backend is what enforces it, and saying which answer counts is different
+ * from telling somebody who did nothing wrong that something went wrong.
+ */
+const REPLY_WORDS: Record<Exclude<ReplyOutcome, 'FAILED'>, string> = {
+  SENT: 'Thank you. Your reply is with the couple.',
+  ALREADY_REPLIED:
+    'You have already replied to this invitation. The couple has that first ' +
+    'answer, and it is the one that counts.',
+};
+
+/**
+ * What they read when the reply did not reach the couple.
+ *
+ * The same three things the Create Flow tells a couple whose save failed: what
+ * did not happen, what the backend gave as the reason, and that nothing they
+ * wrote is gone.
+ */
+function replyProblem(reason: string): string {
+  return (
+    `Your reply did not reach the couple: ${reason}. Nothing you have ` +
+    'written has been lost, so you can try again.'
+  );
+}
+
+/**
+ * The line the card prints where a reply has nowhere to go.
+ *
+ * Recorded in `docs/adr/0002-figma-is-literal-truth.md` and claimed in
+ * `visual/expectations/wedding-template-1-rsvp.mjs`, which is the Showcase's
+ * card and is exactly such a one.
+ */
+const UNSENT_NOTE =
+  'Nothing is saved yet. Your reply stays on this page and goes when you ' +
+  'reload it.';
 
 /**
  * The two answers the design draws to "Will you be attending?", in its own
@@ -205,13 +285,19 @@ function Question({
 }
 
 export default function RsvpCard({
+  guest,
   onClose,
-  onSubmit,
+  onKeep,
 }: {
+  /**
+   * Who is replying and where their reply goes, or nothing where the
+   * invitation was sent to nobody.
+   */
+  guest?: ReplyingGuest;
   /** Put the card away, changing nothing. */
   onClose: () => void;
-  /** Take a guest's reply, which is all this card does with one. */
-  onSubmit: (rsvp: Rsvp) => void;
+  /** Take a reply that has nowhere to go, which is all a preview can do. */
+  onKeep: (rsvp: Rsvp) => void;
 }) {
   const dialogRef = useRef<HTMLDivElement>(null);
   const titleId = useId();
@@ -223,6 +309,35 @@ export default function RsvpCard({
   const [attending, setAttending] = useState<boolean | null>(null);
   const [plusOne, setPlusOne] = useState<boolean | null>(null);
   const [message, setMessage] = useState('');
+  const [sending, setSending] = useState(false);
+  const [outcome, setOutcome] = useState<ReplyOutcome | null>(null);
+  const [problem, setProblem] = useState<string | null>(null);
+
+  /**
+   * The name the Guest List holds for whoever is replying, where it holds one.
+   *
+   * A row with no name leaves the field to the guest: the token is what says
+   * who they are either way, and a read-only empty box would be asking them to
+   * confirm nothing.
+   */
+  const knownName = guest?.name.trim() ?? '';
+
+  /** A reply the couple has, or already had, is one no further press changes. */
+  const settled = outcome === 'SENT' || outcome === 'ALREADY_REPLIED';
+
+  /**
+   * The one line above Submit, which says whatever is true of this reply: what
+   * became of it where there was somewhere to send it, and that there is not
+   * where there is not.
+   *
+   * Nothing at all until a reply that can be sent has been, so a card nobody
+   * has pressed yet is the card the design draws.
+   */
+  const saidOfTheReply = guest
+    ? outcome === 'FAILED'
+      ? problem
+      : outcome && REPLY_WORDS[outcome]
+    : UNSENT_NOTE;
 
   // The card takes focus itself rather than handing it to the Name field, which
   // is what leaving `initialFocus` out asks for: it is read on a phone, where
@@ -235,20 +350,74 @@ export default function RsvpCard({
   // be put at the top of a five-thousand-pixel invitation for having closed it.
   useDialogBehaviour(dialogRef, onClose);
 
-  const reply = (event: FormEvent<HTMLFormElement>) => {
+  const reply = async (event: FormEvent<HTMLFormElement>) => {
     event.preventDefault();
     // The browser will not submit the form until every question is answered,
     // so an unanswered one cannot arrive here. Both are still read as answered
     // or not rather than coerced, because a reply that quietly said "not
     // coming" for somebody who had said nothing would be worse than no reply.
     if (attending === null || plusOne === null) return;
-    onSubmit({
-      name: name.trim(),
+    // A reply already in flight, and one the couple already has, are both
+    // presses that cannot do anything: the control is disabled for each, and
+    // this is the other half of that, for a form submitted some other way.
+    if (sending || settled) return;
+
+    const rsvp: Rsvp = {
+      name: knownName || name.trim(),
       attending,
       plusOne,
       message: message.trim(),
       repliedAt: new Date(),
-    });
+    };
+
+    // Nobody to sign it with, so it goes no further than the page that took it.
+    if (!guest) {
+      onKeep(rsvp);
+      return;
+    }
+
+    setSending(true);
+    // Whatever the last press had to say, because this one is what the line
+    // above Submit is about now.
+    setOutcome(null);
+    setProblem(null);
+    try {
+      const sent = await submitWeddingRsvp(
+        {
+          is_attending: rsvp.attending,
+          // The design asks whether a guest brings somebody and the backend
+          // counts how many, so yes is one and no is none. A guest the Guest
+          // List allows two can therefore only claim one, which is the gap seen
+          // from the guest's end and is reported rather than worked around -
+          // `hbd-381`.
+          plus_one_count: rsvp.plusOne ? 1 : 0,
+          // An empty message is left out rather than sent as nothing, so the
+          // couple's reply list holds a message only where a guest wrote one.
+          message: rsvp.message || undefined,
+        },
+        guest.slug,
+        guest.token
+      );
+      if (sent.success) {
+        setOutcome('SENT');
+      } else if (sent.message === GUEST_ALREADY_RESPONDED) {
+        setOutcome('ALREADY_REPLIED');
+      } else {
+        setProblem(replyProblem(sent.message));
+        setOutcome('FAILED');
+      }
+    } catch (error) {
+      // The wedding client answers with a result rather than throwing, network
+      // failures included, so this is only reached if it ever stops doing that
+      // or the action itself cannot be reached. A guest is told either way,
+      // because the alternative is a press that appeared to do nothing.
+      setProblem(
+        replyProblem(error instanceof Error ? error.message : String(error))
+      );
+      setOutcome('FAILED');
+    } finally {
+      setSending(false);
+    }
   };
 
   return (
@@ -293,11 +462,21 @@ export default function RsvpCard({
                 className="font-[family-name:var(--font-wt1-mono)] text-[12px] font-normal leading-[normal] text-[#000000]">
                 Name
               </label>
+              {/*
+                A guest who came by their own link is shown the name the Guest
+                List holds for them and cannot change it: the backend knows who
+                they are from the token, so a typed name would be discarded and
+                a field that took one would be asking for something nobody
+                reads. Read-only rather than disabled, because it is still
+                theirs to read, select and copy, and a disabled field is
+                skipped by everything that walks a form.
+              */}
               <input
                 id={nameId}
                 type="text"
-                value={name}
+                value={knownName || name}
                 onChange={(event) => setName(event.target.value)}
+                readOnly={knownName !== ''}
                 required
                 autoComplete="name"
                 className="w-full rounded-[2px] border border-solid border-[#000000] bg-[#d9d8d6] px-[12px] py-[8px] font-[family-name:var(--font-wt1-mono)] text-[10px] font-normal leading-[normal] text-[#000000] outline-1 outline-offset-[3px] outline-[#090909] focus-visible:outline"
@@ -369,12 +548,27 @@ export default function RsvpCard({
 
             {/* Submit and Close. Figma `Frame 44`, node 312:3880. */}
             <div className="flex flex-col gap-[12px]">
-              <p className="font-[family-name:var(--font-wt1-mono)] text-[10px] font-semibold leading-[normal] text-[#898989]">
-                Nothing is saved yet. Your reply stays on this page and goes
-                when you reload it.
-              </p>
+              {/*
+                One line above Submit, in the small grey setting the design
+                already uses for the Optional beside a question.
+
+                Drawn only when there is something to say, because an empty one
+                would still take its 12 of the gap the design draws between
+                these three and put a band of nothing above Submit. It is a live
+                region so that what became of a press is announced and not only
+                shown - a guest who cannot see the line has pressed a control
+                that would otherwise appear to have done nothing.
+              */}
+              {saidOfTheReply && (
+                <p
+                  role="status"
+                  className="font-[family-name:var(--font-wt1-mono)] text-[10px] font-semibold leading-[normal] text-[#898989]">
+                  {saidOfTheReply}
+                </p>
+              )}
               <button
                 type="submit"
+                disabled={sending || settled}
                 className="flex items-center justify-center gap-[10px] border border-solid border-[#fafafa] bg-[#000000] p-[10px]">
                 <p className="whitespace-nowrap font-[family-name:var(--font-wt1-mono)] text-[12px] font-normal leading-[normal] text-[#fafafa]">
                   Submit

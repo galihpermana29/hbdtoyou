@@ -11,7 +11,7 @@ import HolyVerse from './HolyVerse';
 import LoveStory from './LoveStory';
 import Messages from './Messages';
 import PhotoShare from './PhotoShare';
-import RsvpCard, { type Rsvp } from './RsvpCard';
+import RsvpCard, { type ReplyingGuest, type Rsvp } from './RsvpCard';
 import TokenOfLove from './TokenOfLove';
 import VinylWidget from './VinylWidget';
 import { SealedProvider } from './sealed-context';
@@ -46,6 +46,17 @@ export interface WeddingTemplate1Props {
    */
   addressee?: string;
   /**
+   * Who is replying, and where their reply goes: the guest their own link
+   * resolved to, and the address the invitation is published at.
+   *
+   * Left out everywhere the invitation was sent to nobody - the Showcase, the
+   * Create Flow's two panels and Play Preview - where a reply has nowhere to go
+   * and stays in the page instead. The addressee beside it is the same guest's
+   * name where both are given; it is a separate prop because the Showcase has a
+   * name to write on the envelope and no guest to send anything as.
+   */
+  guest?: ReplyingGuest;
+  /**
    * What this invitation is scrolling inside, so that a sealed one begins at
    * the top of its envelope: `'page'` where it has the window to itself, and a
    * ref to the scroller where something else does the scrolling - `Scroller`
@@ -79,16 +90,20 @@ export default function WeddingTemplate1({
   content = DEFAULT_WEDDING_TEMPLATE_1_CONTENT,
   sealed = false,
   addressee,
+  guest,
   scrollsInside,
   showVinylWidget = false,
 }: WeddingTemplate1Props) {
   /**
-   * Every reply this page has taken, which is as far as one gets.
+   * Every reply this page took and could not send, which is as far as one gets
+   * on an invitation nobody was sent.
    *
-   * The invitation is what a guest replies on, so it is what holds the replies
-   * until somebody has somewhere to send them: `RsvpCard.tsx` says why that is
-   * not here. Attendance and a plus one are held and drawn nowhere, because
-   * they are the couple's to read and no screen shows them to anybody yet.
+   * A guest replying from their own link is answered by the backend instead, and
+   * their message is not added here: the Guest Messages wall is not connected to
+   * anything yet, so a message that appeared on it would be telling the guest
+   * their words were on the invitation when only the couple can see them.
+   * Attendance and a plus one are held and drawn nowhere either, because they
+   * are the couple's to read and no screen shows them to anybody yet.
    *
    * Every invitation can be replied to, including the two drawn as panels
    * inside the Create Flow, where pressing RSVP Now puts the card over the
@@ -185,8 +200,9 @@ export default function WeddingTemplate1({
 
       {replying && (
         <RsvpCard
+          guest={guest}
           onClose={() => setReplying(false)}
-          onSubmit={(rsvp) => {
+          onKeep={(rsvp) => {
             setRsvps((taken) => [...taken, rsvp]);
             setReplying(false);
           }}

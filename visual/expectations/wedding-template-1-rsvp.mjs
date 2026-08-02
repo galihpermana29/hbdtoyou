@@ -14,7 +14,7 @@
  *                            open, the same way a sealed invitation does
  *   [role=dialog] p          every line of words that names nothing: the card's
  *                            own title, the Optional beside a question, the
- *                            line saying a reply is not saved, and the words
+ *                            line saying where this reply goes, and the words
  *                            inside the two controls at the foot of it
  *   [role=dialog] legend     a question with more than one answer under it
  *   [role=dialog] label      a field's name, and each answer, since an answer's
@@ -40,9 +40,15 @@
  * claim the design makes.
  *
  * Anything a reply does. That a Guest Message joins the invitation's own, that
- * closing the card changes nothing, and that nothing reaches a network are
- * behaviours, and the only behaviours this harness can hold are `overflow` and
- * `contain`.
+ * closing the card changes nothing, and where a reply goes are behaviours, and
+ * the only behaviours this harness can hold are `overflow` and `contain`.
+ *
+ * This screen is the Showcase's card, which is an invitation nobody was sent:
+ * there is no guest to sign a reply with, so the reply stays in the page and the
+ * card says so. A guest who came by their own personal link sends theirs, and is
+ * told what became of it in the same place - none of which any screen the design
+ * draws can show, because each of those lines is drawn only once there is
+ * something to say. See `docs/adr/0002-figma-is-literal-truth.md`.
  */
 
 import { declaredPositions } from './declared-positions.mjs';
@@ -114,7 +120,7 @@ const CLOSE_CONTROL = { ...FOOT_CONTROL, borderColor: '#000000' };
 const PARAGRAPHS = [
   'Card title',
   'Optional aside',
-  'Unsaved note',
+  'Unsent note',
   'Submit label',
   'Close label',
 ];
@@ -139,13 +145,13 @@ const LABELS = [
 /**
  * The line the card prints that the design does not draw.
  *
- * A reply is held in the page and lost on reload, and the card says so above
- * the control that takes it rather than letting a guest find out afterwards.
- * The deviation is agreed and recorded in
+ * A reply left on an invitation nobody was sent is held in the page and lost on
+ * reload, and the card says so above the control that takes it rather than
+ * letting a guest find out afterwards. The deviation is agreed and recorded in
  * `docs/adr/0002-figma-is-literal-truth.md`; the words are claimed here so
  * that they cannot quietly become something vaguer.
  */
-const UNSAVED_NOTE =
+const UNSENT_NOTE =
   'Nothing is saved yet. Your reply stays on this page and goes when you ' +
   'reload it.';
 
@@ -229,7 +235,7 @@ function rsvpExpectations() {
       style: { ...FIELD_BOX, ...FIELD_TEXT },
     },
 
-    paragraph('Unsaved note', ASIDE, UNSAVED_NOTE),
+    paragraph('Unsent note', ASIDE, UNSENT_NOTE),
     {
       name: 'Submit control',
       select: '[role="dialog"] button',

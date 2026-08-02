@@ -1,12 +1,8 @@
-import {
-  INVITATION_NOT_PUBLISHED,
-  type IWeddingGuestResponse,
-} from '@/action/interfaces';
+import { INVITATION_NOT_PUBLISHED } from '@/action/interfaces';
 import {
   getPublicWeddingInvitation,
   resolveWeddingGuest,
 } from '@/action/wedding-api';
-import type { IGlobalResponse } from '@/action/user-api';
 import {
   GUEST_TOKEN_PARAM,
   guestTokenFrom,
@@ -58,6 +54,11 @@ export const metadata = {
  * would put somebody else's name on the one surface of the invitation meant to
  * be that guest's own.
  *
+ * The same token is what a reply is signed with, so a guest who arrived by their
+ * own link can answer the invitation and one who arrived at its bare address
+ * cannot: the backend says who is replying from the token rather than from
+ * anything typed, and there is nobody for an unsigned reply to be from.
+ *
  * It lives under `(gifts)`, which is what keeps the site footer off it, per
  * `docs/adr/0003-the-route-group-says-whether-a-page-is-a-gift.md`.
  */
@@ -96,6 +97,23 @@ export default async function WeddingInvitationViewerPage({
   // can read, and which draws no name across the envelope.
   const guestIsKnown = !personalLink || Boolean(guest?.data);
 
+  // The one guest this invitation is for, where a personal link brought
+  // somebody the Guest List knows: the row answers both what to write across
+  // the envelope and who a reply is from, so it is read once and asked twice.
+  //
+  // Read here rather than anywhere nearer the template, because the shape it
+  // arrives in is the backend's: the guest endpoints answer in PascalCase where
+  // the invitation answers in snake_case, and that is a fact about the wire
+  // rather than about an invitation. Nothing is written across the envelope for
+  // a row carrying no name, for the same reason nothing is without a token.
+  //
+  // Replying is gated on the row rather than on the name it carries. The token
+  // is what identifies a guest to the backend, so a row with no name is still
+  // somebody who can answer - they are only asked for their name, the way
+  // anybody without a personal link is.
+  const guestRow = guest?.data ?? null;
+  const addressee = guestRow?.Name?.trim() || undefined;
+
   // Everything below is drawn inside the invitation's own fonts, because all of
   // it is what the invitation's own address answered with.
   return (
@@ -103,7 +121,12 @@ export default async function WeddingInvitationViewerPage({
       {content && guestIsKnown ? (
         <WeddingTemplate1
           content={content}
-          addressee={addresseeOf(guest)}
+          addressee={addressee}
+          guest={
+            guestRow
+              ? { slug: params.slug, token, name: addressee ?? '' }
+              : undefined
+          }
           sealed
           scrollsInside="page"
           showVinylWidget
@@ -115,21 +138,6 @@ export default async function WeddingInvitationViewerPage({
       )}
     </div>
   );
-}
-
-/**
- * The name to write across the envelope, which is the Guest List's own.
- *
- * Read out of the guest row here rather than anywhere nearer the template,
- * because the shape it arrives in is the backend's: the guest endpoints answer
- * in PascalCase where the invitation answers in snake_case, and that is a fact
- * about the wire rather than about an invitation. Nothing is drawn for a row
- * carrying no name, for the same reason nothing is drawn without a token.
- */
-function addresseeOf(
-  guest: IGlobalResponse<null | IWeddingGuestResponse> | null
-): string | undefined {
-  return guest?.data?.Name?.trim() || undefined;
 }
 
 /**

@@ -8,9 +8,15 @@
  * scrolls it when dragged.
  * Animation: the title and each card fade up in a gentle stagger on scroll.
  *
- * The five the design draws are its own example wedding's. A guest who replies
- * to the invitation adds theirs to the top of them, and it is there until the
- * page is reloaded: see `RsvpCard.tsx` for why it goes no further than that.
+ * The five the design draws are its own example wedding's. A reply left on an
+ * invitation nobody was sent - the Showcase, the Create Flow's previews - adds
+ * its message to the top of them until the page is reloaded, because there is
+ * nowhere else for it to go.
+ *
+ * A guest replying on their own invitation is answered by the couple's backend
+ * instead, and their message does not appear here: it is the couple's to read,
+ * and a message on this wall would tell the guest their words were on the
+ * invitation when only the couple can see them. See `RsvpCard.tsx`.
  */
 
 import { motion } from 'framer-motion';

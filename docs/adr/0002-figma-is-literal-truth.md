@@ -151,12 +151,21 @@ The control's colour, size and weight are claimed by the check; its underline is
 Splitting them apart is how a template comes to name a column the parsing does not read, which would be invisible until a couple had filled that column in for nothing.
 The headings are claimed in `visual/expectations/guest-invites-populated.mjs` and the control in `visual/expectations/guest-invites-empty.mjs`, so neither can quietly become something else; the file itself reaches the browser as a link's `download` and the check reads copy and computed style rather than attributes, so nothing opens it.
 
-The RSVP prints one line the design does not draw, above the Submit control: "Nothing is saved yet. Your reply stays on this page and goes when you reload it."
+The RSVP prints one line the design does not draw, above the Submit control, saying whatever is true of the reply being written.
 
-An RSVP is held in the page and lost on reload, because persisting one is integration work and is not built.
-The design was drawn for the finished thing and so says nothing about that.
-A card that took a guest's reply and quietly dropped it would be worse than one that says so, so the card says so, in the small grey setting the design already uses for the Optional beside a question.
-It is claimed in `visual/expectations/wedding-template-1-rsvp.mjs` so that it cannot quietly become something vaguer, and it goes when the reply is actually saved.
+The design was drawn for the finished thing, so it draws the card once and says nothing about what becomes of a reply.
+A card that took a guest's reply and quietly dropped it, or quietly failed to send it, would be worse than one that says so, so the card says so, in the small grey setting the design already uses for the Optional beside a question.
+
+Where a reply has nowhere to go the line is "Nothing is saved yet. Your reply stays on this page and goes when you reload it."
+That is every invitation nobody was sent: the Showcase, the Create Flow's two panels and Play Preview, and a published invitation opened at its bare address rather than by a guest's own link.
+It is claimed in `visual/expectations/wedding-template-1-rsvp.mjs`, whose screen is the Showcase's card, so that it cannot quietly become something vaguer.
+
+Where a guest came by their own link the reply reaches the couple, and the same line says which of three things happened: "Thank you. Your reply is with the couple.", "You have already replied to this invitation. The couple has that first answer, and it is the one that counts.", or one naming what the backend said and that nothing they wrote has been lost.
+None of those is asserted, for the same reason a failed save's line is not: each is drawn only when there is something to say, and every screen the design draws has nothing.
+
+The Name field on that card is read-only and holds the name the Guest List carries, unless the list carries none for that guest, in which case it is theirs to type as anybody else's is.
+The backend says who is replying from the token on the link, so a typed name would be discarded, and a field that took one would be asking a guest for something nobody reads.
+The design draws the field, so it stays drawn: a guest confirming who they are is truer than a box that quietly does nothing.
 
 One addition is agreed and recorded: the guest invites step carries a "Save as draft" control beside Confirm Create, which the design does not draw.
 
