@@ -1,5 +1,6 @@
 'use client';
 
+import { message } from 'antd';
 import { useForm, useWatch } from 'antd/es/form/Form';
 import { ChevronLeft, ChevronRight } from 'lucide-react';
 import { useRouter } from 'next/navigation';
@@ -12,7 +13,9 @@ import {
   flowActionBack,
   flowActionForward,
   flowActionRow,
+  flowProblem,
 } from '@/components/forms/wedding/create-flow-treatment';
+import { useInvitationSave } from '@/components/forms/wedding/use-invitation-save';
 import GuestInvitesStep from '@/components/forms/wedding/guest-invites-step';
 import PublishedStep from '@/components/forms/wedding/published-step';
 import WeddingInvitationForm from '@/components/forms/wedding/wedding-invitation-form';
@@ -59,9 +62,11 @@ export interface WeddingInvitationCreateClientsideProps {
   /**
    * The invitation's Invitation Slug, or empty while it has none.
    *
-   * Empty is what a couple gets, because nothing saves yet and the slug is the
-   * backend's to generate: see `SLUG_PARAM`. A couple no longer chooses it, so
-   * nothing in the flow writes to it either.
+   * Empty is still what a couple gets. Saving creates the invitation and the
+   * backend generates its slug, but the create call answers with the identifier
+   * alone, so the slug has to be read back before this flow can show anybody an
+   * address: `hbd-ox7.9`. A couple no longer chooses it, so nothing in the flow
+   * writes to it either. See `SLUG_PARAM`.
    */
   slug: string;
 }
@@ -81,6 +86,9 @@ export default function WeddingInvitationCreateClientside({
     greetingMessage: DEFAULT_GUEST_MESSAGE,
     guestList: null,
   });
+
+  const { save, isSaving, problem, sayThereIsNobodyToSaveFor, forgetProblem } =
+    useInvitationSave(form);
 
   const brideNickname = useWatch('brideName', form);
   const groomNickname = useWatch('groomName', form);
@@ -105,8 +113,41 @@ export default function WeddingInvitationCreateClientside({
    * scrolling it past them says nothing.
    */
   function goToStep(next: CreateFlowStep) {
+    // Whatever the last save had to say belonged to the step being left. It is
+    // printed at the foot of whichever step is showing, so carrying it along
+    // would put a message about one press under a row a couple has not pressed.
+    forgetProblem();
     setStep(next);
     window.scrollTo({ top: 0, behavior: 'instant' });
+  }
+
+  /**
+   * Keep what the couple has entered, and then go on to the guest invites step.
+   *
+   * The save is what makes the step finished, so a failed one stops it: the
+   * values stay in the form, the reason is printed under the row, and pressing
+   * Next again retries. A retry after a first save that failed creates rather
+   * than updates, because there is still no invitation - see
+   * `use-invitation-save.ts`.
+   */
+  async function goOnToGuestInvites() {
+    if ((await save()) === 'FAILED') return;
+    goToStep('Guest invites details');
+  }
+
+  /**
+   * Keep what the couple has entered, and stay where they are.
+   *
+   * A save that worked says so and goes, because nothing else on the screen
+   * changes when it does: a couple who pressed the control on purpose and saw
+   * nothing at all would have no way to tell a save from a dead button. A save
+   * that failed is printed under the row instead, and stays there, because that
+   * one is not news a couple should be able to miss.
+   */
+  async function saveAsDraft() {
+    const outcome = await save();
+    if (outcome === 'SAVED') message.success('Your invitation is saved.');
+    if (outcome === 'NOT_SIGNED_IN') sayThereIsNobodyToSaveFor();
   }
 
   return (
@@ -163,13 +204,31 @@ export default function WeddingInvitationCreateClientside({
                     className={flowActionBack}>
                     Previous step
                   </button>
+                  {/* Dimmed while it is saving, which is a state the design
+                      does not draw: a control that cannot be pressed and looks
+                      exactly as it did reads as a press that did nothing, and a
+                      couple's answer to that is to press it again. The check
+                      never sees it, because nothing on a designed screen is
+                      mid-save. */}
                   <button
                     type="button"
-                    onClick={() => goToStep('Guest invites details')}
-                    className={flowActionForward}>
+                    onClick={goOnToGuestInvites}
+                    disabled={isSaving}
+                    aria-busy={isSaving}
+                    className={`${flowActionForward} disabled:opacity-60`}>
                     Next
                   </button>
                 </div>
+
+                {/* Only when a save has something to say, which is never on a
+                    screen the design draws. */}
+                {problem ? (
+                  <p
+                    role="alert"
+                    className={`mt-[12px] text-right ${flowProblem}`}>
+                    {problem}
+                  </p>
+                ) : null}
               </div>
 
               {/* The control travels with the panel rather than with the page,
@@ -242,6 +301,9 @@ export default function WeddingInvitationCreateClientside({
               }
               onPreviousStep={() => goToStep('Fill in the details & story')}
               onConfirm={() => goToStep('Share with guests')}
+              onSaveAsDraft={saveAsDraft}
+              isSaving={isSaving}
+              saveProblem={problem}
             />
           </div>
 

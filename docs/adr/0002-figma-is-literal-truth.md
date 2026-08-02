@@ -153,5 +153,19 @@ The design was drawn for the finished thing and so says nothing about that.
 A card that took a guest's reply and quietly dropped it would be worse than one that says so, so the card says so, in the small grey setting the design already uses for the Optional beside a question.
 It is claimed in `visual/expectations/wedding-template-1-rsvp.mjs` so that it cannot quietly become something vaguer, and it goes when the reply is actually saved.
 
+One addition is agreed and recorded: the guest invites step carries a "Save as draft" control beside Confirm Create, which the design does not draw.
+
+The design was drawn for a flow that saved nothing, so it has no way to say "keep this, I will come back".
+Every other save in the flow happens on the way past - pressing Next from the details-and-story step writes what a couple has entered - and the guest invites step's own forward action is Confirm Create, which publishes.
+Following the frame literally would leave a couple who wants to stop for the evening with two choices, publishing a wedding they have not finished or closing the tab on it.
+
+It sits between Previous step and Confirm Create rather than at the start of the row, because it is the other thing a couple can do with what they have written rather than the other way out of the step.
+It wears the shape the design does state for the action beside the filled one, `flowActionAside` in `src/components/forms/wedding/create-flow-treatment.ts`, which is the outlined action written under its own name rather than Previous step's treatment worn by a control that does not go back.
+`visual/expectations/guest-invites.mjs` claims it with the same style block as Previous step, so it can neither disappear nor drift away from the action it was drawn beside.
+
+A save that fails prints one line under that row, in the red the flow already gives a field that will not take what it was given.
+The line names what the backend said and tells the couple nothing has been lost, and a step whose save failed does not advance.
+It is not asserted, because it is drawn only when there is something to say and every screen the design draws has nothing.
+
 This rule holds at desktop width, where the design exists.
 Below that there is no design, so usability governs and the rule does not apply.

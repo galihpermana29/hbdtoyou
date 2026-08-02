@@ -1,5 +1,7 @@
 import type { Dayjs } from 'dayjs';
 
+import type { IWeddingInvitationPayload } from '@/action/interfaces';
+
 /** A single love-story timeline entry shown in the viewer. */
 export interface WeddingMilestone {
   year: string;
@@ -418,6 +420,58 @@ export function formValuesToContent(
     memoRollEnabled: v.memoRollEnabled ?? defaults.memoRollEnabled,
     digitalGiftEnabled: v.digitalGiftEnabled ?? defaults.digitalGiftEnabled,
     songRequestEnabled: v.songRequestEnabled ?? defaults.songRequestEnabled,
+  };
+}
+
+/**
+ * The title every invitation is created with.
+ *
+ * Fixed, because the Create Flow never asks a couple for one: the design draws
+ * no such field, and the only publish check the backend documents is that the
+ * title is not empty, so a title nobody types can never fail it. It is what a
+ * couple would see naming this invitation in a list of their own things, so it
+ * is written as a person would read it rather than as an identifier.
+ */
+export const WEDDING_INVITATION_TITLE = 'Wedding Invitation';
+
+/**
+ * What the backend is sent, built from what the couple has entered.
+ *
+ * The content is exactly what the Site Preview shows them - the same
+ * `formValuesToContent`, serialised - so a couple never saves one invitation and
+ * watches another. Anything they have not answered falls back to the sample
+ * invitation, there as it does in the preview, which is what lets a half-filled
+ * draft still render as a wedding.
+ *
+ * Three things the payload can carry are deliberately absent.
+ *
+ * `invitation_slug`, because the backend generates one when it is not given
+ * a slug and there is no endpoint to ask whether a name is free, so a couple
+ * choosing one could only be told it was taken after failing.
+ *
+ * `photo_storage_limit_mb`, because the side that counts bytes and refuses
+ * uploads is the side that should hold the quota; putting a number here as well
+ * means the wrong one can be believed. Deciding it is `hbd-ox7.2`.
+ *
+ * `caption`, because nothing asks a couple for one and nothing prints it.
+ *
+ * The flags are the couple's three switches, plus `rsvp_enabled`, which is
+ * always on: replying is the only way a guest can leave a message, so turning it
+ * off would silently empty the Guest Messages a couple watches being written.
+ * See `docs/adr/0002-figma-is-literal-truth.md`.
+ */
+export function formValuesToInvitationPayload(
+  values: Partial<WeddingInvitationFormValues> | null | undefined
+): Omit<IWeddingInvitationPayload, 'template_id'> {
+  const content = formValuesToContent(values);
+
+  return {
+    title: WEDDING_INVITATION_TITLE,
+    detail_content_json_text: JSON.stringify(content),
+    rsvp_enabled: true,
+    digital_gift_enabled: content.digitalGiftEnabled,
+    pov_guest_photo_enabled: content.memoRollEnabled,
+    song_request_enabled: content.songRequestEnabled,
   };
 }
 

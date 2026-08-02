@@ -170,24 +170,46 @@ export const guestInvitesIntroduction = [
   },
 ];
 
-/** The pair of actions that ends the step. */
+/** The outlined action the design draws beside the filled one. */
+const OUTLINED_ACTION = {
+  ...TYPE.actionLabel,
+  color: '#e34013',
+  backgroundColor: '#ffffff',
+  borderStyle: 'solid',
+  borderWidth: '1px',
+  borderColor: '#e34013',
+  borderRadius: '8px',
+  padding: '12px 18px',
+  gap: '6px',
+  boxShadow: FIELD_SHADOW,
+};
+
+/**
+ * The actions that end the step, in the order the design ranges them.
+ *
+ * "Save as draft" is in neither frame. Every other save in this flow happens on
+ * the way past, so a couple who wants to stop for the evening has nowhere to say
+ * so, and the design was drawn for a flow that saved nothing at all. It is
+ * asserted rather than left out so that it cannot quietly disappear or become
+ * something else, and the deviation is agreed and recorded in
+ * `docs/adr/0002-figma-is-literal-truth.md`.
+ *
+ * It wears the shape the design does state for the action beside the filled one,
+ * so it is claimed with the same style block as Previous step.
+ */
 export const stepActions = [
   {
     name: 'Previous step action',
     select: 'button',
     withText: 'Previous step',
-    style: {
-      ...TYPE.actionLabel,
-      color: '#e34013',
-      backgroundColor: '#ffffff',
-      borderStyle: 'solid',
-      borderWidth: '1px',
-      borderColor: '#e34013',
-      borderRadius: '8px',
-      padding: '12px 18px',
-      gap: '6px',
-      boxShadow: FIELD_SHADOW,
-    },
+    style: OUTLINED_ACTION,
+  },
+  {
+    // Not in the design. See the note above.
+    name: 'Save as draft action',
+    select: 'button',
+    withText: 'Save as draft',
+    style: OUTLINED_ACTION,
   },
   {
     name: 'Confirm Create action',

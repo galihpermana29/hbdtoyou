@@ -45,17 +45,20 @@ export interface GuestInvitesValues {
 export const SLUG_PREFIX = 'memoify.live/wedding-1/';
 
 /**
- * The query parameter an invitation's slug can be supplied by, while nothing
- * saves.
+ * The query parameter an invitation's slug can be supplied by, while the flow
+ * has no way to learn one.
  *
- * The slug is the backend's to generate, and nothing calls the backend yet, so
- * a flow nobody tells has no address at all - which is the truth, and which
- * leaves the published step with nothing to show on a screen whose whole point
- * is the address. This is how it is told one: the same scaffolding shape the
- * Showcase uses for its Example Content and its addressee, opt-in, and drawn
- * from nowhere by default so that no couple is ever shown somebody else's name
- * as their own. It comes out in `hbd-ox7.6`, when the create call starts
- * handing back the slug the backend made.
+ * The slug is the backend's to generate. The flow now creates the invitation it
+ * generates the slug for, and still cannot read it: the create call answers with
+ * the identifier and nothing else, so learning the address means reading the
+ * invitation back. Until that happens a flow has no address at all - which is
+ * the truth, and which leaves the published step with nothing to show on a
+ * screen whose whole point is the address.
+ *
+ * This is how it is told one: the same scaffolding shape the Showcase uses for
+ * its Example Content and its addressee, opt-in, and drawn from nowhere by
+ * default so that no couple is ever shown somebody else's name as their own. It
+ * comes out in `hbd-ox7.9`, when a published invitation has an address to show.
  */
 export const SLUG_PARAM = 'slug';
 

@@ -4,6 +4,7 @@ import { Upload } from 'lucide-react';
 import { useEffect, useId, useRef, useState } from 'react';
 
 import {
+  flowActionAside,
   flowActionBack,
   flowActionForward,
   flowActionRow,
@@ -39,12 +40,16 @@ import {
  * The third step of the Create Flow: a couple reads their invitation's address,
  * writes what their guests will receive, and uploads a Guest List.
  *
- * Nothing here reaches a network, and the address is not one of the things a
- * couple fills in. The design draws the web domain as theirs to choose and
- * shows the chosen name being confirmed as available; there is no endpoint that
- * can answer whether a name is free, so a couple choosing one could only be
- * told it was taken after failing. The backend generates the slug instead, and
- * the field shows it rather than taking it.
+ * One thing here reaches a network, and it is the one control the design does
+ * not draw: Save as draft hands what the couple has entered to the flow above,
+ * which keeps it. Everything else on the step is composed from what the flow
+ * already holds.
+ *
+ * The address is not one of the things a couple fills in. The design draws the
+ * web domain as theirs to choose and shows the chosen name being confirmed as
+ * available; there is no endpoint that can answer whether a name is free, so a
+ * couple choosing one could only be told it was taken after failing. The backend
+ * generates the slug instead, and the field shows it rather than taking it.
  *
  * The Guest List has the two states the design draws, and which one is showing
  * is decided by nothing but whether there is a Guest List: an area saying what
@@ -71,6 +76,19 @@ export interface GuestInvitesStepProps {
   onPreviousStep: () => void;
   /** Go on to the published step. */
   onConfirm: () => void;
+  /**
+   * Keep what the couple has entered, without going anywhere.
+   *
+   * The design draws no such control, and a couple who wants to stop for the
+   * evening has nowhere else to say so: every other save in this flow is
+   * something that happens on the way past. Agreed and recorded in
+   * `docs/adr/0002-figma-is-literal-truth.md`.
+   */
+  onSaveAsDraft: () => void;
+  /** Whether a save is in flight, so nothing is pressed twice into one. */
+  isSaving: boolean;
+  /** What a couple is told about the last save, or nothing to tell them. */
+  saveProblem: string | null;
 }
 
 /**
@@ -101,6 +119,9 @@ export default function GuestInvitesStep({
   groomNickname,
   onPreviousStep,
   onConfirm,
+  onSaveAsDraft,
+  isSaving,
+  saveProblem,
 }: GuestInvitesStepProps) {
   const slugId = useId();
   const slugLabelId = useId();
@@ -326,10 +347,31 @@ export default function GuestInvitesStep({
               className={flowActionBack}>
               Previous step
             </button>
+            {/* Beside Confirm Create rather than beside Previous step: it is
+                the other thing a couple can do with what they have written,
+                not the other way out of the step. Dimmed while it is saving,
+                for the reason the Next action is. */}
+            <button
+              type="button"
+              onClick={onSaveAsDraft}
+              disabled={isSaving}
+              aria-busy={isSaving}
+              className={`${flowActionAside} disabled:opacity-60`}>
+              Save as draft
+            </button>
             <button type="submit" className={flowActionForward}>
               Confirm Create
             </button>
           </div>
+
+          {/* Under the row rather than over it, so a couple reads it where they
+              have just pressed. Nothing is drawn while there is nothing to say,
+              which is every screen the design draws. */}
+          {saveProblem ? (
+            <p role="alert" className={`text-right ${flowProblem}`}>
+              {saveProblem}
+            </p>
+          ) : null}
         </form>
       </div>
 

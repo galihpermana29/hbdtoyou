@@ -212,11 +212,27 @@ const ACTION =
 const OUTLINED = `${ACTION} border border-[#E34013] bg-white text-[#E34013]`;
 const FILLED = `${ACTION} bg-[#E34013] text-white`;
 
+/** The outlined action the design draws beside the filled one at a step's foot. */
+const OUTLINED_STEP_ACTION = `${OUTLINED} px-[18px] py-[12px] font-[700]`;
+
 /** The action that goes back a step. */
-export const flowActionBack = `${OUTLINED} px-[18px] py-[12px] font-[700]`;
+export const flowActionBack = OUTLINED_STEP_ACTION;
 
 /** The action that goes on to the next step. */
 export const flowActionForward = `${FILLED} px-[18px] py-[12px] font-[700]`;
+
+/**
+ * An action in that row that neither goes back nor goes on.
+ *
+ * The design draws no such thing - Save as draft is ours, and is recorded in
+ * `docs/adr/0002-figma-is-literal-truth.md` - so it wears the shape the design
+ * does state for the action beside the one it draws filled. That is the same
+ * shape as the action that goes back, written once above and given two names
+ * rather than two definitions: what a treatment is called at the call site is
+ * how anybody reading a row knows what the button does, and a control named
+ * "back" that saves would be a small lie in every file that used it.
+ */
+export const flowActionAside = OUTLINED_STEP_ACTION;
 
 /** The published screen's Play My Invite, outlined as the back action is. */
 export const flowActionPlay = `${OUTLINED} py-[10px] pl-[18px] pr-[16px] font-[600]`;
