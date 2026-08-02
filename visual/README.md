@@ -16,11 +16,12 @@ And Wedding Template 1, which is the invitation itself, drawn as a phone: it ren
 For each element the design describes, the check asserts typeface, size, weight, line height, letter spacing, colour, background, border colour, width and style, corner radius, shadow, padding, margin and gap, together with the exact copy the element renders and where it sits in the document relative to every other element.
 
 Two properties carry a behaviour rather than an appearance: `overflow` and `contain`.
-They are asserted in four places, each of them something defined by the behaviour rather than by how it looks.
+They are asserted in five places, each of them something defined by the behaviour rather than by how it looks.
 On everything below the envelope, which a sealed invitation contains out of the page and an opened one lets go - the difference between an envelope a guest has to open and one they can scroll past.
 On `body` while the invitation is sealed, which says the page is still the guest's own to scroll: an envelope taller than the window has to be scrolled down before its one control can be pressed.
 On `body` again while the RSVP is open, because the invitation does not scroll under a guest who is replying to it.
 And on the Messages section's list of Guest Messages, which the design draws as a box shorter than the list inside it, so a list a guest cannot scroll is not that section.
+And on the Guest List's columns in the Create Flow, which carry more about a guest than the card the design draws is wide, so they scroll on one axis and not the other - a table that also scrolled downwards would hide guests as well as columns.
 It is the only part of any of them that a computed style can hold.
 
 It never asserts a width or a height.
@@ -156,6 +157,11 @@ A structural selector says where an element sits and lets its copy be checked as
 Those selectors use nothing but ordinary HTML and the standard ARIA patterns - `header`, `nav[aria-label="Breadcrumb"]`, `h1`, `form section`, `label` with its control, `[role="group"]` for a field the design builds from more than one element, `button`, `button[aria-expanded]` for the one that opens a Section, `inert` for a region nobody may reach yet, `footer` - and that list is the whole contract a screen has to satisfy.
 The invitation adds one plain `main > div`, for the region below the envelope once it has been opened: `inert` is what marks it out of reach and is exactly what an opened one no longer has, so there is nothing left to find it by but its place in the markup.
 It is the only `div` `main` owns, and a second one would fail the run as an ambiguous selector rather than quietly claim the wrong element.
+
+The Guest List card adds the other, `form [role="group"] > div`, for its header and for the region its columns scroll in.
+Neither has anything of its own to be found by - a header is a row of three things the design already claims separately, and the scrolling region is a plain box - so both are asked for by position within the card, `nth: 0` and `nth: 1`.
+That is weaker than the `main > div` case and worth knowing: a third `div` added directly inside the card would not fail as ambiguous, it would silently move whichever claim sat after it.
+The card holds exactly those two, and adding a third means renumbering both claims in `visual/expectations/guest-invites-populated.mjs`.
 
 The chrome above a screen's own content is the same on all four steps, so it lives in `visual/expectations/page-chrome.mjs` and each screen spreads it in.
 

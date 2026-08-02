@@ -8,6 +8,15 @@
  *
  * The order of this list is the order the design arranges the screen in, and the
  * check asserts it. Nothing here says how wide or how tall anything is.
+ *
+ * ## The one element the design does not have
+ *
+ * "Guest List template" below is in neither frame. A Guest List carries six
+ * things about a guest and the design draws a dashed area saying only "CSV", so
+ * a couple filling one in has to guess which six and in what order. The control
+ * offering them the file to fill in is asserted rather than left out so that it
+ * cannot quietly disappear, and the deviation is agreed and recorded in
+ * `docs/adr/0002-figma-is-literal-truth.md`.
  */
 
 import {
@@ -62,6 +71,18 @@ const emptyGuestList = [
     name: 'Guest List size limit',
     withText: 'Max file size 5MB',
     style: TYPE.fieldHint,
+  },
+  {
+    // Not in the design. See the note at the top of this file.
+    name: 'Guest List template',
+    select: 'a',
+    withText: 'Download CSV template',
+    style: {
+      fontSize: '14px',
+      fontWeight: 600,
+      lineHeight: '20px',
+      color: '#e34013',
+    },
   },
 ];
 

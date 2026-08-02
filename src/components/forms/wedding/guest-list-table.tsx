@@ -5,7 +5,15 @@ import { useEffect, useId, useRef, useState } from 'react';
 
 import { flowFieldBox } from './create-flow-treatment';
 import GuestListFileInput from './guest-list-file-input';
-import { uploadedOn, type Guest, type GuestList } from './guest-list';
+import {
+  guestCell,
+  GUEST_COLUMNS,
+  plusOnesFrom,
+  uploadedOn,
+  type Guest,
+  type GuestColumn,
+  type GuestList,
+} from './guest-list';
 
 /**
  * The Guest List a couple has uploaded, as the design draws it: a card naming
@@ -15,13 +23,27 @@ import { uploadedOn, type Guest, type GuestList } from './guest-list';
  * Nothing here reaches a network. The list lives in the step's state, and every
  * action below changes that state and nothing else - see `guest-list.ts`.
  *
+ * ## Six columns where the design draws one
+ *
+ * The design's table has a Guest column and an Action column, and the backend
+ * accepts six things about a guest. Every one of them is drawn, because whatever
+ * the table does not show a couple cannot check and cannot correct, and their
+ * only other recourse is to fix the spreadsheet and upload the whole list again.
+ * The deviation is agreed and recorded in
+ * `docs/adr/0002-figma-is-literal-truth.md`.
+ *
+ * Six columns and a couple's own notes do not fit the width the design draws the
+ * card at, so the columns scroll sideways inside the card rather than widening
+ * it. A table that pushed the page sideways would move every other thing on the
+ * screen to make room for a phone number.
+ *
  * ## The one thing the design does not draw
  *
  * The design gives an Edit action but no picture of what it opens. A row is
- * therefore edited where it sits: the name becomes a field, and the row's two
- * actions become Cancel and Save for as long as it is open. Editing in place is
- * the smallest thing that can be true to an action labelled "Edit" without
- * inventing a screen nobody designed.
+ * therefore edited where it sits: every column the table shows becomes a field,
+ * and the row's two actions become Cancel and Save for as long as it is open.
+ * Editing in place is the smallest thing that can be true to an action labelled
+ * "Edit" without inventing a screen nobody designed.
  */
 
 /** The design's card title, and the line beside it saying when the list arrived. */
@@ -32,7 +54,7 @@ const TYPE_UPLOAD_DATE = 'text-[12px] font-[500] leading-[18px] text-[#525252]';
 const TYPE_COLUMN_HEADING =
   'text-left text-[12px] font-[500] leading-[18px] text-[#525252]';
 
-/** The design's guest name. */
+/** The design's guest name, worn by every column that holds their answers. */
 const TYPE_GUEST = 'text-[14px] font-[500] leading-[20px] text-[#171717]';
 
 /** The design's row action, in the two colours it gives them. */
@@ -44,22 +66,30 @@ const ACTION_LOUD = `${ACTION} text-[#F82900]`;
 const RULE = 'border-b border-[#E5E5E5]';
 
 /** What the design pads a heading cell and a row cell by. */
-const HEADING_CELL = `${RULE} px-[24px] py-[12px]`;
-const ROW_CELL = `${RULE} px-[24px] py-[16px]`;
+const HEADING_CELL = `${RULE} whitespace-nowrap px-[24px] py-[12px]`;
+const ROW_CELL = `${RULE} whitespace-nowrap px-[24px] py-[16px]`;
+
+/**
+ * Where any width the columns do not need is put, so that Action still sits at
+ * the far edge when the list is short enough to leave some.
+ */
+const SPARE_WIDTH = GUEST_COLUMNS[GUEST_COLUMNS.length - 1];
+const spareWidth = (column: GuestColumn) =>
+  column === SPARE_WIDTH ? 'w-full' : '';
 
 export interface GuestListTableProps {
   guestList: GuestList;
   /** Replace the whole list with the one this file names. */
   onUpload: (file: File) => void;
-  /** Correct one guest's name, leaving the rest of the list alone. */
-  onRename: (id: string, name: string) => void;
+  /** Correct one guest, leaving the rest of the list alone. */
+  onCorrect: (guest: Guest) => void;
   onDelete: (id: string) => void;
 }
 
 export default function GuestListTable({
   guestList: { guests, uploadedAt },
   onUpload,
-  onRename,
+  onCorrect,
   onDelete,
 }: GuestListTableProps) {
   const titleId = useId();
@@ -68,24 +98,18 @@ export default function GuestListTable({
   // Which row is open, and what has been typed into it so far. Held apart from
   // the list so that abandoning an edit costs nothing: the guest is only
   // rewritten when the couple says so.
-  const [editingId, setEditingId] = useState<string | null>(null);
-  const [draftName, setDraftName] = useState('');
-
-  function beginEditing(guest: Guest) {
-    setEditingId(guest.id);
-    setDraftName(guest.name);
-  }
+  const [draft, setDraft] = useState<Guest | null>(null);
 
   // A row with no name in it is a row nobody can tell from the one below, so
   // there is nothing to save. Saying so by turning Save off, rather than by
   // taking the action and quietly doing nothing with it: an action that closes
-  // the row and leaves the old name behind looks exactly like one that worked.
-  const nothingToSave = draftName.trim() === '';
+  // the row and leaves the old guest behind looks exactly like one that worked.
+  const nothingToSave = draft !== null && draft.name.trim() === '';
 
   function saveEditing() {
-    if (nothingToSave) return;
-    onRename(editingId, draftName.trim());
-    setEditingId(null);
+    if (!draft || nothingToSave) return;
+    onCorrect({ ...draft, name: draft.name.trim() });
+    setDraft(null);
   }
 
   return (
@@ -116,123 +140,169 @@ export default function GuestListTable({
         />
       </div>
 
-      {/* Separated rather than collapsed, because the design gives every cell
-          its own hairline underneath and nothing else, and a collapsed border
-          belongs to two cells at once. */}
-      <table className="w-full border-separate border-spacing-0">
-        <thead>
-          <tr>
-            <th
-              scope="col"
-              className={`w-full ${HEADING_CELL} ${TYPE_COLUMN_HEADING}`}>
-              Guest
-            </th>
-            <th
-              scope="col"
-              className={`whitespace-nowrap ${HEADING_CELL} ${TYPE_COLUMN_HEADING}`}>
-              Action
-            </th>
-          </tr>
-        </thead>
-        <tbody>
-          {guests.map((guest, index) => {
-            const isEditing = guest.id === editingId;
-            return (
-              <tr
-                key={guest.id}
-                className={index % 2 === 0 ? 'bg-[#FAFAFA]' : 'bg-white'}>
-                <td className={`w-full ${ROW_CELL} ${TYPE_GUEST}`}>
-                  {isEditing ? (
-                    <GuestNameField
-                      value={draftName}
-                      onChange={setDraftName}
-                      onSave={saveEditing}
-                      onCancel={() => setEditingId(null)}
-                    />
-                  ) : (
-                    guest.name
-                  )}
-                </td>
-                <td className={`whitespace-nowrap ${ROW_CELL}`}>
-                  <div className="flex items-center justify-end gap-[12px]">
-                    {isEditing ? (
-                      <>
-                        <button
-                          type="button"
-                          onClick={() => setEditingId(null)}
-                          className={ACTION_QUIET}>
-                          Cancel
-                        </button>
-                        <button
-                          type="button"
-                          onClick={saveEditing}
-                          disabled={nothingToSave}
-                          className={`${ACTION_LOUD} disabled:opacity-40`}>
-                          Save
-                        </button>
-                      </>
-                    ) : (
-                      <>
-                        <button
-                          type="button"
-                          aria-label={`Delete ${guest.name}`}
-                          onClick={() => onDelete(guest.id)}
-                          className={ACTION_QUIET}>
-                          Delete
-                        </button>
-                        <button
-                          type="button"
-                          aria-label={`Edit ${guest.name}`}
-                          onClick={() => beginEditing(guest)}
-                          className={ACTION_LOUD}>
-                          Edit
-                        </button>
-                      </>
-                    )}
-                  </div>
-                </td>
-              </tr>
-            );
-          })}
-        </tbody>
-      </table>
+      {/* The columns scroll here rather than in the page. It is a tab stop
+          because a region that only a pointer can scroll is a region somebody
+          navigating by keyboard cannot read the far side of, and nothing inside
+          it would carry them there: the columns hold answers rather than
+          controls until a row is being edited. Named, because an unnamed thing
+          that takes focus is one nobody hearing the page read out can place. */}
+      <div
+        role="region"
+        aria-label="Guest List columns"
+        tabIndex={0}
+        className="overflow-x-auto overflow-y-hidden">
+        {/* Separated rather than collapsed, because the design gives every cell
+            its own hairline underneath and nothing else, and a collapsed border
+            belongs to two cells at once. */}
+        <table className="w-full border-separate border-spacing-0">
+          <thead>
+            <tr>
+              {GUEST_COLUMNS.map((column) => (
+                <th
+                  key={column.field}
+                  scope="col"
+                  className={`${spareWidth(
+                    column
+                  )} ${HEADING_CELL} ${TYPE_COLUMN_HEADING}`}>
+                  {column.heading}
+                </th>
+              ))}
+              <th
+                scope="col"
+                className={`${HEADING_CELL} ${TYPE_COLUMN_HEADING}`}>
+                Action
+              </th>
+            </tr>
+          </thead>
+          <tbody>
+            {guests.map((guest, index) => {
+              const editing = draft?.id === guest.id ? draft : null;
+              return (
+                <tr
+                  key={guest.id}
+                  className={index % 2 === 0 ? 'bg-[#FAFAFA]' : 'bg-white'}>
+                  {GUEST_COLUMNS.map((column) => (
+                    <td
+                      key={column.field}
+                      className={`${spareWidth(
+                        column
+                      )} ${ROW_CELL} ${TYPE_GUEST}`}>
+                      {editing ? (
+                        <GuestAnswerField
+                          column={column}
+                          guest={editing}
+                          isFirst={column === GUEST_COLUMNS[0]}
+                          onChange={setDraft}
+                          onSave={saveEditing}
+                          onCancel={() => setDraft(null)}
+                        />
+                      ) : (
+                        guestCell(guest, column)
+                      )}
+                    </td>
+                  ))}
+                  <td className={ROW_CELL}>
+                    <div className="flex items-center justify-end gap-[12px]">
+                      {editing ? (
+                        <>
+                          <button
+                            type="button"
+                            onClick={() => setDraft(null)}
+                            className={ACTION_QUIET}>
+                            Cancel
+                          </button>
+                          <button
+                            type="button"
+                            onClick={saveEditing}
+                            disabled={nothingToSave}
+                            className={`${ACTION_LOUD} disabled:opacity-40`}>
+                            Save
+                          </button>
+                        </>
+                      ) : (
+                        <>
+                          <button
+                            type="button"
+                            aria-label={`Delete ${guest.name}`}
+                            onClick={() => onDelete(guest.id)}
+                            className={ACTION_QUIET}>
+                            Delete
+                          </button>
+                          <button
+                            type="button"
+                            aria-label={`Edit ${guest.name}`}
+                            onClick={() => setDraft(guest)}
+                            className={ACTION_LOUD}>
+                            Edit
+                          </button>
+                        </>
+                      )}
+                    </div>
+                  </td>
+                </tr>
+              );
+            })}
+          </tbody>
+        </table>
+      </div>
     </div>
   );
 }
 
-interface GuestNameFieldProps {
-  value: string;
-  onChange: (value: string) => void;
+interface GuestAnswerFieldProps {
+  column: GuestColumn;
+  guest: Guest;
+  /** Whether this is the field a couple lands in when the row opens. */
+  isFirst: boolean;
+  onChange: (guest: Guest) => void;
   onSave: () => void;
   onCancel: () => void;
 }
 
 /**
- * The name of the guest being corrected, in place of the name being shown.
+ * One of the guest's answers, in place of the answer being shown.
  *
- * Focused as it opens, because a couple who pressed Edit is about to type, and
- * bound to Enter and Escape as well as to the row's two actions, so that
- * correcting a typo never needs the pointer.
+ * Named by its column, so a couple hearing the row read out is told which
+ * answer they are in. Every field is bound to Enter and Escape as well as to the
+ * row's two actions, so correcting a typo never needs the pointer, and the first
+ * one takes focus as the row opens because a couple who pressed Edit is about to
+ * type.
+ *
+ * A column holding a count rather than words is asked for as one: a number
+ * field, floored at nobody. What is typed is read by the same function that
+ * reads an uploaded cell, so a couple correcting a guest by hand cannot reach a
+ * value uploading the same thing could not - and anything that is not a whole
+ * number of people, an emptied field included, is the couple not having said.
  */
-function GuestNameField({
-  value,
+function GuestAnswerField({
+  column,
+  guest,
+  isFirst,
   onChange,
   onSave,
   onCancel,
-}: GuestNameFieldProps) {
+}: GuestAnswerFieldProps) {
   const ref = useRef<HTMLInputElement>(null);
+  const isCount = column.holds === 'a count';
 
   useEffect(() => {
-    ref.current?.select();
-  }, []);
+    if (isFirst) ref.current?.select();
+  }, [isFirst]);
 
   return (
     <input
       ref={ref}
-      type="text"
-      value={value}
-      aria-label="Guest name"
-      onChange={(event) => onChange(event.target.value)}
+      type={isCount ? 'number' : 'text'}
+      min={isCount ? 0 : undefined}
+      value={guestCell(guest, column)}
+      aria-label={column.heading}
+      onChange={(event) => {
+        const typed = event.target.value;
+        onChange({
+          ...guest,
+          [column.field]: isCount ? plusOnesFrom(typed) : typed,
+        });
+      }}
       onKeyDown={(event) => {
         if (event.key === 'Enter') {
           event.preventDefault();

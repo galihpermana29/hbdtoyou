@@ -12,6 +12,7 @@ import {
   flowDropZoneTitle,
   flowFieldBox,
   flowHint,
+  flowInlineAction,
   flowLabel,
   flowProblem,
   flowSectionName,
@@ -27,7 +28,14 @@ import {
 } from './guest-invites-types';
 import GuestListFileInput from './guest-list-file-input';
 import GuestListTable from './guest-list-table';
-import { GUEST_LIST_SIZE_LIMIT, readGuestList, type Guest } from './guest-list';
+import {
+  GUEST_LIST_SIZE_LIMIT,
+  GUEST_LIST_TEMPLATE_ACTION,
+  GUEST_LIST_TEMPLATE_HREF,
+  GUEST_LIST_TEMPLATE_NAME,
+  readGuestList,
+  type Guest,
+} from './guest-list';
 
 /**
  * The third step of the Create Flow: a couple names their invitation, writes
@@ -150,9 +158,10 @@ export default function GuestInvitesStep({
     });
   }
 
-  function renameGuest(id: string, name: string) {
+  /** Put one guest's corrected answers back, in the place they were in. */
+  function correctGuest(corrected: Guest) {
     changeGuests((guests) =>
-      guests.map((guest) => (guest.id === id ? { ...guest, name } : guest))
+      guests.map((guest) => (guest.id === corrected.id ? corrected : guest))
     );
   }
 
@@ -227,7 +236,6 @@ export default function GuestInvitesStep({
                     onBlur={() => setSlugTouched(true)}
                     className="min-w-0 flex-1 rounded-r-[8px] bg-white px-[14px] py-[12px] text-[16px] font-[400] leading-[24px] text-[#101828] outline-none placeholder:text-[#667085]"
                   />
-
                 </div>
                 <p id={`${slugId}-rules`} className={flowHint}>
                   {SLUG_RULES}
@@ -268,7 +276,7 @@ export default function GuestInvitesStep({
                 <GuestListTable
                   guestList={guestList}
                   onUpload={uploadGuestList}
-                  onRename={renameGuest}
+                  onCorrect={correctGuest}
                   onDelete={deleteGuest}
                 />
               ) : (
@@ -309,9 +317,30 @@ export default function GuestInvitesStep({
                       isTheTabStop
                     />
                   </div>
-                  <p className={flowHint}>{GUEST_LIST_SIZE_LIMIT}</p>
                 </>
               )}
+
+              {/* The design draws the size limit and nothing beside it. The
+                  template goes on the end of that line, and on a line of its own
+                  once a list is uploaded, because a couple has nothing to go on
+                  but the word CSV: the list carries six things about a guest,
+                  and guessing which and in what order is not something to ask of
+                  anybody. Below the card rather than inside it - the design's
+                  card header holds three things at a stated spacing, and a
+                  fourth crushes all three onto two lines each. Agreed and
+                  recorded in `docs/adr/0002-figma-is-literal-truth.md`. */}
+              <div className="flex items-center gap-[16px]">
+                {guestList ? null : (
+                  <p className={flowHint}>{GUEST_LIST_SIZE_LIMIT}</p>
+                )}
+                <a
+                  href={GUEST_LIST_TEMPLATE_HREF}
+                  download={GUEST_LIST_TEMPLATE_NAME}
+                  className={`ml-auto ${flowInlineAction}`}>
+                  {GUEST_LIST_TEMPLATE_ACTION}
+                </a>
+              </div>
+
               {guestListProblem ? (
                 <p role="alert" className={flowProblem}>
                   {guestListProblem}

@@ -147,6 +147,17 @@ export const flowDropZoneTitle =
 export const flowDropZonePrompt =
   'text-[14px] font-[400] leading-[16.8px] text-[rgba(0,0,0,0.45)]';
 
+/**
+ * A small action set in a line of guidance rather than drawn as a control.
+ *
+ * The design draws no such thing, so this borrows what it does state: the
+ * accent every action in the flow is drawn in, at the size and weight it gives
+ * a row's own actions. Underlined, because a line of words in a paragraph is
+ * only a link if it looks like one.
+ */
+export const flowInlineAction =
+  'text-[14px] font-[600] leading-[20px] text-[#E34013] underline';
+
 /** What a couple is told when a field will not take what they gave it. */
 export const flowProblem =
   'text-[14px] font-[400] leading-[20px] text-[#D92D20]';

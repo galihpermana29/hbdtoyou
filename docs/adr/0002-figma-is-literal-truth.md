@@ -110,6 +110,28 @@ No run verifies this.
 `visual/style-vocabulary.mjs` carries no `backgroundImage`, so a gradient can be neither asserted nor found by the check, and the band has neither copy nor border to be found by instead.
 What settles it is a browser driven to the end of the list, asserting that the bottom of it renders identically with the band taken away, and at rest that it does not.
 
+One addition is agreed and recorded: the Guest List carries six columns where the design's table draws one, and the uploader offers the file to fill them in.
+
+The design draws a Guest column and an Action column, and the backend accepts six things about a guest - name, group label, phone, email, maximum plus ones and notes.
+Maximum plus ones is the one that earns its place beyond tidiness: it is what caps how many people a guest may bring, and without it every guest gets whatever the backend defaults to.
+So the frame cannot be followed literally without shipping a form that collects a fifth of what the product can store.
+Whatever the table does not show a couple can neither check nor correct, and their only other recourse is to fix the spreadsheet and upload the whole list again, which replaces every guest.
+
+Six columns and a couple's own notes do not fit the width the design draws the card at, so the columns scroll sideways inside the card rather than widening it.
+A table that pushed the page sideways would move everything else on the screen to make room for a phone number.
+It is a tab stop, because a region only a pointer can scroll is a region somebody navigating by keyboard cannot read the far side of.
+
+The dashed area the design draws says only "Upload in format .CSV", which leaves a couple guessing which six columns and in what order.
+A control reading "Download CSV template" is therefore printed on the end of the size limit's line, in the accent every action in the flow is drawn in, and it downloads a file carrying the six headings and no example row - a row that file carried would be read as a guest by the couple who forgot to delete it.
+It stays on the screen once a list is uploaded, on a line of its own under the card, because uploading again is the only way to change a column the first file never had, and the couple who has just seen five empty columns is the couple who most needs the file to fill them in.
+Under the card rather than inside it: the design's card header holds a title, a date and Upload File at a stated spacing, and putting a fourth thing among them crushes all three onto two lines each.
+Nothing in the check would have caught that, because every one of those is a dimension and dimensions are never asserted - it was found by looking at the capture, which is the job screenshots are kept for.
+The control's colour, size and weight are claimed by the check; its underline is not, because the harness has no vocabulary for a text decoration.
+
+`GUEST_COLUMNS` in `src/components/forms/wedding/guest-list.ts` is the single list behind all three: what the template writes, what a heading row in a couple's own file is recognised as, and what the table draws.
+Splitting them apart is how a template comes to name a column the parsing does not read, which would be invisible until a couple had filled that column in for nothing.
+The headings are claimed in `visual/expectations/guest-invites-populated.mjs` and the control in `visual/expectations/guest-invites-empty.mjs`, so neither can quietly become something else; the file itself reaches the browser as a link's `download` and the check reads copy and computed style rather than attributes, so nothing opens it.
+
 The RSVP prints one line the design does not draw, above the Submit control: "Nothing is saved yet. Your reply stays on this page and goes when you reload it."
 
 An RSVP is held in the page and lost on reload, because persisting one is integration work and is not built.
