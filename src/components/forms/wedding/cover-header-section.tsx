@@ -14,6 +14,7 @@ import {
   flowLabel,
 } from './create-flow-treatment';
 import { fieldTreatment } from './field-treatment';
+import FlowSwitch from './flow-switch';
 import FlowTextField from './flow-text-field';
 import PhotoDropZone from './photo-drop-zone';
 import { DUMMY_BACKGROUND_MUSIC_OPTIONS } from './wedding-invitation-types';
@@ -37,6 +38,9 @@ import { DUMMY_BACKGROUND_MUSIC_OPTIONS } from './wedding-invitation-types';
 
 /** How many photos the design says the cover takes. */
 const COUPLES_PHOTO_LIMIT = 5;
+
+/** The design's name for the track, which is what its switch is named for. */
+const BACKGROUND_TRACK = 'Background Track';
 
 export interface CoverHeaderSectionProps {
   /** The largest file the couple's plan allows, in megabytes. */
@@ -104,9 +108,18 @@ export default function CoverHeaderSection({
         </div>
 
         <div className={flowFieldParts}>
-          <label htmlFor={backgroundTrackId} className={flowLabel}>
-            Background Track
-          </label>
+          {/* The only field of this Section a couple may leave off the
+              invitation entirely, so its switch sits on the label's own line,
+              in the shape MemoRoll's is drawn in. See
+              `docs/adr/0002-figma-is-literal-truth.md`. */}
+          <div className="flex items-center justify-between gap-[12px]">
+            <label htmlFor={backgroundTrackId} className={flowLabel}>
+              {BACKGROUND_TRACK}
+            </label>
+            <Form.Item name="songRequestEnabled" noStyle>
+              <FlowSwitch label={BACKGROUND_TRACK} />
+            </Form.Item>
+          </div>
           <p className={flowHint}>
             Add a backtrack that represent you &amp; your partner story or
             something that you both shared

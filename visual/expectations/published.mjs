@@ -42,12 +42,19 @@
  * ## The link the screen shows
  *
  * The frame reads `https://FreeAtLastWithElias.memoify.live?name=guest`. Two
- * things about it are not literal. The address is a path rather than a
- * subdomain, per `docs/adr/0001-path-urls-not-subdomains.md`, and it names no
- * guest, because what the couple copies here is the invitation rather than one
- * guest's copy of it. The slug is still the couple's own: the harness types the
- * design's own name into the field on the step before, so what is asserted below
- * is what that name produces.
+ * things about it are not literal. The address is a path carrying the template
+ * rather than a subdomain, per `docs/adr/0001-path-urls-not-subdomains.md`, and
+ * it names no guest, because what the couple copies here is the invitation
+ * rather than one guest's copy of it.
+ *
+ * The slug in it is the design's own name, handed to the flow in a query
+ * parameter. A couple no longer chooses their slug and nothing has been saved
+ * yet for the backend to have generated one, so a flow nobody tells has no
+ * address at all - and this screen without one is not the frame. The parameter
+ * is scaffolding, `SLUG_PARAM` in
+ * `src/components/forms/wedding/guest-invites-types.ts`, and it comes out when
+ * an invitation is actually created. What is asserted below is therefore still
+ * the frame's own link, minus those two differences.
  */
 
 import { FIELD_SHADOW, pageChrome, siteFooter, TYPE } from './page-chrome.mjs';
@@ -68,11 +75,11 @@ const STEP_TYPE = {
   },
 };
 
-/** The Invitation Slug the harness types on the step before this one. */
+/** The Invitation Slug the design's own frame is drawn with. */
 export const DESIGNED_SLUG = 'FreeAtLastWithElias';
 
 /** What that slug makes, which is what this screen has to show. */
-const INVITATION_LINK = `https://memoify.live/wedding/${DESIGNED_SLUG}`;
+const INVITATION_LINK = `https://memoify.live/wedding-1/${DESIGNED_SLUG}`;
 
 export const expectations = [
   ...pageChrome('Share with guests'),

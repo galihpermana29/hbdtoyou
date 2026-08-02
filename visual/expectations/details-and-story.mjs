@@ -72,8 +72,8 @@
  * The cost is that every position counted down the page is counted among the
  * OPEN Sections only. The nth of a label, of a group, and of a repeated piece of
  * copy all move when a Section closes. Nothing below writes such a number down:
- * each Section declares the labels and the groups it holds, and the numbers are
- * derived from whichever Sections a state draws open.
+ * each Section declares the labels, the groups and the switches it holds, and
+ * the numbers are derived from whichever Sections a state draws open.
  *
  * ## What is deliberately not asserted here
  *
@@ -98,6 +98,23 @@
  * colours rather than background images and has no way to describe an
  * illustration at all. Both are the design's and both are drawn; they are
  * covered by review rather than by this manifest.
+ *
+ * ## The three switches
+ *
+ * The design draws one, on MemoRoll. Two more are drawn beyond it - on the Gift
+ * Registry Section and on the Background Track field - because the invitation
+ * carries a flag for each and a couple had no way to answer either. The
+ * deviation is recorded in `docs/adr/0002-figma-is-literal-truth.md`.
+ *
+ * A switch says nothing, so copy cannot find one: it is a shape and a colour,
+ * and the words beside it belong to whatever it turns off. All three are
+ * therefore found by the standard ARIA pattern and told apart by position, and
+ * that position is derived rather than written down for the same reason every
+ * other position on this screen is. Two of them sit in a Section's header and
+ * are on the page whether it is open or closed, and one is a field of a Section
+ * and goes when it closes, so which switch is second depends on the state: a
+ * Section declares the first kind as `headerSwitch` and the second in
+ * `switches`, beside the labels and the groups it declares the same way.
  *
  * A Section's control is asserted for its colour and its insets rather than for
  * the shape drawn inside it. The design draws two different marks - a pencil on
@@ -173,6 +190,20 @@ const MEMO_ROLL_CARD = {
 const SECTION_TOGGLE = {
   open: { color: '#98a2b3', padding: '10px' },
   closed: { color: '#e34013', padding: '10px' },
+};
+
+/**
+ * A switch saying whether a block appears on the invitation.
+ *
+ * The design draws one and draws it on, and draws nothing at all for off, so
+ * this is the only state with a design behind it. Every screen here is at rest
+ * with nothing turned off, which is what a couple who has not touched a switch
+ * sees.
+ */
+const SWITCH_ON = {
+  backgroundColor: '#e34013',
+  borderRadius: '9999px',
+  padding: '2px',
 };
 
 /**
@@ -324,11 +355,13 @@ const LOVE_STORY_STORIES = [
 /**
  * The eight Sections, in the order the design stacks them.
  *
- * Each one declares the labels and the groups it holds, in its own order, and
- * what to expect of its contents once it is open. `labels` and `groups` are what
- * every position counted down the page is derived from, so a field added to a
- * Section is one line in that Section's list rather than a renumbering of every
- * field under it.
+ * Each one declares the labels, the groups and the switches it holds, in its own
+ * order, and what to expect of its contents once it is open. Those three lists
+ * are what every position counted down the page is derived from, so a field
+ * added to a Section is one line in that Section's list rather than a
+ * renumbering of every field under it. A switch drawn in the Section's header
+ * rather than among its fields is `headerSwitch`, because closing the Section
+ * does not take it away.
  */
 const SECTIONS = [
   {
@@ -344,6 +377,7 @@ const SECTIONS = [
       'Background Track',
     ],
     groups: [],
+    switches: ['Background Track'],
     fields: (form) => [
       ...form.uploadArea('Couples Photos'),
       ...form.textField('Bride Nickname'),
@@ -351,6 +385,9 @@ const SECTIONS = [
       ...form.textField('Wedding Place Name'),
       ...form.textField('Wedding Date'),
       form.labelFor('Background Track'),
+      // Beyond the design, which draws no way to leave the track off. See
+      // `docs/adr/0002-figma-is-literal-truth.md`.
+      form.switchFor('Background Track'),
       {
         name: 'Background Track hint',
         withText:
@@ -369,6 +406,7 @@ const SECTIONS = [
     description: 'Verses or prayers you and your partner love',
     labels: ['Verse Name', 'Verse'],
     groups: [],
+    switches: [],
     // The design puts the citation above the verse itself, and the check asserts
     // that order rather than only that both are present.
     fields: (form) => [
@@ -391,6 +429,7 @@ const SECTIONS = [
       'Groom’s Mother',
     ],
     groups: [],
+    switches: [],
     // Each partner is asked for in the same shape - a portrait, their own name
     // across the card, then their father and their mother side by side - and
     // the bride comes first. A father and a mother are two fields because they
@@ -426,6 +465,7 @@ const SECTIONS = [
       'Wedding Teaser Video',
     ],
     groups: LOVE_STORY_YEARS,
+    switches: [],
     // Three chapters, each a year and the story of it, with the Proposal Photo
     // between the second and the third where the design puts it and the teaser
     // video at the end. The design offers no way to add a chapter or remove one,
@@ -450,6 +490,7 @@ const SECTIONS = [
     description: 'Details on the wedding venue location & reception time',
     labels: ['More Photos', 'Wedding Address', 'Wedding Location'],
     groups: ['Wedding Reception Time', 'Start', 'End', 'Wedding Location'],
+    switches: [],
     // The reception's start and its end share one name, so they are a group with
     // a name over a pair of boxes rather than two labelled fields - which is
     // exactly what the design draws. The Wedding Location carries an action
@@ -528,6 +569,12 @@ const SECTIONS = [
       'Account Holder Name',
     ],
     groups: ['Bank/e-Wallet Provider'],
+    switches: [],
+    // Beyond the design, which draws no way to leave the gift block off. In the
+    // header rather than among the fields, so it is on the page whether the
+    // Section is open or closed. See `docs/adr/0002-figma-is-literal-truth.md`.
+    headerSwitch: 'Gift Registry',
+    always: (form) => [form.switchFor('Gift Registry')],
     // The provider is asked for on its own, above the account, and it is the one
     // answer in the flow that is chosen rather than typed - a box with the answer
     // in it and a chevron after, which is a group for the same reason a marked
@@ -552,6 +599,7 @@ const SECTIONS = [
     description: 'Showcase all your pre-wedding photos',
     labels: ['Photo Gallery'],
     groups: [],
+    switches: [],
     fields: (form) => form.uploadArea('Photo Gallery'),
   },
   {
@@ -561,6 +609,8 @@ const SECTIONS = [
     card: MEMO_ROLL_CARD,
     labels: [],
     groups: [],
+    switches: [],
+    headerSwitch: 'Enable MemoRoll?',
     /**
      * The one Section with nothing to open.
      *
@@ -577,7 +627,7 @@ const SECTIONS = [
      * for.
      */
     withoutToggle: true,
-    always: [
+    always: (form) => [
       {
         name: 'MemoRoll Learn more',
         withText: 'Learn more',
@@ -589,15 +639,7 @@ const SECTIONS = [
           margin: '6px 0px 0px 0px',
         },
       },
-      {
-        name: 'MemoRoll switch',
-        select: 'form [role="switch"]',
-        style: {
-          backgroundColor: '#e34013',
-          borderRadius: '9999px',
-          padding: '2px',
-        },
-      },
+      form.switchFor('Enable MemoRoll?'),
     ],
   },
 ];
@@ -623,7 +665,7 @@ const nthByCopy = (copies, index) =>
  * because the check cannot see inside a closed one. The counting itself, and
  * both of the mistakes it guards against, are `declared-positions.mjs`.
  */
-function positionsWithin(openSections) {
+function positionsWithin(openSections, switches) {
   const labels = openSections.flatMap((section) => section.labels);
   const groups = openSections.flatMap((section) => section.groups);
   const uploads = labels.filter((label) => label in UPLOAD_AREAS);
@@ -635,6 +677,7 @@ function positionsWithin(openSections) {
     labels,
     groups,
     'upload areas': uploads,
+    switches,
   });
 
   const labelNth = (label) => at('labels', label);
@@ -652,6 +695,19 @@ function positionsWithin(openSections) {
     labelFor,
     groupNth,
     everythingWasAskedFor,
+
+    /**
+     * One switch, found by the ARIA pattern and told apart by position.
+     *
+     * Named for what it turns off rather than for anything it renders, because
+     * it renders nothing: the words beside it are the Section's or the field's.
+     */
+    switchFor: (name) => ({
+      name: `${name} switch`,
+      select: 'form [role="switch"]',
+      nth: at('switches', name),
+      style: SWITCH_ON,
+    }),
 
     /**
      * A label and the text box under it, which is most of what the design draws.
@@ -801,11 +857,21 @@ export function detailsAndStory(open) {
     }
   }
 
-  const form = positionsWithin(SECTIONS.filter(isOpen));
+  // A switch that is a field of a Section goes when that Section closes; the
+  // one in a Section's header stays, so which switch is second is a question
+  // about the state rather than a number this file can write down. A header's
+  // comes first within its own Section, because that is where the page draws
+  // it.
+  const switches = SECTIONS.flatMap((section) => [
+    ...(section.headerSwitch ? [section.headerSwitch] : []),
+    ...(isOpen(section) ? section.switches : []),
+  ]);
+
+  const form = positionsWithin(SECTIONS.filter(isOpen), switches);
 
   const sections = SECTIONS.flatMap((section, index) => [
     ...sectionHeader(section, index, isOpen(section)),
-    ...(section.always ?? []),
+    ...(section.always?.(form) ?? []),
     // A Section with no control has nothing to open, so its parts are the ones
     // it always draws and there are no fields under them.
     ...(section.withoutToggle || !isOpen(section) ? [] : section.fields(form)),

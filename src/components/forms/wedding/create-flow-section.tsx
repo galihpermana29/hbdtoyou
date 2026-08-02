@@ -33,6 +33,12 @@ import {
  * what it offers rather than which way it points. A closed Section carries a
  * pencil in the flow's orange, offering to be edited; an open one carries a grey
  * chevron, offering to be put away again. Both are 20px inside 10px of padding.
+ *
+ * A Section whose whole block a couple may leave off the invitation carries a
+ * switch at the end of that header, in the place and the shape the MemoRoll
+ * Section already puts one: what appears on the invitation is answered where
+ * the block is named, and how it reads is answered inside. See
+ * `docs/adr/0002-figma-is-literal-truth.md`.
  */
 
 export interface CreateFlowSectionProps {
@@ -42,6 +48,12 @@ export interface CreateFlowSectionProps {
   description: string;
   /** Whether the Section starts open. */
   defaultOpen?: boolean;
+  /**
+   * The switch saying whether this Section's block appears on the invitation,
+   * for the Sections a couple may leave off. Drawn at the end of the header,
+   * past the control that opens the Section.
+   */
+  headerSwitch?: ReactNode;
   children: ReactNode;
 }
 
@@ -49,6 +61,7 @@ export default function CreateFlowSection({
   name,
   description,
   defaultOpen = false,
+  headerSwitch,
   children,
 }: CreateFlowSectionProps) {
   const fieldsId = useId();
@@ -60,17 +73,27 @@ export default function CreateFlowSection({
       <div className="grid grid-cols-[minmax(0,1fr)_auto] items-center gap-x-[12px]">
         <h3 className={`col-start-1 ${flowSectionName}`}>{name}</h3>
         <p className={`col-start-1 ${flowHint}`}>{description}</p>
-        <button
-          type="button"
-          aria-label={name}
-          aria-expanded={isOpen}
-          aria-controls={fieldsId}
-          onClick={() => setIsOpen(!isOpen)}
-          className={`col-start-2 row-span-2 row-start-1 self-center p-[10px] ${
-            isOpen ? 'text-[#98A2B3]' : 'text-[#E34013]'
-          }`}>
-          <Mark size={20} aria-hidden="true" />
-        </button>
+        {/* The control and the switch share the header's second column, 12px
+            apart as everything else in this grid is, so that a Section with a
+            switch stacks its two lines of words exactly where a Section without
+            one does.
+
+            The switch is the last thing in the row, at the card's right edge,
+            which is where the MemoRoll Section puts its own. */}
+        <div className="col-start-2 row-span-2 row-start-1 flex items-center gap-[12px] self-center">
+          <button
+            type="button"
+            aria-label={name}
+            aria-expanded={isOpen}
+            aria-controls={fieldsId}
+            onClick={() => setIsOpen(!isOpen)}
+            className={`p-[10px] ${
+              isOpen ? 'text-[#98A2B3]' : 'text-[#E34013]'
+            }`}>
+            <Mark size={20} aria-hidden="true" />
+          </button>
+          {headerSwitch}
+        </div>
       </div>
 
       {/* One element rather than the fields themselves, so the card's 24px is

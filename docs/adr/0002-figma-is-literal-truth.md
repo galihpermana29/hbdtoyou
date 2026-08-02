@@ -84,16 +84,30 @@ The seventh Section is named "Photo Collection", following the other three.
 So there is no frame of record for that step.
 Each disagreement was decided on its own, and neither frame can be trusted wholesale where they differ again.
 
-One addition is agreed and recorded: the guest invites step prints a line under the web domain field that the design does not draw, stating the rules a slug is held to.
+The web domain field is read-only and prints nothing under it, where the design draws it as the couple's to type.
 
-The frame draws the field and nothing beneath it, and a slug has rules all the same.
-A couple who cannot see them can only find them by being refused, which is what user story 34 on `hbd-byb` exists to prevent.
-The design is silent on the rules rather than saying there are none, so following it literally would ship a field that explains itself only once it has been got wrong.
+An addition was agreed here once and has been withdrawn.
+The step used to print a line stating the rules a slug is held to - "Letters, numbers and hyphens only, 3 to 63 characters, starting and ending with a letter or a number" - because a couple who cannot see the rules can only find them by being refused, which is what user story 34 on `hbd-byb` exists to prevent.
+That reasoning ended when the typing did.
+There is no endpoint that can say whether a slug is free, so a couple choosing one could only be told it was taken after failing; the backend generates the slug instead and the field shows it.
+Rules for typing something nobody types, and a message naming a fault nobody can have caused, are both words a couple cannot act on, so neither is drawn.
 
-The line reads "Letters, numbers and hyphens only, 3 to 63 characters, starting and ending with a letter or a number".
-It is always shown, above the message that names whatever is actually wrong with what has been typed, and it wears the design's own field hint treatment so it belongs to the screen it was added to.
-Its lengths are interpolated from the same two constants `slugProblem` enforces, in `SLUG_RULES` in `src/components/forms/wedding/guest-invites-types.ts`, so the hint cannot come to disagree with the lengths a slug is actually held to.
-It is claimed in `visual/expectations/guest-invites.mjs`, which both of the step's states spread in, so that it cannot quietly disappear or become something vaguer.
+The field is still a field rather than a line of text: it is the address they are about to send, so it stays reachable, selectable and copyable.
+`visual/expectations/guest-invites.mjs` claims the box and its value and no longer claims a hint, so the line cannot come back unnoticed either.
+
+Two additions are agreed and recorded: the Gift Registry Section and the Background Track field each carry a switch the design does not draw.
+
+The invitation is created with four feature flags and the design draws a control for exactly one of them, MemoRoll.
+The other three are `rsvp_enabled`, `digital_gift_enabled` and `song_request_enabled`, and two of those are plainly a couple's decision rather than the product's: whether the block asking for a gift appears at all, and whether the invitation offers a track.
+Following the frame literally would ship two answers the couple can never give, each defaulted on their behalf, one of which asks their guests for money.
+
+`rsvp_enabled` gets no switch and is always on.
+Replying is the only way a guest can leave a message, so turning it off would silently empty the Guest Messages a couple can watch being written - which is a different thing from the couple choosing to stop taking replies, and there is no design for either.
+
+Both switches are the shape the design does state, `src/components/forms/wedding/flow-switch.tsx`, which is MemoRoll's own switch written once and worn by all three rather than drawn again slightly differently twice.
+Each sits at the end of the line naming what it turns off: the Gift Registry's at the right edge of the Section header, past the control that opens it, so a couple who has decided against a gift block does not have to open five questions to say so, and the Background Track's on that field's label line.
+Both start on, because the invitation the design draws has both and a couple who never touches them should get the invitation they were shown.
+All three are claimed in `visual/expectations/details-and-story.mjs`.
 
 The fade over the foot of the Guest Messages is drawn as the design draws it, and lets go as a guest scrolls to the end of the list.
 

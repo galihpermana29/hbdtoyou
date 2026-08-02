@@ -19,14 +19,19 @@
  * design's copy, so its type is asserted and its words are not. The chat around
  * it is designed, so the guest's name, their status and the timestamp are.
  *
- * ## The one element the design does not have
+ * ## The field the design draws as the couple's to type
  *
- * "Slug rules" below is not in either frame. The design shows no hint under the
- * web domain field, and a couple who cannot see what characters a slug may
- * contain can only discover the rules by failing. It is asserted rather than
- * left out so that it cannot quietly disappear, and it wears the design's own
- * hint treatment so it belongs to the screen it was added to. The deviation is
- * agreed and recorded in `docs/adr/0002-figma-is-literal-truth.md`.
+ * The web domain field is read-only. There is no endpoint that can say whether
+ * a slug is free, so a couple choosing one could only be told it was taken
+ * after failing; the backend generates it and the field shows it. Nothing is
+ * printed under the box either, because rules for typing something nobody types
+ * are words a couple cannot act on. The design draws no hint there, so the
+ * screen and the frame agree again; the deviation that used to live here is
+ * recorded, withdrawn, in `docs/adr/0002-figma-is-literal-truth.md`.
+ *
+ * What the box holds is not asserted. The slug belongs to the invitation rather
+ * than to the design, the same way the couple's own writing in the message does,
+ * so its type and its box are claimed and its characters are not.
  */
 
 import { FIELD_SHADOW, TYPE } from './page-chrome.mjs';
@@ -120,7 +125,7 @@ export const guestInvitesIntroduction = [
     // product serves a path, so the fixed part of the address is read first.
     // See `docs/adr/0001-path-urls-not-subdomains.md`.
     name: 'Invitation Slug prefix',
-    withText: 'memoify.live/wedding/',
+    withText: 'memoify.live/wedding-1/',
     style: {
       fontSize: '14px',
       fontWeight: 600,
@@ -136,14 +141,6 @@ export const guestInvitesIntroduction = [
     name: 'Invitation Slug input',
     control: 'Custom Your Web Domain',
     style: { ...FIELD_VALUE, backgroundColor: '#ffffff', padding: '12px 14px' },
-  },
-  {
-    // Not in the design. See the note at the top of this file.
-    name: 'Slug rules',
-    withText:
-      'Letters, numbers and hyphens only, 3 to 63 characters, starting and ' +
-      'ending with a letter or a number',
-    style: TYPE.fieldHint,
   },
   {
     name: 'Invitation Greeting Message label',

@@ -134,6 +134,8 @@ const REALISTIC: WeddingTemplate1Content = {
   bankProvider: 'BCA',
   accountNumber: '8720 1145 9032',
   memoRollEnabled: true,
+  digitalGiftEnabled: true,
+  songRequestEnabled: true,
 };
 
 /**
@@ -202,6 +204,8 @@ const HOSTILE: WeddingTemplate1Content = {
   bankProvider: 'CIMB Niaga',
   accountNumber: '1234 5678 9012 3456 7890',
   memoRollEnabled: true,
+  digitalGiftEnabled: true,
+  songRequestEnabled: true,
 };
 
 /**

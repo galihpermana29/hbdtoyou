@@ -3,6 +3,7 @@
 import { Form } from 'antd';
 
 import { flowHint, flowSectionName } from './create-flow-treatment';
+import FlowSwitch from './flow-switch';
 import MemoRollCamera from './memo-roll-camera';
 
 /**
@@ -46,47 +47,9 @@ const CARD =
 const LEARN_MORE =
   'col-start-1 mt-[6px] text-[14px] font-[600] leading-[20px] text-[#E34013]';
 
-/**
- * The switch, and the knob that slides across it.
- *
- * The design draws it on, and draws nothing for off, so off is the flow's own
- * hairline grey rather than a colour invented for it.
- */
-const SWITCH =
-  'col-start-2 row-span-2 row-start-1 inline-flex h-[20px] w-[36px] ' +
-  'shrink-0 items-center justify-self-end self-center rounded-full p-[2px]';
-const KNOB = 'block h-[16px] w-[16px] rounded-full bg-white';
-
-interface MemoRollSwitchProps {
-  /** The field's identifier, supplied by `Form.Item` from the field's name. */
-  id?: string;
-  value?: boolean;
-  onChange?: (enabled: boolean) => void;
-}
-
-/**
- * The answer itself, split out so that `Form.Item` has something to inject
- * `value` and `onChange` into, and the Section can hold its own field the way
- * every other Section does.
- */
-function MemoRollSwitch({ id, value, onChange }: MemoRollSwitchProps) {
-  const isOn = value ?? false;
-
-  return (
-    <button
-      type="button"
-      id={id}
-      role="switch"
-      aria-checked={isOn}
-      aria-label={NAME}
-      onClick={() => onChange?.(!isOn)}
-      className={`${SWITCH} ${
-        isOn ? 'justify-end bg-[#E34013]' : 'justify-start bg-[#D0D5DD]'
-      }`}>
-      <span aria-hidden="true" className={KNOB} />
-    </button>
-  );
-}
+/** Where the switch sits in the header the design lays out around it. */
+const SWITCH_PLACE =
+  'col-start-2 row-span-2 row-start-1 justify-self-end self-center';
 
 export default function MemoRollSection() {
   return (
@@ -106,7 +69,7 @@ export default function MemoRollSection() {
         <p className={`col-start-1 ${flowHint}`}>{DESCRIPTION}</p>
         <p className={LEARN_MORE}>Learn more</p>
         <Form.Item name="memoRollEnabled" noStyle>
-          <MemoRollSwitch />
+          <FlowSwitch label={NAME} className={SWITCH_PLACE} />
         </Form.Item>
       </div>
     </section>

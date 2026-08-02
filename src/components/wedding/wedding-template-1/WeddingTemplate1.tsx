@@ -54,7 +54,14 @@ export interface WeddingTemplate1Props {
    * a picture beside a form and are never scrolled through.
    */
   scrollsInside?: Scroller;
-  /** Draw the Background Track control over the invitation. */
+  /**
+   * Draw the Background Track control over the invitation, where the page
+   * showing it has room for one.
+   *
+   * The couple's own answer is the other half of this: a wedding whose
+   * Background Track is switched off has no track to offer, so the control is
+   * not drawn on it whatever the page asked for.
+   */
   showVinylWidget?: boolean;
 }
 
@@ -168,7 +175,7 @@ export default function WeddingTemplate1({
           <LoveStory content={content} />
           <EventDetails content={content} onReply={() => setReplying(true)} />
           <Messages rsvps={rsvps} />
-          <TokenOfLove content={content} />
+          {content.digitalGiftEnabled && <TokenOfLove content={content} />}
           {content.memoRollEnabled && <PhotoShare />}
           <Gallery content={content} />
           <Footer />
@@ -185,7 +192,7 @@ export default function WeddingTemplate1({
         />
       )}
 
-      {showVinylWidget && (
+      {showVinylWidget && content.songRequestEnabled && (
         <div className="pointer-events-none fixed inset-x-0 bottom-0 z-50 mx-auto flex max-w-[375px] justify-end p-4">
           <div className="pointer-events-auto">
             <VinylWidget />

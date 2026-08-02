@@ -1,6 +1,10 @@
 import { Metadata } from 'next';
 
 import WeddingInvitationCreateClientside from './wedding-invitation-create-clientside';
+import {
+  slugFrom,
+  SLUG_PARAM,
+} from '@/components/forms/wedding/guest-invites-types';
 
 export const metadata: Metadata = {
   title: 'Create Wedding Invitation | Memoify',
@@ -8,7 +12,13 @@ export const metadata: Metadata = {
     'Design your BNW wedding invitation with a live preview. Add photos, your love story, event details, and more.',
 };
 
-export default function WeddingInvitationCreatePage() {
+export interface WeddingInvitationCreatePageProps {
+  searchParams: Record<string, string | string[] | undefined>;
+}
+
+export default function WeddingInvitationCreatePage({
+  searchParams,
+}: WeddingInvitationCreatePageProps) {
   if (process.env.IS_MAINTENANCE === 'true') {
     return (
       <div className="flex min-h-[70vh] flex-col items-center justify-center px-4 text-center">
@@ -32,5 +42,12 @@ export default function WeddingInvitationCreatePage() {
     );
   }
 
-  return <WeddingInvitationCreateClientside />;
+  // Read here rather than in the flow, so the address is settled before the
+  // first paint and there is no moment where the field says one thing and then
+  // another. See `SLUG_PARAM` for why a query supplies it at all.
+  return (
+    <WeddingInvitationCreateClientside
+      slug={slugFrom(searchParams[SLUG_PARAM])}
+    />
+  );
 }

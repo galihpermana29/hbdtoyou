@@ -6,6 +6,7 @@ import type { OpenNotificationFunction } from '@/app/(landing)/(core)/create/use
 import CreateFlowSection from './create-flow-section';
 import { flowFieldStack } from './create-flow-treatment';
 import FlowChoiceField from './flow-choice-field';
+import FlowSwitch from './flow-switch';
 import FlowTextField from './flow-text-field';
 import PhotoDropZone from './photo-drop-zone';
 import { BANK_PROVIDER_OPTIONS } from './wedding-invitation-types';
@@ -21,10 +22,18 @@ import { BANK_PROVIDER_OPTIONS } from './wedding-invitation-types';
  * The design draws no field for the message printed above the account, though
  * the invitation prints one, so it shows the sample's until a design exists for
  * it. Filed as `hbd-byb.22` rather than answered by inventing a field.
+ *
+ * Whether the block appears at all is the couple's, and the switch that says so
+ * sits in the header rather than among the fields: asking for a gift is a
+ * decision about the whole block, and a couple who has decided against one
+ * should not have to open the Section and read five questions to say so.
  */
 
 /** How many photos the design says this Section takes. */
 const GIFT_PHOTO_LIMIT = 1;
+
+/** What the design calls this Section, which is what its switch is named for. */
+const NAME = 'Gift Registry';
 
 export interface GiftRegistrySectionProps {
   /** The largest file the couple's plan allows, in megabytes. */
@@ -38,8 +47,13 @@ export default function GiftRegistrySection({
 }: GiftRegistrySectionProps) {
   return (
     <CreateFlowSection
-      name="Gift Registry"
-      description="Include Bank Account/e-Wallet Information for gift collection">
+      name={NAME}
+      description="Include Bank Account/e-Wallet Information for gift collection"
+      headerSwitch={
+        <Form.Item name="digitalGiftEnabled" noStyle>
+          <FlowSwitch label={NAME} />
+        </Form.Item>
+      }>
       <div className={flowFieldStack}>
         <Form.Item name="tokenPhoto" noStyle>
           <PhotoDropZone

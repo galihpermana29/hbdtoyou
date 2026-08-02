@@ -198,15 +198,11 @@ async function uploadGuestList(page) {
 /**
  * Advance to the published step.
  *
- * Confirming is the only way on, and it will not advance while the slug has a
- * problem, so the slug is chosen first. It is the design's own name, so that the
- * link the screen shows is the link the frame was drawn with.
+ * Confirming is the only way on, and it is the only thing to do: the slug is
+ * not a couple's to choose any more, so there is nothing to fill in on the way.
  */
 async function advanceToPublished(page) {
   await advanceToGuestInvites(page);
-  await page
-    .getByRole('textbox', { name: 'Custom Your Web Domain' })
-    .fill(DESIGNED_SLUG);
   await page.getByRole('button', { name: 'Confirm Create' }).click();
 }
 
@@ -304,7 +300,11 @@ export const screens = [
   {
     id: 'published',
     title: 'Published, with the link to share',
-    route: DETAILS_AND_STORY_ROUTE,
+    // Given a slug, because a couple no longer chooses one and nothing saves
+    // yet, so a flow nobody tells has no address to show. It is the design's
+    // own name, and the parameter is scaffolding until an invitation is created
+    // and given a slug of its own: `hbd-ox7.6`.
+    route: `${DETAILS_AND_STORY_ROUTE}?slug=${DESIGNED_SLUG}`,
     figmaNodeId: '305-8972',
     baseline: 'published.png',
     expectations: published,

@@ -21,9 +21,7 @@ import GuestInvitesPreview from './guest-invites-preview';
 import {
   guestLinkFor,
   SAMPLE_GUEST_NAME,
-  SLUG_RULES,
   SLUG_PREFIX,
-  slugProblem,
   type GuestInvitesValues,
 } from './guest-invites-types';
 import GuestListFileInput from './guest-list-file-input';
@@ -38,15 +36,15 @@ import {
 } from './guest-list';
 
 /**
- * The third step of the Create Flow: a couple names their invitation, writes
- * what their guests will receive, and uploads a Guest List.
+ * The third step of the Create Flow: a couple reads their invitation's address,
+ * writes what their guests will receive, and uploads a Guest List.
  *
- * Nothing here reaches a network. The product has no per-content slug, no
- * availability check and no fetch-by-slug, so this screen validates a slug's
- * format, keeps everything the couple types in memory, and stops there. The
- * design shows the chosen name being confirmed as available; without a backend
- * that cannot be answered truthfully, so it is not answered at all. Availability
- * and publishing are `hbd-byb.17`.
+ * Nothing here reaches a network, and the address is not one of the things a
+ * couple fills in. The design draws the web domain as theirs to choose and
+ * shows the chosen name being confirmed as available; there is no endpoint that
+ * can answer whether a name is free, so a couple choosing one could only be
+ * told it was taken after failing. The backend generates the slug instead, and
+ * the field shows it rather than taking it.
  *
  * The Guest List has the two states the design draws, and which one is showing
  * is decided by nothing but whether there is a Guest List: an area saying what
@@ -71,12 +69,7 @@ export interface GuestInvitesStepProps {
   groomNickname: string;
   /** Go back to the details and story step. */
   onPreviousStep: () => void;
-  /**
-   * Go on to the published step.
-   *
-   * Only called once the slug is well formed, so the screen after this one can
-   * be sure it has a link to show.
-   */
+  /** Go on to the published step. */
   onConfirm: () => void;
 }
 
@@ -114,14 +107,6 @@ export default function GuestInvitesStep({
   const messageId = useId();
   const guestListLabelId = useId();
   const dropZoneFileRef = useRef<HTMLInputElement>(null);
-
-  // The rules stay on the screen the whole time, because the moment a couple is
-  // most likely to need them is while they are typing something that breaks
-  // them. What is wrong is said underneath, and only once they have had a go,
-  // so an untouched field is not scolded for being empty.
-  const [slugTouched, setSlugTouched] = useState(false);
-  const problem = slugProblem(values.slug);
-  const showProblem = slugTouched && problem !== null;
 
   const messageRef = useHeightOfContent(values.greetingMessage, isCurrent);
 
@@ -188,14 +173,7 @@ export default function GuestInvitesStep({
           onSubmit={(event) => {
             // Confirming goes on to the published screen and nowhere else:
             // nothing is sent, because there is nothing to send it to yet.
-            // A slug with a problem keeps the couple here, on the field that
-            // has it, rather than carrying a broken address forward.
             event.preventDefault();
-            setSlugTouched(true);
-            if (problem) {
-              document.getElementById(slugId)?.focus();
-              return;
-            }
             onConfirm();
           }}>
           <section className="flex flex-col">
@@ -215,36 +193,28 @@ export default function GuestInvitesStep({
                   aria-labelledby={slugLabelId}
                   className={`flex items-stretch ${flowFieldBox}`}>
                   {/* The address reads left to right as one line, so the part
-                      the product fixes comes before the part a couple chooses.
-                      The design draws it the other way round, as a subdomain
-                      suffix, which the product cannot serve: see
+                      the product fixes comes before the part that names this
+                      invitation. The design draws it the other way round, as a
+                      subdomain suffix, which the product cannot serve: see
                       `docs/adr/0001-path-urls-not-subdomains.md`. */}
                   <span className="flex items-center rounded-l-[8px] border-r border-[#D0D5DD] bg-white px-[20px] py-[10px] text-[14px] font-[600] leading-[20px] text-[#E34013]">
                     {SLUG_PREFIX}
                   </span>
+                  {/* Read-only rather than disabled, and still an input: the
+                      couple does not choose this, but it is the address they
+                      are about to send, so it has to be reachable, selectable
+                      and copyable. Nothing is said underneath it either - rules
+                      for typing something nobody types, and a message naming a
+                      fault nobody can have caused, would both be words a couple
+                      cannot act on. */}
                   <input
                     id={slugId}
                     type="text"
+                    readOnly
                     value={values.slug}
-                    aria-invalid={showProblem}
-                    aria-describedby={`${slugId}-rules`}
-                    placeholder="galihpermana"
-                    onChange={(event) => {
-                      setSlugTouched(true);
-                      onChange({ ...values, slug: event.target.value });
-                    }}
-                    onBlur={() => setSlugTouched(true)}
                     className="min-w-0 flex-1 rounded-r-[8px] bg-white px-[14px] py-[12px] text-[16px] font-[400] leading-[24px] text-[#101828] outline-none placeholder:text-[#667085]"
                   />
                 </div>
-                <p id={`${slugId}-rules`} className={flowHint}>
-                  {SLUG_RULES}
-                </p>
-                {showProblem ? (
-                  <p role="alert" className={flowProblem}>
-                    {problem}
-                  </p>
-                ) : null}
               </div>
 
               <div className="flex flex-col gap-[6px]">

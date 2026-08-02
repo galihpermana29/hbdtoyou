@@ -55,7 +55,20 @@ const CHOOSE_TEMPLATE_ROUTE = '/wedding-invitation';
  * nothing a couple typed can return to it, and it is mounted when it is reached
  * rather than kept alive behind the others.
  */
-export default function WeddingInvitationCreateClientside() {
+export interface WeddingInvitationCreateClientsideProps {
+  /**
+   * The invitation's Invitation Slug, or empty while it has none.
+   *
+   * Empty is what a couple gets, because nothing saves yet and the slug is the
+   * backend's to generate: see `SLUG_PARAM`. A couple no longer chooses it, so
+   * nothing in the flow writes to it either.
+   */
+  slug: string;
+}
+
+export default function WeddingInvitationCreateClientside({
+  slug,
+}: WeddingInvitationCreateClientsideProps) {
   const router = useRouter();
   const { contextHolder, openNotification } = useCreateContent();
   const [form] = useForm<WeddingInvitationFormValues>();
@@ -64,7 +77,7 @@ export default function WeddingInvitationCreateClientside() {
     'Fill in the details & story'
   );
   const [guestInvites, setGuestInvites] = useState<GuestInvitesValues>({
-    slug: '',
+    slug,
     greetingMessage: DEFAULT_GUEST_MESSAGE,
     guestList: null,
   });
@@ -232,10 +245,7 @@ export default function WeddingInvitationCreateClientside() {
             />
           </div>
 
-          {/* The link is never missing here: Confirm Create is the only way on
-              to this step, and it does not advance while the slug has a problem.
-              Asking is how that stays true rather than a fallback for it. */}
-          {isPublished && invitationLink !== null ? (
+          {isPublished ? (
             <div className="mt-[60px]">
               <PublishedStep form={form} invitationLink={invitationLink} />
             </div>

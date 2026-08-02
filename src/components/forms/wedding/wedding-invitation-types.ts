@@ -97,6 +97,18 @@ export interface WeddingTemplate1Content {
   accountNumber: string;
   /** Whether guests are invited to send back their own photographs of the day. */
   memoRollEnabled: boolean;
+  /** Whether the block saying where a gift can be sent appears at all. */
+  digitalGiftEnabled: boolean;
+  /**
+   * Whether the invitation offers the couple's background track.
+   *
+   * The invitation has no audio yet - it draws a record and plays nothing - so
+   * today this decides only whether the record is drawn. That defect is the
+   * epic's `Further Notes` rather than this field being decorative: the answer
+   * is the couple's either way, and it is the answer the create payload has
+   * always carried as `song_request_enabled`.
+   */
+  songRequestEnabled: boolean;
 }
 
 /** Ant Design form field values for the wedding invitation creator. */
@@ -139,6 +151,8 @@ export interface WeddingInvitationFormValues {
   bankProvider?: string;
   accountNumber?: string;
   memoRollEnabled?: boolean;
+  digitalGiftEnabled?: boolean;
+  songRequestEnabled?: boolean;
 }
 
 /**
@@ -258,6 +272,8 @@ export const DEFAULT_WEDDING_TEMPLATE_1_CONTENT: WeddingTemplate1Content = {
   bankProvider: 'BRI',
   accountNumber: '3331 0908 1766',
   memoRollEnabled: true,
+  digitalGiftEnabled: true,
+  songRequestEnabled: true,
 };
 
 /**
@@ -400,6 +416,8 @@ export function formValuesToContent(
     bankProvider: v.bankProvider || defaults.bankProvider,
     accountNumber: v.accountNumber?.trim() || defaults.accountNumber,
     memoRollEnabled: v.memoRollEnabled ?? defaults.memoRollEnabled,
+    digitalGiftEnabled: v.digitalGiftEnabled ?? defaults.digitalGiftEnabled,
+    songRequestEnabled: v.songRequestEnabled ?? defaults.songRequestEnabled,
   };
 }
 
@@ -414,8 +432,12 @@ export function formValuesToContent(
  * unanswered, so the Site Preview still has a wedding to show.
  *
  * What is here is the state a field cannot start without: an empty list for
- * every field that holds files, and the MemoRoll switch, which the design draws
- * on.
+ * every field that holds files, and the three switches, each of which starts on.
+ *
+ * On, because every one of them decides whether a block a couple has not looked
+ * at yet appears, and the invitation the design draws has all three. A couple
+ * who never touches them gets the invitation they were shown; turning something
+ * off is the decision, and it is theirs to make.
  */
 export function getDefaultFormValues(): WeddingInvitationFormValues {
   const d = DEFAULT_WEDDING_TEMPLATE_1_CONTENT;
@@ -428,6 +450,8 @@ export function getDefaultFormValues(): WeddingInvitationFormValues {
     galleryPhotos: [],
     tokenPhoto: [],
     memoRollEnabled: d.memoRollEnabled,
+    digitalGiftEnabled: d.digitalGiftEnabled,
+    songRequestEnabled: d.songRequestEnabled,
   };
 }
 

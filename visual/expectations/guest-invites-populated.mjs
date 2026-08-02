@@ -66,8 +66,9 @@
  * Neither is asserted below, because neither is on this screen. They belong to
  * states the design has no frame for, and this file records only what the frame
  * it names says. They are written down here so that they are known to be
- * unchecked rather than assumed to be checked, which is the same reason "Slug
- * rules" in `guest-invites.mjs` is written down the other way round.
+ * unchecked rather than assumed to be checked, which is the same reason
+ * `guest-invites.mjs` writes down that the web domain field's value is not
+ * claimed.
  *
  * ## The design's second shadow layer
  *
