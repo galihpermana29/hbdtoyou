@@ -9,14 +9,31 @@
  * ask completely different things of them: one is to wait, the other is to go
  * back to the couple. See `docs/adr/0002-figma-is-literal-truth.md`.
  *
+ * A third thing can go wrong once a link is personal: the wedding opens and the
+ * guest on the end of it does not. That is worth its own words rather than
+ * either of the above, because the address is right and it is the half of the
+ * link a guest never sees that did not answer - and because the same half is
+ * what a reply will be signed with, so somebody told nothing here would find out
+ * when they tried to RSVP.
+ *
+ * Its words carry two answers, because the frontend is given one. A token that
+ * is invalid, revoked or another wedding's is refused, and a backend that was
+ * briefly down refuses nothing at all, and both reach this screen as the same
+ * empty result - so a guest is told to try again and then, if that does not
+ * work, to go back to the couple. Telling somebody whose link is perfectly good
+ * that it is not would be worse than asking them to wait a minute first.
+ *
  * It is drawn in the invitation's own black and the invitation's own typeface,
  * because it is the invitation's address that was opened. A guest who followed a
  * wedding link should land somewhere that looks like the wedding rather than
  * somewhere that looks like a fault in a different product.
  */
 
-/** Which of the two things went wrong, in the words a guest is given for it. */
-export type Unavailable = 'NOT_READY' | 'CANNOT_BE_OPENED';
+/** Which of the three things went wrong, in the words a guest is given for it. */
+export type Unavailable =
+  | 'NOT_READY'
+  | 'CANNOT_BE_OPENED'
+  | 'GUEST_NOT_CONFIRMED';
 
 const WORDS: Record<Unavailable, { heading: string; body: string }> = {
   NOT_READY: {
@@ -30,6 +47,13 @@ const WORDS: Record<Unavailable, { heading: string; body: string }> = {
     body:
       'The address may have been mistyped, or the invitation may have been ' +
       'taken down. Ask the couple for the link again.',
+  },
+  GUEST_NOT_CONFIRMED: {
+    heading: 'This invitation could not tell who you are',
+    body:
+      'The wedding is there, but the part of the link that says who you are ' +
+      'did not answer. Try again in a minute, and if it still will not open, ' +
+      'ask the couple for your own link.',
   },
 };
 
@@ -45,10 +69,11 @@ export default function InvitationUnavailable({
       {/* The invitation's own script and its own off-white, at two thirds of
           the 48px its sections are headed in: this is the wedding answering,
           but it is not one of the wedding's headings. Held to 260px so that it
-          breaks onto two balanced lines rather than running to within a few
-          pixels of the screen's edge on the longer of the two messages, which
-          would then overflow on any phone narrower than 375. */}
-      <h1 className="mx-auto max-w-[260px] font-[family-name:var(--font-wt1-script)] text-[32px] leading-[normal] text-[rgba(250,250,250,0.98)]">
+          breaks onto two lines rather than running to within a few pixels of
+          the screen's edge on the longest of the three messages, which would
+          then overflow on any phone narrower than 375; and balanced, so that
+          the second of those two lines is not left holding one word. */}
+      <h1 className="mx-auto max-w-[260px] text-balance font-[family-name:var(--font-wt1-script)] text-[32px] leading-[normal] text-[rgba(250,250,250,0.98)]">
         {heading}
       </h1>
       <p className="mx-auto mt-[20px] max-w-[300px] font-[family-name:var(--font-wt1-mono)] text-[12px] leading-[20px] text-[rgba(250,250,250,0.7)]">

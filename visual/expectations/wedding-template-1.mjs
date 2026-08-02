@@ -184,13 +184,20 @@ const FILLED_CONTROL_BOX = { ...CONTROL_BOX, backgroundColor: '#000000' };
 const CONTROL_LABEL = type('12px', 400, '#fafafa');
 
 /**
- * The three lines the Hero prints outside the envelope.
+ * The four lines the Hero prints outside the envelope.
  *
  * Named here rather than written where they are asserted, because the sealed
  * screen and the three opened ones claim the same words - a guest reads them
  * before opening the invitation and still afterwards - and two spellings of one
  * line of the design would be a difference nothing would report.
+ *
+ * The first is who the invitation is addressed to, the design's own name across
+ * the front of the envelope, node 332:30838. It is the one line of the four that
+ * a real invitation does not share: what the Showcase draws is Example Content,
+ * `EXAMPLE_ADDRESSEE`, because nobody's invitation can carry anybody's name, and
+ * a guest's own comes from the token on their own link.
  */
+const ENVELOPE_ADDRESSEE = 'Galih & Keluarga';
 const OPEN_INVITATION = 'Open Invitation';
 const INVITATION_HEADING = 'You’re Invited';
 const INVITATION_WELCOME =
@@ -287,6 +294,13 @@ const SECTIONS = [
       'Save the Date S',
       'Save the Date AVE',
       'Save the Date THE DATE',
+      // The envelope keeps its addressee after it has been opened. It is drawn
+      // on the closed envelope, and the closed envelope fades rather than
+      // leaving: taking the name out of the markup at the moment a guest
+      // presses would snatch it away ahead of the photograph it is written on.
+      // Faded out, then, like the Open Invitation control below it, and counted
+      // for the same reason - the check compares no opacity.
+      'Envelope addressee',
       'Open Invitation label',
       'Invitation heading',
       'Invitation welcome',
@@ -334,6 +348,11 @@ const SECTIONS = [
         // The one line in the invitation the design tracks out: 2% of its size.
         letterSpacing: '0.1252px',
       }),
+      invitation.paragraph(
+        'Envelope addressee',
+        type('16px', 400, '#090909'),
+        ENVELOPE_ADDRESSEE
+      ),
       OPEN_INVITATION_CONTROL,
       invitation.paragraph(
         'Open Invitation label',
@@ -875,10 +894,15 @@ const SEALED_PARAGRAPHS = [
  * short window reach the control, so a run says the page is free.
  *
  * The addressee the design writes across the closed envelope - "Galih &
- * Keluarga", node 332:30838 - is not drawn and is not claimed. The design hides
- * it behind the envelope's own photograph, where it cannot be read, and there is
- * nowhere for it to come from: a guest's name is the Guest List's, and the
- * template is handed one wedding rather than one guest. `hbd-a09.17`.
+ * Keluarga", node 332:30838 - is drawn and is claimed, in the design's own place
+ * and over the photograph the design hides it beneath rather than under it. Why
+ * the hiding is not followed is `docs/adr/0002-figma-is-literal-truth.md`.
+ *
+ * The name here is the Showcase's Example Content, which is why this screen can
+ * assert a name at all: nobody's invitation, so nobody's name. A real guest's
+ * comes from the token on their own link, which the Invitation Viewer resolves
+ * against the Guest List, and a real invitation opened without one draws no
+ * addressee - a state no frame is drawn for and nothing here claims.
  */
 function sealedExpectations() {
   const invitation = positions(SEALED_PARAGRAPHS, []);
@@ -897,7 +921,7 @@ function sealedExpectations() {
     invitation.paragraph(
       'Envelope addressee',
       type('16px', 400, '#090909'),
-      'Galih & Partner'
+      ENVELOPE_ADDRESSEE
     ),
     OPEN_INVITATION_CONTROL,
     invitation.paragraph(

@@ -22,6 +22,7 @@ import GuestInvitesPreview from './guest-invites-preview';
 import {
   guestLinkFor,
   SAMPLE_GUEST_NAME,
+  SAMPLE_GUEST_TOKEN,
   SLUG_PREFIX,
   type GuestInvitesValues,
 } from './guest-invites-types';
@@ -428,7 +429,7 @@ export default function GuestInvitesStep({
             brideNickname,
             groomNickname,
             guestName: SAMPLE_GUEST_NAME,
-            guestLink: guestLinkFor(values.slug, SAMPLE_GUEST_NAME),
+            guestLink: guestLinkFor(values.slug, SAMPLE_GUEST_TOKEN),
           }}
         />
       </div>

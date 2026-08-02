@@ -59,9 +59,9 @@ export const SLUG_PREFIX = 'memoify.live/wedding-1/';
  * address. Without a way to hand that screen one there would be nothing there to
  * hold against the frame.
  *
- * The same scaffolding shape the Showcase uses for its Example Content and its
- * addressee: opt-in, and drawn from nowhere by default, so a couple who has
- * saved nothing is shown no address rather than somebody else's.
+ * The same scaffolding shape the Showcase uses to choose its Example Content:
+ * opt-in, and drawn from nowhere by default, so a couple who has saved nothing
+ * is shown no address rather than somebody else's.
  */
 export const SLUG_PARAM = 'slug';
 
@@ -103,6 +103,34 @@ export const DEFAULT_GUEST_MESSAGE = [
 export const SAMPLE_GUEST_NAME = 'Johnny';
 
 /**
+ * The token the preview's link carries, which belongs to nobody.
+ *
+ * A real token is minted by the backend when the Guest List is saved, one per
+ * guest, and there is no guest here: the preview is a picture of a message to a
+ * guest called Johnny who does not exist. So this is the shape of a personal
+ * link rather than one that opens anything, which is all the preview is drawing.
+ */
+export const SAMPLE_GUEST_TOKEN = 'sample-guest-token';
+
+/**
+ * The query parameter a guest's personal link carries their token in.
+ *
+ * The token rather than their name. It is the backend that says who a guest is
+ * - `resolveWeddingGuest` hands it back the name on the Guest List - and a name
+ * on the address would be a name anybody could type, which would put a
+ * stranger's word on the one surface of the invitation meant to be that guest's
+ * own. It is also what a reply will be signed with when replying is wired, so a
+ * link that carries it is a link a guest will be able to answer from.
+ */
+export const GUEST_TOKEN_PARAM = 'guest';
+
+/** The guest token a link carried, or none, in which case no guest opened it. */
+export function guestTokenFrom(value: string | string[] | undefined): string {
+  const token = Array.isArray(value) ? value[0] : value;
+  return token?.trim() ?? '';
+}
+
+/**
  * Where a published invitation lives, or null while it has no slug.
  *
  * Null rather than a link built from an empty slug: an address showing
@@ -127,13 +155,19 @@ export function invitationLinkFor(slug: string): string | null {
 /**
  * The link one guest would receive, or null while there is no address yet.
  *
- * The same address as the invitation itself, naming the guest it was written
- * for, so the invitation can greet them.
+ * The same address as the invitation itself, carrying the token that guest was
+ * minted, so the invitation they open knows who opened it and can greet them by
+ * the name the Guest List holds.
+ *
+ * The design writes this link as `?name=guest`, which cannot work: a name is
+ * something anybody can type, and the invitation would have to take a stranger's
+ * word for who they were. See `docs/adr/0002-figma-is-literal-truth.md`.
  */
-export function guestLinkFor(slug: string, guestName: string): string | null {
+export function guestLinkFor(slug: string, guestToken: string): string | null {
   const invitation = invitationLinkFor(slug);
-  if (!invitation) return null;
-  return `${invitation}?name=${guestName.trim().toLowerCase()}`;
+  const token = guestToken.trim();
+  if (!invitation || token === '') return null;
+  return `${invitation}?${GUEST_TOKEN_PARAM}=${encodeURIComponent(token)}`;
 }
 
 export interface GuestMessageSubstitutions {

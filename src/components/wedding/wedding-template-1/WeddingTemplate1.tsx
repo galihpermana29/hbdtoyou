@@ -40,8 +40,9 @@ export interface WeddingTemplate1Props {
    * Who this invitation was sent to, drawn on the closed envelope.
    *
    * A guest's name rather than the couple's, so it is not part of the content
-   * the Create Flow collects: one wedding is sent to many guests. Where it
-   * comes from for real is `hbd-a09.21`, which needs a link per guest.
+   * the Create Flow collects: one wedding is sent to many guests. It comes from
+   * the token on the guest's own link, which the Invitation Viewer resolves
+   * against the Guest List; the Showcase passes its Example Content's.
    */
   addressee?: string;
   /**

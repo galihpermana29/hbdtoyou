@@ -1,10 +1,26 @@
-import { INVITATION_NOT_PUBLISHED } from '@/action/interfaces';
-import { getPublicWeddingInvitation } from '@/action/wedding-api';
-import { weddingContentFrom } from '@/components/forms/wedding/wedding-invitation-types';
+import {
+  INVITATION_NOT_PUBLISHED,
+  type IWeddingGuestResponse,
+} from '@/action/interfaces';
+import {
+  getPublicWeddingInvitation,
+  resolveWeddingGuest,
+} from '@/action/wedding-api';
+import type { IGlobalResponse } from '@/action/user-api';
+import {
+  GUEST_TOKEN_PARAM,
+  guestTokenFrom,
+} from '@/components/forms/wedding/guest-invites-types';
+import {
+  weddingContentFrom,
+  type WeddingTemplate1Content,
+} from '@/components/forms/wedding/wedding-invitation-types';
 import WeddingTemplate1 from '@/components/wedding/wedding-template-1/WeddingTemplate1';
 import { weddingTemplate1Fonts } from '@/components/wedding/wedding-template-1/fonts';
 
-import InvitationUnavailable from './invitation-unavailable';
+import InvitationUnavailable, {
+  type Unavailable,
+} from './invitation-unavailable';
 
 export const metadata = {
   title: 'Wedding Invitation',
@@ -34,48 +50,103 @@ export const metadata = {
  * the couple would be told their wedding had been read by people who do not
  * exist.
  *
- * Whose envelope this is - the guest's name across the front of it - is not
- * answered here. That needs the guest's token off the link, which is
- * `hbd-ox7.10`.
+ * Whose envelope this is - the guest's name across the front of it - comes from
+ * the token their own link carries. The address alone is the wedding and is the
+ * same for everybody; the token is the half of the link that is one guest's, and
+ * the backend is what turns it into a name. A link without one is the invitation
+ * with no guest on the end of it, which draws no addressee at all: a placeholder
+ * would put somebody else's name on the one surface of the invitation meant to
+ * be that guest's own.
  *
  * It lives under `(gifts)`, which is what keeps the site footer off it, per
  * `docs/adr/0003-the-route-group-says-whether-a-page-is-a-gift.md`.
  */
 export default async function WeddingInvitationViewerPage({
   params,
+  searchParams,
 }: {
   params: { slug: string };
+  searchParams: { [key: string]: string | string[] | undefined };
 }) {
+  const token = guestTokenFrom(searchParams[GUEST_TOKEN_PARAM]);
   const invitation = await getPublicWeddingInvitation(params.slug);
   const content = weddingContentFrom(invitation.data?.detail_content_json_text);
+  const personalLink = token !== '';
 
-  // Two things a guest can be told apart, and only two. An invitation that
-  // exists but is still a draft is a link that is early, and the guest keeps it;
-  // everything else - no such slug, a refused read, a record that will not parse
-  // - is a link that does not work, and the guest goes back to the couple. The
-  // difference between the reasons behind "does not work" is ours to look into
-  // and nothing a guest could act on.
+  // Two things a guest can be told apart when the address itself did not
+  // answer, and only two. An invitation that exists but is still a draft is a
+  // link that is early, and the guest keeps it; everything else - no such slug,
+  // a refused read, a record that will not parse - is a link that does not
+  // work, and the guest goes back to the couple. The difference between the
+  // reasons behind "does not work" is ours to look into and nothing a guest
+  // could act on.
   //
-  // Both are drawn inside the invitation's own fonts, because both are what the
-  // invitation's own address answered with.
+  // Asked before the guest is, and separately rather than both at once: the
+  // backend records the open and bumps the guest's count on every resolve, so
+  // resolving somebody whose invitation then turned out to be a draft would tell
+  // the couple a wedding nobody has been shown had been read. That is the same
+  // reason this route's title is fixed rather than fetched.
+  const guest =
+    content && personalLink
+      ? await resolveWeddingGuest(params.slug, token)
+      : null;
+
+  // A link carrying no token asked about no guest, and that is not a failure:
+  // it is the invitation itself, which anybody the couple hands the address to
+  // can read, and which draws no name across the envelope.
+  const guestIsKnown = !personalLink || Boolean(guest?.data);
+
+  // Everything below is drawn inside the invitation's own fonts, because all of
+  // it is what the invitation's own address answered with.
   return (
     <div className={`${weddingTemplate1Fonts} bg-black`}>
-      {content ? (
+      {content && guestIsKnown ? (
         <WeddingTemplate1
           content={content}
+          addressee={addresseeOf(guest)}
           sealed
           scrollsInside="page"
           showVinylWidget
         />
       ) : (
         <InvitationUnavailable
-          reason={
-            invitation.message === INVITATION_NOT_PUBLISHED
-              ? 'NOT_READY'
-              : 'CANNOT_BE_OPENED'
-          }
+          reason={refusal(content, guestIsKnown, invitation.message)}
         />
       )}
     </div>
   );
+}
+
+/**
+ * The name to write across the envelope, which is the Guest List's own.
+ *
+ * Read out of the guest row here rather than anywhere nearer the template,
+ * because the shape it arrives in is the backend's: the guest endpoints answer
+ * in PascalCase where the invitation answers in snake_case, and that is a fact
+ * about the wire rather than about an invitation. Nothing is drawn for a row
+ * carrying no name, for the same reason nothing is drawn without a token.
+ */
+function addresseeOf(
+  guest: IGlobalResponse<null | IWeddingGuestResponse> | null
+): string | undefined {
+  return guest?.data?.Name?.trim() || undefined;
+}
+
+/**
+ * Which of the three refusals a guest is shown.
+ *
+ * A wedding that parsed and a guest who is still not known means the personal
+ * half of the link is the part that failed. Nothing here can say which way: the
+ * client folds a refusal and a fault into the same answer, so a revoked token,
+ * another wedding's token and a backend that was down for a second all arrive
+ * identically - which is why the words for this one cover both what the guest
+ * can do now and what they can do if it lasts.
+ */
+function refusal(
+  content: WeddingTemplate1Content | null,
+  guestIsKnown: boolean,
+  message: string
+): Unavailable {
+  if (content && !guestIsKnown) return 'GUEST_NOT_CONFIRMED';
+  return message === INVITATION_NOT_PUBLISHED ? 'NOT_READY' : 'CANNOT_BE_OPENED';
 }

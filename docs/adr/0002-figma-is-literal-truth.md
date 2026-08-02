@@ -49,12 +49,17 @@ The line is kept and the hiding is not.
 The addressee is drawn in the design's own place, node 332:30838, 152x19 at 115,374 in 16px Sometype Mono, which sits on the face of the envelope clear of the seal above it.
 It is drawn over the photograph rather than under it, because a line of copy the design states and then covers is the frame contradicting itself rather than an instruction.
 
-Where the name comes from is still not answered.
-A guest's name belongs to the Guest List, and reaching it needs a link per guest, which is `hbd-a09.21` and waits on the Create Flow being wired to a backend at all.
-Until then a query parameter supplies one, the same scaffolding shape the Showcase already uses to choose its Example Content, and it comes out when that lands.
+Where the name comes from is the guest's own link, and the query parameter that stood in for one during development has gone.
+The link carries the token the backend mints for that guest, `?guest=<token>`, and the Invitation Viewer resolves it into the name the Guest List holds.
+The design writes that link as `?name=guest`, which is the third thing about it that cannot be followed: a name on the address is a name anybody can type, and the invitation would be taking a stranger's word for who they were.
+The tokens themselves arrive when the Guest List is saved with the invitation, which is `hbd-ox7.7`, so until that lands the only link of this shape anybody sees is the one the greeting message is previewed with.
+
+The Showcase keeps an addressee because the design's sealed frame has one, and its name is Example Content like the couple and the chapters around it - the frame's own "Galih & Keluarga", `EXAMPLE_ADDRESSEE`.
+Nobody's invitation, so nobody's name.
 
 An invitation with no addressee draws none.
 A placeholder would be worse than nothing, because the one surface of the invitation that is supposed to be a guest's own would carry somebody else's name.
+So a real invitation opened without a token draws none, and one opened with a token the backend refuses is told so rather than shown a blank envelope: that half of the link is also what a reply is signed with.
 
 The Love Story asks for three chapters and offers no way to add a fourth or remove one.
 

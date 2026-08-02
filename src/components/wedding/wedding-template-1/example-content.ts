@@ -37,20 +37,20 @@ const DEFAULT_EXAMPLE_CONTENT_NAME: ExampleContentName = 'flattering';
 export const EXAMPLE_CONTENT_PARAM = 'content';
 
 /**
- * Who a Showcase invitation is addressed to, supplied while nothing else can.
+ * Who a Showcase invitation is addressed to.
  *
- * The name belongs to the Guest List the Create Flow collects, and reaching it
- * needs a link per guest, which is `hbd-a09.21`. Until then this is how the
- * closed envelope gets a name to draw, the same scaffolding shape as the
- * parameter above, and it comes out when that lands.
+ * Example Content like everything else on this route, and for the same reason:
+ * the design draws a closed envelope with a name across the front of it, and a
+ * Showcase that drew none would not be that frame. It is the frame's own name -
+ * node 332:30838 writes "Galih & Keluarga" - so what is shown is what was
+ * drawn rather than a name invented here.
+ *
+ * Nobody's invitation, which is the whole of why this is safe to write down. A
+ * real guest's name is their own and comes from the token on their own link,
+ * which the Invitation Viewer resolves; a real invitation with no token still
+ * draws no addressee at all.
  */
-export const ADDRESSEE_PARAM = 'guest';
-
-/** The addressee a query gave, or none, in which case none is drawn. */
-export function addresseeFrom(value: string | string[] | undefined) {
-  const name = Array.isArray(value) ? value[0] : value;
-  return name?.trim() || undefined;
-}
+export const EXAMPLE_ADDRESSEE = 'Galih & Keluarga';
 
 /**
  * The designer's photographs, which every set shares.
