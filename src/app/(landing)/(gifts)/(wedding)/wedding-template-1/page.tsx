@@ -5,12 +5,7 @@ import {
   exampleContent,
 } from '@/components/wedding/wedding-template-1/example-content';
 import WeddingTemplate1 from '@/components/wedding/wedding-template-1/WeddingTemplate1';
-import {
-  instrumentSerif,
-  luxuriousScript,
-  publicSans,
-  sometypeMono,
-} from '@/components/wedding/wedding-template-1/fonts';
+import { weddingTemplate1Fonts } from '@/components/wedding/wedding-template-1/fonts';
 
 export const metadata = {
   title: 'Wedding Invitation',
@@ -48,10 +43,8 @@ export default function WeddingTemplate1ShowcasePage({
 }: {
   searchParams: { [key: string]: string | string[] | undefined };
 }) {
-  const fontVars = `${luxuriousScript.variable} ${sometypeMono.variable} ${instrumentSerif.variable} ${publicSans.variable}`;
-
   return (
-    <div className={`${fontVars} bg-black`}>
+    <div className={`${weddingTemplate1Fonts} bg-black`}>
       <WeddingTemplate1
         content={exampleContent(searchParams[EXAMPLE_CONTENT_PARAM])}
         addressee={addresseeFrom(searchParams[ADDRESSEE_PARAM])}

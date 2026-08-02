@@ -343,6 +343,26 @@ export interface IWeddingCreatedResponse {
   id: string;
 }
 
+// The invitation as its owner sees it, whatever state it is in. This is the one
+// answer that carries the Invitation Slug back to the couple who caused it: the
+// create call answers with the identifier alone, and the public read answers
+// only for a published invitation and only when asked by slug.
+//
+// The content is optional because the recorded example of this response omits
+// it, on an invitation that had none yet.
+export interface IOwnedWeddingInvitationResponse {
+  id: string;
+  invitation_slug: string;
+  status: string;
+  rsvp_enabled: boolean;
+  pov_guest_photo_enabled: boolean;
+  view_count: number;
+  photo_storage_limit_mb?: number;
+  title: string;
+  caption?: string;
+  detail_content_json_text?: string;
+}
+
 export interface IWeddingPublishIssue {
   Field: string;
   Message: string;
@@ -382,6 +402,12 @@ export interface IWeddingGuestResponse {
   OpenCount?: number;
   CreateTime: string;
 }
+
+// What the backend answers a public read with when the invitation exists but is
+// still a draft, carried on the message of an unsuccessful result. It is the one
+// refusal a caller can act on rather than only report: a link that has arrived
+// ahead of its wedding is a link somebody should keep.
+export const INVITATION_NOT_PUBLISHED = 'INVITATION_NOT_PUBLISHED';
 
 // What a wedding guest sees. Only ever answered for a published invitation.
 export interface IPublicWeddingInvitationResponse {

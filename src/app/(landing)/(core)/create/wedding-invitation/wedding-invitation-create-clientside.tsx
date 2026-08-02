@@ -21,12 +21,7 @@ import PublishedStep from '@/components/forms/wedding/published-step';
 import WeddingInvitationForm from '@/components/forms/wedding/wedding-invitation-form';
 import WeddingInvitationPreview from '@/components/forms/wedding/wedding-invitation-preview';
 import NavigationBar from '@/components/ui/navbar';
-import {
-  instrumentSerif,
-  luxuriousScript,
-  publicSans,
-  sometypeMono,
-} from '@/components/wedding/wedding-template-1/fonts';
+import { weddingTemplate1Fonts } from '@/components/wedding/wedding-template-1/fonts';
 import {
   DEFAULT_GUEST_MESSAGE,
   invitationLinkFor,
@@ -36,8 +31,6 @@ import {
   DEFAULT_WEDDING_TEMPLATE_1_CONTENT,
   type WeddingInvitationFormValues,
 } from '@/components/forms/wedding/wedding-invitation-types';
-
-const fontVars = `${luxuriousScript.variable} ${sometypeMono.variable} ${instrumentSerif.variable} ${publicSans.variable}`;
 
 /** Where a couple goes back to from the first step this flow owns. */
 const CHOOSE_TEMPLATE_ROUTE = '/wedding-invitation';
@@ -60,13 +53,14 @@ const CHOOSE_TEMPLATE_ROUTE = '/wedding-invitation';
  */
 export interface WeddingInvitationCreateClientsideProps {
   /**
-   * The invitation's Invitation Slug, or empty while it has none.
+   * The Invitation Slug to fall back on while no invitation has been saved, or
+   * empty for the nothing a couple starts with.
    *
-   * Empty is still what a couple gets. Saving creates the invitation and the
-   * backend generates its slug, but the create call answers with the identifier
-   * alone, so the slug has to be read back before this flow can show anybody an
-   * address: `hbd-ox7.9`. A couple no longer chooses it, so nothing in the flow
-   * writes to it either. See `SLUG_PARAM`.
+   * A real one is not this: saving creates the invitation, the backend generates
+   * its slug, and `useInvitation` reads it back, which is the only address any
+   * couple is ever shown. This is what stands in on a screen where no invitation
+   * can exist - see `SLUG_PARAM` - and the read-back address wins over it the
+   * moment there is one.
    */
   slug: string;
 }
@@ -89,6 +83,7 @@ export default function WeddingInvitationCreateClientside({
 
   const {
     save,
+    slug: savedSlug,
     isSaving,
     publish,
     isPublishing,
@@ -105,10 +100,24 @@ export default function WeddingInvitationCreateClientside({
   const isGuestInvites = step === 'Guest invites details';
   const isPublished = step === 'Share with guests';
 
+  // The address the invitation was actually given, once a save has learned one,
+  // and whatever this flow was handed until then. A saved invitation's own slug
+  // wins outright: it is the only one that resolves.
+  //
+  // Derived on the way down rather than written into the state, because the slug
+  // is the invitation's rather than the step's and nothing on the step edits it.
+  // The step hands the whole values object back when a couple changes something
+  // else, so the address does end up in the state - harmlessly, because it is
+  // the same value, and because this line still decides which one is used.
+  const guestInvitesValues: GuestInvitesValues = {
+    ...guestInvites,
+    slug: savedSlug ?? guestInvites.slug,
+  };
+
   // Composed here rather than passed up from the step that owns the slug, so
   // that the address the couple is shown and the one their guests are shown are
   // the same function of the same value.
-  const invitationLink = invitationLinkFor(guestInvites.slug);
+  const invitationLink = invitationLinkFor(guestInvitesValues.slug);
 
   /**
    * Move to another step, from the top of it.
@@ -179,7 +188,7 @@ export default function WeddingInvitationCreateClientside({
   }
 
   return (
-    <div className={fontVars}>
+    <div className={weddingTemplate1Fonts}>
       {contextHolder}
 
       <header>
@@ -317,7 +326,7 @@ export default function WeddingInvitationCreateClientside({
           <div className={isGuestInvites ? 'mt-[60px]' : 'hidden'}>
             <GuestInvitesStep
               isCurrent={isGuestInvites}
-              values={guestInvites}
+              values={guestInvitesValues}
               onChange={setGuestInvites}
               brideNickname={
                 brideNickname?.trim() ||

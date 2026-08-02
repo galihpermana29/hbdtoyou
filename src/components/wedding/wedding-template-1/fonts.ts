@@ -39,3 +39,15 @@ export const publicSans = Public_Sans({
   display: 'swap',
   variable: '--font-wt1-sans',
 });
+
+/**
+ * All four, as the class that declares them, for whatever is drawing the
+ * template. Every section names its face by the variable rather than by the
+ * family, so a page that renders the invitation and forgets one of these draws
+ * that section in whatever `globals.css` sets for everything - which is a
+ * silent wrong typeface rather than a missing one.
+ *
+ * Written once here rather than composed again at each of the three places that
+ * draw it: the Showcase, the Create Flow, and the Invitation Viewer.
+ */
+export const weddingTemplate1Fonts = `${luxuriousScript.variable} ${sometypeMono.variable} ${instrumentSerif.variable} ${publicSans.variable}`;

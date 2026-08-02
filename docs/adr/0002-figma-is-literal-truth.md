@@ -180,5 +180,22 @@ The one line written here is for the case where the check refuses and names noth
 
 Nothing about this is asserted, for the reason the failed save is not: it is drawn only when there is something to say, and every screen the design draws has nothing.
 
+One addition is agreed and recorded: the Invitation Viewer draws a screen for a link that does not open an invitation, which the design does not draw.
+
+The design draws the invitation, and an invitation that will not open is not one of its states.
+It cannot be followed literally here because a link is not a screen: it travels through a message, a screenshot and somebody reading it out over a phone, and it will arrive early, mistyped and after the wedding has been taken down.
+A guest handed the server's error page cannot tell "not yet" from "wrong address", and those ask opposite things of them - one is to keep the link, the other is to go back to the couple and ask for it again.
+
+So the two are told apart, and only those two.
+An invitation the backend answers for and says is still a draft reads "This invitation is not ready yet", and under it "The couple are still putting it together. The link is the right one and it will open as soon as they publish, so keep it and come back."
+Everything else - no such slug, a refused read, a stored record that will not parse - reads "This invitation could not be opened", and under it "The address may have been mistyped, or the invitation may have been taken down. Ask the couple for the link again."
+Which of the several faults behind the second one it was is ours to look into and nothing a guest could act on, so it is not printed.
+
+It is drawn in the invitation's own black and the invitation's own typefaces, in `src/app/(landing)/(gifts)/(wedding)/wedding-1/[slug]/invitation-unavailable.tsx`, because it is the invitation's address that was opened.
+A guest who followed a wedding link should land somewhere that looks like the wedding rather than somewhere that looks like a fault in a different product.
+
+Nothing about it is asserted.
+The check has no invitation to read - it drives a signed-out browser against no backend - so it cannot reach either state, and there is no frame to hold them against in any case.
+
 This rule holds at desktop width, where the design exists.
 Below that there is no design, so usability governs and the rule does not apply.

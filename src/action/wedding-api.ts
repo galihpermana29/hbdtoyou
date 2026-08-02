@@ -25,6 +25,7 @@
 
 import { getSession } from '@/store/get-set-session';
 import {
+  IOwnedWeddingInvitationResponse,
   IPublicWeddingInvitationResponse,
   IWeddingCreatedResponse,
   IWeddingGuestPayload,
@@ -126,6 +127,30 @@ export async function createWeddingInvitation(
     headers: await ownerHeaders(),
     body: JSON.stringify(payload),
   });
+}
+
+/**
+ * The invitation as its owner sees it, found by its UUID.
+ *
+ * This is how a flow that has just created an invitation learns the address it
+ * was given. Nothing else can tell it: create answers with the identifier and
+ * nothing else, and the public read answers only for a published invitation and
+ * only when asked by slug, so a draft has no way of being asked about at all.
+ *
+ * Never cached. The answer changes every time the invitation does, and a cached
+ * one would show a couple an address that is no longer theirs.
+ */
+export async function getOwnedWeddingInvitation(
+  weddingId: string
+): Promise<IGlobalResponse<null | IOwnedWeddingInvitationResponse>> {
+  return callWedding<IOwnedWeddingInvitationResponse>(
+    `/${encodeURIComponent(weddingId)}`,
+    {
+      method: 'GET',
+      headers: await ownerHeaders(),
+      cache: 'no-store',
+    }
+  );
 }
 
 export async function updateWeddingInvitation(

@@ -45,20 +45,23 @@ export interface GuestInvitesValues {
 export const SLUG_PREFIX = 'memoify.live/wedding-1/';
 
 /**
- * The query parameter an invitation's slug can be supplied by, while the flow
- * has no way to learn one.
+ * The query parameter an invitation's slug can be supplied by, for a screen on
+ * which no invitation can exist.
  *
- * The slug is the backend's to generate. The flow now creates the invitation it
- * generates the slug for, and still cannot read it: the create call answers with
- * the identifier and nothing else, so learning the address means reading the
- * invitation back. Until that happens a flow has no address at all - which is
- * the truth, and which leaves the published step with nothing to show on a
- * screen whose whole point is the address.
+ * No couple is ever shown an address from here. The slug is the backend's to
+ * generate, `useInvitation` reads it back off the saved invitation, and that is
+ * the only address the flow puts in front of anybody - it is the only one that
+ * resolves.
  *
- * This is how it is told one: the same scaffolding shape the Showcase uses for
- * its Example Content and its addressee, opt-in, and drawn from nowhere by
- * default so that no couple is ever shown somebody else's name as their own. It
- * comes out in `hbd-ox7.9`, when a published invitation has an address to show.
+ * What this is for is the check. Saving needs an account, the check drives the
+ * flow signed out, so nothing it does can create an invitation or be given a
+ * slug - and the design draws a published screen whose whole subject is the
+ * address. Without a way to hand that screen one there would be nothing there to
+ * hold against the frame.
+ *
+ * The same scaffolding shape the Showcase uses for its Example Content and its
+ * addressee: opt-in, and drawn from nowhere by default, so a couple who has
+ * saved nothing is shown no address rather than somebody else's.
  */
 export const SLUG_PARAM = 'slug';
 

@@ -24,10 +24,10 @@ import {
  * The fourth and last step of the Create Flow: the invitation is published, and
  * here is the link to send.
  *
- * Nothing is published from here, and nothing is fetched. There is no publish
- * call yet, so this screen says what the couple has just done and shows them
- * the address it would live at, composed from the invitation's slug. Making
- * that address real is `hbd-ox7.8` and `hbd-ox7.9`.
+ * Nothing is published from here, and nothing is fetched. Publishing happened on
+ * the step before, which is what carried the couple here; this screen says what
+ * they have just done and shows them the address the invitation now answers at,
+ * composed from its slug.
  *
  * There is no way back. The design gives this step no Previous step action, so
  * it is the one step that is mounted when it is reached rather than kept alive
@@ -67,11 +67,12 @@ export interface PublishedStepProps {
    * The address the couple sends, built from the invitation's Slug, or null
    * while the invitation has no slug.
    *
-   * Null is what a couple gets today, because the slug is generated when an
-   * invitation is created and nothing creates one yet: `hbd-ox7.6`. The box
-   * holding the link is then not drawn at all, rather than drawn around
-   * nothing - an empty address field with a Copy action beside it would be
-   * offering to copy something that is not there.
+   * Null is what somebody who never saved gets - a visitor with no account, who
+   * had no invitation to publish - and what a couple gets when the read that
+   * would have learned the slug did not come back. The box holding the link is
+   * then not drawn at all, rather than drawn around nothing: an empty address
+   * field with a Copy action beside it would be offering to copy something that
+   * is not there.
    */
   invitationLink: string | null;
 }

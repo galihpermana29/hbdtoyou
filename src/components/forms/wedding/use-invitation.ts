@@ -1,7 +1,8 @@
 'use client';
 
 /**
- * The invitation this flow is making: keeping it, and publishing it.
+ * The invitation this flow is making: keeping it, learning where it lives, and
+ * publishing it.
  *
  * The first save creates the invitation and every save after it updates the one
  * that was created, so the flow has to know whether it has an invitation yet.
@@ -16,6 +17,15 @@
  * Nothing here is silent. A save that did not happen comes back as a message the
  * step prints and refuses to go on past, because a couple who believes their
  * evening is saved and finds out otherwise has lost more than a step.
+ *
+ * ## The address is read back, never guessed
+ *
+ * The Invitation Slug is the backend's. It generates one when an invitation is
+ * created without a name, and the create call answers with the identifier alone,
+ * so the flow that caused the slug cannot see it. Reading the invitation back is
+ * the only way, and a save is the only moment there is anything to read - so
+ * that is where it happens, straight after the first one and again after any
+ * later one while the address is still unknown.
  *
  * ## Publishing asks first
  *
@@ -53,6 +63,7 @@ import type { FormInstance } from 'antd';
 import { getAllTemplates } from '@/action/user-api';
 import {
   createWeddingInvitation,
+  getOwnedWeddingInvitation,
   publishCheckWeddingInvitation,
   publishWeddingInvitation,
   updateWeddingInvitation,
@@ -97,6 +108,16 @@ export type PublishOutcome =
 export interface Invitation {
   /** Keep what the couple has entered so far. */
   save: () => Promise<SaveOutcome>;
+  /**
+   * The Invitation Slug this invitation was given, or null while the flow has
+   * not been able to learn one.
+   *
+   * Null covers three cases and tells them apart nowhere, because none of them
+   * is an address: nothing has been saved, the read that would have learned it
+   * did not come back, or there is nobody signed in to save for. Every screen
+   * that shows an address already draws nothing when there is none.
+   */
+  slug: string | null;
   /** Whether a save is in flight, so nothing can be pressed twice into one. */
   isSaving: boolean;
   /**
@@ -177,6 +198,7 @@ export function useInvitation(
   const [isPublishing, setIsPublishing] = useState(false);
   const [problem, setProblem] = useState<string | null>(null);
   const [outstanding, setOutstanding] = useState<string[] | null>(null);
+  const [slug, setSlug] = useState<string | null>(null);
 
   /**
    * The invitation this flow has created, or nothing while it has none.
@@ -209,6 +231,27 @@ export function useInvitation(
     return { id: template.id };
   }
 
+  /**
+   * Find out what address this invitation was given, if it is not known yet.
+   *
+   * The slug belongs to the backend - it generates one when an invitation is
+   * created without a name - and the create call answers with the identifier
+   * alone, so the only way to learn it is to read the invitation back.
+   *
+   * A read that does not come back says nothing to the couple. The save it
+   * followed worked, their invitation is kept, and the one thing missing is the
+   * address, which every screen that shows one already draws nothing for. The
+   * next save asks again, so a couple who carries on filling the flow in is
+   * likely to be told the address before they reach the screen that needs it.
+   */
+  async function learnTheAddress(weddingId: string) {
+    if (slug) return;
+
+    const invitation = await getOwnedWeddingInvitation(weddingId);
+    const learned = invitation.data?.invitation_slug?.trim();
+    if (learned) setSlug(learned);
+  }
+
   /** Drop whatever the last press had to say, whichever press it was. */
   function forgetWhatWentWrong() {
     setProblem(null);
@@ -238,6 +281,7 @@ export function useInvitation(
           setProblem(problemMessage('saved', updated.message));
           return 'FAILED';
         }
+        await learnTheAddress(invitationId.current);
         return 'SAVED';
       }
 
@@ -264,6 +308,9 @@ export function useInvitation(
       // Only now does this flow have an invitation. Until this line every retry
       // creates, which is what a couple whose first save failed needs.
       invitationId.current = created.data.id;
+      // And only now is there an invitation to have an address, so this is the
+      // earliest the couple can be told where their wedding is going to live.
+      await learnTheAddress(created.data.id);
       return 'SAVED';
     } catch (error) {
       // The wedding calls answer with a result rather than throwing, including
@@ -356,6 +403,7 @@ export function useInvitation(
 
   return {
     save,
+    slug,
     isSaving,
     publish,
     isPublishing,

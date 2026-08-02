@@ -300,10 +300,11 @@ export const screens = [
   {
     id: 'published',
     title: 'Published, with the link to share',
-    // Given a slug, because a couple no longer chooses one and nothing saves
-    // yet, so a flow nobody tells has no address to show. It is the design's
-    // own name, and the parameter is scaffolding until an invitation is created
-    // and given a slug of its own: `hbd-ox7.6`.
+    // Given a slug, because this run has none to be given. A real couple's
+    // address is read back off the invitation their save created, and saving
+    // needs an account: this drives the flow signed out, so it never creates
+    // one. The parameter is how a screen whose whole subject is the address can
+    // still be held against the frame, and the value is the design's own name.
     route: `${DETAILS_AND_STORY_ROUTE}?slug=${DESIGNED_SLUG}`,
     figmaNodeId: '305-8972',
     baseline: 'published.png',

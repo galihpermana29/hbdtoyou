@@ -476,6 +476,52 @@ export function formValuesToInvitationPayload(
 }
 
 /**
+ * The content of a published invitation, read back out of what was stored.
+ *
+ * The counterpart of `formValuesToInvitationPayload`, which wrote it. The record
+ * holds exactly a `WeddingTemplate1Content` and holds all of it, because
+ * `formValuesToContent` answers every field before it is serialised, so this
+ * hands the record to the template as it stands rather than merging it over the
+ * sample invitation. Merging would be inventing content at the point of reading,
+ * on a page a couple is sending to their families, for a record that already
+ * said what it holds.
+ *
+ * That is a rule about this end only. It does not stop a couple's guests reading
+ * the sample's names and faces, because the writing end already put them there:
+ * `formValuesToContent` resolves every unanswered field to the sample before
+ * serialising, and both portraits come from it whatever a couple answers. Which
+ * fields a published invitation should be allowed to carry nothing for is
+ * `hbd-a09.10` and `hbd-a09.20`, and it is settled where the record is written.
+ *
+ * Null when the record is not one of these at all - unparseable, or parsed into
+ * something that is not an object, or carrying no Love Story. The last is
+ * checked because it is the one field whose absence would throw rather than
+ * render: every photograph is read through `pickPhoto`, which copes with there
+ * being none, and every name lands in a text node, while the Love Story indexes
+ * and slices its chapters. A guest is told the invitation could not be opened,
+ * which is true, rather than handed the server's error page.
+ */
+export function weddingContentFrom(
+  stored: string | null | undefined
+): WeddingTemplate1Content | null {
+  if (!stored) return null;
+
+  let parsed: unknown;
+  try {
+    parsed = JSON.parse(stored);
+  } catch {
+    return null;
+  }
+
+  if (typeof parsed !== 'object' || parsed === null) return null;
+  if (!Array.isArray((parsed as WeddingTemplate1Content).milestones)) {
+    return null;
+  }
+
+  return parsed as WeddingTemplate1Content;
+}
+
+/**
  * Initial form values for the creator (prefills preview on first paint).
  *
  * Every field a couple types in or chooses is deliberately absent. The design
