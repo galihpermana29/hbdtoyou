@@ -54,6 +54,59 @@ async function ownerHeaders(): Promise<Record<string, string>> {
 }
 
 /**
+ * What went out and what came back, for a person watching the dev server.
+ *
+ * These are server actions, so nothing about them reaches the browser's network
+ * panel: a couple pressing Next sends one POST to the page they are on, and the
+ * request to the wedding backend happens out of sight. Without this there is
+ * nothing to look at when a save fails.
+ *
+ * Off in production, because a payload is a couple's own wedding and a log is
+ * not the place for it. Headers are never printed either way: one of them is a
+ * bearer token.
+ *
+ * A body is printed whole rather than trimmed. The one thing worth knowing when
+ * a save is refused is exactly what was sent, and a truncated payload has a way
+ * of hiding the field that caused it.
+ *
+ * The console is what a dev server prints to, which is the whole point of these
+ * three, so the rule against it is turned off for them and nowhere else.
+ */
+const logging = process.env.APP_ENV !== 'production';
+
+/* eslint-disable no-console */
+function logRequest(method: string, url: string, body: unknown) {
+  if (!logging) return;
+  console.log(`\n[wedding] -> ${method} ${url}`);
+  if (body !== undefined) {
+    console.log(
+      '[wedding] -> body',
+      typeof body === 'string' ? body : JSON.stringify(body)
+    );
+  }
+}
+
+function logResponse(
+  method: string,
+  url: string,
+  status: number,
+  body: unknown
+) {
+  if (!logging) return;
+  console.log(`[wedding] <- ${status} ${method} ${url}`);
+  console.log(
+    '[wedding] <- body',
+    typeof body === 'string' ? body : JSON.stringify(body)
+  );
+}
+
+function logFailure(method: string, url: string, reason: unknown) {
+  if (!logging) return;
+  console.log(`[wedding] !! ${method} ${url} never answered: ${reason}`);
+}
+/* eslint-enable no-console */
+
+/**
  * Every failure comes back as a result in the shape callers already handle,
  * including a network one, so nothing above this file has to catch.
  */
@@ -70,53 +123,47 @@ async function callWedding<T>(
     ? { 'Content-Type': 'application/json', ...init.headers }
     : init.headers;
 
+  const url = baseUri + '/wedding' + path;
+  const method = init.method ?? 'GET';
+
+  logRequest(method, url, init.body);
+
   try {
-    res = await fetch(baseUri + '/wedding' + path, { ...init, headers });
+    res = await fetch(url, { ...init, headers });
   } catch (error) {
-    return {
-      success: false,
-      message: error instanceof Error ? error.message : String(error),
-      data: null,
-    };
+    const reason = error instanceof Error ? error.message : String(error);
+    logFailure(method, url, reason);
+    return { success: false, message: reason, data: null };
+  }
+
+  // Read once, as text, so the same body can be both logged and parsed. Reading
+  // a Response twice throws, and a body that failed to parse is exactly the one
+  // worth seeing.
+  const raw = await res.text().catch(() => '');
+  logResponse(method, url, res.status, raw);
+
+  let parsed: any = null;
+  try {
+    parsed = raw ? JSON.parse(raw) : null;
+  } catch {
+    parsed = null;
   }
 
   if (!res.ok) {
-    try {
-      const errorData = await res.json();
-      const errorMessage =
-        errorData.errors?.[0] || errorData.status || res.statusText;
-      return {
-        success: false,
-        message: errorMessage,
-        data: null,
-      };
-    } catch {
-      return {
-        success: false,
-        message: res.statusText,
-        data: null,
-      };
-    }
-  }
-
-  try {
-    const data = await res.json();
-
     return {
-      success: true,
-      message: data.message,
-      // An endpoint with nothing to answer sends `{}`, and a caller that asks
-      // whether there is data should be told no rather than undefined.
-      data: data.data ?? null,
-    };
-  } catch {
-    // An endpoint that answers with no body at all still succeeded.
-    return {
-      success: true,
-      message: res.statusText,
+      success: false,
+      message: parsed?.errors?.[0] || parsed?.status || res.statusText,
       data: null,
     };
   }
+
+  return {
+    success: true,
+    message: parsed?.message ?? res.statusText,
+    // An endpoint with nothing to answer sends `{}`, and a caller that asks
+    // whether there is data should be told no rather than undefined.
+    data: parsed?.data ?? null,
+  };
 }
 
 export async function createWeddingInvitation(
