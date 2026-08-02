@@ -3,25 +3,16 @@
 import { Google } from '@mui/icons-material';
 import {
   Avatar,
-  Badge,
   Button,
   Cascader,
-  Divider,
   Dropdown,
   MenuProps,
   message,
-  Modal,
-  Tag,
-  Tooltip,
 } from 'antd';
 import Link from 'next/link';
 import { useEffect, useState } from 'react';
-import { signIn, signOut } from 'next-auth/react';
-import {
-  useMemoifyProfile,
-  useMemoifySession,
-  useMemoifyUpgradePlan,
-} from '@/app/session-provider';
+import { signIn } from 'next-auth/react';
+import { useMemoifySession } from '@/app/session-provider';
 import { IProfileResponse } from '@/action/interfaces';
 import { removeSession } from '@/store/get-set-session';
 import Image from 'next/image';
@@ -36,14 +27,11 @@ import {
   LogOut,
   Menu,
   Newspaper,
-  Settings,
   Settings2,
   Zap,
 } from 'lucide-react';
-import dynamic from 'next/dynamic';
 // Lazy load the jumbotron image
 import jumbotronImage from '@/assets/fitur-1-image.png';
-import GasMeterOutlined from '@mui/icons-material/GasMeterOutlined';
 import './stlye.css';
 import { formatNumberWithComma } from '@/lib/utils';
 import { getUserProfile } from '@/action/user-api';
@@ -414,11 +402,16 @@ const NavigationBar = () => {
     }
   };
 
+  // Keyed on the token rather than the session object. Reading the profile is a
+  // server action, and a server action re-renders everything that reads the
+  // router, so an object dependency would be re-created between one read and
+  // the next and ask for another - forever, several times a second, for as long
+  // as a signed-in visitor stayed on any page carrying the navigation.
   useEffect(() => {
     if (session.accessToken) {
       handleGetProfile();
     }
-  }, [session]);
+  }, [session.accessToken]);
 
   return (
     <div className="border-b-[1px] bg-white">

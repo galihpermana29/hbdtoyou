@@ -15,7 +15,13 @@ import {
   usePathname,
   useSelectedLayoutSegments,
 } from 'next/navigation';
-import React, { createContext, useContext, useEffect, useState } from 'react';
+import React, {
+  createContext,
+  useContext,
+  useEffect,
+  useMemo,
+  useState,
+} from 'react';
 import { Provider } from 'react-redux';
 
 // Define the context type
@@ -134,7 +140,15 @@ const SessionProvider = ({
   session: string;
   initialProfileData: IProfileResponse | null;
 }) => {
-  const parsedSession: SessionData = session ? JSON.parse(session) : {};
+  // Parsed once per distinct cookie rather than once per render. A server
+  // action makes Next re-render everything that reads the router, and this
+  // provider reads it three times over, so a fresh object here would hand every
+  // consumer a session that looks new on each of those renders - which is
+  // exactly how an effect keyed on the session turns into an endless loop.
+  const parsedSession: SessionData = useMemo(
+    () => (session ? JSON.parse(session) : {}),
+    [session]
+  );
   const [userProfile, setUserProfile] = useState<IProfileResponse | null>(
     initialProfileData
   );
