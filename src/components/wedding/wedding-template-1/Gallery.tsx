@@ -2,10 +2,40 @@
 
 /**
  * Wedding Template 1 - Gallery. Figma node 312:1807.
- * A photo collage: five images absolutely positioned and cropped by the
- * frame's overflow. Fixed 375-wide mobile composition, 570px tall.
- * Animation: the five photos fade up in a subtle stagger on scroll; their
- * absolute left/top positions are untouched (motion adds only opacity + y).
+ *
+ * The couple's pre-wedding photographs, and the one section on the invitation
+ * with no words at all.
+ *
+ * ## Why this is not the collage the design draws
+ *
+ * The design places five photographs by hand, each its own size, overlapping
+ * the section's edges inside a fixed 570px band. That is a composition rather
+ * than a rule, and it does not generalise: the Photo Collection now asks a
+ * couple for between five and fifteen photographs, and there is no honest way
+ * to read a sixth slot out of an arrangement that has five.
+ *
+ * Two alternatives were rejected. Capping the couple at five throws away the
+ * ask. Drawing the collage once per group of five forces the count onto a
+ * multiple of five, so a couple with seven photographs would be told to find
+ * three more or drop two. Both are recorded in
+ * `docs/adr/0002-figma-is-literal-truth.md`, along with this.
+ *
+ * So the section is two columns of varying heights that grow with the count.
+ * That keeps what the collage was actually doing - photographs of different
+ * sizes, read down the page - without pretending to know where a fifteenth one
+ * goes.
+ *
+ * Two columns rather than three because the invitation is phone width; three
+ * would leave wedding photographs about 130px wide. The section grows rather
+ * than holding the design's fixed band, because the invitation already scrolls
+ * and a fixed band would either crop a couple's photographs or strand a gap
+ * beneath them.
+ *
+ * The ground stays `#fafafa`, which is the one thing the design states about
+ * this section and the one thing the check asserts about it.
+ *
+ * Animation: the photographs reveal in sequence on scroll, as every other
+ * section's contents do.
  */
 
 import { motion } from 'framer-motion';
@@ -15,26 +45,28 @@ import { useWeddingReveal } from './use-wedding-reveal';
 
 import {
   DEFAULT_WEDDING_TEMPLATE_1_CONTENT,
-  pickPhoto,
   type WeddingTemplate1Content,
 } from '@/components/forms/wedding/wedding-invitation-types';
 
 /**
- * The sample invitation, which is what an unanswered photograph falls back to.
+ * How the photographs are dealt into the two columns.
  *
- * The section draws no artwork of its own at all - it is five photographs in
- * five boxes - so it names none, and the whole of it is the couple's.
- */
-const SAMPLE = DEFAULT_WEDDING_TEMPLATE_1_CONTENT;
-
-/**
- * How many photographs the design lays out, which is five boxes drawn below.
+ * Alternating rather than split down the middle, so the columns stay about the
+ * same length whatever the count is: an odd number leaves one column a single
+ * photograph longer, where splitting would put the first eight in one column
+ * and the last seven in the other and lean the section to one side.
  *
- * Written down rather than counted off the sample's list: the design decides
- * how many boxes there are, and a sample that happened to hold four would
- * otherwise leave the fifth box with no photograph at all and say nothing.
+ * Reading order follows the columns rather than the page, which is what masonry
+ * is. That is also the order of the markup, so nothing has to be told about it.
  */
-const GALLERY_PHOTO_COUNT = 5;
+function intoColumns(photos: string[]): [string[], string[]] {
+  const left: string[] = [];
+  const right: string[] = [];
+  photos.forEach((photo, index) => {
+    (index % 2 === 0 ? left : right).push(photo);
+  });
+  return [left, right];
+}
 
 export default function Gallery({
   content = DEFAULT_WEDDING_TEMPLATE_1_CONTENT,
@@ -42,59 +74,43 @@ export default function Gallery({
   content?: WeddingTemplate1Content;
 }) {
   const staggerReveal = useWeddingReveal(staggerContainer);
-  const photos = Array.from({ length: GALLERY_PHOTO_COUNT }, (_, index) =>
-    pickPhoto(content.galleryPhotos, index, SAMPLE.galleryPhotos[index])
+
+  // Only the photographs a couple actually gave. Nothing stands in for one they
+  // did not: an empty box in a wedding album is worse than a shorter album.
+  const photos = (content.galleryPhotos ?? []).filter(
+    (photo) => typeof photo === 'string' && photo.length > 0
   );
+  const [left, right] = intoColumns(photos);
+
+  // A couple who has added none gets no section at all, rather than a band of
+  // empty ground with nothing in it.
+  if (photos.length === 0) return null;
 
   return (
     <motion.section
-      className="relative h-[570px] w-full overflow-hidden bg-[#fafafa]"
+      className="relative w-full overflow-hidden bg-[#fafafa]"
       {...staggerReveal}>
-      <motion.div
-        variants={fadeUp}
-        className="absolute left-[-3px] top-[-83px] h-[279px] w-[186px]">
-        <img
-          alt=""
-          className="pointer-events-none absolute inset-0 size-full max-w-none object-cover"
-          src={photos[0]}
-        />
-      </motion.div>
-      <motion.div
-        variants={fadeUp}
-        className="absolute left-[-19px] top-[191px] h-[138px] w-[207px]">
-        <img
-          alt=""
-          className="pointer-events-none absolute inset-0 size-full max-w-none object-cover"
-          src={photos[1]}
-        />
-      </motion.div>
-      <motion.div
-        variants={fadeUp}
-        className="absolute left-[164px] top-0 h-[315px] w-[210px]">
-        <img
-          alt=""
-          className="pointer-events-none absolute inset-0 size-full max-w-none object-cover"
-          src={photos[2]}
-        />
-      </motion.div>
-      <motion.div
-        variants={fadeUp}
-        className="absolute left-[-13px] top-[315px] h-[300px] w-[238px]">
-        <img
-          alt=""
-          className="pointer-events-none absolute inset-0 size-full max-w-none object-cover"
-          src={photos[3]}
-        />
-      </motion.div>
-      <motion.div
-        variants={fadeUp}
-        className="absolute left-[188px] top-[315px] h-[311px] w-[233px]">
-        <img
-          alt=""
-          className="pointer-events-none absolute inset-0 size-full max-w-none object-cover"
-          src={photos[4]}
-        />
-      </motion.div>
+      <div className="flex w-full items-start gap-[2px]">
+        {[left, right].map((column, columnIndex) => (
+          <div
+            key={columnIndex}
+            className="flex min-w-0 flex-1 flex-col gap-[2px]">
+            {column.map((photo) => (
+              <motion.img
+                key={photo}
+                alt=""
+                variants={fadeUp}
+                src={photo}
+                // The height follows the photograph rather than the layout,
+                // which is the whole point of masonry: a portrait stays a
+                // portrait and a landscape stays a landscape, and neither is
+                // cropped to make a grid line up.
+                className="pointer-events-none block h-auto w-full max-w-none"
+              />
+            ))}
+          </div>
+        ))}
+      </div>
     </motion.section>
   );
 }

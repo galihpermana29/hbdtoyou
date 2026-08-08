@@ -27,16 +27,6 @@ import {
 const ASSET = '/templates/wedding-template-1';
 
 /**
- * The sample invitation, which is what an unanswered photograph falls back to.
- *
- * The section names artwork - the film strip, the polaroid's border, the map
- * keepsake - and never a photograph, because a photograph belongs to whoever is
- * getting married. Where a couple has not given one, the one the sample holds
- * stands in, the same as an unanswered name does.
- */
-const SAMPLE = DEFAULT_WEDDING_TEMPLATE_1_CONTENT;
-
-/**
  * The largest and the smallest a chapter's story may be printed at.
  *
  * The ceiling is the 10px the design sets one in, and it is a ceiling rather
@@ -85,14 +75,15 @@ const SIDE_CHAPTERS_MAX_HEIGHT = 353;
 const CENTRE_CHAPTER_MAX_HEIGHT = 246;
 
 /** The film-strip of three photos, tilted -4.83deg. */
+/** Where the design puts each of the film strip's three slots, top to bottom. */
+const FILM_SLOT_TOPS = ['10.5px', '117.08px', '223.67px'];
+
 function FilmStrip({ content }: { content: WeddingTemplate1Content }) {
   const reveal = useWeddingReveal(fadeUp);
   // Three, because the design draws three slots in the strip below and the
   // Love Story asks a couple three questions. Counting the sample's list
   // instead would leave a slot empty and silent if the sample ever held fewer.
-  const photos = [0, 1, 2].map((i) =>
-    pickPhoto(content.loveStoryPhotos, i, SAMPLE.loveStoryPhotos[i])
-  );
+  const photos = [0, 1, 2].map((i) => pickPhoto(content.loveStoryPhotos, i));
 
   return (
     <motion.div
@@ -105,27 +96,23 @@ function FilmStrip({ content }: { content: WeddingTemplate1Content }) {
             filter:
               'drop-shadow(0px 0px 1.85px rgba(0,0,0,0.25)) drop-shadow(0px 2px 5.15px rgba(0,0,0,0.17))',
           }}>
-          <div className="absolute left-[9.69px] top-[10.5px] h-[99.318px] w-[108.201px]">
-            <img
-              alt=""
-              className="pointer-events-none absolute inset-0 size-full max-w-none object-cover"
-              src={photos[0]}
-            />
-          </div>
-          <div className="absolute left-[9.69px] top-[117.08px] h-[99.318px] w-[108.201px]">
-            <img
-              alt=""
-              className="pointer-events-none absolute inset-0 size-full max-w-none object-cover"
-              src={photos[1]}
-            />
-          </div>
-          <div className="absolute left-[9.69px] top-[223.67px] h-[99.318px] w-[108.201px]">
-            <img
-              alt=""
-              className="pointer-events-none absolute inset-0 size-full max-w-none object-cover"
-              src={photos[2]}
-            />
-          </div>
+          {/* The strip's three slots are the design's and are drawn whether or
+              not a couple has filled them. An unfilled one shows the film
+              behind it rather than a photograph from somebody else's romance. */}
+          {FILM_SLOT_TOPS.map((top, index) => (
+            <div
+              key={top}
+              className="absolute left-[9.69px] h-[99.318px] w-[108.201px]"
+              style={{ top }}>
+              {photos[index] ? (
+                <img
+                  alt=""
+                  className="pointer-events-none absolute inset-0 size-full max-w-none object-cover"
+                  src={photos[index]}
+                />
+              ) : null}
+            </div>
+          ))}
           <div className="absolute left-0 top-0 h-[333.888px] w-[129.845px]">
             <div className="pointer-events-none absolute inset-0 overflow-hidden">
               <img
@@ -148,7 +135,7 @@ function Polaroid({ content }: { content: WeddingTemplate1Content }) {
   const reveal = useWeddingReveal(fadeUp);
   const [revealed, setRevealed] = useState(false);
   const isRevealed = !sealed || revealed;
-  const polaroidPhoto = content.polaroidPhoto || SAMPLE.polaroidPhoto;
+  const polaroidPhoto = content.polaroidPhoto;
 
   const coverAnim = {
     animate: { opacity: isRevealed ? 0 : 1, scale: isRevealed ? 1.05 : 1 },
@@ -167,11 +154,17 @@ function Polaroid({ content }: { content: WeddingTemplate1Content }) {
       className="absolute left-[191px] top-[389px] flex h-[219.836px] w-[178.439px] cursor-pointer items-center justify-center"
       {...reveal}>
       <div className="absolute left-[9.02px] top-[9.9px] h-[156.339px] w-[139.745px]">
-        <img
-          alt=""
-          className="pointer-events-none absolute inset-0 block size-full max-w-none"
-          src={polaroidPhoto}
-        />
+        {polaroidPhoto ? (
+          // Cropped to the frame rather than stretched into it. Without this a
+          // photograph whose shape is not the frame's is squashed to fit, which
+          // is a couple's faces made wider or narrower than they are - the one
+          // distortion nobody forgives on their own wedding invitation.
+          <img
+            alt=""
+            className="pointer-events-none absolute inset-0 block size-full max-w-none object-cover"
+            src={polaroidPhoto}
+          />
+        ) : null}
       </div>
       <div className="absolute left-[0.01px] top-0 h-[205.649px] w-[159.458px] shadow-[0px_1.914px_2.967px_0px_rgba(0,0,0,0.17)]">
         <img
@@ -254,7 +247,7 @@ export default function LoveStory({
   const staggerReveal = useWeddingReveal(staggerContainer);
   const centerMilestone = content.milestones[2] ?? content.milestones[0];
   const rightMilestones = content.milestones.slice(0, 2);
-  const mapPhoto = content.mapPhoto || SAMPLE.mapPhoto;
+  const mapPhoto = content.mapPhoto;
 
   return (
     <section className="relative h-[1081px] w-full overflow-hidden bg-[#090909]">
@@ -349,11 +342,13 @@ export default function LoveStory({
           />
         </div>
         <div className="absolute left-[21.01px] top-[81.93px] h-[127.104px] w-[207.988px] rounded-[4.202px]">
-          <img
-            alt=""
-            className="pointer-events-none absolute inset-0 size-full max-w-none rounded-[4.202px] object-cover"
-            src={mapPhoto}
-          />
+          {mapPhoto ? (
+            <img
+              alt=""
+              className="pointer-events-none absolute inset-0 size-full max-w-none rounded-[4.202px] object-cover"
+              src={mapPhoto}
+            />
+          ) : null}
         </div>
         <div className="absolute left-[111.35px] top-[127.1px] size-[27.307px]">
           <img

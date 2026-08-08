@@ -43,14 +43,6 @@ import {
 const ASSET = '/templates/wedding-template-1';
 
 /**
- * The sample invitation, which is what an unanswered photograph falls back to.
- *
- * The section names the torn edge, the portrait frame and the emblem, which are
- * the template's on every invitation, and it names neither partner's face.
- */
-const SAMPLE = DEFAULT_WEDDING_TEMPLATE_1_CONTENT;
-
-/**
  * The height either of a partner's two written answers steps down towards.
  *
  * Three lines of the 10px the design sets them in, which at this leading is 45.
@@ -155,18 +147,23 @@ function Partner({
           {fullName}
         </AutoFitText>
       </div>
-      <div className="flex w-full flex-col items-start gap-[4px]">
-        <p className="w-full font-[family-name:var(--font-wt1-mono)] text-[8px]">
-          {lead}
-        </p>
-        <AutoFitText
-          maxFontSize={10}
-          minFontSize={8}
-          maxHeight={ANSWER_MAX_HEIGHT}
-          className="w-full font-[family-name:var(--font-wt1-mono)] font-semibold">
-          {parents}
-        </AutoFitText>
-      </div>
+      {/* The lead goes with the names it introduces. Parents are optional, and
+          "The daughter of" standing over an empty line is worse than saying
+          nothing: it announces a family and then fails to name them. */}
+      {parents ? (
+        <div className="flex w-full flex-col items-start gap-[4px]">
+          <p className="w-full font-[family-name:var(--font-wt1-mono)] text-[8px]">
+            {lead}
+          </p>
+          <AutoFitText
+            maxFontSize={10}
+            minFontSize={8}
+            maxHeight={ANSWER_MAX_HEIGHT}
+            className="w-full font-[family-name:var(--font-wt1-mono)] font-semibold">
+            {parents}
+          </AutoFitText>
+        </div>
+      ) : null}
     </motion.div>
   );
 }
@@ -187,8 +184,12 @@ export default function BrideGroom({
   // template's and is drawn on every invitation; who is inside it is not, and a
   // couple who has not given theirs is shown the sample's rather than a picture
   // baked into this section.
-  const bridePhoto = content.bridePhoto || SAMPLE.bridePhoto;
-  const groomPhoto = content.groomPhoto || SAMPLE.groomPhoto;
+  // Theirs or nothing. These fell back to the sample until now, which put the
+  // designer's two models inside the frames of every couple who had not chosen
+  // portraits yet - the exact thing hbd-9h3.1 set out to end, surviving because
+  // it guarded where the photograph is drawn and not where it is chosen.
+  const bridePhoto = content.bridePhoto;
+  const groomPhoto = content.groomPhoto;
 
   // The portraits slide in from off-canvas. They can't use whileInView on
   // themselves: at their start offset they sit outside the section's
@@ -257,13 +258,15 @@ export default function BrideGroom({
         className="absolute left-[157px] top-[224px] h-[171.693px] w-[218.254px]"
         {...slideIn(230)}>
         <div className="absolute left-[17.46px] top-[16.73px] h-[141.138px] w-[169.511px]">
-          <div className="pointer-events-none absolute inset-0 overflow-hidden">
-            <img
-              alt=""
-              className="absolute left-0 top-[-9%] h-[159.43%] w-full max-w-none"
-              src={bridePhoto}
-            />
-          </div>
+          {bridePhoto ? (
+            <div className="pointer-events-none absolute inset-0 overflow-hidden">
+              <img
+                alt=""
+                className="absolute left-0 top-[-9%] h-[159.43%] w-full max-w-none object-cover"
+                src={bridePhoto}
+              />
+            </div>
+          ) : null}
         </div>
         <div className="absolute left-[-2.3px] top-[-2.94px] flex h-[177.581px] w-[222.855px] items-center justify-center">
           <div className="flex-none rotate-[1.56deg]">
@@ -287,13 +290,15 @@ export default function BrideGroom({
         <div className="flex-none rotate-[-1.38deg]">
           <div className="relative h-[171.69px] w-[218.25px]">
             <div className="absolute left-[32.01px] top-[16.73px] h-[141.135px] w-[169.507px]">
-              <div className="pointer-events-none absolute inset-0 overflow-hidden">
-                <img
-                  alt=""
-                  className="absolute left-[-0.18%] top-[-0.07%] h-[159.43%] w-full max-w-none"
-                  src={groomPhoto}
-                />
-              </div>
+              {groomPhoto ? (
+                <div className="pointer-events-none absolute inset-0 overflow-hidden">
+                  <img
+                    alt=""
+                    className="absolute left-[-0.18%] top-[-0.07%] h-[159.43%] w-full max-w-none object-cover"
+                    src={groomPhoto}
+                  />
+                </div>
+              ) : null}
             </div>
             <div className="absolute left-0 top-0 flex h-[171.69px] w-[218.25px] items-center justify-center">
               <div className="flex-none rotate-180 -scale-y-100">

@@ -8,8 +8,8 @@
  * account number to the clipboard and briefly swaps its label to "copied".
  */
 
-import { useState } from 'react';
-import { motion } from 'framer-motion';
+import { useEffect, useState } from 'react';
+import { motion, useReducedMotion } from 'framer-motion';
 
 import { fadeUpCenter } from './variants';
 import { useWeddingReveal } from './use-wedding-reveal';
@@ -23,13 +23,37 @@ import {
 const ASSET = '/templates/wedding-template-1';
 
 /**
- * The sample invitation, which is what an unanswered photograph falls back to.
+ * Which of the photographs is showing, moving on by itself.
  *
- * The section names artwork and never a photograph, because a photograph
- * belongs to whoever is getting married. Where a couple has not given one, the
- * one the sample holds stands in, the same as an unanswered name does.
+ * The block has room for one and the couple gives three, so they take turns.
+ * There is no control to press: this sits in the middle of an invitation
+ * somebody is reading, and a carousel with arrows would ask them to operate it.
+ *
+ * Stops for a guest who has asked for less movement, showing the first and
+ * leaving it there. A photograph that never appears would be worse than a still
+ * one - the template has made that mistake before, with the two portraits - so
+ * reduced motion means no movement rather than no photographs.
  */
-const SAMPLE = DEFAULT_WEDDING_TEMPLATE_1_CONTENT;
+function useCrossFade(howMany: number): number {
+  const reduce = useReducedMotion();
+  const [showing, setShowing] = useState(0);
+
+  useEffect(() => {
+    if (reduce || howMany < 2) return;
+    const timer = setInterval(
+      () => setShowing((previous) => (previous + 1) % howMany),
+      CROSS_FADE_EVERY_MS
+    );
+    return () => clearInterval(timer);
+  }, [reduce, howMany]);
+
+  // A couple who removed a photograph could otherwise leave this pointing past
+  // the end of the list, at nothing.
+  return showing < howMany ? showing : 0;
+}
+
+/** How long each photograph is left up before the next one comes through. */
+const CROSS_FADE_EVERY_MS = 4000;
 
 export default function TokenOfLove({
   content = DEFAULT_WEDDING_TEMPLATE_1_CONTENT,
@@ -38,7 +62,10 @@ export default function TokenOfLove({
 }) {
   const fadeUpCenterReveal = useWeddingReveal(fadeUpCenter);
   const [copied, setCopied] = useState(false);
-  const tokenPhoto = content.tokenPhoto || SAMPLE.tokenPhoto;
+  const photos = (content.tokenPhotos ?? []).filter(
+    (photo) => typeof photo === 'string' && photo.length > 0
+  );
+  const showing = useCrossFade(photos.length);
 
   const handleCopy = () => {
     navigator.clipboard?.writeText(content.accountNumber).then(() => {
@@ -83,12 +110,20 @@ export default function TokenOfLove({
             <p className="absolute left-[calc(50%-45.5px)] top-[185.72px] whitespace-nowrap font-[family-name:var(--font-wt1-script)] text-[32px] leading-[normal] text-black">
               Thank You
             </p>
+            {/* All of them, stacked, with one shown at a time. Stacked rather
+                than swapped so the two frames of a cross-fade overlap: swapping
+                the source would blink through the ground between them. */}
             <div className="absolute left-1/2 top-[15.25px] h-[171.5px] w-[302.328px] -translate-x-1/2">
-              <img
-                alt="Couple"
-                className="pointer-events-none absolute inset-0 size-full max-w-none object-cover"
-                src={tokenPhoto}
-              />
+              {photos.map((photo, index) => (
+                <img
+                  key={photo}
+                  alt={index === showing ? 'Couple' : ''}
+                  aria-hidden={index === showing ? undefined : true}
+                  className="pointer-events-none absolute inset-0 size-full max-w-none object-cover transition-opacity duration-[1200ms]"
+                  style={{ opacity: index === showing ? 1 : 0 }}
+                  src={photo}
+                />
+              ))}
             </div>
           </div>
 

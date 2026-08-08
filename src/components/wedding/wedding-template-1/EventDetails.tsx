@@ -26,6 +26,7 @@ import { fadeUp, fadeUpCenter } from './variants';
 import { useWeddingReveal } from './use-wedding-reveal';
 import { AutoFitText } from './AutoFitText';
 import { formatWeddingDateLabel } from './wedding-date-label';
+import { directionsTo } from '@/components/forms/wedding/wedding-map';
 
 import {
   DEFAULT_WEDDING_TEMPLATE_1_CONTENT,
@@ -34,15 +35,6 @@ import {
 } from '@/components/forms/wedding/wedding-invitation-types';
 
 const ASSET = '/templates/wedding-template-1';
-
-/**
- * The sample invitation, which is what an unanswered photograph falls back to.
- *
- * The section names artwork and never a photograph, because a photograph
- * belongs to whoever is getting married. Where a couple has not given one, the
- * one the sample holds stands in, the same as an unanswered name does.
- */
-const SAMPLE = DEFAULT_WEDDING_TEMPLATE_1_CONTENT;
 
 /**
  * The two boxes the design draws the venue's name and its written address in.
@@ -91,6 +83,23 @@ const VENUE_ADDRESS_BOX_HEIGHT = 60;
  * that column is 149 where the design draws 146, and legibility is what those
  * 3px bought.
  */
+/**
+ * How tall the section is, and how much taller a map makes it.
+ *
+ * The design draws 648px and places everything inside against it. Its contents
+ * are absolutely positioned, so they add no height of their own - which is why
+ * the map could not simply push the section open, and why RSVP Now, the one
+ * control on this page that does anything, was cut in half by the section's own
+ * edge instead.
+ *
+ * So the height says out loud what is in the section: the design's 648, plus
+ * the map and the gap above it when there is a map. Nothing here is asserted -
+ * the check never asserts a dimension - so it costs nothing but the reading.
+ */
+const SECTION_HEIGHT = 648;
+const MAP_HEIGHT = 180;
+const MAP_GAP = 24;
+
 const VENUE_NAME_CEILING = 12;
 const VENUE_ADDRESS_CEILING = 10;
 const VENUE_FLOOR = 8;
@@ -131,18 +140,27 @@ export default function EventDetails({
   const pad = (n: number) => String(n).padStart(2, '0');
   // Placeholder "08" (matching the design) until the client clock is live.
   const cd = (n: number) => (mounted ? pad(n) : '08');
-  const polaroidPhoto = pickPhoto(
-    content.eventPhotos,
-    0,
-    SAMPLE.eventPhotos[0]
-  );
+  const polaroidPhoto = pickPhoto(content.eventPhotos, 0);
+  const directions = directionsTo(content.address);
   const dateLabel = formatWeddingDateLabel(content.weddingDateIso, {
     beforeYear: ' ',
   });
-  const timeLabel = `${content.eventStartTime.replace(':', '.')} - ${content.eventEndTime.replace(':', '.')} WIB`;
+  // Both ends or neither. "19.00 -  WIB" is worse than no line at all: it reads
+  // as a reception that starts and never finishes, rather than as a couple who
+  // has not said yet.
+  const timeLabel =
+    content.eventStartTime && content.eventEndTime
+      ? `${content.eventStartTime.replace(':', '.')} - ${content.eventEndTime.replace(':', '.')} WIB`
+      : '';
 
   return (
-    <section className="relative h-[648px] w-full overflow-hidden bg-[#292929]">
+    <section
+      className="relative w-full overflow-hidden bg-[#292929]"
+      style={{
+        height: content.mapsUrl
+          ? SECTION_HEIGHT + MAP_HEIGHT + MAP_GAP
+          : SECTION_HEIGHT,
+      }}>
       {/* Section title */}
       <motion.div
         className="absolute left-1/2 top-[60px] h-[31px] w-[245px]"
@@ -179,9 +197,13 @@ export default function EventDetails({
                   {content.address}
                 </AutoFitText>
               </div>
-              {content.mapsUrl ? (
+              {/* Directions, which the embed cannot give: an embed address
+                  opens a stripped map with no way to start a route. Built from
+                  the written address instead, so it opens in whichever maps
+                  application the guest already uses. */}
+              {directions ? (
                 <a
-                  href={content.mapsUrl}
+                  href={directions}
                   target="_blank"
                   rel="noopener noreferrer"
                   className="flex items-center justify-center border border-solid border-[#fafafa] gap-[10px] p-[10px]">
@@ -211,12 +233,17 @@ export default function EventDetails({
                       src={`${ASSET}/polaroid-frame.png`}
                     />
                   </div>
+                  {/* The polaroid frame is the design's; what is inside it is
+                      the couple's. An empty frame is the honest answer before
+                      they have chosen a venue photograph. */}
                   <div className="absolute left-[9.43px] top-[10.34px] h-[163.363px] w-[146.022px]">
-                    <img
-                      alt=""
-                      className="pointer-events-none absolute inset-0 block size-full max-w-none object-cover"
-                      src={polaroidPhoto}
-                    />
+                    {polaroidPhoto ? (
+                      <img
+                        alt=""
+                        className="pointer-events-none absolute inset-0 block size-full max-w-none object-cover"
+                        src={polaroidPhoto}
+                      />
+                    ) : null}
                   </div>
                 </div>
               </div>
@@ -224,6 +251,30 @@ export default function EventDetails({
           </div>
 
           {/* Countdown + reception details */}
+          {/* The map, across the whole column rather than squeezed beside the
+              address.
+              
+              It was drawn in the venue row first, which put a map, a written
+              address and a tilted polaroid into 343px and made all three too
+              small to read. Full width above the countdown is where a guest
+              looks for it anyway: they have just read where the wedding is and
+              the next thing they want is to see it.
+              
+              Built from the address extracted out of what the couple pasted,
+              never from the paste itself - a guest opens this page, and putting
+              somebody else's markup into it would run their script in every
+              guest's browser. */}
+          {content.mapsUrl ? (
+            <iframe
+              src={content.mapsUrl}
+              title="Wedding location"
+              loading="lazy"
+              referrerPolicy="no-referrer-when-downgrade"
+              style={{ height: MAP_HEIGHT }}
+              className="w-full border-0"
+            />
+          ) : null}
+
           <div className="flex w-full flex-col items-start gap-[10px] p-[10px] leading-[normal] text-white [word-break:break-word]">
             <div className="flex w-full items-center justify-between py-[8px] text-center font-[family-name:var(--font-wt1-mono)] font-semibold">
               <div className="relative flex min-w-px flex-[1_0_0] flex-col items-center gap-[2px]">

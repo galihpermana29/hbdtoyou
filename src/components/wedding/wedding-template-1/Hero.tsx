@@ -36,15 +36,6 @@ import { formatWeddingDateLabel } from './wedding-date-label';
 
 const ASSET = '/templates/wedding-template-1';
 
-/**
- * The sample invitation, which is what an unanswered photograph falls back to.
- *
- * The section names artwork and never a photograph, because a photograph
- * belongs to whoever is getting married. Where a couple has not given one, the
- * one the sample holds stands in, the same as an unanswered name does.
- */
-const SAMPLE = DEFAULT_WEDDING_TEMPLATE_1_CONTENT;
-
 const cardShadow = {
   filter:
     'drop-shadow(1.783px 0px 6.686px rgba(0,0,0,0.1)) drop-shadow(0px 1.783px 5.705px rgba(0,0,0,0.17))',
@@ -137,7 +128,7 @@ function EnvelopeCard({
   reduce: boolean | null;
   content: WeddingTemplate1Content;
 }) {
-  const couplePhoto = pickPhoto(content.heroPhotos, 0, SAMPLE.heroPhotos[0]);
+  const couplePhoto = pickPhoto(content.heroPhotos, 0);
   const dateLabel = formatWeddingDateLabel(content.weddingDateIso, {
     beforeYear: ', ',
   });
@@ -198,12 +189,18 @@ function EnvelopeCard({
                 src={`${ASSET}/paper.jpg`}
               />
               <div className="absolute left-[4.7px] top-[4.7px] h-[167.769px] w-[255.436px] border-[1.044px] border-solid border-[#201e1f]" />
+              {/* The frame is drawn either way, because it is the design's
+                  card rather than the couple's photograph. What goes inside it
+                  is theirs, and a couple who has not chosen one yet gets the
+                  empty frame rather than a stranger's wedding photo. */}
               <div className="absolute left-1/2 top-[11.74px] h-[132.023px] w-[232.736px] -translate-x-1/2">
-                <img
-                  alt={coupleLabel}
-                  className="pointer-events-none absolute inset-0 size-full max-w-none object-cover"
-                  src={couplePhoto}
-                />
+                {couplePhoto ? (
+                  <img
+                    alt={coupleLabel}
+                    className="pointer-events-none absolute inset-0 size-full max-w-none object-cover"
+                    src={couplePhoto}
+                  />
+                ) : null}
               </div>
               {/* The wedding day, captioning the photograph above it.
 
