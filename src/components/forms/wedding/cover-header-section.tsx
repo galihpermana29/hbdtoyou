@@ -23,7 +23,7 @@ import {
   requiredValue,
 } from './required-fields';
 import PhotoDropZone from './photo-drop-zone';
-import { DUMMY_BACKGROUND_MUSIC_OPTIONS } from './wedding-invitation-types';
+import { BACKGROUND_TRACK_OPTIONS } from './background-track-catalog';
 
 /**
  * The first Section of the details-and-story step: what a guest sees when the
@@ -156,14 +156,14 @@ export default function CoverHeaderSection({
           </p>
           {/* Searched by artist or by song, as the design's placeholder says,
               against the tracks the product currently offers. */}
-          <Form.Item name="backgroundMusic" noStyle>
+          <Form.Item name="backgroundTrack" noStyle>
             <Select
               id={backgroundTrackId}
               size="large"
               showSearch
               optionFilterProp="label"
               placeholder={copy.backgroundTrackPlaceholder}
-              options={DUMMY_BACKGROUND_MUSIC_OPTIONS}
+              options={BACKGROUND_TRACK_OPTIONS}
               prefix={<Music size={20} aria-hidden="true" />}
               suffixIcon={null}
               className={`w-full ${fieldTreatment}`}

@@ -9,9 +9,10 @@
  *
  * Optional is the default and is not listed. The Holy Verse is optional because
  * it arrives Prefilled and a couple may not want a verse at all; every parent is
- * optional because plenty of couples cannot name four; the teaser video and the
- * Background Track are optional because nothing renders them yet, which is
- * `hbd-o3f`'s siblings rather than this ticket's business.
+ * optional because plenty of couples cannot name four; the teaser video is
+ * optional because nothing renders it yet, which is `hbd-o3f`'s siblings rather
+ * than this ticket's business; and the Background Track is optional because a
+ * couple who picks nothing means silence, and silence needs no answer.
  */
 
 import type { FlowCopyKey } from './copy';

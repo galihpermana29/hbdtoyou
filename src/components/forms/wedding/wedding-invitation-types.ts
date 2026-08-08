@@ -2,6 +2,12 @@ import dayjs, { type Dayjs } from 'dayjs';
 
 import type { IWeddingInvitationPayload } from '@/action/interfaces';
 import type { FlowCopyKey } from './copy';
+import {
+  MENCINTAIMU,
+  backgroundTrackByUrl,
+  backgroundTrackFromLegacyId,
+  type WeddingBackgroundTrack,
+} from './background-track-catalog';
 
 /** A single love-story timeline entry shown in the viewer. */
 export interface WeddingMilestone {
@@ -87,7 +93,21 @@ export interface WeddingTemplate1Content {
   bridePhoto: string;
   groomPhoto: string;
   weddingDateIso: string;
-  backgroundMusicId: string;
+  /**
+   * The Background Track the couple picked, whole: title, artist and the url
+   * the invitation plays.
+   *
+   * The whole track rather than a reference into the catalog, because a
+   * published invitation is self-contained: it must keep playing the song the
+   * couple chose whatever the catalog does after they chose it. Null is a
+   * couple who picked nothing, and it means silence - no player, no record
+   * drawn - rather than anything invented for them.
+   *
+   * Records saved before this carried the pick as `backgroundMusicId`, a slug
+   * into a label-only list; `weddingContentFrom` reads those back through the
+   * catalog's memory of what each slug meant.
+   */
+  backgroundTrack: WeddingBackgroundTrack | null;
   verseText: string;
   verseCitation: string;
   loveStoryPhotos: string[];
@@ -120,13 +140,12 @@ export interface WeddingTemplate1Content {
   /** Whether the block saying where a gift can be sent appears at all. */
   digitalGiftEnabled: boolean;
   /**
-   * Whether the invitation offers the couple's background track.
+   * Whether the invitation offers the couple's Background Track.
    *
-   * The invitation has no audio yet - it draws a record and plays nothing - so
-   * today this decides only whether the record is drawn. That defect is the
-   * epic's `Further Notes` rather than this field being decorative: the answer
-   * is the couple's either way, and it is the answer the create payload has
-   * always carried as `song_request_enabled`.
+   * Off means silence and no record drawn, whatever track is stored: the pick
+   * is kept, the way the Gift Registry's answers are kept while its switch is
+   * off, so turning the switch back on brings the same song back. It is the
+   * answer the create payload has always carried as `song_request_enabled`.
    */
   songRequestEnabled: boolean;
   /**
@@ -165,7 +184,8 @@ export interface WeddingInvitationFormValues {
   bridePhoto?: string[];
   groomPhoto?: string[];
   weddingDate?: Dayjs;
-  backgroundMusic?: string;
+  /** The picked Background Track's url, which is how the select names it. */
+  backgroundTrack?: string;
   verseText?: string;
   verseCitation?: string;
   loveStoryPhotos?: string[];
@@ -219,13 +239,6 @@ export const BANK_PROVIDER_OPTIONS = [
   'ShopeePay',
 ];
 
-/** Placeholder music options until the internal API is ready. */
-export const DUMMY_BACKGROUND_MUSIC_OPTIONS = [
-  { label: 'Sal Priadi - Mencintaimu', value: 'sal-priadi-mencintaimu' },
-  { label: 'Raim Laode - Komang', value: 'raim-laode-komang' },
-  { label: 'Nadhif Basalamah - Penjaga Hati', value: 'nadhif-penjaga-hati' },
-];
-
 /** Where Wedding Template 1's artwork is served from. */
 const TEMPLATE_1_ASSET = '/templates/wedding-template-1';
 
@@ -266,7 +279,7 @@ export const DEFAULT_WEDDING_TEMPLATE_1_CONTENT: WeddingTemplate1Content = {
   bridePhoto: `${TEMPLATE_1_ASSET}/bride-photo.jpg`,
   groomPhoto: `${TEMPLATE_1_ASSET}/groom-photo.jpg`,
   weddingDateIso: '2026-05-03T19:00:00+07:00',
-  backgroundMusicId: 'sal-priadi-mencintaimu',
+  backgroundTrack: { ...MENCINTAIMU },
   verseText:
     'Dan di antara tanda-tanda (kebesaran)-Nya ialah Dia menciptakan pasangan-pasangan untukmu dari jenismu sendiri, agar kamu cenderung dan merasa tenteram kepadanya, dan Dia menjadikan di antaramu rasa cinta dan kasih sayang. Sesungguhnya pada yang demikian itu benar-benar terdapat tanda-tanda (kebesaran Allah) bagi kaum yang berpikir',
   verseCitation: 'Q.S Ar-Rum : 21',
@@ -484,7 +497,7 @@ export function formValuesToContent(
     bridePhoto: pickPhoto(v.bridePhoto, 0),
     groomPhoto: pickPhoto(v.groomPhoto, 0),
     weddingDateIso: weddingDateToIso(v.weddingDate, v.eventStartTime),
-    backgroundMusicId: v.backgroundMusic ?? '',
+    backgroundTrack: backgroundTrackByUrl(v.backgroundTrack),
     verseText: v.verseText?.trim() ?? '',
     verseCitation: v.verseCitation?.trim() ?? '',
     loveStoryPhotos: v.loveStoryPhotos ?? [],
@@ -725,6 +738,13 @@ export function weddingIdFrom(
  * being none, and every name lands in a text node, while the Love Story indexes
  * and slices its chapters. A guest is told the invitation could not be opened,
  * which is true, rather than handed the server's error page.
+ *
+ * The Background Track is the one field read rather than handed over as it
+ * stands, because the record's word is not enough to hand an audio element: a
+ * track without a url is not a track, and a record from before the track was
+ * stored whole carries only the retired `backgroundMusicId` slug. Both read
+ * back as what they are - the song the slug stood for where the catalog
+ * remembers one, and no track at all otherwise.
  */
 export function weddingContentFrom(
   stored: string | null | undefined
@@ -743,7 +763,32 @@ export function weddingContentFrom(
     return null;
   }
 
-  return parsed as WeddingTemplate1Content;
+  const record = parsed as StoredRecord;
+  return { ...record, backgroundTrack: storedBackgroundTrack(record) };
+}
+
+/**
+ * A record as it was actually stored, which may predate the Background Track
+ * being stored whole and still carry the retired `backgroundMusicId` slug.
+ */
+type StoredRecord = WeddingTemplate1Content & { backgroundMusicId?: string };
+
+/** The playable track a stored record carries, however old the record is. */
+function storedBackgroundTrack(record: StoredRecord): WeddingBackgroundTrack | null {
+  const track = record.backgroundTrack;
+  if (
+    track &&
+    typeof track === 'object' &&
+    typeof track.url === 'string' &&
+    track.url.trim() !== ''
+  ) {
+    return {
+      title: typeof track.title === 'string' ? track.title : '',
+      artist: typeof track.artist === 'string' ? track.artist : '',
+      url: track.url,
+    };
+  }
+  return backgroundTrackFromLegacyId(record.backgroundMusicId);
 }
 
 /**
@@ -785,7 +830,8 @@ function photoList(photo: string | undefined): string[] {
  * The inverse of `formValuesToContent`, and it is not a spread of the record,
  * because that function transforms rather than copying: a Dayjs becomes a
  * stamp, four photographs become single strings or a renamed list, and the
- * chosen track is stored under another name. Every one of those is undone here.
+ * chosen track is stored whole where the form holds only its url. Every one of
+ * those is undone here.
  *
  * ## Two values are dropped rather than restored
  *
@@ -826,7 +872,7 @@ export function contentToFormValues(
     bridePhoto: photoList(content.bridePhoto),
     groomPhoto: photoList(content.groomPhoto),
     weddingDate: weddingDateFromIso(content.weddingDateIso),
-    backgroundMusic: content.backgroundMusicId ?? '',
+    backgroundTrack: content.backgroundTrack?.url || undefined,
     verseText: content.verseText ?? '',
     verseCitation: content.verseCitation ?? '',
     loveStoryPhotos: content.loveStoryPhotos ?? [],

@@ -407,11 +407,21 @@ function WaxSeal() {
 export default function Hero({
   content = DEFAULT_WEDDING_TEMPLATE_1_CONTENT,
   addressee,
+  onOpen,
   onOpened,
 }: {
   content?: WeddingTemplate1Content;
   /** Who this invitation was sent to, drawn on the closed envelope. */
   addressee?: string;
+  /**
+   * Say that the guest has pressed Open Invitation, inside the press itself.
+   *
+   * Called synchronously from the click handler rather than folded into
+   * `onOpened`, because this is the gesture the Background Track starts on and
+   * a browser only lets audio start inside one: `onOpened` arrives on a timer
+   * 1.7s later, which Safari no longer counts as the guest asking.
+   */
+  onOpen?: () => void;
   /**
    * Say that the opening is over and the rest of the invitation is the guest's.
    *
@@ -498,7 +508,10 @@ export default function Hero({
         <div className="absolute left-1/2 top-[487px] z-40 -translate-x-1/2">
           <motion.button
             type="button"
-            onClick={() => setOpened(true)}
+            onClick={() => {
+              setOpened(true);
+              onOpen?.();
+            }}
             aria-label="Open invitation"
             className="flex items-center justify-center border border-solid border-[#fafafa] gap-[10px] p-[10px]"
             initial={false}
