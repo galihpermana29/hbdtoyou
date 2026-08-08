@@ -354,9 +354,9 @@ export function joinParents(father?: string, mother?: string): string {
  * The couple, as the record names them, or empty when it does not name them.
  *
  * For the product's own screens rather than for the invitation: a couple's list
- * of their own invitations has to say which is which, and every one of them is
- * titled `Wedding Invitation`. Their nicknames are the only thing on the record
- * that tells one from another.
+ * of their own invitations has to say which is which, and a record saved before
+ * the title named the couple is titled `Wedding Invitation`. The nicknames on
+ * the record are what tells those apart, so they are what every row reads.
  *
  * Empty rather than anything invented when neither nickname has been given, and
  * one name rather than a stranded ampersand when only one has - the same rule
@@ -518,15 +518,65 @@ export function formValuesToContent(
 }
 
 /**
- * The title every invitation is created with.
+ * What an invitation is titled while neither nickname has been given.
  *
- * Fixed, because the Create Flow never asks a couple for one: the design draws
- * no such field, and the only publish check the backend documents is that the
- * title is not empty, so a title nobody types can never fail it. It is what a
- * couple would see naming this invitation in a list of their own things, so it
- * is written as a person would read it rather than as an identifier.
+ * The stand-in only, no longer every invitation's title: the title is the
+ * couple, written `{Groom Nickname} & {Bride Nickname}` in that order, and
+ * every save sends the current one, so the record tracks what they typed. This
+ * fixed title stands only while that would say nothing - both nicknames empty,
+ * which is only ever true of an early draft. It also keeps the backend's one
+ * documented publish check, a title that is not empty, impossible to fail:
+ * no invitation is ever titled nothing.
  */
 export const WEDDING_INVITATION_TITLE = 'Wedding Invitation';
+
+/**
+ * Whether both nicknames have been given.
+ *
+ * The one question the name-derived address hangs on, answered in one place so
+ * that every asker agrees: the create that spends the offer because the title
+ * already named the couple, the update that makes it, and the flow opened on a
+ * saved record deciding whether the moment has already passed. Existing is
+ * having been typed - `invitationSlugFrom` may still spell nothing a URL can
+ * carry, and that is a different question with a different answer.
+ */
+export function namesTheCouple(
+  groomNickname: string | undefined,
+  brideNickname: string | undefined
+): boolean {
+  return [groomNickname, brideNickname].every(
+    (name) => (name?.trim() ?? '') !== ''
+  );
+}
+
+/**
+ * The Invitation Slug the couple's nicknames spell, or empty when they do not.
+ *
+ * Lowercase and hyphenated, groom first as the title writes them, each
+ * nickname reduced to the letters and digits a URL can carry. Empty when
+ * either nickname is missing, and empty when either of them survives that
+ * reduction as nothing - a slug naming one partner would claim less than it
+ * means, and a slug is minted for the couple or not at all.
+ *
+ * Empty is "offer nothing": the backend minted this invitation a slug at
+ * create and that one stands. The only caller allowed to send this is the one
+ * unpublished update described in `use-invitation.ts` - from the moment an
+ * invitation is published its slug is frozen forever, because a shared link
+ * must never die.
+ */
+export function invitationSlugFrom(
+  groomNickname: string | undefined,
+  brideNickname: string | undefined
+): string {
+  const names = [groomNickname, brideNickname].map((name) =>
+    (name?.trim() ?? '')
+      .toLowerCase()
+      .replace(/[^a-z0-9]+/g, '-')
+      .replace(/^-+|-+$/g, '')
+  );
+  if (names.some((name) => name === '')) return '';
+  return names.join('-');
+}
 
 /**
  * What the backend is sent, built from what the couple has entered.
@@ -537,11 +587,21 @@ export const WEDDING_INVITATION_TITLE = 'Wedding Invitation';
  * invitation, there as it does in the preview, which is what lets a half-filled
  * draft still render as a wedding.
  *
+ * The title is the couple, `{Groom Nickname} & {Bride Nickname}`, or the one
+ * of them that has been given, or the fixed stand-in while both are empty -
+ * the same joining rule `joinParents` follows, so a lone name is never printed
+ * beside a stranded ampersand. Every save sends the current one, so the record
+ * tracks what the couple typed.
+ *
  * Three things the payload can carry are deliberately absent.
  *
- * `invitation_slug`, because the backend generates one when it is not given
- * a slug and there is no endpoint to ask whether a name is free, so a couple
- * choosing one could only be told it was taken after failing.
+ * `invitation_slug`, because the backend generates one from the title when it
+ * is not given a slug - and the title names the couple, so an invitation whose
+ * nicknames exist by its first save is minted a named address with nothing
+ * sent. The one save that does send a slug is the unpublished update where the
+ * nicknames first exist, and that is `use-invitation.ts`'s
+ * `offerANamedAddress`, not this function's: what this builds never carries
+ * one.
  *
  * `photo_storage_limit_mb`, because the side that counts bytes and refuses
  * uploads is the side that should hold the quota; putting a number here as well
@@ -573,8 +633,12 @@ export function formValuesToInvitationPayload(
     ? { ...content, [WEDDING_ID_KEY]: weddingId }
     : content;
 
+  const couple = [content.groomName, content.brideName]
+    .filter((name) => name !== '')
+    .join(' & ');
+
   return {
-    title: WEDDING_INVITATION_TITLE,
+    title: couple || WEDDING_INVITATION_TITLE,
     detail_content_json_text: JSON.stringify(record),
     rsvp_enabled: true,
     digital_gift_enabled: content.digitalGiftEnabled,

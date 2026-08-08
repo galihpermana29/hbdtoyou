@@ -38,6 +38,7 @@ import {
 } from '@/components/forms/wedding/guest-invites-types';
 import {
   contentToFormValues,
+  namesTheCouple,
   type WeddingInvitationFormValues,
   type WeddingTemplate1Content,
 } from '@/components/forms/wedding/wedding-invitation-types';
@@ -177,7 +178,18 @@ export default function WeddingInvitationCreateClientside({
     forgetWhatWentWrong,
   } = useInvitation(
     form,
-    opened && { weddingId: opened.weddingId, slug: opened.slug }
+    opened && {
+      weddingId: opened.weddingId,
+      slug: opened.slug,
+      isPublished: opened.isPublished,
+      // Both nicknames, because the offer of a name-derived address is made on
+      // the save where they first exist, and a record already carrying both is
+      // one whose moment has passed - whatever came of it.
+      namesTheCouple: namesTheCouple(
+        opened.content.groomName,
+        opened.content.brideName
+      ),
+    }
   );
 
   /**

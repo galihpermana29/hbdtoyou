@@ -129,7 +129,9 @@ Belongs to the invitation's content, not to the Guest List.
 _Avoid_: wishes
 
 **Invitation Slug**:
-The couple-chosen identifier that makes their invitation's link unique.
+The identifier that makes an invitation's link unique.
+Minted by the backend from the invitation's title, offered a name-derived replacement at most once while unpublished, and frozen forever from publish.
+Never the couple's to type.
 _Avoid_: domain, subdomain
 
 ### The template's parts
