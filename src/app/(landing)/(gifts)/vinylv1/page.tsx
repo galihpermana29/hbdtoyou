@@ -10,7 +10,7 @@ const PREVIEW_DATA = {
 
 From the moment our paths crossed, everything changed. The world became softer, warmer, painted in colors I never knew existed.
 
-Every moment with you feels like a song I want to replay forever — the quiet mornings, the late-night whispers, the way you laugh when you think nobody's watching.
+Every moment with you feels like a song I want to replay forever - the quiet mornings, the late-night whispers, the way you laugh when you think nobody's watching.
 
 You are my favorite chapter, my most beautiful melody, my home.
 

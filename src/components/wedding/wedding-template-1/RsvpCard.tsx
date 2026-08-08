@@ -42,6 +42,7 @@ import { submitWeddingRsvp } from '@/action/wedding-api';
 import { useDialogBehaviour } from '@/hooks/use-dialog-behaviour';
 
 import { PaperGround, TornEdge } from './TornPaper';
+import { useFitToPhone } from './use-fit-to-phone';
 
 const ASSET = '/templates/wedding-template-1';
 
@@ -350,6 +351,11 @@ export default function RsvpCard({
   // be put at the top of a five-thousand-pixel invitation for having closed it.
   useDialogBehaviour(dialogRef, onClose);
 
+  // The card is a 375px-wide composition like the invitation behind it, and
+  // it opens over the window, so on a phone narrower than that it is scaled
+  // rather than sliced: see `use-fit-to-phone.ts`.
+  const fit = useFitToPhone<HTMLFormElement>();
+
   const reply = async (event: FormEvent<HTMLFormElement>) => {
     event.preventDefault();
     // The browser will not submit the form until every question is answered,
@@ -429,6 +435,8 @@ export default function RsvpCard({
       tabIndex={-1}
       className="fixed inset-0 z-[100] overflow-y-auto overscroll-contain bg-[#090909]/80 outline-none">
       <form
+        ref={fit.frame}
+        style={fit.style}
         onSubmit={reply}
         className="relative mx-auto w-[375px] max-w-full overflow-hidden pb-[43px] pt-[52px]">
         {/* The paper card, Figma `Rectangle 1` 312:3858, and what is on it. */}

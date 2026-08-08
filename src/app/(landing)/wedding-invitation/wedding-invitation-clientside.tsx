@@ -46,7 +46,7 @@ const VALUE_PROPS: { title: string; description: string }[] = [
   {
     title: 'Personal to every guest',
     description:
-      'Greet each guest by name and tailor the story they see — far warmer than a one-size-fits-all card.',
+      'Greet each guest by name and tailor the story they see - far warmer than a one-size-fits-all card.',
   },
   {
     title: 'Ready in minutes',
@@ -56,7 +56,7 @@ const VALUE_PROPS: { title: string; description: string }[] = [
   {
     title: 'Everything in one link',
     description:
-      'RSVP, schedule, maps, gallery and music — all living in a single shareable invitation link.',
+      'RSVP, schedule, maps, gallery and music - all living in a single shareable invitation link.',
   },
 ];
 
@@ -99,7 +99,7 @@ const REVIEWS: { quote: string; name: string; role: string }[] = [
   },
   {
     quote:
-      'We shared one link and that was it — no printing, no chasing addresses.',
+      'We shared one link and that was it - no printing, no chasing addresses.',
     name: 'Sinta & Dimas',
     role: 'Married in Yogyakarta',
   },
@@ -151,11 +151,11 @@ export default function WeddingInvitationPage() {
           </h1>
           <p className="mt-[24px] mx-auto max-w-[768px] text-[#7b7b7b] text-[16px] md:text-[20px] font-[400]">
             Design beautiful wedding invitation websites filled with your story,
-            photos, schedules, RSVP, and meaningful moments — all in minutes.
+            photos, schedules, RSVP, and meaningful moments - all in minutes.
           </p>
         </div>
 
-        {/* Auto-sliding invitation previews — six cards rendered twice for a
+        {/* Auto-sliding invitation previews - six cards rendered twice for a
             seamless loop. TODO: swap placeholders for exported Figma cards. */}
         <div className="wedding-marquee mt-[56px]">
           <div className="wedding-marquee-track wedding-marquee-track--left">
@@ -228,7 +228,7 @@ export default function WeddingInvitationPage() {
                 Signature templates for your big day
               </h2>
               <p className="text-[#7b7b7b] text-[16px] md:text-[20px] font-[400]">
-                Hand-crafted designs across every mood — editorial, classic,
+                Hand-crafted designs across every mood - editorial, classic,
                 botanical and more. Make any of them yours in minutes.
               </p>
             </div>
@@ -277,7 +277,7 @@ export default function WeddingInvitationPage() {
               Everything your celebration needs, in one place
             </h2>
             <p className="text-[#7b7b7b] text-[16px] md:text-[20px] font-[400]">
-              From the first hello to the last dance — thoughtful features that
+              From the first hello to the last dance - thoughtful features that
               make your guests feel part of the moment.
             </p>
           </div>
@@ -309,7 +309,7 @@ export default function WeddingInvitationPage() {
         </div>
       </section>
 
-      {/* Social proof — two marquee rows, opposite directions */}
+      {/* Social proof - two marquee rows, opposite directions */}
       <section className="py-[90px] overflow-hidden">
         <div className="mx-auto max-w-6xl 2xl:max-w-7xl px-[20px] text-center mb-[48px]">
           <h2 className="text-[#1B1B1B] font-[700] text-[28px] md:text-[36px] leading-[1.2] mb-[16px]">
@@ -336,7 +336,7 @@ export default function WeddingInvitationPage() {
         </div>
       </section>
 
-      {/* Pricing — shared with the root landing page */}
+      {/* Pricing - shared with the root landing page */}
       <PricingSection />
 
       {/* Final CTA / newsletter */}

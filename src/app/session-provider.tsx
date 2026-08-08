@@ -142,8 +142,18 @@ const promotionalContent: AdContent[] = [
  * a deliberate decision about our own UI. No gift route belongs here: a gift is
  * kept clear by the same question the footer asks, so a template added tomorrow
  * is covered without anybody remembering this file exists.
+ *
+ * The scrapbook and journal build pages hang off their product's own route
+ * rather than under `/create`, so they are named here too: somebody assembling
+ * a scrapbook or writing a journal is building, and an advertisement over the
+ * work interrupts it the same way it would in the Create Flow.
  */
-const PRODUCT_ROUTES_WITHOUT_ADS = ['/create', '/payment'];
+const PRODUCT_ROUTES_WITHOUT_ADS = [
+  '/create',
+  '/payment',
+  '/scrapbook/create',
+  '/journal/create',
+];
 
 function isProductRouteWithoutAds(pathname: string): boolean {
   return PRODUCT_ROUTES_WITHOUT_ADS.some(

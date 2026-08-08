@@ -16,6 +16,7 @@ import TokenOfLove from './TokenOfLove';
 import VinylWidget from './VinylWidget';
 import { SealedProvider } from './sealed-context';
 import { useBeginAtTheTop, type Scroller } from './use-begin-at-the-top';
+import { useFitToPhone } from './use-fit-to-phone';
 import {
   DEFAULT_WEDDING_TEMPLATE_1_CONTENT,
   type WeddingTemplate1Content,
@@ -131,6 +132,10 @@ export default function WeddingTemplate1({
 
   useBeginAtTheTop(sealed, scrollsInside);
 
+  // Scaled, whole, into a box narrower than the phone the design draws:
+  // see `use-fit-to-phone.ts`. At 375px and above this writes no style.
+  const fit = useFitToPhone<HTMLElement>();
+
   /**
    * Put everything below the envelope out of reach until it is opened.
    *
@@ -149,7 +154,10 @@ export default function WeddingTemplate1({
 
   return (
     <SealedProvider sealed={sealed}>
-      <main className="relative mx-auto w-full max-w-[375px] overflow-x-hidden bg-[#090909] text-[#fafafa]">
+      <main
+        ref={fit.frame}
+        style={fit.style}
+        className="relative mx-auto w-full max-w-[375px] overflow-x-hidden bg-[#090909] text-[#fafafa]">
         <Hero content={content} addressee={addressee} onOpened={reveal} />
         {/* Everything below the envelope, out of the invitation until it is
             opened. Two marks, because "not yet" has two halves.

@@ -233,6 +233,80 @@ export function normaliseShadow(input) {
 }
 
 /**
+ * A background image to its gradients, each colour and stop normalised.
+ *
+ * A gradient is the one thing a design fills a box with that `backgroundColor`
+ * cannot hold, so without this the Messages fade could have nothing said about
+ * it. The colours inside a gradient go through `normaliseColour`, the same way
+ * they do everywhere else, so `rgba(0,0,0,0.8)` written in an expectation
+ * matches the `rgba(0, 0, 0, 0.8)` the browser reports. Stops and angles are
+ * trimmed the way lengths are, so `-6.67%` is one claim however it is spelled.
+ *
+ * A layer that is not a function at all, or a function that is not a gradient -
+ * `url(…)` most of all - is passed through as written rather than refused,
+ * because this normaliser runs on the page's side of the comparison too: a
+ * claim against an element that turns out to draw an image should fail with
+ * both spellings shown, not stop the run.
+ */
+export function normaliseBackgroundImage(input) {
+  const value = String(input).trim();
+  if (value === '' || value.toLowerCase() === 'none') {
+    return 'none';
+  }
+
+  return splitOutsideBrackets(value, (character) => character === ',')
+    .map((layer) => {
+      const call = /^([a-z-]+)\((.*)\)$/is.exec(layer);
+      if (!call || !call[1].toLowerCase().endsWith('gradient')) {
+        return layer;
+      }
+      const name = call[1].toLowerCase();
+      const parts = splitOutsideBrackets(
+        call[2],
+        (character) => character === ','
+      ).map(normaliseGradientArgument);
+      return `${name}(${parts.join(', ')})`;
+    })
+    .join(', ');
+}
+
+/**
+ * One comma-separated argument of a gradient: a direction, or a colour stop.
+ *
+ * Its tokens are judged one by one, because a colour stop is a colour and its
+ * positions in either order and a direction is keywords or an angle: whatever
+ * spells like a colour is normalised as one, whatever spells like a percentage,
+ * an angle or a length is trimmed as a number, and the keywords are lowered.
+ */
+function normaliseGradientArgument(argument) {
+  return splitOutsideBrackets(argument, (character) => /\s/.test(character))
+    .map((token) => {
+      const value = token.toLowerCase();
+      if (
+        HEX.test(value) ||
+        FUNCTIONAL_COLOUR.test(value) ||
+        value === 'transparent' ||
+        value === 'currentcolor'
+      ) {
+        return normaliseColour(token);
+      }
+      const percentage = /^(-?[\d.]+)%$/.exec(value);
+      if (percentage) {
+        return `${trimNumber(Number.parseFloat(percentage[1]))}%`;
+      }
+      const angle = /^(-?[\d.]+)deg$/.exec(value);
+      if (angle) {
+        return `${trimNumber(Number.parseFloat(angle[1]))}deg`;
+      }
+      if (/^-?[\d.]+(px)?$/.test(value)) {
+        return normaliseLength(value);
+      }
+      return value;
+    })
+    .join(' ');
+}
+
+/**
  * Split on separators that are not inside brackets, so `rgba(…)` survives.
  *
  * Used for both halves of reading a shadow: commas separate its layers, and
@@ -271,6 +345,10 @@ export const ASSERTABLE_PROPERTIES = {
   letterSpacing: { normalise: normaliseLength, read: ['letterSpacing'] },
   color: { normalise: normaliseColour, read: ['color'] },
   backgroundColor: { normalise: normaliseColour, read: ['backgroundColor'] },
+  backgroundImage: {
+    normalise: normaliseBackgroundImage,
+    read: ['backgroundImage'],
+  },
   borderColor: {
     normalise: normaliseColourList,
     read: [

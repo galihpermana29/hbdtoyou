@@ -148,6 +148,34 @@ function checkTheVocabulary() {
     'rgba(16, 24, 40, 0.05) 0px 1px 2px 0px',
     'a shadow written as CSS is the shadow the browser reports'
   );
+  same(
+    'backgroundImage',
+    'linear-gradient(to top, rgba(0,0,0,0.8) -6.67%, rgba(102,102,102,0) 194.29%)',
+    'linear-gradient(to top, rgba(0, 0, 0, 0.8) -6.67%, rgba(102, 102, 102, 0) 194.29%)',
+    'a gradient written as CSS is the gradient the browser reports'
+  );
+  same(
+    'backgroundImage',
+    'linear-gradient(90deg, rgba(0,0,0,0.04) 0%, rgba(0,0,0,0.04) 100%), ' +
+      'linear-gradient(90deg, rgba(239,233,226,0.3) 0%, rgba(239,233,226,0.3) 100%)',
+    'linear-gradient(90deg, rgba(0, 0, 0, 0.04) 0%, rgba(0, 0, 0, 0.04) 100%), ' +
+      'linear-gradient(90deg, rgba(239, 233, 226, 0.3) 0%, rgba(239, 233, 226, 0.3) 100%)',
+    'two fills over one box survive as two layers'
+  );
+  same('backgroundImage', 'none', 'NONE', 'no background image is none');
+  differ(
+    'backgroundImage',
+    'linear-gradient(to top, rgba(0,0,0,0.8) -6.67%, rgba(102,102,102,0) 194.29%)',
+    'linear-gradient(to top, rgba(0,0,0,0.8) 6.67%, rgba(102,102,102,0) 194.29%)',
+    'a stop that loses its minus sign is a change'
+  );
+  differ(
+    'backgroundImage',
+    'linear-gradient(to top, rgba(0,0,0,0.8) -6.67%, rgba(102,102,102,0) 194.29%)',
+    'linear-gradient(to bottom, rgba(0,0,0,0.8) -6.67%, rgba(102,102,102,0) 194.29%)',
+    'a gradient turned the other way is a change'
+  );
+
   same('overflow', 'hidden', 'hidden hidden', 'one overflow means both axes');
   differ(
     'overflow',

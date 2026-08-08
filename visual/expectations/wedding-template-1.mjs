@@ -39,6 +39,11 @@
  *   main > div         the same region once it is open, found by its place in
  *                      the markup because the attribute saying "not yet" is
  *                      exactly what an opened invitation no longer has
+ *   main section:has([role="region"]) > [aria-hidden]
+ *                      the fade over the foot of that list: the one decorative
+ *                      veil the section owning the scrollable region draws as
+ *                      its own child, marked `aria-hidden` because it says
+ *                      nothing a screen reader should read over the wishes
  *
  * `main section` is a descendant rather than a child on purpose. Everything
  * below the Hero is wrapped in one region so that a sealed invitation can put
@@ -571,6 +576,24 @@ const SECTIONS = [
         invitation.paragraph(`${wish.who}'s date`, WISH_DATE, EVERY_WISH_DATED),
         invitation.paragraph(`${wish.who}'s wish`, WISH_MESSAGE, wish.said),
       ]),
+      {
+        // The fade the design lays over the foot of that list, node 312:1785.
+        // Both stops sit outside the box - the node's gradientTransform puts
+        // the first just below the bottom edge and the second above the top -
+        // so the stops are the design's own numbers, minus sign included:
+        // `hbd-mme` corrected that sign with nothing able to see it, and this
+        // is what now sees it. Found by the one decorative veil the section
+        // owning the scrollable region draws as its own child, and claimed
+        // after the wishes because it is the section's last child: the band
+        // is laid over the list, so it is drawn after everything under it.
+        name: 'Messages fade',
+        select: 'main section:has([role="region"]) > [aria-hidden]',
+        style: {
+          backgroundImage:
+            'linear-gradient(to top, rgba(0,0,0,0.8) -6.67%, ' +
+            'rgba(102,102,102,0) 194.29%)',
+        },
+      },
     ],
   },
   {

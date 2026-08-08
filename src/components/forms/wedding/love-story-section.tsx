@@ -83,7 +83,7 @@ const STORY_PLACEHOLDERS = [
     'Freya still makes Elias laugh until his sides ache, and Elias’s calm ' +
     'presence remains her haven. Now, they are excited to begin their next ' +
     'chapter together, celebrating not just their love, but the unique path ' +
-    'they’ve carved side by side—surrounded by the family and friends who ' +
+    'they’ve carved side by side - surrounded by the family and friends who ' +
     'mean the most.',
 ];
 

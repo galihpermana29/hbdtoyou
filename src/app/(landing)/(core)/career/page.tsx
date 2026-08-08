@@ -115,7 +115,7 @@ const ProgramPage = () => {
             </h2>
           </div>
           <p className="text-gray-600 mb-8">
-            As a member of the AU Program, you aren&rsquo;t just a user —
+            As a member of the AU Program, you aren&rsquo;t just a user -
             you&rsquo;re a partner. Selected authors receive:
           </p>
           <div className="grid grid-cols-1 md:grid-cols-3 gap-5">

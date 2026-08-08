@@ -448,8 +448,14 @@ export default function Messages({
         edge, the way `to top` measures, that is -6.67% and 194.29% - so the
         bottom edge is itself already a little way into the fade, at 0.773 alpha
         rather than the stop's own 0.8. Dropping the first stop's minus sign
-        clamps it back to 0.8 and darkens that edge. Nothing the check can find
-        draws this box, so the sign is guarded by this comment alone.
+        clamps it back to 0.8 and darkens that edge. The check asserts the
+        gradient, stops and all, so flipping the sign is a red run rather than
+        a quiet darkening.
+
+        `aria-hidden` is what the check finds the box by - the one decorative
+        veil in the section that owns the scrollable list - and it is true
+        anyway: the band says nothing a screen reader should read over the
+        wishes beneath it.
 
         `opacity` is what keeps it honest now that the list scrolls: the band
         promises more below, and at the end of the list there is none, so it
@@ -464,6 +470,7 @@ export default function Messages({
         is short enough to read as the band keeping up.
       */}
       <div
+        aria-hidden
         className="pointer-events-none absolute left-[16px] top-[536px] w-[335px]"
         style={{
           height: FADE_HEIGHT,

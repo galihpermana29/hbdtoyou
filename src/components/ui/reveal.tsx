@@ -9,7 +9,7 @@ export const fadeUp = {
 };
 
 interface RevealProps extends HTMLMotionProps<'div'> {
-  /** Seconds to wait before the reveal starts — use to stagger siblings. */
+  /** Seconds to wait before the reveal starts - use to stagger siblings. */
   delay?: number;
   /** Fraction of the element that must be visible before triggering (0–1). */
   amount?: number;

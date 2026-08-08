@@ -14,6 +14,7 @@ import { motion } from 'framer-motion';
 import { fadeUpCenter } from './variants';
 import { useWeddingReveal } from './use-wedding-reveal';
 import { AutoFitText } from './AutoFitText';
+import { PAPER_TINT } from './TornPaper';
 
 import {
   DEFAULT_WEDDING_TEMPLATE_1_CONTENT,
@@ -58,13 +59,7 @@ export default function HolyVerse({
           className="absolute inset-0 size-full max-w-none object-cover"
           src={`${ASSET}/paper.jpg`}
         />
-        <div
-          className="absolute inset-0"
-          style={{
-            backgroundImage:
-              'linear-gradient(90deg, rgba(0,0,0,0.04) 0%, rgba(0,0,0,0.04) 100%), linear-gradient(90deg, rgba(239,233,226,0.3) 0%, rgba(239,233,226,0.3) 100%)',
-          }}
-        />
+        <div className="absolute inset-0" style={PAPER_TINT} />
       </div>
 
       <motion.div
