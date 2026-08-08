@@ -16,6 +16,12 @@ import {
 import { fieldTreatment } from './field-treatment';
 import FlowSwitch from './flow-switch';
 import FlowTextField from './flow-text-field';
+import { useFlowCopy } from './flow-language';
+import {
+  requiredPhotos,
+  requiredText,
+  requiredValue,
+} from './required-fields';
 import PhotoDropZone from './photo-drop-zone';
 import { DUMMY_BACKGROUND_MUSIC_OPTIONS } from './wedding-invitation-types';
 
@@ -37,64 +43,88 @@ import { DUMMY_BACKGROUND_MUSIC_OPTIONS } from './wedding-invitation-types';
  */
 
 /** How many photos the design says the cover takes. */
-const COUPLES_PHOTO_LIMIT = 5;
-
-/** The design's name for the track, which is what its switch is named for. */
-const BACKGROUND_TRACK = 'Background Track';
+const COUPLES_PHOTO_LIMIT = 1;
 
 export interface CoverHeaderSectionProps {
   /** The largest file the couple's plan allows, in megabytes. */
   maxUploadMb: number;
   openNotification?: OpenNotificationFunction;
+  /** Raised by a refused Next, to show the couple what is missing. */
+  openIt?: boolean;
 }
 
 export default function CoverHeaderSection({
   maxUploadMb,
   openNotification,
+  openIt,
 }: CoverHeaderSectionProps) {
   const weddingDateId = useId();
   const backgroundTrackId = useId();
+  const copy = useFlowCopy();
 
   return (
     <CreateFlowSection
-      name="Cover Header"
-      description="The general details about the event and what your guests will see when opening the invitation"
+      openIt={openIt}
+      name={copy.coverHeaderName}
+      description={copy.coverHeaderDescription}
       defaultOpen>
       <div className={flowFieldStack}>
-        <Form.Item name="heroPhotos" noStyle>
+        <Form.Item
+          name="heroPhotos"
+          className="!mb-0"
+          rules={requiredPhotos(copy, 'couplesPhotos', 1)}>
           <PhotoDropZone
-            label="Couples Photos"
+            required
+            label={copy.couplesPhotos}
             limit={COUPLES_PHOTO_LIMIT}
-            hint="We recommend to add more than 2 images in the ratio of 4:3 or 16:9 for more interactivity"
+            ratio="ratioWide"
+            atLeast={1}
             maxSizeMb={maxUploadMb}
             openNotification={openNotification}
           />
         </Form.Item>
 
         <div className={flowFieldPair}>
-          <Form.Item name="brideName" noStyle>
-            <FlowTextField label="Bride Nickname" placeholder="Freya" />
+          <Form.Item
+          name="brideName"
+          className="!mb-0"
+          rules={requiredText(copy, 'brideNickname')}>
+            <FlowTextField
+            required label={copy.brideNickname} placeholder="Freya" />
           </Form.Item>
-          <Form.Item name="groomName" noStyle>
-            <FlowTextField label="Groom Nickname" placeholder="Elias" />
+          <Form.Item
+          name="groomName"
+          className="!mb-0"
+          rules={requiredText(copy, 'groomNickname')}>
+            <FlowTextField
+            required label={copy.groomNickname} placeholder="Elias" />
           </Form.Item>
         </div>
 
-        <Form.Item name="venueName" noStyle>
+        <Form.Item
+          name="venueName"
+          className="!mb-0"
+          rules={requiredText(copy, 'weddingPlaceName')}>
           <FlowTextField
-            label="Wedding Place Name"
+            required
+            label={copy.weddingPlaceName}
             placeholder="MANDARIN HOTEL, JAKARTA"
           />
         </Form.Item>
 
         <div className={flowFieldParts}>
-          <label htmlFor={weddingDateId} className={flowLabel}>
-            Wedding Date
+          <label
+            htmlFor={weddingDateId}
+            className={`${flowLabel} wedding-required-label`}>
+            {copy.weddingDate}
           </label>
           {/* A picker rather than a typed date, so a day that does not exist
               cannot be entered. The design puts the calendar mark before the
               date rather than after it, which is what `prefix` is for. */}
-          <Form.Item name="weddingDate" noStyle>
+          <Form.Item
+          name="weddingDate"
+          className="!mb-0"
+          rules={requiredValue(copy, 'weddingDate')}>
             <DatePicker
               id={weddingDateId}
               size="large"
@@ -114,10 +144,10 @@ export default function CoverHeaderSection({
               `docs/adr/0002-figma-is-literal-truth.md`. */}
           <div className="flex items-center justify-between gap-[12px]">
             <label htmlFor={backgroundTrackId} className={flowLabel}>
-              {BACKGROUND_TRACK}
+              {copy.backgroundTrack}
             </label>
             <Form.Item name="songRequestEnabled" noStyle>
-              <FlowSwitch label={BACKGROUND_TRACK} />
+              <FlowSwitch label={copy.backgroundTrack} />
             </Form.Item>
           </div>
           <p className={flowHint}>
@@ -132,7 +162,7 @@ export default function CoverHeaderSection({
               size="large"
               showSearch
               optionFilterProp="label"
-              placeholder="Search artist or song name"
+              placeholder={copy.backgroundTrackPlaceholder}
               options={DUMMY_BACKGROUND_MUSIC_OPTIONS}
               prefix={<Music size={20} aria-hidden="true" />}
               suffixIcon={null}

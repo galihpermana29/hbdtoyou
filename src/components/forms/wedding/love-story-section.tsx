@@ -10,6 +10,8 @@ import FlowMarkedField from './flow-marked-field';
 import FlowTextField from './flow-text-field';
 import PhotoDropZone from './photo-drop-zone';
 import VideoDropZone from './video-drop-zone';
+import { useFlowCopy } from './flow-language';
+import { requiredPhotos, requiredText } from './required-fields';
 import {
   LOVE_STORY_CHAPTERS,
   LOVE_STORY_LIMIT,
@@ -56,7 +58,7 @@ const STORY_GUIDANCE = 'We know it’s hard, but keep it short please.';
 const YEAR_PLACEHOLDER = '2020';
 
 /** How many photos the design says the film strip takes, and the proposal. */
-const POLAROID_PHOTO_LIMIT = 12;
+const POLAROID_PHOTO_LIMIT = 3;
 const PROPOSAL_PHOTO_LIMIT = 1;
 
 /**
@@ -103,11 +105,17 @@ function Chapter({
   chapter: WeddingLoveStoryChapter;
   index: number;
 }) {
+  const copy = useFlowCopy();
+
   return (
     <>
-      <Form.Item name={['milestones', index, 'year']} noStyle>
+      <Form.Item
+        name={['milestones', index, 'year']}
+        className="!mb-0"
+        rules={requiredText(copy, chapter.yearLabel)}>
         <FlowMarkedField
-          label={chapter.yearLabel}
+            required
+          label={copy[chapter.yearLabel]}
           mark={<Calendar size={20} aria-hidden="true" />}
           placeholder={YEAR_PLACEHOLDER}
           format={asYear}
@@ -115,9 +123,13 @@ function Chapter({
         />
       </Form.Item>
 
-      <Form.Item name={['milestones', index, 'body']} noStyle>
+      <Form.Item
+        name={['milestones', index, 'body']}
+        className="!mb-0"
+        rules={requiredText(copy, chapter.storyLabel)}>
         <FlowTextField
-          label={chapter.storyLabel}
+            required
+          label={copy[chapter.storyLabel]}
           rows={STORY_ROWS}
           limit={LOVE_STORY_LIMIT}
           guidance={STORY_GUIDANCE}
@@ -132,22 +144,32 @@ export interface LoveStorySectionProps {
   /** The largest photo the couple's plan allows, in megabytes. */
   maxUploadMb: number;
   openNotification?: OpenNotificationFunction;
+  /** Raised by a refused Next, to show the couple what is missing. */
+  openIt?: boolean;
 }
 
 export default function LoveStorySection({
   maxUploadMb,
   openNotification,
+  openIt,
 }: LoveStorySectionProps) {
+  const copy = useFlowCopy();
   return (
     <CreateFlowSection
-      name="Love Story"
-      description="Tell the world how you & your partner’s met and what leads your both to this lifetime commitment (in short, ofc)">
+      openIt={openIt}
+      name={copy.loveStoryName}
+      description={copy.loveStoryDescription}>
       <div className={flowFieldStack}>
-        <Form.Item name="loveStoryPhotos" noStyle>
+        <Form.Item
+          name="loveStoryPhotos"
+          className="!mb-0"
+          rules={requiredPhotos(copy, 'polaroidPhotos', 3)}>
           <PhotoDropZone
-            label="Polaroid Photos"
+            required
+            label={copy.polaroidPhotos}
             limit={POLAROID_PHOTO_LIMIT}
-            hint="We recommend to add more than 3 images in the ratio of 4:3 for more interactivity"
+            ratio="ratioStandard"
+            atLeast={3}
             maxSizeMb={maxUploadMb}
             openNotification={openNotification}
           />
@@ -156,10 +178,16 @@ export default function LoveStorySection({
         <Chapter chapter={LOVE_STORY_CHAPTERS[0]} index={0} />
         <Chapter chapter={LOVE_STORY_CHAPTERS[1]} index={1} />
 
-        <Form.Item name="polaroidPhoto" noStyle>
+        <Form.Item
+          name="polaroidPhoto"
+          className="!mb-0"
+          rules={requiredPhotos(copy, 'proposalPhoto', 1)}>
           <PhotoDropZone
-            label="Proposal Photo"
+            required
+            label={copy.proposalPhoto}
             limit={PROPOSAL_PHOTO_LIMIT}
+            ratio="ratioStandard"
+            atLeast={1}
             maxSizeMb={maxUploadMb}
             openNotification={openNotification}
           />
@@ -169,7 +197,7 @@ export default function LoveStorySection({
 
         <Form.Item name="loveStoryVideo" noStyle>
           <VideoDropZone
-            label="Wedding Teaser Video"
+            label={copy.weddingTeaserVideo}
             openNotification={openNotification}
           />
         </Form.Item>

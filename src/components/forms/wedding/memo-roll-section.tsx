@@ -4,6 +4,7 @@ import { Form } from 'antd';
 
 import { flowHint, flowSectionName } from './create-flow-treatment';
 import FlowSwitch from './flow-switch';
+import { useFlowCopy } from './flow-language';
 import MemoRollCamera from './memo-roll-camera';
 
 /**
@@ -26,11 +27,6 @@ import MemoRollCamera from './memo-roll-camera';
  * as `hbd-byb.23` rather than answered by inventing a destination.
  */
 
-/** What the design calls this Section, and what it says the Section is for. */
-const NAME = 'Enable MemoRoll?';
-const DESCRIPTION =
-  "Create a collective photo experience for the wedding. Capture your wedding through every guest's lens.";
-
 /**
  * The card, which the design fills with a wash of the flow's orange.
  *
@@ -52,6 +48,7 @@ const SWITCH_PLACE =
   'col-start-2 row-span-2 row-start-1 justify-self-end self-center';
 
 export default function MemoRollSection() {
+  const copy = useFlowCopy();
   return (
     <section className={CARD}>
       <MemoRollCamera />
@@ -65,11 +62,11 @@ export default function MemoRollSection() {
           the application's; ours would otherwise run across the illustration.
           See `docs/adr/0002-figma-is-literal-truth.md` on the typeface. */}
       <div className="relative grid grid-cols-[minmax(0,1fr)_106px] items-center gap-x-[12px]">
-        <h3 className={`col-start-1 ${flowSectionName}`}>{NAME}</h3>
-        <p className={`col-start-1 ${flowHint}`}>{DESCRIPTION}</p>
+        <h3 className={`col-start-1 ${flowSectionName}`}>{copy.memoRollEnable}</h3>
+        <p className={`col-start-1 ${flowHint}`}>{copy.memoRollDescription}</p>
         <p className={LEARN_MORE}>Learn more</p>
         <Form.Item name="memoRollEnabled" noStyle>
-          <FlowSwitch label={NAME} className={SWITCH_PLACE} />
+          <FlowSwitch label={copy.memoRollEnable} className={SWITCH_PLACE} />
         </Form.Item>
       </div>
     </section>

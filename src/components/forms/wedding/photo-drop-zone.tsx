@@ -2,6 +2,7 @@
 
 import { X } from 'lucide-react';
 import Image from 'next/image';
+import { useFlowCopy } from './flow-language';
 import { useId, useRef, useState } from 'react';
 
 import type { OpenNotificationFunction } from '@/app/(landing)/(core)/create/usecase/useCreateContent';
@@ -36,7 +37,26 @@ export interface PhotoDropZoneProps {
    * Optional because the design does not print one everywhere: the Proposal
    * Photo takes a single photo and is left to say so in its prompt.
    */
-  hint?: string;
+  /**
+   * The shape of photograph this field wants, as the design states it.
+   *
+   * Only the ratio, never the number. The guidance a couple reads is built from
+   * `limit` below, so it cannot disagree with what the field will accept - the
+   * design's own guidance did, on four fields out of six, and a couple was told
+   * to add more than two photographs to a field that takes one.
+   */
+  ratio: 'ratioStandard' | 'ratioWide';
+  /**
+   * The fewest this field accepts.
+   *
+   * The same number the field's rule enforces, so the guidance and the refusal
+   * cannot tell a couple different things. Venue Photos said "exactly 5" while
+   * its rule wanted one, which is the same class of mistake as the guidance
+   * that said "more than 2" over a field that took one.
+   */
+  atLeast: number;
+  /** Whether the field must be answered, which draws the mark beside its label. */
+  required?: boolean;
   /** The largest file the couple's plan allows, in megabytes. */
   maxSizeMb: number;
   /**
@@ -48,10 +68,41 @@ export interface PhotoDropZoneProps {
   openNotification?: OpenNotificationFunction;
 }
 
+/**
+ * What this field asks for, said once, from the numbers that enforce it.
+ *
+ * Four sentences rather than one with a number in it, because "1 photographs"
+ * and "between 1 and 5" both read like a machine that could not be bothered.
+ */
+function photoGuidance(
+  copy: Record<string, string>,
+  atLeast: number,
+  most: number,
+  ratio: string
+): string {
+  if (most === 1) return copy.photoGuidanceOne.replace('{ratio}', ratio);
+  if (atLeast === most) {
+    return copy.photoGuidanceMany
+      .replace('{count}', String(most))
+      .replace('{ratio}', ratio);
+  }
+  if (atLeast <= 1) {
+    return copy.photoGuidanceUpTo
+      .replace('{most}', String(most))
+      .replace('{ratio}', ratio);
+  }
+  return copy.photoGuidanceBetween
+    .replace('{count}', String(atLeast))
+    .replace('{most}', String(most))
+    .replace('{ratio}', ratio);
+}
+
 export default function PhotoDropZone({
   label,
   limit,
-  hint,
+  ratio,
+  atLeast,
+  required,
   maxSizeMb,
   id,
   value,
@@ -60,6 +111,7 @@ export default function PhotoDropZone({
 }: PhotoDropZoneProps) {
   const fallbackId = useId();
   const fieldId = id ?? fallbackId;
+  const copy = useFlowCopy();
 
   const [isUploading, setIsUploading] = useState(false);
   // What was wrong with the last files chosen, so a photo that cannot be added
@@ -109,7 +161,11 @@ export default function PhotoDropZone({
       .filter((reason): reason is string => reason !== null);
     const overflow = chosen
       .slice(room)
-      .map((file) => `${file.name} is more than the ${limit} this field takes`);
+      .map((file) =>
+        copy.tooManyPhotos
+          .replace('{file}', file.name)
+          .replace('{limit}', String(limit))
+      );
 
     const acceptable = considered
       .filter(({ reason }) => reason === null)
@@ -146,9 +202,10 @@ export default function PhotoDropZone({
       id={fieldId}
       accept={ACCEPTED_TYPES}
       multiple={limit > 1}
-      title={isUploading ? 'Adding Your Photos' : 'Add More Photos'}
-      prompt={`Drag & drop up to ${limit} images from your gallery`}
-      hint={hint}
+      title={isUploading ? copy.uploadInProgress : copy.uploadAddPhotos}
+      prompt={copy.uploadDragPrompt.replace('{limit}', String(limit))}
+      required={required}
+      hint={photoGuidance(copy, atLeast, limit, copy[ratio])}
       problem={problem}
       onFiles={add}>
       {/* Counted by position rather than keyed on the address, because the same

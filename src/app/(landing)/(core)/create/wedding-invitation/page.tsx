@@ -1,6 +1,7 @@
 import { Metadata } from 'next';
 
 import WeddingInvitationCreateClientside from './wedding-invitation-create-clientside';
+import { FlowLanguageProvider } from '@/components/forms/wedding/flow-language';
 import {
   slugFrom,
   SLUG_PARAM,
@@ -45,9 +46,15 @@ export default function WeddingInvitationCreatePage({
   // Read here rather than in the flow, so the address is settled before the
   // first paint and there is no moment where the field says one thing and then
   // another. See `SLUG_PARAM` for why a query supplies it at all.
+  // The language wraps the whole flow rather than the step being read, because
+  // a couple who chooses Indonesian on the details step has chosen it for the
+  // guest invites step too, and a provider that only covered one of them would
+  // hand them a form that changed language when they pressed Next.
   return (
-    <WeddingInvitationCreateClientside
-      slug={slugFrom(searchParams[SLUG_PARAM])}
-    />
+    <FlowLanguageProvider>
+      <WeddingInvitationCreateClientside
+        slug={slugFrom(searchParams[SLUG_PARAM])}
+      />
+    </FlowLanguageProvider>
   );
 }

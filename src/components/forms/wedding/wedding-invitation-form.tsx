@@ -17,16 +17,24 @@ import {
   getDefaultFormValues,
   type WeddingInvitationFormValues,
 } from '@/components/forms/wedding/wedding-invitation-types';
+import type { SectionKey } from '@/components/forms/wedding/required-fields';
 
 export interface WeddingInvitationFormProps {
   form: FormInstance<WeddingInvitationFormValues>;
   openNotification?: OpenNotificationFunction;
+  /**
+   * The Sections a refused Next wants opened, so the couple can see what it
+   * refused over. Empty the rest of the time, which is every other moment.
+   */
+  openSections?: SectionKey[];
 }
 
 export default function WeddingInvitationForm({
   form,
   openNotification,
+  openSections = [],
 }: WeddingInvitationFormProps) {
+  const wants = (section: SectionKey) => openSections.includes(section);
   const profile = useMemoifyProfile();
   const isFreeAccount = profile?.quota < 1;
 
@@ -46,6 +54,7 @@ export default function WeddingInvitationForm({
         <CoverHeaderSection
           maxUploadMb={maxUploadMb}
           openNotification={openNotification}
+          openIt={wants('coverHeader')}
         />
 
         <HolyVerseSection />
@@ -53,26 +62,31 @@ export default function WeddingInvitationForm({
         <BrideGroomIntroductionSection
           maxUploadMb={maxUploadMb}
           openNotification={openNotification}
+          openIt={wants('introduction')}
         />
 
         <LoveStorySection
           maxUploadMb={maxUploadMb}
           openNotification={openNotification}
+          openIt={wants('loveStory')}
         />
 
         <VenueDetailsSection
           maxUploadMb={maxUploadMb}
           openNotification={openNotification}
+          openIt={wants('venueDetails')}
         />
 
         <GiftRegistrySection
           maxUploadMb={maxUploadMb}
           openNotification={openNotification}
+          openIt={wants('giftRegistry')}
         />
 
         <PhotoCollectionSection
           maxUploadMb={maxUploadMb}
           openNotification={openNotification}
+          openIt={wants('photoCollection')}
         />
 
         <MemoRollSection />

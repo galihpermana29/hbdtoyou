@@ -6,6 +6,13 @@ import { useId } from 'react';
 
 import type { OpenNotificationFunction } from '@/app/(landing)/(core)/create/usecase/useCreateContent';
 import CreateFlowSection from './create-flow-section';
+import { useFlowCopy } from './flow-language';
+import {
+  requiredMapEmbed,
+  requiredPhotos,
+  requiredText,
+} from './required-fields';
+import { mapEmbedFrom } from './wedding-map';
 import {
   flowFieldParts,
   flowFieldRange,
@@ -75,24 +82,34 @@ export interface VenueDetailsSectionProps {
   /** The largest photo the couple's plan allows, in megabytes. */
   maxUploadMb: number;
   openNotification?: OpenNotificationFunction;
+  /** Raised by a refused Next, to show the couple what is missing. */
+  openIt?: boolean;
 }
 
 export default function VenueDetailsSection({
   maxUploadMb,
   openNotification,
+  openIt,
 }: VenueDetailsSectionProps) {
   const receptionTimeId = useId();
+  const copy = useFlowCopy();
 
   return (
     <CreateFlowSection
-      name="Venue Details"
-      description="Details on the wedding venue location & reception time">
+      openIt={openIt}
+      name={copy.venueDetailsName}
+      description={copy.venueDetailsDescription}>
       <div className={flowFieldStack}>
-        <Form.Item name="eventPhotos" noStyle>
+        <Form.Item
+          name="eventPhotos"
+          className="!mb-0"
+          rules={requiredPhotos(copy, 'venuePhotos', 1)}>
           <PhotoDropZone
-            label="More Photos"
+            required
+            label={copy.venuePhotos}
             limit={VENUE_PHOTO_LIMIT}
-            hint="We recommend to add more than 2 images in the ratio of 4:3 or 16:9 for more interactivity"
+            ratio="ratioWide"
+            atLeast={1}
             maxSizeMb={maxUploadMb}
             openNotification={openNotification}
           />
@@ -103,24 +120,32 @@ export default function VenueDetailsSection({
           aria-labelledby={receptionTimeId}
           className={flowFieldParts}>
           <p id={receptionTimeId} className={flowLabel}>
-            Wedding Reception Time
+            {copy.receptionTime}
           </p>
           <div className={flowFieldRange}>
-            <Form.Item name="eventStartTime" noStyle>
+            <Form.Item
+              name="eventStartTime"
+              className="!mb-0"
+              rules={requiredText(copy, 'receptionStart')}>
               <FlowMarkedField
-                name="Start"
+            required
+                name={copy.receptionStart}
                 mark={<Clock size={20} aria-hidden="true" />}
-                placeholder="Start"
+                placeholder={copy.receptionStart}
                 format={asTime}
                 complete={completeTime}
                 inputMode="numeric"
               />
             </Form.Item>
-            <Form.Item name="eventEndTime" noStyle>
+            <Form.Item
+              name="eventEndTime"
+              className="!mb-0"
+              rules={requiredText(copy, 'receptionEnd')}>
               <FlowMarkedField
-                name="End"
+            required
+                name={copy.receptionEnd}
                 mark={<Clock size={20} aria-hidden="true" />}
-                placeholder="End"
+                placeholder={copy.receptionEnd}
                 format={asTime}
                 complete={completeTime}
                 inputMode="numeric"
@@ -131,15 +156,23 @@ export default function VenueDetailsSection({
 
         {/* The address the invitation prints. The location link below it is
             for directions; a guest still needs somewhere written down. */}
-        <Form.Item name="address" noStyle>
+        <Form.Item
+          name="address"
+          className="!mb-0"
+          rules={requiredText(copy, 'weddingAddress')}>
           <FlowTextField
-            label="Wedding Address"
+            required
+            label={copy.weddingAddress}
             placeholder="Jl. Imam Bonjol, Menteng"
           />
         </Form.Item>
 
-        <Form.Item name="mapsUrl" noStyle>
-          <WeddingLocationField />
+        <Form.Item
+          name="mapsUrl"
+          className="!mb-0"
+          rules={requiredMapEmbed(copy, (value) => mapEmbedFrom(value) !== null)}>
+          <WeddingLocationField
+            required />
         </Form.Item>
       </div>
     </CreateFlowSection>

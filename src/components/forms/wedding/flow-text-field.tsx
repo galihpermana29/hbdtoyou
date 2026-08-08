@@ -1,5 +1,6 @@
 'use client';
 
+import './field-treatment.css';
 import { useId, type ChangeEvent } from 'react';
 
 import {
@@ -32,6 +33,8 @@ import {
 export interface FlowTextFieldProps {
   /** The words above the field, as the design writes them. */
   label: string;
+  /** Whether the field must be answered, which draws the mark beside it. */
+  required?: boolean;
   placeholder?: string;
   /**
    * How many lines of the answer the design leaves room for.
@@ -69,6 +72,7 @@ export interface FlowTextFieldProps {
 
 export default function FlowTextField({
   label,
+  required,
   placeholder,
   rows,
   limit,
@@ -87,7 +91,7 @@ export default function FlowTextField({
 
   return (
     <div className={flowFieldParts}>
-      <label htmlFor={fieldId} className={flowLabel}>
+      <label htmlFor={fieldId} className={`${flowLabel}${required ? ' wedding-required-label' : ''}`}>
         {label}
       </label>
       {rows === undefined ? (

@@ -53,6 +53,8 @@ export async function uploadFile(
 export interface FlowFileFieldProps {
   /** The words above the field, as the design writes them. */
   label: string;
+  /** Whether the field must be answered, which draws the mark beside it. */
+  required?: boolean;
   /** The file field's identifier, so the label points at what a couple uses. */
   id: string;
   /** The types the field takes, as the file dialog filters them. */
@@ -75,6 +77,7 @@ export interface FlowFileFieldProps {
 
 export default function FlowFileField({
   label,
+  required,
   id,
   accept,
   multiple,
@@ -89,7 +92,7 @@ export default function FlowFileField({
 
   return (
     <div className={flowFieldParts}>
-      <label htmlFor={id} className={flowLabel}>
+      <label htmlFor={id} className={`${flowLabel}${required ? ' wedding-required-label' : ''}`}>
         {label}
       </label>
 

@@ -4,6 +4,8 @@ import { Form } from 'antd';
 
 import type { OpenNotificationFunction } from '@/app/(landing)/(core)/create/usecase/useCreateContent';
 import CreateFlowSection from './create-flow-section';
+import { useFlowCopy } from './flow-language';
+import { requiredPhotos, requiredText } from './required-fields';
 import { flowFieldPair, flowFieldStack } from './create-flow-treatment';
 import FlowTextField from './flow-text-field';
 import PhotoDropZone from './photo-drop-zone';
@@ -40,28 +42,42 @@ const PORTRAIT_LIMIT = 1;
 export default function BrideGroomIntroductionSection({
   maxUploadMb,
   openNotification,
+  openIt,
 }: {
   maxUploadMb: number;
   openNotification?: OpenNotificationFunction;
+  /** Raised by a refused Next, to show the couple what is missing. */
+  openIt?: boolean;
 }) {
+  const copy = useFlowCopy();
   return (
     <CreateFlowSection
-      name="Bride & Groom’s Introduction"
-      description="Introduction to the Bride & Groom’s family and/or education background">
+      openIt={openIt}
+      name={copy.introductionName}
+      description={copy.introductionDescription}>
       <div className={flowFieldStack}>
-        <Form.Item name="bridePhoto" noStyle>
+        <Form.Item
+          name="bridePhoto"
+          className="!mb-0"
+          rules={requiredPhotos(copy, 'bridePhoto', 1)}>
           <PhotoDropZone
-            label="Bride Photo"
+            required
+            label={copy.bridePhoto}
             limit={PORTRAIT_LIMIT}
-            hint="One portrait of the bride, in the ratio of 4:3"
+            ratio="ratioStandard"
+            atLeast={1}
             maxSizeMb={maxUploadMb}
             openNotification={openNotification}
           />
         </Form.Item>
 
-        <Form.Item name="brideFullName" noStyle>
+        <Form.Item
+          name="brideFullName"
+          className="!mb-0"
+          rules={requiredText(copy, 'brideName')}>
           <FlowTextField
-            label="Bride Name"
+            required
+            label={copy.brideName}
             placeholder="Freya Putri Magellan"
           />
         </Form.Item>
@@ -69,31 +85,40 @@ export default function BrideGroomIntroductionSection({
         <div className={flowFieldPair}>
           <Form.Item name="brideFatherName" noStyle>
             <FlowTextField
-              label="Bride’s Father"
+              label={copy.brideFather}
               placeholder="Ferdinand Magellan"
             />
           </Form.Item>
           <Form.Item name="brideMotherName" noStyle>
             <FlowTextField
-              label="Bride’s Mother"
+              label={copy.brideMother}
               placeholder="Tuti Pudjiastuti"
             />
           </Form.Item>
         </div>
 
-        <Form.Item name="groomPhoto" noStyle>
+        <Form.Item
+          name="groomPhoto"
+          className="!mb-0"
+          rules={requiredPhotos(copy, 'groomPhoto', 1)}>
           <PhotoDropZone
-            label="Groom Photo"
+            required
+            label={copy.groomPhoto}
             limit={PORTRAIT_LIMIT}
-            hint="One portrait of the groom, in the ratio of 4:3"
+            ratio="ratioStandard"
+            atLeast={1}
             maxSizeMb={maxUploadMb}
             openNotification={openNotification}
           />
         </Form.Item>
 
-        <Form.Item name="groomFullName" noStyle>
+        <Form.Item
+          name="groomFullName"
+          className="!mb-0"
+          rules={requiredText(copy, 'groomName')}>
           <FlowTextField
-            label="Groom Name"
+            required
+            label={copy.groomName}
             placeholder="Elias Frank Simanjuntak"
           />
         </Form.Item>
@@ -101,13 +126,13 @@ export default function BrideGroomIntroductionSection({
         <div className={flowFieldPair}>
           <Form.Item name="groomFatherName" noStyle>
             <FlowTextField
-              label="Groom’s Father"
+              label={copy.groomFather}
               placeholder="Frank Simajuntak"
             />
           </Form.Item>
           <Form.Item name="groomMotherName" noStyle>
             <FlowTextField
-              label="Groom’s Mother"
+              label={copy.groomMother}
               placeholder="Esther Triasningsih"
             />
           </Form.Item>

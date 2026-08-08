@@ -4,18 +4,25 @@ import { message } from 'antd';
 import { useForm, useWatch } from 'antd/es/form/Form';
 import { ChevronLeft, ChevronRight } from 'lucide-react';
 import { useRouter } from 'next/navigation';
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 
 import CreateFlowBreadcrumb from './create-flow-breadcrumb';
 import CreateFlowSteps, { type CreateFlowStep } from './create-flow-steps';
 import useCreateContent from '../usecase/useCreateContent';
 import {
+  flowActionAside,
   flowActionBack,
   flowActionForward,
   flowActionRow,
   flowProblem,
 } from '@/components/forms/wedding/create-flow-treatment';
 import { useInvitation } from '@/components/forms/wedding/use-invitation';
+import {
+  sectionHolding,
+  type SectionKey,
+} from '@/components/forms/wedding/required-fields';
+import FlowLanguageField from '@/components/forms/wedding/flow-language-field';
+import { useFlowCopy } from '@/components/forms/wedding/flow-language';
 import GuestInvitesStep from '@/components/forms/wedding/guest-invites-step';
 import PublishedStep from '@/components/forms/wedding/published-step';
 import WeddingInvitationForm from '@/components/forms/wedding/wedding-invitation-form';
@@ -24,13 +31,19 @@ import NavigationBar from '@/components/ui/navbar';
 import { weddingTemplate1Fonts } from '@/components/wedding/wedding-template-1/fonts';
 import {
   DEFAULT_GUEST_MESSAGE,
+  greetingSeededWith,
   invitationLinkFor,
   type GuestInvitesValues,
 } from '@/components/forms/wedding/guest-invites-types';
-import {
-  DEFAULT_WEDDING_TEMPLATE_1_CONTENT,
-  type WeddingInvitationFormValues,
-} from '@/components/forms/wedding/wedding-invitation-types';
+import { type WeddingInvitationFormValues } from '@/components/forms/wedding/wedding-invitation-types';
+
+/**
+ * How long the Sections take to finish opening, in milliseconds.
+ *
+ * Measured rather than guessed: the scroll below has to land after the reflow
+ * they cause, or the browser undoes it.
+ */
+const SECTIONS_FINISH_OPENING_MS = 250;
 
 /** Where a couple goes back to from the first step this flow owns. */
 const CHOOSE_TEMPLATE_ROUTE = '/wedding-invitation';
@@ -96,6 +109,81 @@ export default function WeddingInvitationCreateClientside({
   const brideNickname = useWatch('brideName', form);
   const groomNickname = useWatch('groomName', form);
 
+  /**
+   * Whether the couple has written their own greeting message.
+   *
+   * Until they have, the message follows the names they type in the step
+   * before, so a nickname corrected on the first step is corrected here too.
+   * The moment they edit it, it is theirs and nothing rewrites it again - not
+   * even if they go back and change a nickname afterwards. Silently rewording
+   * something a couple wrote to their families is worse than letting one name
+   * go stale, and the stale one is at least visible to them.
+   */
+  const [messageIsTheirs, setMessageIsTheirs] = useState(false);
+
+  useEffect(() => {
+    if (messageIsTheirs) return;
+    setGuestInvites((previous) => ({
+      ...previous,
+      greetingMessage: greetingSeededWith(
+        brideNickname ?? '',
+        groomNickname ?? ''
+      ),
+    }));
+  }, [brideNickname, groomNickname, messageIsTheirs]);
+
+  const copy = useFlowCopy();
+  const [openSections, setOpenSections] = useState<SectionKey[]>([]);
+
+  /**
+   * The fields a refused Next found empty, so the couple can be taken to one.
+   *
+   * Held in state and acted on in an effect rather than scrolled to inside the
+   * press, because a field inside a Section that has not opened yet is
+   * `display: none` and scrolling to it does nothing at all, silently.
+   *
+   * One effect is not enough either. A Section opens itself when it sees the
+   * request, which is its own state change, and a child's effect runs before
+   * its parent's - so by the time this one runs, the Sections have agreed to
+   * open and the browser has not laid them out yet. Waiting for a frame where
+   * the field actually occupies space is what makes this land; without it the
+   * scroll was skipped every time and Chrome's scroll anchoring moved the page
+   * instead, which looked convincingly like a scroll going to the wrong place.
+   */
+  const [invalidFields, setInvalidFields] = useState<string[]>([]);
+
+  useEffect(() => {
+    if (invalidFields.length === 0) return;
+
+    // Left until the Sections have finished expanding.
+    //
+    // Eight of them open under this press, and while they do Chrome keeps
+    // correcting the scroll position to hold the content still - a scroll
+    // issued into that reflow is applied and then quietly undone, which looks
+    // exactly like a scroll that went nowhere. A frame is not long enough to
+    // wait; the reflow outlasts several.
+    const settling = setTimeout(() => {
+      const shown = invalidFields
+        .map((name) => document.getElementById(name))
+        .filter((field): field is HTMLElement => Boolean(field?.offsetParent));
+      if (shown.length === 0) return;
+
+      // The field highest on the page, not the first antd happens to name. antd
+      // returns them in the order the fields mounted rather than the order a
+      // couple reads them, and scrolling to that one sent a couple who pressed
+      // Next from the bottom of the step further down it.
+      shown
+        .reduce((highest, field) =>
+          field.getBoundingClientRect().top <
+          highest.getBoundingClientRect().top
+            ? field
+            : highest
+        )
+        .scrollIntoView({ behavior: 'instant', block: 'center' });
+    }, SECTIONS_FINISH_OPENING_MS);
+
+    return () => clearTimeout(settling);
+  }, [invalidFields]);
   const isDetailsAndStory = step === 'Fill in the details & story';
   const isGuestInvites = step === 'Guest invites details';
   const isPublished = step === 'Share with guests';
@@ -148,6 +236,42 @@ export default function WeddingInvitationCreateClientside({
    * `use-invitation.ts`.
    */
   async function goOnToGuestInvites() {
+    // Asked for before anything is sent, because a step that is not finished is
+    // not a step to save: the couple would be told their invitation was kept
+    // and then told it was not ready, about the same press.
+    //
+    // Each field says for itself what is wrong with it, underneath itself, so
+    // nothing is printed here. What this still owes the couple is getting them
+    // to the first of those messages.
+    try {
+      await form.validateFields();
+    } catch (refused) {
+      const errorFields =
+        (refused as { errorFields?: { name: (string | number)[] }[] })
+          .errorFields ?? [];
+      if (errorFields.length === 0) return;
+
+      // Opened first, and scrolled to second. A collapsed Section's fields are
+      // hidden, and nothing can be scrolled to something that is not laid out -
+      // so asking for the scroll before the Section opens lands on whatever
+      // happened to be at that height.
+      setOpenSections(
+        errorFields
+          .map((field) => sectionHolding(String(field.name[0])))
+          .filter((section): section is SectionKey => section !== null)
+      );
+      // Scrolled by hand rather than through `form.scrollToField`, which found
+      // the field and moved nothing: every one of these controls is a component
+      // of ours, and antd's own scroll leans on internals they do not satisfy.
+      // The identifier is the field's name, which is what `Form.Item` puts on
+      // the control it wraps, so this needs no agreement with antd at all.
+      //
+      setInvalidFields(errorFields.map((field) => String(field.name[0])));
+      return;
+    }
+
+    setOpenSections([]);
+    setInvalidFields([]);
     if ((await save()) === 'FAILED') return;
     goToStep('Guest invites details');
   }
@@ -160,6 +284,13 @@ export default function WeddingInvitationCreateClientside({
    * nothing at all would have no way to tell a save from a dead button. A save
    * that failed is printed under the row instead, and stays there, because that
    * one is not news a couple should be able to miss.
+   */
+  /**
+   * Keep what the couple has entered, whatever state it is in.
+   *
+   * Deliberately does not validate. Validation gates what a couple can reach,
+   * never what they are allowed to keep: this is the way out of a step they
+   * cannot finish yet, and a way out that could itself be refused is not one.
    */
   async function saveAsDraft() {
     const outcome = await save();
@@ -226,9 +357,18 @@ export default function WeddingInvitationCreateClientside({
                   its own card, and they sit on the page at the same gutter as
                   the heading above them. */}
               <div className="min-w-0 flex-1">
+                {/* Above the Sections and outside the Form. It governs every
+                    Section, so it cannot sit in one; and it is a preference
+                    about reading the flow rather than an answer about a
+                    wedding, so it is not one of the Form's fields either. That
+                    second part is load-bearing: the check addresses this step's
+                    labels by their position within the Form, and a setting
+                    parked among them would renumber every one of them. */}
+                <FlowLanguageField />
                 <WeddingInvitationForm
                   form={form}
                   openNotification={openNotification}
+                  openSections={openSections}
                 />
 
                 <div className={`mt-[40px] ${flowActionRow}`}>
@@ -239,7 +379,7 @@ export default function WeddingInvitationCreateClientside({
                     type="button"
                     onClick={() => router.push(CHOOSE_TEMPLATE_ROUTE)}
                     className={flowActionBack}>
-                    Previous step
+                    {copy.actionPreviousStep}
                   </button>
                   {/* Dimmed while it is saving, which is a state the design
                       does not draw: a control that cannot be pressed and looks
@@ -247,13 +387,30 @@ export default function WeddingInvitationCreateClientside({
                       couple's answer to that is to press it again. The check
                       never sees it, because nothing on a designed screen is
                       mid-save. */}
+                  {/* The way out of a step a couple cannot finish yet.
+                      Next asks the whole step to be answered; this asks for
+                      nothing and keeps whatever is there, which is the
+                      difference between validation gating what a couple can
+                      reach and validation gating what they are allowed to
+                      keep. Only the first is defensible: an invitation cannot
+                      be loaded back into this flow yet (`hbd-gd4`), so work
+                      that is not saved here is not merely inconvenient to
+                      recover, it is gone. */}
+                  <button
+                    type="button"
+                    onClick={saveAsDraft}
+                    disabled={isSaving}
+                    aria-busy={isSaving}
+                    className={`${flowActionAside} disabled:opacity-60`}>
+                    {copy.actionSaveAsDraft}
+                  </button>
                   <button
                     type="button"
                     onClick={goOnToGuestInvites}
                     disabled={isSaving}
                     aria-busy={isSaving}
                     className={`${flowActionForward} disabled:opacity-60`}>
-                    Next
+                    {copy.actionNext}
                   </button>
                 </div>
 
@@ -327,15 +484,18 @@ export default function WeddingInvitationCreateClientside({
             <GuestInvitesStep
               isCurrent={isGuestInvites}
               values={guestInvitesValues}
-              onChange={setGuestInvites}
-              brideNickname={
-                brideNickname?.trim() ||
-                DEFAULT_WEDDING_TEMPLATE_1_CONTENT.brideName
-              }
-              groomNickname={
-                groomNickname?.trim() ||
-                DEFAULT_WEDDING_TEMPLATE_1_CONTENT.groomName
-              }
+              onChange={(next) => {
+                if (next.greetingMessage !== guestInvitesValues.greetingMessage) {
+                  setMessageIsTheirs(true);
+                }
+                setGuestInvites(next);
+              }}
+              // Whatever the couple has typed, and nothing where they have
+              // typed nothing. These used to fall back to the sample wedding,
+              // which put Elias and Freya into the preview of a message a
+              // couple was about to send their own families.
+              brideNickname={brideNickname?.trim() ?? ''}
+              groomNickname={groomNickname?.trim() ?? ''}
               onPreviousStep={() => goToStep('Fill in the details & story')}
               onConfirm={confirmCreate}
               onSaveAsDraft={saveAsDraft}

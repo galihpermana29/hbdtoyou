@@ -3,7 +3,9 @@
 import { MapPin } from 'lucide-react';
 import { useState } from 'react';
 
-import { flowFieldAction, flowProblem } from './create-flow-treatment';
+import { flowFieldAction } from './create-flow-treatment';
+import { useFlowCopy } from './flow-language';
+import { mapEmbedFrom } from './wedding-map';
 import FlowMarkedField from './flow-marked-field';
 
 /**
@@ -25,20 +27,10 @@ import FlowMarkedField from './flow-marked-field';
  * takes one back.
  */
 
-/** What the design says to paste, and the only thing a guest can follow. */
-const LINK_PROBLEM = 'Paste a link that starts with http:// or https://';
-
-/** Whether this is something a guest's browser can open. */
-function isFollowable(link: string): boolean {
-  try {
-    const { protocol } = new URL(link);
-    return protocol === 'http:' || protocol === 'https:';
-  } catch {
-    return false;
-  }
-}
 
 export interface WeddingLocationFieldProps {
+  /** Whether the field must be answered, which draws the mark beside its label. */
+  required?: boolean;
   /** The field's identifier, supplied by `Form.Item` from the field's name. */
   id?: string;
   value?: string;
@@ -47,12 +39,13 @@ export interface WeddingLocationFieldProps {
 
 export default function WeddingLocationField({
   id,
+  required,
   value,
   onChange,
 }: WeddingLocationFieldProps) {
+  const copy = useFlowCopy();
   const saved = value ?? '';
   const [draft, setDraft] = useState(saved);
-  const [problem, setProblem] = useState<string | null>(null);
 
   // The draft follows the saved link whenever that changes from outside, so a
   // form that is reset does not leave yesterday's link in the box.
@@ -70,47 +63,49 @@ export default function WeddingLocationField({
    * beside the reason, so a couple can correct a link rather than retype one.
    */
   function save(typed: string): string {
-    const link = typed.trim();
-    if (link !== '' && !isFollowable(link)) {
-      setProblem(LINK_PROBLEM);
+    const pasted = typed.trim();
+    if (pasted === '') {
+      setLastSaved('');
+      onChange?.('');
+      return '';
+    }
+
+    // Only the address inside the paste is kept. What a couple pasted is left
+    // in the box when it is refused, so they can correct it rather than go back
+    // to Google Maps and copy it again - and the rule on the field says why,
+    // in the one place this field says anything, alongside every other field.
+    const embed = mapEmbedFrom(pasted);
+    if (embed === null) {
+      onChange?.(pasted);
       return typed;
     }
-    setProblem(null);
-    setLastSaved(link);
-    onChange?.(link);
-    return link;
+
+    setLastSaved(embed);
+    onChange?.(embed);
+    return embed;
   }
 
   return (
     <div className="flex flex-col gap-[6px]">
       <FlowMarkedField
-        label="Wedding Location"
-        hint="Go to Google Maps, find your wedding venue then copy the direction link"
+        label={copy.weddingLocation}
+        required={required}
+        hint={copy.locationHint}
         mark={<MapPin size={20} aria-hidden="true" />}
-        placeholder="Paste the location maps"
+        placeholder={copy.locationPlaceholder}
         id={id}
         value={draft}
-        // The complaint goes as soon as they start fixing it: it was about the
-        // link they had, and they no longer have that one.
-        onChange={(typed) => {
-          setProblem(null);
-          setDraft(typed);
-        }}
+        onChange={(typed) => setDraft(typed)}
         complete={save}
         action={
           <button
             type="button"
             onClick={() => setDraft(save(draft))}
             className={flowFieldAction}>
-            Save Location
+            {copy.saveLocation}
           </button>
         }
       />
-      {problem ? (
-        <p role="alert" className={flowProblem}>
-          {problem}
-        </p>
-      ) : null}
     </div>
   );
 }

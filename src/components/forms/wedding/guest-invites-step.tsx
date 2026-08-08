@@ -18,6 +18,7 @@ import {
   flowProblem,
   flowSectionName,
 } from './create-flow-treatment';
+import { useFlowCopy } from './flow-language';
 import GuestInvitesPreview from './guest-invites-preview';
 import {
   guestLinkFor,
@@ -147,6 +148,7 @@ export default function GuestInvitesStep({
   const messageId = useId();
   const guestListLabelId = useId();
   const dropZoneFileRef = useRef<HTMLInputElement>(null);
+  const copy = useFlowCopy();
 
   const messageRef = useHeightOfContent(values.greetingMessage, isCurrent);
 
@@ -217,7 +219,7 @@ export default function GuestInvitesStep({
             onConfirm();
           }}>
           <section className="flex flex-col">
-            <h3 className={flowSectionName}>Customize your invitation</h3>
+            <h3 className={flowSectionName}>{copy.customiseInvitation}</h3>
             <p className={flowHint}>
               Personalize your invitation domain &amp; message for your guests
               to see
@@ -226,7 +228,7 @@ export default function GuestInvitesStep({
             <div className="mt-[24px] flex flex-col gap-[24px]">
               <div className="flex flex-col gap-[6px]">
                 <label id={slugLabelId} htmlFor={slugId} className={flowLabel}>
-                  Custom Your Web Domain
+                  {copy.customDomain}
                 </label>
                 <div
                   role="group"
@@ -259,7 +261,7 @@ export default function GuestInvitesStep({
 
               <div className="flex flex-col gap-[6px]">
                 <label htmlFor={messageId} className={flowLabel}>
-                  Invitation Greeting Message
+                  {copy.greetingMessage}
                 </label>
                 <textarea
                   id={messageId}
@@ -275,7 +277,7 @@ export default function GuestInvitesStep({
           </section>
 
           <section className="flex flex-col">
-            <h3 className={flowSectionName}>Add Guest List</h3>
+            <h3 className={flowSectionName}>{copy.addGuestList}</h3>
             <p className={flowHint}>
               Personalize your invitation domain &amp; message for your guests
               to see
@@ -292,7 +294,7 @@ export default function GuestInvitesStep({
               ) : (
                 <>
                   <p id={guestListLabelId} className={flowLabel}>
-                    Guest List
+                    {copy.guestList}
                   </p>
                   <div
                     role="group"
@@ -315,7 +317,7 @@ export default function GuestInvitesStep({
                         Drag &amp; drop up your list here
                       </p>
                       <p className={flowDropZonePrompt}>
-                        Upload in format .CSV
+                        {copy.uploadCsvFormat}
                       </p>
                     </div>
                     {/* The design draws no control here, only an area, so the
@@ -364,7 +366,7 @@ export default function GuestInvitesStep({
               type="button"
               onClick={onPreviousStep}
               className={flowActionBack}>
-              Previous step
+              {copy.actionPreviousStep}
             </button>
             {/* Beside Confirm Create rather than beside Previous step: it is
                 the other thing a couple can do with what they have written,
@@ -376,7 +378,7 @@ export default function GuestInvitesStep({
               disabled={isBusy}
               aria-busy={isBusy}
               className={`${flowActionAside} disabled:opacity-60`}>
-              Save as draft
+              {copy.actionSaveAsDraft}
             </button>
             {/* Dimmed while something is in flight, as its neighbour is: this
                 one asks the backend two questions in turn, and a couple who
@@ -386,7 +388,7 @@ export default function GuestInvitesStep({
               disabled={isBusy}
               aria-busy={isBusy}
               className={`${flowActionForward} disabled:opacity-60`}>
-              Confirm Create
+              {copy.actionConfirmCreate}
             </button>
           </div>
 

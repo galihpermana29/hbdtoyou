@@ -1,5 +1,6 @@
 'use client';
 
+import './field-treatment.css';
 import { useId, type ChangeEvent, type ReactNode } from 'react';
 
 import {
@@ -39,6 +40,8 @@ export interface FlowMarkedFieldProps {
    * by that rather than by nothing.
    */
   label?: string;
+  /** Whether the field must be answered, which draws the mark beside it. */
+  required?: boolean;
   /** What to call a field the design draws no label for. */
   name?: string;
   /** The line of guidance the design prints between the label and the box. */
@@ -78,6 +81,7 @@ export interface FlowMarkedFieldProps {
 
 export default function FlowMarkedField({
   label,
+  required,
   name,
   hint,
   mark,
@@ -113,7 +117,7 @@ export default function FlowMarkedField({
   return (
     <div className={flowFieldParts}>
       {label ? (
-        <label id={labelId} htmlFor={fieldId} className={flowLabel}>
+        <label id={labelId} htmlFor={fieldId} className={`${flowLabel}${required ? ' wedding-required-label' : ''}`}>
           {label}
         </label>
       ) : null}

@@ -81,3 +81,23 @@
   font-size: 16px;
   line-height: 24px;
 }
+
+/*
+ * The mark that says a field must be answered.
+ *
+ * Drawn with `::after` rather than written into the label, deliberately. The
+ * design draws no asterisks - it was drawn for a form where nothing was
+ * required - so this is an addition, and putting it in the markup would append
+ * "*" to the text of twenty labels the check asserts word for word. A generated
+ * mark is invisible to `textContent`, so what those labels say is still exactly
+ * what the design says they say.
+ *
+ * It carries no meaning for assistive technology on purpose: the control itself
+ * is marked `aria-required` by the rule, which is the thing a screen reader
+ * announces. This is for eyes.
+ */
+.wedding-required-label::after {
+  content: '*';
+  margin-left: 2px;
+  color: #d92d20;
+}

@@ -1,6 +1,7 @@
 'use client';
 
 import { ChevronDown } from 'lucide-react';
+import './field-treatment.css';
 import { useId, type ChangeEvent } from 'react';
 
 import {
@@ -35,6 +36,8 @@ import {
 export interface FlowChoiceFieldProps {
   /** The words above the field, as the design writes them. */
   label: string;
+  /** Whether the field must be answered, which draws the mark beside it. */
+  required?: boolean;
   /**
    * The design's own example, shown until a couple chooses.
    *
@@ -57,6 +60,7 @@ export interface FlowChoiceFieldProps {
 
 export default function FlowChoiceField({
   label,
+  required,
   placeholder,
   options,
   id,
@@ -78,7 +82,7 @@ export default function FlowChoiceField({
 
   return (
     <div className={flowFieldParts}>
-      <label id={labelId} htmlFor={fieldId} className={flowLabel}>
+      <label id={labelId} htmlFor={fieldId} className={`${flowLabel}${required ? ' wedding-required-label' : ''}`}>
         {label}
       </label>
 

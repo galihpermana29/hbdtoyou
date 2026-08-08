@@ -1,7 +1,7 @@
 'use client';
 
 import { ChevronUp, Pencil } from 'lucide-react';
-import { useId, useState, type ReactNode } from 'react';
+import { useEffect, useId, useState, type ReactNode } from 'react';
 
 import {
   flowHint,
@@ -54,6 +54,19 @@ export interface CreateFlowSectionProps {
    * past the control that opens the Section.
    */
   headerSwitch?: ReactNode;
+  /**
+   * Ask this Section to open, from outside it.
+   *
+   * A Section decides for itself whether it is open, because opening one is
+   * something a couple does. There is one exception: a Next that refuses has to
+   * put the couple in front of what is missing, and an answer they cannot see
+   * is an answer they cannot give. So a failed Next raises this, the Section
+   * opens, and the couple closes it again themselves if they want to.
+   *
+   * Raising it opens; lowering it does not close. Closing on their behalf would
+   * take away a Section they had deliberately opened to work in.
+   */
+  openIt?: boolean;
   children: ReactNode;
 }
 
@@ -62,10 +75,15 @@ export default function CreateFlowSection({
   description,
   defaultOpen = false,
   headerSwitch,
+  openIt = false,
   children,
 }: CreateFlowSectionProps) {
   const fieldsId = useId();
   const [isOpen, setIsOpen] = useState(defaultOpen);
+
+  useEffect(() => {
+    if (openIt) setIsOpen(true);
+  }, [openIt]);
   const Mark = isOpen ? ChevronUp : Pencil;
 
   return (

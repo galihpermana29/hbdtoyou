@@ -1,5 +1,8 @@
 import { Check } from 'lucide-react';
 
+import { useFlowCopy } from '@/components/forms/wedding/flow-language';
+import type { FlowCopyKey } from '@/components/forms/wedding/copy';
+
 /**
  * How far along the Create Flow a couple is, drawn as the design draws it.
  *
@@ -23,8 +26,18 @@ import { Check } from 'lucide-react';
  */
 
 type Step = {
+  /**
+   * The step's identity, in English, and never what a couple reads.
+   *
+   * A screen says which step it is by this, so it has to stay put while the
+   * words on the page change language. What is drawn comes from `copyKey` and
+   * `descriptionKey` below.
+   */
   title: string;
   description: string;
+  /** What the stepper draws for this step, in the language being read. */
+  copyKey: FlowCopyKey;
+  descriptionKey: FlowCopyKey;
   /** The class colouring this step's title while it is not the current one. */
   restingTitleClass: string;
   /** The same, for its description. */
@@ -34,24 +47,32 @@ type Step = {
 const CREATE_FLOW_STEPS = [
   {
     title: 'Choose your template',
+    copyKey: 'stepChooseTemplate',
+    descriptionKey: 'stepChooseTemplateDescription',
     description: 'Pick a template design that calls to your dream wedding',
     restingTitleClass: 'text-[#1B1B1B]',
     restingDescriptionClass: 'text-[#7B7B7B]',
   },
   {
     title: 'Fill in the details & story',
+    copyKey: 'stepDetailsAndStory',
+    descriptionKey: 'stepDetailsAndStoryDescription',
     description: 'Add photos, music, and story details.',
     restingTitleClass: 'text-[#344054]',
     restingDescriptionClass: 'text-[#475467]',
   },
   {
     title: 'Guest invites details',
+    copyKey: 'stepGuestInvites',
+    descriptionKey: 'stepGuestInvitesDescription',
     description: 'Config guest details on your the invites',
     restingTitleClass: 'text-[#344054]',
     restingDescriptionClass: 'text-[#475467]',
   },
   {
     title: 'Share with guests',
+    copyKey: 'stepShareWithGuests',
+    descriptionKey: 'stepShareWithGuestsDescription',
     description: 'Easily share your invitation to invited guests.',
     restingTitleClass: 'text-[#7B7B7B]',
     restingDescriptionClass: 'text-[#7B7B7B]',
@@ -105,6 +126,7 @@ export default function CreateFlowSteps({
 }: {
   current: CreateFlowStep;
 }) {
+  const copy = useFlowCopy();
   const currentIndex = CREATE_FLOW_STEPS.findIndex(
     (step) => step.title === current
   );
@@ -141,13 +163,13 @@ export default function CreateFlowSteps({
                 className={`text-[14px] font-[600] leading-[20px] ${
                   isCurrent ? CURRENT_CLASS : step.restingTitleClass
                 }`}>
-                {step.title}
+                {copy[step.copyKey]}
               </p>
               <p
                 className={`text-[14px] font-[400] leading-[20px] ${
                   isCurrent ? CURRENT_CLASS : step.restingDescriptionClass
                 }`}>
-                {step.description}
+                {copy[step.descriptionKey]}
               </p>
             </div>
           </li>
