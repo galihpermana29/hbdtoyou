@@ -440,3 +440,11 @@ export interface IWeddingRsvpPayload {
 // rather than only report: a guest who has already replied has not failed at
 // anything, and telling them so is different from telling them it went wrong.
 export const GUEST_ALREADY_RESPONDED = 'GUEST_ALREADY_RESPONDED';
+
+// What the backend refuses a reply with when its IP has sent too many too
+// quickly, carried the same way. Also a refusal a caller can act on rather
+// than only report: a rate-limited guest has a reply the couple will take,
+// just not this second, and "try again shortly" is different from "it went
+// wrong". Any message that is neither of these two constants stays generic -
+// inventing reasons the backend has not named would be guessing.
+export const RATE_LIMITED = 'RATE_LIMITED';

@@ -185,7 +185,8 @@ Where a reply has nowhere to go the line is "Nothing is saved yet. Your reply st
 That is every invitation nobody was sent: the Showcase, the Create Flow's two panels and Play Preview, and a published invitation opened at its bare address rather than by a guest's own link.
 It is claimed in `visual/expectations/wedding-template-1-rsvp.mjs`, whose screen is the Showcase's card, so that it cannot quietly become something vaguer.
 
-Where a guest came by their own link the reply reaches the couple, and the same line says which of three things happened: "Thank you. Your reply is with the couple.", "You have already replied to this invitation. The couple has that first answer, and it is the one that counts.", or one naming what the backend said and that nothing they wrote has been lost.
+Where a guest came by their own link the reply reaches the couple, and the same line says which of four things happened: "Thank you. Your reply is with the couple.", "You have already replied to this invitation. The couple has that first answer, and it is the one that counts.", a rate-limited reply's "Your reply has not gone through just yet: too many replies arrived at once. Nothing you have written has been lost - wait a moment, then press Submit again.", or one naming what the backend said and that nothing they wrote has been lost.
+Only the failures the backend has named get words of their own; the last stays generic on purpose, because inventing a friendlier reason for an unnamed failure would be guessing.
 None of those is asserted, for the same reason a failed save's line is not: each is drawn only when there is something to say, and every screen the design draws has nothing.
 
 The Name field on that card is read-only and holds the name the Guest List carries, unless the list carries none for that guest, in which case it is theirs to type as anybody else's is.

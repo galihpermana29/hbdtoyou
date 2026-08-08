@@ -37,7 +37,7 @@ import {
   type ReactNode,
 } from 'react';
 
-import { GUEST_ALREADY_RESPONDED } from '@/action/interfaces';
+import { GUEST_ALREADY_RESPONDED, RATE_LIMITED } from '@/action/interfaces';
 import { submitWeddingRsvp } from '@/action/wedding-api';
 import { useDialogBehaviour } from '@/hooks/use-dialog-behaviour';
 
@@ -113,11 +113,28 @@ const REPLY_WORDS: Record<Exclude<ReplyOutcome, 'FAILED'>, string> = {
 };
 
 /**
+ * What a rate-limited guest reads: a failure, but one with its own words.
+ *
+ * The backend limits replies by IP, so a wedding party replying from one
+ * venue's wifi can be told to wait through no fault of their own. Waiting is
+ * the whole of the remedy, so the line says so rather than printing the
+ * backend's `RATE_LIMITED` at them - and it stays a failure rather than a
+ * settled reply, so Submit stays pressable for the retry it asks for.
+ */
+const RATE_LIMITED_WORDS =
+  'Your reply has not gone through just yet: too many replies arrived at ' +
+  'once. Nothing you have written has been lost - wait a moment, then press ' +
+  'Submit again.';
+
+/**
  * What they read when the reply did not reach the couple.
  *
  * The same three things the Create Flow tells a couple whose save failed: what
  * did not happen, what the backend gave as the reason, and that nothing they
- * wrote is gone.
+ * wrote is gone. Only the failures the backend has named get words of their
+ * own - `GUEST_ALREADY_RESPONDED` and `RATE_LIMITED` above - and everything
+ * else stays this generic on purpose, because inventing a friendlier reason
+ * for an unnamed failure would be guessing.
  */
 function replyProblem(reason: string): string {
   return (
@@ -414,6 +431,9 @@ export default function RsvpCard({
         setOutcome('SENT');
       } else if (sent.message === GUEST_ALREADY_RESPONDED) {
         setOutcome('ALREADY_REPLIED');
+      } else if (sent.message === RATE_LIMITED) {
+        setProblem(RATE_LIMITED_WORDS);
+        setOutcome('FAILED');
       } else {
         setProblem(replyProblem(sent.message));
         setOutcome('FAILED');

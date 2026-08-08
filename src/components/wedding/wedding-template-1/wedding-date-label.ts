@@ -16,20 +16,19 @@
  * caller picks the one its own section prints rather than inventing
  * punctuation.
  *
- * A date this cannot read falls back to the sample invitation's day, the same
- * as an unanswered name or an unanswered photograph does: a guest is shown a
- * wedding rather than a gap. That day is written out here rather than read off
- * `DEFAULT_WEDDING_TEMPLATE_1_CONTENT`, which is the last of this cascade's
- * duplication and is `hbd-bk0`: deriving it would read the sample's day in the
- * viewer's own timezone, which is a behaviour change rather than this bead's
- * de-duplication.
+ * A date this cannot read is answered with nothing, and a caller draws no line
+ * rather than an empty one. It used to fall back to the Showcase's day, which
+ * printed somebody else's wedding on a draft whose couple had not picked one
+ * yet - and spelt that day out a second time beside
+ * `DEFAULT_WEDDING_TEMPLATE_1_CONTENT`, which was `hbd-bk0`. A missing answer
+ * stays missing: nothing invented reaches a guest.
  */
 export function formatWeddingDateLabel(
   iso: string,
   { beforeYear }: { beforeYear: ', ' | ' ' }
 ): string {
   const d = new Date(iso);
-  if (Number.isNaN(d.getTime())) return `May 3rd${beforeYear}2026`;
+  if (Number.isNaN(d.getTime())) return '';
   const day = d.getDate();
   const suffix =
     day % 10 === 1 && day !== 11

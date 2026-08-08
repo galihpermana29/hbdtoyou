@@ -222,9 +222,13 @@ function EnvelopeCard({
                   other line a couple owns on these cards carries, and the
                   alternative is one line held inside the card by arithmetic
                   nobody wrote down. */}
-              <div className="absolute left-[136.91px] top-[147.16px] -translate-x-1/2 font-[family-name:var(--font-wt1-script)] text-[16.699px] leading-[normal] text-black">
-                <FitText maxWidth={CARD_LINE_MAX_WIDTH}>{dateLabel}</FitText>
-              </div>
+              {/* A date the formatter could not read is an empty label, and
+                  the card omits the line rather than drawing a blank one. */}
+              {dateLabel && (
+                <div className="absolute left-[136.91px] top-[147.16px] -translate-x-1/2 font-[family-name:var(--font-wt1-script)] text-[16.699px] leading-[normal] text-black">
+                  <FitText maxWidth={CARD_LINE_MAX_WIDTH}>{dateLabel}</FitText>
+                </div>
+              )}
             </div>
           </motion.div>
         </div>
