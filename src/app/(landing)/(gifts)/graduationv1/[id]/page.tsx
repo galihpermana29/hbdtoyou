@@ -24,6 +24,7 @@ export default async function GraduationV1Page({ params }: { params: any }) {
           </a> */}
           <a
             target="_blank"
+            rel="noreferrer"
             href="https://memoify.live"
             className="hover:text-gray-300 text-sm md:text-base">
             MEMOIFY

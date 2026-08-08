@@ -87,6 +87,7 @@ export default function Graduationv2Page() {
           <div className="md:fixed md:w-[300px] space-y-8">
             <a
               target="_blank"
+              rel="noreferrer"
               href="https://memoify.live"
               className="hover:text-gray-300 text-sm md:text-base">
               <Image

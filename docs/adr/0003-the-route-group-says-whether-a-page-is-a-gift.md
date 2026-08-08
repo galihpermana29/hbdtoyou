@@ -4,7 +4,8 @@ The site footer stays off any page that draws somebody's gift, and what settles 
 A page under `(gifts)` or `(scrapbooks)` is a gift, whether it is the sample the product links to from `/templates` or the `[id]` viewer a recipient was sent.
 Everything else is the product's own UI and keeps its footer.
 
-This is decided in one place, `drawsAGift` in `src/lib/gift-routes.ts`, and asked once, where the footer is rendered in `src/app/session-provider.tsx`.
+This is decided in one place, `drawsAGift` in `src/lib/gift-routes.ts`.
+Everything the product would otherwise put on a gift asks it, rather than keeping a list of its own: `src/app/session-provider.tsx` asks it once and both the site footer and the promotional ads modal read that one answer.
 
 ## Why not a list of routes
 
@@ -36,12 +37,16 @@ Both live in `(core)` rather than in a gift route group, so they are named in `g
 Journal entries, and every `[id]` viewer of every template under `(gifts)` and `(scrapbooks)`, no longer carry the site footer.
 That is a visible change to pages that have been carrying it since the list was written.
 
-Four gift routes are not covered, because they sit in `src/app/(landing)/` itself rather than in either group: `albumgraduation1`, `graduationv1`, `graduationv2` and `netlfix-wedding`.
-They still carry the footer, which is `hbd-b0z`.
-Moving them into `(gifts)` changes no URL and is the whole fix.
+Four gift routes were not covered, because they sat in `src/app/(landing)/` itself rather than in either group: `albumgraduation1`, `graduationv1`, `graduationv2` and `netlfix-wedding`.
+They have been moved into `(gifts)`, which changed no URL, and the rule now covers them.
+`src/app/(landing)/wedding-invitation` stays where it is: it is the product's marketing page for the wedding invitation, with its own Open Graph card, not somebody's invitation.
 
-The promotional ads modal keeps a list of its own, in the same shape and with the same hole, so it can still open over somebody's gift.
-That is `hbd-s1r`, and the answer is to ask `drawsAGift` there too.
+The promotional ads modal asks `drawsAGift` too, so no advertisement opens over a gift.
+It keeps a short list beside that answer, but only of the product's own routes - `/create` and `/payment` - where an ad would interrupt somebody building a gift or paying for one.
+That list matches a route and everything beneath it rather than by equality, so it does not repeat the hole described above: `/create/wedding-invitation` and `/payment/paypal-success` need no entry of their own.
+It does not reach the two build pages that hang off another product's route, `/scrapbook/create` and `/journal/create`, which is `hbd-00d`.
+No gift route appears in it, so a template added tomorrow is covered by the rule alone.
+The modal also closes itself on arriving at a gift, because this provider outlives a navigation and an ad opened on a page that allows one would otherwise still be standing on the page that does not.
 
 The check cannot see any of this from the other side.
 `visual/expectations/page-chrome.mjs` asserts the site footer is present on the Create Flow's screens, which guards the rule against hiding the footer where the product wants it.

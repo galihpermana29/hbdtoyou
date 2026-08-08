@@ -8,7 +8,6 @@ import {
   PersonCard,
   ScheduleItem,
   SectionHeader,
-  WishCard,
   WishForm,
 } from '@/components/netflix';
 import Image from 'next/image';
@@ -113,12 +112,9 @@ const NetlfixWeddingPage = () => {
   );
 
   // Handle wish submission
-  const handleWishSubmit = async (values: {
-    name: string;
-    message: string;
-  }) => {
-    // This would typically send the data to an API
-    console.log('Submitted wish:', values);
+  const handleWishSubmit = async () => {
+    // The Showcase has no invitation to attach a wish to, so it accepts one and
+    // keeps it nowhere.
     return Promise.resolve();
   };
 

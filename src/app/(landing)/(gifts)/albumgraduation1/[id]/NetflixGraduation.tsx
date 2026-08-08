@@ -93,7 +93,7 @@ const NetflixGraduation = ({
         link.click();
 
         message.success('Instagram story template downloaded successfully!');
-      } catch (error) {
+      } catch {
         message.error('Failed to generate Instagram story template');
 
         // Ensure line height is restored even if there's an error

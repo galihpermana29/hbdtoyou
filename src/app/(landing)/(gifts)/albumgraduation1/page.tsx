@@ -3,18 +3,15 @@
 // import { UserProfileGreen, UserProfileRed, UserProfileYellow } from '@/components/icons/UserProfileIcons';
 import {
   EpisodeCard,
-  GalleryGrid,
   NetflixButton,
   SectionHeader,
-  WishCard,
   WishForm,
 } from '@/components/netflix';
 import { GraduationData } from '@/services/gemini';
-import { Form, Spin } from 'antd';
+import { Spin } from 'antd';
 import dayjs from 'dayjs';
 import advancedFormat from 'dayjs/plugin/advancedFormat.js';
 import Image from 'next/image';
-import { useSearchParams } from 'next/navigation';
 import { useEffect, useState } from 'react';
 dayjs.extend(advancedFormat);
 
@@ -97,10 +94,6 @@ const defaultGraduationData = {
 };
 
 const GraduationFilmV1Page = () => {
-  const searchParams = useSearchParams();
-  const name = searchParams.get('name') || 'Guest';
-  const [isDrawerOpen, setIsDrawerOpen] = useState(false);
-  const [form] = Form.useForm();
   const [loading, setLoading] = useState(true);
   const [graduationData, setGraduationData] = useState<GraduationData | null>(
     null
@@ -113,7 +106,7 @@ const GraduationFilmV1Page = () => {
       try {
         const parsedData = JSON.parse(storedData);
         setGraduationData(parsedData);
-      } catch (error) {
+      } catch {
         setGraduationData(defaultGraduationData as GraduationData);
       }
     } else {
@@ -122,10 +115,6 @@ const GraduationFilmV1Page = () => {
     }
     setLoading(false);
   }, []);
-
-  const onClose = () => {
-    setIsDrawerOpen(false);
-  };
 
   const showMoreIcon = (
     <svg
@@ -144,12 +133,9 @@ const GraduationFilmV1Page = () => {
     </svg>
   );
 
-  // Handle wish submission
-  const handleWishSubmit = async (values: {
-    name: string;
-    message: string;
-  }) => {
-    // This would typically send the data to an API
+  const handleWishSubmit = async () => {
+    // The Showcase has no album to attach a wish to, so it accepts one and
+    // keeps it nowhere.
     return Promise.resolve();
   };
 

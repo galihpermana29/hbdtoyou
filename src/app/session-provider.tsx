@@ -131,6 +131,26 @@ const promotionalContent: AdContent[] = [
   // },
 ];
 
+/**
+ * The product's own routes that an advertisement would interrupt: the flow
+ * somebody builds a gift in and the flow they pay us in. Each one covers the
+ * route itself and everything beneath it, so `/create` also covers
+ * `/create/wedding-invitation` and `/payment` also covers the page PayPal
+ * returns to.
+ *
+ * These are named one by one because no rule gathers them, and each addition is
+ * a deliberate decision about our own UI. No gift route belongs here: a gift is
+ * kept clear by the same question the footer asks, so a template added tomorrow
+ * is covered without anybody remembering this file exists.
+ */
+const PRODUCT_ROUTES_WITHOUT_ADS = ['/create', '/payment'];
+
+function isProductRouteWithoutAds(pathname: string): boolean {
+  return PRODUCT_ROUTES_WITHOUT_ADS.some(
+    (route) => pathname === route || pathname.startsWith(`${route}/`)
+  );
+}
+
 const SessionProvider = ({
   children,
   session,
@@ -175,12 +195,9 @@ const SessionProvider = ({
   const [loading, setLoading] = useState(true);
 
   const isPremium = userProfile?.type === 'premium';
-  const isHideAds = [
-    '/create',
-    '/payment',
-    '/wedding-template-1',
-    '/create/wedding-invitation',
-  ].includes(pathname);
+
+  const isGift = drawsAGift(segments, contentId);
+  const isHideAds = isGift || isProductRouteWithoutAds(pathname);
 
   const PREMIUM_ADS_KEY = 'memoify_premium_ads_count';
   const PREMIUM_ADS_LIMIT = 3;
@@ -249,7 +266,12 @@ const SessionProvider = ({
   };
 
   useEffect(() => {
-    if (isHideAds) return;
+    if (isHideAds) {
+      // This provider outlives a navigation, so an ad opened on a page that
+      // allows one is still open on arrival at a page that does not.
+      setAdsModalVisible(false);
+      return;
+    }
     if (isPremium && getPremiumAdsCount() >= PREMIUM_ADS_LIMIT) return;
 
     const interval = setInterval(() => {
@@ -355,7 +377,7 @@ const SessionProvider = ({
       {/* The site footer would intrude on the page a recipient came to see, so
           it stays off a gift. The Create Flow that builds one is ordinary
           product UI and keeps it. */}
-      {!drawsAGift(segments, contentId) && <Footer />}
+      {!isGift && <Footer />}
     </SessionContext.Provider>
   );
 };

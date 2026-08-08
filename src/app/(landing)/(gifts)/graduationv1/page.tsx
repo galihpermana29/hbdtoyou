@@ -83,6 +83,7 @@ export default function GraduationV1Page() {
           </a>
           <a
             target="_blank"
+            rel="noreferrer"
             href="https://memoify.live"
             className="hover:text-gray-300 text-sm md:text-base">
             MEMOIFY

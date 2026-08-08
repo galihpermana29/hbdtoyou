@@ -2,8 +2,6 @@
 import FormGeneration from './FormGeneration';
 import useCreateContent from '../../create/usecase/useCreateContent';
 import { Suspense, useEffect, useState } from 'react';
-import { Spin } from 'antd';
-import { LoadingOutlined } from '@ant-design/icons';
 import { useSearchParams } from 'next/navigation';
 import { ChevronLeft, ChevronRight } from 'lucide-react';
 import ScrapbookResult1 from '@/app/(landing)/(scrapbooks)/scrapbook1/page';
@@ -13,7 +11,7 @@ import Scrapbook4 from '@/app/(landing)/(scrapbooks)/scrapbook4/page';
 import Scrapbook5 from '@/app/(landing)/(scrapbooks)/scrapbook5/page';
 
 import { warmUpAIModel } from '@/action/user-api';
-import GeneratingLLMLoadingModal from '@/app/(landing)/albumgraduation1/[id]/GeneratingLLMLoadingModal';
+import GeneratingLLMLoadingModal from '@/app/(landing)/(gifts)/albumgraduation1/[id]/GeneratingLLMLoadingModal';
 import Scrapbook6 from '@/app/(landing)/(scrapbooks)/scrapbook6/page';
 import Scrapbook7 from '@/app/(landing)/(scrapbooks)/scrapbook7/page';
 import Scrapbook8 from '@/app/(landing)/(scrapbooks)/scrapbook8/page';
@@ -79,7 +77,6 @@ const ScrapbookCreatePage = () => {
 
   useEffect(() => {
     if (templateName === 'scrapbook1') {
-      console.log('warm up');
       warmUpAIModel();
     }
   }, [templateName]);
