@@ -263,13 +263,25 @@ const MARKED_ANSWER = {
  */
 const CHOSEN_ANSWER = { ...MARKED_ANSWER, color: '#667085' };
 
-/** The ratios the design recommends for a Section that shows several photos. */
-const WIDE_PHOTO_HINT =
-  'We recommend to add more than 2 images in the ratio of 4:3 or 16:9 for more interactivity';
+/**
+ * What an uploader says it wants.
+ *
+ * Built by the drop zone from the number it enforces rather than written beside
+ * the field, so the two cannot disagree. The design's own guidance did: it said
+ * "more than 2 images" over a field that takes one. See
+ * `docs/adr/0002-figma-is-literal-truth.md`.
+ */
+const one = (ratio) => `One photograph, in the ratio of ${ratio}`;
+const exactly = (count, ratio) =>
+  `Exactly ${count} photographs, in the ratio of ${ratio}`;
+const upTo = (most, ratio) =>
+  `Up to ${most} photographs, in the ratio of ${ratio}`;
+const between = (count, most, ratio) =>
+  `Between ${count} and ${most} photographs, in the ratio of ${ratio}`;
 
-/** The ratios it recommends for a Section that shows them in a stack. */
-const TALL_PHOTO_HINT =
-  'We recommend to add more than 3 images in the ratio of 4:3 for more interactivity';
+const WIDE = '4:3 or 16:9';
+const STANDARD = '4:3';
+
 
 /**
  * Every dashed area the form takes a file in, keyed by the field it belongs to,
@@ -282,13 +294,13 @@ const TALL_PHOTO_HINT =
 const UPLOAD_AREAS = {
   'Couples Photos': {
     title: 'Add More Photos',
-    prompt: 'Drag & drop up to 5 images from your gallery',
-    hint: WIDE_PHOTO_HINT,
+    prompt: 'Drag & drop up to 1 images from your gallery',
+    hint: one(WIDE),
   },
   'Polaroid Photos': {
     title: 'Add More Photos',
-    prompt: 'Drag & drop up to 12 images from your gallery',
-    hint: TALL_PHOTO_HINT,
+    prompt: 'Drag & drop up to 3 images from your gallery',
+    hint: exactly(3, STANDARD),
   },
   // The one area the design prints no guidance under: it takes a single photo,
   // and the prompt inside it already says so. It says it in the design's own
@@ -298,7 +310,7 @@ const UPLOAD_AREAS = {
   'Proposal Photo': {
     title: 'Add More Photos',
     prompt: 'Drag & drop up to 1 images from your gallery',
-    hint: null,
+    hint: one(STANDARD),
   },
   // The two areas the design draws no field for at all. The invitation prints a
   // portrait of each partner and the design never asks for either, so these two
@@ -308,35 +320,37 @@ const UPLOAD_AREAS = {
   'Bride Photo': {
     title: 'Add More Photos',
     prompt: 'Drag & drop up to 1 images from your gallery',
-    hint: 'One portrait of the bride, in the ratio of 4:3',
+    hint: one(STANDARD),
   },
   'Groom Photo': {
     title: 'Add More Photos',
     prompt: 'Drag & drop up to 1 images from your gallery',
-    hint: 'One portrait of the groom, in the ratio of 4:3',
+    hint: one(STANDARD),
   },
   'Wedding Teaser Video': {
     title: 'Add a Video',
     prompt: 'Drag & drop video file from your gallery',
     hint: 'Max video size 15MB',
   },
-  'More Photos': {
+  'Venue Photos': {
     title: 'Add More Photos',
     prompt: 'Drag & drop up to 5 images from your gallery',
-    hint: WIDE_PHOTO_HINT,
+    hint: upTo(5, WIDE),
   },
-  // A second area that takes one photo and still says "up to 1 images", and this
-  // one is given the guidance for three underneath it. Both are read off the
-  // frame: see `docs/adr/0002-figma-is-literal-truth.md`.
+  // The design drew this area saying "up to 1 images" with the guidance for
+  // three printed underneath it, which was the frame disagreeing with itself.
+  // It takes three now - the invitation cross-fades between them - so the
+  // prompt and the guidance finally say the same thing. See
+  // `docs/adr/0002-figma-is-literal-truth.md`.
   'Gift Section Photo': {
     title: 'Add More Photos',
-    prompt: 'Drag & drop up to 1 images from your gallery',
-    hint: TALL_PHOTO_HINT,
+    prompt: 'Drag & drop up to 3 images from your gallery',
+    hint: exactly(3, STANDARD),
   },
   'Photo Gallery': {
     title: 'Add More Photos',
-    prompt: 'Drag & drop up to 20 images from your gallery',
-    hint: 'We recommend to add more than 5 images in the ratio of 4:3 for more interactivity',
+    prompt: 'Drag & drop up to 15 images from your gallery',
+    hint: between(5, 15, STANDARD),
   },
 };
 
@@ -488,7 +502,7 @@ const SECTIONS = [
   {
     name: 'Venue Details',
     description: 'Details on the wedding venue location & reception time',
-    labels: ['More Photos', 'Wedding Address', 'Wedding Location'],
+    labels: ['Venue Photos', 'Wedding Address', 'Wedding Location'],
     groups: ['Wedding Reception Time', 'Start', 'End', 'Wedding Location'],
     switches: [],
     // The reception's start and its end share one name, so they are a group with
@@ -496,7 +510,7 @@ const SECTIONS = [
     // exactly what the design draws. The Wedding Location carries an action
     // inside its box, divided off by a hairline the design draws full height.
     fields: (form) => [
-      ...form.uploadArea('More Photos'),
+      ...form.uploadArea('Venue Photos'),
       {
         name: 'Wedding Reception Time field',
         select: 'form [role="group"]',
@@ -527,7 +541,7 @@ const SECTIONS = [
       {
         name: 'Wedding Location hint',
         withText:
-          'Go to Google Maps, find your wedding venue then copy the direction link',
+          'Open Google Maps, find your venue, then choose Share, Embed a map, Copy HTML. Paste it here. What you paste starts with <iframe.',
         style: TYPE.fieldHint,
       },
       {
@@ -880,11 +894,56 @@ export function detailsAndStory(open) {
 
   return [
     ...pageChrome('Fill in the details & story'),
+    {
+      // Not in the design, and agreed and recorded in
+      // `docs/adr/0002-figma-is-literal-truth.md`.
+      //
+      // The design was drawn for a form that only existed in English. This
+      // chooses which language the flow is read in, and it sits above the
+      // Sections because it governs all of them - inside one, it would read as
+      // that Section's setting. Captured showing English, which is the choice
+      // the check makes for itself; see `READ_IN_ENGLISH` in `capture.mjs`.
+      name: 'Language label',
+      select: 'label',
+      withText: 'Language',
+      style: {
+        fontSize: '14px',
+        fontWeight: '500',
+        lineHeight: '20px',
+        color: '#344054',
+      },
+    },
     ...sections,
     {
       name: 'Previous step action',
       select: 'button',
       withText: 'Previous step',
+      style: {
+        ...TYPE.actionLabel,
+        color: '#e34013',
+        backgroundColor: '#ffffff',
+        borderStyle: 'solid',
+        borderWidth: '1px',
+        borderColor: '#e34013',
+        borderRadius: '8px',
+        padding: '12px 18px',
+        gap: '6px',
+        boxShadow: FIELD_SHADOW,
+      },
+    },
+    {
+      // Not in the design, and agreed and recorded in
+      // `docs/adr/0002-figma-is-literal-truth.md`.
+      //
+      // The design was drawn for a flow that saved nothing, so it draws no way
+      // to stop partway. Once this step's fields are required, Next stops
+      // being a way out of it, and a couple with three Sections answered and
+      // five to go could neither advance nor keep what they had written. It
+      // wears the shape the design states for the action beside the filled
+      // one, which is the same shape as Previous step.
+      name: 'Save as draft action',
+      select: 'button',
+      withText: 'Save as draft',
       style: {
         ...TYPE.actionLabel,
         color: '#e34013',

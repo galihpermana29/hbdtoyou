@@ -47,6 +47,35 @@ const FREEZE_STYLES = `
  * which would make two runs of the same commit produce different evidence.
  */
 const DESIGN_INSTANT = new Date('2026-01-05T02:41:00Z');
+
+/**
+ * Read the Create Flow in English, whatever a couple would get.
+ *
+ * The flow opens in Indonesian, because that is who the product marries. The
+ * design is drawn in English and ADR 0002 makes the design the reference, so a
+ * check that captured the default would be holding Indonesian copy against
+ * English frames and failing every screen for the one reason that is not a
+ * fault.
+ *
+ * The stored choice is seeded before any page script runs, rather than the
+ * language control being driven on every screen. Driving it would put a click
+ * inside every preparation step, where it could interfere with the Sections
+ * being opened and closed around it, and would make each screen depend on the
+ * behaviour of a control that same screen is supposed to be asserting. Seeding
+ * is the same decision arriving by the same door a returning couple's would.
+ *
+ * This says nothing about whether the Indonesian is right. Nothing here can:
+ * there is no Indonesian frame to hold it against, and inventing one would be
+ * the check marking its own homework.
+ */
+const READ_IN_ENGLISH = () => {
+  try {
+    window.localStorage.setItem('memoify-wedding-flow-language', 'en');
+  } catch {
+    // A context that refuses storage still renders; it renders in Indonesian,
+    // and the screen it belongs to will say so loudly rather than silently.
+  }
+};
 const DESIGN_TIME_ZONE = 'Asia/Jakarta';
 
 /** Wait until every font and image the page asked for has arrived. */
@@ -125,6 +154,7 @@ export async function withBrowser(run) {
     });
     try {
       await context.clock.setFixedTime(DESIGN_INSTANT);
+      await context.addInitScript(READ_IN_ENGLISH);
       const page = await context.newPage();
       await page.goto(url, { waitUntil: 'load', timeout: 120000 });
       await page.addStyleTag({ content: FREEZE_STYLES });

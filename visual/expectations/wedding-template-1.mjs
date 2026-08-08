@@ -477,9 +477,11 @@ const SECTIONS = [
       'Reception time',
       'RSVP label',
     ],
-    // View Location is a box rather than a link here, and deliberately: the
-    // section draws a link only when the couple has given a maps address, and
-    // no set of Example Content gives one, so all three render the same shape.
+    // View Location is a link in all three sets. It used to be a box, because
+    // it pointed at the maps address a couple pasted and no Example Content
+    // gives one. It is now built from the written address instead - an embed
+    // address opens a stripped map with no directions - and every set has an
+    // address, so every set gets a link.
     parts: (invitation) => [
       invitation.paragraph(
         'Venue & Details heading',
@@ -494,7 +496,7 @@ const SECTIONS = [
       invitation.paragraph('Venue address', setting(400, '#ffffff')),
       {
         name: 'View Location control',
-        select: 'div',
+        select: 'a',
         withText: 'View Location',
         style: CONTROL_BOX,
       },

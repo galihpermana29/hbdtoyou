@@ -88,7 +88,7 @@ import { pageChrome, siteFooter } from './page-chrome.mjs';
 
 /** The guest the design lists, and how many times it lists them. */
 export const DESIGNED_GUEST = 'Olivia Rhye';
-const DESIGNED_GUEST_COUNT = 7;
+export const DESIGNED_GUEST_COUNT = 7;
 
 /**
  * The columns the table draws, in order, and what the uploaded file puts in

@@ -163,6 +163,155 @@ async function editTheLoveStory(page) {
   await pressSection(page, 'Cover Header');
 }
 
+
+/**
+ * A one-pixel PNG, which is all a photograph has to be here.
+ *
+ * The check never asserts what a photograph looks like - it cannot, it asserts
+ * computed style and copy - so the smallest valid image is the honest choice.
+ * Anything larger would only be slower.
+ */
+const ONE_PIXEL_PNG = Buffer.from(
+  'iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAADUlEQVR42mP8z8BQDwAEhQGAhKmMIQAAAABJRU5ErkJggg==',
+  'base64'
+);
+
+/**
+ * Answer the photograph fields without a backend to upload to.
+ *
+ * The uploader posts to the wedding backend and hands back the address it
+ * answers with. There is no backend here - the check drives a signed-out
+ * browser against none - so the request is answered with an address instead,
+ * and everything downstream of it is the real code doing the real thing with a
+ * real value.
+ *
+ * Stubbed at the network rather than by writing into the form's store, because
+ * the store is not something a couple can reach. Every field below is filled by
+ * the same means a couple would fill it.
+ */
+async function answerUploadsWithAnAddress(page) {
+  await page.route('**/uploads', (route) =>
+    route.fulfill({
+      status: 200,
+      contentType: 'application/json',
+      body: JSON.stringify({
+        data: 'https://example.invalid/a-photograph.png',
+      }),
+    })
+  );
+}
+
+/**
+ * Fill in everything the details-and-story step insists on.
+ *
+ * Next refuses an unfinished step, which is the whole point of it, so the only
+ * way to the steps beyond is to answer what it asks for. This answers each
+ * field the way a couple would: by typing into it or by choosing a file.
+ *
+ * The values are arbitrary and say nothing about the design. What matters is
+ * that they are present, so the screens past this one can be reached at all.
+ */
+async function fillTheDetailsAndStory(page) {
+  await answerUploadsWithAnAddress(page);
+  await expandEverySection(page);
+
+  // Every photograph field, given as many photographs as it asks for.
+  //
+  // Found by what the field accepts, which is file extensions rather than a
+  // MIME pattern: `.jpg, .jpeg, .png`, as the design writes it. How many it
+  // wants is read off the field's own prompt rather than listed here - each
+  // drop zone prints its maximum once, so the prompts line up with the fields
+  // in the order both appear, and neither can drift from the other.
+  const photographs = page.locator('input[type="file"][accept*=".png"]');
+  const prompts = await page
+    .locator('p', { hasText: /Drag & drop up to/ })
+    .allInnerTexts();
+  const howManyPhotographs = await photographs.count();
+  for (let index = 0; index < howManyPhotographs; index += 1) {
+    const stated = (prompts[index] ?? '').match(/up to (\d+)/);
+    const wanted = stated ? Number(stated[1]) : 1;
+    await photographs.nth(index).setInputFiles(
+      Array.from({ length: wanted }, (_, n) => ({
+        name: `photograph-${index}-${n}.png`,
+        mimeType: 'image/png',
+        buffer: ONE_PIXEL_PNG,
+      }))
+    );
+  }
+
+  /**
+   * Answer a field by the label a couple reads.
+   *
+   * Some labels point straight at a box and some point at a group holding one -
+   * a field that draws a mark or a prefix beside its box is a group - so this
+   * takes whichever it finds. Reaching for the box inside first and the label's
+   * own target second means neither shape has to be remembered here.
+   */
+  const type = async (label, value) => {
+    const found = page.getByLabel(label, { exact: true }).first();
+    if ((await found.count()) === 0) return;
+    const inner = found.locator('input, textarea');
+    if ((await inner.count()) > 0) await inner.first().fill(value);
+    else await found.fill(value);
+  };
+
+  await type('Bride Nickname', 'Freya');
+  await type('Groom Nickname', 'Elias');
+  await type('Wedding Place Name', 'Mandarin Hotel, Jakarta');
+  await type('Bride Name', 'Freya Putri Magellan');
+  await type('Groom Name', 'Elias Frank Simanjuntak');
+  await type('Wedding Address', 'Jl. Imam Bonjol, Menteng');
+
+  // The Love Story's three chapters, each a year and a story. All six are
+  // required: a chapter with a year and no story is half a chapter.
+  await type('The year when you first met', '2020');
+  await type('How you first met?', 'We met while volunteering.');
+  await type('The year you both getting closer', '2022');
+  await type('How you both getting closer?', 'We liked the same maps.');
+  await type('The year they asked the BIG question!', '2023');
+  await type('Finally, the happy ending', 'She said yes.');
+
+  // The Gift Registry is switched off rather than filled in.
+  //
+  // Its switch answers whether the block appears on the invitation at all, and
+  // a Section that is off asks for nothing - so this is the shortest honest way
+  // past it, and it exercises the exemption at the same time. Filling it in
+  // instead would mean driving its Bank/e-Wallet Provider, which is a choice
+  // rather than a typed answer and the one control here nothing else needs.
+  await page
+    .locator('form section')
+    .filter({ hasText: 'Gift Registry' })
+    .getByRole('switch')
+    .click();
+
+  // Fields that draw a mark or a prefix beside their box are a group, and the
+  // box inside the group is what takes a value. They are reached by what the
+  // design writes in them rather than by a label pointing at the group.
+  const intoBox = async (placeholder, value) => {
+    const box = page.getByPlaceholder(placeholder, { exact: true });
+    if ((await box.count()) > 0) await box.first().fill(value);
+  };
+
+  await intoBox('Start', '19:00');
+  await intoBox('End', '21:00');
+  // The date picker keeps what was typed when it is committed, not when it is
+  // typed, so this types into it and presses Enter while it still has focus.
+  // The date picker commits what was typed on Enter rather than on blur, and it
+  // only listens once its panel is open - so this opens it the way a couple
+  // would, types, and confirms.
+  // The date picker commits on Enter rather than on blur, so it is confirmed
+  // rather than merely typed into.
+  await intoBox('03/05/2026', '03/05/2026');
+  await page.getByPlaceholder('03/05/2026', { exact: true }).press('Enter');
+  // The markup Google Maps hands over under Share, Embed a map, Copy HTML. The
+  // field keeps the address out of it and refuses anything else.
+  await intoBox(
+    'Paste the embed code from Google Maps',
+    '<iframe src="https://www.google.com/maps/embed?pb=!1m18!1m12" width="600" height="450"></iframe>'
+  );
+
+}
+
 /**
  * Advance to the guest invites step.
  *
@@ -173,7 +322,36 @@ async function editTheLoveStory(page) {
  * reachable at all.
  */
 async function advanceToGuestInvites(page) {
+  await fillTheDetailsAndStory(page);
   await page.getByRole('button', { name: 'Next', exact: true }).click();
+
+  // The step it lands on, rather than a fixed pause: a Next that was refused
+  // leaves the couple where they were, and waiting for the thing that only
+  // exists on the next step is how this notices.
+  //
+  // A refusal is reported in the step's own words. Without this the failure is
+  // a timeout on a button, which says the step could not be left and not one
+  // word about why - and why is always the same kind of thing: one more field
+  // became required and nothing here fills it yet.
+  const confirmCreate = page.getByRole('button', { name: 'Confirm Create' });
+  try {
+    await confirmCreate.waitFor({ timeout: 15000 });
+  } catch (couldNotLeaveTheStep) {
+    // Every message, not the first. The step used to refuse with one grouped
+    // list and now refuses with a message under each field it is about, so
+    // reading one of them would name a single field and hide the rest.
+    const refusals = await page
+      .locator('.ant-form-item-explain-error')
+      .allInnerTexts();
+    const said =
+      refusals.length > 0
+        ? refusals.join(' / ')
+        : 'nothing, which means it was refused for some other reason';
+    throw new Error(
+      `The details-and-story step would not be left. It said: ${said}`,
+      { cause: couldNotLeaveTheStep }
+    );
+  }
 }
 
 /**
@@ -192,7 +370,20 @@ async function uploadGuestList(page) {
     mimeType: 'text/csv',
     buffer: Buffer.from(DESIGNED_GUEST_LIST, 'utf8'),
   });
-  await page.locator('tbody tr').last().waitFor();
+  // The list, once it has stopped growing.
+  //
+  // Waiting on the last row resolves the moment one row exists, so a run that
+  // read the page between the first row and the rest saw a half-drawn list and
+  // reported it as a design failure - which is what made this screen flake.
+  // Waiting for a fixed count would be sharper still, but it would have to be
+  // kept in step with the file by hand; settling asks the page instead.
+  await page.locator('tbody tr').first().waitFor();
+  await page.waitForFunction(() => {
+    const now = document.querySelectorAll('tbody tr').length;
+    const settled = window.__rowsLastSeen === now && now > 0;
+    window.__rowsLastSeen = now;
+    return settled;
+  });
 }
 
 /**
