@@ -245,7 +245,8 @@ Most of them do not: the product marries Indonesian couples, and every field on 
 
 So the flow opens in Indonesian and a control above the Sections switches it to English.
 It sits above them because it governs all of them, and outside the form because it is a preference about reading the flow rather than an answer about a wedding.
-That second part is load-bearing rather than tidy: the check addresses this step's fields by their position within the form, and a setting parked among them renumbered every one of them the first time it was tried.
+That second part is load-bearing rather than tidy: the check addresses each step's fields by their position within its form, and a setting parked among them renumbered every one of them the first time it was tried.
+The same control sits on Guest invites details, above that step's fields and outside its form for the same reasons, so the choice is offered on both of the steps a couple works in rather than only the first.
 
 This is the one place where the design cannot be the reference for what a couple sees, because the design has nothing to say about a language it was not drawn in.
 The check therefore selects English before every capture, and holds the English against the frames exactly as before.
