@@ -389,6 +389,11 @@ export interface IWeddingGuestPayload {
 }
 
 // Token is the guest's personal link. The backend mints it; nothing here does.
+//
+// Notes is written down even though the recorded example of this response omits
+// it, because the batch insert and the edit both accept one: a column the couple
+// fills in and the row never carries back is a column that empties itself the
+// first time anybody reads the list.
 export interface IWeddingGuestResponse {
   ID: string;
   WeddingID: string;
@@ -396,6 +401,7 @@ export interface IWeddingGuestResponse {
   GroupLabel?: string | null;
   Phone?: string | null;
   Email?: string | null;
+  Notes?: string | null;
   Token: string;
   MaxPlusOnes: number;
   RSVPStatus: string;

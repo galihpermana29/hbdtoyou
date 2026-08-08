@@ -358,10 +358,15 @@ async function advanceToGuestInvites(page) {
  * Advance to the guest invites step and upload the design's Guest List.
  *
  * The file is handed to the field rather than to anything the page exports,
- * because uploading is the only way this state exists: the CSV is read in the
- * browser and nothing is stored, so a Guest List that was never uploaded is a
- * Guest List that is not there. Nothing waits for a network, because nothing
- * reaches one - the table is rendered as soon as the file has been read.
+ * because uploading is the only way this state exists: a Guest List that was
+ * never uploaded is a Guest List that is not there.
+ *
+ * A real couple's upload is sent, and this one is not. Guests belong to an
+ * invitation and an invitation belongs to an owner, and this run drives the flow
+ * signed out - so it never creates one, and the list stays in the browser
+ * exactly as the whole of it used to. That is the same reason the published
+ * screen has to be handed a slug, and it is what keeps this screen a question
+ * about the design rather than about a backend.
  */
 async function uploadGuestList(page) {
   await advanceToGuestInvites(page);

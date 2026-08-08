@@ -1,33 +1,44 @@
 /**
  * The Guest List a couple uploads, and how a CSV becomes one.
  *
- * Everything here happens in the browser. The file is never sent anywhere: it is
- * read, parsed, and held in the step's own state, because the product has no
- * place to put a Guest List yet. Storing one is `hbd-ox7.7`.
+ * Reading happens in the browser. The file itself is never sent anywhere: it is
+ * read and parsed here, and what reaches the backend is the guests it named. The
+ * sending is `use-guest-roster.ts`; this module says what a guest is, what the
+ * backend calls each of their answers, and how a spreadsheet becomes a list of
+ * them.
  *
  * Parsing is written out rather than taken from a library, because the shape the
  * backend accepts is six columns of plain text, and the whole of RFC 4180 that
  * matters for that is quoting, escaped quotes and line endings.
  *
- * ## One list of columns, three jobs
+ * ## One list of columns, four jobs
  *
  * `GUEST_COLUMNS` is the only place the six columns are written down. It decides
  * what the template a couple downloads has at the top of it, what a heading row
  * in their own file is recognised as, and what the table draws. Splitting those
  * apart is how a template comes to name a column the parser does not read, which
  * would be invisible until a couple filled that column in for nothing.
+ *
+ * The fourth job is what the backend calls each of them, which is `SENT_AS`. It
+ * is a record of every answer rather than a list, so a seventh column cannot be
+ * added without saying what to send it as, and a column a couple fills in cannot
+ * silently go nowhere.
  */
 
-/** One person the couple intends to invite. */
-export interface Guest {
-  /**
-   * Stable for as long as the guest is in the list.
-   *
-   * A row is corrected in place, so it cannot be identified by its name, and it
-   * cannot be identified by its position either, because deleting the row above
-   * it would move it.
-   */
-  id: string;
+import type {
+  IWeddingGuestPayload,
+  IWeddingGuestResponse,
+} from '@/action/interfaces';
+
+/**
+ * The six things a couple says about one guest.
+ *
+ * Apart from who the guest is, because these are the answers and that is an
+ * identity: `GuestField` is derived from this and indexes the columns, so a
+ * field that is not one of the six would have to be given a column, a heading
+ * and a place in the template file it has no business having.
+ */
+export interface GuestAnswers {
   name: string;
   /** Which side, table or family the couple files this guest under. */
   groupLabel: string;
@@ -45,8 +56,179 @@ export interface Guest {
   notes: string;
 }
 
-/** The fields of a guest that come from the file, which is all of them but the id. */
-export type GuestField = Exclude<keyof Guest, 'id'>;
+/** The fields of a guest that come from the file, which is all of the answers. */
+export type GuestField = keyof GuestAnswers;
+
+/** One person the couple intends to invite. */
+export interface Guest extends GuestAnswers {
+  /**
+   * Stable for as long as the guest is in the list.
+   *
+   * A row is corrected in place, so it cannot be identified by its name, and it
+   * cannot be identified by its position either, because deleting the row above
+   * it would move it.
+   *
+   * Made here while the backend has never seen this guest, and the backend's own
+   * identifier from the moment it has. Which of the two it is at any moment is
+   * `token`: a guest the backend holds has one, and that is the only guest whose
+   * id names anything the backend would answer to.
+   */
+  id: string;
+  /**
+   * The token the backend minted for this guest, or null while it holds none.
+   *
+   * The token is the personal link: the invitation resolves it into the name on
+   * this row, and a reply is signed with it. Nothing here invents one, which is
+   * why it is null rather than empty until a guest has actually been saved -
+   * an empty token would read as a guest with a link that opens nothing.
+   */
+  token: string | null;
+}
+
+/**
+ * What the backend calls each answer.
+ *
+ * A record of every field rather than a list of the ones that happen to be sent,
+ * so a column added to `GUEST_COLUMNS` and not to this cannot compile: a couple
+ * who fills in a column that reaches nobody has been asked for something for
+ * nothing, and nothing on the screen would say so.
+ */
+const SENT_AS: Record<GuestField, keyof IWeddingGuestPayload> = {
+  name: 'name',
+  groupLabel: 'group_label',
+  phone: 'phone',
+  email: 'email',
+  maxPlusOnes: 'max_plus_ones',
+  notes: 'notes',
+};
+
+/** A guest's answer as the wire carries it, or nothing where they gave none. */
+function answerSent(guest: Guest, field: GuestField): string | number | null {
+  const answer = guest[field];
+  const said = typeof answer === 'string' ? answer.trim() : answer;
+  return said === null || said === '' ? null : said;
+}
+
+/**
+ * Whether a column holds a number of people rather than a couple's words.
+ *
+ * Asked of `GUEST_COLUMNS` rather than written down again, so that the six
+ * columns stay described in one place. A function rather than a derived table
+ * because it is read when a guest is sent, long after this module has loaded,
+ * and so it does not care that the columns are declared below it.
+ */
+const holdsACount = (field: GuestField) =>
+  GUEST_COLUMNS.find((column) => column.field === field)?.holds === 'a count';
+
+/**
+ * One guest as the backend takes them when they are new: every column they
+ * answered, and nothing for the ones they did not.
+ *
+ * A column left blank is left out rather than sent empty, so that whatever the
+ * backend would put there itself stands for an answer nobody gave. That is the
+ * difference the count already draws - null is the couple not having said, and
+ * the cap the backend chooses is a better answer than a zero nobody chose - and
+ * the words are the same case said the other way: an empty phone number is not
+ * a phone number.
+ *
+ * Neither an identifier nor a token is here. The backend mints both when it
+ * inserts the guest, and a personal link is built from the token it minted, so
+ * inventing either would be inventing the address of somebody's invitation.
+ */
+export function guestToPayload(guest: Guest): IWeddingGuestPayload {
+  const payload: IWeddingGuestPayload = { name: guest.name.trim() };
+  // The same object seen as the shape a loop can write to. The name is written
+  // ahead of the loop because it is the one column the backend requires, and a
+  // record a loop filled in cannot promise it; the loop writes it again, with
+  // the same value.
+  const columns: Partial<Record<keyof IWeddingGuestPayload, string | number>> =
+    payload;
+
+  for (const field of Object.keys(SENT_AS) as GuestField[]) {
+    const said = answerSent(guest, field);
+    if (said === null) continue;
+    columns[SENT_AS[field]] = said;
+  }
+
+  return payload;
+}
+
+/**
+ * One guest as the backend takes them when it already holds them.
+ *
+ * Every worded answer goes, empty ones included, because this writes over a
+ * guest rather than adding one: a field left out keeps whatever the backend
+ * already has, so a couple who cleared a phone number would watch it come back.
+ *
+ * Driven by `SENT_AS` for the same reason the insert is. A seventh column added
+ * to `GUEST_COLUMNS` reaches the backend on the way in and on the way out, or it
+ * does not compile - which is better than a column a couple can fill in but
+ * never correct.
+ *
+ * The count is the exception, and it is a real limitation rather than an
+ * oversight. The wire carries a number or nothing, and nothing means "leave it
+ * alone" rather than "unset it", so a count once given cannot be taken back.
+ * `guestAsUpdated` is what keeps the screen honest about that.
+ */
+export function guestToUpdatePayload(guest: Guest): IWeddingGuestPayload {
+  const payload: IWeddingGuestPayload = { name: guest.name.trim() };
+  const columns: Partial<Record<keyof IWeddingGuestPayload, string | number>> =
+    payload;
+
+  for (const field of Object.keys(SENT_AS) as GuestField[]) {
+    const said = answerSent(guest, field);
+    // A count nobody has said is left out, because the wire has no way to say
+    // "unset this"; every other emptied answer goes as the empty string it is.
+    if (said === null && holdsACount(field)) continue;
+    columns[SENT_AS[field]] = said ?? '';
+  }
+
+  return payload;
+}
+
+/**
+ * The guest the backend holds after that update, which is what the table draws.
+ *
+ * Everything the correction said, plus the count it was unable to take back: a
+ * couple who emptied the count still has whatever number was there, so showing
+ * them a blank cell would be showing them something the backend does not hold.
+ */
+export function guestAsUpdated(corrected: Guest, before: Guest): Guest {
+  return {
+    ...corrected,
+    maxPlusOnes: corrected.maxPlusOnes ?? before.maxPlusOnes,
+  };
+}
+
+/**
+ * A guest as the backend hands them back.
+ *
+ * This is the only way a saved guest is built, on the way back from an insert as
+ * well as on a read. Keeping the couple's own answers and taking only the id and
+ * the token from the row was tried and dropped: it needs the reply paired to the
+ * request, the contract nowhere promises a batch answers in the order it was
+ * sent, and a reordered reply would give every guest somebody else's token -
+ * which is a personal link opening the invitation under the wrong name, and the
+ * one thing this must not get wrong.
+ *
+ * Every answer the row has no value for reads as unanswered, which is the same
+ * thing a row that stopped early in the file reads as. The count is taken at its
+ * word, including a zero: the wire cannot tell a couple who said nobody from a
+ * couple who said nothing and got whatever the backend puts there, and reading a
+ * zero as "they never said" would quietly discard a real answer.
+ */
+export function guestFromRow(row: IWeddingGuestResponse): Guest {
+  return {
+    id: row.ID,
+    token: row.Token,
+    name: row.Name ?? '',
+    groupLabel: row.GroupLabel ?? '',
+    phone: row.Phone ?? '',
+    email: row.Email ?? '',
+    maxPlusOnes: typeof row.MaxPlusOnes === 'number' ? row.MaxPlusOnes : null,
+    notes: row.Notes ?? '',
+  };
+}
 
 /**
  * A Guest List: the guests, and when the file they came from was read.
@@ -364,6 +546,9 @@ function guestFrom(row: string[], cellOf: CellOf): Guest | null {
 
   return {
     id: crypto.randomUUID(),
+    // Nobody the backend has heard of yet. Both of these are replaced by what it
+    // answers with the moment the list is sent.
+    token: null,
     name: answers.name,
     groupLabel: answers.groupLabel,
     phone: answers.phone,

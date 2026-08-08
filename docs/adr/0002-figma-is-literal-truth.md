@@ -52,7 +52,8 @@ It is drawn over the photograph rather than under it, because a line of copy the
 Where the name comes from is the guest's own link, and the query parameter that stood in for one during development has gone.
 The link carries the token the backend mints for that guest, `?guest=<token>`, and the Invitation Viewer resolves it into the name the Guest List holds.
 The design writes that link as `?name=guest`, which is the third thing about it that cannot be followed: a name on the address is a name anybody can type, and the invitation would be taking a stranger's word for who they were.
-The tokens themselves arrive when the Guest List is saved with the invitation, which is `hbd-ox7.7`, so until that lands the only link of this shape anybody sees is the one the greeting message is previewed with.
+The tokens themselves arrive when the Guest List is saved with the invitation, which `hbd-ox7.7` landed: uploading a list inserts every guest in one batch and the backend answers with the token it minted for each of them.
+The greeting message's preview still carries a token belonging to nobody, because it is a picture of a message to a guest called Johnny who does not exist.
 
 The Showcase keeps an addressee because the design's sealed frame has one, and its name is Example Content like the couple and the chapters around it - the frame's own "Galih & Keluarga", `EXAMPLE_ADDRESSEE`.
 Nobody's invitation, so nobody's name.
@@ -139,6 +140,30 @@ Whatever the table does not show a couple can neither check nor correct, and the
 Six columns and a couple's own notes do not fit the width the design draws the card at, so the columns scroll sideways inside the card rather than widening it.
 A table that pushed the page sideways would move everything else on the screen to make room for a phone number.
 It is a tab stop, because a region only a pointer can scroll is a region somebody navigating by keyboard cannot read the far side of.
+
+The Action column does not scroll with them.
+At the design's width the card is about 586px and the six columns about 736, so Delete and Edit - the only two controls the design's own Action column carries - sat past the visible edge until somebody thought to scroll, and nothing on the screen said there was anything to the right of Notes.
+The two actions the design puts on every row were therefore, in practice, on none of them.
+
+So the column is pinned to the right-hand edge of the scrolling region, keeping its row's own background so the other columns pass behind it rather than through it, with a seam down its left.
+The seam is a shadow rather than a border because the design gives these cells one hairline and it runs underneath them; a rule down the side would be one the design does not draw.
+Nothing about this moves a cell or changes the design's arrangement: Action is still the last column, still after Notes, and still the far edge of the row.
+
+The check does not catch this and could not have.
+Reaching the far side of a scrolling region is a question about where an element is, and every property that could answer it is a dimension - which is exactly the class of claim the harness refuses.
+What found it was reading the capture, which is the job screenshots are kept for, and what the check does still guarantee is that pinning the column changed none of the twenty-one values already asserted about those cells.
+
+Two more states of that card are drawn that the design has no frame for, because the Guest List now reaches a backend.
+
+Every action on it waits for the backend before the list changes, so while one is in flight Upload File, Delete, Edit and Save are dimmed and cannot be pressed, at the `opacity-40` the card already used for a Save with nothing to save.
+The design was drawn for a table nothing was sent from, so it has no mid-flight state; a control that cannot be pressed and looks exactly as it did reads as a press that did nothing, and a couple's answer to that is to press it again - which for Delete is one guest removed and one refusal about a guest who is already gone.
+Cancel is never dimmed, because it abandons a draft that was never sent and a couple whose save is being refused should always be able to close the row.
+The empty state's drop area is held the same way and for a sharper reason: there is no card on the screen yet to say a file is already being sent, so a second one dropped into that gap would be inserted as well as the first, leaving the invitation carrying both lists and the screen showing one.
+
+A refusal prints one line under the Guest List, where a file that cannot be read already printed one.
+It names what did not happen, what the backend said, and what is still true - which differs every time, and is the part a couple cannot work out for themselves: a correction that was refused leaves the guest as they were, a deletion that was refused leaves them on the invitation, and an upload that replaced a list but could not remove the old one leaves named people holding a working personal link to an invitation whose list no longer shows them.
+
+Neither is asserted, for the reason the failed save is not: both are drawn only when there is something to say, and every screen the design draws has nothing.
 
 The dashed area the design draws says only "Upload in format .CSV", which leaves a couple guessing which six columns and in what order.
 A control reading "Download CSV template" is therefore printed on the end of the size limit's line, in the accent every action in the flow is drawn in, and it downloads a file carrying the six headings and no example row - a row that file carried would be read as a guest by the couple who forgot to delete it.

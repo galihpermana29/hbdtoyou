@@ -1,7 +1,7 @@
 'use client';
 
 import { Upload } from 'lucide-react';
-import { useEffect, useId, useRef, useState } from 'react';
+import { useEffect, useId, useRef } from 'react';
 
 import {
   flowActionAside,
@@ -34,8 +34,8 @@ import {
   GUEST_LIST_TEMPLATE_ACTION,
   GUEST_LIST_TEMPLATE_HREF,
   GUEST_LIST_TEMPLATE_NAME,
-  readGuestList,
   type Guest,
+  type GuestList,
 } from './guest-list';
 
 /**
@@ -56,9 +56,10 @@ import {
  *
  * The Guest List has the two states the design draws, and which one is showing
  * is decided by nothing but whether there is a Guest List: an area saying what
- * it takes and how large a file may be, or the list itself. The CSV is read in
- * the browser and the guests it names are held in this step's values, so
- * uploading one sends nothing anywhere.
+ * it takes and how large a file may be, or the list itself. The list is not this
+ * step's - the backend holds it, and `use-guest-roster.ts` reads it back and
+ * sends every change to it - so what this step does with a chosen file is hand
+ * it over, and what it does with a correction or a deletion is ask for one.
  */
 
 export interface GuestInvitesStepProps {
@@ -75,6 +76,26 @@ export interface GuestInvitesStepProps {
   /** The nicknames the couple entered on the previous step. */
   brideNickname: string;
   groomNickname: string;
+  /** The Guest List the backend holds, or null while there is none. */
+  guestList: GuestList | null;
+  /** Let the guests this file names replace the whole list. */
+  onUploadGuestList: (file: File) => void;
+  /**
+   * Correct one guest, leaving the rest of the list alone, and say whether the
+   * backend took it - which is what closes the row being edited.
+   */
+  onCorrectGuest: (guest: Guest) => Promise<boolean>;
+  onDeleteGuest: (id: string) => void;
+  /**
+   * What went wrong with the last thing done to the Guest List, or nothing.
+   *
+   * One line for both kinds, because a couple reads them in the same place and
+   * for the same reason: a file that could not be read and a change the backend
+   * refused are both a press of theirs that did not do what it looked like.
+   */
+  guestListProblem: string | null;
+  /** Whether one of those is in flight, so none of them can be pressed twice. */
+  isGuestListBusy: boolean;
   /** Go back to the details and story step. */
   onPreviousStep: () => void;
   /**
@@ -136,6 +157,12 @@ export default function GuestInvitesStep({
   onChange,
   brideNickname,
   groomNickname,
+  guestList,
+  onUploadGuestList,
+  onCorrectGuest,
+  onDeleteGuest,
+  guestListProblem,
+  isGuestListBusy,
   onPreviousStep,
   onConfirm,
   onSaveAsDraft,
@@ -151,50 +178,6 @@ export default function GuestInvitesStep({
   const copy = useFlowCopy();
 
   const messageRef = useHeightOfContent(values.greetingMessage, isCurrent);
-
-  // What was wrong with the last file a couple chose, so that a file which
-  // cannot be read says so instead of appearing to do nothing.
-  const [guestListProblem, setGuestListProblem] = useState<string | null>(null);
-
-  const { guestList } = values;
-
-  /**
-   * Read a chosen file, and let it replace the whole Guest List.
-   *
-   * Replace rather than merge: the design's only way to change the list wholesale
-   * is to upload again, and a couple doing that after fixing their spreadsheet
-   * means the new file, not the new file added to the old one.
-   */
-  async function uploadGuestList(file: File) {
-    const { guests, problem: fileProblem } = await readGuestList(file);
-    setGuestListProblem(fileProblem);
-    if (guests) {
-      onChange({ ...values, guestList: { guests, uploadedAt: new Date() } });
-    }
-  }
-
-  /** Change who is on the Guest List, keeping the date the file arrived. */
-  function changeGuests(change: (guests: Guest[]) => Guest[]) {
-    if (!guestList) return;
-    const guests = change(guestList.guests);
-    onChange({
-      ...values,
-      // Nobody left is the empty state again rather than a Guest List with
-      // nobody on it: an upload date belongs to a file that still names someone.
-      guestList: guests.length > 0 ? { ...guestList, guests } : null,
-    });
-  }
-
-  /** Put one guest's corrected answers back, in the place they were in. */
-  function correctGuest(corrected: Guest) {
-    changeGuests((guests) =>
-      guests.map((guest) => (guest.id === corrected.id ? corrected : guest))
-    );
-  }
-
-  function deleteGuest(id: string) {
-    changeGuests((guests) => guests.filter((guest) => guest.id !== id));
-  }
 
   return (
     <div className="flex gap-[60px]">
@@ -287,24 +270,35 @@ export default function GuestInvitesStep({
               {guestList ? (
                 <GuestListTable
                   guestList={guestList}
-                  onUpload={uploadGuestList}
-                  onCorrect={correctGuest}
-                  onDelete={deleteGuest}
+                  onUpload={onUploadGuestList}
+                  onCorrect={onCorrectGuest}
+                  onDelete={onDeleteGuest}
+                  isBusy={isGuestListBusy}
                 />
               ) : (
                 <>
                   <p id={guestListLabelId} className={flowLabel}>
                     {copy.guestList}
                   </p>
+                  {/* Nothing is taken while a list is on its way to the
+                      backend. The card the table draws does not exist yet, so
+                      there is nothing on the screen saying a file is already
+                      being sent, and a second one dropped into the gap would be
+                      inserted as well as the first - leaving the invitation
+                      carrying both lists and the screen showing one. */}
                   <div
                     role="group"
                     aria-labelledby={guestListLabelId}
-                    onClick={() => dropZoneFileRef.current?.click()}
+                    aria-busy={isGuestListBusy}
+                    onClick={() => {
+                      if (!isGuestListBusy) dropZoneFileRef.current?.click();
+                    }}
                     onDragOver={(event) => event.preventDefault()}
                     onDrop={(event) => {
                       event.preventDefault();
+                      if (isGuestListBusy) return;
                       const file = event.dataTransfer.files?.[0];
-                      if (file) uploadGuestList(file);
+                      if (file) onUploadGuestList(file);
                     }}
                     className={flowDropZone}>
                     <Upload
@@ -325,8 +319,9 @@ export default function GuestInvitesStep({
                         reaches. */}
                     <GuestListFileInput
                       ref={dropZoneFileRef}
-                      onChoose={uploadGuestList}
+                      onChoose={onUploadGuestList}
                       isTheTabStop
+                      isBusy={isGuestListBusy}
                     />
                   </div>
                 </>
@@ -407,8 +402,8 @@ export default function GuestInvitesStep({
           {outstanding ? (
             <div role="alert" className={`text-right ${flowProblem}`}>
               <p>
-                Your invitation is not ready to publish yet. It is still a draft,
-                and nothing has been sent to your guests.
+                Your invitation is not ready to publish yet. It is still a
+                draft, and nothing has been sent to your guests.
               </p>
               {/* By position, because the backend names a field and a fault
                   separately and only the fault is printed: two fields can be

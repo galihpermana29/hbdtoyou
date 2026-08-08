@@ -118,6 +118,25 @@ export interface WeddingTemplate1Content {
    * always carried as `song_request_enabled`.
    */
   songRequestEnabled: boolean;
+  /**
+   * The message the couple sends their guests, placeholders and all.
+   *
+   * Here rather than on each guest's row because it is one message per
+   * invitation: the same words for everybody, with the two things that differ -
+   * the guest's name and their personal link - resolved per guest when the
+   * message goes out. On the row it would be the same paragraph stored two
+   * hundred times, and editing it would be two hundred writes.
+   *
+   * Nothing in the invitation renders it. It is stored with the invitation
+   * because that is where the couple's own words belong and there is nowhere
+   * else for them, not because a guest ever reads this field.
+   *
+   * Optional because a record written before there was anywhere to put it does
+   * not carry one, and because the Showcase's Example Content is nobody's
+   * invitation and sends nobody a message. Every save this flow makes carries
+   * one - see `formValuesToInvitationPayload`, which cannot be called without.
+   */
+  greetingMessage?: string;
 }
 
 /** Ant Design form field values for the wedding invitation creator. */
@@ -388,7 +407,19 @@ function pickPhoto(photos: string[] | undefined, index: number): string {
  * terms.
  */
 export function formValuesToContent(
-  values: Partial<WeddingInvitationFormValues> | null | undefined
+  values: Partial<WeddingInvitationFormValues> | null | undefined,
+  /**
+   * The greeting message, for the callers that are about to save.
+   *
+   * Not one of the form's fields: it is written on the guest invites step, which
+   * is not an antd form, so it arrives here separately rather than being fished
+   * out of a store it was never put in.
+   *
+   * Left out by the two callers that render the invitation, because the
+   * invitation does not render it and a key written as an empty string would be
+   * a claim that the couple had cleared their message.
+   */
+  greetingMessage?: string
 ): WeddingTemplate1Content {
   const v = values ?? {};
 
@@ -449,6 +480,7 @@ export function formValuesToContent(
     memoRollEnabled: v.memoRollEnabled ?? false,
     digitalGiftEnabled: v.digitalGiftEnabled ?? false,
     songRequestEnabled: v.songRequestEnabled ?? false,
+    ...(greetingMessage === undefined ? {} : { greetingMessage }),
   };
 }
 
@@ -488,11 +520,17 @@ export const WEDDING_INVITATION_TITLE = 'Wedding Invitation';
  * always on: replying is the only way a guest can leave a message, so turning it
  * off would silently empty the Guest Messages a couple watches being written.
  * See `docs/adr/0002-figma-is-literal-truth.md`.
+ *
+ * The greeting message is asked for rather than optional, because this is the
+ * only function that writes to the backend and a save that forgot it would be a
+ * couple publishing an invitation that does not carry the words their families
+ * are going to read.
  */
 export function formValuesToInvitationPayload(
-  values: Partial<WeddingInvitationFormValues> | null | undefined
+  values: Partial<WeddingInvitationFormValues> | null | undefined,
+  greetingMessage: string
 ): Omit<IWeddingInvitationPayload, 'template_id'> {
-  const content = formValuesToContent(values);
+  const content = formValuesToContent(values, greetingMessage);
 
   return {
     title: WEDDING_INVITATION_TITLE,

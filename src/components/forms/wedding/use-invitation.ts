@@ -27,6 +27,18 @@
  * that is where it happens, straight after the first one and again after any
  * later one while the address is still unknown.
  *
+ * ## What a save carries, and what it does not
+ *
+ * Everything on the antd form, plus the greeting message, which is not on it:
+ * the guest invites step is not a form and holds its own words, so they are
+ * handed to `save` rather than fished out of a store they were never put in.
+ *
+ * The Guest List is not carried here at all. Guests are their own rows on the
+ * backend with their own endpoints, and each one gets a token minted for them
+ * when they are inserted, so a list is not a field of the invitation and cannot
+ * ride along with one. What this owes the Guest List is the invitation to hang
+ * it on, which is `weddingId`. Sending it is `use-guest-roster.ts`.
+ *
  * ## Publishing asks first
  *
  * The backend does not validate on publish. It says so deliberately, so that a
@@ -106,8 +118,24 @@ export type PublishOutcome =
   | 'NOTHING_TO_PUBLISH';
 
 export interface Invitation {
-  /** Keep what the couple has entered so far. */
-  save: () => Promise<SaveOutcome>;
+  /**
+   * Keep what the couple has entered so far, greeting message included.
+   *
+   * The message is passed in rather than read out of the form, because the guest
+   * invites step is not an antd form and never put it there. It is asked for on
+   * every save so that no caller can leave it behind: a couple who writes the
+   * words their families will read and then publishes an invitation without them
+   * has lost the one thing on that step that is theirs to write.
+   */
+  save: (greetingMessage: string) => Promise<SaveOutcome>;
+  /**
+   * The invitation this flow has created, or null while it has none.
+   *
+   * What the Guest List is hung on. Guests belong to an invitation, so there is
+   * nowhere to put one until a save has made it - see `use-guest-roster.ts`,
+   * which reads this and does nothing at all while it is null.
+   */
+  weddingId: string | null;
   /**
    * The Invitation Slug this invitation was given, or null while the flow has
    * not been able to learn one.
@@ -210,6 +238,16 @@ export function useInvitation(
    */
   const invitationId = useRef<string | null>(null);
 
+  /**
+   * The same identifier, for the parts of the screen that are drawn from it.
+   *
+   * The ref is what a save reads mid-flight and the state is what a render
+   * reads, and they are written together in the one place an invitation comes
+   * into existence. A ref alone would never re-render the Guest List into
+   * knowing it now has somewhere to go.
+   */
+  const [weddingId, setWeddingId] = useState<string | null>(null);
+
   /** The backend's id for the template this flow fills in. */
   async function weddingTemplateId(): Promise<
     { id: string } | { problem: string }
@@ -258,7 +296,7 @@ export function useInvitation(
     setOutstanding(null);
   }
 
-  async function save(): Promise<SaveOutcome> {
+  async function save(greetingMessage: string): Promise<SaveOutcome> {
     if (!session?.accessToken) return 'NOT_SIGNED_IN';
 
     setIsSaving(true);
@@ -270,7 +308,10 @@ export function useInvitation(
       // Every field, including the ones a couple has not touched, because the
       // backend is sent the whole invitation rather than a diff and an untouched
       // switch is still an answer.
-      const payload = formValuesToInvitationPayload(form.getFieldsValue(true));
+      const payload = formValuesToInvitationPayload(
+        form.getFieldsValue(true),
+        greetingMessage
+      );
 
       if (invitationId.current) {
         const updated = await updateWeddingInvitation(
@@ -306,8 +347,10 @@ export function useInvitation(
       }
 
       // Only now does this flow have an invitation. Until this line every retry
-      // creates, which is what a couple whose first save failed needs.
+      // creates, which is what a couple whose first save failed needs. And only
+      // now is there anywhere to put a guest, which is what the state says.
       invitationId.current = created.data.id;
+      setWeddingId(created.data.id);
       // And only now is there an invitation to have an address, so this is the
       // earliest the couple can be told where their wedding is going to live.
       await learnTheAddress(created.data.id);
@@ -403,6 +446,7 @@ export function useInvitation(
 
   return {
     save,
+    weddingId,
     slug,
     isSaving,
     publish,

@@ -27,17 +27,27 @@ export interface GuestListFileInputProps {
    * than being a second tab stop that does what the button beside it does.
    */
   isTheTabStop: boolean;
+  /**
+   * Whether a Guest List is already on its way to the backend.
+   *
+   * A second file taken while the first is still going would be inserted as
+   * well as it, leaving the invitation carrying both lists and the screen
+   * showing one.
+   */
+  isBusy?: boolean;
 }
 
 const GuestListFileInput = forwardRef<
   HTMLInputElement,
   GuestListFileInputProps
->(function GuestListFileInput({ onChoose, isTheTabStop }, ref) {
+>(function GuestListFileInput({ onChoose, isTheTabStop, isBusy }, ref) {
   return (
     <input
       ref={ref}
       type="file"
       accept={GUEST_LIST_ACCEPT}
+      disabled={isBusy}
+      aria-busy={isBusy}
       aria-label={isTheTabStop ? 'Guest List' : undefined}
       aria-hidden={isTheTabStop ? undefined : true}
       tabIndex={isTheTabStop ? undefined : -1}

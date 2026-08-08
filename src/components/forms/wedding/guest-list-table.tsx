@@ -20,8 +20,9 @@ import {
  * the list and when it arrived, an action that replaces it, and one row per
  * guest with an action to correct or remove that guest alone.
  *
- * Nothing here reaches a network. The list lives in the step's state, and every
- * action below changes that state and nothing else - see `guest-list.ts`.
+ * Nothing here reaches a network itself. Every action below asks for a change
+ * and waits to be given a new list, because the list belongs to the backend -
+ * see `use-guest-roster.ts`, which is what sends them.
  *
  * ## Six columns where the design draws one
  *
@@ -36,6 +37,22 @@ import {
  * card at, so the columns scroll sideways inside the card rather than widening
  * it. A table that pushed the page sideways would move every other thing on the
  * screen to make room for a phone number.
+ *
+ * ## The Action column does not scroll away
+ *
+ * At the width the design draws the card, the six columns are wider than it is,
+ * so Delete and Edit - the only two controls the design's own Action column
+ * carries - sat past the visible edge until somebody thought to scroll. Nothing
+ * on the screen said there was anything to the right of Notes, so the two
+ * actions the design puts on every row were, in practice, on none of them.
+ *
+ * The column is therefore pinned to the right-hand edge of the scrolling region
+ * and carries a seam down its left, which is a shadow rather than a border
+ * because the design gives these cells one hairline and it is underneath them.
+ * It keeps its row's own background, so the columns pass behind it rather than
+ * through it. Nothing about that is a dimension and nothing about it moves a
+ * cell, so the design's arrangement is untouched: the Action column is still
+ * last, still after Notes, and still the far edge of the row.
  *
  * ## The one thing the design does not draw
  *
@@ -77,13 +94,45 @@ const SPARE_WIDTH = GUEST_COLUMNS[GUEST_COLUMNS.length - 1];
 const spareWidth = (column: GuestColumn) =>
   column === SPARE_WIDTH ? 'w-full' : '';
 
+/**
+ * What holds the Action column at the right-hand edge of the scrolling region.
+ *
+ * The seam is a shadow rather than a border because the design gives these cells
+ * exactly one hairline and it runs underneath them; a second one down the side
+ * would be a rule the design does not draw. It fades to nothing, so a card with
+ * nothing to scroll shows no seam at all.
+ */
+const PINNED =
+  'sticky right-0 z-[1] [box-shadow:-8px_0_8px_-8px_rgba(0,0,0,0.12)]';
+
+/** The card's own ground, and the stripe the design gives every other row. */
+const CARD_GROUND = 'bg-white';
+const rowGround = (index: number) =>
+  index % 2 === 0 ? 'bg-[#FAFAFA]' : 'bg-white';
+
 export interface GuestListTableProps {
   guestList: GuestList;
   /** Replace the whole list with the one this file names. */
   onUpload: (file: File) => void;
-  /** Correct one guest, leaving the rest of the list alone. */
-  onCorrect: (guest: Guest) => void;
+  /**
+   * Correct one guest, leaving the rest of the list alone, and say whether it
+   * landed.
+   *
+   * The answer is what closes the row. A correction the backend refused leaves
+   * it open with what the couple typed still in it, so that trying again is one
+   * press rather than typing the whole row out a second time.
+   */
+  onCorrect: (guest: Guest) => Promise<boolean>;
   onDelete: (id: string) => void;
+  /**
+   * Whether a change to the list is still on its way to the backend.
+   *
+   * Every action here waits for the backend to agree before the list changes, so
+   * a couple who cannot tell a slow press from a dead one presses again - and a
+   * Delete pressed twice is one guest deleted and one refusal about a guest who
+   * is already gone.
+   */
+  isBusy: boolean;
 }
 
 export default function GuestListTable({
@@ -91,6 +140,7 @@ export default function GuestListTable({
   onUpload,
   onCorrect,
   onDelete,
+  isBusy,
 }: GuestListTableProps) {
   const titleId = useId();
   const fileRef = useRef<HTMLInputElement>(null);
@@ -106,10 +156,9 @@ export default function GuestListTable({
   // the row and leaves the old guest behind looks exactly like one that worked.
   const nothingToSave = draft !== null && draft.name.trim() === '';
 
-  function saveEditing() {
+  async function saveEditing() {
     if (!draft || nothingToSave) return;
-    onCorrect({ ...draft, name: draft.name.trim() });
-    setDraft(null);
+    if (await onCorrect({ ...draft, name: draft.name.trim() })) setDraft(null);
   }
 
   return (
@@ -129,7 +178,9 @@ export default function GuestListTable({
         <button
           type="button"
           onClick={() => fileRef.current?.click()}
-          className="inline-flex items-center gap-[8px] rounded-[8px] border border-[#F82900] bg-[#F82900] px-[16px] py-[10px] text-[14px] font-[600] leading-[20px] text-white [box-shadow:0_1px_2px_0_rgba(0,0,0,0.05)]">
+          disabled={isBusy}
+          aria-busy={isBusy}
+          className="inline-flex items-center gap-[8px] rounded-[8px] border border-[#F82900] bg-[#F82900] px-[16px] py-[10px] text-[14px] font-[600] leading-[20px] text-white [box-shadow:0_1px_2px_0_rgba(0,0,0,0.05)] disabled:opacity-40">
           <Upload size={20} aria-hidden="true" />
           Upload File
         </button>
@@ -137,6 +188,7 @@ export default function GuestListTable({
           ref={fileRef}
           onChoose={onUpload}
           isTheTabStop={false}
+          isBusy={isBusy}
         />
       </div>
 
@@ -169,7 +221,7 @@ export default function GuestListTable({
               ))}
               <th
                 scope="col"
-                className={`${HEADING_CELL} ${TYPE_COLUMN_HEADING}`}>
+                className={`${PINNED} ${CARD_GROUND} ${HEADING_CELL} ${TYPE_COLUMN_HEADING}`}>
                 Action
               </th>
             </tr>
@@ -178,9 +230,7 @@ export default function GuestListTable({
             {guests.map((guest, index) => {
               const editing = draft?.id === guest.id ? draft : null;
               return (
-                <tr
-                  key={guest.id}
-                  className={index % 2 === 0 ? 'bg-[#FAFAFA]' : 'bg-white'}>
+                <tr key={guest.id} className={rowGround(index)}>
                   {GUEST_COLUMNS.map((column) => (
                     <td
                       key={column.field}
@@ -201,10 +251,15 @@ export default function GuestListTable({
                       )}
                     </td>
                   ))}
-                  <td className={ROW_CELL}>
+                  <td className={`${PINNED} ${rowGround(index)} ${ROW_CELL}`}>
                     <div className="flex items-center justify-end gap-[12px]">
                       {editing ? (
                         <>
+                          {/* Cancel is never dimmed. It abandons a draft that
+                              was never sent anywhere, so there is nothing in
+                              flight for it to collide with, and a couple whose
+                              save is being refused should always be able to
+                              close the row. */}
                           <button
                             type="button"
                             onClick={() => setDraft(null)}
@@ -214,7 +269,8 @@ export default function GuestListTable({
                           <button
                             type="button"
                             onClick={saveEditing}
-                            disabled={nothingToSave}
+                            disabled={nothingToSave || isBusy}
+                            aria-busy={isBusy}
                             className={`${ACTION_LOUD} disabled:opacity-40`}>
                             Save
                           </button>
@@ -225,14 +281,18 @@ export default function GuestListTable({
                             type="button"
                             aria-label={`Delete ${guest.name}`}
                             onClick={() => onDelete(guest.id)}
-                            className={ACTION_QUIET}>
+                            disabled={isBusy}
+                            aria-busy={isBusy}
+                            className={`${ACTION_QUIET} disabled:opacity-40`}>
                             Delete
                           </button>
                           <button
                             type="button"
                             aria-label={`Edit ${guest.name}`}
                             onClick={() => setDraft(guest)}
-                            className={ACTION_LOUD}>
+                            disabled={isBusy}
+                            aria-busy={isBusy}
+                            className={`${ACTION_LOUD} disabled:opacity-40`}>
                             Edit
                           </button>
                         </>

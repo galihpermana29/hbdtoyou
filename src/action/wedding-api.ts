@@ -24,6 +24,7 @@
  */
 
 import { getSession } from '@/store/get-set-session';
+import type { Meta } from './interfaces';
 import {
   IOwnedWeddingInvitationResponse,
   IPublicWeddingInvitationResponse,
@@ -107,13 +108,23 @@ function logFailure(method: string, url: string, reason: unknown) {
 /* eslint-enable no-console */
 
 /**
+ * What one call answered: the result every caller already handles, and what a
+ * paginated endpoint said about the rest of the list.
+ *
+ * `meta` sits beside the data in the wire format rather than inside it, so it
+ * cannot travel on `IGlobalResponse` itself. Null on every endpoint that is not
+ * a list, which is most of them.
+ */
+type WeddingResult<T> = IGlobalResponse<null | T> & { meta: Meta | null };
+
+/**
  * Every failure comes back as a result in the shape callers already handle,
  * including a network one, so nothing above this file has to catch.
  */
 async function callWedding<T>(
   path: string,
   init: Omit<RequestInit, 'headers'> & { headers?: Record<string, string> }
-): Promise<IGlobalResponse<null | T>> {
+): Promise<WeddingResult<T>> {
   let res: Response;
 
   // A request that sends JSON says so, and one that sends nothing says nothing:
@@ -133,7 +144,7 @@ async function callWedding<T>(
   } catch (error) {
     const reason = error instanceof Error ? error.message : String(error);
     logFailure(method, url, reason);
-    return { success: false, message: reason, data: null };
+    return { success: false, message: reason, data: null, meta: null };
   }
 
   // Read once, as text, so the same body can be both logged and parsed. Reading
@@ -154,6 +165,7 @@ async function callWedding<T>(
       success: false,
       message: parsed?.errors?.[0] || parsed?.status || res.statusText,
       data: null,
+      meta: null,
     };
   }
 
@@ -163,6 +175,7 @@ async function callWedding<T>(
     // An endpoint with nothing to answer sends `{}`, and a caller that asks
     // whether there is data should be told no rather than undefined.
     data: parsed?.data ?? null,
+    meta: parsed?.meta ?? null,
   };
 }
 
@@ -253,6 +266,115 @@ export async function addWeddingGuests(
       method: 'POST',
       headers: await ownerHeaders(),
       body: JSON.stringify({ guests }),
+    }
+  );
+}
+
+/**
+ * How many guests are asked for at once, and how many pages will be read.
+ *
+ * The endpoint pages, and a couple's Guest List is one list rather than a page
+ * of one, so the whole of it is read here instead of every screen learning to
+ * page. A hundred at a time because a wedding is hundreds of people rather than
+ * thousands, and fifty pages so that a backend which miscounts its own pages
+ * ends the loop rather than running it forever.
+ */
+const GUESTS_PER_PAGE = 100;
+const MOST_GUEST_PAGES = 50;
+
+/**
+ * Everybody on a wedding's Guest List, with the token each personal link is
+ * built from.
+ *
+ * This is what makes a Guest List something a couple can come back to. Without
+ * it the list only ever exists in the browser that uploaded it, so a couple who
+ * closes the tab has lost two hundred names that are sitting in the database.
+ *
+ * Never cached, for the same reason the invitation's own owner read is not: the
+ * answer changes whenever the couple edits the list, and a cached one would show
+ * them guests they have already removed.
+ */
+export async function listWeddingGuests(
+  weddingId: string
+): Promise<IGlobalResponse<null | IWeddingGuestResponse[]>> {
+  const guests: IWeddingGuestResponse[] = [];
+
+  for (let page = 1; page <= MOST_GUEST_PAGES; page += 1) {
+    const answered = await callWedding<IWeddingGuestResponse[]>(
+      `/${encodeURIComponent(weddingId)}/guests` +
+        `?page=${page}&limit=${GUESTS_PER_PAGE}`,
+      {
+        method: 'GET',
+        headers: await ownerHeaders(),
+        cache: 'no-store',
+      }
+    );
+
+    // A page that was refused is the whole read refused. Answering with the
+    // guests gathered so far would be answering with part of a Guest List and
+    // saying nothing about the part that is missing.
+    if (!answered.success) return answered;
+
+    guests.push(...(answered.data ?? []));
+
+    // An answer with no meta at all is one page, which is what a backend that
+    // has stopped paginating would be saying.
+    if (page >= (answered.meta?.totalPage ?? 1)) {
+      return { success: true, message: answered.message, data: guests };
+    }
+  }
+
+  return {
+    success: false,
+    message:
+      `this invitation has more than ${MOST_GUEST_PAGES * GUESTS_PER_PAGE} ` +
+      'guests, which is more than the guest list can be read in one go',
+    data: null,
+  };
+}
+
+/**
+ * Correct one guest, leaving the rest of the list alone.
+ *
+ * Every answer goes, including the ones the couple has emptied, because this
+ * writes over a guest rather than adding to them: a field left out of the body
+ * keeps whatever the backend already holds, so an omitted one would be a
+ * correction that silently did not happen. The token does not change, so the
+ * personal link a guest may already have been sent still opens the invitation.
+ */
+export async function updateWeddingGuest(
+  guest: IWeddingGuestPayload,
+  weddingId: string,
+  guestId: string
+): Promise<IGlobalResponse<null>> {
+  return callWedding<null>(
+    `/${encodeURIComponent(weddingId)}/guests/${encodeURIComponent(guestId)}`,
+    {
+      method: 'PATCH',
+      headers: await ownerHeaders(),
+      body: JSON.stringify(guest),
+    }
+  );
+}
+
+/**
+ * Take one guest off the list for good.
+ *
+ * Permanent, and it cascades to whatever that guest had already sent: their
+ * reply and their photographs go with them. That is the endpoint the couple's
+ * Delete is asking for - the other one, revoke, keeps the row and only stops the
+ * personal link working, which is a different thing and nothing on this screen
+ * offers it.
+ */
+export async function deleteWeddingGuest(
+  weddingId: string,
+  guestId: string
+): Promise<IGlobalResponse<null>> {
+  return callWedding<null>(
+    `/${encodeURIComponent(weddingId)}/guests/${encodeURIComponent(guestId)}`,
+    {
+      method: 'DELETE',
+      headers: await ownerHeaders(),
     }
   );
 }

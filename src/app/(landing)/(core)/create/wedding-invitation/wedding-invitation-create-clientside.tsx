@@ -17,6 +17,7 @@ import {
   flowProblem,
 } from '@/components/forms/wedding/create-flow-treatment';
 import { useInvitation } from '@/components/forms/wedding/use-invitation';
+import { useGuestRoster } from '@/components/forms/wedding/use-guest-roster';
 import {
   sectionHolding,
   type SectionKey,
@@ -91,11 +92,11 @@ export default function WeddingInvitationCreateClientside({
   const [guestInvites, setGuestInvites] = useState<GuestInvitesValues>({
     slug,
     greetingMessage: DEFAULT_GUEST_MESSAGE,
-    guestList: null,
   });
 
   const {
     save,
+    weddingId,
     slug: savedSlug,
     isSaving,
     publish,
@@ -105,6 +106,20 @@ export default function WeddingInvitationCreateClientside({
     sayThereIsNobodyToSaveFor,
     forgetWhatWentWrong,
   } = useInvitation(form);
+
+  /**
+   * Who is invited, as the backend holds them.
+   *
+   * Not part of `guestInvites`, because it is not something this page is
+   * keeping: the roster reads the list back off the invitation and sends every
+   * upload, correction and deletion to it. A copy here would be a second answer
+   * to who is invited, and the wrong one every time a call was refused.
+   *
+   * It is handed the invitation as soon as there is one, and holds the list in
+   * the browser until then - which is a visitor with no account, who has nothing
+   * to save a wedding to either.
+   */
+  const guests = useGuestRoster(weddingId);
 
   const brideNickname = useWatch('brideName', form);
   const groomNickname = useWatch('groomName', form);
@@ -272,7 +287,7 @@ export default function WeddingInvitationCreateClientside({
 
     setOpenSections([]);
     setInvalidFields([]);
-    if ((await save()) === 'FAILED') return;
+    if ((await save(guestInvitesValues.greetingMessage)) === 'FAILED') return;
     goToStep('Guest invites details');
   }
 
@@ -293,25 +308,38 @@ export default function WeddingInvitationCreateClientside({
    * cannot finish yet, and a way out that could itself be refused is not one.
    */
   async function saveAsDraft() {
-    const outcome = await save();
+    const outcome = await save(guestInvitesValues.greetingMessage);
     if (outcome === 'SAVED') message.success('Your invitation is saved.');
     if (outcome === 'NOT_SIGNED_IN') sayThereIsNobodyToSaveFor();
   }
 
   /**
-   * Publish the invitation, if the backend says it may go out, and then show
-   * the couple the screen that says it has.
+   * Keep what the couple has written here, publish the invitation if the backend
+   * says it may go out, and then show them the screen that says it has.
    *
-   * The check is what makes this press finished, so anything outstanding stops
-   * it: what came back is printed under the row, the invitation stays the draft
-   * it already was, and the couple can go back, fix what was named and press
-   * again. A refused call is the same, for the same reason a refused save is.
+   * The save comes first because the greeting message is written on this step
+   * and nothing has saved it since. Next saved the message as it stood when the
+   * couple arrived, which is the one seeded from their nicknames; every word
+   * they have written over it since is only in this page. Publishing without
+   * this would publish an invitation carrying the message they did not send.
    *
-   * Somebody with no account never had an invitation to publish, so there is
-   * nothing to ask about and they are carried on exactly as Next carries them -
-   * see `use-invitation.ts`.
+   * Only a refused save stops the press. A visitor with no account answers
+   * `NOT_SIGNED_IN` and is carried on exactly as Next carries them, because they
+   * never had an invitation to publish either.
+   *
+   * The check is what makes the rest of this press finished, so anything
+   * outstanding stops it: what came back is printed under the row, the
+   * invitation stays the draft it already was, and the couple can go back, fix
+   * what was named and press again. A refused call is the same, for the same
+   * reason a refused save is.
+   *
+   * The Guest List is not sent here. Every guest reached the backend when the
+   * file was uploaded and every correction since went with it, so there is
+   * nothing left of the list for this press to carry - see `use-guest-roster.ts`.
    */
   async function confirmCreate() {
+    if ((await save(guestInvitesValues.greetingMessage)) === 'FAILED') return;
+
     const outcome = await publish();
     if (outcome === 'PUBLISHED' || outcome === 'NOTHING_TO_PUBLISH') {
       goToStep('Share with guests');
@@ -449,30 +477,30 @@ export default function WeddingInvitationCreateClientside({
                 />
                 <div className="flex w-full items-start lg:sticky lg:top-[96px] lg:w-auto">
                   <button
-                  type="button"
-                  onClick={() => setIsPreviewCollapsed(!isPreviewCollapsed)}
-                  aria-expanded={!isPreviewCollapsed}
-                  aria-label={
-                    isPreviewCollapsed
-                      ? 'Show the Site Preview'
-                      : 'Hide the Site Preview'
-                  }
-                  className="hidden h-[40px] w-[40px] shrink-0 items-center justify-center rounded-full border border-[#EDEDED] bg-white text-[#1B1B1B] shadow-lg hover:border-[#E34013] lg:flex">
-                  {isPreviewCollapsed ? (
-                    <ChevronLeft className="h-5 w-5" aria-hidden="true" />
-                  ) : (
-                    <ChevronRight className="h-5 w-5" aria-hidden="true" />
-                  )}
-                </button>
+                    type="button"
+                    onClick={() => setIsPreviewCollapsed(!isPreviewCollapsed)}
+                    aria-expanded={!isPreviewCollapsed}
+                    aria-label={
+                      isPreviewCollapsed
+                        ? 'Show the Site Preview'
+                        : 'Hide the Site Preview'
+                    }
+                    className="hidden h-[40px] w-[40px] shrink-0 items-center justify-center rounded-full border border-[#EDEDED] bg-white text-[#1B1B1B] shadow-lg hover:border-[#E34013] lg:flex">
+                    {isPreviewCollapsed ? (
+                      <ChevronLeft className="h-5 w-5" aria-hidden="true" />
+                    ) : (
+                      <ChevronRight className="h-5 w-5" aria-hidden="true" />
+                    )}
+                  </button>
 
-                {/* Collapsed only where there is a control to bring it back:
+                  {/* Collapsed only where there is a control to bring it back:
                     below lg the two columns stack, the control is gone, and a
                     panel hidden by a decision taken on a wider screen would be
                     hidden with no way to ask for it. */}
-                <div
-                  className={`w-full min-w-0 lg:w-auto ${
-                    isPreviewCollapsed ? 'lg:hidden' : 'lg:ml-[40px]'
-                  }`}>
+                  <div
+                    className={`w-full min-w-0 lg:w-auto ${
+                      isPreviewCollapsed ? 'lg:hidden' : 'lg:ml-[40px]'
+                    }`}>
                     <WeddingInvitationPreview form={form} />
                   </div>
                 </div>
@@ -485,7 +513,9 @@ export default function WeddingInvitationCreateClientside({
               isCurrent={isGuestInvites}
               values={guestInvitesValues}
               onChange={(next) => {
-                if (next.greetingMessage !== guestInvitesValues.greetingMessage) {
+                if (
+                  next.greetingMessage !== guestInvitesValues.greetingMessage
+                ) {
                   setMessageIsTheirs(true);
                 }
                 setGuestInvites(next);
@@ -496,6 +526,12 @@ export default function WeddingInvitationCreateClientside({
               // couple was about to send their own families.
               brideNickname={brideNickname?.trim() ?? ''}
               groomNickname={groomNickname?.trim() ?? ''}
+              guestList={guests.guestList}
+              onUploadGuestList={guests.upload}
+              onCorrectGuest={guests.correct}
+              onDeleteGuest={guests.remove}
+              guestListProblem={guests.problem}
+              isGuestListBusy={guests.isBusy}
               onPreviousStep={() => goToStep('Fill in the details & story')}
               onConfirm={confirmCreate}
               onSaveAsDraft={saveAsDraft}
