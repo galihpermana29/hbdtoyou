@@ -211,5 +211,77 @@ A guest who followed a wedding link should land somewhere that looks like the we
 Nothing about it is asserted.
 The check has no invitation to read - it drives a signed-out browser against no backend - so it cannot reach either state, and there is no frame to hold them against in any case.
 
+The Create Flow carries a language control the design does not draw, and opens in Indonesian.
+
+The design exists in English because it was drawn in English, not because a decision was taken that couples read English.
+Most of them do not: the product marries Indonesian couples, and every field on this form was asking them about their own wedding in a second language.
+
+So the flow opens in Indonesian and a control above the Sections switches it to English.
+It sits above them because it governs all of them, and outside the form because it is a preference about reading the flow rather than an answer about a wedding.
+That second part is load-bearing rather than tidy: the check addresses this step's fields by their position within the form, and a setting parked among them renumbered every one of them the first time it was tried.
+
+This is the one place where the design cannot be the reference for what a couple sees, because the design has nothing to say about a language it was not drawn in.
+The check therefore selects English before every capture, and holds the English against the frames exactly as before.
+Nothing verifies the Indonesian.
+There is no Indonesian frame to hold it against, and inventing one would be the check marking its own homework, so the translations are reviewed by a person who reads both.
+
+The invitation is not translated, in either direction.
+What a guest reads is what the couple wrote, and a control that rewrote it would be editing their words.
+
+The Venue Details Section draws a map the design does not draw, and View Location no longer points where the design implies.
+
+The design draws a View Location control and no map, so a guest had to leave the invitation to find out where the wedding was.
+The Section now renders the couple's own map beneath the address, from the embed Google Maps hands over under Share, Embed a map, Copy HTML.
+
+What the couple pastes is never rendered.
+The address inside the paste is taken out and a fresh iframe is built from it, because a couple's invitation is opened by strangers and putting their markup into that page would run a pasted script in every guest's browser.
+An `onload` smuggled in beside a valid `src` is therefore harmless: only the address survives the extraction.
+
+View Location is built from the written Wedding Address rather than from the pasted value, because an embed address opens a stripped map with no way to start directions.
+So the couple pastes once and both jobs are served: the map shows the pin they chose, the control opens the venue in whatever maps application the guest already uses.
+
+The field's guidance changed with it, and its Indonesian names Google Maps' own menu items - worth checking against the real application, because wrong menu names in an instruction are worse than English ones.
+
+Required fields carry a red mark the design does not draw, and every uploader's guidance is generated rather than written.
+
+The design was drawn for a form where nothing was required, so it marks nothing.
+Now that a step can refuse, a couple who cannot tell which fields are obliged only finds out by being refused, so each required field's label carries the mark.
+It is drawn with `::after` rather than written into the label, which keeps it out of `textContent` and leaves the twenty label assertions saying exactly what the design says.
+The control itself is what assistive technology hears, through `aria-required`; the mark is for eyes.
+
+The guidance under an uploader is built from the numbers that field enforces, and the prop that let a Section write its own is gone.
+The design's guidance said "We recommend to add more than 2 images" over a field that takes one, and once the counts moved four of the six were telling couples the opposite of what the field would accept.
+A number a person writes beside another number drifts from it; removing the prop turned every stale hint into a compile error rather than something to notice by eye.
+
+Three photograph fields take a different number than the design's frames say.
+
+The Couples Photo takes one where the frame says five, because the invitation prints one and always did.
+The Polaroid Photos take three where the frame says twelve, because the film strip has three slots.
+The Gift Section Photo takes three where the frame says one, and that frame was already disagreeing with itself: it printed the guidance for three underneath a prompt that said one.
+
+In every case the frame's number described a field the invitation could not honour, and a couple was being invited to add photographs that would never be seen.
+The prompts follow the real numbers, which means the words inside those areas changed too.
+
+The Venue Details Section asks for "Venue Photos" where the design writes "More Photos".
+
+The design's label says how many rather than what of, on the one field in that Section that takes a photograph at all.
+A couple reading it has just answered the address and the reception time and is being asked for "More" of something the label does not name.
+It is renamed rather than kept, because this is the Section where a guest works out where to go, and the photographs in it are of the venue.
+
+The Gallery is laid out as masonry rather than as the collage the design draws.
+
+Node 312-1807 places five photographs by hand, each its own size, overlapping the section's edges inside a fixed 570px band.
+It is a composition rather than a rule, and it does not generalise: a couple is now asked for between five and fifteen photographs, and there is no honest way to read a sixth slot out of an arrangement that has five.
+The alternatives were to cap the couple at five, which throws away the ask, or to draw the collage once per group of five, which forces the count to land on a multiple of five.
+
+So the section becomes two columns of varying heights that grow with the count.
+It keeps what the collage was actually doing - photographs of different sizes, read down the page - without pretending to know where a fifteenth one goes.
+
+This costs the check nothing, which is part of why it is affordable.
+Gallery is the one section with no words at all, so the only thing asserted about it is its ground, `#fafafa`, and that is as true of masonry as of the collage.
+
+Nothing here licenses redrawing a section that does generalise.
+The collage was replaced because the design states five and the product now asks for fifteen, not because masonry is nicer.
+
 This rule holds at desktop width, where the design exists.
 Below that there is no design, so usability governs and the rule does not apply.

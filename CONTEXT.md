@@ -29,6 +29,19 @@ Step 4.
 The published invitation and its shareable link.
 _Avoid_: Share with communities, Share
 
+**Prefill**:
+An answer already in a field when the couple first opens it, put there because most couples want it.
+Theirs from that moment: editable, clearable, and saved exactly like anything they typed.
+The scripture the Holy Verse section opens with is one.
+_Avoid_: default, which is also used for the other thing below
+
+**Fallback**:
+A value invented at render time to stand in for one the couple never gave.
+There are none, deliberately: nothing invented reaches the backend or a guest.
+An optional answer left blank is absent, and the invitation omits what it would have said rather than
+printing somebody else's.
+_Avoid_: default
+
 ### Invitation content
 
 **Section**:
