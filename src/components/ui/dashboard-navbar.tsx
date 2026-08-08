@@ -9,6 +9,17 @@ const DashboardNavbar = ({ isAdmin }: { isAdmin: boolean }) => {
           className="text-[#182230] font-[600] text-[16px] hover:bg-[#F9FAFB] rounded-[8px] py-[8px] px-[12px]">
           Dashboard
         </Link>
+        {/* Outside the admin guard, unlike every tab below it. A couple's own
+            wedding invitations are the one thing here that belongs to the person
+            signed in rather than to whoever runs the product, and inside the
+            guard this tab would be invisible to every couple it exists for. The
+            screen behind it scopes itself the way the Dashboard tab does: the
+            person's own invitations, or everybody's for an administrator. */}
+        <Link
+          href={'/dashboard/wedding'}
+          className="text-[#182230] font-[600] text-[16px] hover:bg-[#F9FAFB] rounded-[8px] py-[8px] px-[12px]">
+          Wedding
+        </Link>
         {isAdmin && (
           <>
             <Link

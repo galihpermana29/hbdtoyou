@@ -189,10 +189,12 @@ export function useGuestRoster(weddingId: string | null): GuestRoster {
     readBack.current = weddingId;
 
     let abandoned = false;
+    let landed = false;
 
     (async () => {
       const answered = await listWeddingGuests(weddingId);
       if (abandoned) return;
+      landed = true;
 
       if (!answered.success) {
         setProblem(readProblem(answered.message));
@@ -219,6 +221,17 @@ export function useGuestRoster(weddingId: string | null): GuestRoster {
 
     return () => {
       abandoned = true;
+      // A read that was abandoned before it answered did not happen, so the
+      // invitation is not marked as read and the next mount asks again.
+      //
+      // Without this, a screen mounted already knowing which invitation it is
+      // showed an empty Guest List over a list with people on it: React runs
+      // every effect twice in development, the first run was abandoned by its
+      // own cleanup, and the second saw the identifier already recorded and
+      // asked nothing. The Create Flow never showed it, because there the
+      // identifier arrives after a save rather than at mount - which is exactly
+      // the kind of difference a second screen finds.
+      if (!landed) readBack.current = null;
     };
   }, [weddingId]);
 

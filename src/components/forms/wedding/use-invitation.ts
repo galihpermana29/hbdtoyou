@@ -14,6 +14,21 @@
  * that was never made; an update that failed leaves the identifier, so the next
  * attempt updates the same one rather than making a second.
  *
+ * ## Opening one that already exists
+ *
+ * A flow opened on a saved invitation is handed its identifier and starts
+ * holding it, which is the whole of what editing needs: every branch here
+ * already asks whether there is one, so a save from an editor updates for the
+ * same reason a couple's second press does. Nothing else changes - the same
+ * calls, the same failures, the same words - and there is no second code path
+ * that could drift from the first.
+ *
+ * A published invitation is not a special case either. `PUT /{uuid}` does not
+ * ask what state an invitation is in, so a change to one guests are already
+ * holding is live the moment it saves, and there is no draft copy and no
+ * republish step for there to be. The screen that offers the edit is where that
+ * is said, because it is the only place a couple can still decide not to.
+ *
  * Nothing here is silent. A save that did not happen comes back as a message the
  * step prints and refuses to go on past, because a couple who believes their
  * evening is saved and finds out otherwise has lost more than a step.
@@ -76,11 +91,11 @@ import { getAllTemplates } from '@/action/user-api';
 import {
   createWeddingInvitation,
   getOwnedWeddingInvitation,
-  publishCheckWeddingInvitation,
-  publishWeddingInvitation,
   updateWeddingInvitation,
 } from '@/action/wedding-api';
 import { useMemoifySession } from '@/app/session-provider';
+import { NOT_SIGNED_IN_PROBLEM, problemMessage } from './invitation-problems';
+import { attemptPublish } from './publish-invitation';
 import {
   formValuesToInvitationPayload,
   type WeddingInvitationFormValues,
@@ -187,46 +202,35 @@ export interface Invitation {
 }
 
 /**
- * What a couple reads when a press of theirs did not reach the backend.
+ * An invitation this flow was opened on rather than one it is about to make.
  *
- * One sentence for both, because both say the same thing: what did not happen,
- * what the backend gave as the reason, and that nothing they entered is gone.
+ * Everything a save needs to update the existing invitation instead of creating
+ * a second one. What the couple entered is not here: that is the form's, and it
+ * is seeded through the form's own initial values.
  */
-export function problemMessage(
-  whatDidNotHappen: 'saved' | 'published',
-  reason: string
-): string {
-  return (
-    `Your invitation was not ${whatDidNotHappen}: ${reason}. Nothing you have ` +
-    'entered has been lost, so you can try again.'
-  );
+export interface OpenedInvitation {
+  weddingId: string;
+  /** The address it already has, or empty when the read did not carry one. */
+  slug: string;
 }
 
-/** What they read when they asked to save and there is no account to save to. */
-export const NOT_SIGNED_IN_PROBLEM =
-  'You are not signed in, so there is nowhere to save your invitation yet. ' +
-  'Sign in and try again.';
-
-/**
- * What a couple reads when the check refused and named nothing.
- *
- * The contract says a refusal carries its reasons, so this is the shape being
- * broken rather than a case the product has. It is still written down, because
- * a couple whose invitation will not publish and who is shown an empty list has
- * been told less than nothing.
- */
-export const UNSTATED_ISSUE =
-  'The backend refused to publish this invitation and did not say why.';
-
 export function useInvitation(
-  form: FormInstance<WeddingInvitationFormValues>
+  form: FormInstance<WeddingInvitationFormValues>,
+  /**
+   * The invitation being opened again, or nothing for one being made.
+   *
+   * Read once, at the first render, because it is where this flow started
+   * rather than something that changes under it: an invitation cannot become a
+   * different invitation while a couple is editing it.
+   */
+  opened?: OpenedInvitation
 ): Invitation {
   const session = useMemoifySession();
   const [isSaving, setIsSaving] = useState(false);
   const [isPublishing, setIsPublishing] = useState(false);
   const [problem, setProblem] = useState<string | null>(null);
   const [outstanding, setOutstanding] = useState<string[] | null>(null);
-  const [slug, setSlug] = useState<string | null>(null);
+  const [slug, setSlug] = useState<string | null>(opened?.slug || null);
 
   /**
    * The invitation this flow has created, or nothing while it has none.
@@ -235,8 +239,13 @@ export function useInvitation(
    * because a save reads it at the moment it runs: state read out of a callback
    * that was made before the create came back would still be the `null` it was
    * then, and the couple would get a second invitation for their second press.
+   *
+   * A flow opened on an invitation starts holding it, which is the whole of what
+   * makes editing update rather than create: every branch below already asks
+   * this one question, so an identifier put here before the first save is an
+   * identifier every save updates.
    */
-  const invitationId = useRef<string | null>(null);
+  const invitationId = useRef<string | null>(opened?.weddingId ?? null);
 
   /**
    * The same identifier, for the parts of the screen that are drawn from it.
@@ -246,7 +255,9 @@ export function useInvitation(
    * into existence. A ref alone would never re-render the Guest List into
    * knowing it now has somewhere to go.
    */
-  const [weddingId, setWeddingId] = useState<string | null>(null);
+  const [weddingId, setWeddingId] = useState<string | null>(
+    opened?.weddingId ?? null
+  );
 
   /** The backend's id for the template this flow fills in. */
   async function weddingTemplateId(): Promise<
@@ -290,6 +301,29 @@ export function useInvitation(
     if (learned) setSlug(learned);
   }
 
+  /**
+   * Write the invitation's own identifier into the record it holds.
+   *
+   * Only ever after a create. The record is the one place a couple's listing can
+   * read which invitation a content row belongs to - see `WEDDING_ID_KEY` - and
+   * the create that wrote it did not know the identifier yet, because the
+   * identifier is what the create answered with.
+   *
+   * The same values as the save that just ran, read from the form again rather
+   * than passed along, so the two writes cannot disagree about anything except
+   * the one key this adds.
+   */
+  async function nameTheRecord(weddingId: string, greetingMessage: string) {
+    await updateWeddingInvitation(
+      formValuesToInvitationPayload(
+        form.getFieldsValue(true),
+        greetingMessage,
+        weddingId
+      ),
+      weddingId
+    );
+  }
+
   /** Drop whatever the last press had to say, whichever press it was. */
   function forgetWhatWentWrong() {
     setProblem(null);
@@ -308,9 +342,14 @@ export function useInvitation(
       // Every field, including the ones a couple has not touched, because the
       // backend is sent the whole invitation rather than a diff and an untouched
       // switch is still an answer.
+      //
+      // The identifier goes in with it, so that the saved record says which
+      // invitation it is - see `WEDDING_ID_KEY`, which is what a couple's
+      // listing reads to find its way back here. A create has none yet.
       const payload = formValuesToInvitationPayload(
         form.getFieldsValue(true),
-        greetingMessage
+        greetingMessage,
+        invitationId.current
       );
 
       if (invitationId.current) {
@@ -354,6 +393,17 @@ export function useInvitation(
       // And only now is there an invitation to have an address, so this is the
       // earliest the couple can be told where their wedding is going to live.
       await learnTheAddress(created.data.id);
+      // And only now can the record say which invitation it is, which the create
+      // above could not: the identifier is the backend's answer to it. So a
+      // first save is two writes, and the second one is what makes this
+      // invitation findable again from the couple's own listing.
+      //
+      // Silent when it does not land, exactly as `learnTheAddress` is and for
+      // the same reason: the invitation is saved either way, every later save
+      // carries the identifier too, and every way out of this flow saves. What
+      // it costs in the meantime is a row the listing can show and cannot open,
+      // which that screen says plainly rather than hiding.
+      await nameTheRecord(created.data.id, greetingMessage);
       return 'SAVED';
     } catch (error) {
       // The wedding calls answer with a result rather than throwing, including
@@ -384,61 +434,20 @@ export function useInvitation(
     forgetWhatWentWrong();
 
     try {
-      const check = await publishCheckWeddingInvitation(weddingId);
-      if (!check.success || !check.data) {
-        setProblem(
-          problemMessage(
-            'published',
-            check.message || 'the backend did not answer the check'
-          )
-        );
+      // The same two calls the couple's own listing makes, in the same order and
+      // refused in the same words - see `publish-invitation.ts`. What this adds
+      // is where the answer is printed, which is the only part that is the
+      // flow's.
+      const attempt = await attemptPublish(weddingId);
+      if (attempt.outcome === 'FAILED') {
+        setProblem(attempt.problem);
         return 'FAILED';
       }
-
-      if (!check.data.OK) {
-        // Whatever came back, and a line of our own only when nothing did. The
-        // message alone: the contract's example pairs a field name with a whole
-        // sentence naming it ("title", "Title must not be empty"), so printing
-        // both would say it twice.
-        const issues = (check.data.Issues ?? [])
-          .map((issue) => issue.Message?.trim())
-          .filter((message): message is string => Boolean(message));
-        setOutstanding(issues.length > 0 ? issues : [UNSTATED_ISSUE]);
+      if (attempt.outcome === 'NOT_READY') {
+        setOutstanding(attempt.outstanding);
         return 'NOT_READY';
       }
-
-      const published = await publishWeddingInvitation(weddingId);
-      if (!published.success) {
-        setProblem(problemMessage('published', published.message));
-        return 'FAILED';
-      }
-
-      // The backend answers a publish with the state it left the invitation in,
-      // so a state that is not published is taken at its word rather than read
-      // as one because the call itself came back. An answer with no state at all
-      // is not disagreeing with anything, and the call succeeded.
-      if (published.data && published.data.status !== 'published') {
-        setProblem(
-          problemMessage(
-            'published',
-            `the backend left it a ${published.data.status}`
-          )
-        );
-        return 'FAILED';
-      }
-
       return 'PUBLISHED';
-    } catch (error) {
-      // Both wedding calls answer with a result rather than throwing, so this
-      // is only reached if one of them ever stops doing that. A couple is told
-      // either way, because the alternative is a press that did nothing.
-      setProblem(
-        problemMessage(
-          'published',
-          error instanceof Error ? error.message : String(error)
-        )
-      );
-      return 'FAILED';
     } finally {
       setIsPublishing(false);
     }

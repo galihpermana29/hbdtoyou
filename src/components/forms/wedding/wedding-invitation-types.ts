@@ -1,4 +1,4 @@
-import type { Dayjs } from 'dayjs';
+import dayjs, { type Dayjs } from 'dayjs';
 
 import type { IWeddingInvitationPayload } from '@/action/interfaces';
 import type { FlowCopyKey } from './copy';
@@ -9,6 +9,17 @@ export interface WeddingMilestone {
   title: string;
   body: string;
 }
+
+/**
+ * What a couple actually answers about one chapter.
+ *
+ * The title is not here, and that is the point. It is the design's - see
+ * `LOVE_STORY_CHAPTERS` - so `formValuesToContent` writes it in on the way out
+ * and `contentToFormValues` drops it on the way back. Leaving it off the type
+ * makes that a compile-time fact rather than a convention: a form that held a
+ * title would be a form asking a couple to confirm an answer they never gave.
+ */
+export type WeddingMilestoneAnswer = Pick<WeddingMilestone, 'year' | 'body'>;
 
 /**
  * One chapter of the Love Story, as the design asks for it.
@@ -158,7 +169,7 @@ export interface WeddingInvitationFormValues {
   verseText?: string;
   verseCitation?: string;
   loveStoryPhotos?: string[];
-  milestones?: WeddingMilestone[];
+  milestones?: WeddingMilestoneAnswer[];
   /** The proposal photo, held as the one-photo list its field hands back. */
   polaroidPhoto?: string[];
   loveStoryVideo?: string;
@@ -336,6 +347,28 @@ export function joinParents(father?: string, mother?: string): string {
   return [father, mother]
     .map((name) => name?.trim() ?? '')
     .filter((name) => name.length > 0)
+    .join(' & ');
+}
+
+/**
+ * The couple, as the record names them, or empty when it does not name them.
+ *
+ * For the product's own screens rather than for the invitation: a couple's list
+ * of their own invitations has to say which is which, and every one of them is
+ * titled `Wedding Invitation`. Their nicknames are the only thing on the record
+ * that tells one from another.
+ *
+ * Empty rather than anything invented when neither nickname has been given, and
+ * one name rather than a stranded ampersand when only one has - the same rule
+ * `joinParents` follows, for the same reason. What a screen puts in place of an
+ * empty answer is the screen's to decide and say.
+ */
+export function coupleNamedIn(
+  content: Pick<WeddingTemplate1Content, 'brideName' | 'groomName'> | null | undefined
+): string {
+  return [content?.brideName, content?.groomName]
+    .map((name) => name?.trim() ?? '')
+    .filter((name) => name !== '')
     .join(' & ');
 }
 
@@ -525,21 +558,82 @@ export const WEDDING_INVITATION_TITLE = 'Wedding Invitation';
  * only function that writes to the backend and a save that forgot it would be a
  * couple publishing an invitation that does not carry the words their families
  * are going to read.
+ *
+ * The invitation's own identifier is written into the record for the reason set
+ * out on `WEDDING_ID_KEY`, and is absent on the create that has not been given
+ * one yet.
  */
 export function formValuesToInvitationPayload(
   values: Partial<WeddingInvitationFormValues> | null | undefined,
-  greetingMessage: string
+  greetingMessage: string,
+  weddingId?: string | null
 ): Omit<IWeddingInvitationPayload, 'template_id'> {
   const content = formValuesToContent(values, greetingMessage);
+  const record: SavedWeddingRecord = weddingId
+    ? { ...content, [WEDDING_ID_KEY]: weddingId }
+    : content;
 
   return {
     title: WEDDING_INVITATION_TITLE,
-    detail_content_json_text: JSON.stringify(content),
+    detail_content_json_text: JSON.stringify(record),
     rsvp_enabled: true,
     digital_gift_enabled: content.digitalGiftEnabled,
     pov_guest_photo_enabled: content.memoRollEnabled,
     song_request_enabled: content.songRequestEnabled,
   };
+}
+
+/**
+ * Where a saved record carries the identifier of the invitation holding it.
+ *
+ * A couple's own invitations cannot be listed from the wedding endpoints: there
+ * is no collection there to ask, only `GET /wedding/{ref}`, which needs the
+ * identifier a listing would be asking for. `GET /wedding` answers
+ * `METHOD_NOT_ALLOWED`. What can be listed is the generic content table, which
+ * carries one row per invitation and is already how the dashboard finds
+ * everything else a person has made - but a content row's own id is the
+ * content's, not the invitation's, and nothing on it names the invitation, its
+ * address or its status.
+ *
+ * So the identifier is written into the one part of the row this product owns:
+ * the content it stored there. That is the same reason the greeting message
+ * lives there - see `WeddingTemplate1Content.greetingMessage` - and the same
+ * shape: a key nothing in the invitation renders, kept because there is nowhere
+ * else for it.
+ *
+ * It is denormalised, and it is written on every save, so a record cannot hold
+ * a stale one for long. A record saved before this existed carries none, and a
+ * listing says so rather than guessing: see
+ * `docs/adr/0004-a-saved-invitation-carries-its-own-identifier.md`. This goes
+ * away the day the backend can list a couple's invitations, which is `hbd-007`.
+ */
+export const WEDDING_ID_KEY = 'weddingId';
+
+/**
+ * The record as it is stored: the invitation's content, plus who it belongs to.
+ *
+ * Separate from `WeddingTemplate1Content` because the viewer renders that and
+ * this is not part of what a guest sees. Nothing that draws an invitation reads
+ * this type.
+ */
+export type SavedWeddingRecord = WeddingTemplate1Content & {
+  [WEDDING_ID_KEY]?: string;
+};
+
+/**
+ * Which invitation a stored record belongs to, or null when it does not say.
+ *
+ * Null is ordinary rather than broken: every invitation saved before the
+ * identifier was written carries no such key, and so does anything that is not
+ * one of these records at all. Both cases are a row a listing can show and
+ * cannot open, which is what it says.
+ */
+export function weddingIdFrom(
+  stored: string | null | undefined
+): string | null {
+  const content = weddingContentFrom(stored) as SavedWeddingRecord | null;
+  const id = content?.[WEDDING_ID_KEY];
+  return typeof id === 'string' && id.trim() !== '' ? id.trim() : null;
 }
 
 /**
@@ -586,6 +680,123 @@ export function weddingContentFrom(
   }
 
   return parsed as WeddingTemplate1Content;
+}
+
+/**
+ * The day of the wedding, read back off the moment that was stored.
+ *
+ * By the ten characters at the front rather than by parsing the whole stamp.
+ * `weddingDateToIso` writes the couple's day with a `+07:00` offset on it, and
+ * handing that to Dayjs converts it into whatever zone the browser is in - so a
+ * wedding stored as the third of May reads back as the second for a couple
+ * sitting west of Jakarta, and the form would show them a date they never
+ * picked. The date part is the answer they gave; the offset and the time are
+ * this function's counterpart writing the reception's start onto it.
+ *
+ * Undefined when there is no day stored, which is a couple who never picked
+ * one, and undefined rather than today: an invented date is an answer.
+ */
+function weddingDateFromIso(iso: string | undefined): Dayjs | undefined {
+  const day = (iso ?? '').slice(0, 10);
+  if (!/^\d{4}-\d{2}-\d{2}$/.test(day)) return undefined;
+  const parsed = dayjs(day);
+  return parsed.isValid() ? parsed : undefined;
+}
+
+/**
+ * A photograph a field holds as a one-item list, read back off the one string
+ * the content model holds it as.
+ *
+ * An empty string is no photograph rather than a list holding an empty one,
+ * which would draw an uploader with a broken image already in it.
+ */
+function photoList(photo: string | undefined): string[] {
+  const one = photo?.trim() ?? '';
+  return one === '' ? [] : [one];
+}
+
+/**
+ * A saved invitation, back in the shape the Create Flow's form holds.
+ *
+ * The inverse of `formValuesToContent`, and it is not a spread of the record,
+ * because that function transforms rather than copying: a Dayjs becomes a
+ * stamp, four photographs become single strings or a renamed list, and the
+ * chosen track is stored under another name. Every one of those is undone here.
+ *
+ * ## Two values are dropped rather than restored
+ *
+ * `mapPhoto` and each chapter's `title` are derived on the way out - the first
+ * from the first of the Venue Details photographs, the second from the design's
+ * own words for the chapter. Neither was ever answered, so neither comes back:
+ * a couple opening their invitation would otherwise find the form holding
+ * answers they never gave, and correcting them would be correcting the
+ * template. `photoShareUrl` is dropped for the same reason - it is written as
+ * an empty string by the writer and asked for nowhere.
+ *
+ * ## Every field is stated, including the empty ones
+ *
+ * The result is complete rather than sparse, and that is deliberate. The form's
+ * own initial values carry the Holy Verse as a Prefill, and an absent key
+ * leaves a Prefill standing - so a couple who deliberately cleared the
+ * scripture would open their invitation to find it back, offered as though they
+ * had chosen it. An answer they cleared is an answer, and it reads back empty.
+ * See CONTEXT.md for Prefill against Fallback.
+ *
+ * The greeting message is not here. It is not one of the form's fields - it is
+ * written on the guest invites step, which is not a form - so it is read off
+ * the record separately by whoever is seeding the flow.
+ */
+export function contentToFormValues(
+  content: WeddingTemplate1Content
+): WeddingInvitationFormValues {
+  return {
+    heroPhotos: content.heroPhotos ?? [],
+    groomName: content.groomName ?? '',
+    brideName: content.brideName ?? '',
+    groomFullName: content.groomFullName ?? '',
+    brideFullName: content.brideFullName ?? '',
+    groomFatherName: content.groomFatherName ?? '',
+    groomMotherName: content.groomMotherName ?? '',
+    brideFatherName: content.brideFatherName ?? '',
+    brideMotherName: content.brideMotherName ?? '',
+    bridePhoto: photoList(content.bridePhoto),
+    groomPhoto: photoList(content.groomPhoto),
+    weddingDate: weddingDateFromIso(content.weddingDateIso),
+    backgroundMusic: content.backgroundMusicId ?? '',
+    verseText: content.verseText ?? '',
+    verseCitation: content.verseCitation ?? '',
+    loveStoryPhotos: content.loveStoryPhotos ?? [],
+    // One answer per chapter the design asks about, always, because that is what
+    // the form draws. A record holding fewer than three - or none, which is a
+    // record written before the Love Story was asked for - reads back as
+    // unanswered chapters rather than as missing fields.
+    milestones: LOVE_STORY_CHAPTERS.map((_chapter, index) => ({
+      year: content.milestones?.[index]?.year ?? '',
+      body: content.milestones?.[index]?.body ?? '',
+    })),
+    polaroidPhoto: photoList(content.polaroidPhoto),
+    loveStoryVideo: content.loveStoryVideo ?? '',
+    eventPhotos: content.eventPhotos ?? [],
+    eventStartTime: content.eventStartTime ?? '',
+    eventEndTime: content.eventEndTime ?? '',
+    venueName: content.venueName ?? '',
+    address: content.address ?? '',
+    mapsUrl: content.mapsUrl ?? '',
+    galleryPhotos: content.galleryPhotos ?? [],
+    tokenPhoto: content.tokenPhotos ?? [],
+    tokenMessage: content.tokenMessage ?? '',
+    accountHolder: content.accountHolder ?? '',
+    bankProvider: content.bankProvider ?? '',
+    accountNumber: content.accountNumber ?? '',
+    // The three switches, as they were answered. `?? false` and not `?? true`:
+    // the form starts them on because a couple who has not looked at them gets
+    // the invitation the design draws, but a record is somebody who has already
+    // been through the flow, and a switch it does not carry is one that was off
+    // when nothing was written for it.
+    memoRollEnabled: content.memoRollEnabled ?? false,
+    digitalGiftEnabled: content.digitalGiftEnabled ?? false,
+    songRequestEnabled: content.songRequestEnabled ?? false,
+  };
 }
 
 /**

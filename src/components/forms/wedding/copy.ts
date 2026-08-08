@@ -59,6 +59,10 @@ export const FLOW_COPY = {
   actionNext: { en: 'Next', id: 'Lanjut' },
   actionSaveAsDraft: { en: 'Save as draft', id: 'Simpan sebagai draf' },
   actionConfirmCreate: { en: 'Confirm Create', id: 'Konfirmasi & Buat' },
+  // Not on any designed screen: it replaces Confirm Create when the invitation
+  // being edited is already published, where there is nothing left to create
+  // and nothing left to confirm - only a change that goes live.
+  actionSaveChanges: { en: 'Save changes', id: 'Simpan perubahan' },
 
   // Cover Header.
   coverHeaderName: { en: 'Cover Header', id: 'Cover Header' },

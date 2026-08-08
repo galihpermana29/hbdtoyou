@@ -27,12 +27,22 @@ export interface WeddingInvitationFormProps {
    * refused over. Empty the rest of the time, which is every other moment.
    */
   openSections?: SectionKey[];
+  /**
+   * What the fields start holding, for an invitation being opened again.
+   *
+   * Absent for a couple starting one, who get the Prefills and the empty fields
+   * the design draws. A saved invitation supplies every field it has - see
+   * `contentToFormValues`, which states the empty ones too, so a Prefill a
+   * couple cleared stays cleared.
+   */
+  initialValues?: WeddingInvitationFormValues;
 }
 
 export default function WeddingInvitationForm({
   form,
   openNotification,
   openSections = [],
+  initialValues,
 }: WeddingInvitationFormProps) {
   const wants = (section: SectionKey) => openSections.includes(section);
   const profile = useMemoifyProfile();
@@ -45,7 +55,7 @@ export default function WeddingInvitationForm({
     <Form
       form={form}
       layout="vertical"
-      initialValues={getDefaultFormValues()}
+      initialValues={initialValues ?? getDefaultFormValues()}
       requiredMark={false}
       className="wedding-invitation-form">
       {/* The Sections stack 24px apart, and each one opens and closes on its

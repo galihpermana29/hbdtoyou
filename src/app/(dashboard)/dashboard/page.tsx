@@ -3,6 +3,7 @@ import {
   getContentStatsByUserId,
   getDashboardOverview,
 } from '@/action/user-api';
+import { isAdminEmail } from '@/lib/admin';
 import { mapContentToCard } from '@/lib/utils';
 import { getSession } from '@/store/get-set-session';
 import { Banknote, Camera, CreditCard, Megaphone, UserRoundPlus } from 'lucide-react';
@@ -13,7 +14,7 @@ import DashboardContentContainer from './view/container/DashboardContentContaine
 const DashboardPage = async () => {
   const session = await getSession();
 
-  const isAdmin = session?.email === 'memoify.live@gmail.com';
+  const isAdmin = isAdminEmail(session?.email);
   const data = await getContentByUserId(
     isAdmin ? null : (session?.userId as string),
     '200',

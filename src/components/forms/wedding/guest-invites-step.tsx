@@ -1,6 +1,5 @@
 'use client';
 
-import { Upload } from 'lucide-react';
 import { useEffect, useId, useRef } from 'react';
 
 import {
@@ -8,12 +7,8 @@ import {
   flowActionBack,
   flowActionForward,
   flowActionRow,
-  flowDropZone,
-  flowDropZonePrompt,
-  flowDropZoneTitle,
   flowFieldBox,
   flowHint,
-  flowInlineAction,
   flowLabel,
   flowProblem,
   flowSectionName,
@@ -27,16 +22,8 @@ import {
   SLUG_PREFIX,
   type GuestInvitesValues,
 } from './guest-invites-types';
-import GuestListFileInput from './guest-list-file-input';
-import GuestListTable from './guest-list-table';
-import {
-  GUEST_LIST_SIZE_LIMIT,
-  GUEST_LIST_TEMPLATE_ACTION,
-  GUEST_LIST_TEMPLATE_HREF,
-  GUEST_LIST_TEMPLATE_NAME,
-  type Guest,
-  type GuestList,
-} from './guest-list';
+import GuestListField from './guest-list-field';
+import { type Guest, type GuestList } from './guest-list';
 
 /**
  * The third step of the Create Flow: a couple reads their invitation's address,
@@ -96,6 +83,17 @@ export interface GuestInvitesStepProps {
   guestListProblem: string | null;
   /** Whether one of those is in flight, so none of them can be pressed twice. */
   isGuestListBusy: boolean;
+  /**
+   * Whether the invitation being filled in is one that has already gone out.
+   *
+   * Only ever true for an invitation opened again from the couple's own
+   * listing, and it changes what the last press of this step is. There is
+   * nothing left to create, nothing left to confirm, and no draft to save as:
+   * there is one invitation, its address never changes, and a save is live the
+   * moment it lands. So the step offers one action that says that, and does not
+   * ask the backend whether the invitation may go out - it already has.
+   */
+  isAlreadyPublished?: boolean;
   /** Go back to the details and story step. */
   onPreviousStep: () => void;
   /**
@@ -163,6 +161,7 @@ export default function GuestInvitesStep({
   onDeleteGuest,
   guestListProblem,
   isGuestListBusy,
+  isAlreadyPublished = false,
   onPreviousStep,
   onConfirm,
   onSaveAsDraft,
@@ -173,8 +172,6 @@ export default function GuestInvitesStep({
   const slugId = useId();
   const slugLabelId = useId();
   const messageId = useId();
-  const guestListLabelId = useId();
-  const dropZoneFileRef = useRef<HTMLInputElement>(null);
   const copy = useFlowCopy();
 
   const messageRef = useHeightOfContent(values.greetingMessage, isCurrent);
@@ -266,94 +263,14 @@ export default function GuestInvitesStep({
               to see
             </p>
 
-            <div className="mt-[24px] flex flex-col gap-[6px]">
-              {guestList ? (
-                <GuestListTable
-                  guestList={guestList}
-                  onUpload={onUploadGuestList}
-                  onCorrect={onCorrectGuest}
-                  onDelete={onDeleteGuest}
-                  isBusy={isGuestListBusy}
-                />
-              ) : (
-                <>
-                  <p id={guestListLabelId} className={flowLabel}>
-                    {copy.guestList}
-                  </p>
-                  {/* Nothing is taken while a list is on its way to the
-                      backend. The card the table draws does not exist yet, so
-                      there is nothing on the screen saying a file is already
-                      being sent, and a second one dropped into the gap would be
-                      inserted as well as the first - leaving the invitation
-                      carrying both lists and the screen showing one. */}
-                  <div
-                    role="group"
-                    aria-labelledby={guestListLabelId}
-                    aria-busy={isGuestListBusy}
-                    onClick={() => {
-                      if (!isGuestListBusy) dropZoneFileRef.current?.click();
-                    }}
-                    onDragOver={(event) => event.preventDefault()}
-                    onDrop={(event) => {
-                      event.preventDefault();
-                      if (isGuestListBusy) return;
-                      const file = event.dataTransfer.files?.[0];
-                      if (file) onUploadGuestList(file);
-                    }}
-                    className={flowDropZone}>
-                    <Upload
-                      size={32}
-                      aria-hidden="true"
-                      className="text-[#141414]"
-                    />
-                    <div className="flex flex-col items-center gap-[4px] text-center">
-                      <p className={flowDropZoneTitle}>
-                        Drag &amp; drop up your list here
-                      </p>
-                      <p className={flowDropZonePrompt}>
-                        {copy.uploadCsvFormat}
-                      </p>
-                    </div>
-                    {/* The design draws no control here, only an area, so the
-                        field itself is what a couple arriving by keyboard
-                        reaches. */}
-                    <GuestListFileInput
-                      ref={dropZoneFileRef}
-                      onChoose={onUploadGuestList}
-                      isTheTabStop
-                      isBusy={isGuestListBusy}
-                    />
-                  </div>
-                </>
-              )}
-
-              {/* The design draws the size limit and nothing beside it. The
-                  template goes on the end of that line, and on a line of its own
-                  once a list is uploaded, because a couple has nothing to go on
-                  but the word CSV: the list carries six things about a guest,
-                  and guessing which and in what order is not something to ask of
-                  anybody. Below the card rather than inside it - the design's
-                  card header holds three things at a stated spacing, and a
-                  fourth crushes all three onto two lines each. Agreed and
-                  recorded in `docs/adr/0002-figma-is-literal-truth.md`. */}
-              <div className="flex items-center gap-[16px]">
-                {guestList ? null : (
-                  <p className={flowHint}>{GUEST_LIST_SIZE_LIMIT}</p>
-                )}
-                <a
-                  href={GUEST_LIST_TEMPLATE_HREF}
-                  download={GUEST_LIST_TEMPLATE_NAME}
-                  className={`ml-auto ${flowInlineAction}`}>
-                  {GUEST_LIST_TEMPLATE_ACTION}
-                </a>
-              </div>
-
-              {guestListProblem ? (
-                <p role="alert" className={flowProblem}>
-                  {guestListProblem}
-                </p>
-              ) : null}
-            </div>
+            <GuestListField
+              guestList={guestList}
+              onUpload={onUploadGuestList}
+              onCorrect={onCorrectGuest}
+              onDelete={onDeleteGuest}
+              problem={guestListProblem}
+              isBusy={isGuestListBusy}
+            />
           </section>
 
           <div className={`mt-[24px] ${flowActionRow}`}>
@@ -366,15 +283,21 @@ export default function GuestInvitesStep({
             {/* Beside Confirm Create rather than beside Previous step: it is
                 the other thing a couple can do with what they have written,
                 not the other way out of the step. Dimmed while it is saving,
-                for the reason the Next action is. */}
-            <button
-              type="button"
-              onClick={onSaveAsDraft}
-              disabled={isBusy}
-              aria-busy={isBusy}
-              className={`${flowActionAside} disabled:opacity-60`}>
-              {copy.actionSaveAsDraft}
-            </button>
+                for the reason the Next action is.
+
+                Gone on an invitation that is already published, where the word
+                draft is untrue: there is no draft copy to save to, and the
+                press beside it keeps the same thing this one would. */}
+            {isAlreadyPublished ? null : (
+              <button
+                type="button"
+                onClick={onSaveAsDraft}
+                disabled={isBusy}
+                aria-busy={isBusy}
+                className={`${flowActionAside} disabled:opacity-60`}>
+                {copy.actionSaveAsDraft}
+              </button>
+            )}
             {/* Dimmed while something is in flight, as its neighbour is: this
                 one asks the backend two questions in turn, and a couple who
                 cannot tell a slow press from a dead one presses again. */}
@@ -383,7 +306,9 @@ export default function GuestInvitesStep({
               disabled={isBusy}
               aria-busy={isBusy}
               className={`${flowActionForward} disabled:opacity-60`}>
-              {copy.actionConfirmCreate}
+              {isAlreadyPublished
+                ? copy.actionSaveChanges
+                : copy.actionConfirmCreate}
             </button>
           </div>
 

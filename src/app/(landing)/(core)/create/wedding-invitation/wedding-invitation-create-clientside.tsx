@@ -4,7 +4,7 @@ import { message } from 'antd';
 import { useForm, useWatch } from 'antd/es/form/Form';
 import { ChevronLeft, ChevronRight } from 'lucide-react';
 import { useRouter } from 'next/navigation';
-import { useEffect, useState } from 'react';
+import { useEffect, useMemo, useState } from 'react';
 
 import CreateFlowBreadcrumb from './create-flow-breadcrumb';
 import CreateFlowSteps, { type CreateFlowStep } from './create-flow-steps';
@@ -36,7 +36,11 @@ import {
   invitationLinkFor,
   type GuestInvitesValues,
 } from '@/components/forms/wedding/guest-invites-types';
-import { type WeddingInvitationFormValues } from '@/components/forms/wedding/wedding-invitation-types';
+import {
+  contentToFormValues,
+  type WeddingInvitationFormValues,
+  type WeddingTemplate1Content,
+} from '@/components/forms/wedding/wedding-invitation-types';
 
 /**
  * How long the Sections take to finish opening, in milliseconds.
@@ -48,6 +52,9 @@ const SECTIONS_FINISH_OPENING_MS = 250;
 
 /** Where a couple goes back to from the first step this flow owns. */
 const CHOOSE_TEMPLATE_ROUTE = '/wedding-invitation';
+
+/** Where a couple who opened one of their own invitations came from. */
+const OWN_INVITATIONS_ROUTE = '/dashboard/wedding';
 
 /**
  * The Create Flow, one step at a time.
@@ -65,6 +72,37 @@ const CHOOSE_TEMPLATE_ROUTE = '/wedding-invitation';
  * nothing a couple typed can return to it, and it is mounted when it is reached
  * rather than kept alive behind the others.
  */
+/**
+ * An invitation this flow was opened on, rather than one it is about to make.
+ *
+ * What `/dashboard/wedding/{uuid}/edit` hands down, as it was stored.
+ *
+ * The record rather than the form values it becomes, because the screen handing
+ * this over renders on the server and `contentToFormValues` produces a Dayjs for
+ * the wedding day - which is not a plain object and cannot cross into a client
+ * component. It arrives as what the backend stored, and is turned into answers
+ * here, where the form that holds them lives.
+ */
+export interface OpenedWeddingInvitation {
+  weddingId: string;
+  /** The address it already has, or empty when the read did not carry one. */
+  slug: string;
+  /** Whether guests can already read it, which changes what a save means. */
+  isPublished: boolean;
+  /** The invitation exactly as it was saved. */
+  content: WeddingTemplate1Content;
+  /**
+   * The words the couple wrote for their guests, or null when the record holds
+   * none.
+   *
+   * Null is an invitation saved before there was anywhere to keep the message,
+   * and it is treated as a couple who has not written one: the message seeds
+   * itself from their nicknames, the way it does for anybody starting. A saved
+   * message is theirs and nothing rewrites it.
+   */
+  greetingMessage: string | null;
+}
+
 export interface WeddingInvitationCreateClientsideProps {
   /**
    * The Invitation Slug to fall back on while no invitation has been saved, or
@@ -77,21 +115,53 @@ export interface WeddingInvitationCreateClientsideProps {
    * moment there is one.
    */
   slug: string;
+  /**
+   * The saved invitation being opened again, or nothing for one being made.
+   *
+   * The flow is the same flow either way. That is the point: an editor built
+   * beside this one would be a second place every wedding field has to be kept
+   * correct, and the first field either of them forgot would be a field a couple
+   * could fill in and never see again.
+   */
+  opened?: OpenedWeddingInvitation;
+  /**
+   * Whether the page around this flow already draws the site's own navigation.
+   *
+   * `site` is the Create Flow at its own address, which owns its chrome. On the
+   * dashboard the layout has already drawn a navigation bar and the dashboard's
+   * tabs, and a second one below them would be two navigations on one screen.
+   */
+  chrome?: 'site' | 'dashboard';
 }
 
 export default function WeddingInvitationCreateClientside({
   slug,
+  opened,
+  chrome = 'site',
 }: WeddingInvitationCreateClientsideProps) {
   const router = useRouter();
   const { contextHolder, openNotification } = useCreateContent();
   const [form] = useForm<WeddingInvitationFormValues>();
+
+  /**
+   * The saved invitation as the form's own answers.
+   *
+   * Once, because the form takes these as its initial values and reads them at
+   * the first render only - and because the conversion mints a Dayjs, so
+   * repeating it would hand the form a new object on every render for a value
+   * that has not changed.
+   */
+  const savedValues = useMemo(
+    () => (opened ? contentToFormValues(opened.content) : undefined),
+    [opened]
+  );
   const [isPreviewCollapsed, setIsPreviewCollapsed] = useState(false);
   const [step, setStep] = useState<CreateFlowStep>(
     'Fill in the details & story'
   );
   const [guestInvites, setGuestInvites] = useState<GuestInvitesValues>({
-    slug,
-    greetingMessage: DEFAULT_GUEST_MESSAGE,
+    slug: opened?.slug || slug,
+    greetingMessage: opened?.greetingMessage ?? DEFAULT_GUEST_MESSAGE,
   });
 
   const {
@@ -105,7 +175,10 @@ export default function WeddingInvitationCreateClientside({
     outstanding,
     sayThereIsNobodyToSaveFor,
     forgetWhatWentWrong,
-  } = useInvitation(form);
+  } = useInvitation(
+    form,
+    opened && { weddingId: opened.weddingId, slug: opened.slug }
+  );
 
   /**
    * Who is invited, as the backend holds them.
@@ -133,8 +206,15 @@ export default function WeddingInvitationCreateClientside({
    * even if they go back and change a nickname afterwards. Silently rewording
    * something a couple wrote to their families is worse than letting one name
    * go stale, and the stale one is at least visible to them.
+   *
+   * A saved invitation's message is theirs from the first render. It was saved,
+   * so it is what they meant to send, and seeding over it would discard a
+   * message a couple wrote the moment they opened their own invitation to
+   * change something else.
    */
-  const [messageIsTheirs, setMessageIsTheirs] = useState(false);
+  const [messageIsTheirs, setMessageIsTheirs] = useState(
+    opened?.greetingMessage != null
+  );
 
   useEffect(() => {
     if (messageIsTheirs) return;
@@ -199,6 +279,18 @@ export default function WeddingInvitationCreateClientside({
 
     return () => clearTimeout(settling);
   }, [invalidFields]);
+  /** Whether this flow draws the navigation around itself, or the page did. */
+  const isOwnChrome = chrome === 'site';
+
+  /**
+   * Where the first step's way back goes.
+   *
+   * Out of the flow either way, to whatever brought the couple into it: a
+   * couple making an invitation came from choosing a template, and a couple
+   * changing one came from their own list of invitations.
+   */
+  const wayBack = isOwnChrome ? CHOOSE_TEMPLATE_ROUTE : OWN_INVITATIONS_ROUTE;
+
   const isDetailsAndStory = step === 'Fill in the details & story';
   const isGuestInvites = step === 'Guest invites details';
   const isPublished = step === 'Share with guests';
@@ -340,6 +432,16 @@ export default function WeddingInvitationCreateClientside({
   async function confirmCreate() {
     if ((await save(guestInvitesValues.greetingMessage)) === 'FAILED') return;
 
+    // An invitation that is already out is not published again. It has been
+    // through the check once, and the save above is already live - so asking
+    // again could only answer that an invitation guests are reading is not
+    // ready to go out, printed underneath a banner saying the change they just
+    // made has already reached them.
+    if (opened?.isPublished) {
+      goToStep('Share with guests');
+      return;
+    }
+
     const outcome = await publish();
     if (outcome === 'PUBLISHED' || outcome === 'NOTHING_TO_PUBLISH') {
       goToStep('Share with guests');
@@ -350,25 +452,42 @@ export default function WeddingInvitationCreateClientside({
     <div className={weddingTemplate1Fonts}>
       {contextHolder}
 
-      <header>
-        <NavigationBar />
-      </header>
+      {isOwnChrome ? (
+        <header>
+          <NavigationBar />
+        </header>
+      ) : null}
 
       <div className="w-full min-h-screen overflow-x-hidden">
         {/* The same container the site navigation uses, so the breadcrumb and
             the heading line up with the logo above them. */}
         <div className="mx-auto flex min-h-screen max-w-6xl flex-col px-[20px] py-[30px] pb-[50px] 2xl:max-w-7xl">
-          <CreateFlowBreadcrumb />
+          {isOwnChrome ? <CreateFlowBreadcrumb /> : null}
 
-          <div className="mt-[32px]">
+          <div className={isOwnChrome ? 'mt-[32px]' : undefined}>
             <h1 className="text-[18px] font-[600] leading-[28px] text-[#1B1B1B]">
-              Create Wedding Invitation
+              {opened ? 'Edit Wedding Invitation' : 'Create Wedding Invitation'}
             </h1>
             <p className="mt-[4px] text-[14px] font-[400] leading-[24px] text-[#7B7B7B]">
-              Create memorable wedding invitation for you &amp; your special
-              person’s big day
+              {opened
+                ? 'Change anything you have already written, and keep it with the same invitation'
+                : 'Create memorable wedding invitation for you & your special person’s big day'}
             </p>
           </div>
+
+          {/* Said before a couple can change anything, because this is the only
+              moment they can still decide not to. There is one invitation and
+              its address never changes, so an edit to a published one is live
+              the moment it saves and nobody who already has the link is told. */}
+          {opened?.isPublished ? (
+            <p
+              role="status"
+              className="mt-[16px] rounded-[8px] border border-[#FEDF89] bg-[#FFFAEB] px-[16px] py-[12px] text-[14px] font-[400] leading-[20px] text-[#B54708]">
+              This invitation is published. Anything you save here is what your
+              guests see straight away, including the ones already holding the
+              link, and nobody is told that it changed.
+            </p>
+          ) : null}
 
           <div className="mt-[32px] border-b border-[#EAECF0] pb-[32px]">
             <CreateFlowSteps current={step} />
@@ -397,6 +516,7 @@ export default function WeddingInvitationCreateClientside({
                   form={form}
                   openNotification={openNotification}
                   openSections={openSections}
+                  initialValues={savedValues}
                 />
 
                 <div className={`mt-[40px] ${flowActionRow}`}>
@@ -405,7 +525,7 @@ export default function WeddingInvitationCreateClientside({
                       destination. */}
                   <button
                     type="button"
-                    onClick={() => router.push(CHOOSE_TEMPLATE_ROUTE)}
+                    onClick={() => router.push(wayBack)}
                     className={flowActionBack}>
                     {copy.actionPreviousStep}
                   </button>
@@ -420,17 +540,23 @@ export default function WeddingInvitationCreateClientside({
                       nothing and keeps whatever is there, which is the
                       difference between validation gating what a couple can
                       reach and validation gating what they are allowed to
-                      keep. Only the first is defensible: an invitation cannot
-                      be loaded back into this flow yet (`hbd-gd4`), so work
-                      that is not saved here is not merely inconvenient to
-                      recover, it is gone. */}
+                      keep. Only the first is defensible: what is saved here is
+                      what a couple finds again under Wedding on their
+                      dashboard, and what is not saved is not there to find. */}
                   <button
                     type="button"
                     onClick={saveAsDraft}
                     disabled={isSaving}
                     aria-busy={isSaving}
                     className={`${flowActionAside} disabled:opacity-60`}>
-                    {copy.actionSaveAsDraft}
+                    {/* The same press either way. On an invitation that is
+                        already out there is no draft to save to - one
+                        invitation, one address, and a save that is live - so
+                        the word draft would be untrue while the way out of an
+                        unfinished step is still needed. */}
+                    {opened?.isPublished
+                      ? copy.actionSaveChanges
+                      : copy.actionSaveAsDraft}
                   </button>
                   <button
                     type="button"
@@ -532,6 +658,7 @@ export default function WeddingInvitationCreateClientside({
               onDeleteGuest={guests.remove}
               guestListProblem={guests.problem}
               isGuestListBusy={guests.isBusy}
+              isAlreadyPublished={opened?.isPublished ?? false}
               onPreviousStep={() => goToStep('Fill in the details & story')}
               onConfirm={confirmCreate}
               onSaveAsDraft={saveAsDraft}

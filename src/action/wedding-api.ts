@@ -23,6 +23,8 @@
  * until there is something to call them.
  */
 
+import { revalidateTag } from 'next/cache';
+
 import { getSession } from '@/store/get-set-session';
 import type { Meta } from './interfaces';
 import {
@@ -179,14 +181,32 @@ async function callWedding<T>(
   };
 }
 
+/**
+ * Drop the cached list of what somebody has made.
+ *
+ * A couple's own invitations are listed off `/contents`, which is cached for a
+ * minute under this tag - see `getContentByUserId`. Without this, a couple who
+ * finishes the Create Flow and goes straight to Wedding is told they have not
+ * made an invitation yet, and a couple who corrects their names sees the old
+ * ones for up to a minute after saving them.
+ *
+ * The same tag the generic content actions drop, because it is the same listing
+ * and a wedding invitation is a row in it.
+ */
+function forgetTheOldListing() {
+  revalidateTag('dashboard-content');
+}
+
 export async function createWeddingInvitation(
   payload: IWeddingInvitationPayload
 ): Promise<IGlobalResponse<null | IWeddingCreatedResponse>> {
-  return callWedding<IWeddingCreatedResponse>('', {
+  const created = await callWedding<IWeddingCreatedResponse>('', {
     method: 'POST',
     headers: await ownerHeaders(),
     body: JSON.stringify(payload),
   });
+  if (created.success) forgetTheOldListing();
+  return created;
 }
 
 /**
@@ -217,11 +237,16 @@ export async function updateWeddingInvitation(
   payload: IWeddingInvitationUpdatePayload,
   weddingId: string
 ): Promise<IGlobalResponse<null>> {
-  return callWedding<null>(`/${encodeURIComponent(weddingId)}`, {
-    method: 'PUT',
-    headers: await ownerHeaders(),
-    body: JSON.stringify(payload),
-  });
+  const updated = await callWedding<null>(
+    `/${encodeURIComponent(weddingId)}`,
+    {
+      method: 'PUT',
+      headers: await ownerHeaders(),
+      body: JSON.stringify(payload),
+    }
+  );
+  if (updated.success) forgetTheOldListing();
+  return updated;
 }
 
 /**
