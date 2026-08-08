@@ -73,7 +73,6 @@ function exampleWeddingPhotographs() {
     groomPhoto: sample.groomPhoto,
     loveStoryPhotos: [...sample.loveStoryPhotos],
     polaroidPhoto: sample.polaroidPhoto,
-    mapPhoto: sample.mapPhoto,
     eventPhotos: [...sample.eventPhotos],
     galleryPhotos: [...sample.galleryPhotos],
     tokenPhotos: [...sample.tokenPhotos],

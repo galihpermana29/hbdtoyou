@@ -113,7 +113,6 @@ export interface WeddingTemplate1Content {
   loveStoryPhotos: string[];
   milestones: WeddingMilestone[];
   polaroidPhoto: string;
-  mapPhoto: string;
   loveStoryVideo: string;
   eventPhotos: string[];
   eventStartTime: string;
@@ -306,7 +305,6 @@ export const DEFAULT_WEDDING_TEMPLATE_1_CONTENT: WeddingTemplate1Content = {
     },
   ],
   polaroidPhoto: `${TEMPLATE_1_ASSET}/lovestory-polaroid-photo.jpg`,
-  mapPhoto: `${TEMPLATE_1_ASSET}/lovestory-map-photo.png`,
   loveStoryVideo: '',
   eventPhotos: [`${TEMPLATE_1_ASSET}/event-photo.png`],
   eventStartTime: '19:00',
@@ -503,9 +501,6 @@ export function formValuesToContent(
     loveStoryPhotos: v.loveStoryPhotos ?? [],
     milestones,
     polaroidPhoto: pickPhoto(v.polaroidPhoto, 0),
-    // The map keepsake is the venue, so it is the first of the photos the
-    // Venue Details Section already collects rather than a field of its own.
-    mapPhoto: pickPhoto(v.eventPhotos, 0),
     loveStoryVideo: v.loveStoryVideo ?? '',
     eventPhotos: v.eventPhotos ?? [],
     eventStartTime: formatTime(v.eventStartTime),
@@ -835,13 +830,15 @@ function photoList(photo: string | undefined): string[] {
  *
  * ## Two values are dropped rather than restored
  *
- * `mapPhoto` and each chapter's `title` are derived on the way out - the first
- * from the first of the Venue Details photographs, the second from the design's
- * own words for the chapter. Neither was ever answered, so neither comes back:
- * a couple opening their invitation would otherwise find the form holding
- * answers they never gave, and correcting them would be correcting the
- * template. `photoShareUrl` is dropped for the same reason - it is written as
- * an empty string by the writer and asked for nowhere.
+ * Each chapter's `title` is derived on the way out from the design's own words
+ * for the chapter. It was never answered, so it does not come back: a couple
+ * opening their invitation would otherwise find the form holding answers they
+ * never gave, and correcting them would be correcting the template.
+ * `photoShareUrl` is dropped for the same reason - it is written as an empty
+ * string by the writer and asked for nowhere. A record saved before the camera
+ * keepsake's screen became the Wedding Teaser Video's home also carries a
+ * `mapPhoto`, derived the same way from the first of the Venue Details
+ * photographs; it is dropped here too, and nothing renders it any more.
  *
  * ## Every field is stated, including the empty ones
  *

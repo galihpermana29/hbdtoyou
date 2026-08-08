@@ -68,7 +68,9 @@
  * The artwork. The envelope, the wax seal, the torn paper, the film strip, the
  * polaroids, the paper grounds and every photograph are images, and this harness
  * compares computed style. Whether an asset is the one the design draws is a
- * judgement and it stays a person's.
+ * judgement and it stays a person's. The film the Love Story camera's screen
+ * plays is media the same way - it carries no copy and the harness has no
+ * vocabulary for an iframe or a video - and ADR 0002 records what verifies it.
  *
  * The size of any line the template fits to its box. The design states 48px for
  * a partner's Nickname, 10px for their full name and for their parents, 12px

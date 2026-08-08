@@ -81,7 +81,8 @@ The invitation prints a line of the couple's own words there, and without the fi
 The invitation prints a portrait of each beside their names and the design asks for neither, so every couple who published carried the designer's two models in their own frames.
 
 All four are recorded in the expectations beside the fields the design does draw, so the check covers them rather than ignoring them.
-Three other values the invitation printed were resolved without new fields: the map keepsake is the first of the photos Venue Details already collects, the photo sharing block's card is product art the block draws itself, and the Guest Messages block is always shown because guests write those on the invitation rather than the couple enabling them.
+Two other values the invitation printed were resolved without new fields: the photo sharing block's card is product art the block draws itself, and the Guest Messages block is always shown because guests write those on the invitation rather than the couple enabling them.
+A third, the map keepsake, was resolved the same way - the first of the photos Venue Details already collects - and has since given up its screen to the Wedding Teaser Video, recorded below.
 
 The designer settled it, one answer each way, rather than making either frame win outright.
 The Sections stack Love Story above Venue Details, following "Expanded All".
@@ -267,6 +268,21 @@ View Location is built from the written Wedding Address rather than from the pas
 So the couple pastes once and both jobs are served: the map shows the pin they chose, the control opens the venue in whatever maps application the guest already uses.
 
 The field's guidance changed with it, and its Indonesian names Google Maps' own menu items - worth checking against the real application, because wrong menu names in an instruction are worse than English ones.
+
+The Love Story's camera plays a film the design does not draw, where the design draws the venue's map.
+
+The Create Flow asks for a Wedding Teaser Video and the design draws nowhere that could play one: nine sections, and none of them is a video.
+A couple was therefore waiting out an upload no guest would ever see, which is the exact waste `hbd-5dd` was filed about.
+The designer settled where it lives rather than adding a tenth section: the camera keepsake at the foot of the Love Story, whose screen the design draws showing the venue's map under a pin.
+The film takes the screen, and the map and its pin retire with the `mapPhoto` the saved record carried for them - that value was a copy of the first Venue Details photograph rather than anything a couple answered, so nothing of theirs is lost, and old records still carrying one are read and ignored.
+
+For now the screen plays the same film on every invitation, because the uploads endpoint refuses video/mp4 (`hbd-zzl`) and a couple has no way to hand their own over.
+Which film is `hbd-1qh`'s question: the one the owner chose, `DQgtgRZqhws`, has embedding disabled on YouTube and renders "Video tidak tersedia" inside the camera, so until embedding is enabled or another video is named the screen plays a plainly marked placeholder, `FALLBACK_TEASER_VIDEO` in `LoveStory.tsx`.
+That makes it the product's one Fallback, and CONTEXT.md's Fallback entry names it as the exception: invented at render time, standing in for a value no couple can yet give, and never reaching the backend.
+It is temporary by construction - the invitation already prefers `loveStoryVideo` whenever a record holds one, so the moment the backend takes mp4 a couple's own film takes the screen and the shared one is never drawn for them again.
+
+The check does not assert the film and cannot: it has no copy, and the harness has no vocabulary for an iframe or a video, so it is media the way the photographs are.
+What settles it is a browser opened at the invitation with the camera's screen playing, which is the job screenshots are kept for.
 
 Required fields carry a red mark the design does not draw, and every uploader's guidance is generated rather than written.
 
