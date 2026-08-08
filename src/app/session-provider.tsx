@@ -1,17 +1,28 @@
 'use client';
 
 import { IProfileResponse } from '@/action/interfaces';
-import { getUserProfile } from '@/action/user-api';
-import { SessionData } from '@/store/iron-session';
-import { Button, Form, Modal, Space, Image } from 'antd';
-import React, { createContext, useContext, useEffect, useState } from 'react';
-import { Footer } from '@/components/ui/footer';
-import { usePathname } from 'next/navigation';
-import dayjs from 'dayjs';
 import { getSpotifyAccessToken } from '@/action/spotify-api';
-import { setSessionSpecific } from '@/store/get-set-session';
-import { Provider } from 'react-redux';
+import { getUserProfile } from '@/action/user-api';
+import { Footer } from '@/components/ui/footer';
+import { drawsAGift } from '@/lib/gift-routes';
 import { store } from '@/lib/store';
+import { setSessionSpecific } from '@/store/get-set-session';
+import { SessionData } from '@/store/iron-session';
+import { Button, Image, Modal, Space } from 'antd';
+import dayjs from 'dayjs';
+import {
+  useParams,
+  usePathname,
+  useSelectedLayoutSegments,
+} from 'next/navigation';
+import React, {
+  createContext,
+  useContext,
+  useEffect,
+  useMemo,
+  useState,
+} from 'react';
+import { Provider } from 'react-redux';
 
 // Define the context type
 interface SessionContextType {
@@ -53,49 +64,92 @@ interface AdContent {
   type: 'text' | 'image';
 }
 
+const premiumAds: AdContent[] = [
+  {
+    id: 1,
+    title: '',
+    description: '',
+    ctaText: '',
+    ctaLink: '/career',
+    image:
+      'https://res.cloudinary.com/dztygf08a/image/upload/v1775671149/au_ads_1_kxqtks.png',
+    type: 'image',
+  }
+]
+
 // Array of promotional content
 const promotionalContent: AdContent[] = [
   {
-    id: 3,
+    id: 1,
     title: '',
     description: '',
     ctaText: '',
-    ctaLink: '/payment',
+    ctaLink: '/career',
     image:
-      'https://res.cloudinary.com/braiwjaya-university/image/upload/v1763139120/Banner_1_1_z2h2vg.png',
+      'https://res.cloudinary.com/dztygf08a/image/upload/v1775671149/au_ads_1_kxqtks.png',
     type: 'image',
   },
-  {
-    id: 4,
-    title: '',
-    description: '',
-    ctaText: '',
-    ctaLink: '/payment',
-    image:
-      'https://res.cloudinary.com/braiwjaya-university/image/upload/v1763139119/Instagram_post_-_28_evusfl.png',
-    type: 'image',
-  },
-  {
-    id: 5,
-    title: '',
-    description: '',
-    ctaText: '',
-    ctaLink: '/payment',
-    image:
-      'https://res.cloudinary.com/braiwjaya-university/image/upload/v1763139189/Ads_Dashboard_3_tjtjs9.png',
-    type: 'image',
-  },
-  {
-    id: 6,
-    title: '',
-    description: '',
-    ctaText: '',
-    ctaLink: '/dashboard',
-    image:
-      'https://res.cloudinary.com/braiwjaya-university/image/upload/v1763139118/Instagram_post_-_30_rz63fu.png',
-    type: 'image',
-  },
+  // {
+  //   id: 3,
+  //   title: '',
+  //   description: '',
+  //   ctaText: '',
+  //   ctaLink: '/payment',
+  //   image:
+  //     'https://res.cloudinary.com/dztygf08a/image/upload/v1775229734/banner1_d8bvj0.png',
+  //   type: 'image',
+  // },
+  // {
+  //   id: 4,
+  //   title: '',
+  //   description: '',
+  //   ctaText: '',
+  //   ctaLink: '/payment',
+  //   image:
+  //     'https://res.cloudinary.com/dztygf08a/image/upload/v1775229725/banner4_givkxi.png',
+  //   type: 'image',
+  // },
+  // {
+  //   id: 5,
+  //   title: '',
+  //   description: '',
+  //   ctaText: '',
+  //   ctaLink: '/payment',
+  //   image:
+  //     'https://res.cloudinary.com/dztygf08a/image/upload/v1775229730/banner3_bivfgx.png',
+  //   type: 'image',
+  // },
+  // {
+  //   id: 6,
+  //   title: '',
+  //   description: '',
+  //   ctaText: '',
+  //   ctaLink: '/dashboard',
+  //   image:
+  //     'https://res.cloudinary.com/dztygf08a/image/upload/v1775229732/banner2_mgmbp5.png',
+  //   type: 'image',
+  // },
 ];
+
+/**
+ * The product's own routes that an advertisement would interrupt: the flow
+ * somebody builds a gift in and the flow they pay us in. Each one covers the
+ * route itself and everything beneath it, so `/create` also covers
+ * `/create/wedding-invitation` and `/payment` also covers the page PayPal
+ * returns to.
+ *
+ * These are named one by one because no rule gathers them, and each addition is
+ * a deliberate decision about our own UI. No gift route belongs here: a gift is
+ * kept clear by the same question the footer asks, so a template added tomorrow
+ * is covered without anybody remembering this file exists.
+ */
+const PRODUCT_ROUTES_WITHOUT_ADS = ['/create', '/payment'];
+
+function isProductRouteWithoutAds(pathname: string): boolean {
+  return PRODUCT_ROUTES_WITHOUT_ADS.some(
+    (route) => pathname === route || pathname.startsWith(`${route}/`)
+  );
+}
 
 const SessionProvider = ({
   children,
@@ -106,7 +160,15 @@ const SessionProvider = ({
   session: string;
   initialProfileData: IProfileResponse | null;
 }) => {
-  const parsedSession: SessionData = session ? JSON.parse(session) : {};
+  // Parsed once per distinct cookie rather than once per render. A server
+  // action makes Next re-render everything that reads the router, and this
+  // provider reads it three times over, so a fresh object here would hand every
+  // consumer a session that looks new on each of those renders - which is
+  // exactly how an effect keyed on the session turns into an endless loop.
+  const parsedSession: SessionData = useMemo(
+    () => (session ? JSON.parse(session) : {}),
+    [session]
+  );
   const [userProfile, setUserProfile] = useState<IProfileResponse | null>(
     initialProfileData
   );
@@ -117,6 +179,8 @@ const SessionProvider = ({
   });
 
   const pathname = usePathname();
+  const segments = useSelectedLayoutSegments();
+  const { id: contentId } = useParams();
 
   const [uploadStateLoading, setUploadStateLoading] = useState(false);
 
@@ -130,9 +194,28 @@ const SessionProvider = ({
 
   const [loading, setLoading] = useState(true);
 
-  const isHideAds =
-    ['/create', '/payment'].includes(pathname) ||
-    userProfile?.type === 'premium';
+  const isPremium = userProfile?.type === 'premium';
+
+  const isGift = drawsAGift(segments, contentId);
+  const isHideAds = isGift || isProductRouteWithoutAds(pathname);
+
+  const PREMIUM_ADS_KEY = 'memoify_premium_ads_count';
+  const PREMIUM_ADS_LIMIT = 3;
+
+  const getPremiumAdsCount = (): number => {
+    try {
+      return parseInt(localStorage.getItem(PREMIUM_ADS_KEY) || '0', 10);
+    } catch {
+      return 0;
+    }
+  };
+
+  const incrementPremiumAdsCount = () => {
+    try {
+      const current = getPremiumAdsCount();
+      localStorage.setItem(PREMIUM_ADS_KEY, String(current + 1));
+    } catch { }
+  };
 
   useEffect(() => {
     if (parsedSession.accessToken && queryKey && queryKey !== '') {
@@ -176,25 +259,37 @@ const SessionProvider = ({
     }
   }, [parsedSession.accessToken]);
 
-  // Function to randomly select promotional content
   const selectRandomContent = () => {
-    const randomIndex = Math.floor(Math.random() * promotionalContent.length);
-    return promotionalContent[randomIndex];
+    const pool = isPremium ? premiumAds : promotionalContent;
+    // const randomIndex = Math.floor(Math.random() * pool.length);
+    return pool[0];
   };
 
-  // Show ads modal every 2 minutes
   useEffect(() => {
-    // Set up interval for subsequent ads
-    if (isHideAds) return;
+    if (isHideAds) {
+      // This provider outlives a navigation, so an ad opened on a page that
+      // allows one is still open on arrival at a page that does not.
+      setAdsModalVisible(false);
+      return;
+    }
+    if (isPremium && getPremiumAdsCount() >= PREMIUM_ADS_LIMIT) return;
+
     const interval = setInterval(() => {
+      if (isPremium) {
+        if (getPremiumAdsCount() >= PREMIUM_ADS_LIMIT) {
+          clearInterval(interval);
+          return;
+        }
+        incrementPremiumAdsCount();
+      }
       setCurrentAdContent(selectRandomContent());
       setAdsModalVisible(true);
-    }, 1000 * 60 * 3);
+    }, 1000 * 60 * 1);
 
     return () => {
       clearInterval(interval);
     };
-  }, [isHideAds]);
+  }, [isHideAds, isPremium]);
 
   return (
     <SessionContext.Provider
@@ -279,7 +374,10 @@ const SessionProvider = ({
         {children}
         {/* {parsedSession.accessToken ? userProfile ? children : <></> : children} */}
       </Provider>
-      {!['/spotify', '/magazinev1', 'journal'].includes(pathname) && <Footer />}
+      {/* The site footer would intrude on the page a recipient came to see, so
+          it stays off a gift. The Create Flow that builds one is ordinary
+          product UI and keeps it. */}
+      {!isGift && <Footer />}
     </SessionContext.Provider>
   );
 };

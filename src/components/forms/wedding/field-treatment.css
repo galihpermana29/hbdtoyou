@@ -1,0 +1,103 @@
+/*
+ * The border and drop shadow the design gives a form control in the wedding
+ * invitation Create Flow, each written once.
+ *
+ * Ant Design's own field colour is #d9d9d9 with no shadow. Correcting it in
+ * antd's source, or globally for the whole application, would change every form
+ * in the product for the sake of one flow, so the treatment is a class this
+ * flow's fields opt into: see `src/components/forms/wedding/field-treatment.ts`.
+ *
+ * Which element draws the border depends on the control. Input, TextArea,
+ * DatePicker and TimePicker draw it on the element the class lands on. Select
+ * draws it on an inner element instead, and its own outer element has no border
+ * at all - so the class is aimed inwards there, and the outer element is
+ * excluded rather than given a second shadow behind the first. Each rule below
+ * carries both spellings, so neither property is stated twice.
+ *
+ * ## Hover and focus
+ *
+ * The design says nothing about either, so antd keeps whatever it already does
+ * with them, and the two properties want different things:
+ *
+ *   resting   the design's border, the design's shadow
+ *   hover     antd's border, and the shadow stays - antd does not touch it
+ *   focus     antd's border and antd's focus ring, which replaces the shadow
+ *
+ * Each rule therefore excludes exactly the states it must not win, by hand,
+ * rather than by being weak enough to lose them. Specificity cannot settle it:
+ * antd's resting rule for an Input is one class and its hover rule is two, and
+ * there is nothing in between - so a rule that beats the first ties the second,
+ * and the winner comes down to the order two stylesheets happened to be
+ * injected in. A rule that cannot match a hovered field does not care.
+ *
+ * Nothing here is `!important`, for the same reason: a resting colour that also
+ * won focus would leave a field with no focus affordance.
+ */
+.wedding-field-treatment:not(.ant-select):not(:focus-within),
+.ant-select-outlined.wedding-field-treatment:not(.ant-select-customize-input):not(.ant-select-focused)
+  .ant-select-selector {
+  box-shadow: 0 1px 2px 0 rgba(16, 24, 40, 0.05);
+}
+
+.wedding-field-treatment:not(.ant-select):not(:hover):not(:focus-within),
+.ant-select-outlined.wedding-field-treatment:not(.ant-select-customize-input):not(:hover):not(.ant-select-focused)
+  .ant-select-selector {
+  border-color: #d0d5dd;
+}
+
+/*
+ * Corner, type and padding, for the controls antd does not already draw the way
+ * the design does.
+ *
+ * A plain Input already matches, which is why the treatment left these alone at
+ * first. A date picker, a time picker and a select do not: antd gives them a
+ * 6px corner, 14px type and a pixel less padding on every side. The design
+ * draws every field of this flow the same, so the difference is antd's rather
+ * than the design's.
+ *
+ * These are stated without excluding hover or focus, unlike the border above.
+ * Antd does not change a corner, a type size or padding when a field is hovered
+ * or focused, so there is no state for these to fight.
+ */
+.wedding-field-treatment.ant-picker,
+.ant-select-single.ant-select-outlined.wedding-field-treatment:not(
+    .ant-select-customize-input
+  )
+  .ant-select-selector {
+  border-radius: 8px;
+  padding: 8px 12px;
+}
+
+.wedding-field-treatment.ant-picker,
+.wedding-field-treatment.ant-picker input,
+.ant-select-outlined.wedding-field-treatment:not(.ant-select-customize-input)
+  .ant-select-selector,
+.ant-select-outlined.wedding-field-treatment:not(.ant-select-customize-input)
+  :is(
+    .ant-select-selection-search-input,
+    .ant-select-selection-item,
+    .ant-select-selection-placeholder
+  ) {
+  font-size: 16px;
+  line-height: 24px;
+}
+
+/*
+ * The mark that says a field must be answered.
+ *
+ * Drawn with `::after` rather than written into the label, deliberately. The
+ * design draws no asterisks - it was drawn for a form where nothing was
+ * required - so this is an addition, and putting it in the markup would append
+ * "*" to the text of twenty labels the check asserts word for word. A generated
+ * mark is invisible to `textContent`, so what those labels say is still exactly
+ * what the design says they say.
+ *
+ * It carries no meaning for assistive technology on purpose: the control itself
+ * is marked `aria-required` by the rule, which is the thing a screen reader
+ * announces. This is for eyes.
+ */
+.wedding-required-label::after {
+  content: '*';
+  margin-left: 2px;
+  color: #d92d20;
+}

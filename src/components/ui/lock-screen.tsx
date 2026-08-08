@@ -15,6 +15,12 @@ type LockScreenProps = {
   onUnlock?: () => void;
   contentId: string;
   type?: 'gift' | 'scrapbook';
+  /**
+   * 'default' — heavy dark veil over the content (standard digital gifts).
+   * 'subtle'  — faint dim + a floating card so the user can still SEE their
+   *             result clearly (but not interact). Used by /photobox-newspaper.
+   */
+  lockVariant?: 'default' | 'subtle';
 };
 
 const LockScreen = ({
@@ -26,7 +32,9 @@ const LockScreen = ({
   onUnlock,
   contentId,
   type = 'gift',
+  lockVariant = 'default',
 }: LockScreenProps) => {
+  const subtle = lockVariant === 'subtle';
   const profile = useMemoifyProfile();
   const isFreeAccount =
     type === 'gift' ? profile?.quota < 1 : profile?.token_scrapbook < 1;
@@ -66,27 +74,47 @@ const LockScreen = ({
   return (
     <div
       className={`relative isolate ${
-        type === 'gift' ? 'min-h-screen max-h-screen overflow-hidden' : ''
+        type === 'gift' && !subtle
+          ? 'min-h-screen max-h-screen overflow-hidden'
+          : ''
       }`}>
       <div
         className={`transition duration-300 ${
-          isLocked ? 'blur-[1.5px] pointer-events-none select-none' : ''
+          isLocked
+            ? `pointer-events-none select-none ${
+                subtle ? 'blur-[1px]' : 'blur-[1.5px]'
+              }`
+            : ''
         }`}>
         {children}
       </div>
 
       {isLocked && (
-        <div className="absolute inset-0 z-20 flex items-center justify-center bg-black/75 backdrop-blur-sm px-6 overflow-hidden">
-          <div className="max-w-md space-y-4 text-center text-white">
+        <div
+          className={`z-20 flex items-center justify-center px-6 overflow-hidden ${
+            subtle
+              ? 'fixed inset-0 bg-black/10 pointer-events-none'
+              : 'absolute inset-0 bg-black/75 backdrop-blur-sm'
+          }`}>
+          <div
+            className={`max-w-md space-y-4 text-center ${
+              subtle
+                ? 'bg-white text-black rounded-2xl shadow-2xl px-7 py-6 pointer-events-auto'
+                : 'text-white'
+            }`}>
             <h2 className="text-2xl font-semibold">{title}</h2>
-            <p className="text-sm text-gray-200">{message}</p>
+            <p className={`text-sm ${subtle ? 'text-gray-600' : 'text-gray-200'}`}>
+              {message}
+            </p>
             <div className="flex items-center justify-center gap-2">
               <Button
                 loading={lockedLoading}
                 onClick={handleUnlock}
                 type="primary"
                 size="middle"
-                className="!bg-white !text-black">
+                className={
+                  subtle ? '!bg-[#E34013] !text-white' : '!bg-white !text-black'
+                }>
                 {buttonText}
               </Button>{' '}
               <Button

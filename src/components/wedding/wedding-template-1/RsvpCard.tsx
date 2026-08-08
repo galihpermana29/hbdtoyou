@@ -1,0 +1,604 @@
+'use client';
+
+/**
+ * Wedding Template 1 - the RSVP a guest replies with. Figma node 312:3846.
+ *
+ * A torn-paper card under a paperclip, opened by the invitation's RSVP Now
+ * control, asking a guest their name, whether they are coming, whether they
+ * bring somebody, and a Guest Message the design marks Optional.
+ *
+ * A reply goes to the couple when there is a guest to sign it with, and stays
+ * in the page when there is not. Which of those it is is the whole of what
+ * `guest` decides: a personal link resolves to somebody on the Guest List and
+ * their reply is posted against the invitation, while the Showcase and the
+ * Create Flow's previews are pictures of an invitation that nobody was sent, so
+ * a reply left on one has nowhere to go and the card says so above the Submit
+ * control rather than letting a guest find out afterwards.
+ *
+ * A guest is identified by their token, so their name is read out of the Guest
+ * List rather than typed: the design draws a Name field, so it stays drawn and
+ * becomes read-only wherever the list holds a name, because a guest confirming
+ * who they are is truer than typing a name the backend discards.
+ *
+ * The lines this card prints about what became of a reply are copy the design
+ * does not draw - see `docs/adr/0002-figma-is-literal-truth.md`.
+ *
+ * It behaves as a dialog rather than as a card that happens to be on top, and
+ * it shares the whole of how with the Create Flow's Play Preview - see
+ * `src/hooks/use-dialog-behaviour.ts`.
+ */
+
+import {
+  useId,
+  useRef,
+  useState,
+  type ComponentProps,
+  type FormEvent,
+  type ReactNode,
+} from 'react';
+
+import { GUEST_ALREADY_RESPONDED } from '@/action/interfaces';
+import { submitWeddingRsvp } from '@/action/wedding-api';
+import { useDialogBehaviour } from '@/hooks/use-dialog-behaviour';
+
+import { PaperGround, TornEdge } from './TornPaper';
+
+const ASSET = '/templates/wedding-template-1';
+
+/** A guest's reply to the invitation. */
+export interface Rsvp {
+  /** Who replied, which is the one thing the couple always gets. */
+  name: string;
+  /** Whether they are coming. */
+  attending: boolean;
+  /** Whether they bring somebody. */
+  plusOne: boolean;
+  /** What they wrote for the couple, empty when they wrote nothing. */
+  message: string;
+  /** When they replied, which is what their Guest Message is dated by. */
+  repliedAt: Date;
+}
+
+/**
+ * The guest a reply is signed with, and the invitation it is posted against.
+ *
+ * Present only where the invitation is somebody's and the link that opened it
+ * was one guest's: the Showcase and the Create Flow's previews have neither, and
+ * a published invitation opened at its bare address has an invitation but no
+ * guest on the end of it.
+ */
+export interface ReplyingGuest {
+  /** The invitation's public address, which the reply is posted against. */
+  slug: string;
+  /** The half of the personal link that says which guest is replying. */
+  token: string;
+  /**
+   * Their name as the Guest List holds it, or empty where the row carries
+   * none. The token is what says who they are, so a nameless row is still a
+   * guest who can reply - it is only the name that has to be asked for.
+   */
+  name: string;
+}
+
+/** What became of a reply, in the shape a save's outcome is told in. */
+type ReplyOutcome =
+  /** The couple has it. */
+  | 'SENT'
+  /** The couple already had one from this guest, and keeps that first one. */
+  | 'ALREADY_REPLIED'
+  /** It was refused or never arrived, and `problem` says so. */
+  | 'FAILED';
+
+/**
+ * What a guest is told for the two outcomes that are nobody's fault.
+ *
+ * Already replied is a refusal rather than a failure: a guest may answer once,
+ * the backend is what enforces it, and saying which answer counts is different
+ * from telling somebody who did nothing wrong that something went wrong.
+ */
+const REPLY_WORDS: Record<Exclude<ReplyOutcome, 'FAILED'>, string> = {
+  SENT: 'Thank you. Your reply is with the couple.',
+  ALREADY_REPLIED:
+    'You have already replied to this invitation. The couple has that first ' +
+    'answer, and it is the one that counts.',
+};
+
+/**
+ * What they read when the reply did not reach the couple.
+ *
+ * The same three things the Create Flow tells a couple whose save failed: what
+ * did not happen, what the backend gave as the reason, and that nothing they
+ * wrote is gone.
+ */
+function replyProblem(reason: string): string {
+  return (
+    `Your reply did not reach the couple: ${reason}. Nothing you have ` +
+    'written has been lost, so you can try again.'
+  );
+}
+
+/**
+ * The line the card prints where a reply has nowhere to go.
+ *
+ * Recorded in `docs/adr/0002-figma-is-literal-truth.md` and claimed in
+ * `visual/expectations/wedding-template-1-rsvp.mjs`, which is the Showcase's
+ * card and is exactly such a one.
+ */
+const UNSENT_NOTE =
+  'Nothing is saved yet. Your reply stays on this page and goes when you ' +
+  'reload it.';
+
+/**
+ * The two answers the design draws to "Will you be attending?", in its own
+ * words. Its apostrophes are the typographic ones it sets them with.
+ */
+const ATTENDING = [
+  { value: true, label: 'I wouldn’t miss it for anything!' },
+  { value: false, label: 'Sadly can’t make it :(' },
+];
+
+/** The two answers the design draws to "Will you be bringing a plus one?". */
+const PLUS_ONE = [
+  { value: true, label: 'YES' },
+  { value: false, label: 'NO' },
+];
+
+/**
+ * The size the design draws this card's torn edges at.
+ *
+ * Every piece of `torn-paper.png` around it, `image 513` to `image 523`, is one
+ * of the Love Story's own two crops scaled by this - Figma states it on the
+ * card as a stroke weight of 0.9504556 and on each piece as a size 0.95046 of
+ * the Love Story's. The crops themselves are identical, to the last decimal.
+ */
+const TORN = 0.9504556;
+
+/**
+ * One piece of this card's torn edge.
+ *
+ * The size is said here rather than on each of the eight below, because it is a
+ * fact about the card and not about any one tear: a ninth piece that forgot it
+ * would be drawn at the Love Story's size in the middle of the card's.
+ */
+function CardEdge(props: Omit<ComponentProps<typeof TornEdge>, 'scale'>) {
+  return <TornEdge {...props} scale={TORN} />;
+}
+
+/**
+ * The paper the reply is written on: the invitation's own ground with torn
+ * edges hanging off all four sides of it.
+ *
+ * The design lays ten pieces around the card at fixed offsets down a 534-tall
+ * paper; they are anchored to the card's four edges here instead, because this
+ * card is a line of copy taller than the design's and a guest's own answer can
+ * make it taller still.
+ */
+function Paper() {
+  return (
+    <div aria-hidden className="pointer-events-none absolute inset-0">
+      {/* Along the top, a long piece and a short one. */}
+      <CardEdge
+        box="left-[-22px] top-[-45px] h-[139.72px] w-[356.42px]"
+        spin="-rotate-90 -scale-y-100"
+      />
+      <CardEdge
+        box="left-[-48px] top-[-45px] h-[49.42px] w-[275.63px]"
+        spin="-rotate-90"
+        long={false}
+      />
+
+      {/* The same pair along the bottom, turned the other way. */}
+      <CardEdge
+        box="bottom-[-33px] left-[-22px] h-[139.72px] w-[356.42px]"
+        spin="rotate-90"
+      />
+      <CardEdge
+        box="bottom-[-33px] left-[-48px] h-[49.42px] w-[275.63px]"
+        spin="rotate-90 -scale-y-100"
+        long={false}
+      />
+
+      {/* Down the left, one piece from the top and one from the bottom. */}
+      <CardEdge
+        box="left-[-40px] top-0 h-[356.42px] w-[139.72px]"
+        spin="rotate-180 -scale-y-100"
+      />
+      <CardEdge
+        box="bottom-0 left-[-36px] h-[356.42px] w-[139.72px]"
+        spin="rotate-180"
+      />
+
+      {/* And the mirror of those two down the right. */}
+      <CardEdge box="right-[-40px] top-0 h-[356.42px] w-[139.72px]" spin="" />
+      <CardEdge
+        box="bottom-0 right-[-36px] h-[356.42px] w-[139.72px]"
+        spin="-scale-y-100"
+      />
+
+      <PaperGround />
+    </div>
+  );
+}
+
+/**
+ * One answer a guest picks, drawn as the hairline box the design draws every
+ * choice in. Figma's `Option`, node 312:3868.
+ *
+ * The radio itself covers the box and is invisible, so the whole box is what a
+ * guest presses and what a screen reader announces, and the keyboard still
+ * moves between the answers of one question with the arrow keys.
+ *
+ * The design draws only the resting box, so what a chosen one looks like is
+ * read off the two boxes it does draw: the Name it drew answered is filled
+ * #d9d8d6 and the Guest Message it drew empty is not, so that fill is the
+ * design's own word for a field holding an answer.
+ */
+function Choice({
+  question,
+  chosen,
+  onChoose,
+  className = '',
+  children,
+}: {
+  question: string;
+  chosen: boolean;
+  onChoose: () => void;
+  className?: string;
+  children: ReactNode;
+}) {
+  return (
+    <label
+      className={`relative flex items-center gap-[10px] rounded-[2px] border border-solid border-[#000000] px-[12px] py-[8px] font-[family-name:var(--font-wt1-mono)] text-[10px] font-normal leading-[normal] text-[#000000] has-[:focus-visible]:outline has-[:focus-visible]:outline-1 has-[:focus-visible]:outline-offset-[3px] has-[:focus-visible]:outline-[#000000] ${
+        chosen ? 'bg-[#d9d8d6]' : ''
+      } ${className}`}>
+      <input
+        type="radio"
+        name={question}
+        checked={chosen}
+        onChange={onChoose}
+        required
+        className="absolute inset-0 m-0 size-full cursor-pointer appearance-none rounded-[2px] opacity-0"
+      />
+      {children}
+    </label>
+  );
+}
+
+/** The question above a pair of answers. Figma's `TextField`, node 312:3865. */
+function Question({
+  legend,
+  className = '',
+  children,
+}: {
+  legend: ReactNode;
+  className?: string;
+  children: ReactNode;
+}) {
+  return (
+    <fieldset className="flex flex-col gap-[12px]">
+      <legend className="font-[family-name:var(--font-wt1-mono)] text-[12px] font-normal leading-[normal] text-[#000000]">
+        {legend}
+      </legend>
+      <div className={`flex gap-[10px] ${className}`}>{children}</div>
+    </fieldset>
+  );
+}
+
+export default function RsvpCard({
+  guest,
+  onClose,
+  onKeep,
+}: {
+  /**
+   * Who is replying and where their reply goes, or nothing where the
+   * invitation was sent to nobody.
+   */
+  guest?: ReplyingGuest;
+  /** Put the card away, changing nothing. */
+  onClose: () => void;
+  /** Take a reply that has nowhere to go, which is all a preview can do. */
+  onKeep: (rsvp: Rsvp) => void;
+}) {
+  const dialogRef = useRef<HTMLDivElement>(null);
+  const titleId = useId();
+  const nameId = useId();
+  const messageId = useId();
+  const optionalId = useId();
+
+  const [name, setName] = useState('');
+  const [attending, setAttending] = useState<boolean | null>(null);
+  const [plusOne, setPlusOne] = useState<boolean | null>(null);
+  const [message, setMessage] = useState('');
+  const [sending, setSending] = useState(false);
+  const [outcome, setOutcome] = useState<ReplyOutcome | null>(null);
+  const [problem, setProblem] = useState<string | null>(null);
+
+  /**
+   * The name the Guest List holds for whoever is replying, where it holds one.
+   *
+   * A row with no name leaves the field to the guest: the token is what says
+   * who they are either way, and a read-only empty box would be asking them to
+   * confirm nothing.
+   */
+  const knownName = guest?.name.trim() ?? '';
+
+  /** A reply the couple has, or already had, is one no further press changes. */
+  const settled = outcome === 'SENT' || outcome === 'ALREADY_REPLIED';
+
+  /**
+   * The one line above Submit, which says whatever is true of this reply: what
+   * became of it where there was somewhere to send it, and that there is not
+   * where there is not.
+   *
+   * Nothing at all until a reply that can be sent has been, so a card nobody
+   * has pressed yet is the card the design draws.
+   */
+  const saidOfTheReply = guest
+    ? outcome === 'FAILED'
+      ? problem
+      : outcome && REPLY_WORDS[outcome]
+    : UNSENT_NOTE;
+
+  // The card takes focus itself rather than handing it to the Name field, which
+  // is what leaving `initialFocus` out asks for: it is read on a phone, where
+  // focusing a text field raises the keyboard over half of what a guest has
+  // just opened, and the first thing they should see is the question rather
+  // than the answer box.
+  //
+  // What gets focus back when the card goes is RSVP Now, the control that
+  // opened it: a guest who reached the card from the keyboard would otherwise
+  // be put at the top of a five-thousand-pixel invitation for having closed it.
+  useDialogBehaviour(dialogRef, onClose);
+
+  const reply = async (event: FormEvent<HTMLFormElement>) => {
+    event.preventDefault();
+    // The browser will not submit the form until every question is answered,
+    // so an unanswered one cannot arrive here. Both are still read as answered
+    // or not rather than coerced, because a reply that quietly said "not
+    // coming" for somebody who had said nothing would be worse than no reply.
+    if (attending === null || plusOne === null) return;
+    // A reply already in flight, and one the couple already has, are both
+    // presses that cannot do anything: the control is disabled for each, and
+    // this is the other half of that, for a form submitted some other way.
+    if (sending || settled) return;
+
+    const rsvp: Rsvp = {
+      name: knownName || name.trim(),
+      attending,
+      plusOne,
+      message: message.trim(),
+      repliedAt: new Date(),
+    };
+
+    // Nobody to sign it with, so it goes no further than the page that took it.
+    if (!guest) {
+      onKeep(rsvp);
+      return;
+    }
+
+    setSending(true);
+    // Whatever the last press had to say, because this one is what the line
+    // above Submit is about now.
+    setOutcome(null);
+    setProblem(null);
+    try {
+      const sent = await submitWeddingRsvp(
+        {
+          is_attending: rsvp.attending,
+          // The design asks whether a guest brings somebody and the backend
+          // counts how many, so yes is one and no is none. A guest the Guest
+          // List allows two can therefore only claim one, which is the gap seen
+          // from the guest's end and is reported rather than worked around -
+          // `hbd-381`.
+          plus_one_count: rsvp.plusOne ? 1 : 0,
+          // An empty message is left out rather than sent as nothing, so the
+          // couple's reply list holds a message only where a guest wrote one.
+          message: rsvp.message || undefined,
+        },
+        guest.slug,
+        guest.token
+      );
+      if (sent.success) {
+        setOutcome('SENT');
+      } else if (sent.message === GUEST_ALREADY_RESPONDED) {
+        setOutcome('ALREADY_REPLIED');
+      } else {
+        setProblem(replyProblem(sent.message));
+        setOutcome('FAILED');
+      }
+    } catch (error) {
+      // The wedding client answers with a result rather than throwing, network
+      // failures included, so this is only reached if it ever stops doing that
+      // or the action itself cannot be reached. A guest is told either way,
+      // because the alternative is a press that appeared to do nothing.
+      setProblem(
+        replyProblem(error instanceof Error ? error.message : String(error))
+      );
+      setOutcome('FAILED');
+    } finally {
+      setSending(false);
+    }
+  };
+
+  return (
+    <div
+      ref={dialogRef}
+      role="dialog"
+      aria-modal="true"
+      aria-labelledby={titleId}
+      tabIndex={-1}
+      className="fixed inset-0 z-[100] overflow-y-auto overscroll-contain bg-[#090909]/80 outline-none">
+      <form
+        onSubmit={reply}
+        className="relative mx-auto w-[375px] max-w-full overflow-hidden pb-[43px] pt-[52px]">
+        {/* The paper card, Figma `Rectangle 1` 312:3858, and what is on it. */}
+        <div className="relative ml-[42px] w-[312px] pb-[5px] pr-[15px] pt-[25px]">
+          <Paper />
+
+          {/*
+            "Kindly Reply" over its rule. Figma `Frame 23`, node 312:3885, which
+            is 31 tall with the rule at 30. The rule is drawn at 50 instead, and
+            the block is as tall, for the same reason the Guest Messages heading
+            is: a 48px script line set at the browser's own leading rather than
+            the design's sits about 20 lower in its box than Figma draws it, so
+            a rule at 30 would be struck through the words instead of under
+            them. Both move together, and both move back when `hbd-a09.13` sets
+            the leading the design asks for.
+          */}
+          <div className="relative ml-[40px] h-[51px] w-[206px]">
+            <p
+              id={titleId}
+              className="absolute left-[12px] top-0 w-[184px] font-[family-name:var(--font-wt1-script)] text-[48px] font-normal leading-[normal] text-[#090909]">
+              Kindly Reply
+            </p>
+            <div className="absolute left-0 top-[50px] h-[0.5px] w-[200px] bg-[#090909]" />
+          </div>
+
+          {/* The questions. Figma `Frame 43`, node 312:3860. */}
+          <div className="relative mt-[21px] flex flex-col gap-[21px]">
+            <div className="flex flex-col gap-[12px]">
+              <label
+                htmlFor={nameId}
+                className="font-[family-name:var(--font-wt1-mono)] text-[12px] font-normal leading-[normal] text-[#000000]">
+                Name
+              </label>
+              {/*
+                A guest who came by their own link is shown the name the Guest
+                List holds for them and cannot change it: the backend knows who
+                they are from the token, so a typed name would be discarded and
+                a field that took one would be asking for something nobody
+                reads. Read-only rather than disabled, because it is still
+                theirs to read, select and copy, and a disabled field is
+                skipped by everything that walks a form.
+              */}
+              <input
+                id={nameId}
+                type="text"
+                value={knownName || name}
+                onChange={(event) => setName(event.target.value)}
+                readOnly={knownName !== ''}
+                required
+                autoComplete="name"
+                className="w-full rounded-[2px] border border-solid border-[#000000] bg-[#d9d8d6] px-[12px] py-[8px] font-[family-name:var(--font-wt1-mono)] text-[10px] font-normal leading-[normal] text-[#000000] outline-1 outline-offset-[3px] outline-[#090909] focus-visible:outline"
+              />
+            </div>
+
+            <Question legend="Will you be attending?" className="flex-col">
+              {ATTENDING.map(({ value, label }) => (
+                <Choice
+                  key={label}
+                  question="attending"
+                  chosen={attending === value}
+                  onChoose={() => setAttending(value)}>
+                  {label}
+                </Choice>
+              ))}
+            </Question>
+
+            <Question
+              legend={
+                <>
+                  Will you be bringing{' '}
+                  {/*
+                    The face is named again on the underlined words because
+                    `globals.css` sets one on `*`, which no element inherits
+                    past: a span without a class of its own is drawn in the
+                    application's face rather than the invitation's.
+                  */}
+                  <u className="font-[family-name:var(--font-wt1-mono)]">
+                    a plus one
+                  </u>
+                  ?
+                </>
+              }>
+              {PLUS_ONE.map(({ value, label }) => (
+                <Choice
+                  key={label}
+                  question="plus-one"
+                  chosen={plusOne === value}
+                  onChoose={() => setPlusOne(value)}
+                  className="flex-1">
+                  {label}
+                </Choice>
+              ))}
+            </Question>
+
+            <div className="flex flex-col gap-[12px]">
+              <div className="flex items-center gap-[12px]">
+                <label
+                  htmlFor={messageId}
+                  className="font-[family-name:var(--font-wt1-mono)] text-[12px] font-normal leading-[normal] text-[#000000]">
+                  Message to the happy couple?
+                </label>
+                <p
+                  id={optionalId}
+                  className="font-[family-name:var(--font-wt1-mono)] text-[10px] font-semibold leading-[normal] text-[#898989]">
+                  Optional
+                </p>
+              </div>
+              <textarea
+                id={messageId}
+                value={message}
+                onChange={(event) => setMessage(event.target.value)}
+                aria-describedby={optionalId}
+                rows={3}
+                className="w-full resize-none rounded-[2px] border border-solid border-[#000000] bg-transparent px-[12px] py-[8px] font-[family-name:var(--font-wt1-mono)] text-[10px] font-normal leading-[normal] text-[#000000] outline-1 outline-offset-[3px] outline-[#090909] focus-visible:outline"
+              />
+            </div>
+
+            {/* Submit and Close. Figma `Frame 44`, node 312:3880. */}
+            <div className="flex flex-col gap-[12px]">
+              {/*
+                One line above Submit, in the small grey setting the design
+                already uses for the Optional beside a question.
+
+                Drawn only when there is something to say, because an empty one
+                would still take its 12 of the gap the design draws between
+                these three and put a band of nothing above Submit. It is a live
+                region so that what became of a press is announced and not only
+                shown - a guest who cannot see the line has pressed a control
+                that would otherwise appear to have done nothing.
+              */}
+              {saidOfTheReply && (
+                <p
+                  role="status"
+                  className="font-[family-name:var(--font-wt1-mono)] text-[10px] font-semibold leading-[normal] text-[#898989]">
+                  {saidOfTheReply}
+                </p>
+              )}
+              <button
+                type="submit"
+                disabled={sending || settled}
+                className="flex items-center justify-center gap-[10px] border border-solid border-[#fafafa] bg-[#000000] p-[10px]">
+                <p className="whitespace-nowrap font-[family-name:var(--font-wt1-mono)] text-[12px] font-normal leading-[normal] text-[#fafafa]">
+                  Submit
+                </p>
+              </button>
+              <button
+                type="button"
+                onClick={onClose}
+                className="flex items-center justify-center gap-[10px] border border-solid border-[#000000] p-[10px]">
+                <p className="whitespace-nowrap font-[family-name:var(--font-wt1-mono)] text-[12px] font-normal leading-[normal] text-[#000000]">
+                  Close
+                </p>
+              </button>
+            </div>
+          </div>
+        </div>
+
+        {/* The paperclip holding the card. Figma `image 520`, node 312:3859. */}
+        <div
+          aria-hidden
+          className="pointer-events-none absolute left-[47.22px] top-0 h-[69.97px] w-[32.48px]">
+          <div className="absolute inset-0 overflow-hidden">
+            <img
+              alt=""
+              className="absolute left-[-145.77%] top-[-32.79%] h-[169.98%] w-[366.17%] max-w-none"
+              src={`${ASSET}/lovestory-torn-strip.png`}
+            />
+          </div>
+        </div>
+      </form>
+    </div>
+  );
+}

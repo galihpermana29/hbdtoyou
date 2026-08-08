@@ -3,25 +3,16 @@
 import { Google } from '@mui/icons-material';
 import {
   Avatar,
-  Badge,
   Button,
   Cascader,
-  Divider,
   Dropdown,
   MenuProps,
   message,
-  Modal,
-  Tag,
-  Tooltip,
 } from 'antd';
 import Link from 'next/link';
 import { useEffect, useState } from 'react';
-import { signIn, signOut } from 'next-auth/react';
-import {
-  useMemoifyProfile,
-  useMemoifySession,
-  useMemoifyUpgradePlan,
-} from '@/app/session-provider';
+import { signIn } from 'next-auth/react';
+import { useMemoifySession } from '@/app/session-provider';
 import { IProfileResponse } from '@/action/interfaces';
 import { removeSession } from '@/store/get-set-session';
 import Image from 'next/image';
@@ -31,18 +22,16 @@ import {
   Book,
   BookA,
   ChevronDown,
+  Heart,
   House,
   LogOut,
   Menu,
-  Settings,
+  Newspaper,
   Settings2,
-  Sparkles,
   Zap,
 } from 'lucide-react';
-import dynamic from 'next/dynamic';
 // Lazy load the jumbotron image
 import jumbotronImage from '@/assets/fitur-1-image.png';
-import GasMeterOutlined from '@mui/icons-material/GasMeterOutlined';
 import './stlye.css';
 import { formatNumberWithComma } from '@/lib/utils';
 import { getUserProfile } from '@/action/user-api';
@@ -138,6 +127,49 @@ const NavigationBar = () => {
 
   const options = [
     {
+      value: 'wedding',
+      disabled: true,
+      label: (
+        <div className="flex items-start gap-2 opacity-60 cursor-not-allowed">
+          <Heart size={18} className="text-[#E34013] mt-[10px]" />
+          <div>
+            <h1 className="text-[16px] font-[600] text-[#101828] text-ellipsis flex items-center gap-2">
+              Wedding Invitations
+              <span className="text-[10px] font-[600] text-[#E34013] bg-[#FDECE5] rounded-full px-[8px] py-[2px]">
+                Coming soon
+              </span>
+            </h1>
+            <p className="text-[14px] font-[400] text-[#7B7B7B] mt-[2px]">
+              Design beautiful digital wedding <br /> invitations as
+              unforgettable as your “I do!”
+            </p>
+          </div>
+        </div>
+      ),
+    },
+    {
+      value: 'photobox-newspaper',
+      label: (
+        <div
+          className="flex items-start gap-2"
+          onClick={() => router.push('/photobox-newspaper')}>
+          <Newspaper size={18} className="text-[#E34013] mt-[10px]" />
+          <div>
+            <h1 className="text-[16px] font-[600] text-[#101828] text-ellipsis flex items-center gap-2">
+              Newspaper Photobox
+              <span className="text-[10px] font-[600] text-[#E34013] bg-[#FDECE5] rounded-full px-[8px] py-[2px]">
+                New
+              </span>
+            </h1>
+            <p className="text-[14px] font-[400] text-[#7B7B7B] mt-[2px]">
+              Snap a live selfie straight into a <br /> vintage newspaper front
+              page.
+            </p>
+          </div>
+        </div>
+      ),
+    },
+    {
       value: 'gift',
       label: (
         <div
@@ -219,27 +251,70 @@ const NavigationBar = () => {
         </div>
       ),
     },
+    // Photobox temporarily hidden — superseded by Newspaper Photobox above.
+    // {
+    //   value: 'photobox',
+    //   label: (
+    //     <div
+    //       className="flex items-start gap-2"
+    //       onClick={() => router.push('/photobox')}>
+    //       <Sparkles size={18} className="text-[#E34013] mt-[10px]" />
+    //       <div>
+    //         <h1 className="text-[16px] font-[600] text-[#101828] text-ellipsis">
+    //           Photobox
+    //         </h1>
+    //         <p className="text-[14px] font-[400] text-[#7B7B7B] mt-[2px]">
+    //           Make every picture a keepsake <br /> with Memoify`s Photobox!
+    //         </p>
+    //       </div>
+    //     </div>
+    //   ),
+    // },
+  ];
+
+  const options2 = [
     {
-      value: 'photobox',
+      value: 'wedding',
+      disabled: true,
       label: (
-        <div
-          className="flex items-start gap-2"
-          onClick={() => router.push('/photobox')}>
-          <Sparkles size={18} className="text-[#E34013] mt-[10px]" />
+        <div className="flex items-start gap-2 opacity-60 cursor-not-allowed">
+          <Heart size={18} className="text-[#E34013] mt-[10px]" />
           <div>
-            <h1 className="text-[16px] font-[600] text-[#101828] text-ellipsis">
-              Photobox
+            <h1 className="text-[14px] font-[600] text-[#101828] text-ellipsis flex items-center gap-2">
+              Wedding Invitations
+              <span className="text-[10px] font-[600] text-[#E34013] bg-[#FDECE5] rounded-full px-[6px] py-[1px]">
+                Coming soon
+              </span>
             </h1>
-            <p className="text-[14px] font-[400] text-[#7B7B7B] mt-[2px]">
-              Make every picture a keepsake <br /> with Memoify`s Photobox!
+            <p className="text-[12px] font-[400] text-[#7B7B7B] mt-[2px]">
+              Design beautiful digital wedding <br /> invitations in minutes
             </p>
           </div>
         </div>
       ),
     },
-  ];
-
-  const options2 = [
+    {
+      value: 'photobox-newspaper',
+      label: (
+        <div
+          className="flex items-start gap-2"
+          onClick={() => router.push('/photobox-newspaper')}>
+          <Newspaper size={18} className="text-[#E34013] mt-[10px]" />
+          <div>
+            <h1 className="text-[14px] font-[600] text-[#101828] text-ellipsis flex items-center gap-2">
+              Newspaper Photobox
+              <span className="text-[10px] font-[600] text-[#E34013] bg-[#FDECE5] rounded-full px-[6px] py-[1px]">
+                New
+              </span>
+            </h1>
+            <p className="text-[12px] font-[400] text-[#7B7B7B] mt-[2px]">
+              Snap a live selfie straight into a <br /> vintage newspaper front
+              page.
+            </p>
+          </div>
+        </div>
+      ),
+    },
     {
       value: 'gift',
       label: (
@@ -297,24 +372,25 @@ const NavigationBar = () => {
         </div>
       ),
     },
-    {
-      value: 'photobox',
-      label: (
-        <div
-          className="flex items-start gap-2"
-          onClick={() => router.push('/photobox')}>
-          <Sparkles size={18} className="text-[#E34013] mt-[10px]" />
-          <div>
-            <h1 className="text-[14px] font-[600] text-[#101828] text-ellipsis">
-              Photobox
-            </h1>
-            <p className="text-[12px] font-[400] text-[#7B7B7B] mt-[2px]">
-              Make every picture a keepsake <br /> with Memoify`s Photobox!
-            </p>
-          </div>
-        </div>
-      ),
-    },
+    // Photobox temporarily hidden — superseded by Newspaper Photobox above.
+    // {
+    //   value: 'photobox',
+    //   label: (
+    //     <div
+    //       className="flex items-start gap-2"
+    //       onClick={() => router.push('/photobox')}>
+    //       <Sparkles size={18} className="text-[#E34013] mt-[10px]" />
+    //       <div>
+    //         <h1 className="text-[14px] font-[600] text-[#101828] text-ellipsis">
+    //           Photobox
+    //         </h1>
+    //         <p className="text-[12px] font-[400] text-[#7B7B7B] mt-[2px]">
+    //           Make every picture a keepsake <br /> with Memoify`s Photobox!
+    //         </p>
+    //       </div>
+    //     </div>
+    //   ),
+    // },
   ];
 
   const handleGetProfile = async () => {
@@ -326,11 +402,16 @@ const NavigationBar = () => {
     }
   };
 
+  // Keyed on the token rather than the session object. Reading the profile is a
+  // server action, and a server action re-renders everything that reads the
+  // router, so an object dependency would be re-created between one read and
+  // the next and ask for another - forever, several times a second, for as long
+  // as a signed-in visitor stayed on any page carrying the navigation.
   useEffect(() => {
     if (session.accessToken) {
       handleGetProfile();
     }
-  }, [session]);
+  }, [session.accessToken]);
 
   return (
     <div className="border-b-[1px] bg-white">
@@ -378,7 +459,7 @@ const NavigationBar = () => {
           <Link
             href={'/career'}
             className={`hidden md:block text-[16px] text-[#7B7B7B] font-[500]`}>
-            Career
+            Program
           </Link>
 
           {sidebar && (
@@ -429,7 +510,7 @@ const NavigationBar = () => {
                 <Link
                   href={'/career'}
                   className={`md:block text-[16px] text-[#7B7B7B] font-[500]`}>
-                  Career
+                  Program
                 </Link>
               </div>
             </div>

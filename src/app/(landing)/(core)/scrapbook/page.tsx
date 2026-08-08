@@ -2,6 +2,7 @@
 
 import { useMemoifySession } from '@/app/session-provider';
 import NavigationBar from '@/components/ui/navbar';
+import Reveal from '@/components/ui/reveal';
 import { Button, Input, Typography } from 'antd';
 import { ArrowLeft, ArrowRight } from 'lucide-react';
 import { signIn } from 'next-auth/react';
@@ -67,6 +68,7 @@ const ScrapbookPage = () => {
         <NavigationBar />
       </div>
       <div className="flex flex-col">
+        <Reveal>
         <div className="flex flex-col items-center justify-center pt-12 sm:pt-16 md:pt-24 pb-16 bg-[#FFF6F5] relative">
           <div className="flex flex-col items-center justify-center px-4 sm:px-8 mx-auto w-full">
             <div className="flex flex-col items-center justify-center gap-y-12 max-w-5xl">
@@ -95,6 +97,8 @@ const ScrapbookPage = () => {
             </div>
           </div>
         </div>
+        </Reveal>
+        <Reveal>
         <div className="w-full pb-[50px]">
           <div
             className="relative w-full h-fit z-20 pb-12 sm:pb-16 md:pb-24"
@@ -115,8 +119,10 @@ const ScrapbookPage = () => {
             />
           </div>
         </div>
+        </Reveal>
 
         {/* Scrapbook Templates Section */}
+        <Reveal>
         <div className="flex pb-12 sm:pb-16 md:pb-24 w-full">
           <div className="flex flex-col w-full max-w-7xl mx-auto">
             {/* Header Section */}
@@ -229,8 +235,10 @@ const ScrapbookPage = () => {
             </div>
           </div>
         </div>
+        </Reveal>
 
         {/* Features Section */}
+        <Reveal>
         <div className="w-full py-12 sm:py-16 md:py-24 bg-white">
           <div className="max-w-7xl mx-auto px-4 sm:px-8">
             <div className="flex flex-col">
@@ -306,8 +314,10 @@ const ScrapbookPage = () => {
             </div>
           </div>
         </div>
+        </Reveal>
 
         {/* Newsletter Subscription Section */}
+        <Reveal>
         <div className="w-full py-12 sm:py-16 md:py-24">
           <div className="max-w-4xl mx-auto px-4 sm:px-8 text-center">
             <Typography.Title
@@ -340,6 +350,7 @@ const ScrapbookPage = () => {
             </div>
           </div>
         </div>
+        </Reveal>
       </div>
     </div>
   );

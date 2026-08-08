@@ -27,6 +27,8 @@ import { useRouter, useSearchParams } from 'next/navigation';
 
 const { Title, Text } = Typography;
 
+const DEFAULT_COUPON_CODE = 'JUNJUNE';
+
 function isValidUUIDv4(uuid: string): boolean {
   const uuidv4Regex =
     /^[0-9a-f]{8}-[0-9a-f]{4}-4[0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i;
@@ -51,7 +53,7 @@ const NewClientPagePayment = () => {
   const type = query.get('type');
   const planId = query.get('plan_id');
 
-  const [couponCode, setCouponCode] = useState('');
+  const [couponCode, setCouponCode] = useState(DEFAULT_COUPON_CODE);
   const [couponLoading, setCouponLoading] = useState(false);
   const [couponPreview, setCouponPreview] = useState<ICouponPreviewResponse | null>(null);
 
@@ -329,7 +331,7 @@ const NewClientPagePayment = () => {
                               }))}
                               onChange={(value) => {
                                 setCouponPreview(null);
-                                setCouponCode('');
+                                setCouponCode(DEFAULT_COUPON_CODE);
                                 router.replace(
                                   `/payment?id=null&type=${type}&plan_id=${value}`
                                 );

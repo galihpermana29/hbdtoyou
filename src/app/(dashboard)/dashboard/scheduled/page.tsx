@@ -1,11 +1,12 @@
 import { getDashboardScheduled } from '@/action/user-api';
+import { isAdminEmail } from '@/lib/admin';
 import { getSession } from '@/store/get-set-session';
 import { redirect } from 'next/navigation';
 import { Table } from 'antd';
 
 const ScheduledPage = async () => {
   const session = await getSession();
-  const isAdmin = session?.email === 'memoify.live@gmail.com';
+  const isAdmin = isAdminEmail(session?.email);
   if (!isAdmin) redirect('/dashboard');
 
   const res = await getDashboardScheduled();
@@ -26,13 +27,14 @@ const ScheduledPage = async () => {
   const d = res.data;
 
   const breakdownColumns = [
-    { title: 'Key', dataIndex: 'key', key: 'key' },
-    { title: 'Value', dataIndex: 'value', key: 'value' },
+    { title: 'Date', dataIndex: 'date', key: 'date' },
+    { title: 'Count', dataIndex: 'count', key: 'count' },
   ];
 
   const breakdownData = d.breakdown.map((item, idx) => ({
     key: idx,
-    ...item,
+    date: item.date,
+    count: item.count,
   }));
 
   return (

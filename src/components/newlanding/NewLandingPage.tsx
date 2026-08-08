@@ -1,7 +1,6 @@
 'use client';
 
 import {
-  Badge,
   Button,
   Card,
   Carousel,
@@ -9,20 +8,20 @@ import {
   Collapse,
   Form,
   Input,
-  Layout,
-  List,
   Row,
   Segmented,
   Space,
   Statistic,
-  Typography,
+  Typography
 } from 'antd';
 import { useState } from 'react';
 
-import { ArrowRight, CircleCheck } from 'lucide-react';
+import { ArrowRight } from 'lucide-react';
 import Image from 'next/image';
 import Link from 'next/link';
 import NavigationBar from '../ui/navbar';
+import Reveal from '@/components/ui/reveal';
+import PricingSection from './PricingSection';
 
 import fictional1 from '@/assets/fictional-1.png';
 import fictional3 from '@/assets/fictional-3.png';
@@ -30,38 +29,53 @@ import fictional4 from '@/assets/fictional-4.png';
 import fictional5 from '@/assets/fictional-5.png';
 import fictional2 from '@/assets/fictional2.png';
 
-import { useMemoifySession } from '@/app/session-provider';
 import mockup1 from '@/assets/mockup1.png';
 import mockup2 from '@/assets/mockup2.png';
 import mockup3 from '@/assets/mockup3.png';
-import { signIn } from 'next-auth/react';
-import { useRouter } from 'next/navigation';
-import { useQuery } from '@tanstack/react-query';
-import { getListPackages } from '@/action/user-api';
 import { faqDataEnglish, faqDataIndonesian } from '@/lib/faqData';
 
 import c1 from '@/assets/c1.png';
 import c2 from '@/assets/c2.png';
 import c3 from '@/assets/c3.png';
 import c4 from '@/assets/c4.png';
-const { Footer } = Layout;
-const { Title, Text, Paragraph } = Typography;
+
+import sampleBobo from '@/assets/sample-bobo.jpeg';
+import sampleBroadsheet from '@/assets/sample-broadsheet.jpeg';
+import sampleClassic from '@/assets/sample-classic.jpeg';
+const { Text } = Typography;
+
+// Real exported sample front pages shown in the Newspaper Photobox marquee, so
+// visitors see the full range of templates (bright Bobo edition + sweet
+// broadsheet + viral political satire).
+const SAMPLE_EDITIONS = [
+  { src: sampleBobo, alt: 'Belajar Memaafkan — Bobo edition' },
+  { src: sampleBroadsheet, alt: 'Love of The Week — broadsheet edition' },
+  { src: sampleClassic, alt: 'Suara Rakyat — political edition' },
+];
+
+const CLIP_ROTATIONS = ['-rotate-2', 'rotate-1', '-rotate-1', 'rotate-2'];
+
+/** A real exported front page used as a marquee clipping. */
+function NewspaperClipping({ edition, index }: { edition: any; index: number }) {
+  return (
+    <div
+      className={`shrink-0 ${
+        CLIP_ROTATIONS[index % CLIP_ROTATIONS.length]
+      } transition-transform duration-300 hover:rotate-0 hover:scale-[1.03]`}>
+      <Image
+        src={edition.src}
+        alt={edition.alt}
+        className="h-[420px] w-auto border border-black/10 rounded-[6px] shadow-[0_14px_34px_rgba(0,0,0,0.18)]"
+      />
+    </div>
+  );
+}
 
 export default function NewLandingPage() {
   const [email, setEmail] = useState('');
   const [faqLanguage, setFaqLanguage] = useState<'English' | 'Indonesia'>(
     'English'
   );
-  const router = useRouter();
-  const session = useMemoifySession();
-
-  const { data: packages, isFetching } = useQuery({
-    queryKey: ['packages'],
-    queryFn: async () => {
-      const data = await getListPackages();
-      return data.data;
-    },
-  });
 
   return (
     <div>
@@ -71,6 +85,68 @@ export default function NewLandingPage() {
 
       {/* Hero Section */}
       <div className="mt-[81px]">
+        <Carousel
+          autoplay
+          autoplaySpeed={6000}
+          pauseOnHover
+          dots
+          className="hero-carousel">
+        {/* Slide 1 — Newspaper Photobox (inner wrapper so slick styling
+            doesn't override the layout) */}
+        <div>
+        <div
+          className="min-h-screen flex flex-col justify-center py-[60px]"
+          style={{ background: '#f4f1ea' }}>
+            {/* Centered intro */}
+            <div className="mx-auto max-w-3xl px-[20px] text-center">
+              <span className="inline-block text-[12px] font-[700] tracking-[0.2em] text-[#E34013] bg-[#FDECE5] rounded-full px-[14px] py-[6px]">
+                NEW · NEWSPAPER PHOTOBOX
+              </span>
+              <h2 className="text-[#1B1B1B] font-[800] text-[34px] md:text-[48px] leading-tight mt-[20px]">
+                You, hot off the press.
+              </h2>
+              <p className="text-[#5b5b5b] text-[16px] md:text-[19px] font-[400] mt-[16px]">
+                Strike a pose and watch your selfie drop straight onto a vintage
+                front page — sweet broadsheet or viral political satire. Capture,
+                pick your edition, download. No design skills, just main-character
+                energy.
+              </p>
+              <div className="flex items-center justify-center mt-[28px]">
+                <Link href={'/photobox-newspaper'} prefetch={true}>
+                  <Button
+                    iconPosition="end"
+                    size="large"
+                    icon={<ArrowRight size={18} />}
+                    className="!bg-[#E34013] !text-white !font-[600] !h-[46px]">
+                    Try Newspaper Photobox
+                  </Button>
+                </Link>
+              </div>
+            </div>
+
+            {/* Full-bleed auto-scrolling marquee of sample front pages */}
+            <div className="wedding-marquee mt-[50px]">
+              <div className="wedding-marquee-track wedding-marquee-track--left gap-[24px] py-[10px] px-[12px]">
+                {/* One marquee "half" must be wider than the viewport or the
+                    -50% loop shows a blank gap. We repeat the few editions to
+                    fill a half, then render the half twice for a seamless loop. */}
+                {[
+                  ...SAMPLE_EDITIONS,
+                  ...SAMPLE_EDITIONS,
+                  ...SAMPLE_EDITIONS,
+                  ...SAMPLE_EDITIONS,
+                  ...SAMPLE_EDITIONS,
+                  ...SAMPLE_EDITIONS,
+                ].map((ed, i) => (
+                  <NewspaperClipping key={i} edition={ed} index={i} />
+                ))}
+              </div>
+            </div>
+          </div>
+        </div>
+
+        {/* Slide 2 — main hero (inner wrapper, same reason) */}
+        <div>
         <div className=" py-[30px] md:py-0 flex flex-col-reverse md:flex-row justify-between items-center mx-auto max-w-6xl 2xl:max-w-7xl px-[20px] min-h-screen">
           <div className="max-w-[600px] mr-[20px] flex-1 mt-[20px] md:mt-0">
             <div className="flex gap-[5px] border-[1px] border-[#D0D5DD] rounded-[6px] max-w-max p-[5px] text-[14px] text-[#1B1B1B] font-[500]">
@@ -99,7 +175,7 @@ export default function NewLandingPage() {
                   Get Started
                 </Button>
               </Link>
-              <Link prefetch={true} href={'/scrapbook'}>
+              <Link prefetch={true} href={'/vinylv1'}>
                 <Button
                   size="large"
                   className="!border-[1px] !border-[#E34013] !text-[#E34013] !font-[600] !h-[60px] !w-[150px]">
@@ -111,7 +187,7 @@ export default function NewLandingPage() {
           <div className="flex-1 min-w-[350px] flex justify-center items-center">
             <Carousel
               autoplay
-              autoplaySpeed={5000}
+              autoplaySpeed={9000}
               className="w-[350px] md:w-[500px] lg:w-[600px]">
               <Image
                 src={mockup1}
@@ -137,8 +213,11 @@ export default function NewLandingPage() {
             </Carousel>
           </div>
         </div>
+        </div>
+        </Carousel>
 
         {/* Photobox Section */}
+        <Reveal>
         <div style={{ background: '#F9FAFB' }}>
           <div className="flex flex-col lg:flex-row-reverse items-start lg:items-center justify-between gap-[30px] mx-auto max-w-6xl 2xl:max-w-7xl px-[20px] py-[90px]">
             <div style={{ flex: 1, minWidth: '300px' }}>
@@ -168,7 +247,9 @@ export default function NewLandingPage() {
             </div>
           </div>
         </div>
+        </Reveal>
 
+        <Reveal>
         <div className="flex flex-col lg:flex-row-reverse items-start lg:items-center justify-between gap-[30px] mx-auto max-w-6xl 2xl:max-w-7xl px-[20px] py-[90px]">
           <div className="flex-1 w-full">
             <Image
@@ -196,7 +277,9 @@ export default function NewLandingPage() {
             </Link>
           </div>
         </div>
+        </Reveal>
 
+        <Reveal>
         <div style={{ background: '#F9FAFB' }}>
           <div className="flex flex-col lg:flex-row-reverse items-start lg:items-center justify-between gap-[30px] mx-auto max-w-6xl 2xl:max-w-7xl px-[20px] py-[90px]">
             <div style={{ flex: 1, minWidth: '300px' }}>
@@ -226,8 +309,10 @@ export default function NewLandingPage() {
             </div>
           </div>
         </div>
+        </Reveal>
 
         {/* Features Section */}
+        <Reveal>
         <div className="mx-auto max-w-6xl 2xl:max-w-7xl">
           <div className="flex items-center lg:items-center flex-col lg:flex-row justify-between">
             <div className="flex-1 flex flex-col justify-between h-full gap-6 py-24 pl-5 pr-20 gap-y-16">
@@ -313,87 +398,12 @@ export default function NewLandingPage() {
             </div>
           </div>
         </div>
+        </Reveal>
 
         {/* Pricing Section */}
+        <Reveal>
         <div className="">
-          <div className="mx-auto max-w-6xl 2xl:max-w-7xl px-[20px] py-[90px]">
-            <h1 className="mb-[20px] text-center text-[#1B1B1B] font-[700] text-[30px] md:text-[36px]">
-              Pricing plans
-            </h1>
-            <p className="text-[#7b7b7b] text-[16px] md:text-[20px] font-[400] text-center mb-[35px]">
-              Simple, transparent pricing that grows with you. Try any plan free
-              for 30 days.
-            </p>
-
-            <Row gutter={[24, 24]} justify="center">
-              {!isFetching &&
-                packages?.map((dx) => {
-                  return (
-                    <Col xs={24} sm={8} key={dx.id}>
-                      <Card className=" flex flex-col justify-between">
-                        <div
-                          style={{ textAlign: 'center', marginBottom: '24px' }}>
-                          <h1 className="text-[#1B1B1B] font-[700] text-[36px]">
-                            IDR {dx.price}
-                          </h1>
-                          <p className="mt-[16px] text-[20px] font-[600]">
-                            {dx.name}
-                          </p>
-                          <p className="text-[#7B7B7B] text-[16px] font-[400]">
-                            {dx.description}
-                          </p>
-                        </div>
-                        <List
-                          bordered={false}
-                          itemLayout="horizontal"
-                          dataSource={dx.features || []}
-                          renderItem={(item) => (
-                            <List.Item>
-                              <List.Item.Meta
-                                avatar={<CircleCheck color="#079455" />}
-                                title={item}
-                              />
-                            </List.Item>
-                          )}
-                        />
-
-                        <div className="flex justify-center items-end">
-                          <Button
-                            onClick={() => {
-                              if (session.accessToken) {
-                                if (dx.name === 'Free Plan') {
-                                  router.push('/create');
-                                }
-
-                                if (dx.name === 'Premium Plan') {
-                                  router.push(
-                                    `/payment?type=premium&plan_id=${dx.id}`
-                                  );
-                                }
-
-                                if (dx.name === 'Advanced Plan') {
-                                  router.push(
-                                    `/payment?type=advanced&plan_id=${dx.id}`
-                                  );
-                                }
-                              } else {
-                                signIn('google');
-                              }
-                            }}
-                            iconPosition="end"
-                            size="large"
-                            className="!border-[1px] !h-[48px] !bg-[#E34013] !text-[#fff] !font-[400] mt-[40px] !w-[90%] !text-[16px]">
-                            {session?.accessToken
-                              ? 'Try now'
-                              : 'Sign in with Google'}
-                          </Button>
-                        </div>
-                      </Card>
-                    </Col>
-                  );
-                })}
-            </Row>
-          </div>
+          <PricingSection />
 
           <div
             style={{
@@ -438,8 +448,10 @@ export default function NewLandingPage() {
             </div>
           </div>
         </div>
+        </Reveal>
 
         {/* FAQ Section */}
+        <Reveal>
         <div id="faq-section" style={{ background: '#F9FAFB' }}>
           <div className="mx-auto max-w-6xl 2xl:max-w-7xl px-[20px] py-[90px]">
             <div className="max-w-[768px] mx-auto mb-[48px]">
@@ -479,8 +491,10 @@ export default function NewLandingPage() {
             </div>
           </div>
         </div>
+        </Reveal>
 
         {/* Stats Section */}
+        <Reveal>
         <div
           style={{ padding: '60px 50px' }}
           className="bg-[url(/stat-background.jpeg)] bg-no-repeat bg-cover">
@@ -510,7 +524,7 @@ export default function NewLandingPage() {
                         User has Joined
                       </p>
                     }
-                    value={5000}
+                    value={9000}
                     suffix="+"
                   />
                   <p className="text-[16px] max-w-[200px] mx-auto font-[400] text-[#9a9a9a] mt-[8px]">
@@ -527,7 +541,7 @@ export default function NewLandingPage() {
                         User Premium
                       </p>
                     }
-                    value={300}
+                    value={1000}
                     suffix="+"
                   />
                   <p className="text-[16px] max-w-[200px] mx-auto font-[400] text-[#9a9a9a] mt-[8px]">
@@ -555,8 +569,10 @@ export default function NewLandingPage() {
             </Row>
           </div>
         </div>
+        </Reveal>
 
         {/* Newsletter Section */}
+        <Reveal>
         <div className="">
           <div className="mx-auto max-w-6xl 2xl:max-w-7xl px-[20px] py-[90px] text-center">
             <div className="max-w-[768px] mx-auto">
@@ -593,6 +609,7 @@ export default function NewLandingPage() {
             </Text>
           </div>
         </div>
+        </Reveal>
       </div>
     </div>
   );

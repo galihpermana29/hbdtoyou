@@ -2,7 +2,7 @@
 import { IDetailContentResponse } from '@/action/interfaces';
 import { createContent, editContent, submitFeedback } from '@/action/user-api';
 import { useMemoifyProfile } from '@/app/session-provider';
-import GeneratingLLMLoadingModal from '@/app/(landing)/albumgraduation1/[id]/GeneratingLLMLoadingModal';
+import GeneratingLLMLoadingModal from '@/app/(landing)/(gifts)/albumgraduation1/[id]/GeneratingLLMLoadingModal';
 import { reset } from '@/lib/uploadSlice';
 import { generateGraduationStory } from '@/services/gemini';
 import { fetchMovieGenres, Genre } from '@/services/tmdb';
@@ -19,7 +19,6 @@ import {
 } from 'antd';
 import { useForm, useWatch } from 'antd/es/form/Form';
 import dayjs from 'dayjs';
-import { useRouter } from 'next/navigation';
 import { useEffect, useState } from 'react';
 import { useDispatch } from 'react-redux';
 import FinalModal from './final-modal';
@@ -44,7 +43,6 @@ const AlbumGraduationv1 = ({
 
   const profile = useMemoifyProfile();
   const isFreeAccount = profile?.quota < 1;
-  const router = useRouter();
   const [form] = useForm();
 
   const dispatch = useDispatch();
@@ -164,19 +162,19 @@ const AlbumGraduationv1 = ({
   }, [editData]);
 
   // Use React Query to fetch movie genres
-  const { data: genres = [], isLoading: genreLoading } = useQuery({
+  const { data: genres = [] } = useQuery({
     queryKey: ['movieGenres'],
     queryFn: async () => {
       try {
         return await fetchMovieGenres();
-      } catch (error) {
+      } catch {
         message.error('Failed to load movie genres');
         return [];
       }
     },
   });
 
-  const genreOptions = genres.map((genre: Genre, index: number) => ({
+  const genreOptions = genres.map((genre: Genre) => ({
     value: genre.id,
     label: genre.name,
   }));

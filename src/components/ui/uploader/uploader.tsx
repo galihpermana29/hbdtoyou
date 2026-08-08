@@ -23,6 +23,8 @@ interface DraggerUploadI {
   multiple?: boolean;
   openNotification?: OpenNotificationFunction;
   disabled?: boolean;
+  acceptTypes?: string;
+  allowedMimeTypes?: string[];
 }
 
 const DraggerUpload = ({
@@ -34,14 +36,13 @@ const DraggerUpload = ({
   type = AccountType.free,
   openNotification,
   disabled = false,
+  acceptTypes = '.jpg, .jpeg, .png',
+  allowedMimeTypes = ['image/jpeg', 'image/png'],
 }: DraggerUploadI) => {
   const [loadingUpload, setLoadingUpload] = useState(false);
   const [fileList, setFileList] = useState<any[]>([]);
 
-  const handleChange: UploadProps['onChange'] = ({
-    fileList: newFileList,
-    file,
-  }) => {
+  const handleChange: UploadProps['onChange'] = () => {
     // if (file.size! > (type === AccountType.free ? 1 : 9) * 1024 * 1024) {
     //   return message.error(
     //     `${
@@ -59,7 +60,7 @@ const DraggerUpload = ({
     // );
   };
 
-  const beforeUpload = async (file: RcFile, fileList: RcFile[]) => {
+  const beforeUpload = async (file: RcFile) => {
     // only allow upload 5 photos at a time
     // if (fileList.length > 5) {
     //   // Find the index of the current file in the list
@@ -72,9 +73,9 @@ const DraggerUpload = ({
     // }
 
     // Validate file type
-    const isJpgOrPng = file.type === 'image/jpeg' || file.type === 'image/png';
-    if (!isJpgOrPng) {
-      message.error('You can only upload JPG/PNG file!');
+    const isAllowedType = allowedMimeTypes.includes(file.type);
+    if (!isAllowedType) {
+      message.error(`Unsupported file type. Allowed: ${acceptTypes}`);
       return false;
     }
 
@@ -110,7 +111,7 @@ const DraggerUpload = ({
         message.error('Your internet connection is poor, try upload one by one photo');
         return false;
       }
-    } catch (error) {
+    } catch {
       setLoadingUpload(false);
       message.error('Your internet connection is poor, try upload one by one photo');
       return false;
@@ -121,7 +122,9 @@ const DraggerUpload = ({
     <button
       type="button"
       className="flex flex-col justify-center items-center px-[20px] gap-[10px] text-caption-2 text-ny-gray-300">
-      <h1>Drop image here or click to upload</h1>
+      {/* A span, not a heading: this is the label on a button, and an h1 here
+          gave every page carrying an uploader a second top-level heading. */}
+      <span>Drop file here or click to upload</span>
     </button>
   );
 
@@ -168,7 +171,7 @@ const DraggerUpload = ({
           disabled={disabled}
           maxCount={limit}
           multiple={multiple}
-          accept=".jpg, .jpeg, .png"
+          accept={acceptTypes}
           onRemove={async (file) => {
             const val = await form.getFieldsValue();
             if (limit === 1) {
@@ -197,7 +200,7 @@ const DraggerUpload = ({
               }
             }
 
-            const data = await beforeUpload(file, fileList);
+            const data = await beforeUpload(file);
             if (data) {
               if (limit === 1) {
                 form.setFieldValue(formItemName, data);
@@ -220,7 +223,7 @@ const DraggerUpload = ({
         </Upload>
       </LoadingHandler>
       <div className="text-caption-2 text-ny-gray-300 text-center mt-[10px] max-w-max">
-        Supported: JPEG, JPG, PNG, Max size:
+        Supported: {acceptTypes.replace(/\./g, '').toUpperCase()}, Max size:{' '}
         {type === AccountType.free ? 1 : 10} MB
       </div>
     </div>

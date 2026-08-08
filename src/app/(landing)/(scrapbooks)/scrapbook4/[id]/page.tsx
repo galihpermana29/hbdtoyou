@@ -89,6 +89,7 @@ const Scrapbook4Result = async ({
           type="scrapbook"
           contentId={id}
           initiallyLocked={
+            // Locked by backend status, or created by a free-tier account.
             data.data.status === 'locked' || data.data.user_type === 'free'
           }>
           <PageFlipScrapbook

@@ -26,6 +26,8 @@ import NewNewspaper1Form from '@/components/forms/new/new-newspaper1-form';
 import NewNewspaper3Form from '@/components/forms/new/new-newspaper3-form';
 import NewGraduation1Form from '@/components/forms/new/new-graduation1-form';
 import NewGraduation2Form from '@/components/forms/new/new-graduation2-form';
+import NewVinylForm from '@/components/forms/new/new-vinyl-form';
+import NewTarotForm from '@/components/forms/new/new-tarot-form';
 
 const StepsCustom = [
   {
@@ -100,19 +102,27 @@ const CreatePage = () => {
     IAllTemplateResponse[] | null
   >(null);
 
+  // The `photobox-newspaper` template only exists on the backend as a hack so
+  // the /photobox-newspaper feature can persist its generated image through the
+  // standard `createContent` flow. It is NOT a real fill-in-a-form digital gift,
+  // so hide it from every /create template list.
+  const HIDDEN_TEMPLATE_SLUGS = ['photobox-newspaper'];
+  const excludeHidden = (list: IAllTemplateResponse[] | null) =>
+    list?.filter((tpl) => !HIDDEN_TEMPLATE_SLUGS.includes(tpl.slug)) ?? null;
+
   const handleGetTemplates = async () => {
     const data = await getOriginalTemplates();
     if (data.success) {
-      setTemplates(data.data);
+      setTemplates(excludeHidden(data.data));
       const dx = await getPopularTemplates();
       if (dx.success) {
-        setPopularTemplates(dx.data);
+        setPopularTemplates(excludeHidden(dx.data));
       } else {
         message.error(dx.message);
       }
       const gx = await getGraduationTemplates();
       if (gx.success) {
-        setGraduationTemplates(gx.data);
+        setGraduationTemplates(excludeHidden(gx.data));
       } else {
         message.error(gx.message);
       }
@@ -156,6 +166,8 @@ const CreatePage = () => {
     graduationv2: NewGraduation2Form,
     magazinev1: NewMagazineV1Form,
     albumgraduation1: AlbumGraduationv1,
+    vinylv1: NewVinylForm,
+    tarotv1: NewTarotForm,
   };
 
   useEffect(() => {

@@ -18,6 +18,7 @@ import Carousel from 'react-multi-carousel';
 import 'react-multi-carousel/lib/styles.css';
 import { IAllTemplateResponse } from '@/action/interfaces';
 import CardTemplate from './card-template/CardTemplate';
+import Reveal from '@/components/ui/reveal';
 
 import './style.css';
 import { useEffect, useState } from 'react';
@@ -109,7 +110,8 @@ const NewTemplates = ({ data }: { data: IAllTemplateResponse[] }) => {
       <div className="fixed top-0 left-0 w-full z-10 ">
         <NavigationBar />
       </div>
-      <div className="mt-[81px] bg-[url(/template-bg.png)] bg-no-repeat bg-cover">
+      <Reveal>
+        <div className="mt-[81px] bg-[url(/template-bg.png)] bg-no-repeat bg-cover">
         <div className="py-[30px] md:py-[90px] flex flex-col text-center items-center mx-auto max-w-6xl 2xl:max-w-7xl px-[20px] min-h-screen ">
           <div>
             <p className="mt-[16px] font-[700] text-[35px] max-w-[1000px] mx-auto md:text-[50px] lg:text-[60px] leading-[1.2]">
@@ -156,10 +158,12 @@ const NewTemplates = ({ data }: { data: IAllTemplateResponse[] }) => {
               height={448}
             />
           </div>
+          </div>
         </div>
-      </div>
+      </Reveal>
 
-      <div className="py-[30px] md:py-[90px] min-h-screen relative">
+      <Reveal>
+        <div className="py-[30px] md:py-[90px] min-h-screen relative">
         <div className="flex-col gap-[20px] lg:gap-0 lg:flex-row flex justify-between items-start mx-auto max-w-6xl 2xl:max-w-7xl px-[20px] mb-[64px]">
           <div className="max-w-[768px]">
             <h1 className="text-[#1B1B1B] font-[600] text-[30px] md:text-[36px]">
@@ -261,10 +265,12 @@ const NewTemplates = ({ data }: { data: IAllTemplateResponse[] }) => {
                   return <CardTemplate data={dx} key={dx.id} />;
                 })}
             </Carousel>
+            </div>
           </div>
         </div>
-      </div>
-      <div className="mx-auto max-w-6xl 2xl:max-w-7xl px-[20px] min-h-screen mt-[90px]">
+      </Reveal>
+      <Reveal>
+        <div className="mx-auto max-w-6xl 2xl:max-w-7xl px-[20px] min-h-screen mt-[90px]">
         <div className="max-w-[768px]">
           <h1 className="text-[#1B1B1B] font-[600] text-[30px] md:text-[36px]">
             Many special features to make your gift more special
@@ -282,9 +288,10 @@ const NewTemplates = ({ data }: { data: IAllTemplateResponse[] }) => {
             current={current}
             direction="vertical"
             items={StepsCustom}
-          />
+            />
+          </div>
         </div>
-      </div>
+      </Reveal>
 
       {/* <div className="py-[30px] md:py-[90px] relative bg-[#F9FAFB]">
         <div className="flex-col gap-[20px] lg:gap-0 lg:flex-row flex justify-between items-start mx-auto max-w-6xl 2xl:max-w-7xl px-[20px] ">
@@ -398,7 +405,8 @@ const NewTemplates = ({ data }: { data: IAllTemplateResponse[] }) => {
       </div> */}
 
       {/* Newsletter Section */}
-      <div className="">
+      <Reveal>
+        <div className="">
         <div className="mx-auto max-w-6xl 2xl:max-w-7xl px-[20px] py-[90px] text-center">
           <div className="max-w-[768px] mx-auto">
             <p className="text-[36px] font-[600] text-[#1B1B1B]">
@@ -431,9 +439,10 @@ const NewTemplates = ({ data }: { data: IAllTemplateResponse[] }) => {
             type="secondary"
             style={{ fontSize: '12px', marginTop: '16px', display: 'block' }}>
             By subscribing you agree to our privacy policy
-          </Typography.Text>
+            </Typography.Text>
+          </div>
         </div>
-      </div>
+      </Reveal>
     </div>
   );
 };

@@ -2,6 +2,9 @@
 @import url('https://fonts.googleapis.com/css2?family=Young+Serif&display=swap');
 @import url('https://fonts.googleapis.com/css2?family=PT+Serif:ital,wght@0,400;0,700;1,400;1,700&display=swap');
 @import url('https://fonts.googleapis.com/css2?family=Inter:ital,opsz,wght@0,14..32,100..900;1,14..32,100..900&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Cinzel:wght@400;700&family=Playfair+Display:ital,wght@0,400;0,700;1,400&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=UnifrakturMaguntia&family=Old+Standard+TT:ital,wght@0,400;0,700;1,400&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Baloo+2:wght@400..800&family=Lilita+One&family=Nunito:ital,wght@0,400..800;1,400..700&display=swap');
 
 @font-face {
   font-family: 'Formula1 Display';
@@ -76,6 +79,40 @@
   font-family: "Inter", sans-serif;
   font-weight: 400;
   font-style: normal;
+}
+
+/* Two-slide hero carousel on the home page — make the dots visible on the
+   light/cream slide backgrounds and brand the active one. */
+.hero-carousel .slick-dots li button {
+  background: #1b1b1b !important;
+  opacity: 0.35;
+}
+.hero-carousel .slick-dots li.slick-active button {
+  background: #e34013 !important;
+  opacity: 1;
+}
+
+/* Aged-broadsheet type for the photobox-newspaper template. */
+.blackletter-font {
+  font-family: 'UnifrakturMaguntia', 'Playfair Display', serif;
+}
+.np-display {
+  font-family: 'Playfair Display', Georgia, 'Times New Roman', serif;
+}
+.np-body {
+  font-family: 'Old Standard TT', 'PT Serif', Georgia, serif;
+}
+
+/* Bright kids'-magazine type (Majalah Bobo–style) for photobox-newspaper. */
+.bobo-masthead {
+  font-family: 'Baloo 2', system-ui, sans-serif;
+  font-weight: 800;
+}
+.bobo-display {
+  font-family: 'Lilita One', 'Baloo 2', system-ui, sans-serif;
+}
+.bobo-body {
+  font-family: 'Nunito', system-ui, sans-serif;
 }
 
 @tailwind base;
@@ -220,3 +257,88 @@
    -webkit-box-shadow: inset 0 0 6px rgba(0,0,0,.3);
    background-color: #555;
  }
+
+/* Celestial Tarot (tarotv1) — scoped styles.
+   Each utility matches both the .tarot-theme root element itself
+   (.tarot-theme.CLASS) and any descendant (.tarot-theme .CLASS). */
+.tarot-theme,
+.tarot-theme * {
+  font-family: 'Inter', ui-sans-serif, system-ui, sans-serif;
+}
+.tarot-theme.tarot-font-display,
+.tarot-theme .tarot-font-display {
+  font-family: 'Cinzel', serif;
+}
+.tarot-theme.tarot-font-serif,
+.tarot-theme .tarot-font-serif {
+  font-family: 'Playfair Display', serif;
+}
+.tarot-theme.mystical-bg,
+.tarot-theme .mystical-bg {
+  background: radial-gradient(circle at 50% -20%, #1a1122 0%, #050505 70%);
+}
+.tarot-theme.gold-border,
+.tarot-theme .gold-border {
+  border: 1px solid rgba(197, 160, 89, 0.3);
+}
+.tarot-theme.card-back-gradient,
+.tarot-theme .card-back-gradient {
+  background: linear-gradient(135deg, #0d0d0d 0%, #1a1a1a 100%);
+  background-image: radial-gradient(
+    circle at 50% 50%,
+    rgba(197, 160, 89, 0.1) 0%,
+    transparent 80%
+  );
+}
+.tarot-theme.perspective-1000,
+.tarot-theme .perspective-1000 {
+  perspective: 1000px;
+}
+.tarot-theme.backface-hidden,
+.tarot-theme .backface-hidden {
+  backface-visibility: hidden;
+}
+
+/* Wedding Invitation landing — auto-scrolling marquees.
+   Render the row of items twice inside the track; the keyframes shift it by
+   -50% so the duplicated half lands exactly where the first started, looping
+   seamlessly. Hovering pauses; reduced-motion users get a static row. */
+@keyframes wedding-marquee-left {
+  from {
+    transform: translateX(0);
+  }
+  to {
+    transform: translateX(-50%);
+  }
+}
+@keyframes wedding-marquee-right {
+  from {
+    transform: translateX(-50%);
+  }
+  to {
+    transform: translateX(0);
+  }
+}
+.wedding-marquee {
+  overflow: hidden;
+}
+.wedding-marquee-track {
+  display: flex;
+  width: max-content;
+  will-change: transform;
+}
+.wedding-marquee-track--left {
+  animation: wedding-marquee-left 45s linear infinite;
+}
+.wedding-marquee-track--right {
+  animation: wedding-marquee-right 45s linear infinite;
+}
+.wedding-marquee:hover .wedding-marquee-track {
+  animation-play-state: paused;
+}
+@media (prefers-reduced-motion: reduce) {
+  .wedding-marquee-track--left,
+  .wedding-marquee-track--right {
+    animation: none;
+  }
+}
