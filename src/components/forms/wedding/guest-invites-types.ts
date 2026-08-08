@@ -99,6 +99,33 @@ export const DEFAULT_GUEST_MESSAGE = [
   '[Bride Nickname] & [Groom Nickname]',
 ].join('\n');
 
+/**
+ * The greeting message written out with the couple's own names in it.
+ *
+ * Two of the four placeholders belong to the couple and are filled here. The
+ * other two belong to the guest - their name and their personal link - and stay
+ * as they are, because they are resolved per guest when the message goes out.
+ *
+ * A nickname that has not been given yet leaves its placeholder alone. Writing
+ * an empty string into the message instead would leave "The Wedding of  & " and
+ * read as a mistake rather than as a question not yet answered.
+ */
+export function greetingSeededWith(
+  brideNickname: string,
+  groomNickname: string
+): string {
+  let message = DEFAULT_GUEST_MESSAGE;
+  const bride = brideNickname.trim();
+  const groom = groomNickname.trim();
+  if (bride !== '') {
+    message = message.split(GUEST_MESSAGE_PLACEHOLDERS.brideNickname).join(bride);
+  }
+  if (groom !== '') {
+    message = message.split(GUEST_MESSAGE_PLACEHOLDERS.groomNickname).join(groom);
+  }
+  return message;
+}
+
 /** The guest the preview addresses, so a couple sees a name rather than a slot. */
 export const SAMPLE_GUEST_NAME = 'Johnny';
 

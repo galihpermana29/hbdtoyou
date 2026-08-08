@@ -1,6 +1,7 @@
 import type { Dayjs } from 'dayjs';
 
 import type { IWeddingInvitationPayload } from '@/action/interfaces';
+import type { FlowCopyKey } from './copy';
 
 /** A single love-story timeline entry shown in the viewer. */
 export interface WeddingMilestone {
@@ -23,26 +24,26 @@ export interface WeddingLoveStoryChapter {
   /** What the invitation prints beside the year. */
   title: string;
   /** What the form asks for the year, as the design writes it. */
-  yearLabel: string;
+  yearLabel: FlowCopyKey;
   /** What the form asks for the story, as the design writes it. */
-  storyLabel: string;
+  storyLabel: FlowCopyKey;
 }
 
 export const LOVE_STORY_CHAPTERS: WeddingLoveStoryChapter[] = [
   {
     title: 'The meeting',
-    yearLabel: 'The year when you first met',
-    storyLabel: 'How you first met?',
+    yearLabel: 'chapterMetYear',
+    storyLabel: 'chapterMetStory',
   },
   {
     title: 'Getting serious',
-    yearLabel: 'The year you both getting closer',
-    storyLabel: 'How you both getting closer?',
+    yearLabel: 'chapterCloserYear',
+    storyLabel: 'chapterCloserStory',
   },
   {
     title: 'On his one knee!',
-    yearLabel: 'The year they asked the BIG question!',
-    storyLabel: 'Finally, the happy ending',
+    yearLabel: 'chapterProposalYear',
+    storyLabel: 'chapterProposalStory',
   },
 ];
 
@@ -92,7 +93,13 @@ export interface WeddingTemplate1Content {
   photoShareUrl: string;
   galleryPhotos: string[];
   tokenMessage: string;
-  tokenPhoto: string;
+  /**
+   * The photographs the Token of Love block cross-fades between.
+   *
+   * A list rather than one, because the block shows three in the space the
+   * design draws for one and moves between them.
+   */
+  tokenPhotos: string[];
   /** Who the account is in, and where it is held. Two answers, joined for display. */
   accountHolder: string;
   bankProvider: string;
@@ -204,11 +211,17 @@ const TEMPLATE_1_ASSET = '/templates/wedding-template-1';
  * deliberate doing it, and no section can now do that because none of them
  * names a photograph at all.
  *
- * They are still what an unanswered photo falls back to, exactly as an
- * unanswered name falls back to "Elias": a draft has to look like something
- * before it is finished. What changes is that the fallback is one nameable
- * wedding rather than a path buried in a component, so a published invitation
- * can be given nothing to fall back to.
+ * Nothing falls back to them any more. They were once what an unanswered
+ * photograph became, exactly as an unanswered name became "Elias", on the
+ * reasoning that a draft has to look like something before it is finished. What
+ * that actually did was write this wedding into other people's saved records:
+ * `formValuesToContent` is serialised verbatim, so a couple who had answered
+ * nothing had Elias, Freya, Ferdinand Magellan and a hotel in Jakarta stored
+ * under their own invitation.
+ *
+ * So this is now one thing only: the wedding the Showcase renders, and the
+ * default a template component is given when it is handed no content at all.
+ * Neither of those is anybody's invitation.
  */
 export const DEFAULT_WEDDING_TEMPLATE_1_CONTENT: WeddingTemplate1Content = {
   groomName: 'Elias',
@@ -269,7 +282,15 @@ export const DEFAULT_WEDDING_TEMPLATE_1_CONTENT: WeddingTemplate1Content = {
   ],
   tokenMessage:
     'While we wish you could be here with us, your presence in our lives is the greatest gift of all. Should you wish to send a token of your love, please follow the link below.',
-  tokenPhoto: `${TEMPLATE_1_ASSET}/token-photo.jpg`,
+  // Three, because the Token of Love block cross-fades between them and a
+  // sample holding one would demonstrate a still picture. The second and third
+  // are borrowed from the gallery: this is the designer's example wedding, and
+  // its job is to show what the block does.
+  tokenPhotos: [
+    `${TEMPLATE_1_ASSET}/token-photo.jpg`,
+    `${TEMPLATE_1_ASSET}/gallery-2.png`,
+    `${TEMPLATE_1_ASSET}/gallery-4.png`,
+  ],
   accountHolder: 'Elias Frank Simanjuntak',
   bankProvider: 'BRI',
   accountNumber: '3331 0908 1766',
@@ -286,11 +307,11 @@ export const DEFAULT_WEDDING_TEMPLATE_1_CONTENT: WeddingTemplate1Content = {
  * point of display, so that the two names stay two names everywhere else.
  *
  * A record that carries only one of the two names prints that one name, without
- * a stranded ampersand beside it. The Create Flow cannot produce such a record -
- * `formValuesToContent` falls back to the sample invitation for anything a
- * couple leaves blank - but the viewer also renders content it was handed rather
- * than content it built, and half an answer is not a reason to print punctuation
- * for a person who is not there.
+ * a stranded ampersand beside it, and a record carrying neither prints nothing
+ * at all rather than an empty line where a family should be. Both are ordinary
+ * now that parents are optional and nothing is invented for them: half an answer
+ * is not a reason to print punctuation for a person who is not there, and no
+ * answer is not a reason to print somebody else's.
  */
 export function joinParents(father?: string, mother?: string): string {
   return [father, mother]
@@ -324,102 +345,110 @@ export function joinAccountHolder(holder?: string, provider?: string): string {
  * Half of one is an answer still being given rather than an answer, and the
  * invitation shows the sample's time until it is finished.
  */
-function formatTime(value: string | undefined, fallback: string): string {
-  return value && /^([01]\d|2[0-3]):[0-5]\d$/.test(value) ? value : fallback;
+function formatTime(value: string | undefined): string {
+  return value && /^([01]\d|2[0-3]):[0-5]\d$/.test(value) ? value : '';
 }
 
+/**
+ * The wedding's moment, or nothing at all.
+ *
+ * A date with no time is still a date, so a couple who has said which day but
+ * not which hour gets midnight rather than nothing. The reverse is not true:
+ * an hour with no day is not a moment, and the invitation prints no date at all
+ * rather than guessing at the year.
+ */
 function weddingDateToIso(value?: Dayjs, startTime?: string): string {
-  if (!value || !value.isValid()) {
-    return DEFAULT_WEDDING_TEMPLATE_1_CONTENT.weddingDateIso;
-  }
+  if (!value || !value.isValid()) return '';
   const date = value.format('YYYY-MM-DD');
-  const time = formatTime(
-    startTime,
-    DEFAULT_WEDDING_TEMPLATE_1_CONTENT.eventStartTime
-  );
+  const time = formatTime(startTime) || '00:00';
   return `${date}T${time}:00+07:00`;
 }
 
-function pickPhoto(
-  photos: string[] | undefined,
-  index: number,
-  fallback: string
-): string {
-  const url = photos?.[index];
-  return url && url.length > 0 ? url : fallback;
+function pickPhoto(photos: string[] | undefined, index: number): string {
+  return photos?.[index] ?? '';
 }
 
-/** Maps live form values onto the viewer content model, falling back to defaults. */
+/**
+ * Maps live form values onto the viewer content model, inventing nothing.
+ *
+ * What a couple has not answered comes back empty, and the invitation omits
+ * whatever it would have said rather than printing somebody else's. There is no
+ * Fallback here and there is not meant to be: this function's output is
+ * serialised verbatim into the saved record by
+ * `formValuesToInvitationPayload`, so anything substituted in here is not a
+ * placeholder, it is a claim about a couple's family stored under their name.
+ *
+ * That is what it used to do. A save written before this change carried Elias,
+ * Freya, Ferdinand Magellan and a hotel in Jakarta into an invitation where none
+ * of them had been typed.
+ *
+ * A Prefill is the other thing and is not done here. It belongs in the form's
+ * initial values, where the couple can see it, edit it and clear it, and where
+ * it is theirs from the moment the field is drawn. See CONTEXT.md for both
+ * terms.
+ */
 export function formValuesToContent(
   values: Partial<WeddingInvitationFormValues> | null | undefined
 ): WeddingTemplate1Content {
-  const defaults = DEFAULT_WEDDING_TEMPLATE_1_CONTENT;
   const v = values ?? {};
 
   // One entry per chapter the design asks about, always, because the invitation
   // draws three and a couple cannot add a fourth or take one away. A chapter
-  // they have not answered falls back to the sample's, the same as every other
-  // field, and its title is the design's rather than anything they typed. The
-  // sample is asked for by chapter rather than by position, so a chapter added
-  // to one list and not the other reads as unanswered instead of throwing.
+  // they have not answered is empty rather than the sample's, and its title is
+  // the design's rather than anything they typed.
   const milestones: WeddingMilestone[] = LOVE_STORY_CHAPTERS.map(
     (chapter, index) => {
       const answered = v.milestones?.[index];
-      const sample = defaults.milestones.find(
-        (milestone) => milestone.title === chapter.title
-      );
       return {
-        year: answered?.year?.trim() || sample?.year || '',
+        year: answered?.year?.trim() ?? '',
         title: chapter.title,
-        body: answered?.body?.trim() || sample?.body || '',
+        body: answered?.body?.trim() ?? '',
       };
     }
   );
 
   return {
-    groomName: v.groomName?.trim() || defaults.groomName,
-    brideName: v.brideName?.trim() || defaults.brideName,
-    groomFullName: v.groomFullName?.trim() || defaults.groomFullName,
-    brideFullName: v.brideFullName?.trim() || defaults.brideFullName,
-    groomFatherName: v.groomFatherName?.trim() || defaults.groomFatherName,
-    groomMotherName: v.groomMotherName?.trim() || defaults.groomMotherName,
-    brideFatherName: v.brideFatherName?.trim() || defaults.brideFatherName,
-    brideMotherName: v.brideMotherName?.trim() || defaults.brideMotherName,
-    heroPhotos: v.heroPhotos ?? defaults.heroPhotos,
-    // The two portraits are the sample's, because the Create Flow has no
-    // question that hands back either of them yet: `hbd-a09.20`.
-    bridePhoto: pickPhoto(v.bridePhoto, 0, defaults.bridePhoto),
-    groomPhoto: pickPhoto(v.groomPhoto, 0, defaults.groomPhoto),
+    groomName: v.groomName?.trim() ?? '',
+    brideName: v.brideName?.trim() ?? '',
+    groomFullName: v.groomFullName?.trim() ?? '',
+    brideFullName: v.brideFullName?.trim() ?? '',
+    groomFatherName: v.groomFatherName?.trim() ?? '',
+    groomMotherName: v.groomMotherName?.trim() ?? '',
+    brideFatherName: v.brideFatherName?.trim() ?? '',
+    brideMotherName: v.brideMotherName?.trim() ?? '',
+    heroPhotos: v.heroPhotos ?? [],
+    bridePhoto: pickPhoto(v.bridePhoto, 0),
+    groomPhoto: pickPhoto(v.groomPhoto, 0),
     weddingDateIso: weddingDateToIso(v.weddingDate, v.eventStartTime),
-    backgroundMusicId: v.backgroundMusic || defaults.backgroundMusicId,
-    verseText: v.verseText?.trim() || defaults.verseText,
-    verseCitation: v.verseCitation?.trim() || defaults.verseCitation,
-    loveStoryPhotos: v.loveStoryPhotos ?? defaults.loveStoryPhotos,
+    backgroundMusicId: v.backgroundMusic ?? '',
+    verseText: v.verseText?.trim() ?? '',
+    verseCitation: v.verseCitation?.trim() ?? '',
+    loveStoryPhotos: v.loveStoryPhotos ?? [],
     milestones,
-    polaroidPhoto: pickPhoto(v.polaroidPhoto, 0, defaults.polaroidPhoto),
+    polaroidPhoto: pickPhoto(v.polaroidPhoto, 0),
     // The map keepsake is the venue, so it is the first of the photos the
     // Venue Details Section already collects rather than a field of its own.
-    mapPhoto: pickPhoto(v.eventPhotos, 0, defaults.mapPhoto),
-    loveStoryVideo: v.loveStoryVideo || defaults.loveStoryVideo,
-    eventPhotos: v.eventPhotos ?? defaults.eventPhotos,
-    eventStartTime: formatTime(v.eventStartTime, defaults.eventStartTime),
-    eventEndTime: formatTime(v.eventEndTime, defaults.eventEndTime),
-    venueName: v.venueName?.trim() || defaults.venueName,
-    address: v.address?.trim() || defaults.address,
-    mapsUrl: v.mapsUrl?.trim() || defaults.mapsUrl,
+    mapPhoto: pickPhoto(v.eventPhotos, 0),
+    loveStoryVideo: v.loveStoryVideo ?? '',
+    eventPhotos: v.eventPhotos ?? [],
+    eventStartTime: formatTime(v.eventStartTime),
+    eventEndTime: formatTime(v.eventEndTime),
+    venueName: v.venueName?.trim() ?? '',
+    address: v.address?.trim() ?? '',
+    mapsUrl: v.mapsUrl?.trim() ?? '',
     // The photo sharing block's card is product art rather than a couple's
     // choice, so the block draws it itself and it is no longer content. The
-    // link under it is still the sample's: see `hbd-byb.22`.
-    photoShareUrl: defaults.photoShareUrl,
-    galleryPhotos: v.galleryPhotos ?? defaults.galleryPhotos,
-    tokenMessage: v.tokenMessage?.trim() || defaults.tokenMessage,
-    tokenPhoto: pickPhoto(v.tokenPhoto, 0, defaults.tokenPhoto),
-    accountHolder: v.accountHolder?.trim() || defaults.accountHolder,
-    bankProvider: v.bankProvider || defaults.bankProvider,
-    accountNumber: v.accountNumber?.trim() || defaults.accountNumber,
-    memoRollEnabled: v.memoRollEnabled ?? defaults.memoRollEnabled,
-    digitalGiftEnabled: v.digitalGiftEnabled ?? defaults.digitalGiftEnabled,
-    songRequestEnabled: v.songRequestEnabled ?? defaults.songRequestEnabled,
+    // link under it has never been asked for: see `hbd-byb.22`.
+    photoShareUrl: '',
+    galleryPhotos: v.galleryPhotos ?? [],
+    tokenMessage: v.tokenMessage?.trim() ?? '',
+    tokenPhotos: v.tokenPhoto ?? [],
+    accountHolder: v.accountHolder?.trim() ?? '',
+    bankProvider: v.bankProvider ?? '',
+    accountNumber: v.accountNumber?.trim() ?? '',
+    memoRollEnabled: v.memoRollEnabled ?? false,
+    digitalGiftEnabled: v.digitalGiftEnabled ?? false,
+    songRequestEnabled: v.songRequestEnabled ?? false,
   };
 }
 
@@ -524,21 +553,44 @@ export function weddingContentFrom(
 /**
  * Initial form values for the creator (prefills preview on first paint).
  *
- * Every field a couple types in or chooses is deliberately absent. The design
- * draws all of them empty, with its example written as grey placeholder text,
- * so filling them in would put the design's examples into a couple's invitation
- * as if they had chosen them. Nothing is lost by leaving them out:
- * `formValuesToContent` falls back to the sample invitation for anything
- * unanswered, so the Site Preview still has a wedding to show.
+ * Almost every field a couple types in is deliberately absent. The design draws
+ * them empty, with its example written as grey placeholder text, and filling
+ * them in would put the design's examples into a couple's invitation as if they
+ * had chosen them. Nothing invents them later either: an unanswered field is
+ * empty all the way through to the saved record and the invitation.
  *
- * What is here is the state a field cannot start without: an empty list for
- * every field that holds files, and the three switches, each of which starts on.
+ * The Holy Verse is the exception, and it is a Prefill rather than a Fallback.
+ * Most couples using this template want Ar-Rum 21, so it is written into the
+ * field where they can see it, change it and clear it - theirs from the first
+ * paint, saved like anything they typed, and gone for good if they delete it.
+ * That is the whole difference: a Prefill is an answer offered, a Fallback is an
+ * answer assumed. See CONTEXT.md.
+ *
+ * The rest is the state a field cannot start without: an empty list for every
+ * field that holds files, and the three switches, each of which starts on.
  *
  * On, because every one of them decides whether a block a couple has not looked
  * at yet appears, and the invitation the design draws has all three. A couple
  * who never touches them gets the invitation they were shown; turning something
  * off is the decision, and it is theirs to make.
  */
+/**
+ * The scripture the Holy Verse Section opens already holding.
+ *
+ * Written out here rather than read off the sample invitation. The two happen to
+ * be the same words today and they are not the same thing: this is an answer
+ * offered to a couple, and the sample's is one wedding's content. Tying them
+ * together would mean editing the sample silently changed what every new couple
+ * is offered.
+ */
+export const PREFILLED_VERSE_CITATION = 'Q.S Ar-Rum : 21';
+export const PREFILLED_VERSE_TEXT =
+  'Dan di antara tanda-tanda (kebesaran)-Nya ialah Dia menciptakan ' +
+  'pasangan-pasangan untukmu dari jenismu sendiri, agar kamu cenderung dan ' +
+  'merasa tenteram kepadanya, dan Dia menjadikan di antaramu rasa cinta dan ' +
+  'kasih sayang. Sesungguhnya pada yang demikian itu benar-benar terdapat ' +
+  'tanda-tanda (kebesaran Allah) bagi kaum yang berpikir';
+
 export function getDefaultFormValues(): WeddingInvitationFormValues {
   const d = DEFAULT_WEDDING_TEMPLATE_1_CONTENT;
   return {
@@ -549,6 +601,8 @@ export function getDefaultFormValues(): WeddingInvitationFormValues {
     eventPhotos: [],
     galleryPhotos: [],
     tokenPhoto: [],
+    verseCitation: PREFILLED_VERSE_CITATION,
+    verseText: PREFILLED_VERSE_TEXT,
     memoRollEnabled: d.memoRollEnabled,
     digitalGiftEnabled: d.digitalGiftEnabled,
     songRequestEnabled: d.songRequestEnabled,

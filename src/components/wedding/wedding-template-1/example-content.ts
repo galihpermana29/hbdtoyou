@@ -75,7 +75,7 @@ function exampleWeddingPhotographs() {
     mapPhoto: sample.mapPhoto,
     eventPhotos: [...sample.eventPhotos],
     galleryPhotos: [...sample.galleryPhotos],
-    tokenPhoto: sample.tokenPhoto,
+    tokenPhotos: [...sample.tokenPhotos],
   };
 }
 
