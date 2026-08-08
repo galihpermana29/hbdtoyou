@@ -79,6 +79,14 @@ export interface ReplyingGuest {
    * guest who can reply - it is only the name that has to be asked for.
    */
   name: string;
+  /**
+   * How many people a yes to the plus one question counts as: the MaxPlusOnes
+   * the Guest List holds for this guest, or one where their row carries no
+   * number. The design asks whether they bring somebody rather than how many,
+   * so yes claims every seat the couple allowed them - a guest allowed two who
+   * could only ever say one was the gap `hbd-381` was about.
+   */
+  maxPlusOnes: number;
 }
 
 /** What became of a reply, in the shape a save's outcome is told in. */
@@ -392,11 +400,9 @@ export default function RsvpCard({
         {
           is_attending: rsvp.attending,
           // The design asks whether a guest brings somebody and the backend
-          // counts how many, so yes is one and no is none. A guest the Guest
-          // List allows two can therefore only claim one, which is the gap seen
-          // from the guest's end and is reported rather than worked around -
-          // `hbd-381`.
-          plus_one_count: rsvp.plusOne ? 1 : 0,
+          // counts how many, so yes is every seat the Guest List allows this
+          // guest and no is none - `hbd-381`.
+          plus_one_count: rsvp.plusOne ? guest.maxPlusOnes : 0,
           // An empty message is left out rather than sent as nothing, so the
           // couple's reply list holds a message only where a guest wrote one.
           message: rsvp.message || undefined,

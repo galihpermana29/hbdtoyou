@@ -124,7 +124,24 @@ export default async function WeddingInvitationViewerPage({
           addressee={addressee}
           guest={
             guestRow
-              ? { slug: params.slug, token, name: addressee ?? '' }
+              ? {
+                  slug: params.slug,
+                  token,
+                  name: addressee ?? '',
+                  // How many a yes to the plus one question counts as. A whole
+                  // number, zero included, is the couple's own word and
+                  // stands, the same reading `plusOnesFrom` gives this column
+                  // on its way in. Anything else - the field absent, or a
+                  // value that was never a count - reads as one, which is not
+                  // a number invented for the couple but the guest's own yes
+                  // counted, the way every yes was before the Guest List
+                  // carried a number.
+                  maxPlusOnes:
+                    Number.isInteger(guestRow.MaxPlusOnes) &&
+                    guestRow.MaxPlusOnes >= 0
+                      ? guestRow.MaxPlusOnes
+                      : 1,
+                }
               : undefined
           }
           sealed
