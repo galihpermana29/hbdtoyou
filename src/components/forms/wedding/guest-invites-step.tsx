@@ -47,6 +47,11 @@ import { type Guest, type GuestList } from './guest-list';
  * step's - the backend holds it, and `use-guest-roster.ts` reads it back and
  * sends every change to it - so what this step does with a chosen file is hand
  * it over, and what it does with a correction or a deletion is ask for one.
+ *
+ * On an invitation opened again the Guest List is not here at all: the couple
+ * manages it on its own screen, `/dashboard/wedding/{id}/guests`, and the same
+ * list drawn in two places would be the same six columns this step was too
+ * narrow for. Creating keeps the card, exactly as the design draws it.
  */
 
 export interface GuestInvitesStepProps {
@@ -94,6 +99,15 @@ export interface GuestInvitesStepProps {
    * ask the backend whether the invitation may go out - it already has.
    */
   isAlreadyPublished?: boolean;
+  /**
+   * Whether the invitation being filled in is one opened again from the
+   * couple's own listing, rather than one being made.
+   *
+   * An opened invitation's Guest List lives on its own screen in the
+   * dashboard, so this step does not draw the card and nothing here replaces
+   * it. A couple creating still sees it, exactly as the design draws it.
+   */
+  isOpenedAgain?: boolean;
   /** Go back to the details and story step. */
   onPreviousStep: () => void;
   /**
@@ -162,6 +176,7 @@ export default function GuestInvitesStep({
   guestListProblem,
   isGuestListBusy,
   isAlreadyPublished = false,
+  isOpenedAgain = false,
   onPreviousStep,
   onConfirm,
   onSaveAsDraft,
@@ -263,22 +278,24 @@ export default function GuestInvitesStep({
             </div>
           </section>
 
-          <section className="flex flex-col">
-            <h3 className={flowSectionName}>{copy.addGuestList}</h3>
-            <p className={flowHint}>
-              Personalize your invitation domain &amp; message for your guests
-              to see
-            </p>
+          {isOpenedAgain ? null : (
+            <section className="flex flex-col">
+              <h3 className={flowSectionName}>{copy.addGuestList}</h3>
+              <p className={flowHint}>
+                Personalize your invitation domain &amp; message for your
+                guests to see
+              </p>
 
-            <GuestListField
-              guestList={guestList}
-              onUpload={onUploadGuestList}
-              onCorrect={onCorrectGuest}
-              onDelete={onDeleteGuest}
-              problem={guestListProblem}
-              isBusy={isGuestListBusy}
-            />
-          </section>
+              <GuestListField
+                guestList={guestList}
+                onUpload={onUploadGuestList}
+                onCorrect={onCorrectGuest}
+                onDelete={onDeleteGuest}
+                problem={guestListProblem}
+                isBusy={isGuestListBusy}
+              />
+            </section>
+          )}
 
           <div className={`mt-[24px] ${flowActionRow}`}>
             <button
