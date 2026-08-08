@@ -31,6 +31,14 @@
  * scrolls on one axis and not the other, which is the whole of "inside its own
  * box rather than pushing the page sideways" said as a property.
  *
+ * The card carries one more thing below 1440, and it is deliberately unclaimed:
+ * a line saying the columns scroll, for the widths where there is no scrollbar
+ * to say it instead. It is `display: none` at the width this check drives, so
+ * there is nothing on the page to assert - and asserting it would mean driving a
+ * second width, which is a different question from whether the screen matches
+ * the design. It is a `p` rather than a `div`, so the two claims below that ask
+ * the card for a `div` by position are unmoved by it.
+ *
  * The five headings are also the only automated claim about the template file a
  * couple downloads. `guest-list.ts` writes the template, names a heading row's
  * words and draws this table from one list of columns, so a heading asserted

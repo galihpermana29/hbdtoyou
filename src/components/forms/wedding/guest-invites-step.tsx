@@ -176,8 +176,15 @@ export default function GuestInvitesStep({
 
   const messageRef = useHeightOfContent(values.greetingMessage, isCurrent);
 
+  // Two columns as the design draws them, and one below lg. The Invitation
+  // Preview is a picture of a phone 405px wide standing beside a form, and a
+  // phone has no 405px to spare for it: side by side at 390 the form was left
+  // with almost nothing, one word to a line and its actions off the left-hand
+  // edge of the window entirely, which is the fault this was raised over. So
+  // below lg the preview goes under the form rather than beside it, and the
+  // form - the thing a couple came here to fill in - gets the width.
   return (
-    <div className="flex gap-[60px]">
+    <div className="flex flex-col gap-[40px] lg:flex-row lg:gap-[60px]">
       <div className="flex min-w-0 flex-1 flex-col gap-[48px]">
         <div>
           <h2 className="text-[36px] font-[600] leading-[50px] text-[#1B1B1B]">
@@ -344,7 +351,9 @@ export default function GuestInvitesStep({
         </form>
       </div>
 
-      <div className="shrink-0 self-start border-l border-[#EAECF0] pl-[60px]">
+      {/* The rule down the left is the division between two columns, so it
+          goes with them: below lg there is one column and nothing to divide. */}
+      <div className="w-full self-start lg:w-auto lg:shrink-0 lg:border-l lg:border-[#EAECF0] lg:pl-[60px]">
         <GuestInvitesPreview
           message={values.greetingMessage}
           substitutions={{

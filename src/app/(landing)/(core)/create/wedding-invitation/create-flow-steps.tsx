@@ -157,8 +157,19 @@ export default function CreateFlowSteps({
             </div>
 
             {/* 200px of text, then a gutter, so the words never run into the
-                next step's when the steps are narrower than the design's. */}
-            <div className="mt-[12px] max-w-[216px] pr-[16px]">
+                next step's when the steps are narrower than the design's. A
+                phone leaves each step about 80px of that, so the gutter closes
+                to 8px there.
+
+                The description is left off below md for the same reason. Four
+                of them in four 70px columns is fifteen lines of one word each,
+                and a stepper nobody can read says less about where a couple is
+                than the four titles alone do. The titles stay, because naming
+                where they are and what is left is the whole of what a stepper
+                is for. The design draws this at 1440 and says nothing about a
+                phone, which is the clause
+                `docs/adr/0002-figma-is-literal-truth.md` closes with. */}
+            <div className="mt-[12px] max-w-[216px] pr-[8px] md:pr-[16px]">
               <p
                 className={`text-[14px] font-[600] leading-[20px] ${
                   isCurrent ? CURRENT_CLASS : step.restingTitleClass
@@ -166,7 +177,7 @@ export default function CreateFlowSteps({
                 {copy[step.copyKey]}
               </p>
               <p
-                className={`text-[14px] font-[400] leading-[20px] ${
+                className={`hidden text-[14px] font-[400] leading-[20px] md:block ${
                   isCurrent ? CURRENT_CLASS : step.restingDescriptionClass
                 }`}>
                 {copy[step.descriptionKey]}

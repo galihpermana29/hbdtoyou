@@ -255,8 +255,15 @@ export const flowActionPlayPreview =
 /** The published screen's Back to home, filled as the forward action is. */
 export const flowActionHome = `${FILLED} py-[12px] pl-[20px] pr-[18px] font-[700]`;
 
-/** The row those two sit in, ranged right as the design ranges them. */
-export const flowActionRow = 'flex justify-end gap-[20px]';
+/**
+ * The row those two sit in, ranged right as the design ranges them.
+ *
+ * Wrapping, because a step can end in three actions and a phone is not always
+ * wide enough for three. Nothing moves while they fit, which is every screen
+ * the design draws; what wrapping buys is that the last of them ends up on a
+ * second line rather than past the edge of the window.
+ */
+export const flowActionRow = 'flex flex-wrap justify-end gap-[20px]';
 
 /**
  * The column a preview panel stands in, on both screens that show one.

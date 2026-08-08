@@ -109,10 +109,14 @@ export default function PublishedStep({
     }
   }
 
+  // The invitation stands beside the news at the width the design is drawn at,
+  // and above it below lg: it is a phone 405px wide, and a phone screen has
+  // nothing left over once it has drawn one. Above rather than below, because
+  // it is the thing the words are about.
   return (
-    <div className="flex">
+    <div className="flex flex-col lg:flex-row">
       <aside
-        className={`mr-[60px] w-[405px] shrink-0 ${flowPreviewTray}`}
+        className={`mb-[40px] w-[405px] max-w-full lg:mb-0 lg:mr-[60px] lg:shrink-0 ${flowPreviewTray}`}
         aria-label="Your invitation">
         <div className={flowPreviewScreen}>
           {/* Sealed, because the frame draws the Open Invitation control in
@@ -179,7 +183,9 @@ export default function PublishedStep({
           </p>
         ) : null}
 
-        <div className="flex">
+        {/* Wrapping, so that a window too narrow for both actions side by side
+            puts the second under the first rather than off the edge of it. */}
+        <div className="flex flex-wrap">
           <button
             ref={playRef}
             type="button"

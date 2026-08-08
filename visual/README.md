@@ -161,7 +161,8 @@ It is the only `div` `main` owns, and a second one would fail the run as an ambi
 The Guest List card adds the other, `form [role="group"] > div`, for its header and for the region its columns scroll in.
 Neither has anything of its own to be found by - a header is a row of three things the design already claims separately, and the scrolling region is a plain box - so both are asked for by position within the card, `nth: 0` and `nth: 1`.
 That is weaker than the `main > div` case and worth knowing: a third `div` added directly inside the card would not fail as ambiguous, it would silently move whichever claim sat after it.
-The card holds exactly those two, and adding a third means renumbering both claims in `visual/expectations/guest-invites-populated.mjs`.
+The card holds exactly those two `div`s, and adding a third means renumbering both claims in `visual/expectations/guest-invites-populated.mjs`.
+It holds one other element, the line saying the columns scroll, and that is a `p` for this reason rather than by accident.
 
 The chrome above a screen's own content is the same on all four steps, so it lives in `visual/expectations/page-chrome.mjs` and each screen spreads it in.
 

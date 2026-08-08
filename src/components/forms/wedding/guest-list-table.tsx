@@ -63,13 +63,21 @@ import {
  * "Edit" without inventing a screen nobody designed.
  */
 
-/** The design's card title, and the line beside it saying when the list arrived. */
+/** The design's card title. */
 const TYPE_CARD_TITLE = 'text-[18px] font-[500] leading-[28px] text-[#171717]';
-const TYPE_UPLOAD_DATE = 'text-[12px] font-[500] leading-[18px] text-[#525252]';
 
-/** The design's column heading. */
-const TYPE_COLUMN_HEADING =
-  'text-left text-[12px] font-[500] leading-[18px] text-[#525252]';
+/**
+ * The small grey line the design writes beside that title and above the rows.
+ *
+ * One treatment rather than three, because the design sets the upload date, the
+ * column headings and anything else of that rank in the same size, weight,
+ * leading and colour - so writing them out separately would invite them to
+ * drift apart for a difference the design does not state.
+ */
+const TYPE_SMALL_GREY = 'text-[12px] font-[500] leading-[18px] text-[#525252]';
+
+/** The design's column heading, which is that line ranged left. */
+const TYPE_COLUMN_HEADING = `text-left ${TYPE_SMALL_GREY}`;
 
 /** The design's guest name, worn by every column that holds their answers. */
 const TYPE_GUEST = 'text-[14px] font-[500] leading-[20px] text-[#171717]';
@@ -166,13 +174,18 @@ export default function GuestListTable({
       role="group"
       aria-labelledby={titleId}
       className="overflow-hidden rounded-[12px] border border-[#E5E5E5] bg-white [box-shadow:0_1px_2px_0_rgba(0,0,0,0.06),0_1px_3px_0_rgba(0,0,0,0)]">
-      <div className="flex items-center gap-[16px] pb-[19px] pl-[24px] pr-[24px] pt-[20px]">
+      {/* Wraps rather than crushes. The design draws three things on one line
+          at a card 560px wide; below about 500px the title, the date and the
+          action cannot share a line without each of them going to two, so they
+          take a line each instead. The padding and the 16px between them are
+          the design's either way. */}
+      <div className="flex flex-wrap items-center gap-[16px] pb-[19px] pl-[24px] pr-[24px] pt-[20px]">
         {/* Grows so that the date and the action sit at the far edge, as the
             design places them, without either being given a width. */}
         <h4 id={titleId} className={`flex-1 ${TYPE_CARD_TITLE}`}>
           Guest List
         </h4>
-        <p className={TYPE_UPLOAD_DATE}>
+        <p className={TYPE_SMALL_GREY}>
           Date uploaded {uploadedOn(uploadedAt)}
         </p>
         <button
@@ -191,6 +204,29 @@ export default function GuestListTable({
           isBusy={isBusy}
         />
       </div>
+
+      {/* Said, rather than left to be discovered. The columns have always
+          scrolled sideways inside the card, and on a pointer a scrollbar under
+          the rows says so; on a phone there is no scrollbar at all and the card
+          is narrow enough that four of the six columns are past the edge, so
+          nothing said it and in practice nobody scrolled.
+
+          Gone at 1440 and wider, which is where the design exists and is taken
+          literally, and it draws no such line. Everywhere below that there is
+          no design and usability governs, which is the clause
+          `docs/adr/0002-figma-is-literal-truth.md` closes with - so this is
+          keyed to the design's own width rather than to a breakpoint, which
+          would leave a laptop with neither the line nor a design to justify its
+          absence.
+
+          A `p` and not a `div` on purpose: the card's two `div` children are
+          claimed by position in
+          `visual/expectations/guest-invites-populated.mjs`, and a third would
+          silently move one of those claims. */}
+      <p
+        className={`px-[24px] pb-[12px] min-[1440px]:hidden ${TYPE_SMALL_GREY}`}>
+        Scroll the table sideways to see every column.
+      </p>
 
       {/* The columns scroll here rather than in the page. It is a tab stop
           because a region that only a pointer can scroll is a region somebody

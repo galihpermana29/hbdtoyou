@@ -310,3 +310,14 @@ The collage was replaced because the design states five and the product now asks
 
 This rule holds at desktop width, where the design exists.
 Below that there is no design, so usability governs and the rule does not apply.
+
+Every frame in this file is drawn at 1440, so 1440 is what "desktop width" means here, and it is the width `npm run visual` drives.
+That is deliberately a width rather than a device: a laptop at 1200 is as undesigned as a phone at 390, and a clause that only reached phones would leave the widths in between with neither a design to follow nor permission to depart from one.
+
+What the clause has been used for so far, so that a reader can find it rather than infer it.
+The Create Flow's two columns stack into one below `lg`, on the guest invites step and on the published step, because the Site Preview is a phone 405px wide and a phone has no 405px to spare beside the form.
+The stepper drops its four descriptions below `md`, because four of them in four 70px columns is fifteen lines of one word each.
+The Guest List card says that its columns scroll sideways, below 1440 only, because a phone has no scrollbar to say it instead.
+
+None of these is a deviation to be argued with the designer.
+They are the product at widths the design does not describe, and the moment a frame is drawn at one of them the frame wins.
