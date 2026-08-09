@@ -36,6 +36,10 @@ Other envs in use: `NEXT_PUBLIC_CLOUDINARY_API_SECRET`, `NEXT_PUBLIC_GEMINI_API_
 
 `IS_MAINTENANCE=true` short-circuits the home page (`src/app/page.tsx`) and `/create` to a maintenance screen. Check for this flag before assuming a route renders its real content.
 
+`WEDDING_FLOW_UNGATED=true` stands down the sign-in gate on `/create/wedding-invitation`.
+It exists for one caller: the visual check drives that flow signed out, so the dev server the harness starts (`visual/dev-server.mjs`) is the only place it is set.
+A production build ignores it, so a deployed environment cannot stand the gate down even by mistake.
+
 ## Architecture
 
 ### Routing layout (App Router with route groups)

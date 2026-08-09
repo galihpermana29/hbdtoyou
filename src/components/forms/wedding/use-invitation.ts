@@ -83,14 +83,17 @@
  * through it, keeping nothing. They cannot fill it in either way, because every
  * photograph they upload is refused for the same reason.
  *
- * Asking them to sign in instead is the right answer and is not this bead's:
- * the flow is reachable at its own URL by anybody, which is `hbd-d6z`.
- * `NOT_SIGNED_IN` is what a save answers instead, so that a control pressed on
- * purpose - Save as draft - can say why nothing happened, while Next stays what
- * it already was for somebody who was never going to be able to save. Publishing
- * answers `NOTHING_TO_PUBLISH` for the same visitor and for the same reason:
- * there is no invitation, so there is nothing to ask the backend about, and
- * Confirm Create carries them on exactly as it did before any of this saved.
+ * The route no longer lets that visitor in: it asks them to sign in first, by
+ * sending them to the landing page whose own control signs them in and brings
+ * them back - see the flow's `page.tsx`. So nobody reaches this hook without an
+ * account except on a server whose gate was deliberately stood down, which is
+ * one server: the one the check starts, because the check drives the flow
+ * signed out. `NOT_SIGNED_IN` is what a save answers there, so that a control
+ * pressed on purpose - Save as draft - can say why nothing happened, while Next
+ * stays a step and not a save. Publishing answers `NOTHING_TO_PUBLISH` for the
+ * same drive and for the same reason: there is no invitation, so there is
+ * nothing to ask the backend about, and Confirm Create carries the check on to
+ * the published screen it is there to hold against the design.
  */
 
 import { useRef, useState } from 'react';

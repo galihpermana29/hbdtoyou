@@ -12,8 +12,12 @@ import {
   MailCheck,
   Music,
 } from 'lucide-react';
+import { signIn } from 'next-auth/react';
 import Link from 'next/link';
 import { useState } from 'react';
+
+import { useMemoifySession } from '@/app/session-provider';
+import { CREATE_FLOW_ROUTE } from '@/components/forms/wedding/create-flow-route';
 
 /**
  * Shared fade-up reveal for sections as they scroll into view. Mirrors the
@@ -130,6 +134,7 @@ const ReviewCard = ({ review }: { review: (typeof REVIEWS)[number] }) => (
 
 export default function WeddingInvitationPage() {
   const [email, setEmail] = useState('');
+  const session = useMemoifySession();
 
   return (
     <div className="bg-white">
@@ -171,7 +176,18 @@ export default function WeddingInvitationPage() {
 
         <div className="mx-auto max-w-6xl 2xl:max-w-7xl px-[20px] mt-[48px] flex flex-col sm:flex-row gap-[16px] justify-center items-center">
           <Link
-            href="/create/wedding-invitation"
+            href={CREATE_FLOW_ROUTE}
+            // The Create Flow needs an account - saving needs an owner and
+            // uploads need a bearer token - so a visitor without one is signed
+            // in first, the same way choosing a template on /create is. The
+            // callback carries them into the flow they were opening, rather
+            // than to the home page a plain sign-in lands on.
+            onClick={(event) => {
+              if (!session?.accessToken) {
+                event.preventDefault();
+                signIn('google', { callbackUrl: CREATE_FLOW_ROUTE });
+              }
+            }}
             className="flex items-center justify-center gap-2 h-[60px] w-full sm:w-auto px-[40px] rounded-[8px] bg-[#E34013] text-white font-[600] text-[16px]">
             Start My Invitation <ArrowRight size={18} />
           </Link>
