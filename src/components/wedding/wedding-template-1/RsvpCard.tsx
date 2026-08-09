@@ -460,28 +460,33 @@ export default function RsvpCard({
    * act, once, so it earns a modal's full animation: the dark ground fades in
    * and the card rises into place with a paper-weight settle. Closing is the
    * same path back at half the time - leaving should never make anybody wait.
-   * A guest who asked for reduced motion gets the designed states instantly,
-   * both ways.
+   * A guest who asked for reduced motion still sees the card arrive and leave
+   * rather than a hard cut - a brief opacity-only fade, with the movement (the
+   * rise and the settle) dropped. Gentler, not zero.
    *
    * The card's rise rides on the form, which is safe because `useFitToPhone`
    * scales with `zoom` rather than `transform` - the two never fight.
    */
   const backdrop = reduce
     ? {
-        initial: false as const,
-        exit: { opacity: 0, transition: { duration: 0 } },
+        initial: { opacity: 0 },
+        transition: { duration: 0.12, ease: EASE },
+        exit: { opacity: 0, transition: { duration: 0.12, ease: EASE } },
       }
     : {
         initial: { opacity: 0 },
+        transition: { duration: 0.25, ease: EASE },
         exit: { opacity: 0, transition: { duration: 0.2, ease: EASE } },
       };
   const card = reduce
     ? {
-        initial: false as const,
-        exit: { opacity: 0, transition: { duration: 0 } },
+        initial: { opacity: 0 },
+        transition: { duration: 0.12, ease: EASE },
+        exit: { opacity: 0, transition: { duration: 0.12, ease: EASE } },
       }
     : {
         initial: { opacity: 0, y: 24, scale: 0.97 },
+        transition: { type: 'spring' as const, duration: 0.45, bounce: 0.15 },
         exit: {
           opacity: 0,
           y: 12,
@@ -499,7 +504,6 @@ export default function RsvpCard({
       tabIndex={-1}
       {...backdrop}
       animate={{ opacity: 1 }}
-      transition={{ duration: 0.25, ease: EASE }}
       className="fixed inset-0 z-[100] overflow-y-auto overscroll-contain bg-[#090909]/80 outline-none">
       <motion.form
         ref={fit.frame}
@@ -507,7 +511,6 @@ export default function RsvpCard({
         onSubmit={reply}
         {...card}
         animate={{ opacity: 1, y: 0, scale: 1 }}
-        transition={{ type: 'spring', duration: 0.45, bounce: 0.15 }}
         className="relative mx-auto w-[375px] max-w-full overflow-hidden pb-[43px] pt-[52px]">
         {/* The paper card, Figma `Rectangle 1` 312:3858, and what is on it. */}
         <div className="relative ml-[42px] w-[312px] pb-[5px] pr-[15px] pt-[25px]">

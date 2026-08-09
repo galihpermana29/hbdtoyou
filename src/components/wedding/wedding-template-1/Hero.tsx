@@ -72,7 +72,7 @@ const CARD_LINE_MAX_WIDTH = 210;
  *
  * A step with a `bounce` moves as a spring rather than a tween: the seal snaps
  * free and the cards settle like paper rather than easing like a slide. Bounce
- * is kept subtle (0.35 at most) so the overshoot reads as weight, not play, and
+ * is kept subtle (0.3 at most) so the overshoot reads as weight, not play, and
  * a spring's visible motion completes at its `duration`, so the unlock
  * arithmetic below still holds.
  *
@@ -81,7 +81,7 @@ const CARD_LINE_MAX_WIDTH = 210;
  * in step if the choreography is ever retimed.
  */
 export const OPENING = {
-  seal: { delay: 0, duration: 0.3, bounce: 0.35 },
+  seal: { delay: 0, duration: 0.3, bounce: 0.3 },
   envelope: { delay: 0.3, duration: 0.6 },
   cards: { delay: 0.75, duration: 0.95, bounce: 0.18 },
 };
@@ -116,7 +116,21 @@ const OPENING_SECONDS = Math.max(
  */
 const ADDRESSEE_MAX_HEIGHT = 32;
 
-/** One step of the opening, or no movement at all where none is wanted. */
+/**
+ * The whole opening where less motion is asked for: gentler, not zero. Every
+ * step becomes one brief opacity-only cross-fade, together rather than in
+ * sequence, and the movement - the seal's lift, the cards' rise and splay - is
+ * dropped by snapping `transform` to its target while the fade runs. A guest
+ * still sees the envelope give way to the cards instead of a hard cut, and
+ * nothing travels.
+ */
+const REDUCED_STEP = {
+  duration: 0.12,
+  ease: EASE,
+  transform: { duration: 0 },
+} as const;
+
+/** One step of the opening, or the gentle cross-fade where less is wanted. */
 const step = (
   reduce: boolean | null,
   {
@@ -126,7 +140,7 @@ const step = (
   }: { delay: number; duration: number; bounce?: number }
 ) =>
   reduce
-    ? { duration: 0 }
+    ? REDUCED_STEP
     : bounce !== undefined
       ? { type: 'spring' as const, duration, bounce, delay }
       : { duration, delay, ease: EASE };
@@ -182,10 +196,14 @@ function EnvelopeCard({
           visibility: opened ? 'visible' : 'hidden',
         }}
         initial={false}
+        // The full transform string rather than framer's y/scale shorthands:
+        // the shorthands run on the main thread via rAF and can drop frames
+        // under load, while a transform string is hardware-accelerated.
         animate={{
           opacity: opened ? 1 : 0,
-          y: opened ? 0 : TUCK,
-          scale: opened ? 1 : 0.82,
+          transform: opened
+            ? 'translateY(0px) scale(1)'
+            : `translateY(${TUCK}px) scale(0.82)`,
         }}
         transition={step(reduce, OPENING.cards)}>
         {/* couple photo card (tilted -8.41deg). Tucked in the envelope it lies
@@ -199,7 +217,9 @@ function EnvelopeCard({
           <motion.div
             className="flex-none"
             initial={false}
-            animate={{ scale: 1, rotate: opened ? -8.41 : -2.5 }}
+            animate={{
+              transform: opened ? 'rotate(-8.41deg)' : 'rotate(-2.5deg)',
+            }}
             transition={step(reduce, OPENING.cards)}>
             <div
               className="relative h-[177.944px] w-[264.046px]"
@@ -260,7 +280,9 @@ function EnvelopeCard({
           <motion.div
             className="flex-none"
             initial={false}
-            animate={{ scale: 1, rotate: opened ? 6.05 : 1.8 }}
+            animate={{
+              transform: opened ? 'rotate(6.05deg)' : 'rotate(1.8deg)',
+            }}
             transition={step(reduce, OPENING.cards)}>
             <div
               className="relative h-[177.944px] w-[264.046px]"
@@ -390,7 +412,9 @@ function EnvelopeCard({
           <motion.div
             className="absolute left-[164px] top-[307px] h-[58px] w-[57px]"
             initial={false}
-            animate={{ y: opened ? -22 : 0 }}
+            animate={{
+              transform: opened ? 'translateY(-22px)' : 'translateY(0px)',
+            }}
             transition={step(reduce, OPENING.seal)}>
             <WaxSeal />
           </motion.div>
@@ -464,8 +488,8 @@ export default function Hero({
 
   // The invitation is handed over at the end of the opening rather than at the
   // start of it, so a guest is not scrolling past the envelope while it is
-  // still moving. Nothing waits when nothing moves: a guest who has asked for
-  // reduced motion is given the invitation at once.
+  // still moving. A guest who has asked for reduced motion gets only the brief
+  // cross-fade and is given the invitation at once.
   useEffect(() => {
     if (!sealed || !envelopeOpened) return;
     if (reduce) {
