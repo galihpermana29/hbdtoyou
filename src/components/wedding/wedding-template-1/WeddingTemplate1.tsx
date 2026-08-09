@@ -1,12 +1,13 @@
 'use client';
 
+import { AnimatePresence, motion, useReducedMotion } from 'framer-motion';
 import { useCallback, useEffect, useRef, useState } from 'react';
 
 import BrideGroom from './BrideGroom';
 import EventDetails from './EventDetails';
 import Footer from './Footer';
 import Gallery from './Gallery';
-import Hero from './Hero';
+import Hero, { OPENING } from './Hero';
 import HolyVerse from './HolyVerse';
 import LoveStory from './LoveStory';
 import Messages from './Messages';
@@ -17,6 +18,7 @@ import VinylWidget from './VinylWidget';
 import { SealedProvider } from './sealed-context';
 import { useBeginAtTheTop, type Scroller } from './use-begin-at-the-top';
 import { useFitToPhone } from './use-fit-to-phone';
+import { EASE } from './variants';
 import {
   DEFAULT_WEDDING_TEMPLATE_1_CONTENT,
   type WeddingTemplate1Content,
@@ -122,6 +124,7 @@ export default function WeddingTemplate1({
    */
   const [rsvps, setRsvps] = useState<Rsvp[]>([]);
   const [replying, setReplying] = useState(false);
+  const reduce = useReducedMotion();
 
   /**
    * Whether the envelope is still closed over the rest of the invitation.
@@ -244,16 +247,22 @@ export default function WeddingTemplate1({
         </div>
       </main>
 
-      {replying && (
-        <RsvpCard
-          guest={guest}
-          onClose={() => setReplying(false)}
-          onKeep={(rsvp) => {
-            setRsvps((taken) => [...taken, rsvp]);
-            setReplying(false);
-          }}
-        />
-      )}
+      {/* AnimatePresence keeps the card mounted through its exit, so closing
+          is the entrance played back rather than a disappearance. The dialog's
+          focus return and scroll unlock run on the real unmount, 200ms later,
+          which holds the page still until the card has actually gone. */}
+      <AnimatePresence>
+        {replying && (
+          <RsvpCard
+            guest={guest}
+            onClose={() => setReplying(false)}
+            onKeep={(rsvp) => {
+              setRsvps((taken) => [...taken, rsvp]);
+              setReplying(false);
+            }}
+          />
+        )}
+      </AnimatePresence>
 
       {offersTrack && (
         <>
@@ -272,9 +281,24 @@ export default function WeddingTemplate1({
               music without opening the invitation. */}
           {!unopened && (
             <div className="pointer-events-none fixed inset-x-0 bottom-0 z-50 mx-auto flex max-w-[375px] justify-end p-4">
-              <div className="pointer-events-auto">
+              {/* On a sealed invitation the record arrives mid-opening, timed
+                  off the envelope cross-fade's own start so it is settled in
+                  the corner by the time the cards have risen - appearing
+                  rather than popping. Anywhere else it is part of the page and
+                  is drawn at rest, like every other reveal. */}
+              <motion.div
+                className="pointer-events-auto"
+                initial={
+                  sealed && !reduce ? { opacity: 0, y: 12, scale: 0.9 } : false
+                }
+                animate={{ opacity: 1, y: 0, scale: 1 }}
+                transition={{
+                  duration: 0.4,
+                  ease: EASE,
+                  delay: OPENING.envelope.delay,
+                }}>
                 <VinylWidget playing={trackPlaying} onToggle={toggleTrack} />
-              </div>
+              </motion.div>
             </div>
           )}
         </>

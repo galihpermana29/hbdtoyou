@@ -23,9 +23,9 @@
  */
 
 import { useEffect, useState } from 'react';
-import { motion } from 'framer-motion';
+import { motion, useReducedMotion } from 'framer-motion';
 
-import { fadeUp, fadeUpCenter } from './variants';
+import { fadeUp, fadeUpCenter, pressTap } from './variants';
 import { useWeddingReveal } from './use-wedding-reveal';
 import { AutoFitText } from './AutoFitText';
 import { formatWeddingDateLabel } from './wedding-date-label';
@@ -121,6 +121,7 @@ export default function EventDetails({
    */
   onReply: () => void;
 }) {
+  const reduce = useReducedMotion();
   const fadeUpCenterReveal = useWeddingReveal(fadeUpCenter);
   const fadeUpReveal = useWeddingReveal(fadeUp);
   const [mounted, setMounted] = useState(false);
@@ -210,15 +211,16 @@ export default function EventDetails({
                   the written address instead, so it opens in whichever maps
                   application the guest already uses. */}
               {directions ? (
-                <a
+                <motion.a
                   href={directions}
                   target="_blank"
                   rel="noopener noreferrer"
+                  whileTap={reduce ? undefined : pressTap}
                   className="flex items-center justify-center border border-solid border-[#fafafa] gap-[10px] p-[10px]">
                   <p className="whitespace-nowrap font-[family-name:var(--font-wt1-mono)] text-[12px] font-normal leading-[normal] text-[#fafafa]">
                     View Location
                   </p>
-                </a>
+                </motion.a>
               ) : (
                 <div className="flex items-center justify-center border border-solid border-[#fafafa] gap-[10px] p-[10px]">
                   <p className="whitespace-nowrap font-[family-name:var(--font-wt1-mono)] text-[12px] font-normal leading-[normal] text-[#fafafa]">
@@ -324,15 +326,16 @@ export default function EventDetails({
         </div>
 
         {/* RSVP button */}
-        <button
+        <motion.button
           type="button"
           onClick={onReply}
           aria-haspopup="dialog"
+          whileTap={reduce ? undefined : pressTap}
           className="flex items-center justify-center border border-solid border-[#fafafa] gap-[10px] p-[10px]">
           <p className="whitespace-nowrap font-[family-name:var(--font-wt1-mono)] text-[12px] font-normal leading-[normal] text-[#fafafa]">
             RSVP Now
           </p>
-        </button>
+        </motion.button>
       </motion.div>
     </section>
   );

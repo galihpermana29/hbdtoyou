@@ -28,6 +28,7 @@
  * `src/hooks/use-dialog-behaviour.ts`.
  */
 
+import { motion, useReducedMotion } from 'framer-motion';
 import {
   useId,
   useRef,
@@ -42,6 +43,7 @@ import { submitWeddingRsvp } from '@/action/wedding-api';
 import { useDialogBehaviour } from '@/hooks/use-dialog-behaviour';
 
 import { PaperGround, TornEdge } from './TornPaper';
+import { EASE, pressTap } from './variants';
 import { useFitToPhone } from './use-fit-to-phone';
 
 const ASSET = '/templates/wedding-template-1';
@@ -326,6 +328,7 @@ export default function RsvpCard({
   onKeep: (rsvp: Rsvp) => void;
 }) {
   const dialogRef = useRef<HTMLDivElement>(null);
+  const reduce = useReducedMotion();
   const titleId = useId();
   const nameId = useId();
   const messageId = useId();
@@ -452,18 +455,59 @@ export default function RsvpCard({
     }
   };
 
+  /**
+   * How the card arrives and leaves. Opening a reply card is a guest's own
+   * act, once, so it earns a modal's full animation: the dark ground fades in
+   * and the card rises into place with a paper-weight settle. Closing is the
+   * same path back at half the time - leaving should never make anybody wait.
+   * A guest who asked for reduced motion gets the designed states instantly,
+   * both ways.
+   *
+   * The card's rise rides on the form, which is safe because `useFitToPhone`
+   * scales with `zoom` rather than `transform` - the two never fight.
+   */
+  const backdrop = reduce
+    ? {
+        initial: false as const,
+        exit: { opacity: 0, transition: { duration: 0 } },
+      }
+    : {
+        initial: { opacity: 0 },
+        exit: { opacity: 0, transition: { duration: 0.2, ease: EASE } },
+      };
+  const card = reduce
+    ? {
+        initial: false as const,
+        exit: { opacity: 0, transition: { duration: 0 } },
+      }
+    : {
+        initial: { opacity: 0, y: 24, scale: 0.97 },
+        exit: {
+          opacity: 0,
+          y: 12,
+          scale: 0.98,
+          transition: { duration: 0.2, ease: EASE },
+        },
+      };
+
   return (
-    <div
+    <motion.div
       ref={dialogRef}
       role="dialog"
       aria-modal="true"
       aria-labelledby={titleId}
       tabIndex={-1}
+      {...backdrop}
+      animate={{ opacity: 1 }}
+      transition={{ duration: 0.25, ease: EASE }}
       className="fixed inset-0 z-[100] overflow-y-auto overscroll-contain bg-[#090909]/80 outline-none">
-      <form
+      <motion.form
         ref={fit.frame}
         style={fit.style}
         onSubmit={reply}
+        {...card}
+        animate={{ opacity: 1, y: 0, scale: 1 }}
+        transition={{ type: 'spring', duration: 0.45, bounce: 0.15 }}
         className="relative mx-auto w-[375px] max-w-full overflow-hidden pb-[43px] pt-[52px]">
         {/* The paper card, Figma `Rectangle 1` 312:3858, and what is on it. */}
         <div className="relative ml-[42px] w-[312px] pb-[5px] pr-[15px] pt-[25px]">
@@ -594,28 +638,35 @@ export default function RsvpCard({
                 that would otherwise appear to have done nothing.
               */}
               {saidOfTheReply && (
-                <p
+                // What became of a press eases in rather than snapping, so the
+                // eye is led to the one line that answers it.
+                <motion.p
                   role="status"
+                  initial={reduce ? false : { opacity: 0, y: 4 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  transition={{ duration: 0.2, ease: EASE }}
                   className="font-[family-name:var(--font-wt1-mono)] text-[10px] font-semibold leading-[normal] text-[#898989]">
                   {saidOfTheReply}
-                </p>
+                </motion.p>
               )}
-              <button
+              <motion.button
                 type="submit"
                 disabled={sending || settled}
+                whileTap={reduce ? undefined : pressTap}
                 className="flex items-center justify-center gap-[10px] border border-solid border-[#fafafa] bg-[#000000] p-[10px]">
                 <p className="whitespace-nowrap font-[family-name:var(--font-wt1-mono)] text-[12px] font-normal leading-[normal] text-[#fafafa]">
                   Submit
                 </p>
-              </button>
-              <button
+              </motion.button>
+              <motion.button
                 type="button"
                 onClick={onClose}
+                whileTap={reduce ? undefined : pressTap}
                 className="flex items-center justify-center gap-[10px] border border-solid border-[#000000] p-[10px]">
                 <p className="whitespace-nowrap font-[family-name:var(--font-wt1-mono)] text-[12px] font-normal leading-[normal] text-[#000000]">
                   Close
                 </p>
-              </button>
+              </motion.button>
             </div>
           </div>
         </div>
@@ -632,7 +683,7 @@ export default function RsvpCard({
             />
           </div>
         </div>
-      </form>
-    </div>
+      </motion.form>
+    </motion.div>
   );
 }

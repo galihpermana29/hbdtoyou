@@ -11,7 +11,7 @@
 import { useEffect, useState } from 'react';
 import { motion, useReducedMotion } from 'framer-motion';
 
-import { fadeUpCenter } from './variants';
+import { fadeUpCenter, pressTap } from './variants';
 import { useWeddingReveal } from './use-wedding-reveal';
 
 import {
@@ -60,6 +60,7 @@ export default function TokenOfLove({
 }: {
   content?: WeddingTemplate1Content;
 }) {
+  const reduce = useReducedMotion();
   const fadeUpCenterReveal = useWeddingReveal(fadeUpCenter);
   const [copied, setCopied] = useState(false);
   const photos = (content.tokenPhotos ?? []).filter(
@@ -148,14 +149,15 @@ export default function TokenOfLove({
                   </p>
                 </div>
               </div>
-              <button
+              <motion.button
                 type="button"
                 onClick={handleCopy}
+                whileTap={reduce ? undefined : pressTap}
                 className="relative flex cursor-pointer items-center justify-center border border-solid border-[#fafafa] bg-black gap-[10px] p-[10px]">
                 <p className="whitespace-nowrap font-[family-name:var(--font-wt1-mono)] text-[12px] leading-[normal] text-[#fafafa]">
                   {copied ? 'copied' : 'copy'}
                 </p>
-              </button>
+              </motion.button>
             </div>
           </div>
 

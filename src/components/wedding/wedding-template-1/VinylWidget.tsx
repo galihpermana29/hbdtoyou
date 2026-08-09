@@ -9,6 +9,9 @@
  * while the track is paused - it is a report of the audio, not an ornament, so
  * whoever draws it tells it what the audio is doing rather than the other way
  * round. Spin is linear at ~10s/turn; the centre cover-art label stays fixed.
+ * A record has mass, so it winds up to speed and coasts back down rather than
+ * starting and stopping dead - the angle it rests at is still exactly where
+ * the coast ended, so a resumed track picks the groove back up.
  * Respects prefers-reduced-motion (no spin, the toggle still works).
  */
 
@@ -18,11 +21,27 @@ import {
   useMotionValue,
   useReducedMotion,
 } from 'framer-motion';
+import { useRef } from 'react';
+
+import { pressTap } from './variants';
 
 const ASSET = '/templates/wedding-template-1';
 
 /** One full turn of the record, in milliseconds. */
 const TURN_MS = 10_000;
+
+/**
+ * How quickly the record chases its target speed, as the time constants of an
+ * exponential approach in milliseconds: up to speed in about a second when the
+ * track starts, and a slightly longer coast down when it pauses, because motors
+ * drive and friction only drags. Interruptible by nature - a track toggled
+ * mid-coast retargets from whatever speed the record still has.
+ */
+const SPIN_UP_TAU = 300;
+const SPIN_DOWN_TAU = 450;
+
+/** Slower than this is stopped: under 1% of full speed, parked at 0. */
+const RESTING_SPEED = 360 / TURN_MS / 100;
 
 export default function VinylWidget({
   playing,
@@ -37,17 +56,26 @@ export default function VinylWidget({
 
   // Driven frame by frame rather than by an infinite animation, because a
   // paused record has to rest exactly where it was: an animation restarted on
-  // resume would snap the record back to its starting angle.
+  // resume would snap the record back to its starting angle. The speed eases
+  // toward its target each frame, which is the inertia.
   const rotate = useMotionValue(0);
+  const speed = useRef(0);
   useAnimationFrame((_, delta) => {
-    if (!playing || reduce) return;
-    rotate.set((rotate.get() + (delta * 360) / TURN_MS) % 360);
+    if (reduce) return;
+    const target = playing ? 360 / TURN_MS : 0;
+    speed.current +=
+      (target - speed.current) *
+      (1 - Math.exp(-delta / (playing ? SPIN_UP_TAU : SPIN_DOWN_TAU)));
+    if (!playing && speed.current < RESTING_SPEED) speed.current = 0;
+    if (speed.current === 0) return;
+    rotate.set((rotate.get() + delta * speed.current) % 360);
   });
 
   return (
-    <button
+    <motion.button
       type="button"
       onClick={onToggle}
+      whileTap={reduce ? undefined : pressTap}
       aria-label={
         playing ? 'Pause the background track' : 'Play the background track'
       }
@@ -81,6 +109,6 @@ export default function VinylWidget({
           src={`${ASSET}/vinyl-exclude.png`}
         />
       </div>
-    </button>
+    </motion.button>
   );
 }

@@ -31,7 +31,7 @@ import { FitText } from './FitText';
 import { AutoFitText } from './AutoFitText';
 import { TornEdge } from './TornPaper';
 import { useSealed } from './sealed-context';
-import { EASE } from './variants';
+import { EASE, pressTap } from './variants';
 import { formatWeddingDateLabel } from './wedding-date-label';
 
 const ASSET = '/templates/wedding-template-1';
@@ -69,11 +69,21 @@ const CARD_LINE_MAX_WIDTH = 210;
  * page unlocks when the last of them has finished, which is what makes opening
  * feel like one act rather than a lock that lets go while the envelope is still
  * moving.
+ *
+ * A step with a `bounce` moves as a spring rather than a tween: the seal snaps
+ * free and the cards settle like paper rather than easing like a slide. Bounce
+ * is kept subtle (0.35 at most) so the overshoot reads as weight, not play, and
+ * a spring's visible motion completes at its `duration`, so the unlock
+ * arithmetic below still holds.
+ *
+ * Exported because the opening is not only the Hero's: the record arrives in
+ * the corner during it, and reading the timing from here is what keeps the two
+ * in step if the choreography is ever retimed.
  */
-const OPENING = {
-  seal: { delay: 0, duration: 0.3 },
+export const OPENING = {
+  seal: { delay: 0, duration: 0.3, bounce: 0.35 },
   envelope: { delay: 0.3, duration: 0.6 },
-  cards: { delay: 0.75, duration: 0.95 },
+  cards: { delay: 0.75, duration: 0.95, bounce: 0.18 },
 };
 
 /**
@@ -109,8 +119,17 @@ const ADDRESSEE_MAX_HEIGHT = 32;
 /** One step of the opening, or no movement at all where none is wanted. */
 const step = (
   reduce: boolean | null,
-  { delay, duration }: { delay: number; duration: number }
-) => (reduce ? { duration: 0 } : { duration, delay, ease: EASE });
+  {
+    delay,
+    duration,
+    bounce,
+  }: { delay: number; duration: number; bounce?: number }
+) =>
+  reduce
+    ? { duration: 0 }
+    : bounce !== undefined
+      ? { type: 'spring' as const, duration, bounce, delay }
+      : { duration, delay, ease: EASE };
 
 /** The envelope with the two cards (save-the-date + couple photo) tucked inside. */
 function EnvelopeCard({
@@ -169,17 +188,19 @@ function EnvelopeCard({
           scale: opened ? 1 : 0.82,
         }}
         transition={step(reduce, OPENING.cards)}>
-        {/* couple photo card (tilted -8.41deg) */}
+        {/* couple photo card (tilted -8.41deg). Tucked in the envelope it lies
+            nearly straight, and it splays out to the tilt the design draws as
+            it rises - two cards fanning apart is what hands do with them. The
+            tucked pose is the animation's own, not a frame the design draws,
+            and it is never seen: the group above holds the cards
+            `visibility: hidden` until the envelope is opened. At rest it is
+            exactly the design's -8.41deg. */}
         <div className="absolute left-0 top-[141.41px] flex h-[214.646px] w-[287.231px] items-center justify-center">
           <motion.div
             className="flex-none"
             initial={false}
-            animate={{ scale: 1, rotate: -8.41 }}
-            transition={{
-              duration: reduce ? 0 : 0.6,
-              ease: EASE,
-              delay: reduce ? 0 : 0.25,
-            }}>
+            animate={{ scale: 1, rotate: opened ? -8.41 : -2.5 }}
+            transition={step(reduce, OPENING.cards)}>
             <div
               className="relative h-[177.944px] w-[264.046px]"
               style={cardShadow}>
@@ -233,17 +254,14 @@ function EnvelopeCard({
           </motion.div>
         </div>
 
-        {/* save the date card (tilted +6.05deg) */}
+        {/* save the date card (tilted +6.05deg), splaying the other way as the
+            pair rises - see the couple photo card above. */}
         <div className="absolute left-[63.66px] top-0 flex h-[204.793px] w-[281.337px] items-center justify-center">
           <motion.div
             className="flex-none"
             initial={false}
-            animate={{ scale: 1, rotate: 6.05 }}
-            transition={{
-              duration: reduce ? 0 : 0.6,
-              ease: EASE,
-              delay: reduce ? 0 : 0.4,
-            }}>
+            animate={{ scale: 1, rotate: opened ? 6.05 : 1.8 }}
+            transition={step(reduce, OPENING.cards)}>
             <div
               className="relative h-[177.944px] w-[264.046px]"
               style={cardShadow}>
@@ -461,10 +479,14 @@ export default function Hero({
     return () => window.clearTimeout(opening);
   }, [sealed, envelopeOpened, reduce]);
 
+  // Drawn at rest wherever the invitation is not Sealed, the same principle
+  // `useWeddingReveal` follows: the Site Preview is a picture of the
+  // invitation, not the invitation arriving.
+  const still = reduce || !sealed;
   const fadeUpMount = (delay: number) => ({
-    initial: reduce ? false : { opacity: 0, y: 16 },
+    initial: still ? false : { opacity: 0, y: 16 },
     animate: { opacity: 1, y: 0 },
-    transition: reduce ? undefined : { duration: 0.6, ease: EASE, delay },
+    transition: still ? undefined : { duration: 0.6, ease: EASE, delay },
   });
 
   return (
@@ -516,7 +538,13 @@ export default function Hero({
             className="flex items-center justify-center border border-solid border-[#fafafa] gap-[10px] p-[10px]"
             initial={false}
             animate={{ opacity: opened ? 0 : 1 }}
-            transition={step(reduce, OPENING.seal)}
+            whileTap={reduce ? undefined : pressTap}
+            // Timed with the seal's lift but as a plain fade: the seal's spring
+            // would bounce an opacity, which only clamps.
+            transition={step(reduce, {
+              delay: OPENING.seal.delay,
+              duration: OPENING.seal.duration,
+            })}
             style={{ pointerEvents: opened ? 'none' : 'auto' }}>
             <p className="whitespace-nowrap font-[family-name:var(--font-wt1-mono)] text-[12px] leading-[normal] text-[#fafafa]">
               Open Invitation

@@ -15,7 +15,13 @@ import { motion, useReducedMotion, type MotionProps } from 'framer-motion';
 
 import { AutoFitBlock } from './AutoFitBlock';
 import { PaperGround, TornEdge } from './TornPaper';
-import { EASE, fadeUp, fadeUpCenter, staggerContainer } from './variants';
+import {
+  EASE,
+  fadeUp,
+  fadeUpCenter,
+  pressTap,
+  staggerContainer,
+} from './variants';
 import { useSealed } from './sealed-context';
 import { useWeddingReveal } from './use-wedding-reveal';
 import {
@@ -170,6 +176,10 @@ function Polaroid({ content }: { content: WeddingTemplate1Content }) {
       onKeyDown={(e) => {
         if (e.key === 'Enter' || e.key === ' ') setRevealed(true);
       }}
+      // A pressable polaroid dips like every other control, but only while it
+      // still has a cover to lift: pressing a revealed photograph does nothing,
+      // so it should not pretend to.
+      whileTap={reduce || isRevealed ? undefined : pressTap}
       className="absolute left-[191px] top-[389px] flex h-[219.836px] w-[178.439px] cursor-pointer items-center justify-center"
       {...reveal}>
       <div className="absolute left-[9.02px] top-[9.9px] h-[156.339px] w-[139.745px]">
