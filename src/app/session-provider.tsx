@@ -161,6 +161,17 @@ function isProductRouteWithoutAds(pathname: string): boolean {
   );
 }
 
+/**
+ * The MemoRoll demo draws the designer's screens edge to edge, so the site
+ * chrome stays off it the same way it stays off a gift: no footer beneath the
+ * walkthrough and no advertisement over it. It is not a gift, though, so it
+ * does not belong in `drawsAGift` - it answers the chrome question here on
+ * its own.
+ */
+function isMemorollDemo(pathname: string): boolean {
+  return pathname === '/memoroll' || pathname.startsWith('/memoroll/');
+}
+
 const SessionProvider = ({
   children,
   session,
@@ -207,7 +218,9 @@ const SessionProvider = ({
   const isPremium = userProfile?.type === 'premium';
 
   const isGift = drawsAGift(segments, contentId);
-  const isHideAds = isGift || isProductRouteWithoutAds(pathname);
+  const isChromeFreeDemo = isMemorollDemo(pathname);
+  const isHideAds =
+    isGift || isChromeFreeDemo || isProductRouteWithoutAds(pathname);
 
   const PREMIUM_ADS_KEY = 'memoify_premium_ads_count';
   const PREMIUM_ADS_LIMIT = 3;
@@ -393,7 +406,7 @@ const SessionProvider = ({
       {/* The site footer would intrude on the page a recipient came to see, so
           it stays off a gift. The Create Flow that builds one is ordinary
           product UI and keeps it. */}
-      {!isGift && <Footer />}
+      {!isGift && !isChromeFreeDemo && <Footer />}
     </SessionContext.Provider>
   );
 };
