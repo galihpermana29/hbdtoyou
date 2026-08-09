@@ -17,11 +17,7 @@ import { fieldTreatment } from './field-treatment';
 import FlowSwitch from './flow-switch';
 import FlowTextField from './flow-text-field';
 import { useFlowCopy } from './flow-language';
-import {
-  requiredPhotos,
-  requiredText,
-  requiredValue,
-} from './required-fields';
+import { requiredPhotos, requiredText, requiredValue } from './required-fields';
 import PhotoDropZone from './photo-drop-zone';
 import { BACKGROUND_TRACK_OPTIONS } from './background-track-catalog';
 
@@ -86,18 +82,24 @@ export default function CoverHeaderSection({
 
         <div className={flowFieldPair}>
           <Form.Item
-          name="brideName"
-          className="!mb-0"
-          rules={requiredText(copy, 'brideNickname')}>
+            name="brideName"
+            className="!mb-0"
+            rules={requiredText(copy, 'brideNickname')}>
             <FlowTextField
-            required label={copy.brideNickname} placeholder="Freya" />
+              required
+              label={copy.brideNickname}
+              placeholder="Freya"
+            />
           </Form.Item>
           <Form.Item
-          name="groomName"
-          className="!mb-0"
-          rules={requiredText(copy, 'groomNickname')}>
+            name="groomName"
+            className="!mb-0"
+            rules={requiredText(copy, 'groomNickname')}>
             <FlowTextField
-            required label={copy.groomNickname} placeholder="Elias" />
+              required
+              label={copy.groomNickname}
+              placeholder="Elias"
+            />
           </Form.Item>
         </div>
 
@@ -122,9 +124,9 @@ export default function CoverHeaderSection({
               cannot be entered. The design puts the calendar mark before the
               date rather than after it, which is what `prefix` is for. */}
           <Form.Item
-          name="weddingDate"
-          className="!mb-0"
-          rules={requiredValue(copy, 'weddingDate')}>
+            name="weddingDate"
+            className="!mb-0"
+            rules={requiredValue(copy, 'weddingDate')}>
             <DatePicker
               id={weddingDateId}
               size="large"

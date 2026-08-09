@@ -237,14 +237,11 @@ export async function updateWeddingInvitation(
   payload: IWeddingInvitationUpdatePayload,
   weddingId: string
 ): Promise<IGlobalResponse<null>> {
-  const updated = await callWedding<null>(
-    `/${encodeURIComponent(weddingId)}`,
-    {
-      method: 'PUT',
-      headers: await ownerHeaders(),
-      body: JSON.stringify(payload),
-    }
-  );
+  const updated = await callWedding<null>(`/${encodeURIComponent(weddingId)}`, {
+    method: 'PUT',
+    headers: await ownerHeaders(),
+    body: JSON.stringify(payload),
+  });
   if (updated.success) forgetTheOldListing();
   return updated;
 }

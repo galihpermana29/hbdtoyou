@@ -2,14 +2,31 @@
 
 import { useCallback, useEffect, useRef, useState } from 'react';
 import Webcam from 'react-webcam';
-import { Form, Input, message, Modal, notification, Progress, Spin } from 'antd';
+import {
+  Form,
+  Input,
+  message,
+  Modal,
+  notification,
+  Progress,
+  Spin,
+} from 'antd';
 import { useRouter } from 'next/navigation';
 import { signIn } from 'next-auth/react';
 import { v4 as uuidv4 } from 'uuid';
 import html2canvas from 'html2canvas';
 import dayjs from 'dayjs';
 import { motion, AnimatePresence } from 'framer-motion';
-import { Camera, Download, RotateCcw, Newspaper, Contrast, Sparkles, Pencil, LogIn } from 'lucide-react';
+import {
+  Camera,
+  Download,
+  RotateCcw,
+  Newspaper,
+  Contrast,
+  Sparkles,
+  Pencil,
+  LogIn,
+} from 'lucide-react';
 
 import boboMascot from '@/assets/1_Bobo.png';
 import NavigationBar from '@/components/ui/navbar';
@@ -542,125 +559,125 @@ const PhotoboxNewspaperPage = () => {
                   backgroundImage:
                     t.grainPaper && grain ? `url(${grain})` : undefined,
                 }}>
-            {/* Masthead */}
-            <div
-              className="px-8 pt-6 pb-5"
-              style={{
-                backgroundColor: t.mastheadBg,
-                color: t.mastheadInk ?? t.ink,
-                borderBottom: t.mastheadBg
-                  ? undefined
-                  : `${t.ruleWidth} solid ${t.ink}`,
-              }}>
-              <div
-                className={`${t.displayClass} text-center text-[17px] ${
-                  t.rounded ? 'tracking-wide' : 'italic'
-                } mb-1`}>
-                {t.brand}
-              </div>
-              <div
-                className={`flex justify-between items-end ${t.bodyClass} text-[12px] uppercase tracking-[0.18em]`}>
-                <span>{t.eyebrowLeft}</span>
-                <span>{t.eyebrowRight}</span>
-              </div>
-              <h2
-                className={`${t.mastheadClass} text-center text-[68px] leading-[1.1] mt-3 pb-1`}>
-                {t.masthead}
-              </h2>
-            </div>
+                {/* Masthead */}
+                <div
+                  className="px-8 pt-6 pb-5"
+                  style={{
+                    backgroundColor: t.mastheadBg,
+                    color: t.mastheadInk ?? t.ink,
+                    borderBottom: t.mastheadBg
+                      ? undefined
+                      : `${t.ruleWidth} solid ${t.ink}`,
+                  }}>
+                  <div
+                    className={`${t.displayClass} text-center text-[17px] ${
+                      t.rounded ? 'tracking-wide' : 'italic'
+                    } mb-1`}>
+                    {t.brand}
+                  </div>
+                  <div
+                    className={`flex justify-between items-end ${t.bodyClass} text-[12px] uppercase tracking-[0.18em]`}>
+                    <span>{t.eyebrowLeft}</span>
+                    <span>{t.eyebrowRight}</span>
+                  </div>
+                  <h2
+                    className={`${t.mastheadClass} text-center text-[68px] leading-[1.1] mt-3 pb-1`}>
+                    {t.masthead}
+                  </h2>
+                </div>
 
-            {/* Dateline strip (broadsheet only) */}
-            {t.dateline && (
-              <div
-                className={`px-8 py-1.5 text-center ${t.bodyClass} text-[11px] uppercase tracking-[0.22em]`}
-                style={{ borderBottom: `1px solid ${t.ink}` }}>
-                Vol. 1 · No. 1 - Jakarta, {dayjs().format('dddd, DD MMMM YYYY')}{' '}
-                - Price 25¢
-              </div>
-            )}
+                {/* Dateline strip (broadsheet only) */}
+                {t.dateline && (
+                  <div
+                    className={`px-8 py-1.5 text-center ${t.bodyClass} text-[11px] uppercase tracking-[0.22em]`}
+                    style={{ borderBottom: `1px solid ${t.ink}` }}>
+                    Vol. 1 · No. 1 - Jakarta,{' '}
+                    {dayjs().format('dddd, DD MMMM YYYY')} - Price 25¢
+                  </div>
+                )}
 
-            {/* Image slot - live webcam or frozen capture. Not clipped, so the
+                {/* Image slot - live webcam or frozen capture. Not clipped, so the
                 mascot can peek up over the masthead band. The photo itself is
                 object-cover at the exact box size, so it never bleeds. */}
-            <div
-              className="relative w-full aspect-[16/9]"
-              style={{
-                backgroundColor: t.photoBg,
-                borderBottom: `${t.ruleWidth} solid ${t.ink}`,
-              }}>
-              {capturedImage ? (
-                <img
-                  src={capturedImage}
-                  alt="Your newspaper photo"
-                  className="w-full h-full object-cover"
-                />
-              ) : (
-                <Webcam
-                  ref={webcamRef}
-                  audio={false}
-                  mirrored
-                  screenshotFormat="image/jpeg"
-                  videoConstraints={videoConstraints}
-                  className="w-full h-full object-cover"
-                  style={{ filter: t.photoFilter }}
-                />
-              )}
+                <div
+                  className="relative w-full aspect-[16/9]"
+                  style={{
+                    backgroundColor: t.photoBg,
+                    borderBottom: `${t.ruleWidth} solid ${t.ink}`,
+                  }}>
+                  {capturedImage ? (
+                    <img
+                      src={capturedImage}
+                      alt="Your newspaper photo"
+                      className="w-full h-full object-cover"
+                    />
+                  ) : (
+                    <Webcam
+                      ref={webcamRef}
+                      audio={false}
+                      mirrored
+                      screenshotFormat="image/jpeg"
+                      videoConstraints={videoConstraints}
+                      className="w-full h-full object-cover"
+                      style={{ filter: t.photoFilter }}
+                    />
+                  )}
 
-              {countdown !== null && (
-                <div className="absolute inset-0 flex items-center justify-center bg-black/50 text-white text-6xl font-bold">
-                  {countdown}
+                  {countdown !== null && (
+                    <div className="absolute inset-0 flex items-center justify-center bg-black/50 text-white text-6xl font-bold">
+                      {countdown}
+                    </div>
+                  )}
+
+                  {t.mascot && (
+                    <img
+                      src={t.mascot}
+                      alt="Mascot"
+                      crossOrigin="anonymous"
+                      className="pointer-events-none select-none absolute -bottom-12 -left-2 z-10 w-[150px] drop-shadow-[0_6px_14px_rgba(0,0,0,0.3)]"
+                    />
+                  )}
                 </div>
-              )}
 
-              {t.mascot && (
-                <img
-                  src={t.mascot}
-                  alt="Mascot"
-                  crossOrigin="anonymous"
-                  className="pointer-events-none select-none absolute -bottom-12 -left-2 z-10 w-[150px] drop-shadow-[0_6px_14px_rgba(0,0,0,0.3)]"
-                />
-              )}
-            </div>
+                {/* Pull quote */}
+                <div
+                  className="px-8 py-6"
+                  style={{ borderBottom: `1px solid ${t.ink}` }}>
+                  <p
+                    className={`${t.displayClass} font-bold text-center text-[32px] leading-tight`}
+                    style={{ color: t.accent }}>
+                    {t.quote}
+                  </p>
+                </div>
 
-            {/* Pull quote */}
-            <div
-              className="px-8 py-6"
-              style={{ borderBottom: `1px solid ${t.ink}` }}>
-              <p
-                className={`${t.displayClass} font-bold text-center text-[32px] leading-tight`}
-                style={{ color: t.accent }}>
-                {t.quote}
-              </p>
-            </div>
+                {/* Body columns */}
+                <div
+                  className={`grid grid-cols-2 px-8 py-7 ${
+                    t.columnDivider ? 'gap-0' : 'gap-8'
+                  }`}>
+                  {t.body.map((col, i) => (
+                    <p
+                      key={i}
+                      className={`${t.bodyClass} text-[15px] leading-relaxed text-justify ${
+                        t.columnDivider ? (i === 1 ? 'pl-8' : 'pr-8') : ''
+                      }`}
+                      style={
+                        t.columnDivider && i === 1
+                          ? { borderLeft: `1px solid ${t.ink}` }
+                          : undefined
+                      }>
+                      {col}
+                    </p>
+                  ))}
+                </div>
 
-            {/* Body columns */}
-            <div
-              className={`grid grid-cols-2 px-8 py-7 ${
-                t.columnDivider ? 'gap-0' : 'gap-8'
-              }`}>
-              {t.body.map((col, i) => (
-                <p
-                  key={i}
-                  className={`${t.bodyClass} text-[15px] leading-relaxed text-justify ${
-                    t.columnDivider ? (i === 1 ? 'pl-8' : 'pr-8') : ''
-                  }`}
-                  style={
-                    t.columnDivider && i === 1
-                      ? { borderLeft: `1px solid ${t.ink}` }
-                      : undefined
-                  }>
-                  {col}
-                </p>
-              ))}
-            </div>
-
-            {/* Footer */}
-            <div
-              className={`px-8 py-3 flex justify-between ${t.bodyClass} text-[12px] uppercase tracking-[0.18em]`}
-              style={{ borderTop: `${t.ruleWidth} solid ${t.ink}` }}>
-              <span>Vol. 1 - No. 1</span>
-              <span>{dayjs().format('DD MMM YYYY')}</span>
-            </div>
+                {/* Footer */}
+                <div
+                  className={`px-8 py-3 flex justify-between ${t.bodyClass} text-[12px] uppercase tracking-[0.18em]`}
+                  style={{ borderTop: `${t.ruleWidth} solid ${t.ink}` }}>
+                  <span>Vol. 1 - No. 1</span>
+                  <span>{dayjs().format('DD MMM YYYY')}</span>
+                </div>
               </motion.div>
             </div>
           </div>

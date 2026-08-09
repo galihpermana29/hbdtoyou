@@ -74,8 +74,8 @@ const premiumAds: AdContent[] = [
     image:
       'https://res.cloudinary.com/dztygf08a/image/upload/v1775671149/au_ads_1_kxqtks.png',
     type: 'image',
-  }
-]
+  },
+];
 
 // Array of promotional content
 const promotionalContent: AdContent[] = [
@@ -224,7 +224,7 @@ const SessionProvider = ({
     try {
       const current = getPremiumAdsCount();
       localStorage.setItem(PREMIUM_ADS_KEY, String(current + 1));
-    } catch { }
+    } catch {}
   };
 
   useEffect(() => {
@@ -246,22 +246,25 @@ const SessionProvider = ({
 
   useEffect(() => {
     if (parsedSession.accessToken) {
-      const interval = setInterval(async () => {
-        setLoading(true);
-        const spotifySession = await getSpotifyAccessToken();
-        const newSession = {
-          spotify: {
-            accessToken: spotifySession.data.access_token,
-            refreshToken: '',
-            expiresIn: dayjs()
-              .add(spotifySession.data.expires_in, 'seconds')
-              .format('YYYY-MM-DD HH:mm:ss'),
-          },
-        };
+      const interval = setInterval(
+        async () => {
+          setLoading(true);
+          const spotifySession = await getSpotifyAccessToken();
+          const newSession = {
+            spotify: {
+              accessToken: spotifySession.data.access_token,
+              refreshToken: '',
+              expiresIn: dayjs()
+                .add(spotifySession.data.expires_in, 'seconds')
+                .format('YYYY-MM-DD HH:mm:ss'),
+            },
+          };
 
-        await setSessionSpecific(newSession.spotify, 'spotify');
-        setLoading(false);
-      }, 1000 * 60 * 30);
+          await setSessionSpecific(newSession.spotify, 'spotify');
+          setLoading(false);
+        },
+        1000 * 60 * 30
+      );
 
       return () => {
         clearInterval(interval);
@@ -284,17 +287,20 @@ const SessionProvider = ({
     }
     if (isPremium && getPremiumAdsCount() >= PREMIUM_ADS_LIMIT) return;
 
-    const interval = setInterval(() => {
-      if (isPremium) {
-        if (getPremiumAdsCount() >= PREMIUM_ADS_LIMIT) {
-          clearInterval(interval);
-          return;
+    const interval = setInterval(
+      () => {
+        if (isPremium) {
+          if (getPremiumAdsCount() >= PREMIUM_ADS_LIMIT) {
+            clearInterval(interval);
+            return;
+          }
+          incrementPremiumAdsCount();
         }
-        incrementPremiumAdsCount();
-      }
-      setCurrentAdContent(selectRandomContent());
-      setAdsModalVisible(true);
-    }, 1000 * 60 * 1);
+        setCurrentAdContent(selectRandomContent());
+        setAdsModalVisible(true);
+      },
+      1000 * 60 * 1
+    );
 
     return () => {
       clearInterval(interval);

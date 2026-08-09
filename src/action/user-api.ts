@@ -1668,9 +1668,7 @@ export async function updateCoupon(
   return { success: true, message: 'success', data: null };
 }
 
-export async function deleteCoupon(
-  id: string
-): Promise<IGlobalResponse<null>> {
+export async function deleteCoupon(id: string): Promise<IGlobalResponse<null>> {
   const session = await getSession();
 
   const res = await fetch(baseUri + `/coupons/${id}`, {

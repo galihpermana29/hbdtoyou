@@ -8,8 +8,9 @@
 
 @font-face {
   font-family: 'Formula1 Display';
-  src: url('/font/Formula1-Display-Bold.woff2') format('woff2'),
-      url('/font/Formula1-Display-Bold.woff') format('woff');
+  src:
+    url('/font/Formula1-Display-Bold.woff2') format('woff2'),
+    url('/font/Formula1-Display-Bold.woff') format('woff');
   font-weight: 500;
   font-style: normal;
   font-display: swap;
@@ -17,8 +18,9 @@
 
 @font-face {
   font-family: 'Formula1 Display';
-  src: url('/font/Formula1-Display-Regular.woff2') format('woff2'),
-      url('/font/Formula1-Display-Regular.woff') format('woff');
+  src:
+    url('/font/Formula1-Display-Regular.woff2') format('woff2'),
+    url('/font/Formula1-Display-Regular.woff') format('woff');
   font-weight: normal;
   font-style: normal;
   font-display: swap;
@@ -26,34 +28,35 @@
 
 @font-face {
   font-family: 'Formula1 Display Wide';
-  src: url('/font/Formula1-Display-Wide.woff2') format('woff2'),
-      url('/font/Formula1-Display-Wide.woff') format('woff');
+  src:
+    url('/font/Formula1-Display-Wide.woff2') format('woff2'),
+    url('/font/Formula1-Display-Wide.woff') format('woff');
   font-weight: 500;
   font-style: normal;
   font-display: swap;
 }
 
-*{
-  font-family: "Plus Jakarta Sans", serif;
+* {
+  font-family: 'Plus Jakarta Sans', serif;
   font-optical-sizing: auto;
   /* font-weight: <weight>; */
   font-style: normal;
   scroll-behavior: smooth;
 }
 
-.ant-upload-wrapper.avatar-uploader .ant-upload.ant-upload-select{
+.ant-upload-wrapper.avatar-uploader .ant-upload.ant-upload-select {
   width: 100% !important;
   height: 200px !important;
   overflow: hidden;
 }
 
 .young-serif-regular {
-  font-family: "Young Serif", serif;
+  font-family: 'Young Serif', serif;
   font-weight: 400;
   font-style: normal;
 }
 .pt-serif-regular {
-  font-family: "PT Serif", serif;
+  font-family: 'PT Serif', serif;
   font-weight: 400;
   font-style: normal;
 }
@@ -62,21 +65,21 @@
   font-family: 'Geist', sans-serif;
 }
 
-.f1-font{
+.f1-font {
   font-family: 'Formula1 Display';
 }
 
-.f1-font-wide{
+.f1-font-wide {
   font-family: 'Formula1 Display Wide';
 }
 
-.f1-font-bold{
+.f1-font-bold {
   font-family: 'Formula1 Display';
   font-weight: bold;
 }
 
 .inter-font {
-  font-family: "Inter", sans-serif;
+  font-family: 'Inter', sans-serif;
   font-weight: 400;
   font-style: normal;
 }
@@ -180,8 +183,6 @@
   body {
     @apply bg-background text-foreground;
   }
-
-
 }
 
 .image-ad .ant-modal-content {
@@ -211,7 +212,7 @@
 /* Optional hover effect for entire card */
 .my-masonry-grid_column > div:hover {
   transform: translateY(-4px);
-  box-shadow: 0 10px 20px rgba(0,0,0,0.1);
+  box-shadow: 0 10px 20px rgba(0, 0, 0, 0.1);
   z-index: 1;
 }
 
@@ -233,30 +234,26 @@
   display: none !important;
 }
 
-
 /*
  *  STYLE 1
  */
 
- #style-1::-webkit-scrollbar-track
- {
-   -webkit-box-shadow: inset 0 0 6px rgba(0,0,0,0.3);
-   border-radius: 10px;
-   background-color: #F5F5F5;
- }
- 
- #style-1::-webkit-scrollbar
- {
-   width: 12px;
-   background-color: #F5F5F5;
- }
- 
- #style-1::-webkit-scrollbar-thumb
- {
-   border-radius: 10px;
-   -webkit-box-shadow: inset 0 0 6px rgba(0,0,0,.3);
-   background-color: #555;
- }
+#style-1::-webkit-scrollbar-track {
+  -webkit-box-shadow: inset 0 0 6px rgba(0, 0, 0, 0.3);
+  border-radius: 10px;
+  background-color: #f5f5f5;
+}
+
+#style-1::-webkit-scrollbar {
+  width: 12px;
+  background-color: #f5f5f5;
+}
+
+#style-1::-webkit-scrollbar-thumb {
+  border-radius: 10px;
+  -webkit-box-shadow: inset 0 0 6px rgba(0, 0, 0, 0.3);
+  background-color: #555;
+}
 
 /* Celestial Tarot (tarotv1) - scoped styles.
    Each utility matches both the .tarot-theme root element itself

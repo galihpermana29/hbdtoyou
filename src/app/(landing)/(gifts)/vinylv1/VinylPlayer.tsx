@@ -87,9 +87,9 @@ export default function VinylPlayer({
             {/* Disc overlay - aligned to platter (slightly left of center due to tonearm) */}
             <div className="absolute top-[3%] left-[3%] w-[87%] aspect-square flex items-center justify-center">
               <div
-                className={`relative w-full aspect-square rounded-full ${isPlaying ? 'animate-vinyl-spin' : ''
-                  }`}
-              >
+                className={`relative w-full aspect-square rounded-full ${
+                  isPlaying ? 'animate-vinyl-spin' : ''
+                }`}>
                 <Image
                   src={vinylDisk}
                   alt="Spinning vinyl"
@@ -104,8 +104,7 @@ export default function VinylPlayer({
           <motion.button
             {...iconHover}
             onClick={() => setActiveModal('voice')}
-            className="absolute sm:top-[4%] sm:left-[4%] top-[15%] left-[6%] w-[30%] sm:w-[40%] max-w-[200px] cursor-pointer"
-          >
+            className="absolute sm:top-[4%] sm:left-[4%] top-[15%] left-[6%] w-[30%] sm:w-[40%] max-w-[200px] cursor-pointer">
             <Image
               src={vinylTape}
               alt="Cassette tape"
@@ -119,8 +118,7 @@ export default function VinylPlayer({
           <motion.button
             {...iconHover}
             onClick={() => setActiveModal('memories')}
-            className="absolute sm:bottom-[4%] sm:left-[4%] bottom-[15%] left-[6%] w-[30%] sm:w-[40%] max-w-[210px] cursor-pointer"
-          >
+            className="absolute sm:bottom-[4%] sm:left-[4%] bottom-[15%] left-[6%] w-[30%] sm:w-[40%] max-w-[210px] cursor-pointer">
             <Image
               src={vinylPolaroids}
               alt="Polaroid photos"
@@ -134,8 +132,7 @@ export default function VinylPlayer({
           <motion.button
             {...iconHover}
             onClick={() => setActiveModal('letter')}
-            className="absolute sm:top-[3%] sm:right-[4%] top-[15%] right-[6%] w-[30%] sm:w-[40%] max-w-[210px] cursor-pointer"
-          >
+            className="absolute sm:top-[3%] sm:right-[4%] top-[15%] right-[6%] w-[30%] sm:w-[40%] max-w-[210px] cursor-pointer">
             <Image
               src={vinylPaper}
               alt="Letter"
@@ -149,8 +146,7 @@ export default function VinylPlayer({
           <motion.button
             {...iconHover}
             onClick={() => setActiveModal('video')}
-            className="absolute sm:bottom-[4%] sm:right-[4%] bottom-[15%] right-[6%] w-[30%] sm:w-[40%] max-w-[190px] cursor-pointer"
-          >
+            className="absolute sm:bottom-[4%] sm:right-[4%] bottom-[15%] right-[6%] w-[30%] sm:w-[40%] max-w-[190px] cursor-pointer">
             <Image
               src={vinylCamRecorder}
               alt="Camcorder"

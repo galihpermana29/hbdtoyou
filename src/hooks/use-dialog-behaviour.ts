@@ -132,7 +132,8 @@ export function useDialogBehaviour(
           'a[href], button:not([disabled]), input, textarea, select, [tabindex]:not([tabindex="-1"])'
         )
       ).filter(
-        (element) => element.offsetParent !== null && !element.closest('[inert]')
+        (element) =>
+          element.offsetParent !== null && !element.closest('[inert]')
       );
       if (focusable.length === 0) return;
 

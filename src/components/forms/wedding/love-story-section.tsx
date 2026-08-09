@@ -114,7 +114,7 @@ function Chapter({
         className="!mb-0"
         rules={requiredText(copy, chapter.yearLabel)}>
         <FlowMarkedField
-            required
+          required
           label={copy[chapter.yearLabel]}
           mark={<Calendar size={20} aria-hidden="true" />}
           placeholder={YEAR_PLACEHOLDER}
@@ -128,7 +128,7 @@ function Chapter({
         className="!mb-0"
         rules={requiredText(copy, chapter.storyLabel)}>
         <FlowTextField
-            required
+          required
           label={copy[chapter.storyLabel]}
           rows={STORY_ROWS}
           limit={LOVE_STORY_LIMIT}

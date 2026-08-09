@@ -166,7 +166,9 @@ const CouponsClient = ({ initialData }: { initialData: ICoupon[] }) => {
       dataIndex: 'discount_value',
       key: 'discount_value',
       render: (val: number, record: ICoupon) =>
-        record.discount_type === 'percent' ? `${val}%` : `Rp ${val.toLocaleString()}`,
+        record.discount_type === 'percent'
+          ? `${val}%`
+          : `Rp ${val.toLocaleString()}`,
     },
     {
       title: 'Max Uses',

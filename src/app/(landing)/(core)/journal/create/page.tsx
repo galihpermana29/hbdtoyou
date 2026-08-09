@@ -193,10 +193,11 @@ const NewEntryPage: React.FC = () => {
                 {type !== 'premium' && (
                   <div className="mt-1 flex justify-between items-center mb-6">
                     <div
-                      className={`text-xs ${charCounts.abstract > MAXLENGTH * 0.8
-                        ? 'text-orange-500'
-                        : 'text-gray-500'
-                        }`}>
+                      className={`text-xs ${
+                        charCounts.abstract > MAXLENGTH * 0.8
+                          ? 'text-orange-500'
+                          : 'text-gray-500'
+                      }`}>
                       <span
                         className={
                           charCounts.abstract >= MAXLENGTH
@@ -241,10 +242,11 @@ const NewEntryPage: React.FC = () => {
                 {type !== 'premium' && (
                   <div className="mt-1 flex justify-between items-center mb-6">
                     <div
-                      className={`text-xs ${charCounts.abstractSecondary > MAXLENGTH * 0.8
-                        ? 'text-orange-500'
-                        : 'text-gray-500'
-                        }`}>
+                      className={`text-xs ${
+                        charCounts.abstractSecondary > MAXLENGTH * 0.8
+                          ? 'text-orange-500'
+                          : 'text-gray-500'
+                      }`}>
                       <span
                         className={
                           charCounts.abstractSecondary >= MAXLENGTH
@@ -301,10 +303,11 @@ const NewEntryPage: React.FC = () => {
                 {type !== 'premium' && (
                   <div className="mt-1 flex justify-between items-center mb-6">
                     <div
-                      className={`text-xs ${charCounts.preamble > MAXLENGTH * 0.8
-                        ? 'text-orange-500'
-                        : 'text-gray-500'
-                        }`}>
+                      className={`text-xs ${
+                        charCounts.preamble > MAXLENGTH * 0.8
+                          ? 'text-orange-500'
+                          : 'text-gray-500'
+                      }`}>
                       <span
                         className={
                           charCounts.preamble >= MAXLENGTH
@@ -349,10 +352,11 @@ const NewEntryPage: React.FC = () => {
                 {type !== 'premium' && (
                   <div className="mt-1 flex justify-between items-center mb-6">
                     <div
-                      className={`text-xs ${charCounts.introduction > MAXLENGTH * 0.8
-                        ? 'text-orange-500'
-                        : 'text-gray-500'
-                        }`}>
+                      className={`text-xs ${
+                        charCounts.introduction > MAXLENGTH * 0.8
+                          ? 'text-orange-500'
+                          : 'text-gray-500'
+                      }`}>
                       <span
                         className={
                           charCounts.introduction >= MAXLENGTH

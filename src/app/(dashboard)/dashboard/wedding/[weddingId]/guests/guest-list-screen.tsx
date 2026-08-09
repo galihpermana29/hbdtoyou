@@ -73,8 +73,8 @@ export default function GuestListScreen({
             : `${invited} ${invited === 1 ? 'guest' : 'guests'} on this list`}
         </h2>
         <p className={flowHint}>
-          Uploading a file replaces the whole list. Everybody it names is given a
-          personal link, and anybody it leaves out loses theirs.
+          Uploading a file replaces the whole list. Everybody it names is given
+          a personal link, and anybody it leaves out loses theirs.
         </p>
 
         <GuestListField

@@ -1,25 +1,13 @@
 'use client';
 
-import {
-  IAllTemplateResponse,
-  ITemplatePayload,
-} from '@/action/interfaces';
+import { IAllTemplateResponse, ITemplatePayload } from '@/action/interfaces';
 import {
   createTemplate,
   deleteTemplate,
   getAllTemplates,
   updateTemplate,
 } from '@/action/user-api';
-import {
-  Button,
-  Form,
-  Input,
-  Modal,
-  Select,
-  Table,
-  Tag,
-  message,
-} from 'antd';
+import { Button, Form, Input, Modal, Select, Table, Tag, message } from 'antd';
 import type { ColumnsType } from 'antd/es/table';
 import { Minus, Plus } from 'lucide-react';
 import { useState } from 'react';
@@ -164,9 +152,7 @@ const TemplatesClient = ({
       title: 'Name',
       dataIndex: 'name',
       key: 'name',
-      render: (name: string) => (
-        <span className="font-semibold">{name}</span>
-      ),
+      render: (name: string) => <span className="font-semibold">{name}</span>,
     },
     {
       title: 'Slug',
@@ -341,9 +327,7 @@ const TemplatesClient = ({
                   {tags.length > 1 && (
                     <Button
                       icon={<Minus size={14} />}
-                      onClick={() =>
-                        setTags(tags.filter((_, i) => i !== idx))
-                      }
+                      onClick={() => setTags(tags.filter((_, i) => i !== idx))}
                     />
                   )}
                 </div>

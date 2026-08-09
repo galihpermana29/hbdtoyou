@@ -41,9 +41,7 @@ export const MENCINTAIMU: WeddingBackgroundTrack = {
 // catalog entry that cannot play is the spinning-record-over-silence that
 // ticket exists to kill. Re-hosting it on a live cloud is `hbd-wkg`; add it
 // back here, url and all, once it serves.
-export const BACKGROUND_TRACK_CATALOG: WeddingBackgroundTrack[] = [
-  MENCINTAIMU,
-];
+export const BACKGROUND_TRACK_CATALOG: WeddingBackgroundTrack[] = [MENCINTAIMU];
 
 /**
  * The catalog as the Cover Header's select offers it, searched by artist or by

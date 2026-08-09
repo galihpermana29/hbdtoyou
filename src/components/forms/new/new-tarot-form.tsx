@@ -199,7 +199,9 @@ const NewTarotForm = ({
           name={'specialSaying'}
           label={
             <div>
-              <h3 className="text-[15px] font-semibold">Your special message</h3>
+              <h3 className="text-[15px] font-semibold">
+                Your special message
+              </h3>
               <p className="text-[13px] text-gray-600 max-w-[400px]">
                 A longer note shown at the end, after all 3 cards are revealed
               </p>

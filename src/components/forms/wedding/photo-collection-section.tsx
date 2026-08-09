@@ -61,11 +61,11 @@ export default function PhotoCollectionSection({
       name={copy.photoCollectionName}
       description={copy.photoCollectionDescription}>
       <Form.Item
-          name="galleryPhotos"
-          className="!mb-0"
-          rules={requiredPhotos(copy, 'photoGallery', 5)}>
+        name="galleryPhotos"
+        className="!mb-0"
+        rules={requiredPhotos(copy, 'photoGallery', 5)}>
         <PhotoDropZone
-            required
+          required
           label={copy.photoGallery}
           limit={PHOTO_GALLERY_LIMIT}
           ratio="ratioStandard"

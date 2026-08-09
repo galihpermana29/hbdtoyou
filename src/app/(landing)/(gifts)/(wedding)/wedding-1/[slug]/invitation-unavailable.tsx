@@ -31,9 +31,7 @@
 
 /** Which of the three things went wrong, in the words a guest is given for it. */
 export type Unavailable =
-  | 'NOT_READY'
-  | 'CANNOT_BE_OPENED'
-  | 'GUEST_NOT_CONFIRMED';
+  'NOT_READY' | 'CANNOT_BE_OPENED' | 'GUEST_NOT_CONFIRMED';
 
 const WORDS: Record<Unavailable, { heading: string; body: string }> = {
   NOT_READY: {

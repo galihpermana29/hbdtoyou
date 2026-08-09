@@ -89,34 +89,34 @@ const EJournal = ({ journalsData }: { journalsData: IContent[] }) => {
       </div>
       <div className="flex flex-col">
         <Reveal>
-        <div className="flex flex-col items-center justify-center pt-12 sm:pt-16 md:pt-24 pb-16 bg-[#FFF6F5] relative">
-          <div className="flex flex-col items-center justify-center px-4 sm:px-8 mx-auto w-full">
-            <div className="flex flex-col items-center justify-center gap-y-12 max-w-5xl">
-              <div className="mx-auto flex flex-col items-center justify-center gap-y-6">
-                <h1 className="text-center text-[#1B1B1B] font-semibold text-4xl md:text-5xl lg:text-6xl inter-font leading-tight md:leading-[72px] tracking-[-2%]">
-                  Write a simple love, apology, or birthday letter like a
-                  research paper.
-                </h1>
-                <p className="text-[#7B7B7B] text-lg md:text-xl font-normal inter-font max-w-3xl text-center">
-                  Translating Deep Emotions into Academic Format: A Case Study
-                  in Heartfelt Communication
-                </p>
+          <div className="flex flex-col items-center justify-center pt-12 sm:pt-16 md:pt-24 pb-16 bg-[#FFF6F5] relative">
+            <div className="flex flex-col items-center justify-center px-4 sm:px-8 mx-auto w-full">
+              <div className="flex flex-col items-center justify-center gap-y-12 max-w-5xl">
+                <div className="mx-auto flex flex-col items-center justify-center gap-y-6">
+                  <h1 className="text-center text-[#1B1B1B] font-semibold text-4xl md:text-5xl lg:text-6xl inter-font leading-tight md:leading-[72px] tracking-[-2%]">
+                    Write a simple love, apology, or birthday letter like a
+                    research paper.
+                  </h1>
+                  <p className="text-[#7B7B7B] text-lg md:text-xl font-normal inter-font max-w-3xl text-center">
+                    Translating Deep Emotions into Academic Format: A Case Study
+                    in Heartfelt Communication
+                  </p>
+                </div>
+                <Button
+                  onClick={() => {
+                    if (accessToken) {
+                      router.push('/journal/create');
+                    } else {
+                      signIn('google');
+                    }
+                  }}
+                  type="primary"
+                  className="!px-[18px] sm:!px-[22px] !py-4 !bg-[#E34013] !text-white !h-[50px] sm:!h-[60px] !rounded-lg !font-semibold !text-base sm:!text-lg relative z-30 w-[80%] sm:w-auto">
+                  Publish a Journal
+                </Button>
               </div>
-              <Button
-                onClick={() => {
-                  if (accessToken) {
-                    router.push('/journal/create');
-                  } else {
-                    signIn('google');
-                  }
-                }}
-                type="primary"
-                className="!px-[18px] sm:!px-[22px] !py-4 !bg-[#E34013] !text-white !h-[50px] sm:!h-[60px] !rounded-lg !font-semibold !text-base sm:!text-lg relative z-30 w-[80%] sm:w-auto">
-                Publish a Journal
-              </Button>
             </div>
           </div>
-        </div>
         </Reveal>
         {/* <div className="relative w-full h-fit z-20 pb-12 sm:pb-16 md:pb-24">
           <Image
@@ -141,150 +141,151 @@ const EJournal = ({ journalsData }: { journalsData: IContent[] }) => {
           />
         </div> */}
         <Reveal>
-        <div
-          className="relative w-full h-fit z-20 pb-12 sm:pb-16 md:pb-24"
-          style={{
-            backgroundImage: "url('/scrapbook-background-pattern.svg')",
-            backgroundPosition: 'center top',
-            backgroundSize: 'cover',
-            backgroundRepeat: 'no-repeat',
-          }}>
-          <Image
-            src="/MacbookProMockup.png"
-            alt="Memoify Live Scrapboox Hero"
-            className="mx-auto px-4 sm:px-0"
-            width={1280}
-            height={448}
-            priority
-          />
-        </div>
+          <div
+            className="relative w-full h-fit z-20 pb-12 sm:pb-16 md:pb-24"
+            style={{
+              backgroundImage: "url('/scrapbook-background-pattern.svg')",
+              backgroundPosition: 'center top',
+              backgroundSize: 'cover',
+              backgroundRepeat: 'no-repeat',
+            }}>
+            <Image
+              src="/MacbookProMockup.png"
+              alt="Memoify Live Scrapboox Hero"
+              className="mx-auto px-4 sm:px-0"
+              width={1280}
+              height={448}
+              priority
+            />
+          </div>
         </Reveal>
         <Reveal>
-        <div className="w-full py-12 sm:py-16 md:py-24 bg-white">
-          <div className="max-w-7xl mx-auto px-4 sm:px-8">
-            <div className="flex flex-col">
-              <Typography.Text className="!text-[#E55A3B] !font-semibold !text-base !mb-3">
-                Features
-              </Typography.Text>
+          <div className="w-full py-12 sm:py-16 md:py-24 bg-white">
+            <div className="max-w-7xl mx-auto px-4 sm:px-8">
+              <div className="flex flex-col">
+                <Typography.Text className="!text-[#E55A3B] !font-semibold !text-base !mb-3">
+                  Features
+                </Typography.Text>
 
-              <Typography.Title
-                level={2}
-                className="!text-3xl sm:!text-4xl !font-semibold !text-[#1B1B1B] !mb-5 !leading-tight !mt-0 !max-w-[624px]">
-                Make your journal truly yours
-              </Typography.Title>
-              <Typography.Paragraph className="!text-[#7B7B7B] !text-base sm:!text-lg md:!text-xl !leading-relaxed !max-w-[869px] !font-normal">
-                From writing heartfelt entries your personal journal becomes a
-                deeply personal reflection of your life and memories.
-              </Typography.Paragraph>
+                <Typography.Title
+                  level={2}
+                  className="!text-3xl sm:!text-4xl !font-semibold !text-[#1B1B1B] !mb-5 !leading-tight !mt-0 !max-w-[624px]">
+                  Make your journal truly yours
+                </Typography.Title>
+                <Typography.Paragraph className="!text-[#7B7B7B] !text-base sm:!text-lg md:!text-xl !leading-relaxed !max-w-[869px] !font-normal">
+                  From writing heartfelt entries your personal journal becomes a
+                  deeply personal reflection of your life and memories.
+                </Typography.Paragraph>
 
-              <div className="flex flex-col lg:flex-row gap-x-8 xl:gap-x-16 gap-y-10 pt-8 sm:pt-12 lg:pt-16">
-                <div className="flex flex-col gap-y-10 items-start">
-                  <div className="flex flex-col items-start w-full max-w-full lg:max-w-[560px]">
-                    {features.map((feature, index) => (
-                      <div
-                        key={index}
-                        className={`w-full pl-6 py-4 border-[4px] border-y-0 border-r-0 cursor-pointer transition-all duration-300 ${activeFeature === index
-                          ? 'border-l-[#E34013]'
-                          : 'border-l-[#F2F4F7] hover:border-l-[#E34013]/50'
+                <div className="flex flex-col lg:flex-row gap-x-8 xl:gap-x-16 gap-y-10 pt-8 sm:pt-12 lg:pt-16">
+                  <div className="flex flex-col gap-y-10 items-start">
+                    <div className="flex flex-col items-start w-full max-w-full lg:max-w-[560px]">
+                      {features.map((feature, index) => (
+                        <div
+                          key={index}
+                          className={`w-full pl-6 py-4 border-[4px] border-y-0 border-r-0 cursor-pointer transition-all duration-300 ${
+                            activeFeature === index
+                              ? 'border-l-[#E34013]'
+                              : 'border-l-[#F2F4F7] hover:border-l-[#E34013]/50'
                           }`}
-                        onClick={() => setActiveFeature(index)}>
-                        <div className="flex flex-col gap-y-2 items-start">
-                          <Typography.Title
-                            level={4}
-                            className="!text-xl !font-semibold !text-[#1B1B1B] !mb-0">
-                            {feature.title}
-                          </Typography.Title>
-                          <Typography.Paragraph className="!text-[#7B7B7B] !leading-relaxed !text-base !mb-0 !font-normal">
-                            {feature.description}
-                          </Typography.Paragraph>
+                          onClick={() => setActiveFeature(index)}>
+                          <div className="flex flex-col gap-y-2 items-start">
+                            <Typography.Title
+                              level={4}
+                              className="!text-xl !font-semibold !text-[#1B1B1B] !mb-0">
+                              {feature.title}
+                            </Typography.Title>
+                            <Typography.Paragraph className="!text-[#7B7B7B] !leading-relaxed !text-base !mb-0 !font-normal">
+                              {feature.description}
+                            </Typography.Paragraph>
+                          </div>
                         </div>
-                      </div>
-                    ))}
+                      ))}
+                    </div>
+                    <Button
+                      onClick={() => {
+                        if (accessToken) {
+                          router.push('/journal/create');
+                        } else {
+                          signIn('google');
+                        }
+                      }}
+                      type="primary"
+                      size="large"
+                      className="!bg-[#E55A3B] !border-[#E55A3B] !rounded-lg !h-12 !px-7 !py-3 !w-fit !text-base !font-semibold">
+                      Publish a Journal
+                    </Button>
                   </div>
-                  <Button
-                    onClick={() => {
-                      if (accessToken) {
-                        router.push('/journal/create');
-                      } else {
-                        signIn('google');
-                      }
-                    }}
-                    type="primary"
-                    size="large"
-                    className="!bg-[#E55A3B] !border-[#E55A3B] !rounded-lg !h-12 !px-7 !py-3 !w-fit !text-base !font-semibold">
-                    Publish a Journal
-                  </Button>
                 </div>
               </div>
             </div>
           </div>
-        </div>
         </Reveal>
       </div>
       <Reveal>
-      <div className="py-[30px] md:py-24 flex flex-col text-center items-center min-h-screen bg-[#F9FAFB] w-full gap-y-12">
-        <div className="max-w-7xl mx-auto w-full max-md:px-4 px-8">
-          <div className="flex max-md:flex-col items-start gap-x-4 border border-solid border-b-[#EAECF0] border-x-0 border-t-0 self-stretch max-md:pb-4">
-            <div className="text-start flex flex-col gap-y-1 flex-1 w-full max-md:pb-4 pb-8">
-              <p className="font-semibold text-lg text-[#1B1B1B]">
-                Published Journal
-              </p>
-              <p className="font-normal text-[#7B7B7B] text-sm">
-                A Case Study in Heartfelt Communication
-              </p>
+        <div className="py-[30px] md:py-24 flex flex-col text-center items-center min-h-screen bg-[#F9FAFB] w-full gap-y-12">
+          <div className="max-w-7xl mx-auto w-full max-md:px-4 px-8">
+            <div className="flex max-md:flex-col items-start gap-x-4 border border-solid border-b-[#EAECF0] border-x-0 border-t-0 self-stretch max-md:pb-4">
+              <div className="text-start flex flex-col gap-y-1 flex-1 w-full max-md:pb-4 pb-8">
+                <p className="font-semibold text-lg text-[#1B1B1B]">
+                  Published Journal
+                </p>
+                <p className="font-normal text-[#7B7B7B] text-sm">
+                  A Case Study in Heartfelt Communication
+                </p>
+              </div>
+              <Input
+                placeholder="Search journal"
+                size="large"
+                className="!w-full md:!max-w-80"
+                value={searchQuery}
+                onChange={(e) => setSearchQuery(e.target.value)}
+                prefix={<SearchIcon className="text-[#667085]" />}
+              />
             </div>
-            <Input
-              placeholder="Search journal"
-              size="large"
-              className="!w-full md:!max-w-80"
-              value={searchQuery}
-              onChange={(e) => setSearchQuery(e.target.value)}
-              prefix={<SearchIcon className="text-[#667085]" />}
-            />
+          </div>
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 max-w-7xl mx-auto w-full max-md:px-4 px-8">
+            {filteredJournals.length > 0
+              ? filteredJournals.map((entry) => (
+                  <JournalCard key={entry.id} entry={entry} />
+                ))
+              : 'No Journals Available'}
           </div>
         </div>
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 max-w-7xl mx-auto w-full max-md:px-4 px-8">
-          {filteredJournals.length > 0
-            ? filteredJournals.map((entry) => (
-              <JournalCard key={entry.id} entry={entry} />
-            ))
-            : 'No Journals Available'}
-        </div>
-      </div>
       </Reveal>
       <Reveal>
-      <div className="w-full py-12 sm:py-16 md:py-24">
-        <div className="max-w-4xl mx-auto px-4 sm:px-8 text-center">
-          <Typography.Title
-            level={2}
-            className="!text-3xl sm:!text-4xl !font-semibold !text-[#1B1B1B] !mb-5 !leading-tight !mt-0 !inter-font">
-            We will send you a new template update
-          </Typography.Title>
+        <div className="w-full py-12 sm:py-16 md:py-24">
+          <div className="max-w-4xl mx-auto px-4 sm:px-8 text-center">
+            <Typography.Title
+              level={2}
+              className="!text-3xl sm:!text-4xl !font-semibold !text-[#1B1B1B] !mb-5 !leading-tight !mt-0 !inter-font">
+              We will send you a new template update
+            </Typography.Title>
 
-          <Typography.Paragraph className="!text-[#7B7B7B] !text-base sm:!text-lg md:!text-xl !leading-relaxed !mb-8 sm:!mb-12 !font-normal max-w-2xl mx-auto">
-            No spam. Just the latest releases and new template, interesting
-            inspiration, and exclusive interviews with great people.
-          </Typography.Paragraph>
+            <Typography.Paragraph className="!text-[#7B7B7B] !text-base sm:!text-lg md:!text-xl !leading-relaxed !mb-8 sm:!mb-12 !font-normal max-w-2xl mx-auto">
+              No spam. Just the latest releases and new template, interesting
+              inspiration, and exclusive interviews with great people.
+            </Typography.Paragraph>
 
-          <div className="flex flex-col sm:flex-row gap-4 justify-center items-center max-w-md mx-auto px-4 sm:px-0">
-            <Input
-              placeholder="Enter your email"
-              size="large"
-              className="!h-12 !rounded-lg !border-[#D0D5DD] !text-base flex-1"
-              style={{
-                fontSize: '16px',
-                fontWeight: 'normal',
-              }}
-            />
-            <Button
-              type="primary"
-              size="large"
-              className="!bg-[#E55A3B] !border-[#E55A3B] hover:!bg-[#d14d30] !rounded-lg !h-12 !px-8 !font-semibold !text-base whitespace-nowrap">
-              Subscribe
-            </Button>
+            <div className="flex flex-col sm:flex-row gap-4 justify-center items-center max-w-md mx-auto px-4 sm:px-0">
+              <Input
+                placeholder="Enter your email"
+                size="large"
+                className="!h-12 !rounded-lg !border-[#D0D5DD] !text-base flex-1"
+                style={{
+                  fontSize: '16px',
+                  fontWeight: 'normal',
+                }}
+              />
+              <Button
+                type="primary"
+                size="large"
+                className="!bg-[#E55A3B] !border-[#E55A3B] hover:!bg-[#d14d30] !rounded-lg !h-12 !px-8 !font-semibold !text-base whitespace-nowrap">
+                Subscribe
+              </Button>
+            </div>
           </div>
         </div>
-      </div>
       </Reveal>
     </div>
   );

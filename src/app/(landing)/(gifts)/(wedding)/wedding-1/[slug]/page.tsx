@@ -176,5 +176,7 @@ function refusal(
   message: string
 ): Unavailable {
   if (content && !guestIsKnown) return 'GUEST_NOT_CONFIRMED';
-  return message === INVITATION_NOT_PUBLISHED ? 'NOT_READY' : 'CANNOT_BE_OPENED';
+  return message === INVITATION_NOT_PUBLISHED
+    ? 'NOT_READY'
+    : 'CANNOT_BE_OPENED';
 }

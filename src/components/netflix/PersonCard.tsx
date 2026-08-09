@@ -16,21 +16,26 @@ interface PersonCardProps {
  * @param imageSrc - Source URL for the person's image
  * @param imageAlt - Alt text for the person's image
  */
-const PersonCard = ({ name, description, imageSrc, imageAlt = 'Person image' }: PersonCardProps) => {
+const PersonCard = ({
+  name,
+  description,
+  imageSrc,
+  imageAlt = 'Person image',
+}: PersonCardProps) => {
   return (
     <div className="flex flex-col gap-y-3 w-[194px]">
       {/* Person image or placeholder */}
       <div className="w-full h-[242px] bg-yellow-300 rounded-md relative overflow-hidden">
         {imageSrc && (
-          <Image 
-            src={imageSrc} 
-            alt={imageAlt} 
-            fill 
-            style={{ objectFit: 'cover' }} 
+          <Image
+            src={imageSrc}
+            alt={imageAlt}
+            fill
+            style={{ objectFit: 'cover' }}
           />
         )}
       </div>
-      
+
       {/* Person details */}
       <div className="flex flex-col gap-y-2 items-start">
         <h2 className="font-bold text-xl text-white">{name}</h2>

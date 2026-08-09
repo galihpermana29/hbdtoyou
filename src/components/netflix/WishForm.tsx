@@ -35,21 +35,25 @@ const WishForm = ({ onSubmit }: WishFormProps) => {
   };
 
   return (
-    <Form id='wish-form' className='max-md:!px-2 md:!px-0' form={form} layout="vertical" onFinish={handleSubmit} requiredMark={false}>
+    <Form
+      id="wish-form"
+      className="max-md:!px-2 md:!px-0"
+      form={form}
+      layout="vertical"
+      onFinish={handleSubmit}
+      requiredMark={false}>
       <Form.Item
-        name='name'
+        name="name"
         className="!mb-3"
         label={<p className="geist-font text-base text-white">Name</p>}
-        rules={[{ required: true, message: 'Please enter your name' }]}
-      >
+        rules={[{ required: true, message: 'Please enter your name' }]}>
         <Input placeholder="Enter your name" className="!px-3 !py-2" />
       </Form.Item>
 
       <Form.Item
-        name='message'
+        name="message"
         label={<p className="geist-font text-base text-white">Message</p>}
-        rules={[{ required: true, message: 'Please enter your message' }]}
-      >
+        rules={[{ required: true, message: 'Please enter your message' }]}>
         <Input.TextArea placeholder="Write your message here" />
       </Form.Item>
 
@@ -57,8 +61,7 @@ const WishForm = ({ onSubmit }: WishFormProps) => {
         fullWidth
         variant="secondary"
         className="!bg-[#808080] !text-[#191919] !px-6 !py-3 !h-fit"
-        onClick={() => form.submit()}
-      >
+        onClick={() => form.submit()}>
         {isSubmitting ? 'Sending...' : 'Send'}
       </NetflixButton>
     </Form>

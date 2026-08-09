@@ -82,7 +82,10 @@ export default function FlowChoiceField({
 
   return (
     <div className={flowFieldParts}>
-      <label id={labelId} htmlFor={fieldId} className={`${flowLabel}${required ? ' wedding-required-label' : ''}`}>
+      <label
+        id={labelId}
+        htmlFor={fieldId}
+        className={`${flowLabel}${required ? ' wedding-required-label' : ''}`}>
         {label}
       </label>
 
