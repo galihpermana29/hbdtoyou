@@ -91,11 +91,7 @@ export type CreateFlowStep = (typeof CREATE_FLOW_STEPS)[number]['title'];
 const CURRENT_CLASS = 'text-[#E34013]';
 
 /** The 24px marker at the head of a step, in whichever state that step is in. */
-function StepMarker({
-  state,
-}: {
-  state: 'complete' | 'current' | 'upcoming';
-}) {
+function StepMarker({ state }: { state: 'complete' | 'current' | 'upcoming' }) {
   if (state === 'complete') {
     return (
       <span className="flex h-[24px] w-[24px] shrink-0 items-center justify-center rounded-full bg-[#E34013]">
