@@ -13,6 +13,8 @@
  * already holds.
  */
 
+import { INVITATION_APEX_HOST, invitationHostFor } from '@/lib/invitation-host';
+
 /**
  * What a couple enters on the guest invites step.
  *
@@ -41,14 +43,13 @@ export interface GuestInvitesValues {
 }
 
 /**
- * The fixed part of the address, printed ahead of the slug.
- *
- * The design draws the chosen name as a subdomain, and the shareable link is a
- * path instead: see `docs/adr/0001-path-urls-not-subdomains.md`. The path
- * carries the template as well as the slug, because more wedding templates are
- * expected and an address that named only the slug could not tell them apart.
+ * The fixed part of the address, printed after the slug, exactly as the design
+ * draws it: the slug is served as the subdomain, per
+ * `docs/adr/0005-an-invitation-answers-at-its-own-subdomain.md`. The address
+ * no longer names the template, because which template draws a wedding is the
+ * record's business rather than the URL's.
  */
-export const SLUG_PREFIX = 'memoify.live/wedding-1/';
+export const SLUG_SUFFIX = `.${INVITATION_APEX_HOST}`;
 
 /**
  * The query parameter an invitation's slug can be supplied by, for a screen on
@@ -171,22 +172,20 @@ export function guestTokenFrom(value: string | string[] | undefined): string {
  * Where a published invitation lives, or null while it has no slug.
  *
  * Null rather than a link built from an empty slug: an address showing
- * `https://memoify.live/wedding-1/` would be telling the couple something
- * untrue about what they are about to send. Nothing else is checked, because
- * nothing else is ours to check - the slug comes from the backend, and a
- * malformed one is neither something a couple caused nor something they could
- * fix.
+ * `https://.memoify.live` would be telling the couple something untrue about
+ * what they are about to send. Nothing else is checked, because nothing else
+ * is ours to check - the slug comes from the backend, and a malformed one is
+ * neither something a couple caused nor something they could fix.
  *
- * The shape is a path carrying the template, per
- * `docs/adr/0001-path-urls-not-subdomains.md`, and the field the couple reads it
- * in shows the same path ahead of the box rather than a subdomain after it. The
- * design draws a subdomain, which the product cannot serve; showing it would
- * promise an address that does not resolve.
+ * The shape is the slug as a subdomain, which is what the design always drew
+ * and what the middleware now serves: see
+ * `docs/adr/0005-an-invitation-answers-at-its-own-subdomain.md`. The old path
+ * address still answers, with a redirect to this one.
  */
 export function invitationLinkFor(slug: string): string | null {
   const value = slug.trim();
   if (value === '') return null;
-  return `https://${SLUG_PREFIX}${value}`;
+  return `https://${invitationHostFor(value)}`;
 }
 
 /**

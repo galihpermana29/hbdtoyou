@@ -137,7 +137,8 @@ _Avoid_: wishes
 The identifier that makes an invitation's link unique.
 Minted by the backend from the invitation's title, offered a name-derived replacement at most once while unpublished, and frozen forever from publish.
 Never the couple's to type.
-_Avoid_: domain, subdomain
+Since ADR 0005 it is also where a published invitation answers: the subdomain label of `{slug}.memoify.live`.
+_Avoid_: domain. Subdomain names where the slug is served, never the slug itself.
 
 ### The template's parts
 
