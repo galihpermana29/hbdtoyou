@@ -1,7 +1,8 @@
 'use client';
 
-import { motion, useReducedMotion } from 'framer-motion';
-import { pressTap } from './variants';
+import { AnimatePresence, motion, useReducedMotion } from 'framer-motion';
+import { useEffect, useState } from 'react';
+import { EASE, REDUCED_FADE, pressTap } from './variants';
 
 /**
  * The demo's shared visual vocabulary, straight from the measured tokens in
@@ -85,6 +86,143 @@ export function DemoSkipLink({
       style={{ fontFamily: 'var(--font-mr-ui)' }}>
       {children}
     </button>
+  );
+}
+
+/* ------------------------- form vocabulary ------------------------- */
+/* The creator side's controls, in the same measured tokens: radius-10
+   fields, pill chips, the orange accent for anything switched on and the
+   palette's blue reserved for focus. */
+
+export function FieldLabel({
+  children,
+  htmlFor,
+}: {
+  children: React.ReactNode;
+  htmlFor?: string;
+}) {
+  return (
+    <label
+      htmlFor={htmlFor}
+      className="block text-[10px] font-semibold uppercase tracking-[0.14em] text-[#212121]/50"
+      style={{ fontFamily: 'var(--font-mr-ui)' }}>
+      {children}
+    </label>
+  );
+}
+
+export function TextInput({
+  className = '',
+  ...rest
+}: React.InputHTMLAttributes<HTMLInputElement>) {
+  return (
+    <input
+      {...rest}
+      className={`h-[52px] w-full rounded-[10px] border border-[#212121]/15 bg-white px-4 text-[16px] text-[#212121] outline-none transition-colors focus:border-[#2e7cf6] ${className}`}
+      style={{ fontFamily: 'var(--font-mr-body)' }}
+    />
+  );
+}
+
+export function ToggleSwitch({
+  on,
+  onChange,
+  label,
+}: {
+  on: boolean;
+  onChange: (on: boolean) => void;
+  label: string;
+}) {
+  const reduce = useReducedMotion();
+  return (
+    <button
+      type="button"
+      role="switch"
+      aria-checked={on}
+      aria-label={label}
+      onClick={() => onChange(!on)}
+      className={`relative h-[30px] w-[52px] shrink-0 rounded-full transition-colors ${
+        on ? 'bg-[#ff3e09]' : 'bg-[#212121]/20'
+      }`}>
+      <motion.span
+        layout={!reduce}
+        transition={
+          reduce
+            ? { duration: 0 }
+            : { type: 'spring', stiffness: 500, damping: 32 }
+        }
+        className={`absolute top-[3px] block h-[24px] w-[24px] rounded-full bg-white shadow ${
+          on ? 'right-[3px]' : 'left-[3px]'
+        }`}
+      />
+    </button>
+  );
+}
+
+export function ChoiceChips<T extends string | number>({
+  options,
+  value,
+  onChange,
+}: {
+  options: { value: T; label: string }[];
+  value: T;
+  onChange: (value: T) => void;
+}) {
+  const reduce = useReducedMotion();
+  return (
+    <div
+      className="flex flex-wrap gap-2"
+      style={{ fontFamily: 'var(--font-mr-ui)' }}>
+      {options.map((option) => {
+        const active = option.value === value;
+        return (
+          <motion.button
+            key={String(option.value)}
+            type="button"
+            aria-pressed={active}
+            whileTap={reduce ? undefined : pressTap}
+            onClick={() => onChange(option.value)}
+            className={`rounded-full px-4 py-2 text-[14px] transition-colors ${
+              active
+                ? 'bg-[#212121] text-white'
+                : 'border border-[#212121]/20 bg-white text-[#212121]'
+            }`}>
+            {option.label}
+          </motion.button>
+        );
+      })}
+    </div>
+  );
+}
+
+/** A toast message that clears itself, paired with DemoToast below. */
+export function useDemoToast() {
+  const [toast, setToast] = useState<string | null>(null);
+  useEffect(() => {
+    if (!toast) return;
+    const t = window.setTimeout(() => setToast(null), 2600);
+    return () => window.clearTimeout(t);
+  }, [toast]);
+  return { toast, showToast: setToast };
+}
+
+/** The demo's transient bottom toast, as the gallery introduced it. */
+export function DemoToast({ message }: { message: string | null }) {
+  const reduce = useReducedMotion();
+  return (
+    <AnimatePresence>
+      {message && (
+        <motion.p
+          initial={reduce ? { opacity: 0 } : { opacity: 0, y: 8 }}
+          animate={{ opacity: 1, y: 0 }}
+          exit={{ opacity: 0 }}
+          transition={reduce ? REDUCED_FADE : { duration: 0.25, ease: EASE }}
+          className="fixed bottom-20 left-1/2 z-40 w-max max-w-[90%] -translate-x-1/2 rounded-full bg-black/80 px-4 py-2 text-[12px] text-white"
+          style={{ fontFamily: 'var(--font-mr-ui)' }}>
+          {message}
+        </motion.p>
+      )}
+    </AnimatePresence>
   );
 }
 

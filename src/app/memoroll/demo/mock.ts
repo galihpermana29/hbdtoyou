@@ -12,6 +12,8 @@ export interface MockWedding {
   dateLabel: string;
   /** The "event hasn't started" calendar leaf. */
   calendar: { month: string; day: string; year: string };
+  /** Where the day happens; the creator demo's venue prefill. */
+  venue: string;
 }
 
 export const MOCK_WEDDING: MockWedding = {
@@ -19,6 +21,21 @@ export const MOCK_WEDDING: MockWedding = {
   title: 'Elias & Freya’s wedding',
   dateLabel: '3 May 2026',
   calendar: { month: 'May', day: '03', year: '2026' },
+  venue: 'The Orchard House',
+};
+
+/**
+ * What the couple's live console reads mid-event. The field names shadow the
+ * backend's existing vocabulary (photo_count, photo_storage_used_mb on
+ * wedding_invitations) so the mock retires cleanly, but nothing here is
+ * fetched: local numbers only.
+ */
+export const MOCK_LIVE_STATUS = {
+  photoCount: 184,
+  guestsJoined: 23,
+  guestsInvited: 50,
+  storageUsedMb: 312,
+  storageLimitMb: 2048,
 };
 
 /** One photo somebody shot on the collective roll. */
