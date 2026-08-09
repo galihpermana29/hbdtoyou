@@ -1,7 +1,10 @@
 import { Metadata } from 'next';
 import { redirect } from 'next/navigation';
 
-import WeddingInvitationCreateClientside from './wedding-invitation-create-clientside';
+import { invitationToResume } from './invitation-to-resume';
+import WeddingInvitationCreateClientside, {
+  type OpenedWeddingInvitation,
+} from './wedding-invitation-create-clientside';
 import { FlowLanguageProvider } from '@/components/forms/wedding/flow-language';
 import {
   slugFrom,
@@ -62,11 +65,21 @@ export default async function WeddingInvitationCreatePage({
   const gateStoodDown =
     process.env.WEDDING_FLOW_UNGATED === 'true' &&
     process.env.NODE_ENV !== 'production';
+
+  // A couple who saved an invitation and comes back gets that invitation, not
+  // a blank second one: the flow resumes the newest unpublished invitation
+  // they own, and a couple with nothing saved starts fresh - see
+  // `invitation-to-resume.ts`. The gate is what makes this answerable: past
+  // it there is a session, and the session says whose invitations to search.
+  // The check's ungated server has no session and never resumes, which is
+  // also what the check needs: it drives the flow from nothing.
+  let resumed: OpenedWeddingInvitation | null = null;
   if (!gateStoodDown) {
     const session = await getSession();
     if (!session?.accessToken) {
       redirect('/wedding-invitation');
     }
+    resumed = session.userId ? await invitationToResume(session.userId) : null;
   }
 
   // Read here rather than in the flow, so the address is settled before the
@@ -80,6 +93,7 @@ export default async function WeddingInvitationCreatePage({
     <FlowLanguageProvider>
       <WeddingInvitationCreateClientside
         slug={slugFrom(searchParams[SLUG_PARAM])}
+        opened={resumed ?? undefined}
       />
     </FlowLanguageProvider>
   );

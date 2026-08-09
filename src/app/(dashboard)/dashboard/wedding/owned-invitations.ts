@@ -36,19 +36,10 @@ import type { IContent } from '@/action/interfaces';
 import { invitationLinkFor } from '@/components/forms/wedding/guest-invites-types';
 import {
   coupleNamedIn,
+  WEDDING_TEMPLATE_SLUG,
   weddingContentFrom,
   weddingIdFrom,
 } from '@/components/forms/wedding/wedding-invitation-types';
-
-/**
- * The backend template a wedding invitation is made from, found by its slug.
- *
- * By slug rather than by the UUID, because the UUID differs between
- * environments - the same reason `use-invitation.ts` looks it up this way, and
- * the two must agree or a listing would be filtered to a template nothing was
- * created under.
- */
-const WEDDING_TEMPLATE_SLUG = 'wedding-inv';
 
 /**
  * How many invitations one page of this listing covers.

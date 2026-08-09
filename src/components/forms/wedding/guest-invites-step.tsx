@@ -49,10 +49,11 @@ import { type Guest, type GuestList } from './guest-list';
  * sends every change to it - so what this step does with a chosen file is hand
  * it over, and what it does with a correction or a deletion is ask for one.
  *
- * On an invitation opened again the Guest List is not here at all: the couple
- * manages it on its own screen, `/dashboard/wedding/{id}/guests`, and the same
- * list drawn in two places would be the same six columns this step was too
- * narrow for. Creating keeps the card, exactly as the design draws it.
+ * On the dashboard the Guest List is not here at all: an invitation opened
+ * there manages it on its own screen, `/dashboard/wedding/{id}/guests`, and
+ * the same list drawn in two places would be the same six columns this step
+ * was too narrow for. The Create Flow at its own address keeps the card,
+ * exactly as the design draws it - creating and resuming alike.
  */
 
 export interface GuestInvitesStepProps {
@@ -101,14 +102,17 @@ export interface GuestInvitesStepProps {
    */
   isAlreadyPublished?: boolean;
   /**
-   * Whether the invitation being filled in is one opened again from the
-   * couple's own listing, rather than one being made.
+   * Whether this invitation's Guest List is managed on its own screen rather
+   * than here.
    *
-   * An opened invitation's Guest List lives on its own screen in the
-   * dashboard, so this step does not draw the card and nothing here replaces
-   * it. A couple creating still sees it, exactly as the design draws it.
+   * True on the dashboard, where an opened invitation's guests have
+   * `/dashboard/wedding/{id}/guests` and this step does not draw the card,
+   * because the same list drawn in two places would go wrong in two places.
+   * The Create Flow at its own address always draws it - a couple resuming a
+   * saved invitation there is still mid-creation, and this is the one place
+   * they can hand a list over.
    */
-  isOpenedAgain?: boolean;
+  guestListLivesElsewhere?: boolean;
   /** Go back to the details and story step. */
   onPreviousStep: () => void;
   /**
@@ -177,7 +181,7 @@ export default function GuestInvitesStep({
   guestListProblem,
   isGuestListBusy,
   isAlreadyPublished = false,
-  isOpenedAgain = false,
+  guestListLivesElsewhere = false,
   onPreviousStep,
   onConfirm,
   onSaveAsDraft,
@@ -294,7 +298,7 @@ export default function GuestInvitesStep({
               </div>
             </section>
 
-            {isOpenedAgain ? null : (
+            {guestListLivesElsewhere ? null : (
               <section className="flex flex-col">
                 <h3 className={flowSectionName}>{copy.addGuestList}</h3>
                 <p className={flowHint}>
