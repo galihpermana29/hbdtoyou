@@ -3,9 +3,10 @@
 /**
  * Wedding Template 1 - Love Story. Figma node 312:1687.
  * A timeline of the couple's story: torn-paper framed film strip, a
- * "tap to reveal" polaroid, dated milestones and a map keepsake.
+ * "tap to reveal" polaroid, dated milestones and a camera keepsake whose
+ * screen plays the Wedding Teaser Video.
  * Fixed 1081px-tall mobile composition, built pixel-accurate to the design.
- * Animation: heading, film strip, milestones and map fade up on scroll; the
+ * Animation: heading, film strip, milestones and camera fade up on scroll; the
  * polaroid cover is tap-to-reveal (fades/scales out to show the photo beneath).
  */
 
@@ -14,7 +15,13 @@ import { motion, useReducedMotion, type MotionProps } from 'framer-motion';
 
 import { AutoFitBlock } from './AutoFitBlock';
 import { PaperGround, TornEdge } from './TornPaper';
-import { EASE, fadeUp, fadeUpCenter, staggerContainer } from './variants';
+import {
+  EASE,
+  fadeUp,
+  fadeUpCenter,
+  pressTap,
+  staggerContainer,
+} from './variants';
 import { useSealed } from './sealed-context';
 import { useWeddingReveal } from './use-wedding-reveal';
 import {
@@ -25,6 +32,24 @@ import {
 } from '@/components/forms/wedding/wedding-invitation-types';
 
 const ASSET = '/templates/wedding-template-1';
+
+/**
+ * The film the camera's screen plays for an invitation whose couple gave no
+ * Wedding Teaser Video - today every invitation, because the uploads endpoint
+ * refuses video/mp4 (hbd-zzl) and a couple has no way to hand one over.
+ * The product's one deliberate Fallback, and the exception CONTEXT.md's
+ * Fallback entry names: render-time only, so nothing invented reaches the
+ * backend, and it retires the moment the backend takes mp4 and a couple's
+ * own film takes the screen.
+ *
+ * PLACEHOLDER, and plainly so (hbd-1qh): the film the owner chose,
+ * youtube.com/watch?v=DQgtgRZqhws, has embedding disabled on YouTube - inside
+ * this camera it renders "Video tidak tersedia" and nothing plays. Until the
+ * owner enables embedding on it or names another video, the screen plays
+ * Blender's openly licensed Big Buck Bunny, which is real, public, innocuous
+ * and demonstrably embeddable. Swap this one constant when hbd-1qh settles.
+ */
+const FALLBACK_TEASER_VIDEO = 'https://www.youtube.com/embed/aqz-KE-bpKQ';
 
 /**
  * The largest and the smallest a chapter's story may be printed at.
@@ -59,7 +84,7 @@ const SIDE_CHAPTERS_MAX_HEIGHT = 353;
 /**
  * How much of the page the chapter in the middle of the paper may fill.
  *
- * It starts 548px into the section, and what would swallow it is the map
+ * It starts 548px into the section, and what would swallow it is the camera
  * keepsake below. That keepsake's box begins at 738.86, but its top 55px are
  * the transparent margin of the photograph rather than the photograph: the
  * camera itself begins at 794, and the design's own chapter runs to 771, well
@@ -151,6 +176,10 @@ function Polaroid({ content }: { content: WeddingTemplate1Content }) {
       onKeyDown={(e) => {
         if (e.key === 'Enter' || e.key === ' ') setRevealed(true);
       }}
+      // A pressable polaroid dips like every other control, but only while it
+      // still has a cover to lift: pressing a revealed photograph does nothing,
+      // so it should not pretend to.
+      whileTap={reduce || isRevealed ? undefined : pressTap}
       className="absolute left-[191px] top-[389px] flex h-[219.836px] w-[178.439px] cursor-pointer items-center justify-center"
       {...reveal}>
       <div className="absolute left-[9.02px] top-[9.9px] h-[156.339px] w-[139.745px]">
@@ -247,7 +276,6 @@ export default function LoveStory({
   const staggerReveal = useWeddingReveal(staggerContainer);
   const centerMilestone = content.milestones[2] ?? content.milestones[0];
   const rightMilestones = content.milestones.slice(0, 2);
-  const mapPhoto = content.mapPhoto;
 
   return (
     <section className="relative h-[1081px] w-full overflow-hidden bg-[#090909]">
@@ -330,7 +358,13 @@ export default function LoveStory({
         </AutoFitBlock>
       </div>
 
-      {/* Map keepsake at the bottom */}
+      {/* Camera keepsake at the bottom. Its screen is the Wedding Teaser
+          Video's home: the couple's own film once the backend can take one,
+          the shared Fallback film until then. The design draws the venue's
+          map and a pin on this screen - ADR 0002 records why it gave them up.
+          The Fallback loads lazily because it sits far below the fold of a
+          Sealed invitation, and a guest who never scrolls here should not
+          fetch YouTube's player. */}
       <motion.div
         className="absolute left-[27px] top-[738.86px] h-[336.142px] w-[354px]"
         {...fadeUpReveal}>
@@ -341,21 +375,25 @@ export default function LoveStory({
             src={`${ASSET}/lovestory-map-bg.png`}
           />
         </div>
-        <div className="absolute left-[21.01px] top-[81.93px] h-[127.104px] w-[207.988px] rounded-[4.202px]">
-          {mapPhoto ? (
-            <img
-              alt=""
-              className="pointer-events-none absolute inset-0 size-full max-w-none rounded-[4.202px] object-cover"
-              src={mapPhoto}
+        <div className="absolute left-[21.01px] top-[81.93px] h-[127.104px] w-[207.988px] overflow-hidden rounded-[4.202px]">
+          {content.loveStoryVideo ? (
+            <video
+              className="absolute inset-0 size-full object-cover"
+              src={content.loveStoryVideo}
+              controls
+              playsInline
+              preload="metadata"
             />
-          ) : null}
-        </div>
-        <div className="absolute left-[111.35px] top-[127.1px] size-[27.307px]">
-          <img
-            alt=""
-            className="pointer-events-none absolute inset-0 block size-full max-w-none"
-            src={`${ASSET}/lovestory-pin.svg`}
-          />
+          ) : (
+            <iframe
+              title="Wedding Teaser Video"
+              className="absolute inset-0 size-full border-0"
+              src={FALLBACK_TEASER_VIDEO}
+              loading="lazy"
+              allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
+              allowFullScreen
+            />
+          )}
         </div>
       </motion.div>
 

@@ -31,7 +31,7 @@ import { FitText } from './FitText';
 import { AutoFitText } from './AutoFitText';
 import { TornEdge } from './TornPaper';
 import { useSealed } from './sealed-context';
-import { EASE } from './variants';
+import { EASE, pressTap } from './variants';
 import { formatWeddingDateLabel } from './wedding-date-label';
 
 const ASSET = '/templates/wedding-template-1';
@@ -69,11 +69,21 @@ const CARD_LINE_MAX_WIDTH = 210;
  * page unlocks when the last of them has finished, which is what makes opening
  * feel like one act rather than a lock that lets go while the envelope is still
  * moving.
+ *
+ * A step with a `bounce` moves as a spring rather than a tween: the seal snaps
+ * free and the cards settle like paper rather than easing like a slide. Bounce
+ * is kept subtle (0.3 at most) so the overshoot reads as weight, not play, and
+ * a spring's visible motion completes at its `duration`, so the unlock
+ * arithmetic below still holds.
+ *
+ * Exported because the opening is not only the Hero's: the record arrives in
+ * the corner during it, and reading the timing from here is what keeps the two
+ * in step if the choreography is ever retimed.
  */
-const OPENING = {
-  seal: { delay: 0, duration: 0.3 },
+export const OPENING = {
+  seal: { delay: 0, duration: 0.3, bounce: 0.3 },
   envelope: { delay: 0.3, duration: 0.6 },
-  cards: { delay: 0.75, duration: 0.95 },
+  cards: { delay: 0.75, duration: 0.95, bounce: 0.18 },
 };
 
 /**
@@ -106,11 +116,34 @@ const OPENING_SECONDS = Math.max(
  */
 const ADDRESSEE_MAX_HEIGHT = 32;
 
-/** One step of the opening, or no movement at all where none is wanted. */
+/**
+ * The whole opening where less motion is asked for: gentler, not zero. Every
+ * step becomes one brief opacity-only cross-fade, together rather than in
+ * sequence, and the movement - the seal's lift, the cards' rise and splay - is
+ * dropped by snapping `transform` to its target while the fade runs. A guest
+ * still sees the envelope give way to the cards instead of a hard cut, and
+ * nothing travels.
+ */
+const REDUCED_STEP = {
+  duration: 0.12,
+  ease: EASE,
+  transform: { duration: 0 },
+} as const;
+
+/** One step of the opening, or the gentle cross-fade where less is wanted. */
 const step = (
   reduce: boolean | null,
-  { delay, duration }: { delay: number; duration: number }
-) => (reduce ? { duration: 0 } : { duration, delay, ease: EASE });
+  {
+    delay,
+    duration,
+    bounce,
+  }: { delay: number; duration: number; bounce?: number }
+) =>
+  reduce
+    ? REDUCED_STEP
+    : bounce !== undefined
+      ? { type: 'spring' as const, duration, bounce, delay }
+      : { duration, delay, ease: EASE };
 
 /** The envelope with the two cards (save-the-date + couple photo) tucked inside. */
 function EnvelopeCard({
@@ -163,23 +196,31 @@ function EnvelopeCard({
           visibility: opened ? 'visible' : 'hidden',
         }}
         initial={false}
+        // The full transform string rather than framer's y/scale shorthands:
+        // the shorthands run on the main thread via rAF and can drop frames
+        // under load, while a transform string is hardware-accelerated.
         animate={{
           opacity: opened ? 1 : 0,
-          y: opened ? 0 : TUCK,
-          scale: opened ? 1 : 0.82,
+          transform: opened
+            ? 'translateY(0px) scale(1)'
+            : `translateY(${TUCK}px) scale(0.82)`,
         }}
         transition={step(reduce, OPENING.cards)}>
-        {/* couple photo card (tilted -8.41deg) */}
+        {/* couple photo card (tilted -8.41deg). Tucked in the envelope it lies
+            nearly straight, and it splays out to the tilt the design draws as
+            it rises - two cards fanning apart is what hands do with them. The
+            tucked pose is the animation's own, not a frame the design draws,
+            and it is never seen: the group above holds the cards
+            `visibility: hidden` until the envelope is opened. At rest it is
+            exactly the design's -8.41deg. */}
         <div className="absolute left-0 top-[141.41px] flex h-[214.646px] w-[287.231px] items-center justify-center">
           <motion.div
             className="flex-none"
             initial={false}
-            animate={{ scale: 1, rotate: -8.41 }}
-            transition={{
-              duration: reduce ? 0 : 0.6,
-              ease: EASE,
-              delay: reduce ? 0 : 0.25,
-            }}>
+            animate={{
+              transform: opened ? 'rotate(-8.41deg)' : 'rotate(-2.5deg)',
+            }}
+            transition={step(reduce, OPENING.cards)}>
             <div
               className="relative h-[177.944px] w-[264.046px]"
               style={cardShadow}>
@@ -222,24 +263,27 @@ function EnvelopeCard({
                   other line a couple owns on these cards carries, and the
                   alternative is one line held inside the card by arithmetic
                   nobody wrote down. */}
-              <div className="absolute left-[136.91px] top-[147.16px] -translate-x-1/2 font-[family-name:var(--font-wt1-script)] text-[16.699px] leading-[normal] text-black">
-                <FitText maxWidth={CARD_LINE_MAX_WIDTH}>{dateLabel}</FitText>
-              </div>
+              {/* A date the formatter could not read is an empty label, and
+                  the card omits the line rather than drawing a blank one. */}
+              {dateLabel && (
+                <div className="absolute left-[136.91px] top-[147.16px] -translate-x-1/2 font-[family-name:var(--font-wt1-script)] text-[16.699px] leading-[normal] text-black">
+                  <FitText maxWidth={CARD_LINE_MAX_WIDTH}>{dateLabel}</FitText>
+                </div>
+              )}
             </div>
           </motion.div>
         </div>
 
-        {/* save the date card (tilted +6.05deg) */}
+        {/* save the date card (tilted +6.05deg), splaying the other way as the
+            pair rises - see the couple photo card above. */}
         <div className="absolute left-[63.66px] top-0 flex h-[204.793px] w-[281.337px] items-center justify-center">
           <motion.div
             className="flex-none"
             initial={false}
-            animate={{ scale: 1, rotate: 6.05 }}
-            transition={{
-              duration: reduce ? 0 : 0.6,
-              ease: EASE,
-              delay: reduce ? 0 : 0.4,
-            }}>
+            animate={{
+              transform: opened ? 'rotate(6.05deg)' : 'rotate(1.8deg)',
+            }}
+            transition={step(reduce, OPENING.cards)}>
             <div
               className="relative h-[177.944px] w-[264.046px]"
               style={cardShadow}>
@@ -368,7 +412,9 @@ function EnvelopeCard({
           <motion.div
             className="absolute left-[164px] top-[307px] h-[58px] w-[57px]"
             initial={false}
-            animate={{ y: opened ? -22 : 0 }}
+            animate={{
+              transform: opened ? 'translateY(-22px)' : 'translateY(0px)',
+            }}
             transition={step(reduce, OPENING.seal)}>
             <WaxSeal />
           </motion.div>
@@ -403,11 +449,21 @@ function WaxSeal() {
 export default function Hero({
   content = DEFAULT_WEDDING_TEMPLATE_1_CONTENT,
   addressee,
+  onOpen,
   onOpened,
 }: {
   content?: WeddingTemplate1Content;
   /** Who this invitation was sent to, drawn on the closed envelope. */
   addressee?: string;
+  /**
+   * Say that the guest has pressed Open Invitation, inside the press itself.
+   *
+   * Called synchronously from the click handler rather than folded into
+   * `onOpened`, because this is the gesture the Background Track starts on and
+   * a browser only lets audio start inside one: `onOpened` arrives on a timer
+   * 1.7s later, which Safari no longer counts as the guest asking.
+   */
+  onOpen?: () => void;
   /**
    * Say that the opening is over and the rest of the invitation is the guest's.
    *
@@ -432,8 +488,8 @@ export default function Hero({
 
   // The invitation is handed over at the end of the opening rather than at the
   // start of it, so a guest is not scrolling past the envelope while it is
-  // still moving. Nothing waits when nothing moves: a guest who has asked for
-  // reduced motion is given the invitation at once.
+  // still moving. A guest who has asked for reduced motion gets only the brief
+  // cross-fade and is given the invitation at once.
   useEffect(() => {
     if (!sealed || !envelopeOpened) return;
     if (reduce) {
@@ -447,10 +503,14 @@ export default function Hero({
     return () => window.clearTimeout(opening);
   }, [sealed, envelopeOpened, reduce]);
 
+  // Drawn at rest wherever the invitation is not Sealed, the same principle
+  // `useWeddingReveal` follows: the Site Preview is a picture of the
+  // invitation, not the invitation arriving.
+  const still = reduce || !sealed;
   const fadeUpMount = (delay: number) => ({
-    initial: reduce ? false : { opacity: 0, y: 16 },
+    initial: still ? false : { opacity: 0, y: 16 },
     animate: { opacity: 1, y: 0 },
-    transition: reduce ? undefined : { duration: 0.6, ease: EASE, delay },
+    transition: still ? undefined : { duration: 0.6, ease: EASE, delay },
   });
 
   return (
@@ -494,12 +554,21 @@ export default function Hero({
         <div className="absolute left-1/2 top-[487px] z-40 -translate-x-1/2">
           <motion.button
             type="button"
-            onClick={() => setOpened(true)}
+            onClick={() => {
+              setOpened(true);
+              onOpen?.();
+            }}
             aria-label="Open invitation"
             className="flex items-center justify-center border border-solid border-[#fafafa] gap-[10px] p-[10px]"
             initial={false}
             animate={{ opacity: opened ? 0 : 1 }}
-            transition={step(reduce, OPENING.seal)}
+            whileTap={reduce ? undefined : pressTap}
+            // Timed with the seal's lift but as a plain fade: the seal's spring
+            // would bounce an opacity, which only clamps.
+            transition={step(reduce, {
+              delay: OPENING.seal.delay,
+              duration: OPENING.seal.duration,
+            })}
             style={{ pointerEvents: opened ? 'none' : 'auto' }}>
             <p className="whitespace-nowrap font-[family-name:var(--font-wt1-mono)] text-[12px] leading-[normal] text-[#fafafa]">
               Open Invitation

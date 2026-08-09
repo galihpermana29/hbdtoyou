@@ -28,8 +28,8 @@ export default function WeddingInvitationCreatePage({
             Under Maintenance
           </h1>
           <p className="mt-4 max-w-[400px] text-gray-700">
-            We are currently working on improving this feature. Please check back
-            soon!
+            We are currently working on improving this feature. Please check
+            back soon!
           </p>
           <div className="mt-6">
             <a

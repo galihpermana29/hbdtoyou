@@ -1,12 +1,13 @@
 'use client';
 
+import { AnimatePresence, motion, useReducedMotion } from 'framer-motion';
 import { useCallback, useEffect, useRef, useState } from 'react';
 
 import BrideGroom from './BrideGroom';
 import EventDetails from './EventDetails';
 import Footer from './Footer';
 import Gallery from './Gallery';
-import Hero from './Hero';
+import Hero, { OPENING } from './Hero';
 import HolyVerse from './HolyVerse';
 import LoveStory from './LoveStory';
 import Messages from './Messages';
@@ -16,6 +17,8 @@ import TokenOfLove from './TokenOfLove';
 import VinylWidget from './VinylWidget';
 import { SealedProvider } from './sealed-context';
 import { useBeginAtTheTop, type Scroller } from './use-begin-at-the-top';
+import { useFitToPhone } from './use-fit-to-phone';
+import { EASE } from './variants';
 import {
   DEFAULT_WEDDING_TEMPLATE_1_CONTENT,
   type WeddingTemplate1Content,
@@ -67,12 +70,16 @@ export interface WeddingTemplate1Props {
    */
   scrollsInside?: Scroller;
   /**
-   * Draw the Background Track control over the invitation, where the page
-   * showing it has room for one.
+   * Play the Background Track behind the invitation, and draw its control over
+   * it, where the page showing it has room for one.
    *
-   * The couple's own answer is the other half of this: a wedding whose
-   * Background Track is switched off has no track to offer, so the control is
-   * not drawn on it whatever the page asked for.
+   * The couple's own answers are the other half of this: a wedding whose
+   * Background Track is switched off, or whose couple never picked a song, has
+   * no track to play, so nothing is played and no record is drawn on it
+   * whatever the page asked for.
+   *
+   * Off for the Create Flow's panels, which draw the invitation as a picture
+   * beside a form: a picture does not start singing while a couple types.
    */
   showVinylWidget?: boolean;
 }
@@ -117,6 +124,7 @@ export default function WeddingTemplate1({
    */
   const [rsvps, setRsvps] = useState<Rsvp[]>([]);
   const [replying, setReplying] = useState(false);
+  const reduce = useReducedMotion();
 
   /**
    * Whether the envelope is still closed over the rest of the invitation.
@@ -129,7 +137,40 @@ export default function WeddingTemplate1({
   const reveal = useCallback(() => setRevealed(true), []);
   const unopened = sealed && !revealed;
 
+  /**
+   * The Background Track, played by this page's own audio element and reported
+   * by it: the vinyl spins on what the audio says it is doing, never on what
+   * was asked of it, so a track that fails to start leaves a resting record
+   * rather than a spinning lie.
+   *
+   * It starts inside the Open Invitation press - the envelope open is the
+   * guest's gesture, and the one a browser will let audio start on - so a
+   * sealed invitation is silent and an opened one begins the way the design
+   * means the experience to begin. `catch` because a refused `play()` is a
+   * browser's answer, not an error: the record simply rests, and the guest has
+   * it to press. On an unsealed page there is no envelope to open, so the
+   * record rests until the guest spins it themselves.
+   */
+  const offersTrack =
+    showVinylWidget &&
+    content.songRequestEnabled &&
+    (content.backgroundTrack?.url ?? '') !== '';
+  const audio = useRef<HTMLAudioElement>(null);
+  const [trackPlaying, setTrackPlaying] = useState(false);
+  const startTrack = useCallback(() => {
+    audio.current?.play().catch(() => {});
+  }, []);
+  const toggleTrack = useCallback(() => {
+    if (!audio.current) return;
+    if (audio.current.paused) startTrack();
+    else audio.current.pause();
+  }, [startTrack]);
+
   useBeginAtTheTop(sealed, scrollsInside);
+
+  // Scaled, whole, into a box narrower than the phone the design draws:
+  // see `use-fit-to-phone.ts`. At 375px and above this writes no style.
+  const fit = useFitToPhone<HTMLElement>();
 
   /**
    * Put everything below the envelope out of reach until it is opened.
@@ -149,8 +190,16 @@ export default function WeddingTemplate1({
 
   return (
     <SealedProvider sealed={sealed}>
-      <main className="relative mx-auto w-full max-w-[375px] overflow-x-hidden bg-[#090909] text-[#fafafa]">
-        <Hero content={content} addressee={addressee} onOpened={reveal} />
+      <main
+        ref={fit.frame}
+        style={fit.style}
+        className="relative mx-auto w-full max-w-[375px] overflow-x-hidden bg-[#090909] text-[#fafafa]">
+        <Hero
+          content={content}
+          addressee={addressee}
+          onOpen={offersTrack ? startTrack : undefined}
+          onOpened={reveal}
+        />
         {/* Everything below the envelope, out of the invitation until it is
             opened. Two marks, because "not yet" has two halves.
 
@@ -198,23 +247,61 @@ export default function WeddingTemplate1({
         </div>
       </main>
 
-      {replying && (
-        <RsvpCard
-          guest={guest}
-          onClose={() => setReplying(false)}
-          onKeep={(rsvp) => {
-            setRsvps((taken) => [...taken, rsvp]);
-            setReplying(false);
-          }}
-        />
-      )}
+      {/* AnimatePresence keeps the card mounted through its exit, so closing
+          is the entrance played back rather than a disappearance. The dialog's
+          focus return and scroll unlock run on the real unmount, 200ms later,
+          which holds the page still until the card has actually gone. */}
+      <AnimatePresence>
+        {replying && (
+          <RsvpCard
+            guest={guest}
+            onClose={() => setReplying(false)}
+            onKeep={(rsvp) => {
+              setRsvps((taken) => [...taken, rsvp]);
+              setReplying(false);
+            }}
+          />
+        )}
+      </AnimatePresence>
 
-      {showVinylWidget && content.songRequestEnabled && (
-        <div className="pointer-events-none fixed inset-x-0 bottom-0 z-50 mx-auto flex max-w-[375px] justify-end p-4">
-          <div className="pointer-events-auto">
-            <VinylWidget />
-          </div>
-        </div>
+      {offersTrack && (
+        <>
+          {/* Mounted while the envelope is still closed, so the track is
+              fetchable the moment the open press asks for it; what waits for
+              the opening is the sound, not the element. */}
+          <audio
+            ref={audio}
+            src={content.backgroundTrack.url}
+            preload="metadata"
+            onPlay={() => setTrackPlaying(true)}
+            onPause={() => setTrackPlaying(false)}
+          />
+          {/* The record only once the envelope is open: Sealed means silent,
+              and a control drawn on the envelope would be a way to start the
+              music without opening the invitation. */}
+          {!unopened && (
+            <div className="pointer-events-none fixed inset-x-0 bottom-0 z-50 mx-auto flex max-w-[375px] justify-end p-4">
+              {/* On a sealed invitation the record arrives mid-opening, timed
+                  off the envelope cross-fade's own start so it is settled in
+                  the corner by the time the cards have risen - appearing
+                  rather than popping. Anywhere else it is part of the page and
+                  is drawn at rest, like every other reveal. */}
+              <motion.div
+                className="pointer-events-auto"
+                initial={
+                  sealed && !reduce ? { opacity: 0, y: 12, scale: 0.9 } : false
+                }
+                animate={{ opacity: 1, y: 0, scale: 1 }}
+                transition={{
+                  duration: 0.4,
+                  ease: EASE,
+                  delay: OPENING.envelope.delay,
+                }}>
+                <VinylWidget playing={trackPlaying} onToggle={toggleTrack} />
+              </motion.div>
+            </div>
+          )}
+        </>
       )}
     </SealedProvider>
   );

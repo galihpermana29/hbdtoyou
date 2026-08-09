@@ -91,6 +91,24 @@ export const guestInvitesIntroduction = [
     style: STEP_TYPE.description,
   },
   {
+    // Not in the design, and agreed and recorded in
+    // `docs/adr/0002-figma-is-literal-truth.md`.
+    //
+    // The same control the step before carries, in the same place: above the
+    // fields and outside the form, so the position-addressed labels below do
+    // not renumber. Captured showing English, which is the choice the check
+    // makes for itself; see `READ_IN_ENGLISH` in `capture.mjs`.
+    name: 'Language label',
+    select: 'label',
+    withText: 'Language',
+    style: {
+      fontSize: '14px',
+      fontWeight: '500',
+      lineHeight: '20px',
+      color: '#344054',
+    },
+  },
+  {
     name: 'Customize your invitation Section name',
     select: 'form section :is(h2, h3)',
     nth: 0,

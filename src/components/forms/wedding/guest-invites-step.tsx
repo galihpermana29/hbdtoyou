@@ -14,6 +14,7 @@ import {
   flowSectionName,
 } from './create-flow-treatment';
 import { useFlowCopy } from './flow-language';
+import FlowLanguageField from './flow-language-field';
 import GuestInvitesPreview from './guest-invites-preview';
 import {
   guestLinkFor,
@@ -47,6 +48,11 @@ import { type Guest, type GuestList } from './guest-list';
  * step's - the backend holds it, and `use-guest-roster.ts` reads it back and
  * sends every change to it - so what this step does with a chosen file is hand
  * it over, and what it does with a correction or a deletion is ask for one.
+ *
+ * On an invitation opened again the Guest List is not here at all: the couple
+ * manages it on its own screen, `/dashboard/wedding/{id}/guests`, and the same
+ * list drawn in two places would be the same six columns this step was too
+ * narrow for. Creating keeps the card, exactly as the design draws it.
  */
 
 export interface GuestInvitesStepProps {
@@ -94,6 +100,15 @@ export interface GuestInvitesStepProps {
    * ask the backend whether the invitation may go out - it already has.
    */
   isAlreadyPublished?: boolean;
+  /**
+   * Whether the invitation being filled in is one opened again from the
+   * couple's own listing, rather than one being made.
+   *
+   * An opened invitation's Guest List lives on its own screen in the
+   * dashboard, so this step does not draw the card and nothing here replaces
+   * it. A couple creating still sees it, exactly as the design draws it.
+   */
+  isOpenedAgain?: boolean;
   /** Go back to the details and story step. */
   onPreviousStep: () => void;
   /**
@@ -162,6 +177,7 @@ export default function GuestInvitesStep({
   guestListProblem,
   isGuestListBusy,
   isAlreadyPublished = false,
+  isOpenedAgain = false,
   onPreviousStep,
   onConfirm,
   onSaveAsDraft,
@@ -197,158 +213,170 @@ export default function GuestInvitesStep({
           </p>
         </div>
 
-        <form
-          className="flex flex-col gap-[24px]"
-          onSubmit={(event) => {
-            // Confirming publishes, which is a request rather than a step: the
-            // browser's own submit would reload the page out from under it.
-            event.preventDefault();
-            onConfirm();
-          }}>
-          <section className="flex flex-col">
-            <h3 className={flowSectionName}>{copy.customiseInvitation}</h3>
-            <p className={flowHint}>
-              Personalize your invitation domain &amp; message for your guests
-              to see
-            </p>
+        <div>
+          {/* The same control the step before carries, in the same place:
+              above the fields and outside the form. It is a preference about
+              reading the flow rather than an answer about a wedding, and its
+              placement is load-bearing here for the same reason it is there:
+              the check addresses this step's labels by their position within
+              the form, and a setting parked among them would renumber every
+              one of them. */}
+          <FlowLanguageField />
+          <form
+            className="flex flex-col gap-[24px]"
+            onSubmit={(event) => {
+              // Confirming publishes, which is a request rather than a step: the
+              // browser's own submit would reload the page out from under it.
+              event.preventDefault();
+              onConfirm();
+            }}>
+            <section className="flex flex-col">
+              <h3 className={flowSectionName}>{copy.customiseInvitation}</h3>
+              <p className={flowHint}>
+                Personalize your invitation domain &amp; message for your guests
+                to see
+              </p>
 
-            <div className="mt-[24px] flex flex-col gap-[24px]">
-              <div className="flex flex-col gap-[6px]">
-                <label id={slugLabelId} htmlFor={slugId} className={flowLabel}>
-                  {copy.customDomain}
-                </label>
-                <div
-                  role="group"
-                  aria-labelledby={slugLabelId}
-                  className={`flex items-stretch ${flowFieldBox}`}>
-                  {/* The address reads left to right as one line, so the part
-                      the product fixes comes before the part that names this
-                      invitation. The design draws it the other way round, as a
-                      subdomain suffix, which the product cannot serve: see
-                      `docs/adr/0001-path-urls-not-subdomains.md`. */}
-                  <span className="flex items-center rounded-l-[8px] border-r border-[#D0D5DD] bg-white px-[20px] py-[10px] text-[14px] font-[600] leading-[20px] text-[#E34013]">
-                    {SLUG_PREFIX}
-                  </span>
-                  {/* Read-only rather than disabled, and still an input: the
-                      couple does not choose this, but it is the address they
-                      are about to send, so it has to be reachable, selectable
-                      and copyable. Nothing is said underneath it either - rules
-                      for typing something nobody types, and a message naming a
-                      fault nobody can have caused, would both be words a couple
-                      cannot act on. */}
-                  <input
-                    id={slugId}
-                    type="text"
-                    readOnly
-                    value={values.slug}
-                    className="min-w-0 flex-1 rounded-r-[8px] bg-white px-[14px] py-[12px] text-[16px] font-[400] leading-[24px] text-[#101828] outline-none placeholder:text-[#667085]"
+              <div className="mt-[24px] flex flex-col gap-[24px]">
+                <div className="flex flex-col gap-[6px]">
+                  <label id={slugLabelId} htmlFor={slugId} className={flowLabel}>
+                    {copy.customDomain}
+                  </label>
+                  <div
+                    role="group"
+                    aria-labelledby={slugLabelId}
+                    className={`flex items-stretch ${flowFieldBox}`}>
+                    {/* The address reads left to right as one line, so the part
+                        the product fixes comes before the part that names this
+                        invitation. The design draws it the other way round, as a
+                        subdomain suffix, which the product cannot serve: see
+                        `docs/adr/0001-path-urls-not-subdomains.md`. */}
+                    <span className="flex items-center rounded-l-[8px] border-r border-[#D0D5DD] bg-white px-[20px] py-[10px] text-[14px] font-[600] leading-[20px] text-[#E34013]">
+                      {SLUG_PREFIX}
+                    </span>
+                    {/* Read-only rather than disabled, and still an input: the
+                        couple does not choose this, but it is the address they
+                        are about to send, so it has to be reachable, selectable
+                        and copyable. Nothing is said underneath it either - rules
+                        for typing something nobody types, and a message naming a
+                        fault nobody can have caused, would both be words a couple
+                        cannot act on. */}
+                    <input
+                      id={slugId}
+                      type="text"
+                      readOnly
+                      value={values.slug}
+                      className="min-w-0 flex-1 rounded-r-[8px] bg-white px-[14px] py-[12px] text-[16px] font-[400] leading-[24px] text-[#101828] outline-none placeholder:text-[#667085]"
+                    />
+                  </div>
+                </div>
+
+                <div className="flex flex-col gap-[6px]">
+                  <label htmlFor={messageId} className={flowLabel}>
+                    {copy.greetingMessage}
+                  </label>
+                  <textarea
+                    id={messageId}
+                    ref={messageRef}
+                    value={values.greetingMessage}
+                    onChange={(event) =>
+                      onChange({ ...values, greetingMessage: event.target.value })
+                    }
+                    className={`w-full resize-none overflow-hidden px-[12px] py-[8px] text-[16px] font-[400] leading-[24px] text-[#101828] outline-none ${flowFieldBox}`}
                   />
                 </div>
               </div>
+            </section>
 
-              <div className="flex flex-col gap-[6px]">
-                <label htmlFor={messageId} className={flowLabel}>
-                  {copy.greetingMessage}
-                </label>
-                <textarea
-                  id={messageId}
-                  ref={messageRef}
-                  value={values.greetingMessage}
-                  onChange={(event) =>
-                    onChange({ ...values, greetingMessage: event.target.value })
-                  }
-                  className={`w-full resize-none overflow-hidden px-[12px] py-[8px] text-[16px] font-[400] leading-[24px] text-[#101828] outline-none ${flowFieldBox}`}
+            {isOpenedAgain ? null : (
+              <section className="flex flex-col">
+                <h3 className={flowSectionName}>{copy.addGuestList}</h3>
+                <p className={flowHint}>
+                  Personalize your invitation domain &amp; message for your
+                  guests to see
+                </p>
+
+                <GuestListField
+                  guestList={guestList}
+                  onUpload={onUploadGuestList}
+                  onCorrect={onCorrectGuest}
+                  onDelete={onDeleteGuest}
+                  problem={guestListProblem}
+                  isBusy={isGuestListBusy}
                 />
-              </div>
-            </div>
-          </section>
+              </section>
+            )}
 
-          <section className="flex flex-col">
-            <h3 className={flowSectionName}>{copy.addGuestList}</h3>
-            <p className={flowHint}>
-              Personalize your invitation domain &amp; message for your guests
-              to see
-            </p>
-
-            <GuestListField
-              guestList={guestList}
-              onUpload={onUploadGuestList}
-              onCorrect={onCorrectGuest}
-              onDelete={onDeleteGuest}
-              problem={guestListProblem}
-              isBusy={isGuestListBusy}
-            />
-          </section>
-
-          <div className={`mt-[24px] ${flowActionRow}`}>
-            <button
-              type="button"
-              onClick={onPreviousStep}
-              className={flowActionBack}>
-              {copy.actionPreviousStep}
-            </button>
-            {/* Beside Confirm Create rather than beside Previous step: it is
-                the other thing a couple can do with what they have written,
-                not the other way out of the step. Dimmed while it is saving,
-                for the reason the Next action is.
-
-                Gone on an invitation that is already published, where the word
-                draft is untrue: there is no draft copy to save to, and the
-                press beside it keeps the same thing this one would. */}
-            {isAlreadyPublished ? null : (
+            <div className={`mt-[24px] ${flowActionRow}`}>
               <button
                 type="button"
-                onClick={onSaveAsDraft}
+                onClick={onPreviousStep}
+                className={flowActionBack}>
+                {copy.actionPreviousStep}
+              </button>
+              {/* Beside Confirm Create rather than beside Previous step: it is
+                  the other thing a couple can do with what they have written,
+                  not the other way out of the step. Dimmed while it is saving,
+                  for the reason the Next action is.
+
+                  Gone on an invitation that is already published, where the word
+                  draft is untrue: there is no draft copy to save to, and the
+                  press beside it keeps the same thing this one would. */}
+              {isAlreadyPublished ? null : (
+                <button
+                  type="button"
+                  onClick={onSaveAsDraft}
+                  disabled={isBusy}
+                  aria-busy={isBusy}
+                  className={`${flowActionAside} disabled:opacity-60`}>
+                  {copy.actionSaveAsDraft}
+                </button>
+              )}
+              {/* Dimmed while something is in flight, as its neighbour is: this
+                  one asks the backend two questions in turn, and a couple who
+                  cannot tell a slow press from a dead one presses again. */}
+              <button
+                type="submit"
                 disabled={isBusy}
                 aria-busy={isBusy}
-                className={`${flowActionAside} disabled:opacity-60`}>
-                {copy.actionSaveAsDraft}
+                className={`${flowActionForward} disabled:opacity-60`}>
+                {isAlreadyPublished
+                  ? copy.actionSaveChanges
+                  : copy.actionConfirmCreate}
               </button>
-            )}
-            {/* Dimmed while something is in flight, as its neighbour is: this
-                one asks the backend two questions in turn, and a couple who
-                cannot tell a slow press from a dead one presses again. */}
-            <button
-              type="submit"
-              disabled={isBusy}
-              aria-busy={isBusy}
-              className={`${flowActionForward} disabled:opacity-60`}>
-              {isAlreadyPublished
-                ? copy.actionSaveChanges
-                : copy.actionConfirmCreate}
-            </button>
-          </div>
-
-          {/* Under the row rather than over it, so a couple reads it where they
-              have just pressed. Nothing is drawn while there is nothing to say,
-              which is every screen the design draws. */}
-          {problem ? (
-            <p role="alert" className={`text-right ${flowProblem}`}>
-              {problem}
-            </p>
-          ) : null}
-
-          {/* What the backend named, listed rather than run together, because a
-              couple has to go back and fix each one. Its words are printed as
-              they arrived: see `docs/adr/0002-figma-is-literal-truth.md`. */}
-          {outstanding ? (
-            <div role="alert" className={`text-right ${flowProblem}`}>
-              <p>
-                Your invitation is not ready to publish yet. It is still a
-                draft, and nothing has been sent to your guests.
-              </p>
-              {/* By position, because the backend names a field and a fault
-                  separately and only the fault is printed: two fields can be
-                  wrong in the same words, and the same words twice is a list of
-                  one as far as React is concerned. */}
-              <ul className="mt-[6px] flex flex-col gap-[4px]">
-                {outstanding.map((issue, position) => (
-                  <li key={position}>{issue}</li>
-                ))}
-              </ul>
             </div>
-          ) : null}
-        </form>
+
+            {/* Under the row rather than over it, so a couple reads it where they
+                have just pressed. Nothing is drawn while there is nothing to say,
+                which is every screen the design draws. */}
+            {problem ? (
+              <p role="alert" className={`text-right ${flowProblem}`}>
+                {problem}
+              </p>
+            ) : null}
+
+            {/* What the backend named, listed rather than run together, because a
+                couple has to go back and fix each one. Its words are printed as
+                they arrived: see `docs/adr/0002-figma-is-literal-truth.md`. */}
+            {outstanding ? (
+              <div role="alert" className={`text-right ${flowProblem}`}>
+                <p>
+                  Your invitation is not ready to publish yet. It is still a
+                  draft, and nothing has been sent to your guests.
+                </p>
+                {/* By position, because the backend names a field and a fault
+                    separately and only the fault is printed: two fields can be
+                    wrong in the same words, and the same words twice is a list of
+                    one as far as React is concerned. */}
+                <ul className="mt-[6px] flex flex-col gap-[4px]">
+                  {outstanding.map((issue, position) => (
+                    <li key={position}>{issue}</li>
+                  ))}
+                </ul>
+              </div>
+            ) : null}
+          </form>
+        </div>
       </div>
 
       {/* The rule down the left is the division between two columns, so it

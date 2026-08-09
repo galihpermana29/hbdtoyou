@@ -25,7 +25,7 @@ const NetlfixWeddingPage = () => {
     mapEmbedUrl:
       'https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d253840.49131625626!2d106.66470603628709!3d-6.2297209292163895!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x2e69f3e945e34b9d%3A0x5371bf0fdad786a2!2sJakarta%2C%20Daerah%20Khusus%20Ibukota%20Jakarta!5e0!3m2!1sid!2sid!4v1752330835231!5m2!1sid!2sid',
     storyDescription:
-      'Dalam perjalanan hidup yang penuh takdir dan waktu, Salsa dan Luqman dipertemukan di saat yang tepat—ketika hati telah mantap dan langkah siap untuk berjalan bersama. Kini, keduanya bersiap melangkah menuju babak baru: sebuah ikatan suci bernama pernikahan.',
+      'Dalam perjalanan hidup yang penuh takdir dan waktu, Salsa dan Luqman dipertemukan di saat yang tepat - ketika hati telah mantap dan langkah siap untuk berjalan bersama. Kini, keduanya bersiap melangkah menuju babak baru: sebuah ikatan suci bernama pernikahan.',
     quoteText:
       '"Dan di antara tanda-tanda (kebesaran)-Nya ialah Dia menciptakan untukmu pasangan dari jenismu sendiri agar kamu cenderung dan merasa tenteram kepadanya, dan Dia menjadikan di antaramu rasa kasih dan sayang…"',
     quoteSource: '(Q.S Ar-Rum: 21)',

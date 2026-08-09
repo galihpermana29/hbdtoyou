@@ -81,7 +81,7 @@
   font-style: normal;
 }
 
-/* Two-slide hero carousel on the home page — make the dots visible on the
+/* Two-slide hero carousel on the home page - make the dots visible on the
    light/cream slide backgrounds and brand the active one. */
 .hero-carousel .slick-dots li button {
   background: #1b1b1b !important;
@@ -258,7 +258,7 @@
    background-color: #555;
  }
 
-/* Celestial Tarot (tarotv1) — scoped styles.
+/* Celestial Tarot (tarotv1) - scoped styles.
    Each utility matches both the .tarot-theme root element itself
    (.tarot-theme.CLASS) and any descendant (.tarot-theme .CLASS). */
 .tarot-theme,
@@ -299,7 +299,7 @@
   backface-visibility: hidden;
 }
 
-/* Wedding Invitation landing — auto-scrolling marquees.
+/* Wedding Invitation landing - auto-scrolling marquees.
    Render the row of items twice inside the track; the keyframes shift it by
    -50% so the duplicated half lands exactly where the first started, looping
    seamlessly. Hovering pauses; reduced-motion users get a static row. */

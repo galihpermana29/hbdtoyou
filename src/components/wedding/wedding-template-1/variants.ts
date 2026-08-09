@@ -44,6 +44,19 @@ export const fade: Variants = {
   },
 };
 
+/**
+ * Press feedback for anything a guest presses: a subtle physical dip while the
+ * finger is down, back to the exact designed state on release. Transform only,
+ * and identity at rest, so no designed computed style changes.
+ *
+ * Gate it where it is spread, the same way every reveal is gated:
+ * `whileTap={reduce ? undefined : pressTap}`.
+ */
+export const pressTap = {
+  scale: 0.97,
+  transition: { duration: 0.15, ease: EASE },
+} as const;
+
 export const staggerContainer: Variants = {
   hidden: {},
   show: {

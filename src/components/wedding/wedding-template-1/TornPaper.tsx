@@ -90,8 +90,12 @@ export function TornEdge({
  * The design's two fills over the paper, in the order Figma stacks them on
  * `Rectangle 1` - cream at 30% and then black at 4%, which CSS writes topmost
  * first.
+ *
+ * Exported because the Holy Verse lays the same two fills over its own ground,
+ * which is a different crop of `paper.jpg` and so cannot be `PaperGround`. Only
+ * the tint is shared: the crop under it stays each caller's own.
  */
-const TINT: CSSProperties = {
+export const PAPER_TINT: CSSProperties = {
   backgroundImage:
     'linear-gradient(90deg, rgba(0,0,0,0.04) 0%, rgba(0,0,0,0.04) 100%), ' +
     'linear-gradient(90deg, rgba(239,233,226,0.3) 0%, rgba(239,233,226,0.3) 100%)',
@@ -116,7 +120,7 @@ export function PaperGround() {
           src={`${ASSET}/paper.jpg`}
         />
       </div>
-      <div className="absolute inset-0" style={TINT} />
+      <div className="absolute inset-0" style={PAPER_TINT} />
     </div>
   );
 }

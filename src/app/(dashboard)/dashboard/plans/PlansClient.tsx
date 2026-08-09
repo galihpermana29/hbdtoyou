@@ -178,7 +178,7 @@ const PlansClient = ({
       title: 'Duration',
       dataIndex: 'duration_days',
       key: 'duration_days',
-      render: (val: number) => (val ? `${val} days` : '—'),
+      render: (val: number) => (val ? `${val} days` : '-'),
     },
     {
       title: 'Active',

@@ -3,6 +3,7 @@
 The template's artwork was sliced out of Figma while the design tool was rate-limited, and nobody had checked afterwards which files were the design's and which had been approximated or taken from elsewhere.
 Sixteen of the thirty-five files are photographs of the designer's own example wedding, and a photograph the template holds rather than the couple is a stranger's face presented as theirs.
 This file is the account: what every file in `public/templates/wedding-template-1/` is, where in the design it comes from, and which of the two kinds it is.
+The counts in it describe the thirty-five files the audit judged; two have since left the directory, and the end of this file says which and why.
 
 ## The two kinds
 
@@ -48,7 +49,6 @@ The remaining three are the SVGs, compared path by path against the design's vec
 | `footer-logo.png` | Footer `Frame 53/image 17` | `d6041128e2b49e4a559c252130993b9397ee4722` |
 | `vinyl-record.png` | Vinyl `Mask group/image 530` | `984d3d49d261e8098735eb8aabb14d3187b4295b` |
 | `vinyl-exclude.png` | Vinyl `Exclude` | `8841373b16a9e05d18455db4da736e103f33535d`, rendered |
-| `lovestory-pin.svg` | Love Story `Frame 31` marker | vector |
 | `lovestory-polaroid-cover.svg` | Love Story `Polaroid/cover` | vector |
 | `vinyl-mask.svg` | Vinyl `Exclude` outline | vector |
 
@@ -69,7 +69,6 @@ Each of these is the sample invitation's, held in `DEFAULT_WEDDING_TEMPLATE_1_CO
 | `lovestory-photo-2.png` | `loveStoryPhotos[1]` | Love Story `Strip/Photo 2` | `3e14470097c5616266636bdd595b32e4a416ec86` |
 | `lovestory-photo-3.png` | `loveStoryPhotos[2]` | Love Story `Strip/Photo 3` | `1548bbbde3ade2e6f35fb2acf0026d90e02cde3a` |
 | `lovestory-polaroid-photo.jpg` | `polaroidPhoto` | Love Story `Polaroid/image` | `7c13228551a69dc1b8c43bf57dd8406335300303` |
-| `lovestory-map-photo.png` | `mapPhoto` | Love Story `Frame 31/Rectangle 5` | `2c9774e91094520d97f6bf0f0e11d20d9c72404e` |
 | `event-photo.png` | `eventPhotos[0]` | Venue Details `Polaroid/Vector 2` | `0f36257b9fd9570b6f878d19cac33bee1648a7ea`, rendered |
 | `gallery-1.png` | `galleryPhotos[0]` | Photo Collection `image 528` | `9b8b2518ebee51ed4f2de76e46d1e31f2874daa0` |
 | `gallery-2.png` | `galleryPhotos[1]` | Photo Collection `image 527` | `85b41c0d2da2c20e5772854536aaa7b837294c92` |
@@ -96,3 +95,6 @@ A name that misstates which kind a file is, is how the confusion this document e
 The Bride & Groom's Introduction drew its two portraits directly, with no content behind them, so every invitation showed the designer's bride and the designer's groom.
 They are now `bridePhoto` and `groomPhoto`.
 The Create Flow does not ask for either yet, so `formValuesToContent` takes both from the sample unconditionally; asking for them is `hbd-a09.20`.
+
+Two files have left the directory since the audit, which is why its counts above say thirty-five.
+The camera keepsake's screen in the Love Story now plays the Wedding Teaser Video rather than the venue's map - ADR 0002 records why - so `lovestory-map-photo.png` and `lovestory-pin.svg` went with the map, along with the `mapPhoto` field the first of them filled.

@@ -14,6 +14,7 @@ And Wedding Template 1, which is the invitation itself, drawn as a phone: it ren
 ## What is asserted, and what is never asserted
 
 For each element the design describes, the check asserts typeface, size, weight, line height, letter spacing, colour, background, border colour, width and style, corner radius, shadow, padding, margin and gap, together with the exact copy the element renders and where it sits in the document relative to every other element.
+A background the design fills with a gradient is asserted through `backgroundImage`, with the colours inside the gradient normalised the way colours are everywhere else and its stops trimmed the way lengths are, so the Messages fade's stops - minus sign included - are a claim a run checks rather than a comment a reader is trusted with.
 
 Two properties carry a behaviour rather than an appearance: `overflow` and `contain`.
 They are asserted in five places, each of them something defined by the behaviour rather than by how it looks.
@@ -157,6 +158,9 @@ A structural selector says where an element sits and lets its copy be checked as
 Those selectors use nothing but ordinary HTML and the standard ARIA patterns - `header`, `nav[aria-label="Breadcrumb"]`, `h1`, `form section`, `label` with its control, `[role="group"]` for a field the design builds from more than one element, `button`, `button[aria-expanded]` for the one that opens a Section, `inert` for a region nobody may reach yet, `footer` - and that list is the whole contract a screen has to satisfy.
 The invitation adds one plain `main > div`, for the region below the envelope once it has been opened: `inert` is what marks it out of reach and is exactly what an opened one no longer has, so there is nothing left to find it by but its place in the markup.
 It is the only `div` `main` owns, and a second one would fail the run as an ambiguous selector rather than quietly claim the wrong element.
+The invitation adds one more, `main section:has([role="region"]) > [aria-hidden]`, for the fade over the foot of the Messages list.
+It is a decorative box with no copy of its own, so the contract is that the section owning the invitation's one scrollable region draws exactly one `aria-hidden` child, and that child is the fade.
+A second decorative child added to that section would fail the run as ambiguous rather than quietly claim the wrong box.
 
 The Guest List card adds the other, `form [role="group"] > div`, for its header and for the region its columns scroll in.
 Neither has anything of its own to be found by - a header is a row of three things the design already claims separately, and the scrolling region is a plain box - so both are asked for by position within the card, `nth: 0` and `nth: 1`.

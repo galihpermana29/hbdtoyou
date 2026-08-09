@@ -251,7 +251,7 @@ const NavigationBar = () => {
         </div>
       ),
     },
-    // Photobox temporarily hidden — superseded by Newspaper Photobox above.
+    // Photobox temporarily hidden - superseded by Newspaper Photobox above.
     // {
     //   value: 'photobox',
     //   label: (
@@ -372,7 +372,7 @@ const NavigationBar = () => {
         </div>
       ),
     },
-    // Photobox temporarily hidden — superseded by Newspaper Photobox above.
+    // Photobox temporarily hidden - superseded by Newspaper Photobox above.
     // {
     //   value: 'photobox',
     //   label: (

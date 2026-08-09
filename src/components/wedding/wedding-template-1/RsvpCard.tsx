@@ -28,6 +28,7 @@
  * `src/hooks/use-dialog-behaviour.ts`.
  */
 
+import { motion, useReducedMotion } from 'framer-motion';
 import {
   useId,
   useRef,
@@ -37,11 +38,13 @@ import {
   type ReactNode,
 } from 'react';
 
-import { GUEST_ALREADY_RESPONDED } from '@/action/interfaces';
+import { GUEST_ALREADY_RESPONDED, RATE_LIMITED } from '@/action/interfaces';
 import { submitWeddingRsvp } from '@/action/wedding-api';
 import { useDialogBehaviour } from '@/hooks/use-dialog-behaviour';
 
 import { PaperGround, TornEdge } from './TornPaper';
+import { EASE, pressTap } from './variants';
+import { useFitToPhone } from './use-fit-to-phone';
 
 const ASSET = '/templates/wedding-template-1';
 
@@ -78,6 +81,14 @@ export interface ReplyingGuest {
    * guest who can reply - it is only the name that has to be asked for.
    */
   name: string;
+  /**
+   * How many people a yes to the plus one question counts as: the MaxPlusOnes
+   * the Guest List holds for this guest, or one where their row carries no
+   * number. The design asks whether they bring somebody rather than how many,
+   * so yes claims every seat the couple allowed them - a guest allowed two who
+   * could only ever say one was the gap `hbd-381` was about.
+   */
+  maxPlusOnes: number;
 }
 
 /** What became of a reply, in the shape a save's outcome is told in. */
@@ -104,11 +115,28 @@ const REPLY_WORDS: Record<Exclude<ReplyOutcome, 'FAILED'>, string> = {
 };
 
 /**
+ * What a rate-limited guest reads: a failure, but one with its own words.
+ *
+ * The backend limits replies by IP, so a wedding party replying from one
+ * venue's wifi can be told to wait through no fault of their own. Waiting is
+ * the whole of the remedy, so the line says so rather than printing the
+ * backend's `RATE_LIMITED` at them - and it stays a failure rather than a
+ * settled reply, so Submit stays pressable for the retry it asks for.
+ */
+const RATE_LIMITED_WORDS =
+  'Your reply has not gone through just yet: too many replies arrived at ' +
+  'once. Nothing you have written has been lost - wait a moment, then press ' +
+  'Submit again.';
+
+/**
  * What they read when the reply did not reach the couple.
  *
  * The same three things the Create Flow tells a couple whose save failed: what
  * did not happen, what the backend gave as the reason, and that nothing they
- * wrote is gone.
+ * wrote is gone. Only the failures the backend has named get words of their
+ * own - `GUEST_ALREADY_RESPONDED` and `RATE_LIMITED` above - and everything
+ * else stays this generic on purpose, because inventing a friendlier reason
+ * for an unnamed failure would be guessing.
  */
 function replyProblem(reason: string): string {
   return (
@@ -300,6 +328,7 @@ export default function RsvpCard({
   onKeep: (rsvp: Rsvp) => void;
 }) {
   const dialogRef = useRef<HTMLDivElement>(null);
+  const reduce = useReducedMotion();
   const titleId = useId();
   const nameId = useId();
   const messageId = useId();
@@ -350,6 +379,11 @@ export default function RsvpCard({
   // be put at the top of a five-thousand-pixel invitation for having closed it.
   useDialogBehaviour(dialogRef, onClose);
 
+  // The card is a 375px-wide composition like the invitation behind it, and
+  // it opens over the window, so on a phone narrower than that it is scaled
+  // rather than sliced: see `use-fit-to-phone.ts`.
+  const fit = useFitToPhone<HTMLFormElement>();
+
   const reply = async (event: FormEvent<HTMLFormElement>) => {
     event.preventDefault();
     // The browser will not submit the form until every question is answered,
@@ -386,11 +420,9 @@ export default function RsvpCard({
         {
           is_attending: rsvp.attending,
           // The design asks whether a guest brings somebody and the backend
-          // counts how many, so yes is one and no is none. A guest the Guest
-          // List allows two can therefore only claim one, which is the gap seen
-          // from the guest's end and is reported rather than worked around -
-          // `hbd-381`.
-          plus_one_count: rsvp.plusOne ? 1 : 0,
+          // counts how many, so yes is every seat the Guest List allows this
+          // guest and no is none - `hbd-381`.
+          plus_one_count: rsvp.plusOne ? guest.maxPlusOnes : 0,
           // An empty message is left out rather than sent as nothing, so the
           // couple's reply list holds a message only where a guest wrote one.
           message: rsvp.message || undefined,
@@ -402,6 +434,9 @@ export default function RsvpCard({
         setOutcome('SENT');
       } else if (sent.message === GUEST_ALREADY_RESPONDED) {
         setOutcome('ALREADY_REPLIED');
+      } else if (sent.message === RATE_LIMITED) {
+        setProblem(RATE_LIMITED_WORDS);
+        setOutcome('FAILED');
       } else {
         setProblem(replyProblem(sent.message));
         setOutcome('FAILED');
@@ -420,16 +455,62 @@ export default function RsvpCard({
     }
   };
 
+  /**
+   * How the card arrives and leaves. Opening a reply card is a guest's own
+   * act, once, so it earns a modal's full animation: the dark ground fades in
+   * and the card rises into place with a paper-weight settle. Closing is the
+   * same path back at half the time - leaving should never make anybody wait.
+   * A guest who asked for reduced motion still sees the card arrive and leave
+   * rather than a hard cut - a brief opacity-only fade, with the movement (the
+   * rise and the settle) dropped. Gentler, not zero.
+   *
+   * The card's rise rides on the form, which is safe because `useFitToPhone`
+   * scales with `zoom` rather than `transform` - the two never fight.
+   */
+  const backdrop = reduce
+    ? {
+        initial: { opacity: 0 },
+        transition: { duration: 0.12, ease: EASE },
+        exit: { opacity: 0, transition: { duration: 0.12, ease: EASE } },
+      }
+    : {
+        initial: { opacity: 0 },
+        transition: { duration: 0.25, ease: EASE },
+        exit: { opacity: 0, transition: { duration: 0.2, ease: EASE } },
+      };
+  const card = reduce
+    ? {
+        initial: { opacity: 0 },
+        transition: { duration: 0.12, ease: EASE },
+        exit: { opacity: 0, transition: { duration: 0.12, ease: EASE } },
+      }
+    : {
+        initial: { opacity: 0, y: 24, scale: 0.97 },
+        transition: { type: 'spring' as const, duration: 0.45, bounce: 0.15 },
+        exit: {
+          opacity: 0,
+          y: 12,
+          scale: 0.98,
+          transition: { duration: 0.2, ease: EASE },
+        },
+      };
+
   return (
-    <div
+    <motion.div
       ref={dialogRef}
       role="dialog"
       aria-modal="true"
       aria-labelledby={titleId}
       tabIndex={-1}
+      {...backdrop}
+      animate={{ opacity: 1 }}
       className="fixed inset-0 z-[100] overflow-y-auto overscroll-contain bg-[#090909]/80 outline-none">
-      <form
+      <motion.form
+        ref={fit.frame}
+        style={fit.style}
         onSubmit={reply}
+        {...card}
+        animate={{ opacity: 1, y: 0, scale: 1 }}
         className="relative mx-auto w-[375px] max-w-full overflow-hidden pb-[43px] pt-[52px]">
         {/* The paper card, Figma `Rectangle 1` 312:3858, and what is on it. */}
         <div className="relative ml-[42px] w-[312px] pb-[5px] pr-[15px] pt-[25px]">
@@ -560,28 +641,35 @@ export default function RsvpCard({
                 that would otherwise appear to have done nothing.
               */}
               {saidOfTheReply && (
-                <p
+                // What became of a press eases in rather than snapping, so the
+                // eye is led to the one line that answers it.
+                <motion.p
                   role="status"
+                  initial={reduce ? false : { opacity: 0, y: 4 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  transition={{ duration: 0.2, ease: EASE }}
                   className="font-[family-name:var(--font-wt1-mono)] text-[10px] font-semibold leading-[normal] text-[#898989]">
                   {saidOfTheReply}
-                </p>
+                </motion.p>
               )}
-              <button
+              <motion.button
                 type="submit"
                 disabled={sending || settled}
+                whileTap={reduce ? undefined : pressTap}
                 className="flex items-center justify-center gap-[10px] border border-solid border-[#fafafa] bg-[#000000] p-[10px]">
                 <p className="whitespace-nowrap font-[family-name:var(--font-wt1-mono)] text-[12px] font-normal leading-[normal] text-[#fafafa]">
                   Submit
                 </p>
-              </button>
-              <button
+              </motion.button>
+              <motion.button
                 type="button"
                 onClick={onClose}
+                whileTap={reduce ? undefined : pressTap}
                 className="flex items-center justify-center gap-[10px] border border-solid border-[#000000] p-[10px]">
                 <p className="whitespace-nowrap font-[family-name:var(--font-wt1-mono)] text-[12px] font-normal leading-[normal] text-[#000000]">
                   Close
                 </p>
-              </button>
+              </motion.button>
             </div>
           </div>
         </div>
@@ -598,7 +686,7 @@ export default function RsvpCard({
             />
           </div>
         </div>
-      </form>
-    </div>
+      </motion.form>
+    </motion.div>
   );
 }

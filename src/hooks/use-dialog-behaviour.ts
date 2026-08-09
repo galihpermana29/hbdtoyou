@@ -54,15 +54,18 @@ interface DialogBehaviour {
  * Four promises, all of them what `aria-modal` tells anything reading the page
  * aloud is true:
  *
- * - the page does not scroll while the dialog is open;
+ * - whatever is behind the dialog does not scroll while it is open;
  * - Escape closes it, and closes only the innermost one;
  * - something inside it takes focus when it opens, and the control that opened
  *   it takes focus back when it goes;
  * - Tab wraps at both ends, so focus can never wander onto the page behind.
  *
- * What is held still is the page, which is the scroller behind a dialog opened
- * from one. A dialog opened from inside another - the RSVP inside Play Preview
- * - leaves the outer one's own scroller moving, and that is `hbd-1zi`.
+ * What is held still is the scroller behind: the page for a dialog opened from
+ * one, and the outer dialog itself for one opened from inside another - each
+ * of these is its own scroller, so the RSVP opened inside Play Preview holds
+ * the preview's invitation still the same way a dialog holds the page. Left
+ * moving, a guest filling in the card could scroll the invitation under it and
+ * close the card somewhere else entirely - which was `hbd-1zi`.
  */
 export function useDialogBehaviour(
   dialogRef: RefObject<HTMLElement>,
@@ -92,20 +95,21 @@ export function useDialogBehaviour(
     };
   }, [dialogRef, initialFocus, opener]);
 
-  // The page behind the dialog, held still because a dialog is open over it.
-  // Its own scroll position is left alone: a dialog opened from halfway down a
-  // form should not throw away where the form had got to.
-  useEffect(() => {
-    const previous = document.body.style.overflow;
-    document.body.style.overflow = 'hidden';
-    return () => {
-      document.body.style.overflow = previous;
-    };
-  }, []);
-
   useEffect(() => {
     const dialog = dialogRef.current;
     if (!dialog) return;
+
+    // The scroller behind this dialog, held still because a dialog is open
+    // over it: the innermost dialog already open where this one opened inside
+    // another - a dialog element is its own scroller - and the page where it
+    // did not. Read before this dialog joins the stack, which is why the lock
+    // lives in this effect. The scroller's position is left alone: hiding
+    // overflow does not move it, so a dialog opened from halfway down a form
+    // closes onto exactly where the form had got to.
+    const behind = openDialogs[openDialogs.length - 1] ?? document.body;
+    const previousOverflow = behind.style.overflow;
+    behind.style.overflow = 'hidden';
+
     openDialogs.push(dialog);
 
     const onKeyDown = (event: KeyboardEvent) => {
@@ -157,6 +161,7 @@ export function useDialogBehaviour(
       window.removeEventListener('keydown', onKeyDown);
       const at = openDialogs.indexOf(dialog);
       if (at !== -1) openDialogs.splice(at, 1);
+      behind.style.overflow = previousOverflow;
     };
   }, [dialogRef]);
 }

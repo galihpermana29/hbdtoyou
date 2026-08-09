@@ -48,9 +48,9 @@ const { Text } = Typography;
 // visitors see the full range of templates (bright Bobo edition + sweet
 // broadsheet + viral political satire).
 const SAMPLE_EDITIONS = [
-  { src: sampleBobo, alt: 'Belajar Memaafkan — Bobo edition' },
-  { src: sampleBroadsheet, alt: 'Love of The Week — broadsheet edition' },
-  { src: sampleClassic, alt: 'Suara Rakyat — political edition' },
+  { src: sampleBobo, alt: 'Belajar Memaafkan - Bobo edition' },
+  { src: sampleBroadsheet, alt: 'Love of The Week - broadsheet edition' },
+  { src: sampleClassic, alt: 'Suara Rakyat - political edition' },
 ];
 
 const CLIP_ROTATIONS = ['-rotate-2', 'rotate-1', '-rotate-1', 'rotate-2'];
@@ -91,7 +91,7 @@ export default function NewLandingPage() {
           pauseOnHover
           dots
           className="hero-carousel">
-        {/* Slide 1 — Newspaper Photobox (inner wrapper so slick styling
+        {/* Slide 1 - Newspaper Photobox (inner wrapper so slick styling
             doesn't override the layout) */}
         <div>
         <div
@@ -107,7 +107,7 @@ export default function NewLandingPage() {
               </h2>
               <p className="text-[#5b5b5b] text-[16px] md:text-[19px] font-[400] mt-[16px]">
                 Strike a pose and watch your selfie drop straight onto a vintage
-                front page — sweet broadsheet or viral political satire. Capture,
+                front page - sweet broadsheet or viral political satire. Capture,
                 pick your edition, download. No design skills, just main-character
                 energy.
               </p>
@@ -145,7 +145,7 @@ export default function NewLandingPage() {
           </div>
         </div>
 
-        {/* Slide 2 — main hero (inner wrapper, same reason) */}
+        {/* Slide 2 - main hero (inner wrapper, same reason) */}
         <div>
         <div className=" py-[30px] md:py-0 flex flex-col-reverse md:flex-row justify-between items-center mx-auto max-w-6xl 2xl:max-w-7xl px-[20px] min-h-screen">
           <div className="max-w-[600px] mr-[20px] flex-1 mt-[20px] md:mt-0">
@@ -225,7 +225,7 @@ export default function NewLandingPage() {
                 Your memories deserve more than just a gallery
               </p>
               <p className="text-[#7b7b7b] text-[16px] md:text-[20px] font-[400] mt-[20px]">
-                Craft beautiful scrapbooks that capture your favorite moments —
+                Craft beautiful scrapbooks that capture your favorite moments -
                 with photos, notes, and a touch of you
               </p>
               <Link href={'/scrapbook'} prefetch={true}>
@@ -323,7 +323,7 @@ export default function NewLandingPage() {
                 <p className="text-[#7b7b7b] text-[16px] md:text-[20px] font-[400] mt-[20px]">
                   Personalize your memories like never before. lets you create
                   stunning, interactive web inspired by your favorite
-                  platforms—whether it&apos;s Netflix, Spotify, etc.
+                  platforms - whether it&apos;s Netflix, Spotify, etc.
                 </p>
               </div>
               <div className="flex flex-col gap-y-6">

@@ -3,7 +3,7 @@
 import { InfoOutlined, PlayArrow } from '@mui/icons-material';
 import Image from 'next/image';
 import widya from '@/assets/widya/after/2.jpg';
-import { useRef, useState } from 'react';
+import { useState } from 'react';
 import Modal from './modal';
 import { Tour, TourProps } from 'antd';
 import { usePathname, useRouter, useSearchParams } from 'next/navigation';
@@ -127,7 +127,7 @@ export default function Featured({
                 dangerouslySetInnerHTML={{
                   __html: modalContent
                     ? addLineBreaksEveryThreeSentences(modalContent)
-                    : 'Hi Widya, I`ve been thinking about what to write for your birthday, and there are a few things I want to share with you. Even though we`ve only known each other for a couple of weeks, it feels like much longer because we talk so much—every night, every day. The more we talk, the more I find myself getting deeply interested in you.',
+                    : 'Hi Widya, I`ve been thinking about what to write for your birthday, and there are a few things I want to share with you. Even though we`ve only known each other for a couple of weeks, it feels like much longer because we talk so much - every night, every day. The more we talk, the more I find myself getting deeply interested in you.',
                 }}></p>
             </div>
           </div>

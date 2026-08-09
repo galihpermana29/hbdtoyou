@@ -38,6 +38,7 @@ import {
 } from '@/components/forms/wedding/guest-invites-types';
 import {
   contentToFormValues,
+  namesTheCouple,
   type WeddingInvitationFormValues,
   type WeddingTemplate1Content,
 } from '@/components/forms/wedding/wedding-invitation-types';
@@ -177,7 +178,18 @@ export default function WeddingInvitationCreateClientside({
     forgetWhatWentWrong,
   } = useInvitation(
     form,
-    opened && { weddingId: opened.weddingId, slug: opened.slug }
+    opened && {
+      weddingId: opened.weddingId,
+      slug: opened.slug,
+      isPublished: opened.isPublished,
+      // Both nicknames, because the offer of a name-derived address is made on
+      // the save where they first exist, and a record already carrying both is
+      // one whose moment has passed - whatever came of it.
+      namesTheCouple: namesTheCouple(
+        opened.content.groomName,
+        opened.content.brideName
+      ),
+    }
   );
 
   /**
@@ -191,8 +203,12 @@ export default function WeddingInvitationCreateClientside({
    * It is handed the invitation as soon as there is one, and holds the list in
    * the browser until then - which is a visitor with no account, who has nothing
    * to save a wedding to either.
+   *
+   * Not on an invitation opened again. Its Guest List has its own screen in
+   * the dashboard and the step here does not draw the card, so reading the
+   * list back would fetch every guest to show nobody.
    */
-  const guests = useGuestRoster(weddingId);
+  const guests = useGuestRoster(opened ? null : weddingId);
 
   const brideNickname = useWatch('brideName', form);
   const groomNickname = useWatch('groomName', form);
@@ -659,6 +675,7 @@ export default function WeddingInvitationCreateClientside({
               guestListProblem={guests.problem}
               isGuestListBusy={guests.isBusy}
               isAlreadyPublished={opened?.isPublished ?? false}
+              isOpenedAgain={Boolean(opened)}
               onPreviousStep={() => goToStep('Fill in the details & story')}
               onConfirm={confirmCreate}
               onSaveAsDraft={saveAsDraft}

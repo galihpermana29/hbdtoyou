@@ -81,7 +81,8 @@ The invitation prints a line of the couple's own words there, and without the fi
 The invitation prints a portrait of each beside their names and the design asks for neither, so every couple who published carried the designer's two models in their own frames.
 
 All four are recorded in the expectations beside the fields the design does draw, so the check covers them rather than ignoring them.
-Three other values the invitation printed were resolved without new fields: the map keepsake is the first of the photos Venue Details already collects, the photo sharing block's card is product art the block draws itself, and the Guest Messages block is always shown because guests write those on the invitation rather than the couple enabling them.
+Two other values the invitation printed were resolved without new fields: the photo sharing block's card is product art the block draws itself, and the Guest Messages block is always shown because guests write those on the invitation rather than the couple enabling them.
+A third, the map keepsake, was resolved the same way - the first of the photos Venue Details already collects - and has since given up its screen to the Wedding Teaser Video, recorded below.
 
 The designer settled it, one answer each way, rather than making either frame win outright.
 The Sections stack Love Story above Venue Details, following "Expanded All".
@@ -185,7 +186,8 @@ Where a reply has nowhere to go the line is "Nothing is saved yet. Your reply st
 That is every invitation nobody was sent: the Showcase, the Create Flow's two panels and Play Preview, and a published invitation opened at its bare address rather than by a guest's own link.
 It is claimed in `visual/expectations/wedding-template-1-rsvp.mjs`, whose screen is the Showcase's card, so that it cannot quietly become something vaguer.
 
-Where a guest came by their own link the reply reaches the couple, and the same line says which of three things happened: "Thank you. Your reply is with the couple.", "You have already replied to this invitation. The couple has that first answer, and it is the one that counts.", or one naming what the backend said and that nothing they wrote has been lost.
+Where a guest came by their own link the reply reaches the couple, and the same line says which of four things happened: "Thank you. Your reply is with the couple.", "You have already replied to this invitation. The couple has that first answer, and it is the one that counts.", a rate-limited reply's "Your reply has not gone through just yet: too many replies arrived at once. Nothing you have written has been lost - wait a moment, then press Submit again.", or one naming what the backend said and that nothing they wrote has been lost.
+Only the failures the backend has named get words of their own; the last stays generic on purpose, because inventing a friendlier reason for an unnamed failure would be guessing.
 None of those is asserted, for the same reason a failed save's line is not: each is drawn only when there is something to say, and every screen the design draws has nothing.
 
 The Name field on that card is read-only and holds the name the Guest List carries, unless the list carries none for that guest, in which case it is theirs to type as anybody else's is.
@@ -243,7 +245,8 @@ Most of them do not: the product marries Indonesian couples, and every field on 
 
 So the flow opens in Indonesian and a control above the Sections switches it to English.
 It sits above them because it governs all of them, and outside the form because it is a preference about reading the flow rather than an answer about a wedding.
-That second part is load-bearing rather than tidy: the check addresses this step's fields by their position within the form, and a setting parked among them renumbered every one of them the first time it was tried.
+That second part is load-bearing rather than tidy: the check addresses each step's fields by their position within its form, and a setting parked among them renumbered every one of them the first time it was tried.
+The same control sits on Guest invites details, above that step's fields and outside its form for the same reasons, so the choice is offered on both of the steps a couple works in rather than only the first.
 
 This is the one place where the design cannot be the reference for what a couple sees, because the design has nothing to say about a language it was not drawn in.
 The check therefore selects English before every capture, and holds the English against the frames exactly as before.
@@ -266,6 +269,21 @@ View Location is built from the written Wedding Address rather than from the pas
 So the couple pastes once and both jobs are served: the map shows the pin they chose, the control opens the venue in whatever maps application the guest already uses.
 
 The field's guidance changed with it, and its Indonesian names Google Maps' own menu items - worth checking against the real application, because wrong menu names in an instruction are worse than English ones.
+
+The Love Story's camera plays a film the design does not draw, where the design draws the venue's map.
+
+The Create Flow asks for a Wedding Teaser Video and the design draws nowhere that could play one: nine sections, and none of them is a video.
+A couple was therefore waiting out an upload no guest would ever see, which is the exact waste `hbd-5dd` was filed about.
+The designer settled where it lives rather than adding a tenth section: the camera keepsake at the foot of the Love Story, whose screen the design draws showing the venue's map under a pin.
+The film takes the screen, and the map and its pin retire with the `mapPhoto` the saved record carried for them - that value was a copy of the first Venue Details photograph rather than anything a couple answered, so nothing of theirs is lost, and old records still carrying one are read and ignored.
+
+For now the screen plays the same film on every invitation, because the uploads endpoint refuses video/mp4 (`hbd-zzl`) and a couple has no way to hand their own over.
+Which film is `hbd-1qh`'s question: the one the owner chose, `DQgtgRZqhws`, has embedding disabled on YouTube and renders "Video tidak tersedia" inside the camera, so until embedding is enabled or another video is named the screen plays a plainly marked placeholder, `FALLBACK_TEASER_VIDEO` in `LoveStory.tsx`.
+That makes it the product's one Fallback, and CONTEXT.md's Fallback entry names it as the exception: invented at render time, standing in for a value no couple can yet give, and never reaching the backend.
+It is temporary by construction - the invitation already prefers `loveStoryVideo` whenever a record holds one, so the moment the backend takes mp4 a couple's own film takes the screen and the shared one is never drawn for them again.
+
+The check does not assert the film and cannot: it has no copy, and the harness has no vocabulary for an iframe or a video, so it is media the way the photographs are.
+What settles it is a browser opened at the invitation with the camera's screen playing, which is the job screenshots are kept for.
 
 Required fields carry a red mark the design does not draw, and every uploader's guidance is generated rather than written.
 

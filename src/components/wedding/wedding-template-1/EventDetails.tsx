@@ -6,7 +6,10 @@
  * guest replies to the invitation from.
  * The countdown ticks every second toward the wedding's own date and time and
  * clamps to 0 once past. To avoid an SSR/client hydration mismatch the digits
- * render the design's "08" placeholders until mounted, then go live.
+ * render the design's "08" placeholders until mounted, then go live. A wedding
+ * whose date cannot be read - a draft opened before the couple picked one -
+ * draws no countdown and no date line at all, because arithmetic against
+ * nothing prints NaN and a guest should never read that.
  *
  * The venue's name and its written address are the couple's own words and are
  * fitted to the box the design draws them in rather than set at a fixed size:
@@ -20,9 +23,9 @@
  */
 
 import { useEffect, useState } from 'react';
-import { motion } from 'framer-motion';
+import { motion, useReducedMotion } from 'framer-motion';
 
-import { fadeUp, fadeUpCenter } from './variants';
+import { fadeUp, fadeUpCenter, pressTap } from './variants';
 import { useWeddingReveal } from './use-wedding-reveal';
 import { AutoFitText } from './AutoFitText';
 import { formatWeddingDateLabel } from './wedding-date-label';
@@ -118,19 +121,25 @@ export default function EventDetails({
    */
   onReply: () => void;
 }) {
+  const reduce = useReducedMotion();
   const fadeUpCenterReveal = useWeddingReveal(fadeUpCenter);
   const fadeUpReveal = useWeddingReveal(fadeUp);
   const [mounted, setMounted] = useState(false);
   const [remaining, setRemaining] = useState(0);
   const target = new Date(content.weddingDateIso).getTime();
+  // No usable date, no countdown: subtracting from NaN prints NaN in every
+  // digit, and a countdown to nothing should not be drawn rather than drawn
+  // wrong. Deterministic from the content, so the server and the client agree.
+  const hasDate = !Number.isNaN(target);
 
   useEffect(() => {
+    if (!hasDate) return;
     const tick = () => setRemaining(Math.max(0, target - Date.now()));
     tick();
     setMounted(true);
     const id = setInterval(tick, 1000);
     return () => clearInterval(id);
-  }, [target]);
+  }, [target, hasDate]);
 
   const totalSeconds = Math.floor(remaining / 1000);
   const days = Math.floor(totalSeconds / 86400);
@@ -202,15 +211,16 @@ export default function EventDetails({
                   the written address instead, so it opens in whichever maps
                   application the guest already uses. */}
               {directions ? (
-                <a
+                <motion.a
                   href={directions}
                   target="_blank"
                   rel="noopener noreferrer"
+                  whileTap={reduce ? undefined : pressTap}
                   className="flex items-center justify-center border border-solid border-[#fafafa] gap-[10px] p-[10px]">
                   <p className="whitespace-nowrap font-[family-name:var(--font-wt1-mono)] text-[12px] font-normal leading-[normal] text-[#fafafa]">
                     View Location
                   </p>
-                </a>
+                </motion.a>
               ) : (
                 <div className="flex items-center justify-center border border-solid border-[#fafafa] gap-[10px] p-[10px]">
                   <p className="whitespace-nowrap font-[family-name:var(--font-wt1-mono)] text-[12px] font-normal leading-[normal] text-[#fafafa]">
@@ -276,27 +286,34 @@ export default function EventDetails({
           ) : null}
 
           <div className="flex w-full flex-col items-start gap-[10px] p-[10px] leading-[normal] text-white [word-break:break-word]">
-            <div className="flex w-full items-center justify-between py-[8px] text-center font-[family-name:var(--font-wt1-mono)] font-semibold">
-              <div className="relative flex min-w-px flex-[1_0_0] flex-col items-center gap-[2px]">
-                <p className="w-full text-[24px]">{cd(days)}</p>
-                <p className="text-[16px]">days</p>
+            {hasDate && (
+              <div className="flex w-full items-center justify-between py-[8px] text-center font-[family-name:var(--font-wt1-mono)] font-semibold">
+                <div className="relative flex min-w-px flex-[1_0_0] flex-col items-center gap-[2px]">
+                  <p className="w-full text-[24px]">{cd(days)}</p>
+                  <p className="text-[16px]">days</p>
+                </div>
+                <div className="relative flex min-w-px flex-[1_0_0] flex-col items-center gap-[2px]">
+                  <p className="w-full text-[24px]">{cd(hours)}</p>
+                  <p className="whitespace-nowrap text-[16px]">hours</p>
+                </div>
+                <div className="relative flex min-w-px flex-[1_0_0] flex-col items-center gap-[2px]">
+                  <p className="w-full text-[24px]">{cd(minutes)}</p>
+                  <p className="whitespace-nowrap text-[16px]">minutes</p>
+                </div>
+                <div className="relative flex min-w-px flex-[1_0_0] flex-col items-center gap-[2px]">
+                  <p className="w-full text-[24px]">{cd(seconds)}</p>
+                  <p className="whitespace-nowrap text-[16px]">seconds</p>
+                </div>
               </div>
-              <div className="relative flex min-w-px flex-[1_0_0] flex-col items-center gap-[2px]">
-                <p className="w-full text-[24px]">{cd(hours)}</p>
-                <p className="whitespace-nowrap text-[16px]">hours</p>
-              </div>
-              <div className="relative flex min-w-px flex-[1_0_0] flex-col items-center gap-[2px]">
-                <p className="w-full text-[24px]">{cd(minutes)}</p>
-                <p className="whitespace-nowrap text-[16px]">minutes</p>
-              </div>
-              <div className="relative flex min-w-px flex-[1_0_0] flex-col items-center gap-[2px]">
-                <p className="w-full text-[24px]">{cd(seconds)}</p>
-                <p className="whitespace-nowrap text-[16px]">seconds</p>
-              </div>
-            </div>
-            <p className="w-full text-center font-[family-name:var(--font-wt1-mono)] text-[14px] font-normal">
-              {dateLabel}
-            </p>
+            )}
+            {/* The date line agrees with the countdown above it: a date the
+                formatter could not read is an empty label, and no line is
+                drawn rather than an empty one. */}
+            {dateLabel && (
+              <p className="w-full text-center font-[family-name:var(--font-wt1-mono)] text-[14px] font-normal">
+                {dateLabel}
+              </p>
+            )}
             <div className="flex w-full items-start justify-center gap-[6px] text-[12px]">
               <p className="w-[113px] font-[family-name:var(--font-wt1-mono)] font-semibold">
                 Reception Starts
@@ -309,15 +326,16 @@ export default function EventDetails({
         </div>
 
         {/* RSVP button */}
-        <button
+        <motion.button
           type="button"
           onClick={onReply}
           aria-haspopup="dialog"
+          whileTap={reduce ? undefined : pressTap}
           className="flex items-center justify-center border border-solid border-[#fafafa] gap-[10px] p-[10px]">
           <p className="whitespace-nowrap font-[family-name:var(--font-wt1-mono)] text-[12px] font-normal leading-[normal] text-[#fafafa]">
             RSVP Now
           </p>
-        </button>
+        </motion.button>
       </motion.div>
     </section>
   );

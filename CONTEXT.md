@@ -37,9 +37,14 @@ _Avoid_: default, which is also used for the other thing below
 
 **Fallback**:
 A value invented at render time to stand in for one the couple never gave.
-There are none, deliberately: nothing invented reaches the backend or a guest.
-An optional answer left blank is absent, and the invitation omits what it would have said rather than
-printing somebody else's.
+There is exactly one, deliberately, and it is temporary: the camera in the Love Story plays one
+shared teaser film on every invitation, because the uploads endpoint refuses video/mp4 (`hbd-zzl`)
+and no couple can hand over a Wedding Teaser Video yet.
+It is render-time only, so nothing invented reaches the backend, and it retires the moment the
+backend takes mp4 and a couple's own film takes the camera - ADR 0002 records it, and which film
+plays until then is `hbd-1qh`.
+Every other optional answer left blank is absent, and the invitation omits what it would have said
+rather than printing somebody else's.
 _Avoid_: default
 
 ### Invitation content
@@ -129,7 +134,9 @@ Belongs to the invitation's content, not to the Guest List.
 _Avoid_: wishes
 
 **Invitation Slug**:
-The couple-chosen identifier that makes their invitation's link unique.
+The identifier that makes an invitation's link unique.
+Minted by the backend from the invitation's title, offered a name-derived replacement at most once while unpublished, and frozen forever from publish.
+Never the couple's to type.
 _Avoid_: domain, subdomain
 
 ### The template's parts

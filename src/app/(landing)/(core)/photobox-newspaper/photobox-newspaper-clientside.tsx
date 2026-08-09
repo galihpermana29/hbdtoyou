@@ -25,7 +25,7 @@ const videoConstraints = {
 };
 
 // The photo slot's aspect ratio. Captures are center-cropped to exactly this
-// so their pixels already match the slot — html2canvas ignores `object-fit`
+// so their pixels already match the slot - html2canvas ignores `object-fit`
 // and would otherwise stretch a 4:3 frame to fill the 16:9 box on export.
 const SLOT_ASPECT = 16 / 9;
 
@@ -93,8 +93,8 @@ const TEMPLATES: Record<
     quote:
       '“Front-page proof that these two are hopelessly, happily, head-over-heels in love.”',
     body: [
-      `From the very first frame, it was never really about the photos — it was about the way they look at each other when they think no one is watching. Every glance, every laugh, every almost-kiss caught mid-pose told the same quiet little story: these two are completely, helplessly smitten.`,
-      `Between the playful poses and the candid in-betweens, they turned an ordinary afternoon into something straight out of a love story. No filters, no fuss — just two people who make each other ridiculously happy, and a front page lucky enough to hold the proof.`,
+      `From the very first frame, it was never really about the photos - it was about the way they look at each other when they think no one is watching. Every glance, every laugh, every almost-kiss caught mid-pose told the same quiet little story: these two are completely, helplessly smitten.`,
+      `Between the playful poses and the candid in-betweens, they turned an ordinary afternoon into something straight out of a love story. No filters, no fuss - just two people who make each other ridiculously happy, and a front page lucky enough to hold the proof.`,
     ],
   },
   classic: {
@@ -146,10 +146,10 @@ const TEMPLATES: Record<
     eyebrowLeft: 'Memoify | Bobo',
     eyebrowRight: 'No. 1 · Rp 5.000',
     masthead: 'Belajar Memaafkan',
-    quote: 'BINTANG SAMPUL MINGGU INI — SENYUMNYA BIKIN SEMUA IKUT CERIA!',
+    quote: 'BINTANG SAMPUL MINGGU INI - SENYUMNYA BIKIN SEMUA IKUT CERIA!',
     body: [
-      `Hari ini halaman depan jadi milikmu! Dari pose paling lucu sampai tawa yang nggak bisa ditahan, semuanya tertangkap dalam satu jepretan penuh warna. Katanya sih, siapa pun yang lihat sampul ini langsung ikut senyum — coba saja buktikan sendiri, dijamin susah berhenti tersenyum.`,
-      `Di dalam edisi spesial ini: teka-teki seru, cerita seru dari negeri jauh, dan tentu saja — kamu sebagai bintang utamanya. Jangan lupa simpan, bagikan ke teman, dan kenang momen ceria ini kapan pun kamu mau. Selamat membaca, dan tetap ceria, ya!`,
+      `Hari ini halaman depan jadi milikmu! Dari pose paling lucu sampai tawa yang nggak bisa ditahan, semuanya tertangkap dalam satu jepretan penuh warna. Katanya sih, siapa pun yang lihat sampul ini langsung ikut senyum - coba saja buktikan sendiri, dijamin susah berhenti tersenyum.`,
+      `Di dalam edisi spesial ini: teka-teki seru, cerita seru dari negeri jauh, dan tentu saja - kamu sebagai bintang utamanya. Jangan lupa simpan, bagikan ke teman, dan kenang momen ceria ini kapan pun kamu mau. Selamat membaca, dan tetap ceria, ya!`,
     ],
   },
 };
@@ -189,7 +189,7 @@ const cropTo169 = (base64: string): Promise<string> =>
 
 /**
  * Bake the selected template's photo treatment (filter + optional grain) into
- * the bitmap, so the look survives the html2canvas export — which only
+ * the bitmap, so the look survives the html2canvas export - which only
  * partially supports CSS `filter`.
  */
 const applyTreatment = (
@@ -325,7 +325,7 @@ const PhotoboxNewspaperPage = () => {
   }, []);
 
   // Uniformly scale the fixed-width newspaper to fit the viewport (never above
-  // 1:1). The scale only affects on-screen display — frameRef stays 896px so
+  // 1:1). The scale only affects on-screen display - frameRef stays 896px so
   // the html2canvas export is always the full desktop layout.
   useEffect(() => {
     const compute = () =>
@@ -389,7 +389,7 @@ const PhotoboxNewspaperPage = () => {
     setRawCropped(cropped);
   }, []);
 
-  // 3-second countdown, then snap — mirrors the existing Photobox behaviour.
+  // 3-second countdown, then snap - mirrors the existing Photobox behaviour.
   const handleCaptureClick = () => {
     let count = 3;
     setCountdown(count);
@@ -502,7 +502,7 @@ const PhotoboxNewspaperPage = () => {
             Photobox Newspaper
           </h1>
           <p className="text-[#7B7B7B] text-[14px] font-[400]">
-            Strike a pose — your shot lands straight on the front page.
+            Strike a pose - your shot lands straight on the front page.
           </p>
         </div>
 
@@ -574,12 +574,12 @@ const PhotoboxNewspaperPage = () => {
               <div
                 className={`px-8 py-1.5 text-center ${t.bodyClass} text-[11px] uppercase tracking-[0.22em]`}
                 style={{ borderBottom: `1px solid ${t.ink}` }}>
-                Vol. 1 · No. 1 — Jakarta, {dayjs().format('dddd, DD MMMM YYYY')}{' '}
-                — Price 25¢
+                Vol. 1 · No. 1 - Jakarta, {dayjs().format('dddd, DD MMMM YYYY')}{' '}
+                - Price 25¢
               </div>
             )}
 
-            {/* Image slot — live webcam or frozen capture. Not clipped, so the
+            {/* Image slot - live webcam or frozen capture. Not clipped, so the
                 mascot can peek up over the masthead band. The photo itself is
                 object-cover at the exact box size, so it never bleeds. */}
             <div
@@ -613,7 +613,6 @@ const PhotoboxNewspaperPage = () => {
               )}
 
               {t.mascot && (
-                // eslint-disable-next-line @next/next/no-img-element
                 <img
                   src={t.mascot}
                   alt="Mascot"
@@ -659,7 +658,7 @@ const PhotoboxNewspaperPage = () => {
             <div
               className={`px-8 py-3 flex justify-between ${t.bodyClass} text-[12px] uppercase tracking-[0.18em]`}
               style={{ borderTop: `${t.ruleWidth} solid ${t.ink}` }}>
-              <span>Vol. 1 — No. 1</span>
+              <span>Vol. 1 - No. 1</span>
               <span>{dayjs().format('DD MMM YYYY')}</span>
             </div>
               </motion.div>
@@ -674,7 +673,7 @@ const PhotoboxNewspaperPage = () => {
         animate={{ y: 0, x: '-50%', opacity: 1 }}
         transition={{ type: 'spring', stiffness: 260, damping: 24 }}
         className="fixed bottom-6 left-1/2 z-50 flex max-w-[calc(100vw-24px)] items-center gap-2 overflow-x-auto rounded-2xl border border-black/10 bg-white px-3 py-2 shadow-[0_10px_40px_rgba(0,0,0,0.15)]">
-        {/* Template switcher — labeled so it's obvious you can change edition */}
+        {/* Template switcher - labeled so it's obvious you can change edition */}
         <div className="flex shrink-0 items-center gap-1 rounded-xl bg-[#f4f1ea] p-1">
           {TEMPLATE_ORDER.map((key) => {
             const cfg = TEMPLATES[key];
@@ -710,7 +709,7 @@ const PhotoboxNewspaperPage = () => {
 
         <span className="mx-1 h-7 w-px shrink-0 bg-black/10" />
 
-        {/* Edit text — labeled so users know the copy is customizable */}
+        {/* Edit text - labeled so users know the copy is customizable */}
         <motion.button
           whileHover={{ scale: 1.05 }}
           whileTap={{ scale: 0.95 }}
@@ -797,9 +796,9 @@ const PhotoboxNewspaperPage = () => {
         </AnimatePresence>
       </motion.div>
 
-      {/* Text editor — masthead / headline / two paragraphs, per template */}
+      {/* Text editor - masthead / headline / two paragraphs, per template */}
       <Modal
-        title={`Edit text — ${TEMPLATES[template].label}`}
+        title={`Edit text - ${TEMPLATES[template].label}`}
         open={editorOpen}
         onCancel={() => setEditorOpen(false)}
         okText="Apply"

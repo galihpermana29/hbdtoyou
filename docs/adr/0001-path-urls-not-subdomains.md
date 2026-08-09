@@ -24,6 +24,10 @@ The slug itself is no longer the couple's to choose.
 There is no endpoint that can say whether a name is free, so a couple picking one could only be told it was taken after failing.
 The backend generates a slug when an invitation is created without one, and the field is read-only.
 
+One exception was decided later (hbd-08l), and it is still not the couple choosing.
+The title now names the couple, so an invitation whose nicknames exist by its first save is minted a name-derived slug by the backend's own generator; a couple who drafted before typing names got a generic one, and on the save where both nicknames first exist - only while the invitation is unpublished - the flow sends a slug derived from them, so their URL says who they are.
+Refused means the generated slug stands and nothing is said, and from the moment the invitation is published the slug is frozen forever, because a shared link must never die.
+
 ## Consequences
 
 The slug is unique and visible in the shared link, so the address the couple sends behaves as the design's does.

@@ -219,7 +219,7 @@ const TemplatesClient = ({
           />
         ) : (
           <span className="text-gray-400 text-xs truncate max-w-[100px] inline-block">
-            {uri || '—'}
+            {uri || '-'}
           </span>
         ),
     },

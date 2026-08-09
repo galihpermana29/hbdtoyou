@@ -42,6 +42,16 @@
  * that is where it happens, straight after the first one and again after any
  * later one while the address is still unknown.
  *
+ * Once, the flow sends a slug instead of reading one. The title now names the
+ * couple, so a couple whose nicknames exist by their first save is minted a
+ * name-derived slug by the backend's own generator; a couple who drafted first
+ * got a generic one. On the save where both nicknames first exist - and only
+ * while the invitation is unpublished - one more write goes out carrying the
+ * slug their names spell, so their URL says who they are. Refused or not,
+ * nothing is said: the pretty address is a courtesy, not a promise. From the
+ * moment the invitation is published the slug is frozen forever, because a
+ * shared link must never die - see `offerANamedAddress`.
+ *
  * ## What a save carries, and what it does not
  *
  * Everything on the antd form, plus the greeting message, which is not on it:
@@ -87,6 +97,7 @@ import { useRef, useState } from 'react';
 
 import type { FormInstance } from 'antd';
 
+import type { IWeddingInvitationPayload } from '@/action/interfaces';
 import { getAllTemplates } from '@/action/user-api';
 import {
   createWeddingInvitation,
@@ -98,6 +109,8 @@ import { NOT_SIGNED_IN_PROBLEM, problemMessage } from './invitation-problems';
 import { attemptPublish } from './publish-invitation';
 import {
   formValuesToInvitationPayload,
+  invitationSlugFrom,
+  namesTheCouple,
   type WeddingInvitationFormValues,
 } from './wedding-invitation-types';
 
@@ -178,8 +191,10 @@ export interface Invitation {
    * What the backend says is still missing, in its own words, or nothing.
    *
    * Its words rather than ours: the only issue the contract documents is an
-   * empty title, which this flow hardcodes and a couple cannot cause, so every
-   * other one would be a string invented here for a fault nobody can describe.
+   * empty title, which a couple cannot cause - an invitation whose nicknames
+   * are still empty is titled the fixed stand-in rather than nothing - so
+   * every other one would be a string invented here for a fault nobody can
+   * describe.
    */
   outstanding: string[] | null;
   /**
@@ -212,6 +227,23 @@ export interface OpenedInvitation {
   weddingId: string;
   /** The address it already has, or empty when the read did not carry one. */
   slug: string;
+  /**
+   * Whether guests can already read it.
+   *
+   * What freezes the address: a published invitation's slug is forever,
+   * because a shared link must never die, so no save on one may carry a slug -
+   * see `offerANamedAddress`, the one code path that sends one.
+   */
+  isPublished: boolean;
+  /**
+   * Whether the saved record already carries both nicknames.
+   *
+   * True is a couple whose one chance at a name-derived address has already
+   * come and gone: the save where their names first existed is behind them,
+   * whether it made the offer, never needed to because the title named them at
+   * create, or predates there being an offer at all. See `offerANamedAddress`.
+   */
+  namesTheCouple: boolean;
 }
 
 export function useInvitation(
@@ -258,6 +290,28 @@ export function useInvitation(
   const [weddingId, setWeddingId] = useState<string | null>(
     opened?.weddingId ?? null
   );
+
+  /**
+   * Whether guests can already read this invitation.
+   *
+   * A ref for the same reason `invitationId` is: a save reads it at the moment
+   * it runs, and nothing on the screen is drawn from it. From the moment this
+   * is true no save may carry a slug, forever - a shared link must never die -
+   * and publishing is the only thing that sets it.
+   */
+  const published = useRef(opened?.isPublished ?? false);
+
+  /**
+   * Whether this invitation has had its one chance at a name-derived address.
+   *
+   * The offer is made on the save where both nicknames first exist and never
+   * again: a slug does not chase a couple who corrects a name later, because
+   * an address that keeps moving is worse than one that says slightly less. A
+   * flow opened on a record that already names them both starts with this
+   * spent: the save where their names first existed is behind it, whether it
+   * made the offer or predates there being one.
+   */
+  const namedAddressOffered = useRef(opened?.namesTheCouple ?? false);
 
   /** The backend's id for the template this flow fills in. */
   async function weddingTemplateId(): Promise<
@@ -324,6 +378,49 @@ export function useInvitation(
     );
   }
 
+  /**
+   * Send the invitation the address its couple's names spell, once, silently.
+   *
+   * The backend mints a slug at create from the title it is given and never
+   * changes it unless a new one is explicitly sent. A couple whose nicknames
+   * were in the title by their first save therefore already has a named
+   * address and this never runs for them; a couple who drafted before typing
+   * names got a generic one. So on the save where both nicknames first exist,
+   * while the invitation is still unpublished, one more write goes out: the
+   * same payload the save that just landed carried, plus the slug the names
+   * spell, so their URL says who they are.
+   *
+   * One offer, whatever comes of it. Refused as taken - or refused at all -
+   * the minted slug stands and nothing is said, because the couple's save
+   * already landed and the pretty address is a courtesy, not a promise. And
+   * never on or after publish: a shared link must never die, so from that
+   * moment no code path sends a slug.
+   */
+  async function offerANamedAddress(
+    weddingId: string,
+    payload: Omit<IWeddingInvitationPayload, 'template_id'>,
+    values: WeddingInvitationFormValues
+  ) {
+    if (published.current || namedAddressOffered.current) return;
+    if (!namesTheCouple(values.groomName, values.brideName)) return;
+
+    // This save is the one where both nicknames first exist, so the offer is
+    // spent here whatever comes of it - including on names that spell nothing
+    // a URL can carry, where the minted slug stands and nothing is sent.
+    namedAddressOffered.current = true;
+
+    const named = invitationSlugFrom(values.groomName, values.brideName);
+    if (!named) return;
+
+    const renamed = await updateWeddingInvitation(
+      { ...payload, invitation_slug: named },
+      weddingId
+    );
+    // The one way the flow ever knows a slug without reading it back: the
+    // backend was sent this one by name and took it.
+    if (renamed.success) setSlug(named);
+  }
+
   /** Drop whatever the last press had to say, whichever press it was. */
   function forgetWhatWentWrong() {
     setProblem(null);
@@ -346,8 +443,9 @@ export function useInvitation(
       // The identifier goes in with it, so that the saved record says which
       // invitation it is - see `WEDDING_ID_KEY`, which is what a couple's
       // listing reads to find its way back here. A create has none yet.
+      const values = form.getFieldsValue(true);
       const payload = formValuesToInvitationPayload(
-        form.getFieldsValue(true),
+        values,
         greetingMessage,
         invitationId.current
       );
@@ -362,6 +460,11 @@ export function useInvitation(
           return 'FAILED';
         }
         await learnTheAddress(invitationId.current);
+        // If this was the save where both nicknames first existed, their
+        // invitation can now be offered an address that says who they are.
+        // After the update rather than inside it, so a save can never be
+        // refused over a slug the couple did not ask for.
+        await offerANamedAddress(invitationId.current, payload, values);
         return 'SAVED';
       }
 
@@ -390,6 +493,12 @@ export function useInvitation(
       // now is there anywhere to put a guest, which is what the state says.
       invitationId.current = created.data.id;
       setWeddingId(created.data.id);
+      // A couple whose nicknames were in the title has been minted a slug
+      // from it by the backend's own generator, and nothing else happens:
+      // their one offer is spent at the moment it was never needed.
+      if (namesTheCouple(values.groomName, values.brideName)) {
+        namedAddressOffered.current = true;
+      }
       // And only now is there an invitation to have an address, so this is the
       // earliest the couple can be told where their wedding is going to live.
       await learnTheAddress(created.data.id);
@@ -447,6 +556,9 @@ export function useInvitation(
         setOutstanding(attempt.outstanding);
         return 'NOT_READY';
       }
+      // Guests can hold the link from this moment, so the address is frozen:
+      // no save from here on may carry a slug - see `offerANamedAddress`.
+      published.current = true;
       return 'PUBLISHED';
     } finally {
       setIsPublishing(false);

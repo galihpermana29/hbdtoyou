@@ -13,7 +13,16 @@ import { useState } from 'react';
 import Carousel from 'react-multi-carousel';
 import 'react-multi-carousel/lib/styles.css';
 
-const ButtonGroup = ({ next, previous, goToSlide, ...rest }) => {
+const ButtonGroup = ({
+  next,
+  previous,
+  ...rest
+}: {
+  next?: () => void;
+  previous?: () => void;
+  goToSlide?: (index: number) => void;
+  carouselState?: { currentSlide: number };
+}) => {
   const {
     carouselState: { currentSlide },
   } = rest;
@@ -53,7 +62,7 @@ const ScrapbookPage = () => {
     {
       title: 'Preserve memories with meaningful style',
       description:
-        "Choose from a variety of scrapbook themes and page designs that match your story's vibe — from vintage and dreamy to fun and bold.",
+        "Choose from a variety of scrapbook themes and page designs that match your story's vibe - from vintage and dreamy to fun and bold.",
     },
     {
       title: 'Decorate with stickers, cutouts & more',

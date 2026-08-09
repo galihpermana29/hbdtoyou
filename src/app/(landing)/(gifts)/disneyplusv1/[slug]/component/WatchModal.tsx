@@ -26,7 +26,7 @@ const WatchModal = ({ content }: { content: string }) => {
             dangerouslySetInnerHTML={{
               __html: content
                 ? addLineBreaksEveryThreeSentences(content)
-                : 'Hi Widya, I`ve been thinking about what to write for your birthday, and there are a few things I want to share with you. Even though we`ve only known each other for a couple of weeks, it feels like much longer because we talk so much—every night, every day. The more we talk, the more I find myself getting deeply interested in you.',
+                : 'Hi Widya, I`ve been thinking about what to write for your birthday, and there are a few things I want to share with you. Even though we`ve only known each other for a couple of weeks, it feels like much longer because we talk so much - every night, every day. The more we talk, the more I find myself getting deeply interested in you.',
             }}></p>
         </div>
       </Modal>

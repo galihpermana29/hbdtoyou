@@ -26,6 +26,7 @@ import {
   DEFAULT_WEDDING_TEMPLATE_1_CONTENT,
   type WeddingTemplate1Content,
 } from '@/components/forms/wedding/wedding-invitation-types';
+import { MENCINTAIMU } from '@/components/forms/wedding/background-track-catalog';
 
 /** Which of the three sets a caller means. */
 export type ExampleContentName = 'flattering' | 'realistic' | 'hostile';
@@ -72,7 +73,6 @@ function exampleWeddingPhotographs() {
     groomPhoto: sample.groomPhoto,
     loveStoryPhotos: [...sample.loveStoryPhotos],
     polaroidPhoto: sample.polaroidPhoto,
-    mapPhoto: sample.mapPhoto,
     eventPhotos: [...sample.eventPhotos],
     galleryPhotos: [...sample.galleryPhotos],
     tokenPhotos: [...sample.tokenPhotos],
@@ -99,7 +99,7 @@ const REALISTIC: WeddingTemplate1Content = {
   brideMotherName: 'Endang Retno Sulistyowati',
   ...exampleWeddingPhotographs(),
   weddingDateIso: '2026-08-22T16:30:00+07:00',
-  backgroundMusicId: 'raim-laode-komang',
+  backgroundTrack: { ...MENCINTAIMU },
   verseText:
     'Wahai manusia! Bertakwalah kepada Tuhanmu yang telah menciptakan kamu dari diri yang satu (Adam), dan (Allah) menciptakan pasangannya (Hawa) dari (diri)-nya; dan dari keduanya Allah memperkembangbiakkan laki-laki dan perempuan yang banyak. Bertakwalah kepada Allah yang dengan nama-Nya kamu saling meminta, dan (peliharalah) hubungan kekeluargaan. Sesungguhnya Allah selalu menjaga dan mengawasimu.',
   verseCitation: 'Q.S An-Nisa : 1',
@@ -169,7 +169,9 @@ const HOSTILE: WeddingTemplate1Content = {
   brideMotherName: 'Retno Wulandari Hapsariningtyas',
   ...exampleWeddingPhotographs(),
   weddingDateIso: '2026-09-30T11:00:00+07:00',
-  backgroundMusicId: 'nadhif-penjaga-hati',
+  // The switch left on with no track ever picked, which a real couple can do,
+  // and the state that must not draw a record for a song that does not exist.
+  backgroundTrack: null,
   verseText:
     'Dan di antara tanda-tanda (kebesaran)-Nya ialah Dia menciptakan pasangan-pasangan untukmu dari jenismu sendiri, agar kamu cenderung dan merasa tenteram kepadanya, dan Dia menjadikan di antaramu rasa cinta dan kasih sayang. Sesungguhnya pada yang demikian itu benar-benar terdapat tanda-tanda (kebesaran Allah) bagi kaum yang berpikir. Dan Allah menjadikan bagimu pasangan (suami atau istri) dari jenis kamu sendiri dan menjadikan anak dan cucu bagimu dari pasanganmu, serta memberimu rezeki dari yang baik. Mengapa mereka beriman kepada yang batil dan mengingkari nikmat Allah?',
   verseCitation: 'Q.S Ar-Rum : 21 dan Q.S An-Nahl : 72',
