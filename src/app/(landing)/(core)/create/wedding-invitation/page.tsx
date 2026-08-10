@@ -1,4 +1,5 @@
 import { Metadata } from 'next';
+import { redirect } from 'next/navigation';
 
 import WeddingInvitationCreateClientside from './wedding-invitation-create-clientside';
 import { FlowLanguageProvider } from '@/components/forms/wedding/flow-language';
@@ -6,6 +7,7 @@ import {
   slugFrom,
   SLUG_PARAM,
 } from '@/components/forms/wedding/guest-invites-types';
+import { getSession } from '@/store/get-set-session';
 
 export const metadata: Metadata = {
   title: 'Create Wedding Invitation | Memoify',
@@ -17,7 +19,7 @@ export interface WeddingInvitationCreatePageProps {
   searchParams: Record<string, string | string[] | undefined>;
 }
 
-export default function WeddingInvitationCreatePage({
+export default async function WeddingInvitationCreatePage({
   searchParams,
 }: WeddingInvitationCreatePageProps) {
   if (process.env.IS_MAINTENANCE === 'true') {
@@ -41,6 +43,30 @@ export default function WeddingInvitationCreatePage({
         </div>
       </div>
     );
+  }
+
+  // Nobody fills this flow in without an account. Saving needs an owner and
+  // every photograph upload needs a bearer token, so a visitor with neither
+  // could fill in the whole flow and keep none of it - the rest of the product
+  // asks them to sign in before a form is ever shown, and this route is no
+  // different. They are sent to the landing page rather than a sign-in screen,
+  // because the landing is where the product explains itself and its own
+  // control signs them in and brings them back here.
+  //
+  // The one exception is the check. It drives this flow signed out on a server
+  // of its own, so the server it starts stands the gate down - see
+  // `visual/dev-server.mjs`, which is the only place the variable is set. The
+  // check's server is a dev server, so a production build ignores the variable
+  // outright: one stray line in a deployment's environment must not reopen the
+  // hole this gate closes.
+  const gateStoodDown =
+    process.env.WEDDING_FLOW_UNGATED === 'true' &&
+    process.env.NODE_ENV !== 'production';
+  if (!gateStoodDown) {
+    const session = await getSession();
+    if (!session?.accessToken) {
+      redirect('/wedding-invitation');
+    }
   }
 
   // Read here rather than in the flow, so the address is settled before the

@@ -41,8 +41,17 @@ export async function ensureAppServed(baseUrl) {
   const server = spawn('npm', ['run', 'dev', '--', '--port', port], {
     // The maintenance flag short-circuits this very route, and a harness that
     // captured the maintenance screen would report a difference nobody could
-    // explain.
-    env: { ...process.env, IS_MAINTENANCE: 'false' },
+    // explain. The gate is stood down for the same reason: the Create Flow
+    // asks a visitor with no account to sign in, the check drives it signed
+    // out, and a harness that captured the landing page it was sent to instead
+    // would report differences on every Create Flow screen. Neither applies to
+    // a server somebody started themselves and this run reused - the check
+    // says so when it meets the gate, rather than reporting the wrong screen.
+    env: {
+      ...process.env,
+      IS_MAINTENANCE: 'false',
+      WEDDING_FLOW_UNGATED: 'true',
+    },
     stdio: 'ignore',
     detached: true,
   });

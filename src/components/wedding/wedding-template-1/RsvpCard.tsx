@@ -43,7 +43,7 @@ import { submitWeddingRsvp } from '@/action/wedding-api';
 import { useDialogBehaviour } from '@/hooks/use-dialog-behaviour';
 
 import { PaperGround, TornEdge } from './TornPaper';
-import { EASE, pressTap } from './variants';
+import { EASE, pressTap, REDUCED_FADE } from './variants';
 import { useFitToPhone } from './use-fit-to-phone';
 
 const ASSET = '/templates/wedding-template-1';
@@ -467,23 +467,20 @@ export default function RsvpCard({
    * The card's rise rides on the form, which is safe because `useFitToPhone`
    * scales with `zoom` rather than `transform` - the two never fight.
    */
+  const gentleFade = {
+    initial: { opacity: 0 },
+    transition: REDUCED_FADE,
+    exit: { opacity: 0, transition: REDUCED_FADE },
+  };
   const backdrop = reduce
-    ? {
-        initial: { opacity: 0 },
-        transition: { duration: 0.12, ease: EASE },
-        exit: { opacity: 0, transition: { duration: 0.12, ease: EASE } },
-      }
+    ? gentleFade
     : {
         initial: { opacity: 0 },
         transition: { duration: 0.25, ease: EASE },
         exit: { opacity: 0, transition: { duration: 0.2, ease: EASE } },
       };
   const card = reduce
-    ? {
-        initial: { opacity: 0 },
-        transition: { duration: 0.12, ease: EASE },
-        exit: { opacity: 0, transition: { duration: 0.12, ease: EASE } },
-      }
+    ? gentleFade
     : {
         initial: { opacity: 0, y: 24, scale: 0.97 },
         transition: { type: 'spring' as const, duration: 0.45, bounce: 0.15 },

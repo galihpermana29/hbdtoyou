@@ -72,6 +72,30 @@ const EXAMPLE_CONTENT_SETS = [
 ];
 
 /**
+ * Refuse to drive a Create Flow that is not on the screen.
+ *
+ * The flow asks a visitor with no account to sign in: the route answers them
+ * with the landing page rather than the form. The check drives the flow signed
+ * out, so a server the harness starts stands the gate down - see
+ * `visual/dev-server.mjs` - but a server somebody started themselves and this
+ * run reused was not told to, and every Create Flow screen would then be held
+ * against a page that is not it. Seven screens of baffling differences, or
+ * this one sentence about the server; every drive of the flow passes through
+ * `pressEverySection`, so this is asked there once rather than in each screen.
+ */
+async function expectTheCreateFlow(page) {
+  const landed = new URL(page.url()).pathname;
+  if (landed !== DETAILS_AND_STORY_ROUTE) {
+    throw new Error(
+      `the Create Flow was asked for and ${landed} answered. The flow asks ` +
+        `visitors to sign in, and the server this run reused was not started ` +
+        `with WEDDING_FLOW_UNGATED=true - restart it with that set, or stop ` +
+        `it and let the harness start its own, which always is`
+    );
+  }
+}
+
+/**
  * Press every Section control that is still in one state, top to bottom, until
  * none is left in it.
  *
@@ -88,6 +112,7 @@ const EXAMPLE_CONTENT_SETS = [
  * hung run says far less than a run that stops and reports the screen.
  */
 async function pressEverySection(page, open) {
+  await expectTheCreateFlow(page);
   const sections = await page.locator('form section').count();
   const remaining = page.locator(
     `form section button[aria-expanded="${open}"]`

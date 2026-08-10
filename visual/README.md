@@ -58,6 +58,10 @@ That is the whole command.
 It starts the app on port 3210 if nothing is already serving there, drives a headless Chromium to each screen, checks it, and stops the server again.
 An app already serving that port is reused, so iterating on one screen does not pay the dev server's start-up every time.
 
+The Create Flow asks a visitor with no account to sign in, and the check drives it signed out.
+A server the harness starts is therefore started with `WEDDING_FLOW_UNGATED=true`, which stands the gate down.
+A server you started yourself was not, so the seven Create Flow screens will refuse to run against it and say so - start yours with the variable set if you want it reused.
+
 ```sh
 npm run visual -- --screen=details-and-story-expanded   # one screen
 npm run visual -- --base-url=http://127.0.0.1:3000      # an app you started yourself

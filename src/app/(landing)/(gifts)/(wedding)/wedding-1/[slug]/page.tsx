@@ -23,12 +23,15 @@ export const metadata = {
 };
 
 /**
- * The Invitation Viewer for Wedding Template 1: somebody's own wedding, at the
- * address they send their guests.
+ * The Invitation Viewer for Wedding Template 1: somebody's own wedding.
  *
- * The path carries the template as well as the slug, per
- * `docs/adr/0001-path-urls-not-subdomains.md`, because more wedding templates
- * are expected and an address naming only the slug could not tell them apart.
+ * The address a couple sends no longer names this path: it is their own
+ * subdomain, which the middleware rewrites to `/w/{slug}`, and that resolver
+ * renders this same page - see
+ * `docs/adr/0005-an-invitation-answers-at-its-own-subdomain.md`. This route
+ * remains the path address: the apex answers it with a redirect to the
+ * subdomain so no shared link ever dies, and dev and staging, which have no
+ * wildcard host, serve it exactly as before.
  *
  * It does what every other gift viewer does. It reads the invitation by its
  * identifier on the server, parses the content the couple built, and hands it to

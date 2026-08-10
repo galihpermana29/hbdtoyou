@@ -20,7 +20,7 @@ import {
   guestLinkFor,
   SAMPLE_GUEST_NAME,
   SAMPLE_GUEST_TOKEN,
-  SLUG_PREFIX,
+  SLUG_SUFFIX,
   type GuestInvitesValues,
 } from './guest-invites-types';
 import GuestListField from './guest-list-field';
@@ -239,21 +239,16 @@ export default function GuestInvitesStep({
 
               <div className="mt-[24px] flex flex-col gap-[24px]">
                 <div className="flex flex-col gap-[6px]">
-                  <label id={slugLabelId} htmlFor={slugId} className={flowLabel}>
+                  <label
+                    id={slugLabelId}
+                    htmlFor={slugId}
+                    className={flowLabel}>
                     {copy.customDomain}
                   </label>
                   <div
                     role="group"
                     aria-labelledby={slugLabelId}
                     className={`flex items-stretch ${flowFieldBox}`}>
-                    {/* The address reads left to right as one line, so the part
-                        the product fixes comes before the part that names this
-                        invitation. The design draws it the other way round, as a
-                        subdomain suffix, which the product cannot serve: see
-                        `docs/adr/0001-path-urls-not-subdomains.md`. */}
-                    <span className="flex items-center rounded-l-[8px] border-r border-[#D0D5DD] bg-white px-[20px] py-[10px] text-[14px] font-[600] leading-[20px] text-[#E34013]">
-                      {SLUG_PREFIX}
-                    </span>
                     {/* Read-only rather than disabled, and still an input: the
                         couple does not choose this, but it is the address they
                         are about to send, so it has to be reachable, selectable
@@ -266,8 +261,16 @@ export default function GuestInvitesStep({
                       type="text"
                       readOnly
                       value={values.slug}
-                      className="min-w-0 flex-1 rounded-r-[8px] bg-white px-[14px] py-[12px] text-[16px] font-[400] leading-[24px] text-[#101828] outline-none placeholder:text-[#667085]"
+                      className="min-w-0 flex-1 rounded-l-[8px] bg-white px-[14px] py-[12px] text-[16px] font-[400] leading-[24px] text-[#101828] outline-none placeholder:text-[#667085]"
                     />
+                    {/* The slug is served as the subdomain, so the fixed part of the address
+                        follows it, exactly as the design draws it - the
+                        deviation that put a path prefix ahead of the box is
+                        withdrawn: see
+                        `docs/adr/0005-an-invitation-answers-at-its-own-subdomain.md`. */}
+                    <span className="flex items-center rounded-r-[8px] border-l border-[#D0D5DD] bg-white px-[20px] py-[10px] text-[14px] font-[600] leading-[20px] text-[#E34013]">
+                      {SLUG_SUFFIX}
+                    </span>
                   </div>
                 </div>
 
@@ -280,7 +283,10 @@ export default function GuestInvitesStep({
                     ref={messageRef}
                     value={values.greetingMessage}
                     onChange={(event) =>
-                      onChange({ ...values, greetingMessage: event.target.value })
+                      onChange({
+                        ...values,
+                        greetingMessage: event.target.value,
+                      })
                     }
                     className={`w-full resize-none overflow-hidden px-[12px] py-[8px] text-[16px] font-[400] leading-[24px] text-[#101828] outline-none ${flowFieldBox}`}
                   />

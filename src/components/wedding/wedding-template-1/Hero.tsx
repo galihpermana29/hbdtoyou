@@ -31,7 +31,7 @@ import { FitText } from './FitText';
 import { AutoFitText } from './AutoFitText';
 import { TornEdge } from './TornPaper';
 import { useSealed } from './sealed-context';
-import { EASE, pressTap } from './variants';
+import { EASE, pressTap, REDUCED_FADE } from './variants';
 import { formatWeddingDateLabel } from './wedding-date-label';
 
 const ASSET = '/templates/wedding-template-1';
@@ -117,16 +117,15 @@ const OPENING_SECONDS = Math.max(
 const ADDRESSEE_MAX_HEIGHT = 32;
 
 /**
- * The whole opening where less motion is asked for: gentler, not zero. Every
- * step becomes one brief opacity-only cross-fade, together rather than in
- * sequence, and the movement - the seal's lift, the cards' rise and splay - is
- * dropped by snapping `transform` to its target while the fade runs. A guest
- * still sees the envelope give way to the cards instead of a hard cut, and
- * nothing travels.
+ * The whole opening where less motion is asked for: every step becomes the
+ * template's one reduced-motion cross-fade, together rather than in sequence,
+ * and the movement - the seal's lift, the cards' rise and splay - is dropped
+ * by snapping `transform` to its target while the fade runs. A guest still
+ * sees the envelope give way to the cards instead of a hard cut, and nothing
+ * travels.
  */
 const REDUCED_STEP = {
-  duration: 0.12,
-  ease: EASE,
+  ...REDUCED_FADE,
   transform: { duration: 0 },
 } as const;
 

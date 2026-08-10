@@ -1,5 +1,7 @@
 # Path URLs, not per-invitation subdomains
 
+Superseded by `0005-an-invitation-answers-at-its-own-subdomain.md`: the infrastructure this decision waited on is now owned, and the invitation answers at its subdomain.
+
 The wedding invitation design shows a couple choosing a custom domain and the published invitation living at `FreeAtLastWithElias.memoify.live`.
 We hold the invitation's Invitation Slug and serve the invitation from a path, `memoify.live/wedding-1/<slug>`, rather than a subdomain.
 

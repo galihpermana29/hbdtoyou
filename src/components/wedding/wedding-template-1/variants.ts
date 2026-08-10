@@ -15,6 +15,15 @@ import type { Variants } from 'framer-motion';
 /** Ease-out curve used everywhere in this template. */
 export const EASE = [0.22, 1, 0.36, 1] as const;
 
+/**
+ * What reduced motion leaves behind, wherever the gate fires on something a
+ * guest would otherwise watch cut hard: one brief opacity-only fade - long
+ * enough that states cross rather than jump, short enough that nobody is made
+ * to wait. Gentler, not zero. Movement (y, scale, rotate, transform) is
+ * dropped at the usage site rather than slowed, so nothing travels.
+ */
+export const REDUCED_FADE = { duration: 0.12, ease: EASE } as const;
+
 export const fadeUp: Variants = {
   hidden: { opacity: 0, y: 28 },
   show: {

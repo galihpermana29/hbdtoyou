@@ -41,11 +41,12 @@
  *
  * ## The link the screen shows
  *
- * The frame reads `https://FreeAtLastWithElias.memoify.live?name=guest`. Two
- * things about it are not literal. The address is a path carrying the template
- * rather than a subdomain, per `docs/adr/0001-path-urls-not-subdomains.md`, and
- * it names no guest, because what the couple copies here is the invitation
- * rather than one guest's copy of it.
+ * The frame reads `https://FreeAtLastWithElias.memoify.live?name=guest`. One
+ * thing about it is not literal: it names no guest, because what the couple
+ * copies here is the invitation rather than one guest's copy of it. The
+ * address itself is now exactly the frame's - the slug as a subdomain, per
+ * `docs/adr/0005-an-invitation-answers-at-its-own-subdomain.md`; the deviation
+ * that showed a path here is withdrawn.
  *
  * The slug in it is the design's own name, handed to the flow in a query
  * parameter. A couple no longer chooses their slug and nothing has been saved
@@ -79,7 +80,7 @@ const STEP_TYPE = {
 export const DESIGNED_SLUG = 'FreeAtLastWithElias';
 
 /** What that slug makes, which is what this screen has to show. */
-const INVITATION_LINK = `https://memoify.live/wedding-1/${DESIGNED_SLUG}`;
+const INVITATION_LINK = `https://${DESIGNED_SLUG}.memoify.live`;
 
 export const expectations = [
   ...pageChrome('Share with guests'),
