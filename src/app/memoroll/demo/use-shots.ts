@@ -12,6 +12,12 @@ export interface Shot {
   dataUrl: string;
   /** Epoch ms when the shutter fired. */
   takenAt: number;
+  /**
+   * The film the shot developed through, already baked into dataUrl's pixels
+   * (ADR 0006) - kept as a label only. Shots stored before films existed
+   * hydrate as 'none', which is also what their pixels are.
+   */
+  film: string;
 }
 
 /**
@@ -27,7 +33,11 @@ export function useShots() {
       if (raw) {
         const parsed = JSON.parse(raw);
         if (Array.isArray(parsed)) {
-          setShots(parsed.slice(0, SHOT_LIMIT));
+          setShots(
+            parsed
+              .slice(0, SHOT_LIMIT)
+              .map((shot) => ({ film: 'none', ...shot }))
+          );
         }
       }
     } catch {
@@ -35,7 +45,7 @@ export function useShots() {
     }
   }, []);
 
-  const addShot = useCallback((dataUrl: string) => {
+  const addShot = useCallback((dataUrl: string, film: string) => {
     setShots((prev) => {
       if (prev.length >= SHOT_LIMIT) return prev;
       const next = [
@@ -44,6 +54,7 @@ export function useShots() {
           id: `shot-${prev.length}-${Date.now()}`,
           dataUrl,
           takenAt: Date.now(),
+          film,
         },
       ];
       writeStore(next);

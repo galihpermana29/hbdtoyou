@@ -26,8 +26,6 @@ export interface MemorollConfig {
   radiusM: number;
   /** The film: the flowchart's ten shots, made a choice. */
   shotsPerGuest: number;
-  /** The look. */
-  filmFilterOn: boolean;
 }
 
 /** What each step screen receives: the config and a way to change it. */
@@ -48,7 +46,6 @@ export const DEFAULT_CONFIG: MemorollConfig = {
   geofenceOn: true,
   radiusM: 250,
   shotsPerGuest: 10,
-  filmFilterOn: true,
 };
 
 /** The day after the event, for the "next morning" reveal preset. */

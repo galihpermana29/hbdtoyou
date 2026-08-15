@@ -140,6 +140,33 @@ Never the couple's to type.
 Since ADR 0005 it is also where a published invitation answers: the subdomain label of `{slug}.memoify.live`.
 _Avoid_: domain. Subdomain names where the slug is served, never the slug itself.
 
+### MemoRoll
+
+**Roll**:
+A guest's whole allotment of Shots for the day.
+When it is spent it is spent: no retakes, no camera-roll uploads.
+
+**Shot**:
+One photo a guest takes on their Roll.
+A Shot is developed at capture: the finished photo is the only artifact, and the negative never exists.
+What a Shot looks like is settled the moment it is taken and never edited afterwards.
+
+**Film**:
+The analog look a Shot develops through, chosen by the guest on the camera, per Shot, before it is taken.
+Named for the stock or device each look imitates: seven real film stocks (Kodak Gold 200, Portra 400, Superia 400, CineStill 800T, Polaroid 600, Lomo X-Pro, Ilford HP5), seven device looks (35mm, Point & Shoot, Disposable, Toy Cam, Cross-process, B&W Street, VHS), plus None, which is plain digital.
+The camera opens on Kodak Gold 200 and stays on whatever the guest last chose.
+The couple has no say: the choice moved from creator to guest and did not leave a switch behind.
+_Avoid_: filter, effect, film filter
+
+**Date Stamp**:
+The date every Film burns into a Shot's corner, the way a point-and-shoot exposes it onto the negative.
+Part of the Film, so a Shot taken on None carries no Date Stamp.
+_Avoid_: timestamp
+
+**Watermark**:
+The small memoify.live mark on every Shot, Film or None alike.
+It belongs to the product, not to the Film.
+
 ### The template's parts
 
 **Sealed**:

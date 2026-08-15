@@ -93,6 +93,13 @@ export const COLLAGE_STRIP = SAMPLE_SOURCES.slice(2, 5);
 /** What the placeholder viewfinder shows when the camera is not granted. */
 export const VIEWFINDER_FALLBACK = SAMPLE_SOURCES[10];
 
+/**
+ * The demo's fictional wedding day as every stamp writes it. The camera
+ * bakes this date (with the real capture time) so a guest's own shots agree
+ * with the mock roll's stamps instead of betraying the demo's date.
+ */
+export const STAMP_DATE = '03/05/2026';
+
 /** The designer's literal gallery copy (guest-05/08/09/12). */
 export const GALLERY_COPY = {
   revealedHeading: 'The roll dropped. Go relive the chaos.',

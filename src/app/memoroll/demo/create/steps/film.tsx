@@ -29,7 +29,9 @@ export default function FilmStep({ config, patch }: StepProps) {
       <motion.div variants={reduce ? undefined : fadeUp}>
         <BodyText className="!text-left text-[#212121]/75">
           Every guest gets one roll of film for the whole day. No retakes, no
-          camera-roll uploads - when it&rsquo;s gone, it&rsquo;s gone.
+          camera-roll uploads - when it&rsquo;s gone, it&rsquo;s gone. Which
+          film a shot develops through is each guest&rsquo;s own pick at the
+          shutter, Kodak Gold to black-and-white HP5.
         </BodyText>
       </motion.div>
 

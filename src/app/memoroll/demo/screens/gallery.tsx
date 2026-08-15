@@ -1,9 +1,11 @@
 'use client';
 
+import tornPaper from '@/assets/memoroll-paper-torn.png';
+import paperTexture from '@/assets/memoroll-paper.png';
 import { AnimatePresence, motion, useReducedMotion } from 'framer-motion';
 import { useEffect, useMemo, useState } from 'react';
 import { DemoPhase } from '../demo-control';
-import { GALLERY_COPY, MOCK_PHOTOS, MockPhoto } from '../mock';
+import { GALLERY_COPY, MOCK_PHOTOS, MockPhoto, STAMP_DATE } from '../mock';
 import { Shot } from '../use-shots';
 import {
   EASE,
@@ -57,7 +59,7 @@ export default function GalleryScreen({
           src: shot.dataUrl,
           camOwner: 'you',
           groupLabel: `May 3 ${hhmm}`,
-          stamp: `03/05/2026 ${hhmm}`,
+          stamp: `${STAMP_DATE} ${hhmm}`,
           own: true,
         };
       }),
@@ -96,7 +98,13 @@ export default function GalleryScreen({
   };
 
   return (
-    <div className="relative flex flex-1 flex-col px-4 pb-24 pt-12">
+    <div
+      className="relative flex flex-1 flex-col px-4 pb-24 pt-12"
+      style={{
+        // The list of photos sits on the paper (hbd-xs7); only here.
+        backgroundImage: `url(${paperTexture.src})`,
+        backgroundSize: 'cover',
+      }}>
       {onBackToCamera && (
         <button
           type="button"
@@ -194,7 +202,8 @@ export default function GalleryScreen({
                   {group.label}
                 </p>
               )}
-              <div className="grid grid-cols-3 gap-2.5">
+              {/* Two columns on torn paper tiles, all states alike (147:906). */}
+              <div className="grid grid-cols-2 gap-3">
                 {group.photos.map((photo) => (
                   <motion.button
                     key={photo.id}
@@ -204,11 +213,19 @@ export default function GalleryScreen({
                     aria-label={
                       blurred
                         ? 'Still hidden until the reveal'
-                        : `Open the shot from ${photo.camOwner}’s cam`
+                        : `Open the shot from ${
+                            photo.own ? 'your' : `${photo.camOwner}’s`
+                          } cam`
                     }
-                    className={`relative bg-white p-1 shadow-sm ${
+                    className={`relative p-[7px] ${
                       blurred ? 'cursor-default' : ''
                     }`}>
+                    <img
+                      src={tornPaper.src}
+                      alt=""
+                      aria-hidden
+                      className="pointer-events-none absolute inset-0 h-full w-full [filter:drop-shadow(0_2px_4px_rgba(33,33,33,0.18))]"
+                    />
                     <span className="relative block aspect-[4/3] overflow-hidden">
                       <img
                         src={photo.src}
@@ -220,13 +237,11 @@ export default function GalleryScreen({
                             : ''
                         } ${blurred && !reduce ? 'scale-110' : ''}`}
                       />
-                      {blurred && (
-                        <span
-                          className="absolute bottom-0.5 right-1 text-[9px] text-white/90"
-                          style={{ fontFamily: 'var(--font-mr-ui)' }}>
-                          {photo.own ? 'yours' : `${photo.camOwner}’s`}
-                        </span>
-                      )}
+                      <span
+                        className="absolute bottom-1 right-1.5 text-[10px] text-white/90 drop-shadow"
+                        style={{ fontFamily: 'var(--font-mr-ui)' }}>
+                        {photo.own ? 'yours' : `${photo.camOwner}’s`}
+                      </span>
                     </span>
                   </motion.button>
                 ))}
@@ -383,18 +398,36 @@ function PhotoViewer({
               ? REDUCED_FADE
               : { type: 'spring', stiffness: 260, damping: 24 }
           }
-          className="relative mt-6 w-full max-w-[340px] cursor-pointer bg-white p-3 pb-4 shadow-2xl">
+          className="relative mt-6 w-full max-w-[340px] cursor-pointer p-4 pb-6">
+          {/* The torn paper stack of Figma 220:915: a ghost sheet behind,
+              the sheet the photo sits on in front. */}
+          <img
+            src={tornPaper.src}
+            alt=""
+            aria-hidden
+            className="pointer-events-none absolute inset-0 h-full w-full rotate-[7deg] opacity-50"
+          />
+          <img
+            src={tornPaper.src}
+            alt=""
+            aria-hidden
+            className="pointer-events-none absolute inset-0 h-full w-full [filter:drop-shadow(0_18px_30px_rgba(0,0,0,0.45))]"
+          />
           <span className="relative block">
             <img
               src={photo.src}
               alt={`A shot from ${ownerLabel}`}
               className="w-full object-cover"
             />
-            <span
-              className="absolute bottom-2 right-3 text-[15px] text-white drop-shadow"
-              style={{ fontFamily: 'var(--font-mr-hand)' }}>
-              {photo.stamp}
-            </span>
+            {/* Own shots carry their stamp in the pixels (ADR 0006); only
+                the mock roll still needs it drawn on. */}
+            {!photo.own && (
+              <span
+                className="absolute bottom-2 right-3 text-[15px] text-white drop-shadow"
+                style={{ fontFamily: 'var(--font-mr-hand)' }}>
+                {photo.stamp}
+              </span>
+            )}
           </span>
         </motion.figure>
       </AnimatePresence>

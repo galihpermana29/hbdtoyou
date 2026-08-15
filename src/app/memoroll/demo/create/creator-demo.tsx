@@ -9,7 +9,6 @@ import { StepProps, useCreatorState } from './config';
 import ManageView from './manage';
 import EventStep from './steps/event';
 import FilmStep from './steps/film';
-import LookStep from './steps/look';
 import PlaceStep from './steps/place';
 import RevealStep from './steps/reveal';
 import ShareStep from './steps/share';
@@ -31,16 +30,16 @@ const STEPS: WizardStep[] = [
   { key: 'reveal', title: 'Nobody peeks til the reveal', screen: RevealStep },
   { key: 'place', title: 'Only where the party is', screen: PlaceStep },
   { key: 'film', title: 'How much film to hand out', screen: FilmStep },
-  { key: 'look', title: 'What the roll looks like', screen: LookStep },
   { key: 'share', title: 'Put it on the tables', screen: ShareStep },
 ];
 
 type View = { kind: 'wizard'; step: number } | { kind: 'manage' };
 
 /**
- * The creator walkthrough: the six-step setup wizard on the paper ground,
- * and the live manage view on the camera's dark ground. Local state only;
- * no backend is called anywhere here.
+ * The creator walkthrough: the five-step setup wizard on the paper ground,
+ * and the live manage view on the camera's dark ground. The look left the
+ * wizard when the film choice moved to the guest's shutter (hbd-xs7).
+ * Local state only; no backend is called anywhere here.
  */
 export default function CreatorDemo() {
   const reduce = useReducedMotion();
