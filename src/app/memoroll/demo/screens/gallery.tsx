@@ -56,7 +56,7 @@ export default function GalleryScreen({
         const hhmm = `${at.getHours()}:${String(at.getMinutes()).padStart(2, '0')}`;
         return {
           id: shot.id,
-          src: shot.dataUrl,
+          src: shot.url,
           camOwner: 'you',
           groupLabel: `May 3 ${hhmm}`,
           stamp: `${STAMP_DATE} ${hhmm}`,

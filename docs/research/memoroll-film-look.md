@@ -299,3 +299,22 @@ OffscreenCanvas support - https://caniuse.com/offscreencanvas.
 Vignetting (cos⁴ law) - https://en.wikipedia.org/wiki/Vignetting.
 GLSL film grain - https://github.com/mattdesl/glsl-film-grain.
 toDataURL - https://developer.mozilla.org/en-US/docs/Web/API/HTMLCanvasElement/toDataURL.
+
+## 10. Iteration 2: the no-grain six-film roster (hbd-sk4, 2026-08-16)
+
+Owner device review of the shipped Wedding Film found the synthetic grain reading as ugly texture rather than film: baked at 480x640 and phone-upscaled, the smoothed noise became blotches, and JPEG chroma subsampling turned the per-channel offsets into colored speckle.
+Competitive measurement (satualbum preset previews) independently showed a shipping product whose looks carry no visible grain at all.
+Decision: synthetic grain is REMOVED from the renderer - not zeroed, removed; the generation and application stages no longer exist, every render is deterministic, and any future grain must return as a new, resolution-aware proposal with its own evidence.
+
+The engine generalized into `src/lib/memoroll-film.ts` (`developMemoRollFilm`, one preset registry) and the keeper contract moved to **960x1280 JPEG at quality 0.78**, stored as Blobs in IndexedDB (ten base64 keepers at this size would threaten localStorage quotas); ADR 0006's develop-at-capture contract is unchanged.
+The visible roster is now six films: **None** (identity + watermark, no stamp), **Wedding Natural** (the approved Wedding Daylight color and tone, unchanged, minus grain), **Soft Pastel** (lifted shadows, soft contrast, upper-mid warmth returning to neutral whites, slight desaturation), **Clean Cool** (near-linear clean daylight with a mild cool mid cast, neutral skin and whites), **Bold Color** (saturation +0.30 with deeper-but-readable shadows and zero channel offsets so skin cannot drift orange), **Black & White** (Rec. 709 luminance conversion through an S-curve with a readable toe and controlled shoulder).
+All recipes are original MemoRoll curves; nothing is copied from any third party.
+The low-light 'party' preset stays in the registry, out of every selector, awaiting hbd-sk4's representative input.
+
+Lighting terminology is now precise and hardware-honest.
+**Flash** is a synchronized fill light: `ImageCapture.takePhoto({ fillLightMode: 'flash' })`, offered only when `getPhotoCapabilities().fillLightMode` includes `'flash'`, with the captured blob decoded via `createImageBitmap(..., { imageOrientation: 'from-image' })` before the cover crop.
+**Torch** is the continuous LED: `applyConstraints`, offered only when the track reports a controllable torch capability, and always turned off when the camera closes, the stream changes, or the component unmounts.
+Unsupported controls are hidden; a runtime failure downgrades the control with a visible note and the shot falls back to the live view rather than being lost; Torch is never silently substituted for Flash; the shutter's white-screen animation is feedback only; the renderer's highlight bloom is none of these.
+
+Measured on the harness (headless Chromium, 960x1280, 6 iterations): color pass 5.4-7.3 ms per look, finalize under 1 ms, JPEG encode 7-11 ms, parked party 12 ms color + 1.5 ms bloom - roughly 15-20 ms per developed keeper against the 300 ms budget, so no WebGL2 escalation is recommended on this evidence; real-phone timings remain to be recorded.
+Determinism and the absence of grain are asserted: repeat renders are bit-identical and a flat-gray keeper develops with a high-frequency residual under 0.15/255 on every look.

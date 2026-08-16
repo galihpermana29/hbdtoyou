@@ -1,81 +1,74 @@
 /**
- * The MemoRoll film roster (hbd-15j integration).
+ * The MemoRoll film roster (hbd-sk4 quality iteration).
  *
- * Two visible films: Wedding Film (the engine in src/lib/wedding-film.ts,
- * per docs/research/memoroll-film-look.md) and None. The fifteen legacy
- * looks of hbd-xs7 are gone from the selector - their recipes died with
- * ctx.filter on iPhones (report §0) - but shots they already developed
- * stay valid forever: pixels are baked (ADR 0006) and Shot.film is a label.
- *
- * Wedding Film has two processing variants. Daylight is provisionally
- * approved. Party is experimental - it lacks a representative low-light
- * phone input - so it is exposed only off-production for real-device
- * testing and never ships to production until explicitly approved.
+ * Six visible films, all rendered by src/lib/memoroll-film.ts. Every look
+ * is an original MemoRoll recipe; the parked low-light 'party' preset stays
+ * out of every selector until a representative input approves it. Shots
+ * developed under earlier rosters remain exactly what they are: pixels are
+ * baked at capture (ADR 0006) and Shot.film is only a label.
  */
 
-import type { WeddingFilmVariant } from '@/lib/wedding-film';
+import type { MemoRollFilmId } from '@/lib/memoroll-film';
 
-export type RollFilmId = 'wedding' | 'none';
-export type WeddingVariant = Exclude<WeddingFilmVariant, 'none'>;
+/** The ids a guest can actually select. */
+export type SelectableFilmId = Exclude<MemoRollFilmId, 'party'>;
 
 export interface RollFilm {
-  id: RollFilmId;
+  id: SelectableFilmId;
   /** Chip label on the camera. */
   name: string;
 }
 
 export const ROLL_FILMS: RollFilm[] = [
-  { id: 'wedding', name: 'Wedding Film' },
   { id: 'none', name: 'None' },
+  { id: 'wedding-natural', name: 'Wedding Natural' },
+  { id: 'soft-pastel', name: 'Soft Pastel' },
+  { id: 'clean-cool', name: 'Clean Cool' },
+  { id: 'bold-color', name: 'Bold Color' },
+  { id: 'black-white', name: 'Black & White' },
 ];
 
-export const DEFAULT_FILM: RollFilmId = 'wedding';
-export const DEFAULT_VARIANT: WeddingVariant = 'daylight';
+export const DEFAULT_FILM: SelectableFilmId = 'wedding-natural';
 
-/** The env-flip convention the repo already uses (CLAUDE.md). */
-export const IS_PRODUCTION_ENV =
-  process.env.NEXT_PUBLIC_APP_ENV === 'production';
+const SELECTABLE = new Set<string>(ROLL_FILMS.map((f) => f.id));
 
 /**
- * The stored id a developed Shot carries and the selection key persists:
- * 'wedding-daylight' | 'wedding-party' | 'none'.
+ * Map any persisted film id onto today's roster: current ids pass through,
+ * 'none' stays None, and everything else - hbd-xs7's fifteen legacy ids,
+ * hbd-15j's 'wedding-daylight'/'wedding-party', unknown values - becomes
+ * Wedding Natural, so an old localStorage can never break selection.
  */
-export function storedFilmId(
-  film: RollFilmId,
-  variant: WeddingVariant
-): string {
-  return film === 'none' ? 'none' : `wedding-${variant}`;
+export function normalizeStoredFilm(raw: string | null): SelectableFilmId {
+  if (raw && SELECTABLE.has(raw)) return raw as SelectableFilmId;
+  if (raw === 'none') return 'none';
+  return DEFAULT_FILM;
+}
+
+/** Films that burn the date stamp; None stays plain (watermark only). */
+export function filmStamps(film: SelectableFilmId): boolean {
+  return film !== 'none';
 }
 
 /**
- * Map any persisted film id - including the fifteen legacy ids of hbd-xs7 -
- * onto today's selection. 'none' stays None; wedding ids keep their variant
- * (Party only where it is exposed); every legacy or unknown id becomes
- * Wedding Film Daylight, so an old localStorage can never break selection.
+ * The live preview is an ordinary CSS approximation of the developed look:
+ * the canvas pixel pipeline is the truth, and preview and export are NOT
+ * pixel-identical (the viewfinder says so).
  */
-export function normalizeStoredFilm(raw: string | null): {
-  film: RollFilmId;
-  variant: WeddingVariant;
-} {
-  if (raw === 'none') return { film: 'none', variant: DEFAULT_VARIANT };
-  if (raw === 'wedding-party' && !IS_PRODUCTION_ENV) {
-    return { film: 'wedding', variant: 'party' };
-  }
-  return { film: 'wedding', variant: DEFAULT_VARIANT };
-}
-
-/**
- * The live preview is an ordinary CSS approximation of the developed look
- * (report §9): grain and bloom are not previewed, and preview and export
- * are NOT pixel-identical - the canvas pixel pipeline is the truth.
- */
-export const PREVIEW_CSS: Record<WeddingVariant, string> = {
-  daylight: 'saturate(1.1) contrast(1.05) brightness(1.02) sepia(0.08)',
-  party: 'saturate(1.15) contrast(1.1) brightness(1.03)',
+export const PREVIEW_CSS: Record<SelectableFilmId, string | undefined> = {
+  none: undefined,
+  'wedding-natural': 'saturate(1.1) contrast(1.05) brightness(1.02) sepia(0.08)',
+  'soft-pastel': 'saturate(0.9) contrast(0.95) brightness(1.06) sepia(0.05)',
+  'clean-cool': 'saturate(1.05) contrast(1.04) brightness(1.02)',
+  'bold-color': 'saturate(1.35) contrast(1.12)',
+  'black-white': 'grayscale(1) contrast(1.15)',
 };
 
-/** Approximate preview vignette strength per variant (report §9 gains). */
-export const PREVIEW_VIGNETTE: Record<WeddingVariant, number> = {
-  daylight: 0.1,
-  party: 0.16,
+/** Approximate preview vignette strength per film (engine corner gains). */
+export const PREVIEW_VIGNETTE: Record<SelectableFilmId, number> = {
+  none: 0,
+  'wedding-natural': 0.1,
+  'soft-pastel': 0.06,
+  'clean-cool': 0.05,
+  'bold-color': 0.08,
+  'black-white': 0.07,
 };

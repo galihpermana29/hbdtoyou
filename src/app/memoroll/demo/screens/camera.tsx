@@ -1,6 +1,6 @@
 'use client';
 
-import { developWeddingFilm } from '@/lib/wedding-film';
+import { developMemoRollFilm } from '@/lib/memoroll-film';
 import {
   AnimatePresence,
   motion,
@@ -9,24 +9,29 @@ import {
 } from 'framer-motion';
 import { useCallback, useEffect, useRef, useState } from 'react';
 import {
+  PhotoCapturer,
+  defaultImageCaptureFactory,
+  detectLightingCapabilities,
+  setTorch,
+} from '../camera-capabilities';
+import {
   DEFAULT_FILM,
-  DEFAULT_VARIANT,
-  IS_PRODUCTION_ENV,
   PREVIEW_CSS,
   PREVIEW_VIGNETTE,
   ROLL_FILMS,
-  RollFilmId,
-  WeddingVariant,
+  SelectableFilmId,
+  filmStamps,
   normalizeStoredFilm,
-  storedFilmId,
 } from '../films';
 import { homemadeApple, poppins } from '../fonts';
 import { STAMP_DATE, VIEWFINDER_FALLBACK } from '../mock';
 import { Shot } from '../use-shots';
 import { EASE, REDUCED_FADE } from '../variants';
 
-const FRAME_W = 480;
-const FRAME_H = 640;
+/** The developed keeper: 960x1280, the report's resolution contract. */
+const FRAME_W = 960;
+const FRAME_H = 1280;
+const JPEG_QUALITY = 0.78;
 
 /** The guest's last film pick survives a reload along with the roll. */
 const FILM_STORAGE_KEY = 'memoroll-demo:film';
@@ -37,11 +42,16 @@ const FILM_STORAGE_KEY = 'memoroll-demo:film';
  * does not. Ten shots, counted down where the guest can feel it, and a dead
  * shutter at zero: the scarcity is the product.
  *
- * The shot develops through the Wedding Film engine (src/lib/wedding-film.ts,
- * hbd-15j): a canvas pixel pipeline that runs everywhere, Safari included -
- * no ctx.filter anywhere. The viewfinder wears an ordinary CSS approximation
- * of the look; the developed pixels are the truth (ADR 0006). Party is
- * experimental and only offered off-production until approved.
+ * Every keeper develops through the MemoRoll film renderer
+ * (src/lib/memoroll-film.ts) into a 960x1280 JPEG blob - baked at capture
+ * per ADR 0006, no ctx.filter anywhere. The viewfinder wears an ordinary
+ * CSS approximation of the look; the developed pixels are the truth.
+ *
+ * Lighting is hardware-honest: Flash (synchronized fill light via
+ * ImageCapture.takePhoto) and Torch (continuous LED via applyConstraints)
+ * appear only when the granted track really supports them, and a runtime
+ * failure downgrades the control with a visible note instead of faking.
+ * The white-screen flash on the shutter is feedback animation only.
  */
 export default function CameraScreen({
   remaining,
@@ -51,47 +61,44 @@ export default function CameraScreen({
 }: {
   remaining: number;
   lastShot: Shot | null;
-  onCapture: (dataUrl: string, film: string) => void;
+  onCapture: (blob: Blob, film: string) => void;
   onOpenGallery: () => void;
 }) {
   const reduce = useReducedMotion();
   const videoRef = useRef<HTMLVideoElement>(null);
   const streamRef = useRef<MediaStream | null>(null);
+  const capturerRef = useRef<PhotoCapturer | null>(null);
   const [live, setLive] = useState(false);
   const [flashKey, setFlashKey] = useState(0);
   const [rollDone, setRollDone] = useState(false);
-  const [film, setFilm] = useState<RollFilmId>(DEFAULT_FILM);
-  const [variant, setVariant] = useState<WeddingVariant>(DEFAULT_VARIANT);
+  const [film, setFilm] = useState<SelectableFilmId>(DEFAULT_FILM);
+  const [flashSupported, setFlashSupported] = useState(false);
+  const [torchSupportedState, setTorchSupportedState] = useState(false);
+  const [flashOn, setFlashOn] = useState(false);
+  const [torchOn, setTorchOn] = useState(false);
+  const [lightingNote, setLightingNote] = useState<string | null>(null);
   const counterControls = useAnimationControls();
 
   useEffect(() => {
     try {
-      const stored = normalizeStoredFilm(
-        window.localStorage.getItem(FILM_STORAGE_KEY)
-      );
-      setFilm(stored.film);
-      setVariant(stored.variant);
+      setFilm(normalizeStoredFilm(window.localStorage.getItem(FILM_STORAGE_KEY)));
     } catch {
       // A blocked store just means the roll opens on the default film.
     }
     // The stamp and watermark draw onto a canvas, which never falls back the
     // way CSS does - warm the fonts up before the first shutter press.
     document.fonts
-      ?.load(`26px ${homemadeApple.style.fontFamily}`)
+      ?.load(`52px ${homemadeApple.style.fontFamily}`)
       .catch(() => undefined);
     document.fonts
-      ?.load(`500 15px ${poppins.style.fontFamily}`)
+      ?.load(`500 30px ${poppins.style.fontFamily}`)
       .catch(() => undefined);
   }, []);
 
-  const persistFilm = (nextFilm: RollFilmId, nextVariant: WeddingVariant) => {
-    setFilm(nextFilm);
-    setVariant(nextVariant);
+  const pickFilm = (id: SelectableFilmId) => {
+    setFilm(id);
     try {
-      window.localStorage.setItem(
-        FILM_STORAGE_KEY,
-        storedFilmId(nextFilm, nextVariant)
-      );
+      window.localStorage.setItem(FILM_STORAGE_KEY, id);
     } catch {
       // Quota or privacy mode: the pick still holds in memory.
     }
@@ -107,8 +114,18 @@ export default function CameraScreen({
       return;
     }
     navigator.mediaDevices
-      .getUserMedia({ video: { facingMode: 'environment' }, audio: false })
-      .then((stream) => {
+      // A high-quality rear 4:3 stream: enough pixels that the 960x1280
+      // keeper crops from real detail rather than upscaling.
+      .getUserMedia({
+        video: {
+          facingMode: 'environment',
+          width: { ideal: 1920 },
+          height: { ideal: 1440 },
+          aspectRatio: { ideal: 4 / 3 },
+        },
+        audio: false,
+      })
+      .then(async (stream) => {
         if (cancelled) {
           stream.getTracks().forEach((t) => t.stop());
           return;
@@ -119,55 +136,87 @@ export default function CameraScreen({
           video.play().catch(() => undefined);
         }
         setLive(true);
+        // Lighting capabilities exist only after permission is granted.
+        const track = stream.getVideoTracks()[0];
+        if (track) {
+          capturerRef.current = defaultImageCaptureFactory(track);
+          const caps = await detectLightingCapabilities(track);
+          if (!cancelled) {
+            setFlashSupported(caps.flash);
+            setTorchSupportedState(caps.torch);
+          }
+        }
       })
       .catch(() => setLive(false));
     return () => {
       cancelled = true;
+      // The torch must never outlive the camera: off before the stream stops.
+      const track = streamRef.current?.getVideoTracks()[0];
+      if (track) {
+        setTorch(track, false).catch(() => undefined);
+      }
       streamRef.current?.getTracks().forEach((t) => t.stop());
       streamRef.current = null;
+      capturerRef.current = null;
     };
   }, []);
 
-  /** Draw whatever the viewfinder is showing onto an undeveloped frame. */
+  const toggleTorch = async () => {
+    const track = streamRef.current?.getVideoTracks()[0];
+    if (!track) return;
+    const next = !torchOn;
+    try {
+      await setTorch(track, next);
+      setTorchOn(next);
+    } catch {
+      // A previously supported operation failed: downgrade honestly.
+      setTorchSupportedState(false);
+      setTorchOn(false);
+      setLightingNote('Torch stopped responding on this camera, so it was turned off.');
+    }
+  };
+
+  /** Draw a source onto the 960x1280 stage with the viewfinder's cover crop. */
+  const stageFrom = (
+    source: CanvasImageSource,
+    sw: number,
+    sh: number
+  ): HTMLCanvasElement => {
+    const canvas = document.createElement('canvas');
+    canvas.width = FRAME_W;
+    canvas.height = FRAME_H;
+    const ctx = canvas.getContext('2d')!;
+    const scale = Math.max(FRAME_W / sw, FRAME_H / sh);
+    const dw = sw * scale;
+    const dh = sh * scale;
+    ctx.drawImage(source, (FRAME_W - dw) / 2, (FRAME_H - dh) / 2, dw, dh);
+    return canvas;
+  };
+
+  /** The no-flash path: whatever the viewfinder is showing right now. */
   const takeFrame = useCallback((): Promise<HTMLCanvasElement> => {
-    const makeStage = (draw: (ctx: CanvasRenderingContext2D) => void) => {
+    const gradientStage = () => {
       const canvas = document.createElement('canvas');
       canvas.width = FRAME_W;
       canvas.height = FRAME_H;
-      draw(canvas.getContext('2d')!);
+      const ctx = canvas.getContext('2d')!;
+      const g = ctx.createLinearGradient(0, 0, FRAME_W, FRAME_H);
+      g.addColorStop(0, '#3a3a3a');
+      g.addColorStop(1, '#141414');
+      ctx.fillStyle = g;
+      ctx.fillRect(0, 0, FRAME_W, FRAME_H);
+      ctx.fillStyle = '#f7f5f3';
+      ctx.font = '56px sans-serif';
+      ctx.textAlign = 'center';
+      ctx.fillText('memoroll demo shot', FRAME_W / 2, FRAME_H / 2);
       return canvas;
     };
-    const coverDraw = (
-      ctx: CanvasRenderingContext2D,
-      source: CanvasImageSource,
-      sw: number,
-      sh: number
-    ) => {
-      const scale = Math.max(FRAME_W / sw, FRAME_H / sh);
-      const dw = sw * scale;
-      const dh = sh * scale;
-      ctx.drawImage(source, (FRAME_W - dw) / 2, (FRAME_H - dh) / 2, dw, dh);
-    };
-    const gradientStage = () =>
-      makeStage((ctx) => {
-        const g = ctx.createLinearGradient(0, 0, FRAME_W, FRAME_H);
-        g.addColorStop(0, '#3a3a3a');
-        g.addColorStop(1, '#141414');
-        ctx.fillStyle = g;
-        ctx.fillRect(0, 0, FRAME_W, FRAME_H);
-        ctx.fillStyle = '#f7f5f3';
-        ctx.font = '28px sans-serif';
-        ctx.textAlign = 'center';
-        ctx.fillText('memoroll demo shot', FRAME_W / 2, FRAME_H / 2);
-      });
 
     const video = videoRef.current;
     if (live && video && video.videoWidth > 0) {
       try {
         return Promise.resolve(
-          makeStage((ctx) =>
-            coverDraw(ctx, video, video.videoWidth, video.videoHeight)
-          )
+          stageFrom(video, video.videoWidth, video.videoHeight)
         );
       } catch {
         return Promise.resolve(gradientStage());
@@ -178,11 +227,7 @@ export default function CameraScreen({
       img.crossOrigin = 'anonymous';
       img.onload = () => {
         try {
-          resolve(
-            makeStage((ctx) =>
-              coverDraw(ctx, img, img.naturalWidth, img.naturalHeight)
-            )
-          );
+          resolve(stageFrom(img, img.naturalWidth, img.naturalHeight));
         } catch {
           resolve(gradientStage());
         }
@@ -191,6 +236,25 @@ export default function CameraScreen({
       img.src = VIEWFINDER_FALLBACK;
     });
   }, [live]);
+
+  /**
+   * The flash path: a synchronized still via ImageCapture, decoded with its
+   * EXIF orientation applied before cropping. Any failure downgrades Flash
+   * and falls back to the video frame - the shot is never lost.
+   */
+  const takeFlashFrame = async (): Promise<HTMLCanvasElement> => {
+    const capturer = capturerRef.current;
+    if (!capturer) throw new Error('no capturer');
+    const blob = await capturer.takePhoto({ fillLightMode: 'flash' });
+    const bitmap = await createImageBitmap(blob, {
+      imageOrientation: 'from-image',
+    });
+    try {
+      return stageFrom(bitmap, bitmap.width, bitmap.height);
+    } finally {
+      bitmap.close();
+    }
+  };
 
   // The moment the tenth shot lands the roll is finished, and the way to the
   // gallery is offered right away rather than after a press of a dead shutter.
@@ -208,13 +272,28 @@ export default function CameraScreen({
       }
       return;
     }
+    // White-screen animation: shutter feedback only, never a light source.
     setFlashKey((k) => k + 1);
-    const stage = await takeFrame();
-    onCapture(developShot(stage, film, variant), storedFilmId(film, variant));
+    let stage: HTMLCanvasElement;
+    if (flashOn && flashSupported && capturerRef.current) {
+      try {
+        stage = await takeFlashFrame();
+      } catch {
+        setFlashSupported(false);
+        setFlashOn(false);
+        setLightingNote(
+          'Flash failed on this camera, so this shot used the live view instead.'
+        );
+        stage = await takeFrame();
+      }
+    } else {
+      stage = await takeFrame();
+    }
+    const blob = await developShot(stage, film);
+    onCapture(blob, film);
   };
 
   const empty = remaining <= 0;
-  const showVariantControl = film === 'wedding' && !IS_PRODUCTION_ENV;
 
   return (
     <div className="flex flex-1 flex-col bg-[#212121] px-3 pb-6 pt-4">
@@ -224,9 +303,7 @@ export default function CameraScreen({
           playsInline
           muted
           className={`absolute inset-0 h-full w-full object-cover transition-[filter] duration-300 ${live ? '' : 'hidden'}`}
-          style={{
-            filter: film === 'wedding' ? PREVIEW_CSS[variant] : undefined,
-          }}
+          style={{ filter: PREVIEW_CSS[film] }}
         />
         {!live && (
           <>
@@ -234,9 +311,7 @@ export default function CameraScreen({
               src={VIEWFINDER_FALLBACK}
               alt="Placeholder viewfinder"
               className="absolute inset-0 h-full w-full object-cover transition-[filter] duration-300"
-              style={{
-                filter: film === 'wedding' ? PREVIEW_CSS[variant] : undefined,
-              }}
+              style={{ filter: PREVIEW_CSS[film] }}
             />
             <span
               className="absolute left-3 top-3 rounded-full bg-black/60 px-3 py-1 text-[10px] uppercase tracking-[0.14em] text-white/80"
@@ -245,13 +320,46 @@ export default function CameraScreen({
             </span>
           </>
         )}
-        {film === 'wedding' && (
+        {PREVIEW_VIGNETTE[film] > 0 && (
           <span
             className="pointer-events-none absolute inset-0 transition-shadow duration-300"
             style={{
-              boxShadow: `inset 0 0 ${Math.round(PREVIEW_VIGNETTE[variant] * 180)}px rgba(15, 15, 15, ${PREVIEW_VIGNETTE[variant]})`,
+              boxShadow: `inset 0 0 ${Math.round(PREVIEW_VIGNETTE[film] * 180)}px rgba(15, 15, 15, ${PREVIEW_VIGNETTE[film]})`,
             }}
           />
+        )}
+        {/* Hardware lighting controls: shown only when truly supported. */}
+        {(flashSupported || torchSupportedState) && (
+          <div className="absolute right-3 top-3 flex gap-2">
+            {flashSupported && (
+              <button
+                type="button"
+                aria-pressed={flashOn}
+                onClick={() => setFlashOn((v) => !v)}
+                className={`rounded-full px-3 py-1.5 text-[11px] transition-colors ${
+                  flashOn
+                    ? 'bg-white text-[#212121]'
+                    : 'bg-black/60 text-white/85'
+                }`}
+                style={{ fontFamily: 'var(--font-mr-ui)' }}>
+                Flash {flashOn ? 'on' : 'off'}
+              </button>
+            )}
+            {torchSupportedState && (
+              <button
+                type="button"
+                aria-pressed={torchOn}
+                onClick={toggleTorch}
+                className={`rounded-full px-3 py-1.5 text-[11px] transition-colors ${
+                  torchOn
+                    ? 'bg-white text-[#212121]'
+                    : 'bg-black/60 text-white/85'
+                }`}
+                style={{ fontFamily: 'var(--font-mr-ui)' }}>
+                Torch {torchOn ? 'on' : 'off'}
+              </button>
+            )}
+          </div>
         )}
         <AnimatePresence>
           {flashKey > 0 && (
@@ -283,67 +391,42 @@ export default function CameraScreen({
         </AnimatePresence>
       </div>
 
-      {/* The variant control is a sibling, not a child, of the film group:
-          nested radiogroups read as one flat list to assistive tech. */}
       <div
-        className="mt-4 flex items-center gap-2"
+        className="mt-4 flex gap-2 overflow-x-auto pb-1 [scrollbar-width:none] [&::-webkit-scrollbar]:hidden"
+        role="radiogroup"
+        aria-label="The film this shot develops through"
         style={{ fontFamily: 'var(--font-mr-ui)' }}>
-        <div
-          className="flex items-center gap-2"
-          role="radiogroup"
-          aria-label="The film this shot develops through">
-          {ROLL_FILMS.map((f) => {
-            const active = f.id === film;
-            return (
-              <button
-                key={f.id}
-                type="button"
-                role="radio"
-                aria-checked={active}
-                onClick={() => persistFilm(f.id, variant)}
-                className={`whitespace-nowrap rounded-full px-4 py-2 text-[12px] transition-colors ${
-                  active
-                    ? 'bg-white text-[#212121]'
-                    : 'border border-white/30 text-white/85'
-                }`}>
-                {f.name}
-              </button>
-            );
-          })}
-        </div>
-        {showVariantControl && (
-          <div
-            className="ml-auto flex items-center gap-1 rounded-full border border-white/20 p-0.5"
-            role="radiogroup"
-            aria-label="Wedding Film lighting variant (staging test control)">
-            {(
-              [
-                ['daylight', 'Daylight'],
-                ['party', 'Party · testing'],
-              ] as [WeddingVariant, string][]
-            ).map(([v, label]) => (
-              <button
-                key={v}
-                type="button"
-                role="radio"
-                aria-checked={variant === v}
-                onClick={() => persistFilm('wedding', v)}
-                className={`whitespace-nowrap rounded-full px-3 py-1.5 text-[11px] transition-colors ${
-                  variant === v
-                    ? 'bg-[#ff3e09] text-white'
-                    : 'text-white/70'
-                }`}>
-                {label}
-              </button>
-            ))}
-          </div>
-        )}
+        {ROLL_FILMS.map((f) => {
+          const active = f.id === film;
+          return (
+            <button
+              key={f.id}
+              type="button"
+              role="radio"
+              aria-checked={active}
+              onClick={() => pickFilm(f.id)}
+              className={`whitespace-nowrap rounded-full px-4 py-2 text-[12px] transition-colors ${
+                active
+                  ? 'bg-white text-[#212121]'
+                  : 'border border-white/30 text-white/85'
+              }`}>
+              {f.name}
+            </button>
+          );
+        })}
       </div>
       <p
         className="mt-1.5 text-[9px] uppercase tracking-[0.12em] text-white/40"
         style={{ fontFamily: 'var(--font-mr-ui)' }}>
         preview approximates the developed look
       </p>
+      {lightingNote && (
+        <p
+          className="mt-1 text-[10px] text-[#ffccce]"
+          style={{ fontFamily: 'var(--font-mr-body)' }}>
+          {lightingNote}
+        </p>
+      )}
 
       <div className="flex items-center justify-between px-6 pb-1 pt-3">
         <motion.div
@@ -410,7 +493,7 @@ export default function CameraScreen({
               {lastShot ? (
                 <motion.img
                   key={lastShot.id}
-                  src={lastShot.dataUrl}
+                  src={lastShot.url}
                   alt="Your last shot"
                   initial={
                     reduce
@@ -445,28 +528,23 @@ export default function CameraScreen({
 }
 
 /**
- * Develop the frame through the Wedding Film engine, then burn in the date
- * stamp (Wedding Film only) and the watermark, and encode. The engine's
- * pixel pass is the color truth; nothing here uses ctx.filter.
+ * Develop the frame through the MemoRoll film renderer, then burn in the
+ * date stamp (any film except None) and the watermark, and encode a JPEG
+ * blob. The renderer's pixel pass is the color truth; nothing here uses
+ * ctx.filter. Overlay sizes scale with the 960x1280 frame.
  */
-function developShot(
+async function developShot(
   stage: HTMLCanvasElement,
-  film: RollFilmId,
-  variant: WeddingVariant
-): string {
-  const { canvas } = developWeddingFilm(
-    stage,
-    FRAME_W,
-    FRAME_H,
-    film === 'none' ? 'none' : variant
-  );
+  film: SelectableFilmId
+): Promise<Blob> {
+  const { canvas } = developMemoRollFilm(stage, FRAME_W, FRAME_H, film);
   const ctx = canvas.getContext('2d', { willReadFrequently: true })!;
 
   ctx.shadowColor = 'rgba(0, 0, 0, 0.55)';
-  ctx.shadowBlur = 4;
+  ctx.shadowBlur = 8;
   ctx.textBaseline = 'alphabetic';
 
-  if (film !== 'none') {
+  if (filmStamps(film)) {
     // The stamp the design burns onto every developed photo (Figma 220:919):
     // white Homemade Apple in the bottom-right corner. The date is the
     // demo's fictional wedding day; only the time is real.
@@ -474,17 +552,23 @@ function developShot(
     const stamp = `${STAMP_DATE} ${at.getHours()}:${String(
       at.getMinutes()
     ).padStart(2, '0')}`;
-    ctx.font = `26px ${homemadeApple.style.fontFamily}, cursive`;
+    ctx.font = `52px ${homemadeApple.style.fontFamily}, cursive`;
     ctx.fillStyle = '#ffffff';
     ctx.textAlign = 'right';
-    ctx.fillText(stamp, FRAME_W - 16, FRAME_H - 20);
+    ctx.fillText(stamp, FRAME_W - 32, FRAME_H - 40);
   }
 
-  ctx.font = `500 15px ${poppins.style.fontFamily}, sans-serif`;
+  ctx.font = `500 30px ${poppins.style.fontFamily}, sans-serif`;
   ctx.fillStyle = 'rgba(255, 255, 255, 0.75)';
   ctx.textAlign = 'left';
-  ctx.fillText('memoify.live', 16, FRAME_H - 20);
+  ctx.fillText('memoify.live', 32, FRAME_H - 40);
   ctx.shadowBlur = 0;
 
-  return canvas.toDataURL('image/jpeg', 0.78);
+  return new Promise<Blob>((resolve, reject) => {
+    canvas.toBlob(
+      (blob) => (blob ? resolve(blob) : reject(new Error('JPEG encode failed'))),
+      'image/jpeg',
+      JPEG_QUALITY
+    );
+  });
 }

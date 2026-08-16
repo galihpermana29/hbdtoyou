@@ -153,12 +153,17 @@ What a Shot looks like is settled the moment it is taken and never edited afterw
 
 **Film**:
 The analog look a Shot develops through, chosen by the guest on the camera, per Shot, before it is taken.
-Two exist: Wedding Film, the consumer-negative-inspired look grounded in the reference study, and None, which is plain digital.
-Wedding Film develops through one of two lighting variants, Daylight or Party; Party is experimental and offered only off-production until approved.
-The camera opens on Wedding Film Daylight and stays on whatever the guest last chose.
+Six exist: Wedding Natural (the approved consumer-negative look), Soft Pastel, Clean Cool, Bold Color, Black & White, and None, which is plain digital.
+No Film carries synthetic grain; a look is tone and color only, and the low-light Party look stays unofferable until a representative input approves it.
+The camera opens on Wedding Natural and stays on whatever the guest last chose.
 The couple has no say: the choice moved from creator to guest and did not leave a switch behind.
-Shots developed under the retired hbd-xs7 roster remain what they are: the pixels were baked when they were taken.
+Shots developed under retired rosters remain what they are: the pixels were baked when they were taken.
 _Avoid_: filter, effect, film filter
+
+**Flash**, **Torch**:
+Two hardware lights on the camera, offered only when the phone truly has them and hidden otherwise.
+Flash is the synchronized burst fired with the shutter; Torch is the continuous lamp a guest switches on in the dark.
+Neither is the shutter's white-screen animation, which is feedback and lights nothing.
 
 **Date Stamp**:
 The date every Film burns into a Shot's corner, the way a point-and-shoot exposes it onto the negative.
