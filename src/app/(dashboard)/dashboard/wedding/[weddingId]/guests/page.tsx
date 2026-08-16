@@ -1,9 +1,7 @@
 import type { Metadata } from 'next';
 
 import GuestListScreen from './guest-list-screen';
-import InvitationRefusal, {
-  couldNotBeOpened,
-} from '../../invitation-refusal';
+import InvitationRefusal, { couldNotBeOpened } from '../../invitation-refusal';
 import { getOwnedWeddingInvitation } from '@/action/wedding-api';
 import { FlowLanguageProvider } from '@/components/forms/wedding/flow-language';
 import {

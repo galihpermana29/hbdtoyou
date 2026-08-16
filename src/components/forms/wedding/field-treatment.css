@@ -34,13 +34,17 @@
  * won focus would leave a field with no focus affordance.
  */
 .wedding-field-treatment:not(.ant-select):not(:focus-within),
-.ant-select-outlined.wedding-field-treatment:not(.ant-select-customize-input):not(.ant-select-focused)
+.ant-select-outlined.wedding-field-treatment:not(
+    .ant-select-customize-input
+  ):not(.ant-select-focused)
   .ant-select-selector {
   box-shadow: 0 1px 2px 0 rgba(16, 24, 40, 0.05);
 }
 
 .wedding-field-treatment:not(.ant-select):not(:hover):not(:focus-within),
-.ant-select-outlined.wedding-field-treatment:not(.ant-select-customize-input):not(:hover):not(.ant-select-focused)
+.ant-select-outlined.wedding-field-treatment:not(
+    .ant-select-customize-input
+  ):not(:hover):not(.ant-select-focused)
   .ant-select-selector {
   border-color: #d0d5dd;
 }

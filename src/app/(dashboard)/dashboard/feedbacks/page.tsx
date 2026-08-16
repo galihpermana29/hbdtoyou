@@ -1,39 +1,39 @@
-import { getListFeedbacks } from "@/action/user-api";
-import { ErrorBoundaryCustom } from "@/components/ui/error-boundary";
-import { Table } from "antd";
+import { getListFeedbacks } from '@/action/user-api';
+import { ErrorBoundaryCustom } from '@/components/ui/error-boundary';
+import { Table } from 'antd';
 
 const getData = async () => {
-  const dx = await getListFeedbacks()
-  return dx
-}
+  const dx = await getListFeedbacks();
+  return dx;
+};
 
-
-const columns = [{
-  title: 'Email',
-  dataIndex: 'email',
-  key: 'email',
-},
-{
-  title: 'Type',
-  dataIndex: 'type',
-  key: 'type',
-},
-{
-  title: 'Message',
-  dataIndex: 'message',
-  key: 'message',
-},
-{
-  title: 'Date Send',
-  dataIndex: 'date',
-  key: 'date',
-}
-]
+const columns = [
+  {
+    title: 'Email',
+    dataIndex: 'email',
+    key: 'email',
+  },
+  {
+    title: 'Type',
+    dataIndex: 'type',
+    key: 'type',
+  },
+  {
+    title: 'Message',
+    dataIndex: 'message',
+    key: 'message',
+  },
+  {
+    title: 'Date Send',
+    dataIndex: 'date',
+    key: 'date',
+  },
+];
 const FeedbackPage = async () => {
   const data = await getData();
 
   if (!data.success) {
-    return <ErrorBoundaryCustom />
+    return <ErrorBoundaryCustom />;
   }
 
   return (

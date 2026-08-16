@@ -40,12 +40,11 @@ const DetailContentModal = ({ content }: { content: IContent }) => {
             Your gift is ready!
           </h1>
           <p className="text-[#7B7B7B] font-[400] text-[16px] my-[5px]">
-            You can share your own version of website with your friends or someone
-            you love. Thank you for using Memoify.
+            You can share your own version of website with your friends or
+            someone you love. Thank you for using Memoify.
             <br />
             <br />
-            Feel free to tag and follow us
-            on instagram @memoify.live
+            Feel free to tag and follow us on instagram @memoify.live
           </p>
         </div>
         <div>
@@ -72,7 +71,6 @@ const DetailContentModal = ({ content }: { content: IContent }) => {
             Open Gift
           </Button>
         </div>
-
       </div>
     </div>
   );

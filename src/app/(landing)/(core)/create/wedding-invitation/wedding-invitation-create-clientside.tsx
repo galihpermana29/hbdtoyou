@@ -76,7 +76,10 @@ const OWN_INVITATIONS_ROUTE = '/dashboard/wedding';
 /**
  * An invitation this flow was opened on, rather than one it is about to make.
  *
- * What `/dashboard/wedding/{uuid}/edit` hands down, as it was stored.
+ * What `/dashboard/wedding/{uuid}/edit` hands down - and what the flow's own
+ * page hands down when a couple returns to it with an unpublished invitation
+ * still going, so they resume that one rather than starting a silent second.
+ * As it was stored, either way.
  *
  * The record rather than the form values it becomes, because the screen handing
  * this over renders on the server and `contentToFormValues` produces a Dayjs for
@@ -144,6 +147,9 @@ export default function WeddingInvitationCreateClientside({
   const { contextHolder, openNotification } = useCreateContent();
   const [form] = useForm<WeddingInvitationFormValues>();
 
+  /** Whether this flow draws the navigation around itself, or the page did. */
+  const isOwnChrome = chrome === 'site';
+
   /**
    * The saved invitation as the form's own answers.
    *
@@ -204,11 +210,13 @@ export default function WeddingInvitationCreateClientside({
    * the browser until then - which is a visitor with no account, who has nothing
    * to save a wedding to either.
    *
-   * Not on an invitation opened again. Its Guest List has its own screen in
-   * the dashboard and the step here does not draw the card, so reading the
-   * list back would fetch every guest to show nobody.
+   * Not on the dashboard. There an invitation's Guest List has its own screen
+   * and the step here does not draw the card, so reading the list back would
+   * fetch every guest to show nobody. The flow at its own address always
+   * reads it, including on an invitation it resumed: the couple is still
+   * mid-creation, and this step is the one place they can hand over a list.
    */
-  const guests = useGuestRoster(opened ? null : weddingId);
+  const guests = useGuestRoster(isOwnChrome ? weddingId : null);
 
   const brideNickname = useWatch('brideName', form);
   const groomNickname = useWatch('groomName', form);
@@ -295,9 +303,6 @@ export default function WeddingInvitationCreateClientside({
 
     return () => clearTimeout(settling);
   }, [invalidFields]);
-  /** Whether this flow draws the navigation around itself, or the page did. */
-  const isOwnChrome = chrome === 'site';
-
   /**
    * Where the first step's way back goes.
    *
@@ -480,14 +485,20 @@ export default function WeddingInvitationCreateClientside({
         <div className="mx-auto flex min-h-screen max-w-6xl flex-col px-[20px] py-[30px] pb-[50px] 2xl:max-w-7xl">
           {isOwnChrome ? <CreateFlowBreadcrumb /> : null}
 
+          {/* The dashboard's door is the one that says Edit. The flow at its
+              own address is creating even when it resumes an invitation the
+              couple already started - what they are finishing is still the
+              making of it. */}
           <div className={isOwnChrome ? 'mt-[32px]' : undefined}>
             <h1 className="text-[18px] font-[600] leading-[28px] text-[#1B1B1B]">
-              {opened ? 'Edit Wedding Invitation' : 'Create Wedding Invitation'}
+              {isOwnChrome
+                ? 'Create Wedding Invitation'
+                : 'Edit Wedding Invitation'}
             </h1>
             <p className="mt-[4px] text-[14px] font-[400] leading-[24px] text-[#7B7B7B]">
-              {opened
-                ? 'Change anything you have already written, and keep it with the same invitation'
-                : 'Create memorable wedding invitation for you & your special person’s big day'}
+              {isOwnChrome
+                ? 'Create memorable wedding invitation for you & your special person’s big day'
+                : 'Change anything you have already written, and keep it with the same invitation'}
             </p>
           </div>
 
@@ -675,7 +686,7 @@ export default function WeddingInvitationCreateClientside({
               guestListProblem={guests.problem}
               isGuestListBusy={guests.isBusy}
               isAlreadyPublished={opened?.isPublished ?? false}
-              isOpenedAgain={Boolean(opened)}
+              guestListLivesElsewhere={!isOwnChrome}
               onPreviousStep={() => goToStep('Fill in the details & story')}
               onConfirm={confirmCreate}
               onSaveAsDraft={saveAsDraft}

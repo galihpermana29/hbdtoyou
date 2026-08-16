@@ -117,7 +117,10 @@ export default function FlowMarkedField({
   return (
     <div className={flowFieldParts}>
       {label ? (
-        <label id={labelId} htmlFor={fieldId} className={`${flowLabel}${required ? ' wedding-required-label' : ''}`}>
+        <label
+          id={labelId}
+          htmlFor={fieldId}
+          className={`${flowLabel}${required ? ' wedding-required-label' : ''}`}>
           {label}
         </label>
       ) : null}

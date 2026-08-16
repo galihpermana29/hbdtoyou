@@ -1,8 +1,6 @@
 import type { Metadata } from 'next';
 
-import InvitationRefusal, {
-  couldNotBeOpened,
-} from '../../invitation-refusal';
+import InvitationRefusal, { couldNotBeOpened } from '../../invitation-refusal';
 import WeddingInvitationCreateClientside from '@/app/(landing)/(core)/create/wedding-invitation/wedding-invitation-create-clientside';
 import { getOwnedWeddingInvitation } from '@/action/wedding-api';
 import { FlowLanguageProvider } from '@/components/forms/wedding/flow-language';

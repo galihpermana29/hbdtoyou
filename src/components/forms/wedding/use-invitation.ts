@@ -114,19 +114,9 @@ import {
   formValuesToInvitationPayload,
   invitationSlugFrom,
   namesTheCouple,
+  WEDDING_TEMPLATE_SLUG,
   type WeddingInvitationFormValues,
 } from './wedding-invitation-types';
-
-/**
- * The backend template this flow fills in, found by its slug.
- *
- * By slug rather than by the UUID itself, because the UUID differs between
- * environments and a literal one would save into whichever wedding happened to
- * carry that id elsewhere. This is the same lookup the photobox flow does for
- * the same reason, and it goes away when a couple can choose between wedding
- * templates and the choice carries the id.
- */
-const WEDDING_TEMPLATE_SLUG = 'wedding-inv';
 
 /** What became of a save. */
 export type SaveOutcome =

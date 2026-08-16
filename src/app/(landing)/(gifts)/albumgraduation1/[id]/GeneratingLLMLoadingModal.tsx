@@ -16,7 +16,9 @@ const thinkingSteps = [
   'Almost there',
 ];
 
-const GeneratingLLMLoadingModal: React.FC<GeneratingLLMLoadingModalProps> = ({ isOpen }) => {
+const GeneratingLLMLoadingModal: React.FC<GeneratingLLMLoadingModalProps> = ({
+  isOpen,
+}) => {
   const [dots, setDots] = useState('');
   const [currentStep, setCurrentStep] = useState(0);
 
@@ -50,8 +52,7 @@ const GeneratingLLMLoadingModal: React.FC<GeneratingLLMLoadingModalProps> = ({ i
       closable={false}
       centered
       width={400}
-      maskClosable={false}
-    >
+      maskClosable={false}>
       <div className="flex flex-col items-center justify-center">
         <div className="relative w-[200px] h-[200px] mb-4">
           <Image
@@ -62,9 +63,7 @@ const GeneratingLLMLoadingModal: React.FC<GeneratingLLMLoadingModalProps> = ({ i
             priority
           />
         </div>
-        <Text className="mt-6 !text-xl !font-medium">
-          Generating{dots}
-        </Text>
+        <Text className="mt-6 !text-xl !font-medium">Generating{dots}</Text>
         <div className="h-6 flex items-center justify-center">
           <Text className="!text-sm !text-gray-500 animate-pulse">
             {thinkingSteps[currentStep]}

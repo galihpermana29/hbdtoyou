@@ -2,8 +2,8 @@
 
 import { useEffect, useState, useCallback, useRef } from 'react';
 import { useRouter } from 'next/navigation';
-import NavigationBar from "@/components/ui/navbar";
-import { Button, message } from "antd";
+import NavigationBar from '@/components/ui/navbar';
+import { Button, message } from 'antd';
 import { paymentPaypalCapture } from '@/action/user-api';
 
 interface PaypalPaymentData {
@@ -45,7 +45,7 @@ const PaymentPaypalSuccess = () => {
         // Call the capture API
         const response = await paymentPaypalCapture({
           order_id: paymentData.order_id,
-          payment_id: paymentData.payment_id
+          payment_id: paymentData.payment_id,
         });
 
         if (response.success) {
@@ -81,7 +81,9 @@ const PaymentPaypalSuccess = () => {
       // Clean up fallback timeout if component unmounts
       return () => clearTimeout(fallbackTimeout);
     } catch (error) {
-      messageApi.error('Failed to redirect. Please click the button to go to dashboard.');
+      messageApi.error(
+        'Failed to redirect. Please click the button to go to dashboard.'
+      );
       setIsRedirecting(false);
       // Focus on the dashboard button if redirect fails
       if (dashboardBtnRef.current) {
@@ -125,32 +127,34 @@ const PaymentPaypalSuccess = () => {
       <div
         className="flex flex-col items-center justify-start min-h-screen py-[30px]"
         role="main"
-        aria-labelledby="payment-success-title"
-      >
+        aria-labelledby="payment-success-title">
         <div className="mx-auto max-w-6xl 2xl:max-w-7xl px-[20px] flex-1 w-full">
           <div className="w-full md:max-w-[50%]">
-            <h1 id="payment-success-title" className="text-[22px] md:text-[35px] font-bold">
+            <h1
+              id="payment-success-title"
+              className="text-[22px] md:text-[35px] font-bold">
               Payment Verified!
             </h1>
 
             <p className="mt-5">
-              We are welcoming you to our premium member account. You can
-              enjoy unlimited image storage, unlimited songs library,
-              unlimited upload size, unlimited access to templates, unlimited
-              photobox frames, and 6 credit to use templates.
+              We are welcoming you to our premium member account. You can enjoy
+              unlimited image storage, unlimited songs library, unlimited upload
+              size, unlimited access to templates, unlimited photobox frames,
+              and 6 credit to use templates.
             </p>
 
             {/* Countdown and redirect status */}
             <div className="mt-5">
-              <p
-                className="font-semibold text-[#E34013]"
-                aria-live="polite"
-              >
+              <p className="font-semibold text-[#E34013]" aria-live="polite">
                 {isRedirecting ? (
-                  <span className="flex items-center">Redirecting to dashboard...
+                  <span className="flex items-center">
+                    Redirecting to dashboard...
                   </span>
                 ) : (
-                  <>Redirecting to dashboard in <span>{countdown}</span> seconds...</>
+                  <>
+                    Redirecting to dashboard in <span>{countdown}</span>{' '}
+                    seconds...
+                  </>
                 )}
               </p>
             </div>
@@ -164,8 +168,7 @@ const PaymentPaypalSuccess = () => {
                 loading={isRedirecting}
                 disabled={isRedirecting}
                 aria-label="Go to Dashboard"
-                className="!bg-[#E34013] !text-white !rounded-[8px] !text-[16px] !font-[600] !h-[40px] !w-[170px]"
-              >
+                className="!bg-[#E34013] !text-white !rounded-[8px] !text-[16px] !font-[600] !h-[40px] !w-[170px]">
                 Go to Dashboard
               </Button>
             </div>

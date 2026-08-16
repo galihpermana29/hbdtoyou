@@ -19,8 +19,7 @@ I carry you with me in every heartbeat.
 Forever yours,`,
   voiceNoteUrl:
     'https://res.cloudinary.com/dztygf08a/video/upload/v1775312959/Sal_Priadi_-_Mencintaimu_Official_Audio_afbgj8.mp3',
-  voiceNoteQuote:
-    '"You feel like home to me, in a way I can\'t explain."',
+  voiceNoteQuote: '"You feel like home to me, in a way I can\'t explain."',
   videoUrl:
     'https://res.cloudinary.com/dztygf08a/video/upload/v1775396289/cutted_vgnc3x.mp4',
   memories: [

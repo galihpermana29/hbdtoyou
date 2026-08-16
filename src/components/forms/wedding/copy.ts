@@ -125,7 +125,10 @@ export const FLOW_COPY = {
     en: 'The year when you first met',
     id: 'Tahun kalian pertama bertemu',
   },
-  chapterMetStory: { en: 'How you first met?', id: 'Bagaimana kalian bertemu?' },
+  chapterMetStory: {
+    en: 'How you first met?',
+    id: 'Bagaimana kalian bertemu?',
+  },
   chapterCloserYear: {
     en: 'The year you both getting closer',
     id: 'Tahun kalian semakin dekat',
@@ -309,14 +312,20 @@ export const FLOW_COPY = {
     en: 'Customize your invitation',
     id: 'Sesuaikan undanganmu',
   },
-  customDomain: { en: 'Custom Your Web Domain', id: 'Atur Alamat Web Undangan' },
+  customDomain: {
+    en: 'Custom Your Web Domain',
+    id: 'Atur Alamat Web Undangan',
+  },
   greetingMessage: {
     en: 'Invitation Greeting Message',
     id: 'Pesan Sambutan Undangan',
   },
   addGuestList: { en: 'Add Guest List', id: 'Tambah Daftar Tamu' },
   guestList: { en: 'Guest List', id: 'Daftar Tamu' },
-  uploadCsvFormat: { en: 'Upload in format .CSV', id: 'Unggah dalam format .CSV' },
+  uploadCsvFormat: {
+    en: 'Upload in format .CSV',
+    id: 'Unggah dalam format .CSV',
+  },
 } satisfies Record<string, Phrase>;
 
 export type FlowCopyKey = keyof typeof FLOW_COPY;

@@ -91,7 +91,9 @@ export default function FlowTextField({
 
   return (
     <div className={flowFieldParts}>
-      <label htmlFor={fieldId} className={`${flowLabel}${required ? ' wedding-required-label' : ''}`}>
+      <label
+        htmlFor={fieldId}
+        className={`${flowLabel}${required ? ' wedding-required-label' : ''}`}>
         {label}
       </label>
       {rows === undefined ? (

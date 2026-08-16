@@ -364,12 +364,12 @@ const PageThree = ({
       }
     }
   };
-  
+
   // Mouse event handler for drag start
   const handleCanvasMouseDown = (e: React.MouseEvent<HTMLCanvasElement>) => {
     handleDragStart(e.clientX, e.clientY);
   };
-  
+
   // Touch event handler for drag start
   const handleCanvasTouchStart = (e: React.TouchEvent<HTMLCanvasElement>) => {
     if (e.touches.length === 1) {
@@ -402,12 +402,12 @@ const PageThree = ({
     setDragStartX(x);
     setDragStartY(y);
   };
-  
+
   // Mouse event handler for drag move
   const handleCanvasMouseMove = (e: React.MouseEvent<HTMLCanvasElement>) => {
     handleDragMove(e.clientX, e.clientY);
   };
-  
+
   // Touch event handler for drag move
   const handleCanvasTouchMove = (e: React.TouchEvent<HTMLCanvasElement>) => {
     if (isDragging && e.touches.length === 1) {
@@ -423,7 +423,7 @@ const PageThree = ({
     setIsDragging(false);
     setActiveDragFrame(-1);
   };
-  
+
   // Mouse event handlers for drag end
   const handleCanvasMouseUp = () => {
     handleDragEnd();
@@ -432,12 +432,12 @@ const PageThree = ({
   const handleCanvasMouseLeave = () => {
     handleDragEnd();
   };
-  
+
   // Touch event handlers for drag end
   const handleCanvasTouchEnd = () => {
     handleDragEnd();
   };
-  
+
   const handleCanvasTouchCancel = () => {
     handleDragEnd();
   };
@@ -634,7 +634,8 @@ const PageThree = ({
             <p className="font-medium">Instructions:</p>
             <ul className="list-disc pl-5 mt-1">
               <li>
-                Click and drag (or touch and drag on mobile) to position images anywhere on the page
+                Click and drag (or touch and drag on mobile) to position images
+                anywhere on the page
               </li>
               <li>Use the + and - buttons to zoom in/out</li>
               <li>Click Reset Position to return to default position</li>

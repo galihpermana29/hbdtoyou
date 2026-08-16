@@ -103,7 +103,8 @@ const LockScreen = ({
                 : 'text-white'
             }`}>
             <h2 className="text-2xl font-semibold">{title}</h2>
-            <p className={`text-sm ${subtle ? 'text-gray-600' : 'text-gray-200'}`}>
+            <p
+              className={`text-sm ${subtle ? 'text-gray-600' : 'text-gray-200'}`}>
               {message}
             </p>
             <div className="flex items-center justify-center gap-2">

@@ -75,8 +75,7 @@ export default function VinylLanding({
           initial={{ opacity: 0, y: -20 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.8, delay: 0.3 }}
-          className="font-serif text-3xl italic text-white md:text-5xl"
-        >
+          className="font-serif text-3xl italic text-white md:text-5xl">
           Dear {recipientName}
         </motion.h1>
 
@@ -87,8 +86,7 @@ export default function VinylLanding({
               style={{ zIndex: stage === 3 ? 20 : 5 }}
               animate={discAnimations[stage]}
               transition={discTransitions[stage]}
-              onAnimationComplete={handleAnimationComplete}
-            >
+              onAnimationComplete={handleAnimationComplete}>
               <Image
                 src={vinylDisk}
                 alt="Vinyl disc"
@@ -103,8 +101,7 @@ export default function VinylLanding({
               style={{ zIndex: 10 }}
               initial={{ opacity: 0, scale: 0.9 }}
               animate={{ opacity: 1, scale: 1 }}
-              transition={{ duration: 0.6, delay: 0.2 }}
-            >
+              transition={{ duration: 0.6, delay: 0.2 }}>
               <Image
                 src={vinylCover}
                 alt="Vinyl sleeve"
@@ -124,23 +121,19 @@ export default function VinylLanding({
               exit={{ opacity: 0, y: 10 }}
               transition={{ duration: 0.6, delay: 0.5 }}
               onClick={handleOpen}
-              className="cursor-pointer border-b border-white/60 pb-1 text-lg tracking-wide text-white/90 transition-colors hover:text-white hover:border-white md:text-xl"
-            >
+              className="cursor-pointer border-b border-white/60 pb-1 text-lg tracking-wide text-white/90 transition-colors hover:text-white hover:border-white md:text-xl">
               Click to open
             </motion.button>
           )}
         </AnimatePresence>
 
-        {!ctaVisible && stage < 3 && (
-          <div className="h-[28px] md:h-[32px]" />
-        )}
+        {!ctaVisible && stage < 3 && <div className="h-[28px] md:h-[32px]" />}
 
         {stage === 3 && !onComplete && (
           <motion.p
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
-            className="text-sm text-white/60"
-          >
+            className="text-sm text-white/60">
             Animation complete
           </motion.p>
         )}

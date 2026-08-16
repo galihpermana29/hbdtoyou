@@ -94,9 +94,9 @@ const ProgramPage = () => {
           <p className="text-gray-600 text-[16px] leading-relaxed">
             The <strong>Memoify AU Program</strong> is a dedicated initiative
             designed to support digital storytellers (AU Authors) on Twitter/X
-            and TikTok. If you frequently use digital gifting or
-            &ldquo;memory boxes&rdquo; as plot devices in your stories, we
-            want to help you make them more immersive for your readers.
+            and TikTok. If you frequently use digital gifting or &ldquo;memory
+            boxes&rdquo; as plot devices in your stories, we want to help you
+            make them more immersive for your readers.
           </p>
         </motion.div>
       </section>

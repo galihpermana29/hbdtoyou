@@ -1,23 +1,23 @@
-"use client"
+'use client';
 
-import React, { useEffect, useRef, useState } from "react"
-import { InertiaOptions, motion } from "motion/react"
+import React, { useEffect, useRef, useState } from 'react';
+import { InertiaOptions, motion } from 'motion/react';
 
 type DragElementsProps = {
-  children: React.ReactNode
+  children: React.ReactNode;
   dragElastic?:
     | number
     | { top?: number; left?: number; right?: number; bottom?: number }
-    | boolean
+    | boolean;
   dragConstraints?:
     | { top?: number; left?: number; right?: number; bottom?: number }
-    | React.RefObject<Element>
-  dragMomentum?: boolean
-  dragTransition?: InertiaOptions
-  dragPropagation?: boolean
-  selectedOnTop?: boolean
-  className?: string
-}
+    | React.RefObject<Element>;
+  dragMomentum?: boolean;
+  dragTransition?: InertiaOptions;
+  dragPropagation?: boolean;
+  selectedOnTop?: boolean;
+  className?: string;
+};
 
 const DragElements: React.FC<DragElementsProps> = ({
   children,
@@ -29,28 +29,28 @@ const DragElements: React.FC<DragElementsProps> = ({
   selectedOnTop = true,
   className,
 }) => {
-  const constraintsRef = useRef<HTMLDivElement>(null)
-  const [zIndices, setZIndices] = useState<number[]>([])
+  const constraintsRef = useRef<HTMLDivElement>(null);
+  const [zIndices, setZIndices] = useState<number[]>([]);
 
-  const [isDragging, setIsDragging] = useState(false)
+  const [isDragging, setIsDragging] = useState(false);
 
   useEffect(() => {
     setZIndices(
       Array.from({ length: React.Children.count(children) }, (_, i) => i)
-    )
-  }, [children])
+    );
+  }, [children]);
 
   const bringToFront = (index: number) => {
     if (selectedOnTop) {
       setZIndices((prevIndices) => {
-        const newIndices = [...prevIndices]
-        const currentIndex = newIndices.indexOf(index)
-        newIndices.splice(currentIndex, 1)
-        newIndices.push(index)
-        return newIndices
-      })
+        const newIndices = [...prevIndices];
+        const currentIndex = newIndices.indexOf(index);
+        newIndices.splice(currentIndex, 1);
+        newIndices.push(index);
+        return newIndices;
+      });
     }
-  }
+  };
 
   return (
     <div ref={constraintsRef} className={`relative w-full h-full ${className}`}>
@@ -66,21 +66,20 @@ const DragElements: React.FC<DragElementsProps> = ({
           style={{
             zIndex: zIndices.indexOf(index),
 
-            cursor: isDragging ? "grabbing" : "grab",
+            cursor: isDragging ? 'grabbing' : 'grab',
           }}
           onDragStart={() => {
-            bringToFront(index)
-            setIsDragging(true)
+            bringToFront(index);
+            setIsDragging(true);
           }}
           onDragEnd={() => setIsDragging(false)}
-          whileDrag={{ cursor: "grabbing" }}
-          className={"absolute"}
-        >
+          whileDrag={{ cursor: 'grabbing' }}
+          className={'absolute'}>
           {child}
         </motion.div>
       ))}
     </div>
-  )
-}
+  );
+};
 
-export default DragElements
+export default DragElements;

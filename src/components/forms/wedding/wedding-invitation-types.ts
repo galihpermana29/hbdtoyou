@@ -375,7 +375,8 @@ export function joinParents(father?: string, mother?: string): string {
  * empty answer is the screen's to decide and say.
  */
 export function coupleNamedIn(
-  content: Pick<WeddingTemplate1Content, 'brideName' | 'groomName'> | null | undefined
+  content:
+    Pick<WeddingTemplate1Content, 'brideName' | 'groomName'> | null | undefined
 ): string {
   return [content?.brideName, content?.groomName]
     .map((name) => name?.trim() ?? '')
@@ -656,6 +657,20 @@ export function formValuesToInvitationPayload(
 }
 
 /**
+ * The backend template every wedding invitation is made from, found by its
+ * slug.
+ *
+ * By slug rather than by the UUID, because the UUID differs between
+ * environments and a literal one would touch whichever wedding happened to
+ * carry that id elsewhere - the same lookup the photobox flow does, for the
+ * same reason. One spelling, because the flow that saves under this template,
+ * the listing that filters to it and the search that resumes an unpublished
+ * one must all agree: a disagreement is an invitation saved under a template
+ * nothing can find again.
+ */
+export const WEDDING_TEMPLATE_SLUG = 'wedding-inv';
+
+/**
  * Where a saved record carries the identifier of the invitation holding it.
  *
  * A couple's own invitations cannot be listed from the wedding endpoints: there
@@ -769,7 +784,9 @@ export function weddingContentFrom(
 type StoredRecord = WeddingTemplate1Content & { backgroundMusicId?: string };
 
 /** The playable track a stored record carries, however old the record is. */
-function storedBackgroundTrack(record: StoredRecord): WeddingBackgroundTrack | null {
+function storedBackgroundTrack(
+  record: StoredRecord
+): WeddingBackgroundTrack | null {
   const track = record.backgroundTrack;
   if (
     track &&

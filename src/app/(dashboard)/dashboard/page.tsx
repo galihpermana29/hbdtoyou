@@ -6,7 +6,13 @@ import {
 import { isAdminEmail } from '@/lib/admin';
 import { mapContentToCard } from '@/lib/utils';
 import { getSession } from '@/store/get-set-session';
-import { Banknote, Camera, CreditCard, Megaphone, UserRoundPlus } from 'lucide-react';
+import {
+  Banknote,
+  Camera,
+  CreditCard,
+  Megaphone,
+  UserRoundPlus,
+} from 'lucide-react';
 import Link from 'next/link';
 import CardClient from './view/container/CardClient';
 import DashboardContentContainer from './view/container/DashboardContentContainer';
@@ -22,8 +28,8 @@ const DashboardPage = async () => {
   );
   const mappedData = data.success
     ? mapContentToCard(data.data, 'dashboard').filter(
-      (show) => show && show?.jumbotronImage && show?.title
-    )
+        (show) => show && show?.jumbotronImage && show?.title
+      )
     : [];
 
   const dataStats = await getContentStatsByUserId();
@@ -47,7 +53,7 @@ const DashboardPage = async () => {
               </div>
               <div className="flex-1 min-w-0">
                 <p className="text-[14px] md:text-[15px] text-[#1B1B1B]">
-                  <span className="font-bold">Announcement!</span>{' '} <br />
+                  <span className="font-bold">Announcement!</span> <br />
                   If you&apos;re an AU author on Twitter/X or TikTok, join our{' '}
                   <span className="font-semibold text-[#E34013]">
                     Memoify AU Program

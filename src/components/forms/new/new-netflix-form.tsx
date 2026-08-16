@@ -61,7 +61,6 @@ const NewNetflixForm = ({
       title: val?.title2 ? val?.title2 : '',
       caption: val?.caption,
 
-
       date_scheduled: val?.date_scheduled
         ? dayjs(val?.date_scheduled).format('DD/MM/YYYY h:mm A Z')
         : null,

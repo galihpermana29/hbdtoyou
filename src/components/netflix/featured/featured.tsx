@@ -9,6 +9,7 @@ import { Tour, TourProps } from 'antd';
 import { usePathname, useRouter, useSearchParams } from 'next/navigation';
 import TruncateText from '@/components/newlanding/TruncateText';
 import { addLineBreaksEveryThreeSentences } from '@/lib/utils';
+import { WIDYA_FALLBACK_PARAGRAPH } from '@/lib/widya-fallback';
 import noImage from '@/assets/empty.png';
 export default function Featured({
   title,
@@ -127,7 +128,7 @@ export default function Featured({
                 dangerouslySetInnerHTML={{
                   __html: modalContent
                     ? addLineBreaksEveryThreeSentences(modalContent)
-                    : 'Hi Widya, I`ve been thinking about what to write for your birthday, and there are a few things I want to share with you. Even though we`ve only known each other for a couple of weeks, it feels like much longer because we talk so much - every night, every day. The more we talk, the more I find myself getting deeply interested in you.',
+                    : WIDYA_FALLBACK_PARAGRAPH,
                 }}></p>
             </div>
           </div>

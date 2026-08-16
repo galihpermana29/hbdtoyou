@@ -128,7 +128,7 @@ export default function VenueDetailsSection({
               className="!mb-0"
               rules={requiredText(copy, 'receptionStart')}>
               <FlowMarkedField
-            required
+                required
                 name={copy.receptionStart}
                 mark={<Clock size={20} aria-hidden="true" />}
                 placeholder={copy.receptionStart}
@@ -142,7 +142,7 @@ export default function VenueDetailsSection({
               className="!mb-0"
               rules={requiredText(copy, 'receptionEnd')}>
               <FlowMarkedField
-            required
+                required
                 name={copy.receptionEnd}
                 mark={<Clock size={20} aria-hidden="true" />}
                 placeholder={copy.receptionEnd}
@@ -170,9 +170,11 @@ export default function VenueDetailsSection({
         <Form.Item
           name="mapsUrl"
           className="!mb-0"
-          rules={requiredMapEmbed(copy, (value) => mapEmbedFrom(value) !== null)}>
-          <WeddingLocationField
-            required />
+          rules={requiredMapEmbed(
+            copy,
+            (value) => mapEmbedFrom(value) !== null
+          )}>
+          <WeddingLocationField required />
         </Form.Item>
       </div>
     </CreateFlowSection>

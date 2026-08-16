@@ -140,7 +140,10 @@ export default function GiftRegistrySection({
           className="!mb-0"
           rules={isOn ? requiredText(copy, 'accountNumber') : []}>
           <FlowTextField
-            required={isOn} label={copy.accountNumber} placeholder="3331 0908 1766" />
+            required={isOn}
+            label={copy.accountNumber}
+            placeholder="3331 0908 1766"
+          />
         </Form.Item>
 
         <Form.Item

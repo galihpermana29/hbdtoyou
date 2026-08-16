@@ -1,14 +1,7 @@
 'use client';
 
 import { Google } from '@mui/icons-material';
-import {
-  Avatar,
-  Button,
-  Cascader,
-  Dropdown,
-  MenuProps,
-  message,
-} from 'antd';
+import { Avatar, Button, Cascader, Dropdown, MenuProps, message } from 'antd';
 import Link from 'next/link';
 import { useEffect, useState } from 'react';
 import { signIn } from 'next-auth/react';
@@ -531,11 +524,15 @@ const NavigationBar = () => {
             <Dropdown menu={{ items }}>
               <div className="flex items-center gap-2 cursor-pointer">
                 <Avatar size={40}>{userProfile?.fullname.charAt(0)}</Avatar>
-                <div className='hidden md:block'>
-                  <p className="font-bold text-[14px]">{userProfile?.fullname}</p>
-                  <p className="text-[#7B7B7B] text-[12px]">{userProfile?.email}</p>
+                <div className="hidden md:block">
+                  <p className="font-bold text-[14px]">
+                    {userProfile?.fullname}
+                  </p>
+                  <p className="text-[#7B7B7B] text-[12px]">
+                    {userProfile?.email}
+                  </p>
                 </div>
-                <ChevronDown size={16} className='hidden md:block' />
+                <ChevronDown size={16} className="hidden md:block" />
               </div>
             </Dropdown>
           )}
