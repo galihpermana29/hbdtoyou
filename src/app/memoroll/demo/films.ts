@@ -1,163 +1,81 @@
 /**
- * The films a Shot can develop through (hbd-xs7). The guest picks one on the
- * camera, per shot, before the shutter - the couple has no say. Each recipe
- * imitates the real stock it is named after; ADR 0006 is why the look bakes
- * into the JPEG at capture instead of riding along as metadata.
+ * The MemoRoll film roster (hbd-15j integration).
+ *
+ * Two visible films: Wedding Film (the engine in src/lib/wedding-film.ts,
+ * per docs/research/memoroll-film-look.md) and None. The fifteen legacy
+ * looks of hbd-xs7 are gone from the selector - their recipes died with
+ * ctx.filter on iPhones (report §0) - but shots they already developed
+ * stay valid forever: pixels are baked (ADR 0006) and Shot.film is a label.
+ *
+ * Wedding Film has two processing variants. Daylight is provisionally
+ * approved. Party is experimental - it lacks a representative low-light
+ * phone input - so it is exposed only off-production for real-device
+ * testing and never ships to production until explicitly approved.
  */
 
-export interface Film {
-  id: string;
-  /** The stock or device the look imitates, shown on the chip. */
+import type { WeddingFilmVariant } from '@/lib/wedding-film';
+
+export type RollFilmId = 'wedding' | 'none';
+export type WeddingVariant = Exclude<WeddingFilmVariant, 'none'>;
+
+export interface RollFilm {
+  id: RollFilmId;
+  /** Chip label on the camera. */
   name: string;
-  /** CSS/canvas filter chain; empty means plain digital. */
-  filter: string;
-  /** 0..1 edge-darkening strength drawn after the filter pass. */
-  vignette: number;
-  /** A translucent color washed over the whole frame (800T cool, 600 fade). */
-  wash?: string;
-  /** 0..1 monochrome grain strength. */
-  grain?: number;
-  /** 0..1 alpha of a blurred copy over the sharp frame (toy-cam dreaminess). */
-  softFocus?: number;
-  /** 0..1 alpha of a bright blurred screen pass (on-camera flash bloom). */
-  bloom?: number;
-  /** Warm gradient leak screened in from a random edge, one corner per shot. */
-  lightLeak?: boolean;
-  /** Camcorder scan lines plus a hue-shifted ghost for the color bleed. */
-  vhs?: boolean;
 }
 
-export const FILMS: Film[] = [
-  {
-    // The drugstore roll: warm, golden, forgiving.
-    id: 'gold200',
-    name: 'Kodak Gold 200',
-    filter: 'sepia(0.25) saturate(1.12) contrast(1.05) brightness(1.03)',
-    vignette: 0.25,
-  },
-  {
-    // Soft pastel warmth, low contrast, flattering skin.
-    id: 'portra400',
-    name: 'Portra 400',
-    filter: 'sepia(0.12) saturate(0.88) contrast(0.92) brightness(1.05)',
-    vignette: 0.15,
-  },
-  {
-    // Cooler, green-teal cast, punchy mids.
-    id: 'superia400',
-    name: 'Superia 400',
-    filter: 'hue-rotate(-8deg) saturate(1.08) contrast(1.06)',
-    vignette: 0.2,
-  },
-  {
-    // Tungsten night film: cool blue, deep contrast. The real stock's red
-    // halation glow has no honest canvas approximation, so it is left out.
-    id: 'cinestill800t',
-    name: 'CineStill 800T',
-    filter: 'saturate(0.85) contrast(1.12) brightness(0.96)',
-    vignette: 0.3,
-    wash: 'rgba(56, 82, 160, 0.16)',
-  },
-  {
-    // Washed, faded, creamy highlights, heavy vignette.
-    id: 'polaroid600',
-    name: 'Polaroid 600',
-    filter: 'saturate(0.72) contrast(0.82) brightness(1.1)',
-    vignette: 0.45,
-    wash: 'rgba(255, 248, 238, 0.16)',
-  },
-  {
-    // Cross-processed slide film: oversaturated, shifted, dark corners.
-    id: 'lomoxpro',
-    name: 'Lomo X-Pro',
-    filter: 'saturate(1.45) contrast(1.25) hue-rotate(-4deg)',
-    vignette: 0.55,
-  },
-  {
-    // Black & white, grainy, high contrast.
-    id: 'hp5',
-    name: 'Ilford HP5',
-    filter: 'grayscale(1) contrast(1.15)',
-    vignette: 0.3,
-    grain: 0.14,
-  },
-  // The Dazz-inspired device looks (hbd-xs7 follow-up): each imitates a
-  // device category rather than a stock, and leans on texture passes -
-  // leaks, bloom, soft focus, scan lines - more than on color alone.
-  {
-    // Warm consumer 35mm (Dazz's "135 SR" territory).
-    id: 'warm35',
-    name: '35mm',
-    filter: 'sepia(0.22) saturate(1.15) contrast(1.06) brightness(1.02)',
-    vignette: 0.2,
-    grain: 0.08,
-  },
-  {
-    // Clean late-90s compact ("D Classic" / "NT16" territory).
-    id: 'pointshoot',
-    name: 'Point & Shoot',
-    filter: 'saturate(1.05) contrast(1.04) brightness(1.03) sepia(0.06)',
-    vignette: 0.1,
-    grain: 0.04,
-  },
-  {
-    // Kodak Fun Saver energy: warm, harsh flash bloom, grain ("D Fun S").
-    id: 'disposable',
-    name: 'Disposable',
-    filter: 'sepia(0.18) saturate(1.08) contrast(1.1) brightness(1.04)',
-    vignette: 0.35,
-    grain: 0.1,
-    bloom: 0.28,
-  },
-  {
-    // Holga-style toy camera: washed, dreamy, leaking light ("Hoga").
-    id: 'toycam',
-    name: 'Toy Cam',
-    filter: 'saturate(0.8) contrast(0.85) brightness(1.08) sepia(0.1)',
-    vignette: 0.5,
-    grain: 0.09,
-    softFocus: 0.45,
-    lightLeak: true,
-  },
-  {
-    // Shifted-hue experimental film, hotter than Lomo X-Pro ("D Exp").
-    id: 'crossprocess',
-    name: 'Cross-process',
-    filter: 'saturate(1.5) contrast(1.28) hue-rotate(-12deg)',
-    vignette: 0.45,
-    grain: 0.12,
-  },
-  {
-    // High-contrast street monochrome, grittier than HP5 ("FXN R").
-    id: 'bwstreet',
-    name: 'B&W Street',
-    filter: 'grayscale(1) contrast(1.3) brightness(1.02)',
-    vignette: 0.3,
-    grain: 0.16,
-  },
-  {
-    // 80s-90s camcorder: washed color, scan lines, channel bleed ("VHS").
-    id: 'vhs',
-    name: 'VHS',
-    filter: 'saturate(0.75) contrast(0.92) brightness(1.05)',
-    vignette: 0.2,
-    grain: 0.1,
-    vhs: true,
-  },
-  {
-    // Plain digital, as shot. No filter, no date stamp - only the watermark.
-    id: 'none',
-    name: 'None',
-    filter: '',
-    vignette: 0,
-  },
+export const ROLL_FILMS: RollFilm[] = [
+  { id: 'wedding', name: 'Wedding Film' },
+  { id: 'none', name: 'None' },
 ];
 
-/** The camera opens on the drugstore roll and stays on the last pick. */
-export const DEFAULT_FILM_ID = 'gold200';
+export const DEFAULT_FILM: RollFilmId = 'wedding';
+export const DEFAULT_VARIANT: WeddingVariant = 'daylight';
 
-export function filmById(id: string | undefined): Film {
-  return (
-    FILMS.find((f) => f.id === id) ?? FILMS.find((f) => f.id === 'none')!
-  );
+/** The env-flip convention the repo already uses (CLAUDE.md). */
+export const IS_PRODUCTION_ENV =
+  process.env.NEXT_PUBLIC_APP_ENV === 'production';
+
+/**
+ * The stored id a developed Shot carries and the selection key persists:
+ * 'wedding-daylight' | 'wedding-party' | 'none'.
+ */
+export function storedFilmId(
+  film: RollFilmId,
+  variant: WeddingVariant
+): string {
+  return film === 'none' ? 'none' : `wedding-${variant}`;
 }
+
+/**
+ * Map any persisted film id - including the fifteen legacy ids of hbd-xs7 -
+ * onto today's selection. 'none' stays None; wedding ids keep their variant
+ * (Party only where it is exposed); every legacy or unknown id becomes
+ * Wedding Film Daylight, so an old localStorage can never break selection.
+ */
+export function normalizeStoredFilm(raw: string | null): {
+  film: RollFilmId;
+  variant: WeddingVariant;
+} {
+  if (raw === 'none') return { film: 'none', variant: DEFAULT_VARIANT };
+  if (raw === 'wedding-party' && !IS_PRODUCTION_ENV) {
+    return { film: 'wedding', variant: 'party' };
+  }
+  return { film: 'wedding', variant: DEFAULT_VARIANT };
+}
+
+/**
+ * The live preview is an ordinary CSS approximation of the developed look
+ * (report §9): grain and bloom are not previewed, and preview and export
+ * are NOT pixel-identical - the canvas pixel pipeline is the truth.
+ */
+export const PREVIEW_CSS: Record<WeddingVariant, string> = {
+  daylight: 'saturate(1.1) contrast(1.05) brightness(1.02) sepia(0.08)',
+  party: 'saturate(1.15) contrast(1.1) brightness(1.03)',
+};
+
+/** Approximate preview vignette strength per variant (report §9 gains). */
+export const PREVIEW_VIGNETTE: Record<WeddingVariant, number> = {
+  daylight: 0.1,
+  party: 0.16,
+};

@@ -153,9 +153,11 @@ What a Shot looks like is settled the moment it is taken and never edited afterw
 
 **Film**:
 The analog look a Shot develops through, chosen by the guest on the camera, per Shot, before it is taken.
-Named for the stock or device each look imitates: seven real film stocks (Kodak Gold 200, Portra 400, Superia 400, CineStill 800T, Polaroid 600, Lomo X-Pro, Ilford HP5), seven device looks (35mm, Point & Shoot, Disposable, Toy Cam, Cross-process, B&W Street, VHS), plus None, which is plain digital.
-The camera opens on Kodak Gold 200 and stays on whatever the guest last chose.
+Two exist: Wedding Film, the consumer-negative-inspired look grounded in the reference study, and None, which is plain digital.
+Wedding Film develops through one of two lighting variants, Daylight or Party; Party is experimental and offered only off-production until approved.
+The camera opens on Wedding Film Daylight and stays on whatever the guest last chose.
 The couple has no say: the choice moved from creator to guest and did not leave a switch behind.
+Shots developed under the retired hbd-xs7 roster remain what they are: the pixels were baked when they were taken.
 _Avoid_: filter, effect, film filter
 
 **Date Stamp**:

@@ -1,5 +1,6 @@
 'use client';
 
+import { developWeddingFilm } from '@/lib/wedding-film';
 import {
   AnimatePresence,
   motion,
@@ -7,7 +8,18 @@ import {
   useReducedMotion,
 } from 'framer-motion';
 import { useCallback, useEffect, useRef, useState } from 'react';
-import { DEFAULT_FILM_ID, FILMS, Film, filmById } from '../films';
+import {
+  DEFAULT_FILM,
+  DEFAULT_VARIANT,
+  IS_PRODUCTION_ENV,
+  PREVIEW_CSS,
+  PREVIEW_VIGNETTE,
+  ROLL_FILMS,
+  RollFilmId,
+  WeddingVariant,
+  normalizeStoredFilm,
+  storedFilmId,
+} from '../films';
 import { homemadeApple, poppins } from '../fonts';
 import { STAMP_DATE, VIEWFINDER_FALLBACK } from '../mock';
 import { Shot } from '../use-shots';
@@ -25,9 +37,11 @@ const FILM_STORAGE_KEY = 'memoroll-demo:film';
  * does not. Ten shots, counted down where the guest can feel it, and a dead
  * shutter at zero: the scarcity is the product.
  *
- * The film strip is the guest's choice (hbd-xs7): every shot develops through
- * the film active when the shutter fires, baked into the JPEG per ADR 0006 -
- * filter, date stamp and watermark are pixels, not metadata.
+ * The shot develops through the Wedding Film engine (src/lib/wedding-film.ts,
+ * hbd-15j): a canvas pixel pipeline that runs everywhere, Safari included -
+ * no ctx.filter anywhere. The viewfinder wears an ordinary CSS approximation
+ * of the look; the developed pixels are the truth (ADR 0006). Party is
+ * experimental and only offered off-production until approved.
  */
 export default function CameraScreen({
   remaining,
@@ -46,14 +60,17 @@ export default function CameraScreen({
   const [live, setLive] = useState(false);
   const [flashKey, setFlashKey] = useState(0);
   const [rollDone, setRollDone] = useState(false);
-  const [filmId, setFilmId] = useState(DEFAULT_FILM_ID);
+  const [film, setFilm] = useState<RollFilmId>(DEFAULT_FILM);
+  const [variant, setVariant] = useState<WeddingVariant>(DEFAULT_VARIANT);
   const counterControls = useAnimationControls();
-  const film = filmById(filmId);
 
   useEffect(() => {
     try {
-      const stored = window.localStorage.getItem(FILM_STORAGE_KEY);
-      if (stored && FILMS.some((f) => f.id === stored)) setFilmId(stored);
+      const stored = normalizeStoredFilm(
+        window.localStorage.getItem(FILM_STORAGE_KEY)
+      );
+      setFilm(stored.film);
+      setVariant(stored.variant);
     } catch {
       // A blocked store just means the roll opens on the default film.
     }
@@ -67,10 +84,14 @@ export default function CameraScreen({
       .catch(() => undefined);
   }, []);
 
-  const pickFilm = (id: string) => {
-    setFilmId(id);
+  const persistFilm = (nextFilm: RollFilmId, nextVariant: WeddingVariant) => {
+    setFilm(nextFilm);
+    setVariant(nextVariant);
     try {
-      window.localStorage.setItem(FILM_STORAGE_KEY, id);
+      window.localStorage.setItem(
+        FILM_STORAGE_KEY,
+        storedFilmId(nextFilm, nextVariant)
+      );
     } catch {
       // Quota or privacy mode: the pick still holds in memory.
     }
@@ -189,10 +210,11 @@ export default function CameraScreen({
     }
     setFlashKey((k) => k + 1);
     const stage = await takeFrame();
-    onCapture(developShot(stage, film), film.id);
+    onCapture(developShot(stage, film, variant), storedFilmId(film, variant));
   };
 
   const empty = remaining <= 0;
+  const showVariantControl = film === 'wedding' && !IS_PRODUCTION_ENV;
 
   return (
     <div className="flex flex-1 flex-col bg-[#212121] px-3 pb-6 pt-4">
@@ -202,7 +224,9 @@ export default function CameraScreen({
           playsInline
           muted
           className={`absolute inset-0 h-full w-full object-cover transition-[filter] duration-300 ${live ? '' : 'hidden'}`}
-          style={{ filter: film.filter || undefined }}
+          style={{
+            filter: film === 'wedding' ? PREVIEW_CSS[variant] : undefined,
+          }}
         />
         {!live && (
           <>
@@ -210,7 +234,9 @@ export default function CameraScreen({
               src={VIEWFINDER_FALLBACK}
               alt="Placeholder viewfinder"
               className="absolute inset-0 h-full w-full object-cover transition-[filter] duration-300"
-              style={{ filter: film.filter || undefined }}
+              style={{
+                filter: film === 'wedding' ? PREVIEW_CSS[variant] : undefined,
+              }}
             />
             <span
               className="absolute left-3 top-3 rounded-full bg-black/60 px-3 py-1 text-[10px] uppercase tracking-[0.14em] text-white/80"
@@ -219,39 +245,11 @@ export default function CameraScreen({
             </span>
           </>
         )}
-        {/* The wash, leak, scan lines and vignette preview what developShot
-            will bake; grain, soft focus and flash bloom have no honest CSS
-            twin and appear at develop time. The previewed leak sits in one
-            corner - the developed one picks its own. */}
-        {film.lightLeak && (
-          <span
-            className="pointer-events-none absolute inset-0 mix-blend-screen"
-            style={{
-              background:
-                'radial-gradient(circle at 92% 20%, rgba(255, 120, 40, 0.85), rgba(255, 60, 90, 0.35) 50%, rgba(255, 60, 90, 0) 70%)',
-            }}
-          />
-        )}
-        {film.vhs && (
-          <span
-            className="pointer-events-none absolute inset-0"
-            style={{
-              background:
-                'repeating-linear-gradient(0deg, rgba(0, 0, 0, 0.16) 0px, rgba(0, 0, 0, 0.16) 1.4px, transparent 1.4px, transparent 4px)',
-            }}
-          />
-        )}
-        {film.wash && (
-          <span
-            className="pointer-events-none absolute inset-0 transition-colors duration-300"
-            style={{ backgroundColor: film.wash }}
-          />
-        )}
-        {film.vignette > 0 && (
+        {film === 'wedding' && (
           <span
             className="pointer-events-none absolute inset-0 transition-shadow duration-300"
             style={{
-              boxShadow: `inset 0 0 ${Math.round(film.vignette * 180)}px rgba(15, 15, 15, ${film.vignette})`,
+              boxShadow: `inset 0 0 ${Math.round(PREVIEW_VIGNETTE[variant] * 180)}px rgba(15, 15, 15, ${PREVIEW_VIGNETTE[variant]})`,
             }}
           />
         )}
@@ -285,32 +283,69 @@ export default function CameraScreen({
         </AnimatePresence>
       </div>
 
+      {/* The variant control is a sibling, not a child, of the film group:
+          nested radiogroups read as one flat list to assistive tech. */}
       <div
-        className="mt-4 flex gap-2 overflow-x-auto pb-1 [scrollbar-width:none] [&::-webkit-scrollbar]:hidden"
-        role="radiogroup"
-        aria-label="The film this shot develops through"
+        className="mt-4 flex items-center gap-2"
         style={{ fontFamily: 'var(--font-mr-ui)' }}>
-        {FILMS.map((f) => {
-          const active = f.id === film.id;
-          return (
-            <button
-              key={f.id}
-              type="button"
-              role="radio"
-              aria-checked={active}
-              onClick={() => pickFilm(f.id)}
-              className={`whitespace-nowrap rounded-full px-4 py-2 text-[12px] transition-colors ${
-                active
-                  ? 'bg-white text-[#212121]'
-                  : 'border border-white/30 text-white/85'
-              }`}>
-              {f.name}
-            </button>
-          );
-        })}
+        <div
+          className="flex items-center gap-2"
+          role="radiogroup"
+          aria-label="The film this shot develops through">
+          {ROLL_FILMS.map((f) => {
+            const active = f.id === film;
+            return (
+              <button
+                key={f.id}
+                type="button"
+                role="radio"
+                aria-checked={active}
+                onClick={() => persistFilm(f.id, variant)}
+                className={`whitespace-nowrap rounded-full px-4 py-2 text-[12px] transition-colors ${
+                  active
+                    ? 'bg-white text-[#212121]'
+                    : 'border border-white/30 text-white/85'
+                }`}>
+                {f.name}
+              </button>
+            );
+          })}
+        </div>
+        {showVariantControl && (
+          <div
+            className="ml-auto flex items-center gap-1 rounded-full border border-white/20 p-0.5"
+            role="radiogroup"
+            aria-label="Wedding Film lighting variant (staging test control)">
+            {(
+              [
+                ['daylight', 'Daylight'],
+                ['party', 'Party · testing'],
+              ] as [WeddingVariant, string][]
+            ).map(([v, label]) => (
+              <button
+                key={v}
+                type="button"
+                role="radio"
+                aria-checked={variant === v}
+                onClick={() => persistFilm('wedding', v)}
+                className={`whitespace-nowrap rounded-full px-3 py-1.5 text-[11px] transition-colors ${
+                  variant === v
+                    ? 'bg-[#ff3e09] text-white'
+                    : 'text-white/70'
+                }`}>
+                {label}
+              </button>
+            ))}
+          </div>
+        )}
       </div>
+      <p
+        className="mt-1.5 text-[9px] uppercase tracking-[0.12em] text-white/40"
+        style={{ fontFamily: 'var(--font-mr-ui)' }}>
+        preview approximates the developed look
+      </p>
 
-      <div className="flex items-center justify-between px-6 pb-1 pt-4">
+      <div className="flex items-center justify-between px-6 pb-1 pt-3">
         <motion.div
           animate={counterControls}
           className="w-[72px] text-center text-white"
@@ -410,129 +445,28 @@ export default function CameraScreen({
 }
 
 /**
- * Develop the undeveloped frame through a film: filter, wash, grain and
- * vignette, then the date stamp any film burns in and the watermark every
- * shot carries. The result is the only artifact - the negative never
- * survives this function (ADR 0006).
+ * Develop the frame through the Wedding Film engine, then burn in the date
+ * stamp (Wedding Film only) and the watermark, and encode. The engine's
+ * pixel pass is the color truth; nothing here uses ctx.filter.
  */
-function developShot(stage: HTMLCanvasElement, film: Film): string {
-  const canvas = document.createElement('canvas');
-  canvas.width = FRAME_W;
-  canvas.height = FRAME_H;
-  const ctx = canvas.getContext('2d')!;
-
-  // Canvas 2D `filter` shipped in Safari 18 (2024); on anything older this
-  // pass is a no-op and the shot develops plain while the preview showed the
-  // film. Accepted for the demo; the real product needs a pixel fallback.
-  ctx.filter = film.filter || 'none';
-  ctx.drawImage(stage, 0, 0);
-  ctx.filter = 'none';
-
-  if (film.softFocus) {
-    // Toy-cam dreaminess: a blurred copy breathed over the sharp frame.
-    ctx.globalAlpha = film.softFocus;
-    ctx.filter = 'blur(3px)';
-    ctx.drawImage(canvas, 0, 0);
-    ctx.filter = 'none';
-    ctx.globalAlpha = 1;
-  }
-
-  if (film.bloom) {
-    // On-camera flash: a bright blurred pass screened over the frame.
-    ctx.globalAlpha = film.bloom;
-    ctx.globalCompositeOperation = 'screen';
-    ctx.filter = 'blur(6px) brightness(1.5)';
-    ctx.drawImage(canvas, 0, 0);
-    ctx.filter = 'none';
-    ctx.globalCompositeOperation = 'source-over';
-    ctx.globalAlpha = 1;
-  }
-
-  if (film.lightLeak) {
-    // Light leaks in from one edge, a different corner every shot, the way
-    // a toy camera's seams never leak twice the same.
-    const rightSide = Math.random() < 0.5;
-    const x = rightSide ? FRAME_W * 0.92 : FRAME_W * 0.08;
-    const y = FRAME_H * (0.12 + Math.random() * 0.3);
-    ctx.globalCompositeOperation = 'screen';
-    let leak = ctx.createRadialGradient(x, y, 20, x, y, FRAME_H * 0.55);
-    leak.addColorStop(0, 'rgba(255, 120, 40, 0.85)');
-    leak.addColorStop(0.5, 'rgba(255, 60, 90, 0.35)');
-    leak.addColorStop(1, 'rgba(255, 60, 90, 0)');
-    ctx.fillStyle = leak;
-    ctx.fillRect(0, 0, FRAME_W, FRAME_H);
-    leak = rightSide
-      ? ctx.createLinearGradient(FRAME_W, 0, FRAME_W - 90, 0)
-      : ctx.createLinearGradient(0, 0, 90, 0);
-    leak.addColorStop(0, 'rgba(255, 200, 120, 0.55)');
-    leak.addColorStop(1, 'rgba(255, 200, 120, 0)');
-    ctx.fillStyle = leak;
-    ctx.fillRect(rightSide ? FRAME_W - 90 : 0, 0, 90, FRAME_H);
-    ctx.globalCompositeOperation = 'source-over';
-  }
-
-  if (film.vhs) {
-    // Camcorder color bleed: a hue-shifted ghost nudged sideways, then the
-    // tape's scan lines.
-    ctx.globalAlpha = 0.35;
-    ctx.globalCompositeOperation = 'lighter';
-    ctx.filter = 'saturate(2) hue-rotate(90deg) opacity(0.35)';
-    ctx.drawImage(canvas, 2.5, 0);
-    ctx.filter = 'none';
-    ctx.globalCompositeOperation = 'source-over';
-    ctx.globalAlpha = 1;
-    ctx.fillStyle = 'rgba(0, 0, 0, 0.16)';
-    for (let y = 0; y < FRAME_H; y += 4) {
-      ctx.fillRect(0, y, FRAME_W, 1.4);
-    }
-  }
-
-  if (film.wash) {
-    ctx.fillStyle = film.wash;
-    ctx.fillRect(0, 0, FRAME_W, FRAME_H);
-  }
-
-  if (film.grain) {
-    const noise = document.createElement('canvas');
-    noise.width = FRAME_W / 4;
-    noise.height = FRAME_H / 4;
-    const nctx = noise.getContext('2d')!;
-    const speckle = nctx.createImageData(noise.width, noise.height);
-    for (let i = 0; i < speckle.data.length; i += 4) {
-      const v = Math.floor(Math.random() * 256);
-      speckle.data[i] = v;
-      speckle.data[i + 1] = v;
-      speckle.data[i + 2] = v;
-      speckle.data[i + 3] = 255;
-    }
-    nctx.putImageData(speckle, 0, 0);
-    ctx.globalAlpha = film.grain;
-    ctx.globalCompositeOperation = 'overlay';
-    ctx.drawImage(noise, 0, 0, FRAME_W, FRAME_H);
-    ctx.globalAlpha = 1;
-    ctx.globalCompositeOperation = 'source-over';
-  }
-
-  if (film.vignette > 0) {
-    const g = ctx.createRadialGradient(
-      FRAME_W / 2,
-      FRAME_H / 2,
-      FRAME_H * 0.28,
-      FRAME_W / 2,
-      FRAME_H / 2,
-      FRAME_H * 0.72
-    );
-    g.addColorStop(0, 'rgba(15, 15, 15, 0)');
-    g.addColorStop(1, `rgba(15, 15, 15, ${film.vignette})`);
-    ctx.fillStyle = g;
-    ctx.fillRect(0, 0, FRAME_W, FRAME_H);
-  }
+function developShot(
+  stage: HTMLCanvasElement,
+  film: RollFilmId,
+  variant: WeddingVariant
+): string {
+  const { canvas } = developWeddingFilm(
+    stage,
+    FRAME_W,
+    FRAME_H,
+    film === 'none' ? 'none' : variant
+  );
+  const ctx = canvas.getContext('2d', { willReadFrequently: true })!;
 
   ctx.shadowColor = 'rgba(0, 0, 0, 0.55)';
   ctx.shadowBlur = 4;
   ctx.textBaseline = 'alphabetic';
 
-  if (film.id !== 'none') {
+  if (film !== 'none') {
     // The stamp the design burns onto every developed photo (Figma 220:919):
     // white Homemade Apple in the bottom-right corner. The date is the
     // demo's fictional wedding day; only the time is real.
@@ -552,5 +486,5 @@ function developShot(stage: HTMLCanvasElement, film: Film): string {
   ctx.fillText('memoify.live', 16, FRAME_H - 20);
   ctx.shadowBlur = 0;
 
-  return canvas.toDataURL('image/jpeg', 0.72);
+  return canvas.toDataURL('image/jpeg', 0.78);
 }
