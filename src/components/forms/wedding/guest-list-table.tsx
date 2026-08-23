@@ -1,6 +1,14 @@
 'use client';
 
-import { Upload } from 'lucide-react';
+import { Button, Dropdown } from 'antd';
+import {
+  Ellipsis,
+  ExternalLink,
+  Copy as CopyIcon,
+  Pencil,
+  Trash2,
+  Upload,
+} from 'lucide-react';
 import { useEffect, useId, useRef, useState } from 'react';
 
 import { flowFieldBox } from './create-flow-treatment';
@@ -133,6 +141,26 @@ export interface GuestListTableProps {
   onCorrect: (guest: Guest) => Promise<boolean>;
   onDelete: (id: string) => void;
   /**
+   * One guest's invitation message, filled in and ready to send.
+   *
+   * Passed in rather than composed here, because the words are the couple's
+   * and live on the step above with the nicknames and the address they are
+   * written from - this table draws a Guest List and does not know what a
+   * wedding says. Null for a guest with no personal link yet, which is what
+   * leaves the control dim.
+   */
+  inviteFor?: (guest: Guest) => string | null;
+  /**
+   * Where to open one guest's invitation, or null while there is nowhere.
+   *
+   * Composed by the screen for the same reason the message is: this table
+   * knows a Guest List and not an address. Off production that is the local
+   * path the middleware rewrites a subdomain to, so the couple can look at an
+   * invitation that has no DNS behind it yet - see
+   * `invitationPreviewLinkFor`.
+   */
+  openInvitationAt?: (guest: Guest) => string | null;
+  /**
    * Whether a change to the list is still on its way to the backend.
    *
    * Every action here waits for the backend to agree before the list changes, so
@@ -143,11 +171,124 @@ export interface GuestListTableProps {
   isBusy: boolean;
 }
 
+/**
+ * Everything a couple can do to one guest, behind one control.
+ *
+ * One press opens the list and everything is in it: the invitation to look at,
+ * the message to send, the row to correct, and the deletion, which is last and
+ * apart because it is the one that cannot be undone.
+ *
+ * The list is all of it rather than one named action beside the rest, because
+ * a button reading Actions offers no clue which of the four it does, and the
+ * one it did - Edit - was already in the list underneath it. Two ways to reach
+ * the same thing, one of them unlabelled, is worse than one way that says what
+ * it is.
+ *
+ * An action with nothing behind it is not offered rather than offered dead: a
+ * guest whose personal link the backend has not minted has no message to copy
+ * and no invitation to open, and a menu item that does nothing when pressed
+ * teaches a couple to distrust the others.
+ */
+function GuestRowActions({
+  guest,
+  invite,
+  openAt,
+  onEdit,
+  onDelete,
+  isBusy,
+}: {
+  guest: Guest;
+  invite: string | null;
+  openAt: string | null;
+  onEdit: () => void;
+  onDelete: () => void;
+  isBusy: boolean;
+}) {
+  const [copied, setCopied] = useState(false);
+
+  useEffect(() => {
+    if (!copied) return;
+    const clearing = window.setTimeout(() => setCopied(false), 2000);
+    return () => window.clearTimeout(clearing);
+  }, [copied]);
+
+  async function copyInvite() {
+    if (!invite) return;
+    try {
+      await navigator.clipboard.writeText(invite);
+      setCopied(true);
+    } catch {
+      // A browser that refuses the clipboard leaves the couple where they
+      // were. Nothing is said: the thing to say is "press it again".
+    }
+  }
+
+  const items = [
+    openAt
+      ? {
+          key: 'open',
+          icon: <ExternalLink size={14} aria-hidden="true" />,
+          label: 'Open invitation',
+        }
+      : null,
+    invite
+      ? {
+          key: 'copy',
+          icon: <CopyIcon size={14} aria-hidden="true" />,
+          label: copied ? 'Copied' : 'Copy invitation message',
+        }
+      : null,
+    {
+      key: 'edit',
+      icon: <Pencil size={14} aria-hidden="true" />,
+      label: 'Edit guest',
+    },
+    { type: 'divider' as const, key: 'before-delete' },
+    {
+      key: 'delete',
+      icon: <Trash2 size={14} aria-hidden="true" />,
+      label: 'Delete guest',
+      danger: true,
+    },
+  ].filter(Boolean);
+
+  function onMenuClick({ key }: { key: string }) {
+    if (key === 'open' && openAt) {
+      // A new tab rather than this one: the couple is working through a list
+      // and should come back to the row they left, not to the top of it.
+      window.open(openAt, '_blank', 'noopener,noreferrer');
+      return;
+    }
+    if (key === 'copy') copyInvite();
+    if (key === 'edit') onEdit();
+    if (key === 'delete') onDelete();
+  }
+
+  return (
+    <Dropdown
+      menu={{ items, onClick: onMenuClick }}
+      placement="bottomRight"
+      disabled={isBusy}
+      trigger={['click']}>
+      {/* Antd's default size rather than its small one: an icon is the whole
+          of what this control says, so it has to be big enough to read at a
+          glance and to hit without aiming. It is also the only control in its
+          cell now, so nothing beside it has to match its height. */}
+      <Button
+        aria-label={`Actions for ${guest.name}`}
+        icon={<Ellipsis size={18} aria-hidden="true" />}
+      />
+    </Dropdown>
+  );
+}
+
 export default function GuestListTable({
   guestList: { guests, uploadedAt },
   onUpload,
   onCorrect,
   onDelete,
+  inviteFor,
+  openInvitationAt,
   isBusy,
 }: GuestListTableProps) {
   const titleId = useId();
@@ -313,24 +454,22 @@ export default function GuestListTable({
                         </>
                       ) : (
                         <>
-                          <button
-                            type="button"
-                            aria-label={`Delete ${guest.name}`}
-                            onClick={() => onDelete(guest.id)}
-                            disabled={isBusy}
-                            aria-busy={isBusy}
-                            className={`${ACTION_QUIET} disabled:opacity-40`}>
-                            Delete
-                          </button>
-                          <button
-                            type="button"
-                            aria-label={`Edit ${guest.name}`}
-                            onClick={() => setDraft(guest)}
-                            disabled={isBusy}
-                            aria-busy={isBusy}
-                            className={`${ACTION_LOUD} disabled:opacity-40`}>
-                            Edit
-                          </button>
+                          {/* One control per row rather than one per verb.
+                              The design draws Delete and Edit side by side and
+                              knew nothing of the other two things a couple
+                              wants here - the message to send, and the
+                              invitation to look at - so a row that grew a
+                              button each time would end up wider than the
+                              guest on it. Agreed and recorded in
+                              `docs/adr/0002-figma-is-literal-truth.md`. */}
+                          <GuestRowActions
+                            guest={guest}
+                            invite={inviteFor?.(guest) ?? null}
+                            openAt={openInvitationAt?.(guest) ?? null}
+                            onEdit={() => setDraft(guest)}
+                            onDelete={() => onDelete(guest.id)}
+                            isBusy={isBusy}
+                          />
                         </>
                       )}
                     </div>

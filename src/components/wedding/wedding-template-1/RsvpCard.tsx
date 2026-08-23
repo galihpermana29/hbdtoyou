@@ -30,6 +30,7 @@
 
 import { motion, useReducedMotion } from 'framer-motion';
 import {
+  useEffect,
   useId,
   useRef,
   useState,
@@ -113,6 +114,19 @@ const REPLY_WORDS: Record<Exclude<ReplyOutcome, 'FAILED'>, string> = {
     'You have already replied to this invitation. The couple has that first ' +
     'answer, and it is the one that counts.',
 };
+
+/**
+ * How long a reply that landed stays on the screen before the card puts itself
+ * away.
+ *
+ * Long enough to read the line above Submit, which is the only place a guest is
+ * told their reply arrived. Closing on the same tick would take the answer away
+ * before it could be read, which is the same as never having said it: a guest
+ * would be left looking at the invitation wondering whether the press worked.
+ * Long enough to read one short sentence and no longer - a card that lingers
+ * after it has nothing left to say is a card somebody has to dismiss twice.
+ */
+const DWELL_ON_A_SENT_REPLY = 1600;
 
 /**
  * What a rate-limited guest reads: a failure, but one with its own words.
@@ -316,6 +330,7 @@ export default function RsvpCard({
   guest,
   onClose,
   onKeep,
+  onSent,
 }: {
   /**
    * Who is replying and where their reply goes, or nothing where the
@@ -326,6 +341,14 @@ export default function RsvpCard({
   onClose: () => void;
   /** Take a reply that has nowhere to go, which is all a preview can do. */
   onKeep: (rsvp: Rsvp) => void;
+  /**
+   * The couple has this reply. Called once, a moment after it landed, so that
+   * whoever holds the card can put it away and read the wall back.
+   *
+   * It must not change between renders, or the moment restarts on every one and
+   * never arrives.
+   */
+  onSent: (rsvp: Rsvp) => void;
 }) {
   const dialogRef = useRef<HTMLDivElement>(null);
   const reduce = useReducedMotion();
@@ -341,6 +364,8 @@ export default function RsvpCard({
   const [sending, setSending] = useState(false);
   const [outcome, setOutcome] = useState<ReplyOutcome | null>(null);
   const [problem, setProblem] = useState<string | null>(null);
+  /** The reply the couple now has, which is what closes the card. */
+  const [landed, setLanded] = useState<Rsvp | null>(null);
 
   /**
    * The name the Guest List holds for whoever is replying, where it holds one.
@@ -378,6 +403,20 @@ export default function RsvpCard({
   // opened it: a guest who reached the card from the keyboard would otherwise
   // be put at the top of a five-thousand-pixel invitation for having closed it.
   useDialogBehaviour(dialogRef, onClose);
+
+  // A reply that landed closes the card itself rather than leaving a guest to
+  // dismiss a form they have finished with, and it is handed on so the wall can
+  // be read back with their own words on it. The timer is cleared if the card
+  // goes first, so a guest who closes it themselves in that moment is not
+  // followed by a page that reloads under the invitation they went back to.
+  useEffect(() => {
+    if (!landed) return;
+    const closing = window.setTimeout(
+      () => onSent(landed),
+      DWELL_ON_A_SENT_REPLY
+    );
+    return () => window.clearTimeout(closing);
+  }, [landed, onSent]);
 
   // The card is a 375px-wide composition like the invitation behind it, and
   // it opens over the window, so on a phone narrower than that it is scaled
@@ -432,6 +471,7 @@ export default function RsvpCard({
       );
       if (sent.success) {
         setOutcome('SENT');
+        setLanded(rsvp);
       } else if (sent.message === GUEST_ALREADY_RESPONDED) {
         setOutcome('ALREADY_REPLIED');
       } else if (sent.message === RATE_LIMITED) {

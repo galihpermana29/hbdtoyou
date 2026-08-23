@@ -18,9 +18,28 @@
  *   an invitation's public identifier can never be its UUID.
  * - Guest. Public, plus the guest's token in `X-Guest-Token`.
  *
- * Only what a screen is coming for is wrapped. The dashboard, moderation, guest
- * photo upload, revoke and archival endpoints are real, and deliberately absent
- * until there is something to call them.
+ * Only what a screen is coming for is wrapped. Audited against the backend's
+ * own guides on 2026-08-17 and again on 2026-08-18 against
+ * `integrations/FE_INTEGRATION_GUIDE_Revised.md` (`hbd-z4k`), these are the
+ * endpoints they document that this file deliberately does not call:
+ *
+ * - `PUT /unpublish` and `GET /{id}/dashboard`. Real, and no screen offers
+ *   either yet.
+ * - `POST /{id}/guests/{guestId}/revoke`. Real; the Guest List offers Delete,
+ *   which is the other endpoint and a different thing - see
+ *   `deleteWeddingGuest`.
+ * - `GET /v1/wedding` as a listing. It does not exist for weddings - only
+ *   Memoroll has one - and the couple's own listing stopped needing it when it
+ *   began drawing every card from `GET /contents` alone (`hbd-007`).
+ *
+ * `GET /slug-availability` was on this list until `hbd-bmi`: the address is
+ * the couple's to choose now, so it is wrapped above as `checkInvitationSlug`.
+ *
+ * Two things the older contract carried are gone from the backend entirely
+ * rather than unwrapped here: the wishes moderation endpoints, because a wish
+ * is now an RSVP's message and nothing reviews it, and the guest-photo quota,
+ * because guest photographs moved to the Memoroll domain and count shots
+ * rather than megabytes (`hbd-ox7.2`).
  */
 
 import { revalidateTag } from 'next/cache';
@@ -36,8 +55,10 @@ import {
   IWeddingInvitationPayload,
   IWeddingInvitationUpdatePayload,
   IWeddingPublishCheckResponse,
+  IWeddingPublicRsvpMessage,
   IWeddingPublishResponse,
   IWeddingRsvpPayload,
+  IWeddingSlugAvailabilityResponse,
 } from './interfaces';
 import { IGlobalResponse } from './user-api';
 
@@ -80,7 +101,7 @@ const logging = process.env.APP_ENV !== 'production';
 /* eslint-disable no-console */
 function logRequest(method: string, url: string, body: unknown) {
   if (!logging) return;
-  console.log(`\n[wedding] -> ${method} ${url}`);
+  // console.log(`\n[wedding] -> ${method} ${url}`);
   if (body !== undefined) {
     console.log(
       '[wedding] -> body',
@@ -155,7 +176,17 @@ async function callWedding<T>(
   const raw = await res.text().catch(() => '');
   logResponse(method, url, res.status, raw);
 
-  let parsed: any = null;
+  // The envelope every endpoint answers in, as far as this file reads it. A
+  // body that is not JSON at all leaves this null, and every read below is an
+  // optional one, so a backend that answers with a proxy's HTML error page is
+  // a failed result rather than a thrown one.
+  let parsed: {
+    data?: T;
+    meta?: Meta;
+    message?: string;
+    status?: string;
+    errors?: string[];
+  } | null = null;
   try {
     parsed = raw ? JSON.parse(raw) : null;
   } catch {
@@ -195,6 +226,36 @@ async function callWedding<T>(
  */
 function forgetTheOldListing() {
   revalidateTag('dashboard-content');
+}
+
+/**
+ * Whether an address is free for the taking.
+ *
+ * Owner-authenticated, which the backend's own guide does not say: asked
+ * without the identity headers it answers `INVALID_USER_ID`, verified against
+ * staging on 2026-08-17. That is no obstacle here - nobody reaches the step
+ * that asks without being signed in - but it is why this goes out with the
+ * same headers every other owner call does rather than straight from a
+ * browser.
+ *
+ * An answer is a courtesy rather than a promise. Between a couple being told
+ * a name is free and their save arriving, somebody else's save can take it,
+ * so the refusal on save is still the one that decides - see
+ * `SLUG_TAKEN`. A failed check answers null, which the step reads as "cannot
+ * say" and shows nothing: a couple who cannot reach the backend has not
+ * chosen a bad name.
+ */
+export async function checkInvitationSlug(
+  slug: string
+): Promise<IGlobalResponse<null | IWeddingSlugAvailabilityResponse>> {
+  return callWedding<IWeddingSlugAvailabilityResponse>(
+    `/slug-availability?slug=${encodeURIComponent(slug)}`,
+    {
+      method: 'GET',
+      headers: await ownerHeaders(),
+      cache: 'no-store',
+    }
+  );
 }
 
 export async function createWeddingInvitation(
@@ -438,21 +499,91 @@ export async function resolveWeddingGuest(
 }
 
 /**
+ * The Guest Messages an invitation may show, oldest first as the backend pages
+ * them.
+ *
+ * Public, and answered only for a published invitation with RSVP enabled. The
+ * wall this feeds used to start empty and grow only in the browser of the guest
+ * who had just written, so a message vanished the moment they reloaded - see
+ * `hbd-ox7.1`, where the decision that wishes appear immediately and unmoderated
+ * was taken.
+ *
+ * Never cached: a wall that is a minute stale is a guest refreshing to find
+ * their own words missing.
+ *
+ * One page, because the design draws five cards and a wall is not a feed. A
+ * couple whose guests write more than this asks for a screen nobody has drawn.
+ */
+export async function publicWeddingRsvpMessages(
+  slug: string,
+  limit = MESSAGES_ON_THE_WALL
+): Promise<IGlobalResponse<null | IWeddingPublicRsvpMessage[]>> {
+  return callWedding<IWeddingPublicRsvpMessage[]>(
+    `/${encodeURIComponent(slug)}/rsvp/public?page=1&limit=${limit}`,
+    {
+      method: 'GET',
+      cache: 'no-store',
+    }
+  );
+}
+
+/** How many Guest Messages the wall asks for. The design draws five. */
+const MESSAGES_ON_THE_WALL = 20;
+
+/**
  * A guest's answer. One guest may answer once, and the backend rate-limits by
  * IP, so both `GUEST_ALREADY_RESPONDED` and `RATE_LIMITED` arrive as messages
  * on an unsuccessful result rather than as thrown errors.
+ *
+ * ## The plus one is asked for and answered in different words
+ *
+ * This endpoint reads a plus one as a switch and a name - `plus_one`,
+ * `plus_one_name` - and reports it back as a count and a list, which is how
+ * the owner's reply list and this app's payload both spell it. The recorded
+ * run in `integrations/memorify_v1_api.postman_collection.json` shows both
+ * halves: a request carrying `plus_one: true, plus_one_name: "Dhila"`, and
+ * the list answering `plus_one_count: 1, plus_one_names: "Dhila"` for that
+ * same reply. A request written in the answer's words is therefore read as a
+ * guest bringing nobody, which is a guest's plus one silently lost - and that
+ * is what this app sent until `hbd-z4k` audited it.
+ *
+ * So the wire body is built here rather than passed through, and it carries
+ * both spellings. Callers keep speaking the domain's language - a count, the
+ * way the Guest List allows seats - and a backend reading either spelling
+ * gets an answer that says the same thing. Both, rather than only the newer
+ * pair, because which version answers in production is not something this
+ * side knows, and a guest's plus one is not the thing to find out with.
+ *
+ * What is not proven is that this endpoint tolerates the fields it does not
+ * read. The create endpoint does - the flow has always sent it a
+ * `pov_guest_photo_enabled` the v2 contract never documents, and creates
+ * succeed - but that is a different handler, and a decoder set to refuse
+ * unknown fields would turn every reply into a refusal. So this wants one
+ * live reply against staging before it is trusted, which is a guest token
+ * away and on `hbd-z4k`. The failure it risks is loud and immediate; the one
+ * it replaces was silent, which is the trade being made on purpose.
  */
 export async function submitWeddingRsvp(
   payload: IWeddingRsvpPayload,
   slug: string,
   guestToken: string
 ): Promise<IGlobalResponse<null>> {
+  const seats = payload.plus_one_count ?? 0;
+  const body = {
+    is_attending: payload.is_attending,
+    plus_one: seats > 0,
+    plus_one_name: payload.plus_one_names,
+    plus_one_count: payload.plus_one_count,
+    plus_one_names: payload.plus_one_names,
+    message: payload.message,
+  };
+
   return callWedding<null>(`/${encodeURIComponent(slug)}/rsvp`, {
     method: 'POST',
     headers: {
       'X-Source': 'web',
       'X-Guest-Token': guestToken,
     },
-    body: JSON.stringify(payload),
+    body: JSON.stringify(body),
   });
 }

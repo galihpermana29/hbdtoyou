@@ -34,6 +34,7 @@ import {
   DEFAULT_GUEST_MESSAGE,
   greetingSeededWith,
   invitationLinkFor,
+  isSlugShaped,
   type GuestInvitesValues,
 } from '@/components/forms/wedding/guest-invites-types';
 import {
@@ -129,6 +130,17 @@ export interface WeddingInvitationCreateClientsideProps {
    */
   opened?: OpenedWeddingInvitation;
   /**
+   * The Example Content to open the form on, when no saved invitation is being
+   * resumed.
+   *
+   * Nobody's wedding: a flow started this way has no invitation behind it, so
+   * the first save creates one exactly as it would for a couple who typed all
+   * of this themselves. That is the difference from `opened`, which carries an
+   * identifier and makes every save an update to a wedding that already
+   * exists - and why the two never arrive together.
+   */
+  startOnExample?: WeddingTemplate1Content;
+  /**
    * Whether the page around this flow already draws the site's own navigation.
    *
    * `site` is the Create Flow at its own address, which owns its chrome. On the
@@ -141,6 +153,7 @@ export interface WeddingInvitationCreateClientsideProps {
 export default function WeddingInvitationCreateClientside({
   slug,
   opened,
+  startOnExample,
   chrome = 'site',
 }: WeddingInvitationCreateClientsideProps) {
   const router = useRouter();
@@ -158,10 +171,10 @@ export default function WeddingInvitationCreateClientside({
    * repeating it would hand the form a new object on every render for a value
    * that has not changed.
    */
-  const savedValues = useMemo(
-    () => (opened ? contentToFormValues(opened.content) : undefined),
-    [opened]
-  );
+  const savedValues = useMemo(() => {
+    const content = opened?.content ?? startOnExample;
+    return content ? contentToFormValues(content) : undefined;
+  }, [opened, startOnExample]);
   const [isPreviewCollapsed, setIsPreviewCollapsed] = useState(false);
   const [step, setStep] = useState<CreateFlowStep>(
     'Fill in the details & story'
@@ -236,6 +249,21 @@ export default function WeddingInvitationCreateClientside({
    * message a couple wrote the moment they opened their own invitation to
    * change something else.
    */
+  /**
+   * Whether the couple has taken the address over.
+   *
+   * A latch rather than a comparison of what is in the box, because a couple
+   * typing an address passes through every prefix of it - "e", "el", "elias-"
+   * - and none of those is a shaped slug. Deciding from the shape meant the
+   * box fell back to the minted address between keystrokes, so an address
+   * could not be typed at all: the state kept overriding what they entered.
+   *
+   * Once it is theirs the box shows what they typed, whatever it is, and only
+   * the save asks whether it is shaped. A saved invitation opened again starts
+   * false: its address is the one the backend holds until they change it.
+   */
+  const [addressIsTheirs, setAddressIsTheirs] = useState(false);
+
   const [messageIsTheirs, setMessageIsTheirs] = useState(
     opened?.greetingMessage != null
   );
@@ -325,9 +353,22 @@ export default function WeddingInvitationCreateClientside({
   // The step hands the whole values object back when a couple changes something
   // else, so the address does end up in the state - harmlessly, because it is
   // the same value, and because this line still decides which one is used.
+  // The address to send with the next save, or nothing. Shaped is asked here
+  // rather than while they type: a half-typed address is not a refusal, it is
+  // somebody mid-word.
+  const chosenSlug =
+    addressIsTheirs &&
+    isSlugShaped(guestInvites.slug) &&
+    guestInvites.slug !== savedSlug
+      ? guestInvites.slug
+      : null;
+
   const guestInvitesValues: GuestInvitesValues = {
     ...guestInvites,
-    slug: savedSlug ?? guestInvites.slug,
+    // Theirs wins over the minted one from the first character: a couple
+    // watching their own address in the box must not see it replaced by the
+    // address it is about to replace.
+    slug: addressIsTheirs ? guestInvites.slug : savedSlug ?? guestInvites.slug,
   };
 
   // Composed here rather than passed up from the step that owns the slug, so
@@ -400,7 +441,12 @@ export default function WeddingInvitationCreateClientside({
 
     setOpenSections([]);
     setInvalidFields([]);
-    if ((await save(guestInvitesValues.greetingMessage)) === 'FAILED') return;
+    if (
+      (await save(guestInvitesValues.greetingMessage, chosenSlug ?? undefined)) ===
+      'FAILED'
+    ) {
+      return;
+    }
     goToStep('Guest invites details');
   }
 
@@ -421,7 +467,10 @@ export default function WeddingInvitationCreateClientside({
    * cannot finish yet, and a way out that could itself be refused is not one.
    */
   async function saveAsDraft() {
-    const outcome = await save(guestInvitesValues.greetingMessage);
+    const outcome = await save(
+      guestInvitesValues.greetingMessage,
+      chosenSlug ?? undefined
+    );
     if (outcome === 'SAVED') message.success('Your invitation is saved.');
     if (outcome === 'NOT_SIGNED_IN') sayThereIsNobodyToSaveFor();
   }
@@ -451,7 +500,12 @@ export default function WeddingInvitationCreateClientside({
    * nothing left of the list for this press to carry - see `use-guest-roster.ts`.
    */
   async function confirmCreate() {
-    if ((await save(guestInvitesValues.greetingMessage)) === 'FAILED') return;
+    if (
+      (await save(guestInvitesValues.greetingMessage, chosenSlug ?? undefined)) ===
+      'FAILED'
+    ) {
+      return;
+    }
 
     // An invitation that is already out is not published again. It has been
     // through the check once, and the save above is already live - so asking
@@ -665,11 +719,15 @@ export default function WeddingInvitationCreateClientside({
             <GuestInvitesStep
               isCurrent={isGuestInvites}
               values={guestInvitesValues}
+              mintedAddress={savedSlug ?? ''}
               onChange={(next) => {
                 if (
                   next.greetingMessage !== guestInvitesValues.greetingMessage
                 ) {
                   setMessageIsTheirs(true);
+                }
+                if (next.slug !== guestInvitesValues.slug) {
+                  setAddressIsTheirs(true);
                 }
                 setGuestInvites(next);
               }}

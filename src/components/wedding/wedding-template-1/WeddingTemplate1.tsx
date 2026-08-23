@@ -1,7 +1,8 @@
 'use client';
 
 import { AnimatePresence, motion, useReducedMotion } from 'framer-motion';
-import { useCallback, useEffect, useRef, useState } from 'react';
+import { useRouter } from 'next/navigation';
+import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 
 import BrideGroom from './BrideGroom';
 import EventDetails from './EventDetails';
@@ -31,6 +32,15 @@ export interface WeddingTemplate1Props {
    * Invitation Viewer will hand it a published record.
    */
   content?: WeddingTemplate1Content;
+  /**
+   * The Guest Messages already on the wall when a guest arrives.
+   *
+   * Read by the viewer and handed down rather than fetched here, because this
+   * component is also the Site Preview and the Showcase, and neither of those
+   * is anybody's invitation to read replies from. Empty everywhere but the
+   * Invitation Viewer.
+   */
+  written?: Rsvp[];
   /**
    * Show the invitation the way a guest is sent it: sealed behind the envelope
    * until they open it, and revealed section by section as they scroll.
@@ -95,6 +105,7 @@ export interface WeddingTemplate1Props {
  */
 export default function WeddingTemplate1({
   content = DEFAULT_WEDDING_TEMPLATE_1_CONTENT,
+  written,
   sealed = false,
   addressee,
   guest,
@@ -102,15 +113,16 @@ export default function WeddingTemplate1({
   showVinylWidget = false,
 }: WeddingTemplate1Props) {
   /**
-   * Every reply this page took and could not send, which is as far as one gets
-   * on an invitation nobody was sent.
+   * Every reply this page is holding: the ones it took and could not send, which
+   * is as far as one gets on an invitation nobody was sent, and the one a guest
+   * has just sent, until the couple's own list is read back holding it.
    *
-   * A guest replying from their own link is answered by the backend instead, and
-   * their message is not added here: the Guest Messages wall is not connected to
-   * anything yet, so a message that appeared on it would be telling the guest
-   * their words were on the invitation when only the couple can see them.
-   * Attendance and a plus one are held and drawn nowhere either, because they
-   * are the couple's to read and no screen shows them to anybody yet.
+   * The wall is connected now. A guest replying from their own link is answered
+   * by the backend, and their message comes back from it on the invitation's
+   * public Guest Messages, so showing their card is telling them the truth
+   * rather than flattering them. Attendance and a plus one are still held and
+   * drawn nowhere, because those are the couple's to read and no screen shows
+   * them to anybody but the couple.
    *
    * Every invitation can be replied to, including the two drawn as panels
    * inside the Create Flow, where pressing RSVP Now puts the card over the
@@ -122,9 +134,88 @@ export default function WeddingTemplate1({
    * panel's other live controls already behave - the copy button, the polaroid
    * that turns over - because there is one template rather than two.
    */
-  const [rsvps, setRsvps] = useState<Rsvp[]>([]);
+  // What this guest has added while they are here. What everybody else wrote
+  // arrives as `written` and stays there rather than being copied into state,
+  // so that reading the wall again after a reply lands puts the couple's own
+  // list on the screen instead of the one this page opened with.
+  const [kept, setKept] = useState<Rsvp[]>([]);
   const [replying, setReplying] = useState(false);
   const reduce = useReducedMotion();
+  const router = useRouter();
+
+  /**
+   * The wall: everything the invitation was opened with, and this guest's own
+   * reply until the invitation is read back holding it.
+   *
+   * A reply is shown at once rather than waiting for the read-back, because a
+   * guest who has just been thanked and sees no card of their own has been told
+   * two different things. It is dropped again the moment the same words come
+   * back from the couple's own list, so the card a guest keeps looking at is the
+   * one the couple actually has.
+   *
+   * The words are what it is matched on, because a reply that has not been read
+   * back yet has no identifier to match on and the name is not dependable: a
+   * guest whose Guest List row carries no name types their own, while the
+   * couple's list answers with the row's, so the same reply can come back
+   * signed differently from how it was sent. The words are the same either way.
+   *
+   * Two guests writing exactly the same thing would hide the second card until
+   * the next open, which is the price and a small one - and a reply with no
+   * words is not a Guest Message at all, so it is never on this wall to double.
+   */
+  const rsvps = useMemo(() => {
+    const theirs = written ?? [];
+    const readBack = new Set(theirs.map((rsvp) => rsvp.message));
+    return [...theirs, ...kept.filter((rsvp) => !readBack.has(rsvp.message))];
+  }, [written, kept]);
+
+  // What the invitation's public Guest Messages came back with, in the browser
+  // console: once when it opens, and again every time they are read back after
+  // a reply lands. That second line is how the read-back is checked from
+  // outside - a message that is on the wall and not in the list is this page's
+  // own copy, and one that is in both arrived from the couple's backend.
+  //
+  // Never in production: a guest's invitation is not a place to leave working
+  // notes. Staging still prints it, which is where a read-back is checked
+  // against a real wedding, so the flip is on the app's own environment rather
+  // than on the build's.
+  useEffect(() => {
+    if (process.env.NEXT_PUBLIC_APP_ENV === 'production' || !written) return;
+    // Deliberate rather than left behind, which is what the rule is guarding
+    // against: this line is the read-back's only outward sign, and it prints
+    // nowhere a guest can reach.
+    // eslint-disable-next-line no-console
+    console.log(
+      `[wedding-1] public RSVP messages: ${written.length}`,
+      written.map((rsvp) => ({
+        name: rsvp.name || '(unnamed)',
+        message: rsvp.message,
+        repliedAt: rsvp.repliedAt,
+      }))
+    );
+  }, [written]);
+
+  /** A reply with nowhere to go, which is all a preview can take. */
+  const keepReply = useCallback((rsvp: Rsvp) => {
+    setKept((taken) => [...taken, rsvp]);
+    setReplying(false);
+  }, []);
+
+  /**
+   * A reply the couple has: put the card away and ask the invitation for its
+   * Guest Messages again, so the wall a guest is returned to is the wall their
+   * own words are now on. `router.refresh` re-runs the viewer's own read, which
+   * is uncached, and keeps this page's state - the envelope stays open and the
+   * invitation stays where it was scrolled to.
+   */
+  const readReplyBack = useCallback(
+    (rsvp: Rsvp) => {
+      setKept((taken) => [...taken, rsvp]);
+      setReplying(false);
+      router.refresh();
+    },
+    [router]
+  );
 
   /**
    * Whether the envelope is still closed over the rest of the invitation.
@@ -256,10 +347,8 @@ export default function WeddingTemplate1({
           <RsvpCard
             guest={guest}
             onClose={() => setReplying(false)}
-            onKeep={(rsvp) => {
-              setRsvps((taken) => [...taken, rsvp]);
-              setReplying(false);
-            }}
+            onKeep={keepReply}
+            onSent={readReplyBack}
           />
         )}
       </AnimatePresence>

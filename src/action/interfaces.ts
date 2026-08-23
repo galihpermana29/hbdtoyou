@@ -92,6 +92,32 @@ export interface IContent {
   is_scheduled: boolean;
   date_scheduled: string;
   dest_email: string;
+  /**
+   * The address a wedding invitation answers at, when the row carries one.
+   *
+   * Two spellings, because the backend has used two. The v3 guide moved slug,
+   * custom_domain and status into the content table as the single source of
+   * truth and calls the field `slug` there; the wedding domain calls the same
+   * thing `invitation_slug` everywhere else, which is what was asked for on
+   * 2026-08-18. Both are read, so a listing draws an address whichever one
+   * arrives, and neither has to be guessed at from here.
+   *
+   * The slug rather than the whole URL, so `invitation-host.ts` stays the only
+   * place an address is composed - see
+   * `docs/adr/0005-an-invitation-answers-at-its-own-subdomain.md`.
+   *
+   * Only weddings have one. Every other template type leaves them absent.
+   */
+  slug?: string;
+  invitation_slug?: string;
+  /**
+   * A domain of the couple's own, when they have one.
+   *
+   * Read rather than sent: nothing in the flow asks a couple for one, because
+   * ADR 0005 gives every published invitation `{slug}.memoify.live`. Typed so
+   * a listing can prefer it over the subdomain the day somebody sells it.
+   */
+  custom_domain?: string | null;
 }
 
 export interface IProfileResponse {
@@ -101,6 +127,18 @@ export interface IProfileResponse {
   type: string;
   quota: number;
   token_scrapbook: number;
+  /**
+   * What is left of the credits each thing is made from.
+   *
+   * The v3 backend spends one on a successful create and refuses the call with
+   * `INSUFFICIENT_QUOTA` when there is none, so these are the difference
+   * between a couple who can make an invitation and a couple who cannot.
+   * Optional because a profile read from an older backend carries neither, and
+   * a missing balance is not a balance of zero: nothing here refuses a couple
+   * on the strength of a field that was never sent.
+   */
+  token_wedding?: number;
+  token_memoroll?: number;
 }
 
 export interface IContentPayload {
@@ -324,12 +362,23 @@ export interface IWeddingInvitationPayload {
   title: string;
   caption?: string;
   detail_content_json_text: string;
-  // Left out, the backend generates one from the title.
+  // Left out, the backend mints `{title-slug}-{8-random-hex}`, so two couples
+  // whose titles match still get addresses that do not (`hbd-vfu`).
   invitation_slug?: string;
   rsvp_enabled?: boolean;
   digital_gift_enabled?: boolean;
+  // Kept, and no longer documented by the backend: the guide the backend wrote
+  // on 2026-08-17 lists neither this nor a photo quota, and a published
+  // invitation reads back without them. The couple's MemoRoll switch survives
+  // either way, because `detail_content_json_text` carries `memoRollEnabled`
+  // and that is the copy this app reads. Still sent rather than dropped on the
+  // strength of an absence - `hbd-z4k` audited it and left the behaviour
+  // alone; whether the backend still has a use for it is a question for them.
   pov_guest_photo_enabled?: boolean;
   song_request_enabled?: boolean;
+  // Never sent. The quota moved to the Memoroll domain, which counts shots
+  // rather than megabytes (`hbd-ox7.2`), and nothing here should hold a number
+  // the side that refuses uploads is the one to hold.
   photo_storage_limit_mb?: number;
 }
 
@@ -343,6 +392,27 @@ export interface IWeddingCreatedResponse {
   id: string;
 }
 
+// Whether an address is still free. True is a courtesy rather than a promise:
+// somebody else's save can take the name between the answer and the attempt,
+// so `SLUG_TAKEN` on the save is what actually decides.
+export interface IWeddingSlugAvailabilityResponse {
+  available: boolean;
+}
+
+// What the backend refuses a save with when the address it carries belongs to
+// somebody else already. Carried on the message of an unsuccessful result, the
+// way the RSVP's two refusals are, because a couple whose chosen name was taken
+// has not failed at anything and telling them so is different from telling them
+// it went wrong.
+export const SLUG_TAKEN = 'SLUG_TAKEN';
+
+// What the v3 backend refuses a create with when the account has no credit
+// left for it. Carried on the message of an unsuccessful result, like the
+// other two refusals a caller can act on rather than only report: one credit
+// is spent per invitation made, and a couple with none has run out rather
+// than done something wrong.
+export const INSUFFICIENT_QUOTA = 'INSUFFICIENT_QUOTA';
+
 // The invitation as its owner sees it, whatever state it is in. This is the one
 // answer that carries the Invitation Slug back to the couple who caused it: the
 // create call answers with the identifier alone, and the public read answers
@@ -350,14 +420,25 @@ export interface IWeddingCreatedResponse {
 //
 // The content is optional because the recorded example of this response omits
 // it, on an invitation that had none yet.
+//
+// `full_url` is the backend's own answer to where the invitation lives, and it
+// spells the address ADR 0005 already builds: `https://{slug}.memoify.live`.
+// Read for confirmation rather than used - `invitation-host.ts` stays the one
+// place that composes an address, because it can answer for a draft that the
+// backend has no public URL for yet, and because one composer cannot disagree
+// with itself. Optional here, and on the older recorded example absent.
 export interface IOwnedWeddingInvitationResponse {
   id: string;
   invitation_slug: string;
   status: string;
   rsvp_enabled: boolean;
-  pov_guest_photo_enabled: boolean;
+  pov_guest_photo_enabled?: boolean;
   view_count: number;
   photo_storage_limit_mb?: number;
+  full_url?: string;
+  custom_domain?: string | null;
+  digital_gift_enabled?: boolean;
+  song_request_enabled?: boolean;
   title: string;
   caption?: string;
   detail_content_json_text?: string;
@@ -416,15 +497,65 @@ export interface IWeddingGuestResponse {
 export const INVITATION_NOT_PUBLISHED = 'INVITATION_NOT_PUBLISHED';
 
 // What a wedding guest sees. Only ever answered for a published invitation.
+//
+// Optional on the two fields the v2 backend stopped answering with: a live read
+// of a published invitation on 2026-08-17 carried neither, and a type that
+// promises a field the wire does not send is a type that lies to whoever
+// reads it (`hbd-z4k`). Nothing here is worse off for it - the flags that
+// decide what an invitation draws are the ones inside
+// `detail_content_json_text`, which is where the Site Preview and the
+// Showcase read them too.
 export interface IPublicWeddingInvitationResponse {
   id: string;
   invitation_slug: string;
   status: string;
   rsvp_enabled: boolean;
-  pov_guest_photo_enabled: boolean;
+  pov_guest_photo_enabled?: boolean;
   view_count: number;
+  full_url?: string;
   title: string;
   detail_content_json_text: string;
+}
+
+// One Guest Message as the invitation is allowed to show it.
+//
+// The public read carries who wrote them, the words and when they were
+// written, and hides the rest of what the RSVP holds: which row of the Guest
+// List the guest is, whether they are coming and who they bring are the
+// couple's business rather than the wall's.
+//
+// `invitee_name` is what the endpoint answers with. It is not in
+// `integrations/FE_INTEGRATION_GUIDE-v3.md`, whose example payload for this
+// endpoint still shows the three fields it carried before the name was added;
+// the backend confirmed the field on 2026-08-24 and the guide has not caught
+// up. The type is what the wire says rather than what the guide says, and this
+// note is here so the next reader does not "fix" it back to the document.
+export interface IWeddingPublicRsvpMessage {
+  id: string;
+  message: string;
+  submitted_at: string;
+  /** Who wrote it, as the Guest List holds their name. */
+  invitee_name?: string;
+  // Three older spellings, kept because they cost nothing and because the
+  // guide's silence on this field means the wire is the only thing that says
+  // which one is live. A deployment still answering an earlier way signs its
+  // cards rather than leaving them blank.
+  name?: string;
+  guest_name?: string;
+  sender_name?: string;
+}
+
+/** The name on a Guest Message, whichever way the backend spelled it. */
+export function guestMessageName(
+  entry: IWeddingPublicRsvpMessage
+): string | null {
+  const named =
+    entry.invitee_name ??
+    entry.name ??
+    entry.guest_name ??
+    entry.sender_name ??
+    '';
+  return named.trim() || null;
 }
 
 export interface IWeddingRsvpPayload {

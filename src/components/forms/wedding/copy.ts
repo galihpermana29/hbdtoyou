@@ -316,6 +316,22 @@ export const FLOW_COPY = {
     en: 'Custom Your Web Domain',
     id: 'Atur Alamat Web Undangan',
   },
+  // The address a couple may choose, and what the backend says about the one
+  // they chose. "Available" and "taken" are said about the address rather than
+  // about them: a name somebody else got to first is not a mistake they made.
+  slugRuleHint: {
+    en: 'Letters, numbers and hyphens only, 3 to 63 characters, starting and ending with a letter or a number',
+    id: 'Hanya huruf, angka dan tanda hubung, 3 sampai 63 karakter, diawali dan diakhiri huruf atau angka',
+  },
+  slugChecking: { en: 'Checking…', id: 'Mengecek…' },
+  slugAvailable: {
+    en: 'This address is available',
+    id: 'Alamat ini tersedia',
+  },
+  slugTaken: {
+    en: 'Already taken, try another',
+    id: 'Sudah dipakai, coba yang lain',
+  },
   greetingMessage: {
     en: 'Invitation Greeting Message',
     id: 'Pesan Sambutan Undangan',

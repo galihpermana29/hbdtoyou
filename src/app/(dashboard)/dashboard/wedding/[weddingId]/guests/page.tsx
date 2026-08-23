@@ -54,6 +54,8 @@ export default async function WeddingGuestsPage({
         couple={coupleNamedIn(
           weddingContentFrom(invitation.data.detail_content_json_text)
         )}
+        slug={invitation.data.invitation_slug ?? ''}
+        content={weddingContentFrom(invitation.data.detail_content_json_text)}
       />
     </FlowLanguageProvider>
   );

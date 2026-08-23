@@ -37,14 +37,14 @@ _Avoid_: default, which is also used for the other thing below
 
 **Fallback**:
 A value invented at render time to stand in for one the couple never gave.
-There is exactly one, deliberately, and it is temporary: the camera in the Love Story plays one
-shared teaser film on every invitation, because the uploads endpoint refuses video/mp4 (`hbd-zzl`)
-and no couple can hand over a Wedding Teaser Video yet.
-It is render-time only, so nothing invented reaches the backend, and it retires the moment the
-backend takes mp4 and a couple's own film takes the camera - ADR 0002 records it, and which film
-plays until then is `hbd-1qh`.
-Every other optional answer left blank is absent, and the invitation omits what it would have said
-rather than printing somebody else's.
+There are none.
+There was exactly one, and it retired on 2026-08-18: the camera in the Love Story played one shared
+teaser film on every invitation, because the uploads endpoint refused video/mp4 and no couple could
+hand over a Wedding Teaser Video.
+The endpoint takes video now and a couple who wants one uploads their own, so the camera plays
+theirs or shows the artwork's own screen.
+An answer left blank is absent, and the invitation omits what it would have said rather than
+printing somebody else's.
 _Avoid_: default
 
 ### Invitation content
@@ -135,10 +135,15 @@ _Avoid_: wishes
 
 **Invitation Slug**:
 The identifier that makes an invitation's link unique.
-Minted by the backend from the invitation's title, offered a name-derived replacement at most once while unpublished, and frozen forever from publish.
-Never the couple's to type.
-Since ADR 0005 it is also where a published invitation answers: the subdomain label of `{slug}.memoify.live`.
+Minted by the backend as `{title-slug}-{8-random-hex}`, so two couples whose titles match still get addresses that do not, and offered a name-derived replacement at most once while unpublished.
+Never the couple's to type: the backend will accept a chosen one, and nothing in the flow asks for it.
+Since ADR 0005 it is also where a published invitation answers: the subdomain label of `{slug}.memoify.live`, and the v2 backend itself prints that address as the invitation's `full_url`.
 _Avoid_: domain. Subdomain names where the slug is served, never the slug itself.
+
+**Guest Token**:
+The name-derived identifier in a guest's personal link (`galih-dhila`), minted by the backend from the guest's name and deduplicated with numeric suffixes when names repeat.
+Opening a link with it counts the visit; submitting an RSVP requires it; revoking it kills the link while the guest row survives.
+_Avoid_: guest id, which names the row rather than the link.
 
 ### MemoRoll
 

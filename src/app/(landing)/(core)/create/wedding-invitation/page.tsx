@@ -1,10 +1,11 @@
 import { Metadata } from 'next';
 import { redirect } from 'next/navigation';
 
-import { invitationToResume } from './invitation-to-resume';
-import WeddingInvitationCreateClientside, {
-  type OpenedWeddingInvitation,
-} from './wedding-invitation-create-clientside';
+import {
+  START_ON_EXAMPLE_PARAM,
+  exampleContentToStartOn,
+} from './example-content-to-start-on';
+import WeddingInvitationCreateClientside from './wedding-invitation-create-clientside';
 import { FlowLanguageProvider } from '@/components/forms/wedding/flow-language';
 import {
   slugFrom,
@@ -66,20 +67,33 @@ export default async function WeddingInvitationCreatePage({
     process.env.WEDDING_FLOW_UNGATED === 'true' &&
     process.env.NODE_ENV !== 'production';
 
-  // A couple who saved an invitation and comes back gets that invitation, not
-  // a blank second one: the flow resumes the newest unpublished invitation
-  // they own, and a couple with nothing saved starts fresh - see
-  // `invitation-to-resume.ts`. The gate is what makes this answerable: past
-  // it there is a session, and the session says whose invitations to search.
-  // The check's ungated server has no session and never resumes, which is
-  // also what the check needs: it drives the flow from nothing.
-  let resumed: OpenedWeddingInvitation | null = null;
+  // A wedding already written, for somebody who came to look at the flow
+  // rather than to fill it in. Off in production - see
+  // `exampleContentToStartOn`.
+  const startOnExample = exampleContentToStartOn(
+    searchParams[START_ON_EXAMPLE_PARAM]
+  );
+
+  // Creating is creating. This address always opens a blank flow, whatever a
+  // couple has saved before, because that is what somebody who came here to
+  // make an invitation asked for.
+  //
+  // It used to resume the newest unpublished invitation instead, to stop a
+  // couple who saved a draft and came back from silently making a second one.
+  // The problem was real and the cure was worse: it never said it had done it,
+  // and there was no way to ask for a blank one, so a couple with any draft at
+  // all could never start another invitation from this screen again.
+  //
+  // Continuing a draft has its own door, and it says what it is: Edit, on the
+  // couple's own listing at `/dashboard/wedding`, which opens that invitation
+  // by its identifier into this same flow. Duplicate drafts are the price, and
+  // they are visible on that listing where a couple can delete or finish them,
+  // which is more than the silent resume ever offered them.
   if (!gateStoodDown) {
     const session = await getSession();
     if (!session?.accessToken) {
       redirect('/wedding-invitation');
     }
-    resumed = session.userId ? await invitationToResume(session.userId) : null;
   }
 
   // Read here rather than in the flow, so the address is settled before the
@@ -93,7 +107,7 @@ export default async function WeddingInvitationCreatePage({
     <FlowLanguageProvider>
       <WeddingInvitationCreateClientside
         slug={slugFrom(searchParams[SLUG_PARAM])}
-        opened={resumed ?? undefined}
+        startOnExample={startOnExample ?? undefined}
       />
     </FlowLanguageProvider>
   );

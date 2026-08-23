@@ -34,24 +34,6 @@ import {
 const ASSET = '/templates/wedding-template-1';
 
 /**
- * The film the camera's screen plays for an invitation whose couple gave no
- * Wedding Teaser Video - today every invitation, because the uploads endpoint
- * refuses video/mp4 (hbd-zzl) and a couple has no way to hand one over.
- * The product's one deliberate Fallback, and the exception CONTEXT.md's
- * Fallback entry names: render-time only, so nothing invented reaches the
- * backend, and it retires the moment the backend takes mp4 and a couple's
- * own film takes the screen.
- *
- * PLACEHOLDER, and plainly so (hbd-1qh): the film the owner chose,
- * youtube.com/watch?v=DQgtgRZqhws, has embedding disabled on YouTube - inside
- * this camera it renders "Video tidak tersedia" and nothing plays. Until the
- * owner enables embedding on it or names another video, the screen plays
- * Blender's openly licensed Big Buck Bunny, which is real, public, innocuous
- * and demonstrably embeddable. Swap this one constant when hbd-1qh settles.
- */
-const FALLBACK_TEASER_VIDEO = 'https://www.youtube.com/embed/aqz-KE-bpKQ';
-
-/**
  * The largest and the smallest a chapter's story may be printed at.
  *
  * The ceiling is the 10px the design sets one in, and it is a ceiling rather
@@ -376,6 +358,15 @@ export default function LoveStory({
           />
         </div>
         <div className="absolute left-[21.01px] top-[81.93px] h-[127.104px] w-[207.988px] overflow-hidden rounded-[4.202px]">
+          {/* The couple's own film, and the artwork's own screen where they
+              gave none. A shared stand-in used to play here on every
+              invitation, because the uploads endpoint refused video/mp4 and no
+              couple could hand a teaser over; the endpoint takes it now, a
+              couple who wants one uploads their own, and the product's one
+              deliberate Fallback retires with the reason it existed.
+              Optional, so this box is empty on plenty of invitations - which
+              is what the camera behind it is drawn to look like, and the same
+              silence every other unanswered field keeps. */}
           {content.loveStoryVideo ? (
             <video
               className="absolute inset-0 size-full object-cover"
@@ -384,16 +375,7 @@ export default function LoveStory({
               playsInline
               preload="metadata"
             />
-          ) : (
-            <iframe
-              title="Wedding Teaser Video"
-              className="absolute inset-0 size-full border-0"
-              src={FALLBACK_TEASER_VIDEO}
-              loading="lazy"
-              allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
-              allowFullScreen
-            />
-          )}
+          ) : null}
         </div>
       </motion.div>
 

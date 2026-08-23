@@ -1,9 +1,9 @@
 import type { Metadata } from 'next';
 
-import { ownedWeddingInvitations } from './owned-invitations';
-import WeddingListing from './wedding-listing';
 import { isAdminEmail } from '@/lib/admin';
 import { getSession } from '@/store/get-set-session';
+import { ownedWeddingInvitations } from './owned-invitations';
+import WeddingListing from './wedding-listing';
 
 export const metadata: Metadata = {
   title: 'Wedding | Memoify',
@@ -44,7 +44,6 @@ export default async function WeddingDashboardPage() {
   const { invitations, problem, moreThanShown } = await ownedWeddingInvitations(
     isAdmin ? null : (session.userId as string)
   );
-
   return (
     <WeddingListing
       invitations={invitations}
