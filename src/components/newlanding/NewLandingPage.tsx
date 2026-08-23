@@ -97,61 +97,7 @@ export default function NewLandingPage() {
           pauseOnHover
           dots
           className="hero-carousel">
-          {/* Slide 1 - Newspaper Photobox (inner wrapper so slick styling
-            doesn't override the layout) */}
-          <div>
-            <div
-              className="min-h-screen flex flex-col justify-center py-[60px]"
-              style={{ background: '#f4f1ea' }}>
-              {/* Centered intro */}
-              <div className="mx-auto max-w-3xl px-[20px] text-center">
-                <span className="inline-block text-[12px] font-[700] tracking-[0.2em] text-[#E34013] bg-[#FDECE5] rounded-full px-[14px] py-[6px]">
-                  NEW · NEWSPAPER PHOTOBOX
-                </span>
-                <h2 className="text-[#1B1B1B] font-[800] text-[34px] md:text-[48px] leading-tight mt-[20px]">
-                  You, hot off the press.
-                </h2>
-                <p className="text-[#5b5b5b] text-[16px] md:text-[19px] font-[400] mt-[16px]">
-                  Strike a pose and watch your selfie drop straight onto a
-                  vintage front page - sweet broadsheet or viral political
-                  satire. Capture, pick your edition, download. No design
-                  skills, just main-character energy.
-                </p>
-                <div className="flex items-center justify-center mt-[28px]">
-                  <Link href={'/photobox-newspaper'} prefetch={true}>
-                    <Button
-                      iconPosition="end"
-                      size="large"
-                      icon={<ArrowRight size={18} />}
-                      className="!bg-[#E34013] !text-white !font-[600] !h-[46px]">
-                      Try Newspaper Photobox
-                    </Button>
-                  </Link>
-                </div>
-              </div>
-
-              {/* Full-bleed auto-scrolling marquee of sample front pages */}
-              <div className="wedding-marquee mt-[50px]">
-                <div className="wedding-marquee-track wedding-marquee-track--left gap-[24px] py-[10px] px-[12px]">
-                  {/* One marquee "half" must be wider than the viewport or the
-                    -50% loop shows a blank gap. We repeat the few editions to
-                    fill a half, then render the half twice for a seamless loop. */}
-                  {[
-                    ...SAMPLE_EDITIONS,
-                    ...SAMPLE_EDITIONS,
-                    ...SAMPLE_EDITIONS,
-                    ...SAMPLE_EDITIONS,
-                    ...SAMPLE_EDITIONS,
-                    ...SAMPLE_EDITIONS,
-                  ].map((ed, i) => (
-                    <NewspaperClipping key={i} edition={ed} index={i} />
-                  ))}
-                </div>
-              </div>
-            </div>
-          </div>
-
-          {/* Slide 2 - main hero (inner wrapper, same reason) */}
+          {/* Slide 1 - main hero (inner wrapper, same reason) */}
           <div>
             <div className=" py-[30px] md:py-0 flex flex-col-reverse md:flex-row justify-between items-center mx-auto max-w-6xl 2xl:max-w-7xl px-[20px] min-h-screen">
               <div className="max-w-[600px] mr-[20px] flex-1 mt-[20px] md:mt-0">
@@ -217,6 +163,59 @@ export default function NewLandingPage() {
                     priority
                   />
                 </Carousel>
+              </div>
+            </div>
+          </div>
+          {/* Slide 2 - Newspaper Photobox (inner wrapper so slick styling
+            doesn't override the layout) */}
+          <div>
+            <div
+              className="min-h-screen flex flex-col justify-center py-[60px]"
+              style={{ background: '#f4f1ea' }}>
+              {/* Centered intro */}
+              <div className="mx-auto max-w-3xl px-[20px] text-center">
+                <span className="inline-block text-[12px] font-[700] tracking-[0.2em] text-[#E34013] bg-[#FDECE5] rounded-full px-[14px] py-[6px]">
+                  NEW · NEWSPAPER PHOTOBOX
+                </span>
+                <h2 className="text-[#1B1B1B] font-[800] text-[34px] md:text-[48px] leading-tight mt-[20px]">
+                  You, hot off the press.
+                </h2>
+                <p className="text-[#5b5b5b] text-[16px] md:text-[19px] font-[400] mt-[16px]">
+                  Strike a pose and watch your selfie drop straight onto a
+                  vintage front page - sweet broadsheet or viral political
+                  satire. Capture, pick your edition, download. No design
+                  skills, just main-character energy.
+                </p>
+                <div className="flex items-center justify-center mt-[28px]">
+                  <Link href={'/photobox-newspaper'} prefetch={true}>
+                    <Button
+                      iconPosition="end"
+                      size="large"
+                      icon={<ArrowRight size={18} />}
+                      className="!bg-[#E34013] !text-white !font-[600] !h-[46px]">
+                      Try Newspaper Photobox
+                    </Button>
+                  </Link>
+                </div>
+              </div>
+
+              {/* Full-bleed auto-scrolling marquee of sample front pages */}
+              <div className="wedding-marquee mt-[50px]">
+                <div className="wedding-marquee-track wedding-marquee-track--left gap-[24px] py-[10px] px-[12px]">
+                  {/* One marquee "half" must be wider than the viewport or the
+                    -50% loop shows a blank gap. We repeat the few editions to
+                    fill a half, then render the half twice for a seamless loop. */}
+                  {[
+                    ...SAMPLE_EDITIONS,
+                    ...SAMPLE_EDITIONS,
+                    ...SAMPLE_EDITIONS,
+                    ...SAMPLE_EDITIONS,
+                    ...SAMPLE_EDITIONS,
+                    ...SAMPLE_EDITIONS,
+                  ].map((ed, i) => (
+                    <NewspaperClipping key={i} edition={ed} index={i} />
+                  ))}
+                </div>
               </div>
             </div>
           </div>
