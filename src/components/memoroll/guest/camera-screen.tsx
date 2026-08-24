@@ -620,7 +620,11 @@ export default function CameraScreen({
             aria-disabled={empty}
             whileTap={reduce || empty ? undefined : { scale: 0.92 }}
             transition={{ duration: 0.12, ease: [0.22, 1, 0.36, 1] }}
-            className="absolute left-1/2 top-[15px] flex h-[64px] w-[64px] -translate-x-1/2 items-center justify-center rounded-full"
+            // Centred by its left edge, never by transform: framer-motion
+            // owns this element's transform for the tap scale, and the first
+            // press would rewrite it without the -translate-x-1/2, jumping the
+            // button half its width off the dock's hump.
+            className="absolute left-[calc(50%-32px)] top-[15px] flex h-[64px] w-[64px] items-center justify-center rounded-full"
             style={{
               background: empty ? '#5a5a5a' : colour.flame,
               boxShadow:
