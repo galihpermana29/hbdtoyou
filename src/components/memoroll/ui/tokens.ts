@@ -22,6 +22,17 @@ export const colour = {
   cream: '#e0dabf',
   /** The mauve of the shutter dock and the shots counter's outer pill. */
   mauve: '#ae9ea6',
+  /**
+   * The dark of a pill that is not chosen - the gallery tab and film pill a
+   * guest is not on - and of the shots counter's inner card. A shade lighter
+   * than the ink so the pill reads as an object on the page rather than a hole
+   * in it.
+   */
+  pill: '#222222',
+  /** The orange a Date Stamp is burned into a print's corner in. */
+  stamp: '#f17e03',
+  /** The Dark Room's red light, the developer bath every print soaks in. */
+  redLight: '#c42a00',
   field: '#f7f6f6',
   hairline: '#dadada',
   muted: '#808080',
@@ -93,6 +104,15 @@ export const type = {
    */
   tally: 'text-[64px] font-bold leading-[48px] tracking-[-0.011em]',
 } as const;
+
+/**
+ * The pair of inner shadows every selection pill wears, chosen or not: the
+ * gallery's tabs, the camera's film pills, the circular back button. One
+ * string, because a pill whose shadows drifted from its neighbours' would
+ * read as a different control.
+ */
+export const pillShadow =
+  'inset 4px 4px 40.9px 12px rgba(0, 0, 0, 0.1), inset 0 -3.6px 5.2px 1px rgba(0, 0, 0, 0.17)';
 
 /** Every screen in the design is a 375-wide phone. */
 export const PHONE_WIDTH = 375;

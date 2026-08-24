@@ -17,8 +17,11 @@ import { colour } from './tokens';
  */
 export default function MemoifyFooter({
   className = '',
+  onDark = false,
 }: {
   className?: string;
+  /** The Dark Room writes this line in white; everywhere else it is ink. */
+  onDark?: boolean;
 }) {
   return (
     <div
@@ -26,7 +29,10 @@ export default function MemoifyFooter({
       style={{ gap: 12 }}>
       <span
         className="text-[10px] font-normal leading-none"
-        style={{ color: colour.ink, fontFamily: 'var(--font-mr-mono)' }}>
+        style={{
+          color: onDark ? '#ffffff' : colour.ink,
+          fontFamily: 'var(--font-mr-mono)',
+        }}>
         Created by Memoify.live
       </span>
       <img

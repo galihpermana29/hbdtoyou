@@ -171,7 +171,7 @@ Selection is expressed the same way in two places: the chosen thing is cream on 
 ## Deviations from the design, agreed
 
 The rule in this repo is that the design is literal truth, including its errors (ADR 0002).
-Four departures are deliberate and recorded.
+Six departures are deliberate and recorded.
 
 1. **The film pills are not "Portra 400".**
    Six pills ship: `RAW` and the five original recipes already in `src/lib/memoroll-film.ts`.
@@ -189,6 +189,16 @@ Four departures are deliberate and recorded.
 4. **Two animations are approximated.**
    The designer attached reference videos to the Landing and to the Dark room as Gumlet links, which cannot be read from here.
    Both are built from the animation guidance in this setup and marked as approximations pending her references.
+
+5. **A guest's own Roll signs with their handle.**
+   guest-17 and guest-18 sign every print of the guest's own Roll "Zidane", while guest-05 has that same guest confirming the handle "dhilafadhila".
+   One guest has one name - the one they confirmed on "This you?" - so their own prints sign with the handle, and "Zidane" stays what it is everywhere else: another guest on the collective roll, the one the preview reveals.
+   The same one-answer resolution as the event's name above.
+
+6. **Where the design gives one element two values, the majority value ships.**
+   The gallery's two time headings both read "May 3 at 07:30pm", which grouping-by-time cannot produce, so the demo's second group carries a later time.
+   guest-18's second heading is filled `#000000` where every other one is `#232323`; the ink wins.
+   And the preview's blurred mid-deck prints carry stamp sizes that disagree with the sharp front card's; the card whose text can actually be read wins.
 
 ## What the capture does not contain
 

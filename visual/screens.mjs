@@ -48,6 +48,16 @@ import { expectations as memorollCreatorShots } from './expectations/memoroll-cr
 import { expectations as memorollCreatorReveal } from './expectations/memoroll-creator-reveal.mjs';
 import { expectations as memorollCreatorPublish } from './expectations/memoroll-creator-publish.mjs';
 import { expectations as memorollCreatorQr } from './expectations/memoroll-creator-qr.mjs';
+import { expectations as memorollGalleryAllDuring } from './expectations/memoroll-gallery-all-during.mjs';
+import { expectations as memorollGalleryAllAfter } from './expectations/memoroll-gallery-all-after.mjs';
+import { expectations as memorollMyRollUndeveloped } from './expectations/memoroll-gallery-myroll-undeveloped.mjs';
+import { expectations as memorollMyRollDevelopCta } from './expectations/memoroll-gallery-myroll-develop-cta.mjs';
+import { expectations as memorollMyRollDeveloped } from './expectations/memoroll-gallery-myroll-developed.mjs';
+import { expectations as memorollDarkRoom } from './expectations/memoroll-darkroom.mjs';
+import {
+  secret as memorollPreviewSecret,
+  told as memorollPreviewTold,
+} from './expectations/memoroll-preview.mjs';
 
 /** The width the design is defined at. Nothing below this is checked. */
 export const DESIGN_WIDTH = 1440;
@@ -583,6 +593,58 @@ async function memorollCreatorQrSheet(page) {
   await page.getByRole('button', { name: 'Share QR Code' }).click();
 }
 
+/**
+ * Turn the demo dock's dials, then fold it away again.
+ *
+ * The gallery's states live behind the dock because they live behind clocks
+ * and cameras: the event phase is a wedding-day clock and the guest's own
+ * Roll is ten trips through the shutter, and neither is something a check can
+ * wait for. The dock is the demo's stated stand-in for both (the same door
+ * `memorollBeforeTheEvent` already uses), and it is closed afterwards so the
+ * captured screen is the designed one and nothing else.
+ */
+async function memorollDock(page, presses) {
+  await page.getByRole('button', { name: /^demo · / }).click();
+  for (const name of presses) {
+    await page.getByRole('button', { name, exact: true }).click();
+  }
+  await page.getByRole('button', { name: /^demo · / }).click();
+}
+
+/** ALL mid-event: the demo opens during the event, so straight in. */
+const memorollGalleryDuring = (page) =>
+  memorollDock(page, ['Open the gallery']);
+
+/** ALL after the Reveal. */
+const memorollGalleryAfter = (page) =>
+  memorollDock(page, ['After · revealed', 'Open the gallery']);
+
+/** My Roll with the dock's roll dial at one of its designed states. */
+async function memorollMyRoll(page, rollState) {
+  await memorollDock(page, [rollState, 'Open the gallery']);
+  await page.getByRole('button', { name: 'My Roll', exact: true }).click();
+}
+
+/**
+ * The Dark Room, pinned mid-develop. The ceremony a guest sees runs through
+ * to their developed Roll; the pin is the dock's way of keeping the chemistry
+ * on the glass long enough to be checked.
+ */
+const memorollDarkRoomHeld = (page) =>
+  memorollDock(page, ['Pin the Dark Room open']);
+
+/** The preview, opened the way a guest opens it: on a sharp print, after the Reveal. */
+async function memorollPreview(page) {
+  await memorollGalleryAfter(page);
+  await page.getByRole('button', { name: 'Open this shot' }).first().click();
+}
+
+/** The preview with the secret told: "Who took this?" pressed. */
+async function memorollPreviewAnswered(page) {
+  await memorollPreview(page);
+  await page.getByRole('button', { name: 'Who took this?' }).click();
+}
+
 export const screens = [
   {
     id: 'details-and-story-collapsed',
@@ -862,6 +924,98 @@ export const screens = [
     baseline: 'memoroll-creator-qr.png',
     expectations: memorollCreatorQr,
     prepare: memorollCreatorQrSheet,
+  },
+  // The gallery, behind its two independent gates. Four of these eight are the
+  // guest's own Roll walking through its gate - undeveloped, the Develop CTA,
+  // the Dark Room, developed - and that gate never waits for the other one:
+  // the developed screen is checked with "Ends in" still counting.
+  {
+    id: 'memoroll-gallery-all-during',
+    title: 'MemoRoll gallery, ALL veiled while the event runs',
+    route: MEMOROLL_ROUTE,
+    figmaFile: MEMOROLL_FIGMA_FILE_NAME,
+    figmaNodeId: '434-7907',
+    designWidth: TEMPLATE_DESIGN_WIDTH,
+    baseline: 'memoroll-gallery-all-during.png',
+    expectations: memorollGalleryAllDuring,
+    prepare: memorollGalleryDuring,
+  },
+  {
+    id: 'memoroll-gallery-all-after',
+    title: 'MemoRoll gallery, ALL sharp after the Reveal',
+    route: MEMOROLL_ROUTE,
+    figmaFile: MEMOROLL_FIGMA_FILE_NAME,
+    figmaNodeId: '470-6015',
+    designWidth: TEMPLATE_DESIGN_WIDTH,
+    baseline: 'memoroll-gallery-all-after.png',
+    expectations: memorollGalleryAllAfter,
+    prepare: memorollGalleryAfter,
+  },
+  {
+    id: 'memoroll-gallery-myroll-undeveloped',
+    title: 'MemoRoll gallery, My Roll undeveloped with shots left',
+    route: MEMOROLL_ROUTE,
+    figmaFile: MEMOROLL_FIGMA_FILE_NAME,
+    figmaNodeId: '470-6458',
+    designWidth: TEMPLATE_DESIGN_WIDTH,
+    baseline: 'memoroll-gallery-myroll-undeveloped.png',
+    expectations: memorollMyRollUndeveloped,
+    prepare: (page) => memorollMyRoll(page, 'One shot left'),
+  },
+  {
+    id: 'memoroll-gallery-myroll-develop-cta',
+    title: 'MemoRoll gallery, My Roll at zero shots offering Develop',
+    route: MEMOROLL_ROUTE,
+    figmaFile: MEMOROLL_FIGMA_FILE_NAME,
+    figmaNodeId: '470-7092',
+    designWidth: TEMPLATE_DESIGN_WIDTH,
+    baseline: 'memoroll-gallery-myroll-develop-cta.png',
+    expectations: memorollMyRollDevelopCta,
+    prepare: (page) => memorollMyRoll(page, 'All ten spent'),
+  },
+  {
+    id: 'memoroll-darkroom',
+    title: 'MemoRoll Dark Room, the blur mid-lift under the red light',
+    route: MEMOROLL_ROUTE,
+    figmaFile: MEMOROLL_FIGMA_FILE_NAME,
+    figmaNodeId: '470-7362',
+    designWidth: TEMPLATE_DESIGN_WIDTH,
+    baseline: 'memoroll-darkroom.png',
+    expectations: memorollDarkRoom,
+    prepare: memorollDarkRoomHeld,
+  },
+  {
+    id: 'memoroll-gallery-myroll-developed',
+    title: 'MemoRoll gallery, My Roll developed mid-event',
+    route: MEMOROLL_ROUTE,
+    figmaFile: MEMOROLL_FIGMA_FILE_NAME,
+    figmaNodeId: '470-6601',
+    designWidth: TEMPLATE_DESIGN_WIDTH,
+    baseline: 'memoroll-gallery-myroll-developed.png',
+    expectations: memorollMyRollDeveloped,
+    prepare: (page) => memorollMyRoll(page, 'Developed'),
+  },
+  {
+    id: 'memoroll-preview-secret',
+    title: 'MemoRoll preview, the shooter still a secret',
+    route: MEMOROLL_ROUTE,
+    figmaFile: MEMOROLL_FIGMA_FILE_NAME,
+    figmaNodeId: '470-7628',
+    designWidth: TEMPLATE_DESIGN_WIDTH,
+    baseline: 'memoroll-preview-secret.png',
+    expectations: memorollPreviewSecret,
+    prepare: memorollPreview,
+  },
+  {
+    id: 'memoroll-preview-told',
+    title: 'MemoRoll preview, the shooter’s name told',
+    route: MEMOROLL_ROUTE,
+    figmaFile: MEMOROLL_FIGMA_FILE_NAME,
+    figmaNodeId: '472-7952',
+    designWidth: TEMPLATE_DESIGN_WIDTH,
+    baseline: 'memoroll-preview-told.png',
+    expectations: memorollPreviewTold,
+    prepare: memorollPreviewAnswered,
   },
 ];
 

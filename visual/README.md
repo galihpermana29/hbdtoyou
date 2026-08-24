@@ -13,7 +13,8 @@ And Wedding Template 1, which is the invitation itself, drawn as a phone: it ren
 
 ## What is asserted, and what is never asserted
 
-For each element the design describes, the check asserts typeface, size, weight, line height, letter spacing, colour, background, border colour, width and style, corner radius, shadow, padding, margin and gap, together with the exact copy the element renders and where it sits in the document relative to every other element.
+For each element the design describes, the check asserts typeface, size, weight, line height, letter spacing, colour, background, border colour, width and style, corner radius, shadow, filter, padding, margin and gap, together with the exact copy the element renders and where it sits in the document relative to every other element.
+The filter is there for one reason: MemoRoll's blur is the product, not a decoration - an Undeveloped Roll is defined by the blur over it, so `blur(4px)` on a hidden print and `none` on a developed one are claims a run checks.
 A background the design fills with a gradient is asserted through `backgroundImage`, with the colours inside the gradient normalised the way colours are everywhere else and its stops trimmed the way lengths are, so the Messages fade's stops - minus sign included - are a claim a run checks rather than a comment a reader is trusted with.
 
 Two properties carry a behaviour rather than an appearance: `overflow` and `contain`.
@@ -107,7 +108,7 @@ When a position was asked for, the failure says how many were found instead, whi
 ## Screens
 
 `visual/screens.mjs` is the list, and it is the only place a screen is defined.
-Twenty-seven screens are covered, from two designs.
+Thirty-five screens are covered, from two designs.
 
 Twelve are the wedding invitation.
 Seven of those are the Create Flow: the details-and-story step in each of its four designed states, the guest invites step empty and populated, and the published screen.
@@ -115,9 +116,14 @@ One is Wedding Template 1 sealed, which is the invitation as a guest is sent it.
 Three are its Showcase opened, which is one screen rendered with each of the three sets of Example Content - flattering, realistic and hostile.
 One is the RSVP a guest replies on, opened over the invitation.
 
-Fifteen are MemoRoll, which is a second Figma file and says so: a screen names its own with `figmaFile`, and one that names none means the wedding file every other screen came from.
+Twenty-three are MemoRoll, which is a second Figma file and says so: a screen names its own with `figmaFile`, and one that names none means the wedding file every other screen came from.
 Five are the guest's way in - the Cover, the closed door counting down, the handle a guest confirms, and the location gate in both the states the design draws.
 Ten are the creator's: the way in, the eight steps that set a roll up, and the QR bottomsheet the last one hands over.
+Eight are the gallery, which is where the product's two independent gates live, and the eight are chosen to walk both: ALL veiled mid-event and sharp after the Reveal, the guest's own Roll undeveloped, offering Develop at zero shots, mid-develop in the Dark Room, and developed sharp *while "Ends in" still counts* - which is the independence, asserted - then the preview with the shooter still a secret and with the name told.
+
+The gallery's states are driven through the demo dock, the same door `memorollBeforeTheEvent` already uses, because they live behind things a check cannot wait for: the event phase is a wedding-day clock and the guest's own Roll is ten trips through the shutter.
+The dock turns those two dials, is folded away again before the capture, and everything after it is pressed the way a guest presses it - the My Roll tab, a sharp print, "Who took this?".
+The Dark Room is the one screen checked in a pose it never rests in: the develop is an animation, so the dock pins it mid-bath and the reduced motion the capture runs under holds every print at the design's own stop - blur 6, blur 10, sharp.
 
 The eight creator steps run in the order their steppers give, which is not the order the frames are laid out in, and the check drives them that way: it presses through from the welcome, waiting for each step's heading before pressing on.
 Waiting is the whole of it. One step leaves as the next enters, and a second Continue pressed into that gap lands on the button of the screen already on its way out - which asks to go to the step the demo is already on, so the flow silently stops advancing and every screen after it is checked in the wrong state.
@@ -141,13 +147,15 @@ It claims the card and not the invitation behind it, since three screens already
 
 ### Where it stands
 
-All twenty-seven screens match the design, so `npm run visual` exits 0.
+All thirty-five screens match the design, so `npm run visual` exits 0.
 It last went red on the two differences every template screen shared - every line set 1.5 loose where the design lets the typeface decide (`hbd-a09.13`), and the five bordered controls omitting the 10px the design puts inside them (`hbd-a09.14`) - and both have landed.
 A red run now means a screen has moved away from the design.
 
-Two parts of the MemoRoll design are deliberately not covered, and both are recorded rather than forgotten.
+Four parts of the MemoRoll design are deliberately not covered, and all are recorded rather than forgotten.
 Only the Collage Cover Style is exercised; Taped wall, Simple and a Cover with no photographs on it are all expressible and unchecked.
-And what a creator has typed into a field is never asserted, because their answer is their content: the design owns the label above it, the note under it and the type it is set in, and a browser reports no value for the check to hold anyway.
+What a creator has typed into a field is never asserted, because their answer is their content: the design owns the label above it, the note under it and the type it is set in, and a browser reports no value for the check to hold anyway.
+The Develop CTA's absence while shots remain is asserted nowhere, because a check cannot assert an absence: the undeveloped screen holds the veil and the tab, and the CTA is the next screen's claim.
+And the preview's swipe is driven by presses rather than by the drag itself - the deck advances under a pointer too, and that is the half a headless check can hold.
 
 A screen is `SKIPPED` when the thing it would check does not exist yet, and the reason says which.
 `route not built yet` is code-side work.

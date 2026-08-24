@@ -2,19 +2,36 @@
 
 import Cover from '@/components/memoroll/guest/cover';
 import CountdownScreen from '@/components/memoroll/guest/countdown-screen';
+import DarkRoomScreen from '@/components/memoroll/guest/darkroom-screen';
+import GalleryScreen, {
+  type GalleryTab,
+  type RevealClock,
+} from '@/components/memoroll/guest/gallery-screen';
+import type {
+  GalleryGroup,
+  GalleryPhoto,
+} from '@/components/memoroll/guest/roll';
 import LocationScreen, {
   type LocationState,
 } from '@/components/memoroll/guest/location-screen';
 import UsernameScreen from '@/components/memoroll/guest/username-screen';
 import { AnimatePresence, motion, useReducedMotion } from 'framer-motion';
 import { useState } from 'react';
-import DemoControl, { DemoPhase } from './demo-control';
-import { MOCK_WEDDING, SAMPLE_SOURCES } from './mock';
+import DemoControl, { DemoPhase, DemoRoll } from './demo-control';
+import {
+  GALLERY_REMAINING,
+  GALLERY_TALLY,
+  MOCK_ALL_ROLL,
+  MOCK_OWN_SHOTS,
+  MOCK_WEDDING,
+  REVEAL_ENDED_ON,
+  SAMPLE_SOURCES,
+  type MockRollPhoto,
+} from './mock';
 import CameraScreen from './screens/camera';
-import GalleryScreen from './screens/gallery';
 import OnboardScreen from './screens/onboard';
 import SsoLoginScreen from './screens/sso-login';
-import { useShots } from './use-shots';
+import { useShots, type Shot } from './use-shots';
 import { REDUCED_FADE, screenVariants } from './variants';
 
 type Screen =
@@ -25,25 +42,87 @@ type Screen =
   | 'location'
   | 'onboard'
   | 'camera'
-  | 'gallery';
+  | 'gallery'
+  | 'darkroom';
+
+/** A photo with the heading its group sits under, before grouping. */
+type RollEntry = { photo: GalleryPhoto; groupLabel: string };
+
+/** One live camera Shot as a gallery entry, grouped under its capture time. */
+function liveShotEntry(shot: Shot, handle: string): RollEntry {
+  const at = new Date(shot.takenAt);
+  const hour12 = ((at.getHours() + 11) % 12) + 1;
+  const half = at.getHours() < 12 ? 'am' : 'pm';
+  const minutes = String(at.getMinutes()).padStart(2, '0');
+  return {
+    photo: {
+      id: shot.id,
+      src: shot.url,
+      // The Date Stamp is already baked into the pixels (ADR 0006).
+      stamp: null,
+      shooter: handle,
+      own: true,
+    },
+    groupLabel: `May 3 at ${String(hour12).padStart(2, '0')}:${minutes}${half}`,
+  };
+}
+
+/** One designed mock Shot as a gallery entry, signed with the guest's handle. */
+function mockShotEntry(
+  mock: Omit<MockRollPhoto, 'shooter'>,
+  handle: string
+): RollEntry {
+  return {
+    photo: {
+      id: mock.id,
+      src: mock.src,
+      stamp: mock.stamp,
+      shooter: handle,
+      own: true,
+    },
+    groupLabel: mock.groupLabel,
+  };
+}
+
+/** Fold a roll into the gallery's time groups, first-seen order kept. */
+function groupRoll(entries: RollEntry[]): GalleryGroup[] {
+  const order: string[] = [];
+  const byLabel = new Map<string, GalleryPhoto[]>();
+  entries.forEach(({ photo, groupLabel }) => {
+    if (!byLabel.has(groupLabel)) {
+      order.push(groupLabel);
+      byLabel.set(groupLabel, []);
+    }
+    byLabel.get(groupLabel)!.push(photo);
+  });
+  return order.map((label) => ({ label, photos: byLabel.get(label)! }));
+}
 
 /**
  * The guest walkthrough: Cover -> countdown or sign-in -> "This you?" ->
- * location -> camera -> gallery. Local state only; nothing here calls a
- * backend.
+ * location -> camera -> gallery -> the Dark Room. Local state only; nothing
+ * here calls a backend.
  *
  * The screens themselves live in `src/components/memoroll/guest/` and take
  * plain props, so the real product renders exactly these components with real
  * data behind them (ADR 0007). This file is the demo's half of that: mock data,
- * and the state a surface has to hold.
+ * and the state a surface has to hold - which for the gallery is the two
+ * independent gates. The event phase gates everyone else's Shots; the guest's
+ * own Roll answers only to its own develop, and the dock carries them as two
+ * separate dials so their independence can be walked, not just read about.
  *
- * The camera, the gallery and the onboarding are still the old design, and are
- * replaced by hbd-qti.2 and hbd-qti.3.
+ * The camera and the onboarding are still the old design, replaced by
+ * hbd-qti.2.
  */
 export default function MemorollDemo() {
   const reduce = useReducedMotion();
   const [screen, setScreen] = useState<Screen>('cover');
   const [phase, setPhase] = useState<DemoPhase>('during');
+  const [roll, setRoll] = useState<DemoRoll>('live');
+  const [developedByHand, setDevelopedByHand] = useState(false);
+  const [galleryTab, setGalleryTab] = useState<GalleryTab>('all');
+  const [darkRoomHeld, setDarkRoomHeld] = useState(false);
+  const [swipeCueSeen, setSwipeCueSeen] = useState(false);
   const [location, setLocation] = useState<LocationState>('asking');
   const [handle, setHandle] = useState('dhilafadhila');
   const { shots, addShot, clearShots, remaining } = useShots();
@@ -76,8 +155,59 @@ export default function MemorollDemo() {
     if (screen !== 'cover' && next === 'before') setScreen('countdown');
   };
 
-  const galleryPhase = phase === 'before' ? 'during' : phase;
-  const dark = screen === 'camera';
+  /** A guest's own Roll, from whichever dial the dock is on. */
+  const ownEntries: RollEntry[] =
+    roll === 'live'
+      ? shots.map((shot) => liveShotEntry(shot, handle))
+      : MOCK_OWN_SHOTS.slice(0, roll === 'nine' ? 9 : 10).map((mock) =>
+          mockShotEntry(mock, handle)
+        );
+
+  const ownRemaining = roll === 'live' ? remaining : roll === 'nine' ? 1 : 0;
+  const ownDeveloped = roll === 'developed' || developedByHand;
+  const eventOver = phase === 'developing' || phase === 'revealed';
+  /**
+   * The Develop CTA appears at zero shots - or at the event's end for a guest
+   * who never spent all ten, so nobody is stranded undeveloped forever.
+   */
+  const canDevelop = ownEntries.length > 0 && (ownRemaining === 0 || eventOver);
+
+  const allEntries: RollEntry[] = [
+    ...MOCK_ALL_ROLL.map((mock) => ({
+      photo: {
+        id: mock.id,
+        src: mock.src,
+        stamp: mock.stamp,
+        shooter: mock.shooter,
+        own: false,
+      },
+      groupLabel: mock.groupLabel,
+    })),
+    ...ownEntries,
+  ];
+
+  const reveal: RevealClock =
+    phase === 'revealed'
+      ? { state: 'past', endedOn: REVEAL_ENDED_ON }
+      : { state: 'counting', remaining: GALLERY_REMAINING };
+
+  const changeRoll = (next: DemoRoll) => {
+    setRoll(next);
+    setDevelopedByHand(false);
+  };
+
+  const openGallery = () => {
+    setScreen(phase === 'before' ? 'countdown' : 'gallery');
+  };
+
+  const pinDarkRoom = () => {
+    // A bath with nothing in it develops nothing: hand it the designed roll.
+    if (ownEntries.length === 0) changeRoll('spent');
+    setDarkRoomHeld(true);
+    setScreen('darkroom');
+  };
+
+  const dark = screen === 'camera' || screen === 'darkroom';
 
   return (
     <div
@@ -140,11 +270,36 @@ export default function MemorollDemo() {
             )}
             {screen === 'gallery' && (
               <GalleryScreen
-                phase={galleryPhase}
-                shots={shots}
-                onBackToCamera={
-                  phase === 'during' ? () => setScreen('camera') : undefined
+                eventName={MOCK_WEDDING.title}
+                photoCount={GALLERY_TALLY.photos}
+                participantCount={GALLERY_TALLY.participants}
+                reveal={reveal}
+                all={groupRoll(allEntries)}
+                own={groupRoll(ownEntries)}
+                ownDeveloped={ownDeveloped}
+                canDevelop={canDevelop}
+                tab={galleryTab}
+                onTabChange={setGalleryTab}
+                onDevelop={() => {
+                  setDarkRoomHeld(false);
+                  setScreen('darkroom');
+                }}
+                onBack={() =>
+                  setScreen(phase === 'during' ? 'camera' : 'cover')
                 }
+                showSwipeCue={!swipeCueSeen}
+                onSwipeCueSeen={() => setSwipeCueSeen(true)}
+              />
+            )}
+            {screen === 'darkroom' && (
+              <DarkRoomScreen
+                photos={ownEntries.map((entry) => entry.photo)}
+                hold={darkRoomHeld}
+                onDeveloped={() => {
+                  setDevelopedByHand(true);
+                  setGalleryTab('myroll');
+                  setScreen('gallery');
+                }}
               />
             )}
           </motion.div>
@@ -154,9 +309,18 @@ export default function MemorollDemo() {
       <DemoControl
         phase={phase}
         onPhaseChange={changePhase}
-        onReloadFilm={clearShots}
+        roll={roll}
+        onRollChange={changeRoll}
+        onOpenGallery={openGallery}
+        onPinDarkRoom={pinDarkRoom}
+        onReloadFilm={() => {
+          clearShots();
+          setDevelopedByHand(false);
+        }}
         onRestart={() => {
           setLocation('asking');
+          setGalleryTab('all');
+          setSwipeCueSeen(false);
           setScreen('cover');
         }}
       />

@@ -24,15 +24,15 @@ export const MOCK_WEDDING: MockWedding = {
   venue: 'The Orchard House',
 };
 
-/** One photo somebody shot on the collective roll. */
-export interface MockPhoto {
+/** One photo on a gallery roll, as the demo mocks it. */
+export interface MockRollPhoto {
   id: string;
   src: string;
-  /** Whose cam it came from, possessive-free ("Zidane"). */
-  camOwner: string;
-  /** Handwritten group label the gallery sorts under, e.g. "May 3 19:30". */
+  /** Who took it. */
+  shooter: string;
+  /** The time heading the gallery groups it under. */
   groupLabel: string;
-  /** Handwritten stamp burned onto the photo in the single view. */
+  /** The Date Stamp the print carries, as the design writes it. */
   stamp: string;
 }
 
@@ -53,23 +53,67 @@ export const SAMPLE_SOURCES = [
 
 const CAM_OWNERS = ['Zidane', 'Widya', 'Nadia'];
 
-const GROUPS = [
-  { label: 'May 3 19:30', stampTime: '19:30' },
-  { label: 'May 3 19:35', stampTime: '19:35' },
-  { label: 'May 3 20:21', stampTime: '20:21' },
-];
+/**
+ * The gallery's two time headings. The design writes "May 3 at 07:30pm" over
+ * both of its groups, which reads as the same placeholder pasted twice - two
+ * groups of the same instant is not a state grouping-by-time can produce - so
+ * the demo's second group carries a later time the way a real roll would.
+ */
+const GALLERY_GROUP_LABELS = ['May 3 at 07:30pm', 'May 3 at 08:15pm'];
 
-/** The collective roll everybody else shot, grouped like guest-09/13. */
-export const MOCK_PHOTOS: MockPhoto[] = SAMPLE_SOURCES.map((src, i) => {
-  const group = GROUPS[Math.floor(i / 4) % GROUPS.length];
-  return {
-    id: `mock-${i}`,
-    src,
-    camOwner: CAM_OWNERS[i % CAM_OWNERS.length],
-    groupLabel: group.label,
-    stamp: `03/05/2026 ${group.stampTime}`,
-  };
-});
+/** The Date Stamp as the redesigned gallery writes it, curly quote included. */
+export const PRINT_STAMP = '5 3 ‘26';
+
+/** Six prints under the first heading, the rest under the second (guest-14/18). */
+const rollGroupLabel = (index: number) =>
+  GALLERY_GROUP_LABELS[index < 6 ? 0 : 1];
+
+/**
+ * The ten sample sources that are photographs. The other two are not: index 9
+ * is a grey placeholder graphic and index 11 is the Memoify mark, and a roll
+ * with either on it reads as a broken image rather than as somebody's shot.
+ */
+const ROLL_SOURCES = [...SAMPLE_SOURCES.slice(0, 9), SAMPLE_SOURCES[10]];
+
+/** The Collective Gallery: everybody else's ten Shots (guest-13/14). */
+export const MOCK_ALL_ROLL: MockRollPhoto[] = ROLL_SOURCES.map((src, i) => ({
+  id: `all-${i}`,
+  src,
+  shooter: CAM_OWNERS[i % CAM_OWNERS.length],
+  groupLabel: rollGroupLabel(i),
+  stamp: PRINT_STAMP,
+}));
+
+/**
+ * A designed stand-in for the guest's own Roll (guest-15/16/17/18), so the
+ * demo can stand in every My Roll state without ten trips through the camera.
+ * The same ten photographs, dealt from the middle so the two rolls do not
+ * mirror each other row for row. The shooter is whoever the guest said they
+ * are on "This you?", so it is signed at the demo surface rather than here.
+ */
+export const MOCK_OWN_SHOTS: Omit<MockRollPhoto, 'shooter'>[] = [
+  ...ROLL_SOURCES.slice(4),
+  ...ROLL_SOURCES.slice(0, 4),
+].map((src, i) => ({
+  id: `own-${i}`,
+  src,
+  groupLabel: rollGroupLabel(i),
+  stamp: PRINT_STAMP,
+}));
+
+/** The header's tally, at the scale the design mocks (guest-13). */
+export const GALLERY_TALLY = { photos: 615, participants: 100 };
+
+/** What remains on the reveal clock while the demo's event runs. */
+export const GALLERY_REMAINING = {
+  days: 0,
+  hours: 16,
+  minutes: 32,
+  seconds: 9,
+};
+
+/** When the demo's Reveal came, as guest-14 prints it. */
+export const REVEAL_ENDED_ON = 'May 4th 2026, 12:00PM';
 
 /** The landing collage (guest-01): one big polaroid over a strip of three. */
 export const COLLAGE_MAIN = SAMPLE_SOURCES[0];
@@ -85,12 +129,3 @@ export const VIEWFINDER_FALLBACK = SAMPLE_SOURCES[10];
  * with the mock roll's stamps instead of betraying the demo's date.
  */
 export const STAMP_DATE = '03/05/2026';
-
-/** The designer's literal gallery copy (guest-05/08/09/12). */
-export const GALLERY_COPY = {
-  revealedHeading: 'The roll dropped. Go relive the chaos.',
-  revealedSub: '1.000 memories captured by 50 guests',
-  developingHeading: 'The roll dropped in',
-  allTab: 'All (1000)',
-  ownTab: 'Captured by you',
-};

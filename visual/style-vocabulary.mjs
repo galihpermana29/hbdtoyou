@@ -307,6 +307,46 @@ function normaliseGradientArgument(argument) {
 }
 
 /**
+ * A filter to its functions, each argument trimmed the way lengths are.
+ *
+ * The one filter the MemoRoll design uses is `blur()`, and there it is the
+ * design rather than a decoration: an Undeveloped Roll is a Roll nobody can
+ * see, and the blur is what "cannot be seen" is drawn as - LAYER_BLUR 4 on a
+ * hidden print, 10 and 6 mid-develop in the Dark Room, none once developed.
+ * A screen that lost it would be showing everybody's photos before the Reveal,
+ * so it is asserted the way a colour is.
+ *
+ * `blur(4)` and `blur(4px)` are one claim; an element with no filter reports
+ * `none`. Functions that are not lengths pass through lowered, the same
+ * pass-through the gradient normaliser gives `url(…)`, so a claim against an
+ * element wearing an unexpected filter fails with both spellings shown.
+ */
+export function normaliseFilter(input) {
+  const value = String(input).trim();
+  if (value === '' || value.toLowerCase() === 'none') {
+    return 'none';
+  }
+
+  return splitOutsideBrackets(value, (character) => /\s/.test(character))
+    .map((layer) => {
+      const call = /^([a-z-]+)\((.*)\)$/is.exec(layer);
+      if (!call) {
+        return layer.toLowerCase();
+      }
+      const parts = splitOutsideBrackets(
+        call[2],
+        (character) => character === ','
+      ).map((argument) =>
+        /^-?[\d.]+(px)?$/i.test(argument)
+          ? normaliseLength(argument)
+          : argument.toLowerCase()
+      );
+      return `${call[1].toLowerCase()}(${parts.join(', ')})`;
+    })
+    .join(' ');
+}
+
+/**
  * Split on separators that are not inside brackets, so `rgba(…)` survives.
  *
  * Used for both halves of reading a shadow: commas separate its layers, and
@@ -386,6 +426,7 @@ export const ASSERTABLE_PROPERTIES = {
     ],
   },
   boxShadow: { normalise: normaliseShadow, read: ['boxShadow'] },
+  filter: { normalise: normaliseFilter, read: ['filter'] },
   padding: {
     normalise: normaliseLengthList,
     read: ['paddingTop', 'paddingRight', 'paddingBottom', 'paddingLeft'],

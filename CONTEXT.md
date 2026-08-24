@@ -171,6 +171,11 @@ _Avoid_: reveal, which is when everyone else's Shots open
 A Roll whose Shots have been taken and cannot yet be seen, shown blurred.
 Every Roll starts this way and there is no way to peek: no preview between frames, no thumbnail of the last Shot.
 
+**Veiled**:
+How a Shot nobody may see yet is drawn: near-black under an 80% veil, softly blurred, with nothing printed on it.
+One treatment for what either gate is holding closed - a guest's own Undeveloped Shots, and everyone else's before the Reveal.
+_Avoid_: hidden, which says nothing about how it looks.
+
 **Dark Room**:
 The screen a Roll develops in, where the blur lifts off the prints.
 
