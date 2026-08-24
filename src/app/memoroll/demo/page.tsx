@@ -1,11 +1,15 @@
 import type { Metadata } from 'next';
-import { memorollFonts } from './fonts';
+import { memorollFonts as designFonts } from '@/components/memoroll/ui/fonts';
+import { memorollFonts as legacyFonts } from './fonts';
 import MemorollDemo from './memoroll-demo';
 
 /**
- * The MemoRoll guest demo: a clickable walkthrough of the designer's 14
- * screens, local state only. Deliberately outside the (gifts) route group -
- * ADR 0003 gives that group runtime meaning this demo must not inherit.
+ * The MemoRoll guest demo: a clickable walkthrough of the designer's screens,
+ * local state only. It renders the same components the real product will
+ * (ADR 0007); only the data behind them differs.
+ *
+ * Deliberately outside the (gifts) route group - ADR 0003 gives that group
+ * runtime meaning this demo must not inherit.
  */
 export const metadata: Metadata = {
   title: 'MemoRoll · guest demo | Memoify',
@@ -16,7 +20,11 @@ export const metadata: Metadata = {
 
 export default function MemorollDemoPage() {
   return (
-    <main className={memorollFonts}>
+    // Two font sets while the design is replaced screen by screen: the four
+    // families of the 2026-08-24 design, and the two the camera and gallery
+    // still use until hbd-qti.2 and hbd-qti.3 replace them. `./fonts.ts` and
+    // this line go with the last of those screens.
+    <main className={`${designFonts} ${legacyFonts}`}>
       <MemorollDemo />
     </main>
   );

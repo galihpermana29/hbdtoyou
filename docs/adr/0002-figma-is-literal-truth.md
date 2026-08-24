@@ -368,3 +368,19 @@ The Guest List card says that its columns scroll sideways, below 1440 only, beca
 
 None of these is a deviation to be argued with the designer.
 They are the product at widths the design does not describe, and the moment a frame is drawn at one of them the frame wins.
+
+## The rule also governs MemoRoll, with one deviation
+
+The MemoRoll design (`docs/design/memoroll/`, captured 2026-08-24 from the Figma file "Randos") is followed the same way, and one departure is agreed rather than argued.
+
+The camera's film pills read `RAW`, then `Portra 400` three times over.
+Ship the placeholder and the product carries Kodak's trademark on a paid surface; ship it three times and it carries a roster that does not exist.
+Three identical labels is a placeholder, and hbd-sk4 already settled that every MemoRoll look is an original recipe rather than a named film stock.
+
+So six pills ship: `RAW`, and the five recipes `src/lib/memoroll-film.ts` already renders.
+`RAW` is taken from the design as the label for the no-film option, replacing "None".
+If the designer supplies real names in her own voice, they replace the five and this paragraph goes away.
+
+Two smaller departures need no argument.
+The iOS status bar and Safari tab bar drawn on every frame are mockery of the browser rather than the product, and are not rendered.
+The Landing and Dark Room animations are approximations, because the references she attached are Gumlet video links that cannot be read from here; they are marked as approximations until she supplies them.

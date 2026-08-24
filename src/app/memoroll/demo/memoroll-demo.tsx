@@ -1,48 +1,79 @@
 'use client';
 
+import Cover from '@/components/memoroll/guest/cover';
+import CountdownScreen from '@/components/memoroll/guest/countdown-screen';
+import LocationScreen, {
+  type LocationState,
+} from '@/components/memoroll/guest/location-screen';
+import UsernameScreen from '@/components/memoroll/guest/username-screen';
 import { AnimatePresence, motion, useReducedMotion } from 'framer-motion';
 import { useState } from 'react';
 import DemoControl, { DemoPhase } from './demo-control';
+import { MOCK_WEDDING, SAMPLE_SOURCES } from './mock';
 import CameraScreen from './screens/camera';
 import GalleryScreen from './screens/gallery';
-import LandingScreen from './screens/landing';
-import LocationGateScreen from './screens/location-gate';
 import OnboardScreen from './screens/onboard';
 import SsoLoginScreen from './screens/sso-login';
-import TimeGateScreen from './screens/time-gate';
 import { useShots } from './use-shots';
 import { REDUCED_FADE, screenVariants } from './variants';
 
 type Screen =
-  'landing' | 'gate' | 'sso' | 'location' | 'onboard' | 'camera' | 'gallery';
+  | 'cover'
+  | 'countdown'
+  | 'sso'
+  | 'username'
+  | 'location'
+  | 'onboard'
+  | 'camera'
+  | 'gallery';
 
 /**
- * The guest walkthrough, following the designer's MVP flowchart:
- * landing -> time gate -> SSO -> location gate -> onboard -> camera ->
- * gallery, with the gallery's ending decided by where the demo phase says
- * the event stands. Local state only; no backend is called anywhere here.
+ * The guest walkthrough: Cover -> countdown or sign-in -> "This you?" ->
+ * location -> camera -> gallery. Local state only; nothing here calls a
+ * backend.
+ *
+ * The screens themselves live in `src/components/memoroll/guest/` and take
+ * plain props, so the real product renders exactly these components with real
+ * data behind them (ADR 0007). This file is the demo's half of that: mock data,
+ * and the state a surface has to hold.
+ *
+ * The camera, the gallery and the onboarding are still the old design, and are
+ * replaced by hbd-qti.2 and hbd-qti.3.
  */
 export default function MemorollDemo() {
   const reduce = useReducedMotion();
-  const [screen, setScreen] = useState<Screen>('landing');
+  const [screen, setScreen] = useState<Screen>('cover');
   const [phase, setPhase] = useState<DemoPhase>('during');
+  const [location, setLocation] = useState<LocationState>('asking');
+  const [handle, setHandle] = useState('dhilafadhila');
   const { shots, addShot, clearShots, remaining } = useShots();
 
-  const enterFromLanding = () => {
-    setScreen(phase === 'before' ? 'gate' : 'sso');
+  const enterFromCover = () => {
+    setScreen(phase === 'before' ? 'countdown' : 'sso');
   };
 
-  const passLocation = () => {
+  /**
+   * The demo walks through Location Blocked once on the way in, because it is
+   * one of the designed screens and a walkthrough that never reaches it would
+   * be hiding a third of what the gate does. A guest with a real phone either
+   * is at the venue or is not.
+   */
+  const answerLocation = () => {
+    if (location === 'asking') {
+      setLocation('blocked');
+      return;
+    }
+    setLocation('asking');
     // After the event there is nothing left to shoot: straight to the roll.
     setScreen(phase === 'during' ? 'onboard' : 'gallery');
   };
 
   const changePhase = (next: DemoPhase) => {
     setPhase(next);
-    // The gate opens the moment the demo clock says the event started.
-    if (screen === 'gate' && next !== 'before') setScreen('sso');
-    // And walking back in time from the roll returns to the closed door.
-    if (screen !== 'landing' && next === 'before') setScreen('gate');
+    // The door opens the moment the demo clock says the event started.
+    if (screen === 'countdown' && next !== 'before') setScreen('sso');
+    // And walking back in time from the roll returns to the closed one.
+    if (screen !== 'cover' && next === 'before') setScreen('countdown');
   };
 
   const galleryPhase = phase === 'before' ? 'during' : phase;
@@ -67,17 +98,34 @@ export default function MemorollDemo() {
             }
             exit={reduce ? { opacity: 0, transition: REDUCED_FADE } : 'exit'}
             className="flex min-h-[100dvh] flex-col">
-            {screen === 'landing' && (
-              <LandingScreen onEnter={enterFromLanding} />
+            {screen === 'cover' && (
+              <Cover
+                eventName={MOCK_WEDDING.title}
+                photos={SAMPLE_SOURCES.slice(0, 6)}
+                style="collage"
+                ctaLabel="Get me in"
+                onEnter={enterFromCover}
+              />
             )}
-            {screen === 'gate' && (
-              <TimeGateScreen onBack={() => setScreen('landing')} />
+            {screen === 'countdown' && (
+              <CountdownScreen
+                remaining={{ days: 6, hours: 7, minutes: 6, seconds: 7 }}
+              />
             )}
             {screen === 'sso' && (
-              <SsoLoginScreen onSignedIn={() => setScreen('location')} />
+              <SsoLoginScreen onSignedIn={() => setScreen('username')} />
+            )}
+            {screen === 'username' && (
+              <UsernameScreen
+                handle={handle}
+                onConfirm={(next) => {
+                  setHandle(next);
+                  setScreen('location');
+                }}
+              />
             )}
             {screen === 'location' && (
-              <LocationGateScreen onPassed={passLocation} />
+              <LocationScreen state={location} onAct={answerLocation} />
             )}
             {screen === 'onboard' && (
               <OnboardScreen onDone={() => setScreen('camera')} />
@@ -107,7 +155,10 @@ export default function MemorollDemo() {
         phase={phase}
         onPhaseChange={changePhase}
         onReloadFilm={clearShots}
-        onRestart={() => setScreen('landing')}
+        onRestart={() => {
+          setLocation('asking');
+          setScreen('cover');
+        }}
       />
     </div>
   );

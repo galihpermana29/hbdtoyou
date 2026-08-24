@@ -31,6 +31,13 @@ import {
   expectations as weddingTemplate1,
   sealed as weddingTemplate1Sealed,
 } from './expectations/wedding-template-1.mjs';
+import { expectations as memorollCountdown } from './expectations/memoroll-countdown.mjs';
+import { expectations as memorollCover } from './expectations/memoroll-cover.mjs';
+import {
+  asking as memorollLocationAsking,
+  blocked as memorollLocationBlocked,
+} from './expectations/memoroll-location.mjs';
+import { expectations as memorollUsername } from './expectations/memoroll-username.mjs';
 
 /** The width the design is defined at. Nothing below this is checked. */
 export const DESIGN_WIDTH = 1440;
@@ -45,7 +52,14 @@ export const DESIGN_WIDTH = 1440;
 export const TEMPLATE_DESIGN_WIDTH = 375;
 
 /** The Figma file the design is read from, for the export instructions. */
+/**
+ * The Figma file a screen was read from. Two files are checked now: the wedding
+ * invitation's, and "Randos", where MemoRoll is drawn. A screen names its own
+ * with `figmaFile`; unnamed means the wedding one, which is what every screen
+ * meant when there was only the one.
+ */
 export const FIGMA_FILE_NAME = 'Wedding Invitations';
+export const MEMOROLL_FIGMA_FILE_NAME = 'Randos';
 
 const DETAILS_AND_STORY_ROUTE = '/create/wedding-invitation';
 
@@ -187,7 +201,6 @@ async function editTheLoveStory(page) {
   await pressSection(page, 'Love Story');
   await pressSection(page, 'Cover Header');
 }
-
 
 /**
  * A one-pixel PNG, which is all a photograph has to be here.
@@ -334,7 +347,6 @@ async function fillTheDetailsAndStory(page) {
     'Paste the embed code from Google Maps',
     '<iframe src="https://www.google.com/maps/embed?pb=!1m18!1m12" width="600" height="450"></iframe>'
   );
-
 }
 
 /**
@@ -463,6 +475,50 @@ async function openTheRsvp(page) {
  * Content, and finally the RSVP a guest replies on. Each names the frame it was
  * read from and how to drive the page into it.
  */
+/* ------------------------------- MemoRoll -------------------------------- */
+
+/**
+ * The MemoRoll demo, which is where these screens can be seen without an
+ * account, a venue or a clock. It renders the same components the real product
+ * will (ADR 0007), so what is checked here is what ships there.
+ */
+const MEMOROLL_ROUTE = '/memoroll/demo';
+
+/** Sign in, which the design does not draw: it is Google's screen, not ours. */
+async function memorollSignIn(page) {
+  await page.getByRole('button', { name: 'Get me in' }).click();
+  await page.getByRole('button', { name: 'Continue with Google' }).click();
+}
+
+/** Confirm the handle, which is the last thing asked before the location gate. */
+async function memorollConfirmHandle(page) {
+  await memorollSignIn(page);
+  await page.getByRole('button', { name: 'Yup, let’s shoot!' }).click();
+}
+
+/**
+ * Refuse the location, which the demo does once on the way in so the designed
+ * blocked state is reachable without standing 500m from a wedding.
+ */
+async function memorollBlockLocation(page) {
+  await memorollConfirmHandle(page);
+  await page.getByRole('button', { name: 'Allow My Location' }).click();
+}
+
+/**
+ * Wind the demo clock back, then knock on the door.
+ *
+ * Turning the clock back while the Cover is still up deliberately does not
+ * navigate - the Cover is what a guest is sent whenever they follow the link,
+ * and the door is only reached by asking to go in. So the phase is set first
+ * and the Cover's own button is pressed after it.
+ */
+async function memorollBeforeTheEvent(page) {
+  await page.getByRole('button', { name: /^demo · / }).click();
+  await page.getByRole('button', { name: 'Before the event' }).click();
+  await page.getByRole('button', { name: 'Get me in' }).click();
+}
+
 export const screens = [
   {
     id: 'details-and-story-collapsed',
@@ -576,6 +632,60 @@ export const screens = [
     baseline: 'wedding-template-1-rsvp.png',
     expectations: weddingTemplate1Rsvp,
     prepare: openTheRsvp,
+  },
+  {
+    id: 'memoroll-cover',
+    title: 'MemoRoll Cover, the first screen a guest is sent',
+    route: MEMOROLL_ROUTE,
+    figmaFile: MEMOROLL_FIGMA_FILE_NAME,
+    figmaNodeId: '450-13476',
+    designWidth: TEMPLATE_DESIGN_WIDTH,
+    baseline: 'memoroll-cover.png',
+    expectations: memorollCover,
+  },
+  {
+    id: 'memoroll-countdown',
+    title: 'MemoRoll before the roll opens, counting down',
+    route: MEMOROLL_ROUTE,
+    figmaFile: MEMOROLL_FIGMA_FILE_NAME,
+    figmaNodeId: '434-7640',
+    designWidth: TEMPLATE_DESIGN_WIDTH,
+    baseline: 'memoroll-countdown.png',
+    expectations: memorollCountdown,
+    prepare: memorollBeforeTheEvent,
+  },
+  {
+    id: 'memoroll-username',
+    title: 'MemoRoll asking a signed-in guest whether the handle is theirs',
+    route: MEMOROLL_ROUTE,
+    figmaFile: MEMOROLL_FIGMA_FILE_NAME,
+    figmaNodeId: '450-13751',
+    designWidth: TEMPLATE_DESIGN_WIDTH,
+    baseline: 'memoroll-username.png',
+    expectations: memorollUsername,
+    prepare: memorollSignIn,
+  },
+  {
+    id: 'memoroll-location-asking',
+    title: 'MemoRoll asking for the location that proves a guest is there',
+    route: MEMOROLL_ROUTE,
+    figmaFile: MEMOROLL_FIGMA_FILE_NAME,
+    figmaNodeId: '434-7429',
+    designWidth: TEMPLATE_DESIGN_WIDTH,
+    baseline: 'memoroll-location-asking.png',
+    expectations: memorollLocationAsking,
+    prepare: memorollConfirmHandle,
+  },
+  {
+    id: 'memoroll-location-blocked',
+    title: 'MemoRoll refusing a guest who is outside the venue',
+    route: MEMOROLL_ROUTE,
+    figmaFile: MEMOROLL_FIGMA_FILE_NAME,
+    figmaNodeId: '434-7485',
+    designWidth: TEMPLATE_DESIGN_WIDTH,
+    baseline: 'memoroll-location-blocked.png',
+    expectations: memorollLocationBlocked,
+    prepare: memorollBlockLocation,
   },
 ];
 

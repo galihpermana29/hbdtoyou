@@ -422,6 +422,16 @@ export const ASSERTABLE_PROPERTIES = {
    * a page.
    */
   contain: { normalise: normaliseKeywordList, read: ['contain'] },
+
+  /**
+   * Which edge a line of copy is set from.
+   *
+   * A design decision rather than a measurement, and one that changes what a
+   * screen means: MemoRoll centres the handle inside a field whose pencil sits
+   * out at the right edge, and the same field with the handle set left would be
+   * a different design rather than the same one at a different width.
+   */
+  textAlign: { normalise: normaliseKeywordList, read: ['textAlign'] },
 };
 
 /** The longhands a browser has to be asked for to cover every property above. */

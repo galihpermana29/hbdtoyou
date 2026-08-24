@@ -50,7 +50,7 @@ export interface MockPhoto {
   stamp: string;
 }
 
-const SAMPLE_SOURCES = [
+export const SAMPLE_SOURCES = [
   'https://res.cloudinary.com/dxuumohme/image/upload/v1735834469/tccbqffnucbsyeeioutb.jpg',
   'https://res.cloudinary.com/dxuumohme/image/upload/v1736878627/bubjbkztn7xfrxmusjtp.jpg',
   'https://res.cloudinary.com/dxuumohme/image/upload/v1736880564/zm9qkwdjbbnugbohko9x.jpg',
