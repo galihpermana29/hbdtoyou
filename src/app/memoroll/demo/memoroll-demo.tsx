@@ -42,7 +42,6 @@ import {
   VIEWFINDER_FALLBACK,
   type MockRollPhoto,
 } from './mock';
-import SsoLoginScreen from './screens/sso-login';
 import { SHOT_LIMIT, useShots, type Shot } from './use-shots';
 import { REDUCED_FADE, screenVariants } from './variants';
 
@@ -52,7 +51,6 @@ const FILM_STORAGE_KEY = 'memoroll-demo:film';
 type Screen =
   | 'cover'
   | 'countdown'
-  | 'sso'
   | 'username'
   | 'location'
   | 'camera'
@@ -166,7 +164,11 @@ export default function MemorollDemo() {
   };
 
   const enterFromCover = () => {
-    setScreen(phase === 'before' ? 'countdown' : 'sso');
+    // "Get me in" is the sign-in: the real product fires Google's own OAuth
+    // sheet here, which is the system's screen rather than a designed one, and
+    // lands on "This you?". The demo signs in instantly - the designer drew no
+    // screen in between because there isn't one.
+    setScreen(phase === 'before' ? 'countdown' : 'username');
   };
 
   /**
@@ -189,7 +191,7 @@ export default function MemorollDemo() {
   const changePhase = (next: DemoPhase) => {
     setPhase(next);
     // The door opens the moment the demo clock says the event started.
-    if (screen === 'countdown' && next !== 'before') setScreen('sso');
+    if (screen === 'countdown' && next !== 'before') setScreen('username');
     // And walking back in time from the roll returns to the closed one.
     if (screen !== 'cover' && next === 'before') setScreen('countdown');
   };
@@ -280,9 +282,6 @@ export default function MemorollDemo() {
               <CountdownScreen
                 remaining={{ days: 6, hours: 7, minutes: 6, seconds: 7 }}
               />
-            )}
-            {screen === 'sso' && (
-              <SsoLoginScreen onSignedIn={() => setScreen('username')} />
             )}
             {screen === 'username' && (
               <UsernameScreen

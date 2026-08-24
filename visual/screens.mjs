@@ -507,10 +507,13 @@ async function openTheRsvp(page) {
 const MEMOROLL_ROUTE = '/memoroll/demo';
 const MEMOROLL_CREATOR_ROUTE = '/memoroll/demo/create';
 
-/** Sign in, which the design does not draw: it is Google's screen, not ours. */
+/**
+ * Go in. "Get me in" is the sign-in: the real product fires Google's own
+ * OAuth sheet here - the system's screen, not a designed one - and lands on
+ * "This you?". The demo signs in on the press itself.
+ */
 async function memorollSignIn(page) {
   await page.getByRole('button', { name: 'Get me in' }).click();
-  await page.getByRole('button', { name: 'Continue with Google' }).click();
 }
 
 /** Confirm the handle, which is the last thing asked before the location gate. */

@@ -22,7 +22,6 @@ const page = await browser.newPage({ viewport: { width: 375, height: 812 } });
 try {
   await page.goto(`${HARNESS_BASE_URL}/memoroll/demo`);
   await page.getByRole('button', { name: 'Get me in' }).click();
-  await page.getByRole('button', { name: 'Continue with Google' }).click();
   await page.getByRole('button', { name: 'Yup, let’s shoot!' }).click();
   await page.getByRole('button', { name: 'Allow My Location' }).click();
   await page.getByRole('button', { name: 'Check Again' }).click();
