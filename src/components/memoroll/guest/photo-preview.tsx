@@ -102,6 +102,13 @@ export default function PhotoPreview({
       className="fixed inset-0 z-40 overflow-hidden"
       style={{
         background: 'rgba(0, 0, 0, 0.5)',
+        // The frame's scrim is 50% black over a bare page, and the designer
+        // approved it as a photo floating on a flat grey field. Over a live
+        // gallery, 50% alone leaves the grid legible behind the deck, so the
+        // backdrop is also blurred - the treatment her own tab-bar mock uses -
+        // until the scrim reads as her frame does whatever is behind it.
+        backdropFilter: 'blur(24px)',
+        WebkitBackdropFilter: 'blur(24px)',
         fontFamily: 'var(--font-mr-body)',
       }}>
       {/* The sheet dims everything; what sits on it keeps to the phone column

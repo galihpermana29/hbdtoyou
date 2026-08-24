@@ -284,15 +284,21 @@ export default function Cover({
         className="pointer-events-none absolute left-[81.7%] top-[58.6%] w-[29%] select-none"
       />
 
-      <div className="relative z-10 flex flex-1 flex-col items-center px-[16px] pt-[24px]">
+      {/* -31px: the design's text column (Frame 89, y 424) starts inside the
+          455-tall hero, tucked into the collage's white space, rather than
+          after it. */}
+      <div className="relative z-10 -mt-[31px] flex flex-1 flex-col items-center px-[16px]">
         <Wordmark className="h-[16px] w-[128px]" />
 
         {/* The event name is the creator's, so it is one string that wraps
-            rather than the design's two hand-broken lines. It steps down a size
-            when it is long: a name twice the designed length in a 32px script
-            would otherwise run off both edges of the phone. */}
+            rather than the design's two hand-broken lines - but it wraps in
+            the design's own 210px column, which is what breaks
+            "Elias & Freya's wedding" into the two centred lines the frame
+            draws instead of one line running under the camera doodle. A long
+            name steps down a size; a 32px script twice the designed length
+            would otherwise spill past three lines. */}
         <h1
-          className={`mt-[24px] text-center ${
+          className={`mt-[24px] max-w-[230px] text-center ${
             eventName.length > 28
               ? 'text-[24px] leading-[30px]'
               : 'text-[32px] leading-[38px]'

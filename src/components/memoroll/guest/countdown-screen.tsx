@@ -52,7 +52,11 @@ export default function CountdownScreen({
         />
       </div>
 
-      <div className="flex flex-1 flex-col items-center justify-center gap-[24px] px-[16px] pt-[350px]">
+      {/* Pinned where the design pins it (Frame 105, y 424 under a 42px
+          status bar the browser draws itself = 382), rather than centred in
+          what is left - centring floated the words 80px lower and left a band
+          of bare paper under the camera. */}
+      <div className="flex flex-1 flex-col items-center gap-[24px] px-[16px] pt-[382px]">
         <Wordmark className="h-[16px] w-[128px]" title="" />
 
         <h1

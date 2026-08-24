@@ -77,10 +77,15 @@ export const expectations = [
   bathPrintPhoto('second', 'blur(10px)'),
   bathPrintPhoto('third', 'none'),
   {
+    // The red light is the design's own overlay, exported flat from the file
+    // (Red light, #c42a00 with its caustics at 60%, blendMode MULTIPLY) and
+    // laid over the bath as an image. Its address is a build artifact and its
+    // pixels are the export's, so what is asserted is that the overlay is
+    // there - the colour lives in the exported image now, not in a property
+    // this harness could hold.
     name: 'the red light over the bath',
     select: 'section[aria-label="Dark Room"] div[aria-hidden]',
     nth: 1,
-    style: { backgroundColor: GALLERY_COLOUR.redLight },
   },
   {
     name: 'Memoify footer, in the dark',

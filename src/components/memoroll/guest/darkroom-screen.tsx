@@ -5,6 +5,7 @@ import { useEffect, useState } from 'react';
 import HeaderRule from '../ui/header-rule';
 import MemoifyFooter from '../ui/memoify-footer';
 import { colour } from '../ui/tokens';
+import redLight from '@/assets/memoroll/darkroom-red-light.jpg';
 import RollPrint from './print';
 import type { GalleryPhoto } from './roll';
 
@@ -166,34 +167,28 @@ export default function DarkRoomScreen({
           ))}
         </div>
 
-        {/* The red light lies over the whole bath. The design fills it with a
-            caustic water texture that the capture cannot hand over, so the
-            veins are gradients drifting slowly - part of the same approximated
-            chemistry as the develop itself. */}
-        <div
+        {/* The red light lies over the whole bath: the design's own overlay,
+            exported flat from the file - #c42a00 with its water caustics at
+            60% - multiplied over the prints exactly as the layer is in Figma
+            (Red light, blendMode MULTIPLY). The slow drift is ours: liquid
+            that held perfectly still would read as a tint, and the reference
+            for the real motion is still pending. */}
+        <motion.div
           aria-hidden
-          className="absolute inset-0"
+          className="absolute inset-[-6%]"
           style={{
-            background: colour.redLight,
+            backgroundImage: `url(${redLight.src})`,
+            backgroundSize: 'cover',
+            backgroundPosition: 'center',
             mixBlendMode: 'multiply',
-            opacity: 0.95,
-          }}>
-          <motion.span
-            className="absolute inset-[-20%] block"
-            style={{
-              mixBlendMode: 'screen',
-              opacity: 0.5,
-              backgroundImage:
-                'radial-gradient(closest-side at 30% 30%, rgba(255, 190, 170, 0.5), transparent 65%), radial-gradient(closest-side at 70% 65%, rgba(255, 150, 120, 0.4), transparent 60%)',
-            }}
-            animate={reduce ? undefined : { x: [0, -26, 0], y: [0, 18, 0] }}
-            transition={
-              reduce
-                ? undefined
-                : { duration: 7, repeat: Infinity, ease: 'easeInOut' }
-            }
-          />
-        </div>
+          }}
+          animate={reduce ? undefined : { x: [0, -14, 0], y: [0, 10, 0] }}
+          transition={
+            reduce
+              ? undefined
+              : { duration: 9, repeat: Infinity, ease: 'easeInOut' }
+          }
+        />
       </div>
 
       <MemoifyFooter onDark />

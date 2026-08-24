@@ -13,12 +13,12 @@ Re-capture on purpose, say so, and re-cut whatever it invalidates.
 
 ## What is here
 
-| | |
-|---|---|
+|                     |                                                                     |
+| ------------------- | ------------------------------------------------------------------- |
 | `design-nodes.json` | the raw capture: both sections, every node, every style. The truth. |
-| `inspect.mjs` | how to read it without loading 2.5MB into a context window |
-| `frames/*.jpg` | every screen exported at 2x. Evidence, not truth - see below |
-| `frames/flow-*.jpg` | the two whole sections, for orientation |
+| `inspect.mjs`       | how to read it without loading 2.5MB into a context window          |
+| `frames/*.jpg`      | every screen exported at 2x. Evidence, not truth - see below        |
+| `frames/flow-*.jpg` | the two whole sections, for orientation                             |
 
 Screenshots decide nothing.
 They are lossy, and the colours in them are JPEG approximations.
@@ -51,7 +51,7 @@ Earlier versions of these screens were parked far off the artboard rather than d
 The Camera frame is 375 wide, clips its content, and has three children sitting at x ≈ -16830.
 They are fully styled, they are in the tree, and they are invisible.
 `inspect.mjs` hides any child whose box does not intersect a clipping parent and says how many it hid; `--all` shows them.
-This is not cosmetic: the leftovers are the *previous* design's camera, in Homemade Apple, and an agent reading the raw tree would faithfully rebuild the thing this work is replacing.
+This is not cosmetic: the leftovers are the _previous_ design's camera, in Homemade Apple, and an agent reading the raw tree would faithfully rebuild the thing this work is replacing.
 
 **iOS chrome is mocked, not designed.**
 Every frame carries an iOS status bar at the top and a Safari tab bar at the bottom, in SF Pro and SF Compact, with `memoroll.com` in the address bar.
@@ -64,7 +64,7 @@ Three identical labels is a placeholder, not a roster - and Portra 400 is Kodak'
 
 **Mixed runs.**
 Six text nodes report their family and size as `mixed`, because they carry more than one style in one string.
-One of them, the venue step's "Phones 500m outside the venue aren't allowed to shoot", reports its *fills* as `mixed` too - a word, not a list - which is exactly what it means and what the whole line is about: 500m is written in the flame and in bold because it is the rule.
+One of them, the venue step's "Phones 500m outside the venue aren't allowed to shoot", reports its _fills_ as `mixed` too - a word, not a list - which is exactly what it means and what the whole line is about: 500m is written in the flame and in bold because it is the rule.
 For those, read the frame image.
 
 ## The guest flow
@@ -101,7 +101,7 @@ guest-19/20-preview           one photo, swipeable, "Who took this?"
 ```
 
 Two gates, and they are independent.
-**Your own Roll** develops when *your* shots hit zero, and is sharp to you immediately, event still running.
+**Your own Roll** develops when _your_ shots hit zero, and is sharp to you immediately, event still running.
 **ALL** stays blurred for everyone until the creator's reveal time, whatever you did with your own roll.
 
 ## The creator flow
@@ -109,16 +109,16 @@ Two gates, and they are independent.
 The steppers say the order, and they disagree with the order the frames are laid out in.
 White is done-or-current, grey `#808080` is not yet, so the highest white number is the step you are on.
 
-| # | Screen | Asks |
-|---|---|---|
-| 1 | `creator-02-vibe` | Wedding / Birthday / Trips, Parties, Gatherings |
-| 2 | `creator-06-name-your-roll` | the event name |
-| 3 | `creator-03/04/05-make-it-yours` | cover style - Collage, Taped wall, Simple - and photos |
-| 4 | `creator-07-time` | when the roll opens |
-| 5 | `creator-08-venue` | venue, address, and the 500m "Only at the venue" switch |
-| 6 | `creator-09-shots-per-guest` | how many shots each guest gets |
-| 7 | `creator-10-reveal-timing` | when the roll develops. CTA is "Create Now" |
-| 8 | `creator-11-ready-to-publish` | Edit / Preview / Publish, then the QR bottomsheet |
+| #   | Screen                           | Asks                                                    |
+| --- | -------------------------------- | ------------------------------------------------------- |
+| 1   | `creator-02-vibe`                | Wedding / Birthday / Trips, Parties, Gatherings         |
+| 2   | `creator-06-name-your-roll`      | the event name                                          |
+| 3   | `creator-03/04/05-make-it-yours` | cover style - Collage, Taped wall, Simple - and photos  |
+| 4   | `creator-07-time`                | when the roll opens                                     |
+| 5   | `creator-08-venue`               | venue, address, and the 500m "Only at the venue" switch |
+| 6   | `creator-09-shots-per-guest`     | how many shots each guest gets                          |
+| 7   | `creator-10-reveal-timing`       | when the roll develops. CTA is "Create Now"             |
+| 8   | `creator-11-ready-to-publish`    | Edit / Preview / Publish, then the QR bottomsheet       |
 
 The event's name is written two ways.
 The field on step 2 and the caption under the QR both read "Freya & Elias' Wedding"; the Cover inside steps 3 and 8 reads "Elias & Freya's wedding".
@@ -137,12 +137,12 @@ Both ship as written.
 
 **Type.** Four families, and every one of them earns its place:
 
-| Family | Job |
-|---|---|
+| Family            | Job                                                                                 |
+| ----------------- | ----------------------------------------------------------------------------------- |
 | Plus Jakarta Sans | everything structural. Regular, Medium, SemiBold, Bold, ExtraBold, ExtraBold Italic |
-| Passion One Bold | the `MEMO R⬭LL` wordmark, where the O is an orange lozenge. Nothing else |
-| Oooh Baby | the event name in script, 32 on the covers |
-| Sometype Mono | "Created by Memoify.live" at 10, in the footer. Nothing else |
+| Passion One Bold  | the `MEMO R⬭LL` wordmark, where the O is an orange lozenge. Nothing else            |
+| Oooh Baby         | the event name in script, 32 on the covers                                          |
+| Sometype Mono     | "Created by Memoify.live" at 10, in the footer. Nothing else                        |
 
 Homemade Apple and Poppins are **not** in this design.
 Homemade Apple appears in the capture only inside the off-canvas leftovers.
@@ -152,15 +152,15 @@ Line height is almost always 150%, tracking almost always -1.1%.
 
 **Colour.**
 
-| | |
-|---|---|
-| `#f7f5f3` | the paper ground - landing, gallery, creator |
-| `#232323` `#212121` `#1b1b1b` | the camera's dark ground |
-| `#ff3e09` | the one accent. Shutter, back button, wordmark lozenge, stepper marks |
-| `#e0dabf` | cream. **Selected** film pill, selected tab, counter text |
-| `#dadada` `#808080` `#999999` | greys, in that order of frequency |
-| `#fdd8b8` `#e7caab` | warm tints on the covers |
-| `#ae9ea6` | the mauve of the shutter dock and the counter's outer pill |
+|                               |                                                                       |
+| ----------------------------- | --------------------------------------------------------------------- |
+| `#f7f5f3`                     | the paper ground - landing, gallery, creator                          |
+| `#232323` `#212121` `#1b1b1b` | the camera's dark ground                                              |
+| `#ff3e09`                     | the one accent. Shutter, back button, wordmark lozenge, stepper marks |
+| `#e0dabf`                     | cream. **Selected** film pill, selected tab, counter text             |
+| `#dadada` `#808080` `#999999` | greys, in that order of frequency                                     |
+| `#fdd8b8` `#e7caab`           | warm tints on the covers                                              |
+| `#ae9ea6`                     | the mauve of the shutter dock and the counter's outer pill            |
 
 Selection is expressed the same way in two places: the chosen thing is cream on dark, the unchosen are dark with cream text.
 
@@ -204,7 +204,7 @@ Six departures are deliberate and recorded.
 
 The two interaction reference videos, and anything she draws after 2026-08-24.
 Her own notes, in Indonesian, are in the file and worth reading - `--all` will show them:
-"Muncul sekali aja pas awal masuk" (the How popup shows once, on first entry),
+"Muncul sekali aja pas awal masuk. ‘10 Shots’ nya ngikutin config harusnya" (the How popup shows once, on first entry - and its shot count follows the creator’s config; the second sentence arrived 2026-08-25),
 "CTA muncul pas udah 0 shots nya" (the Develop CTA appears at zero shots),
 "Cue hand swipe pas awal awal aja" (the swipe hint shows only the first time).
 

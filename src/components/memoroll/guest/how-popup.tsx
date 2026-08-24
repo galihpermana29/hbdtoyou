@@ -37,13 +37,14 @@ const RULES = [
   },
   {
     icon: howShots.src,
-    copy: (
+    copy: (shots: number) => (
       <>
-        Each person gets <strong className="font-bold">10 shots</strong>.
+        Each person gets <strong className="font-bold">{shots} shots</strong>.
         That&apos;s it. No retakes, no camera roll uploads.
       </>
     ),
-    read: "Each person gets 10 shots. That's it. No retakes, no camera roll uploads.",
+    read: (shots: number) =>
+      `Each person gets ${shots} shots. That's it. No retakes, no camera roll uploads.`,
   },
   {
     icon: howReveal.src,
@@ -57,7 +58,18 @@ const RULES = [
   },
 ];
 
-export default function HowPopup({ onDone }: { onDone: () => void }) {
+export default function HowPopup({
+  shots,
+  onDone,
+}: {
+  /**
+   * The Roll this event hands out. The design's frame says 10 because its
+   * creator configured 10; the designer's note on it says the number follows
+   * the config ("'10 Shots' nya ngikutin config harusnya", 2026-08-25).
+   */
+  shots: number;
+  onDone: () => void;
+}) {
   const reduce = useReducedMotion();
 
   return (
@@ -93,26 +105,32 @@ export default function HowPopup({ onDone }: { onDone: () => void }) {
             Here’s how Memoroll works
           </h2>
           <div className="flex flex-col gap-[12px]">
-            {RULES.map((rule) => (
-              <div
-                key={rule.read}
-                className="rounded-[20px] p-[10px]"
-                style={{ background: 'rgba(239, 234, 233, 0.3)' }}>
-                <div className="flex items-center gap-[12px]">
-                  <img
-                    src={rule.icon}
-                    alt=""
-                    aria-hidden
-                    className="h-[56px] w-[56px] shrink-0 rounded-[12px]"
-                  />
-                  <p
-                    className="text-[14px] font-normal leading-[150%] tracking-[-0.011em]"
-                    style={{ color: '#eee9e8' }}>
-                    {rule.copy}
-                  </p>
+            {RULES.map((rule) => {
+              const read =
+                typeof rule.read === 'function' ? rule.read(shots) : rule.read;
+              return (
+                <div
+                  key={read}
+                  className="rounded-[20px] p-[10px]"
+                  style={{ background: 'rgba(239, 234, 233, 0.3)' }}>
+                  <div className="flex items-center gap-[12px]">
+                    <img
+                      src={rule.icon}
+                      alt=""
+                      aria-hidden
+                      className="h-[56px] w-[56px] shrink-0 rounded-[12px]"
+                    />
+                    <p
+                      className="text-[14px] font-normal leading-[150%] tracking-[-0.011em]"
+                      style={{ color: '#eee9e8' }}>
+                      {typeof rule.copy === 'function'
+                        ? rule.copy(shots)
+                        : rule.copy}
+                    </p>
+                  </div>
                 </div>
-              </div>
-            ))}
+              );
+            })}
           </div>
           <Cta onClick={onDone} className="w-full">
             Got it

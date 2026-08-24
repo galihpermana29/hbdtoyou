@@ -1,3 +1,4 @@
+import paper from '@/assets/memoroll-paper.png';
 import { colour } from '../ui/tokens';
 
 /**
@@ -136,7 +137,16 @@ export default function RollPrint({
             : 'A shot'
       }
       className={`block bg-white ${className}`}
-      style={{ padding: s.pad, boxShadow: s.shadow, ...style }}>
+      style={{
+        padding: s.pad,
+        boxShadow: s.shadow,
+        // The design's print border is not flat white: the Photo frame's own
+        // fill is an image of paper, which is what gives every print its
+        // slight tooth. The same paper the film work already shipped.
+        backgroundImage: `url(${paper.src})`,
+        backgroundSize: 'cover',
+        ...style,
+      }}>
       <span
         className="relative block overflow-hidden transition-[filter] duration-700 ease-out motion-reduce:transition-none"
         style={{

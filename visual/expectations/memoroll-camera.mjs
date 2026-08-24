@@ -199,20 +199,12 @@ export const expectations = [
     style: { fontSize: '13px', fontWeight: 800, color: '#a52400' },
   },
   {
-    name: 'a print in the gallery’s stack',
-    select: 'button[aria-label="Open the gallery"] > span[aria-hidden]',
-    nth: 1,
-    style: {
-      backgroundColor: '#ededed',
-      borderRadius: '1px',
-      padding: '1px',
-    },
-  },
-  {
-    name: 'the print’s window, veiled - never a last-shot preview',
-    select: 'button[aria-label="Open the gallery"] > span[aria-hidden] > span',
-    nth: 0,
-    style: { backgroundColor: '#1b1b1b' },
+    // The folder is the design's own artwork, exported from the file (node
+    // 434:7888): the mauve folder with its prints spilling out. What is
+    // asserted is that the artwork is what the button draws - its pixels are
+    // the export's, not this harness's to re-measure.
+    name: 'the design’s folder artwork',
+    select: 'button[aria-label="Open the gallery"] > img[aria-hidden]',
   },
   {
     name: 'the gallery count badge',

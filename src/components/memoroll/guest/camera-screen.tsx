@@ -23,6 +23,7 @@ import {
   type SelectableFilmId,
   filmStamps,
 } from './films';
+import folderArt from '@/assets/memoroll/camera-gallery-folder.png';
 import HowPopup from './how-popup';
 
 /** The baked keeper: 960x1280, the film report's resolution contract. */
@@ -61,6 +62,7 @@ const JPEG_QUALITY = 0.78;
  */
 export default function CameraScreen({
   remaining,
+  rollSize,
   galleryCount,
   film,
   onPickFilm,
@@ -74,6 +76,8 @@ export default function CameraScreen({
   simulatedLighting,
 }: {
   remaining: number;
+  /** The whole Roll this event hands out; the How popup says this number. */
+  rollSize: number;
   /** The number on the gallery button: how many prints the roll holds. */
   galleryCount: number;
   film: SelectableFilmId;
@@ -633,56 +637,26 @@ export default function CameraScreen({
             className="absolute right-[22px] top-[69px] h-[3px] w-[53px] rounded-full"
             style={{ background: colour.pill, filter: 'blur(5.1px)' }}
           />
-          {/* The gallery: a folder of prints and how many it holds. The
-              prints are dark on purpose - Undeveloped Shots are veiled, and
-              nothing on this camera ever previews one. */}
+          {/* The gallery: the design's own folder of prints, exported from
+              the file, with how many it holds. The prints in it are the
+              artwork's - product decoration the same on every camera - not a
+              preview of anybody's Shot, which this camera never shows. The
+              live count is drawn over the artwork's baked badge in the same
+              ink, so whatever number the file was exported with never shows
+              through. */}
           <button
             type="button"
             onClick={onOpenGallery}
             aria-label="Open the gallery"
             className="absolute right-[19px] top-[13px] h-[56px] w-[60px]">
-            <span
+            <img
+              src={folderArt.src}
+              alt=""
               aria-hidden
-              className="absolute left-[0.5px] top-[10.5px] block h-[31px] w-[59px] rounded-[4px]"
-              style={{ background: '#7f6c77' }}
+              className="absolute inset-0 h-full w-full"
             />
-            {[
-              { left: 2.5, top: 5.5 },
-              { left: 21.5, top: 3.5 },
-              { left: 26.5, top: 12.5 },
-            ].map((print) => (
-              <span
-                key={`${print.left}-${print.top}`}
-                aria-hidden
-                className="absolute block h-[40px] w-[31px] rounded-[1px] p-[1px]"
-                style={{
-                  left: print.left,
-                  top: print.top,
-                  background: '#ededed',
-                }}>
-                <span
-                  className="block h-full w-full rounded-[1px]"
-                  style={{ background: colour.inkDeep }}
-                />
-              </span>
-            ))}
             <span
-              aria-hidden
-              className="absolute left-[0.5px] top-[24px] block h-[31px] w-[59px]">
-              <span
-                className="absolute left-0 top-0 block h-[17px] w-[29.5px] rounded-full"
-                style={{ background: '#85707b' }}
-              />
-              <span
-                className="absolute bottom-0 left-0 block h-[25px] w-full rounded-[4px]"
-                style={{
-                  background: '#85707b',
-                  boxShadow: 'inset 2.08px 2.08px 6.18px rgba(86, 72, 79, 1)',
-                }}
-              />
-            </span>
-            <span
-              className="absolute left-[36px] top-[-7px] flex h-[24px] w-[24px] items-center justify-center rounded-full"
+              className="absolute right-0 top-0 flex h-[24px] w-[24px] items-center justify-center rounded-full"
               style={{ background: '#40363b' }}>
               <span className="text-[10px] font-bold leading-[150%] tracking-[-0.011em] text-white">
                 {galleryCount}
@@ -693,7 +667,7 @@ export default function CameraScreen({
       </div>
 
       <AnimatePresence>
-        {showHow && <HowPopup onDone={() => onHowSeen?.()} />}
+        {showHow && <HowPopup shots={rollSize} onDone={() => onHowSeen?.()} />}
       </AnimatePresence>
     </section>
   );

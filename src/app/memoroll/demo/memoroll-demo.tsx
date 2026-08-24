@@ -43,7 +43,7 @@ import {
   type MockRollPhoto,
 } from './mock';
 import SsoLoginScreen from './screens/sso-login';
-import { useShots, type Shot } from './use-shots';
+import { SHOT_LIMIT, useShots, type Shot } from './use-shots';
 import { REDUCED_FADE, screenVariants } from './variants';
 
 /** The guest's last film pick survives a reload along with the roll. */
@@ -299,6 +299,7 @@ export default function MemorollDemo() {
             {screen === 'camera' && (
               <CameraScreen
                 remaining={remaining}
+                rollSize={SHOT_LIMIT}
                 galleryCount={allEntries.length}
                 film={film}
                 onPickFilm={pickFilm}
