@@ -107,11 +107,21 @@ When a position was asked for, the failure says how many were found instead, whi
 ## Screens
 
 `visual/screens.mjs` is the list, and it is the only place a screen is defined.
-Twelve screens are covered.
-Seven are the Create Flow: the details-and-story step in each of its four designed states, the guest invites step empty and populated, and the published screen.
+Twenty-seven screens are covered, from two designs.
+
+Twelve are the wedding invitation.
+Seven of those are the Create Flow: the details-and-story step in each of its four designed states, the guest invites step empty and populated, and the published screen.
 One is Wedding Template 1 sealed, which is the invitation as a guest is sent it.
 Three are its Showcase opened, which is one screen rendered with each of the three sets of Example Content - flattering, realistic and hostile.
 One is the RSVP a guest replies on, opened over the invitation.
+
+Fifteen are MemoRoll, which is a second Figma file and says so: a screen names its own with `figmaFile`, and one that names none means the wedding file every other screen came from.
+Five are the guest's way in - the Cover, the closed door counting down, the handle a guest confirms, and the location gate in both the states the design draws.
+Ten are the creator's: the way in, the eight steps that set a roll up, and the QR bottomsheet the last one hands over.
+
+The eight creator steps run in the order their steppers give, which is not the order the frames are laid out in, and the check drives them that way: it presses through from the welcome, waiting for each step's heading before pressing on.
+Waiting is the whole of it. One step leaves as the next enters, and a second Continue pressed into that gap lands on the button of the screen already on its way out - which asks to go to the step the demo is already on, so the flow silently stops advancing and every screen after it is checked in the wrong state.
+That is what the first run of these ten did, and every one of them reported the same three stepper marks.
 
 The three opened screens share one manifest, because the design owns the type, the order and the words around a couple's answers rather than the answers themselves.
 Checking that one manifest at three lengths of answer is how a section that cannot hold a real couple's content is caught by a command rather than by somebody looking.
@@ -131,9 +141,13 @@ It claims the card and not the invitation behind it, since three screens already
 
 ### Where it stands
 
-All twelve screens match the design, so `npm run visual` exits 0.
+All twenty-seven screens match the design, so `npm run visual` exits 0.
 It last went red on the two differences every template screen shared - every line set 1.5 loose where the design lets the typeface decide (`hbd-a09.13`), and the five bordered controls omitting the 10px the design puts inside them (`hbd-a09.14`) - and both have landed.
 A red run now means a screen has moved away from the design.
+
+Two parts of the MemoRoll design are deliberately not covered, and both are recorded rather than forgotten.
+Only the Collage Cover Style is exercised; Taped wall, Simple and a Cover with no photographs on it are all expressible and unchecked.
+And what a creator has typed into a field is never asserted, because their answer is their content: the design owns the label above it, the note under it and the type it is set in, and a browser reports no value for the check to hold anyway.
 
 A screen is `SKIPPED` when the thing it would check does not exist yet, and the reason says which.
 `route not built yet` is code-side work.

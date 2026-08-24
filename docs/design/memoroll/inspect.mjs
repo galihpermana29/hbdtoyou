@@ -303,16 +303,34 @@ function paint(fill) {
   return fill.type; // IMAGE, GRADIENT_LINEAR, ...
 }
 
+/**
+ * Figma reports `mixed` rather than a list when one node carries more than one
+ * value - a string with two colours in it, for instance. Say so and move on:
+ * throwing would take a whole screen away over one word, and the word is the
+ * answer. The frame image is how a mixed run is read (see README).
+ */
+function paints(value) {
+  if (Array.isArray(value)) return value.map(paint).filter(Boolean);
+  return value === undefined || value === null ? [] : [String(value)];
+}
+
 function describeBox(styles) {
   const parts = [];
-  const fills = (styles.fills ?? []).map(paint).filter(Boolean);
+  const fills = paints(styles.fills);
   if (fills.length) parts.push(`fill ${fills.join(' + ')}`);
 
-  const strokes = (styles.strokes ?? []).map(paint).filter(Boolean);
+  const strokes = paints(styles.strokes);
   if (strokes.length) {
     parts.push(
       `stroke ${strokes.join(' + ')} ${round(styles.strokeWeight)}px ${(styles.strokeAlign ?? '').toLowerCase()}`
     );
+  }
+
+  // A dashed stroke is a dashPattern rather than a style, and it is the whole
+  // difference between an upload slot waiting to be pressed and one already
+  // filled in. Unprinted, it reads as an ordinary hairline.
+  if (Array.isArray(styles.dashPattern) && styles.dashPattern.length) {
+    parts.push(`dashed ${styles.dashPattern.map(round).join('/')}`);
   }
 
   if (styles.cornerRadius) parts.push(`radius ${round(styles.cornerRadius)}`);
@@ -331,7 +349,7 @@ function describeBox(styles) {
     );
   }
 
-  for (const effect of styles.effects ?? []) {
+  for (const effect of Array.isArray(styles.effects) ? styles.effects : []) {
     if (!effect || typeof effect !== 'object') continue;
     if (String(effect.type).includes('BLUR')) {
       parts.push(`${effect.type} ${round(effect.radius)}`);

@@ -24,6 +24,10 @@ Screenshots decide nothing.
 They are lossy, and the colours in them are JPEG approximations.
 Every value you build from comes out of `design-nodes.json`; the frames are for seeing what a screen is meant to feel like, and for catching a layout you have read wrongly.
 
+Two things break that rule because the capture cannot answer them, and both are named where they are used rather than left to be discovered.
+A mixed run reports its family, size or fill as the word `mixed`, so the frame is the only place its two halves can be told apart.
+A raster fill has no colours at all - the waiting Cover slot is an IMAGE, so its peach ground and the shade the wordmark tiles across it (`colour.waiting`, `colour.waitingMark`) were sampled from the frame and are approximations to a pixel or two.
+
 ## Reading it
 
 ```
@@ -36,7 +40,9 @@ node docs/design/memoroll/inspect.mjs --fonts                  type census
 node docs/design/memoroll/inspect.mjs --colors                 colour census
 ```
 
-Each node prints its box, its fills, strokes, radius, effects and auto-layout, and each text node prints its family, style, size, line height, tracking, weight, alignment and its exact characters.
+Each node prints its box, its fills, strokes, dash pattern, radius, effects and auto-layout, and each text node prints its family, style, size, line height, tracking, weight, alignment and its exact characters.
+
+The dash pattern is printed because it carries meaning nothing else does: the creator's empty upload slots are dashed and the filled ones are solid, and a reader that showed only `stroke #212121@0.2 1px` would have said they were the same control.
 
 ## Four traps in this file
 
@@ -58,6 +64,7 @@ Three identical labels is a placeholder, not a roster - and Portra 400 is Kodak'
 
 **Mixed runs.**
 Six text nodes report their family and size as `mixed`, because they carry more than one style in one string.
+One of them, the venue step's "Phones 500m outside the venue aren't allowed to shoot", reports its *fills* as `mixed` too - a word, not a list - which is exactly what it means and what the whole line is about: 500m is written in the flame and in bold because it is the rule.
 For those, read the frame image.
 
 ## The guest flow
@@ -113,9 +120,18 @@ White is done-or-current, grey `#808080` is not yet, so the highest white number
 | 7 | `creator-10-reveal-timing` | when the roll develops. CTA is "Create Now" |
 | 8 | `creator-11-ready-to-publish` | Edit / Preview / Publish, then the QR bottomsheet |
 
+The event's name is written two ways.
+The field on step 2 and the caption under the QR both read "Freya & Elias' Wedding"; the Cover inside steps 3 and 8 reads "Elias & Freya's wedding".
+There is one name field, so once the Cover is actually fed the creator's answer - which is the whole point of ADR 0007 - there is one name, and it is the one the creator typed.
+Do not read the Cover's spelling as a second answer.
+
 Step 5's venue and address both carry the hint "We get this from your digital invitation".
 MemoRoll is being built standalone and the wedding link is deliberately later, so that hint describes a connection that does not exist yet.
 It ships as written - it is the designer's copy, and the fields are editable either way.
+The padlock drawn over each of them does not; see the deviations below.
+
+Step 7's heading, "When should the roll develop", is missing its question mark, and the line under it is the line from step 2 left behind.
+Both ship as written.
 
 ## Tokens
 
@@ -155,7 +171,7 @@ Selection is expressed the same way in two places: the chosen thing is cream on 
 ## Deviations from the design, agreed
 
 The rule in this repo is that the design is literal truth, including its errors (ADR 0002).
-Three departures are deliberate and recorded.
+Four departures are deliberate and recorded.
 
 1. **The film pills are not "Portra 400".**
    Six pills ship: `RAW` and the five original recipes already in `src/lib/memoroll-film.ts`.
@@ -164,7 +180,13 @@ Three departures are deliberate and recorded.
 
 2. **No iOS status bar and no Safari tab bar.** They are mockery of the browser, not the product.
 
-3. **Two animations are approximated.**
+3. **No padlock on the creator's Venue and Address.**
+   Step 5 draws both fields shaded with a padlock at the right edge.
+   The shading ships and the note above it ships word for word; the padlock does not.
+   A padlock says an answer came from somewhere else and is not yours to change, and MemoRoll is standalone: there is nowhere for one to come from, so a creator who believed it would be stuck on step 5.
+   It arrives with the wedding link.
+
+4. **Two animations are approximated.**
    The designer attached reference videos to the Landing and to the Dark room as Gumlet links, which cannot be read from here.
    Both are built from the animation guidance in this setup and marked as approximations pending her references.
 

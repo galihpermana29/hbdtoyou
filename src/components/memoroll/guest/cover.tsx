@@ -6,6 +6,7 @@ import tape from '@/assets/memoroll/cover-tape.png';
 import Cta from '../ui/cta';
 import MemoifyFooter from '../ui/memoify-footer';
 import Wordmark from '../ui/wordmark';
+import { PhotoIcon } from '../ui/icons';
 import { colour } from '../ui/tokens';
 
 /**
@@ -56,14 +57,68 @@ const PRINT_SHADOW = [
   '16.54px 18.44px 10.18px rgba(0,0,0,0.02)',
 ].join(', ');
 
+/**
+ * A slot with nothing in it yet: peach, tiled with the wordmark, with the frame
+ * of a photograph in the middle of it.
+ *
+ * The design draws this as a raster, so its two colours are read off the
+ * exported frame rather than out of the capture (see `colour.waiting`). It is
+ * one artwork in three places - a Collage slot, a taped print, a whole Simple
+ * hero - which is why it takes no size and fills whatever it is put in.
+ *
+ * The number is only drawn while a creator is building the Cover, because it is
+ * not a caption: it is which upload slot downstairs fills this one.
+ */
+function Waiting({ number }: { number?: number }) {
+  return (
+    <div
+      className="relative h-full w-full overflow-hidden"
+      style={{ background: colour.waiting }}>
+      {/* The wordmark, laid across the slot on the diagonal, about two thirds
+          of it wide - so a slot reads as MemoRoll's own paper rather than as a
+          texture. The box is wider and taller than the slot it fills, so the
+          pattern runs off every edge instead of ending inside one. */}
+      <div
+        aria-hidden
+        className="absolute inset-[-40%] flex -rotate-[24deg] flex-col items-center justify-center gap-[28%]"
+        style={{ color: colour.waitingMark }}>
+        {[0, 1, 2].map((row) => (
+          <div
+            key={row}
+            className="flex w-full shrink-0 justify-center gap-[12%]"
+            style={{ marginLeft: row % 2 ? '-22%' : '22%' }}>
+            <Wordmark className="w-[36%]" flame={colour.waitingMark} title="" />
+            <Wordmark className="w-[36%]" flame={colour.waitingMark} title="" />
+          </div>
+        ))}
+      </div>
+
+      <div
+        className="absolute inset-0 flex flex-col items-center justify-center gap-[2%]"
+        style={{ color: colour.flame }}>
+        {number ? (
+          <span
+            className="text-[24px] font-semibold leading-[150%] tracking-[-0.011em]"
+            style={{ color: colour.flame, fontFamily: 'var(--font-mr-body)' }}>
+            {number}
+          </span>
+        ) : null}
+        <PhotoIcon className="w-[34%]" />
+      </div>
+    </div>
+  );
+}
+
 function Print({
   src,
   pad,
+  waitingNumber,
   className = '',
   style,
 }: {
-  src: string;
+  src: string | null;
   pad: number;
+  waitingNumber?: number;
   className?: string;
   style?: React.CSSProperties;
 }) {
@@ -71,35 +126,55 @@ function Print({
     <div
       className={`absolute overflow-hidden bg-white ${className}`}
       style={{ padding: `${pad}%`, boxShadow: PRINT_SHADOW, ...style }}>
-      <img src={src} alt="" className="block h-full w-full object-cover" />
+      {src ? (
+        <img src={src} alt="" className="block h-full w-full object-cover" />
+      ) : (
+        <Waiting number={waitingNumber} />
+      )}
     </div>
   );
 }
 
 /** The hero: whichever way this Cover shows its photographs. */
-function Hero({ style, photos }: { style: CoverStyle; photos: string[] }) {
-  if (!photos.length) {
-    // No photographs yet. The design draws a peach panel tiled with the
-    // wordmark and a picture icon in the middle - a Cover that says it is
-    // waiting for something rather than one that looks broken.
-    return (
-      <div
-        className="relative h-full w-full overflow-hidden"
-        style={{
-          background:
-            'linear-gradient(180deg, #fdd8b8 0%, #fdd8b8 72%, #f7f5f3 100%)',
-        }}
-        aria-hidden
-      />
-    );
-  }
+function Hero({
+  style,
+  photos,
+  draft,
+}: {
+  style: CoverStyle;
+  photos: (string | null)[];
+  draft: boolean;
+}) {
+  const filled = photos.filter(Boolean) as string[];
+
+  /**
+   * Which photograph a slot draws, and it is two different questions.
+   *
+   * A creator building a Cover is looking at their own slots, so slot three is
+   * whatever is in slot three and nothing if that is nothing - which is the
+   * whole point of the numbered waiting slots under it.
+   *
+   * A guest is looking at a finished Cover, so a creator who gave two
+   * photographs to a six-slot Collage gets those two repeated round the collage
+   * rather than four holes advertising what they did not upload.
+   */
+  const at = (index: number) => {
+    if (draft) return photos[index] ?? null;
+    if (filled.length === 0) return null;
+    return filled[index % filled.length];
+  };
 
   if (style === 'simple') {
     // One photograph, full bleed, fading out into the paper so it ends without
     // an edge.
+    const src = at(0);
     return (
       <div className="relative h-full w-full overflow-hidden">
-        <img src={photos[0]} alt="" className="h-full w-full object-cover" />
+        {src ? (
+          <img src={src} alt="" className="h-full w-full object-cover" />
+        ) : (
+          <Waiting />
+        )}
         <div
           className="absolute inset-x-0 bottom-0 h-[38%]"
           style={{
@@ -116,7 +191,7 @@ function Hero({ style, photos }: { style: CoverStyle; photos: string[] }) {
     return (
       <div className="relative h-full w-full overflow-hidden">
         <Print
-          src={photos[0]}
+          src={at(0)}
           pad={4.5}
           style={{
             left: '20.2%',
@@ -141,23 +216,21 @@ function Hero({ style, photos }: { style: CoverStyle; photos: string[] }) {
 
   return (
     <div className="relative h-full w-full overflow-hidden">
-      {COLLAGE_SLOTS.map((slot, i) => {
-        const src = photos[i % photos.length];
-        return (
-          <Print
-            key={i}
-            src={src}
-            pad={slot.pad}
-            style={{
-              left: `${slot.left}%`,
-              top: `${slot.top}%`,
-              width: `${slot.width}%`,
-              aspectRatio: i === 1 || i === 2 ? '270 / 170' : '145 / 208',
-              transform: `rotate(${slot.rotate}deg)`,
-            }}
-          />
-        );
-      })}
+      {COLLAGE_SLOTS.map((slot, i) => (
+        <Print
+          key={i}
+          src={at(i)}
+          pad={slot.pad}
+          waitingNumber={draft ? i + 1 : undefined}
+          style={{
+            left: `${slot.left}%`,
+            top: `${slot.top}%`,
+            width: `${slot.width}%`,
+            aspectRatio: i === 1 || i === 2 ? '270 / 170' : '145 / 208',
+            transform: `rotate(${slot.rotate}deg)`,
+          }}
+        />
+      ))}
     </div>
   );
 }
@@ -166,13 +239,23 @@ export default function Cover({
   eventName,
   photos,
   style = 'collage',
+  draft = false,
   ctaLabel = 'Let’s Shoot!',
   onEnter,
 }: {
   /** The creator's own words, set in script. Any length, any script. */
   eventName: string;
-  photos: string[];
+  /** One entry per slot. A slot with nothing in it is still waiting. */
+  photos: (string | null)[];
   style?: CoverStyle;
+  /**
+   * Whether this Cover is still being built.
+   *
+   * A draft draws its empty slots, numbered, because the creator is looking at
+   * them next to the uploads that fill them. A finished Cover never does: it
+   * repeats what it was given rather than advertising what it was not.
+   */
+  draft?: boolean;
   /** "Let's Shoot!" everywhere except the first template, which says "Get me in". */
   ctaLabel?: string;
   onEnter: () => void;
@@ -182,7 +265,7 @@ export default function Cover({
       className="relative flex min-h-full flex-1 flex-col overflow-hidden"
       style={{ background: colour.paper }}>
       <div className="relative h-[455px] shrink-0">
-        <Hero style={style} photos={photos} />
+        <Hero style={style} photos={photos} draft={draft} />
       </div>
 
       {/* Both stickers sit half off the screen in the design, which is what

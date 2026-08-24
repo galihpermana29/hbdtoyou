@@ -38,6 +38,16 @@ import {
   blocked as memorollLocationBlocked,
 } from './expectations/memoroll-location.mjs';
 import { expectations as memorollUsername } from './expectations/memoroll-username.mjs';
+import { expectations as memorollCreatorWelcome } from './expectations/memoroll-creator-welcome.mjs';
+import { expectations as memorollCreatorVibe } from './expectations/memoroll-creator-vibe.mjs';
+import { expectations as memorollCreatorName } from './expectations/memoroll-creator-name.mjs';
+import { expectations as memorollCreatorCover } from './expectations/memoroll-creator-cover.mjs';
+import { expectations as memorollCreatorTime } from './expectations/memoroll-creator-time.mjs';
+import { expectations as memorollCreatorVenue } from './expectations/memoroll-creator-venue.mjs';
+import { expectations as memorollCreatorShots } from './expectations/memoroll-creator-shots.mjs';
+import { expectations as memorollCreatorReveal } from './expectations/memoroll-creator-reveal.mjs';
+import { expectations as memorollCreatorPublish } from './expectations/memoroll-creator-publish.mjs';
+import { expectations as memorollCreatorQr } from './expectations/memoroll-creator-qr.mjs';
 
 /** The width the design is defined at. Nothing below this is checked. */
 export const DESIGN_WIDTH = 1440;
@@ -483,6 +493,7 @@ async function openTheRsvp(page) {
  * will (ADR 0007), so what is checked here is what ships there.
  */
 const MEMOROLL_ROUTE = '/memoroll/demo';
+const MEMOROLL_CREATOR_ROUTE = '/memoroll/demo/create';
 
 /** Sign in, which the design does not draw: it is Google's screen, not ours. */
 async function memorollSignIn(page) {
@@ -517,6 +528,59 @@ async function memorollBeforeTheEvent(page) {
   await page.getByRole('button', { name: /^demo · / }).click();
   await page.getByRole('button', { name: 'Before the event' }).click();
   await page.getByRole('button', { name: 'Get me in' }).click();
+}
+
+/**
+ * What each creator step asks, in the order the steppers give.
+ *
+ * Used to wait for a step to actually arrive before pressing on: one screen
+ * leaves as the next enters, and a second Continue pressed into that gap lands
+ * on the button of the screen already on its way out, which asks to go to the
+ * step the demo is already on. The flow then quietly stops advancing and every
+ * screen after it is checked in the wrong state.
+ */
+const CREATOR_HEADINGS = [
+  'This Memoroll is for?',
+  'What’s the event called?',
+  'Put some photos on',
+  'When does the roll open?',
+  'Where’s the party?',
+  'How many shots does everyone get?',
+  'When should the roll develop',
+  'Your roll is ready',
+];
+
+/**
+ * Walk the creator to one of the eight steps, the way a creator reaches it.
+ *
+ * Pressing through is deliberate rather than lazy. The demo could be handed a
+ * step to open on, and then every screen would be checked in a state nothing
+ * ever arrives in; pressing Continue seven times checks that the seventh screen
+ * is reachable as well as that it is right. It costs a few seconds and it is
+ * the same decision the Create Flow's own screens make.
+ *
+ * The answers are already the design's own, so nothing is typed on the way.
+ */
+async function memorollCreatorStep(page, step) {
+  await page.getByRole('button', { name: 'Setup My Memoroll' }).click();
+  await page
+    .getByRole('heading', { name: CREATOR_HEADINGS[0], exact: true })
+    .waitFor();
+
+  for (let reached = 1; reached < step; reached += 1) {
+    // The seventh step is the last thing asked, so its button says so.
+    const forward = reached === 7 ? 'Create Now' : 'Continue';
+    await page.getByRole('button', { name: forward, exact: true }).click();
+    await page
+      .getByRole('heading', { name: CREATOR_HEADINGS[reached], exact: true })
+      .waitFor();
+  }
+}
+
+/** The QR bottomsheet, reached from the middle button of the last step. */
+async function memorollCreatorQrSheet(page) {
+  await memorollCreatorStep(page, 8);
+  await page.getByRole('button', { name: 'Share QR Code' }).click();
 }
 
 export const screens = [
@@ -686,6 +750,118 @@ export const screens = [
     baseline: 'memoroll-location-blocked.png',
     expectations: memorollLocationBlocked,
     prepare: memorollBlockLocation,
+  },
+  // The creator's half: the way in, the eight steps in the order the steppers
+  // give, and the QR the last one hands over. The frames are laid out in a
+  // different order than they run, and the marks on them are what settles it.
+  {
+    id: 'memoroll-creator-welcome',
+    title: 'MemoRoll creator welcome, the way in',
+    route: MEMOROLL_CREATOR_ROUTE,
+    figmaFile: MEMOROLL_FIGMA_FILE_NAME,
+    figmaNodeId: '434-8531',
+    designWidth: TEMPLATE_DESIGN_WIDTH,
+    baseline: 'memoroll-creator-welcome.png',
+    expectations: memorollCreatorWelcome,
+  },
+  {
+    id: 'memoroll-creator-vibe',
+    title: 'MemoRoll creator step 1, what the roll is for',
+    route: MEMOROLL_CREATOR_ROUTE,
+    figmaFile: MEMOROLL_FIGMA_FILE_NAME,
+    figmaNodeId: '442-11307',
+    designWidth: TEMPLATE_DESIGN_WIDTH,
+    baseline: 'memoroll-creator-vibe.png',
+    expectations: memorollCreatorVibe,
+    prepare: (page) => memorollCreatorStep(page, 1),
+  },
+  {
+    id: 'memoroll-creator-name',
+    title: 'MemoRoll creator step 2, what the event is called',
+    route: MEMOROLL_CREATOR_ROUTE,
+    figmaFile: MEMOROLL_FIGMA_FILE_NAME,
+    figmaNodeId: '442-11372',
+    designWidth: TEMPLATE_DESIGN_WIDTH,
+    baseline: 'memoroll-creator-name.png',
+    expectations: memorollCreatorName,
+    prepare: (page) => memorollCreatorStep(page, 2),
+  },
+  {
+    id: 'memoroll-creator-cover',
+    title: 'MemoRoll creator step 3, the Cover and the photographs on it',
+    route: MEMOROLL_CREATOR_ROUTE,
+    figmaFile: MEMOROLL_FIGMA_FILE_NAME,
+    figmaNodeId: '442-11433',
+    designWidth: TEMPLATE_DESIGN_WIDTH,
+    baseline: 'memoroll-creator-cover.png',
+    expectations: memorollCreatorCover,
+    prepare: (page) => memorollCreatorStep(page, 3),
+  },
+  {
+    id: 'memoroll-creator-time',
+    title: 'MemoRoll creator step 4, when the roll opens',
+    route: MEMOROLL_CREATOR_ROUTE,
+    figmaFile: MEMOROLL_FIGMA_FILE_NAME,
+    figmaNodeId: '442-11556',
+    designWidth: TEMPLATE_DESIGN_WIDTH,
+    baseline: 'memoroll-creator-time.png',
+    expectations: memorollCreatorTime,
+    prepare: (page) => memorollCreatorStep(page, 4),
+  },
+  {
+    id: 'memoroll-creator-venue',
+    title: 'MemoRoll creator step 5, where the party is',
+    route: MEMOROLL_CREATOR_ROUTE,
+    figmaFile: MEMOROLL_FIGMA_FILE_NAME,
+    figmaNodeId: '442-11622',
+    designWidth: TEMPLATE_DESIGN_WIDTH,
+    baseline: 'memoroll-creator-venue.png',
+    expectations: memorollCreatorVenue,
+    prepare: (page) => memorollCreatorStep(page, 5),
+  },
+  {
+    id: 'memoroll-creator-shots',
+    title: 'MemoRoll creator step 6, how many shots each guest gets',
+    route: MEMOROLL_CREATOR_ROUTE,
+    figmaFile: MEMOROLL_FIGMA_FILE_NAME,
+    figmaNodeId: '442-11697',
+    designWidth: TEMPLATE_DESIGN_WIDTH,
+    baseline: 'memoroll-creator-shots.png',
+    expectations: memorollCreatorShots,
+    prepare: (page) => memorollCreatorStep(page, 6),
+  },
+  {
+    id: 'memoroll-creator-reveal',
+    title: 'MemoRoll creator step 7, when the roll develops',
+    route: MEMOROLL_CREATOR_ROUTE,
+    figmaFile: MEMOROLL_FIGMA_FILE_NAME,
+    figmaNodeId: '442-11766',
+    designWidth: TEMPLATE_DESIGN_WIDTH,
+    baseline: 'memoroll-creator-reveal.png',
+    expectations: memorollCreatorReveal,
+    prepare: (page) => memorollCreatorStep(page, 7),
+  },
+  {
+    id: 'memoroll-creator-publish',
+    title: 'MemoRoll creator step 8, the roll ready to publish',
+    route: MEMOROLL_CREATOR_ROUTE,
+    figmaFile: MEMOROLL_FIGMA_FILE_NAME,
+    figmaNodeId: '442-11832',
+    designWidth: TEMPLATE_DESIGN_WIDTH,
+    baseline: 'memoroll-creator-publish.png',
+    expectations: memorollCreatorPublish,
+    prepare: (page) => memorollCreatorStep(page, 8),
+  },
+  {
+    id: 'memoroll-creator-qr',
+    title: 'MemoRoll creator, the QR bottomsheet a guest scans',
+    route: MEMOROLL_CREATOR_ROUTE,
+    figmaFile: MEMOROLL_FIGMA_FILE_NAME,
+    figmaNodeId: '472-9444',
+    designWidth: TEMPLATE_DESIGN_WIDTH,
+    baseline: 'memoroll-creator-qr.png',
+    expectations: memorollCreatorQr,
+    prepare: memorollCreatorQrSheet,
   },
 ];
 

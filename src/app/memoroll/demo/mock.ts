@@ -24,20 +24,6 @@ export const MOCK_WEDDING: MockWedding = {
   venue: 'The Orchard House',
 };
 
-/**
- * What the couple's live console reads mid-event. The field names shadow the
- * backend's existing vocabulary (photo_count, photo_storage_used_mb on
- * wedding_invitations) so the mock retires cleanly, but nothing here is
- * fetched: local numbers only.
- */
-export const MOCK_LIVE_STATUS = {
-  photoCount: 184,
-  guestsJoined: 23,
-  guestsInvited: 50,
-  storageUsedMb: 312,
-  storageLimitMb: 2048,
-};
-
 /** One photo somebody shot on the collective roll. */
 export interface MockPhoto {
   id: string;

@@ -25,6 +25,25 @@ export const colour = {
   field: '#f7f6f6',
   hairline: '#dadada',
   muted: '#808080',
+  /**
+   * The unchosen half of a choice - a vibe nobody picked, a Cover Style nobody
+   * picked - and the words written on it. The chosen half is the flame, so
+   * these two only ever appear beside it.
+   */
+  unchosen: '#efeae9',
+  unchosenInk: '#696969',
+  /** The stepper's track, and the mark of a step nobody has reached. */
+  track: '#e5e5e5',
+  /**
+   * The ground a Cover slot waits on until a photograph arrives, and the shade
+   * the wordmark tiles across it in.
+   *
+   * These two are read off the exported frame rather than out of the capture,
+   * because the design draws the waiting slot as a raster: it is an IMAGE fill
+   * with no colours of its own for `inspect.mjs --colors` to find.
+   */
+  waiting: '#ffac96',
+  waitingMark: '#fbd1c5',
 } as const;
 
 /**
@@ -49,6 +68,30 @@ export const type = {
   unit: 'text-[12px] font-semibold leading-[150%]',
   /** The footer, and only the footer. */
   footer: 'text-[10px] font-normal leading-none',
+  /**
+   * The smallest thing the design sets: a stepper's number, the name of the
+   * step under it, the note beneath a creator's field, the number on a Cover
+   * slot still waiting for its photograph.
+   */
+  mark: 'text-[10px] font-medium leading-[150%] tracking-[-0.011em]',
+  /**
+   * The creator's welcome, and nothing else: 44px over the dark ground, and the
+   * one place the design sets tracking at zero rather than -1.1%.
+   *
+   * Its leading is 53px rather than the 150% every other line is set at,
+   * because the design draws this heading as five separate lines 20 apart
+   * rather than as one paragraph. 33 of line and 20 of gap is 53, and that is
+   * what a reader sees; 66 would be the same words a third further apart.
+   */
+  display: 'text-[44px] font-bold leading-[53px] tracking-[0px]',
+  /**
+   * The number of shots a guest gets, which is the whole of its screen.
+   *
+   * Its box is 48 tall in the design, under a 64px face, so the digits fill it
+   * rather than floating in half a line of air. At 150% the caption twelve
+   * pixels below it would sit thirty-six below instead.
+   */
+  tally: 'text-[64px] font-bold leading-[48px] tracking-[-0.011em]',
 } as const;
 
 /** Every screen in the design is a 375-wide phone. */

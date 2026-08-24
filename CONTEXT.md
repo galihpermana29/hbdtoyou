@@ -215,6 +215,18 @@ The first screen a guest meets when they scan the QR: the wordmark, the event's 
 Six are drawn, in three Cover Styles - Collage, Taped wall and Simple.
 _Avoid_: landing, template, theme
 
+**Cover Style**:
+How a Cover arranges the creator's photographs, chosen on step three of the creator flow.
+Three exist and they differ in how many photographs they have room for: Collage takes six, Taped wall and Simple take one.
+Not a theme and not a template: everything below the photographs is the same on all three.
+_Avoid_: layout, cover template
+
+**Draft**:
+A MemoRoll that is still being set up: the creator's answers so far, before there is anything for a guest to scan.
+A Cover being drawn from a Draft shows the slots still waiting for a photograph; a published one never does, and repeats what it was given instead.
+Collage numbers its waiting slots, because six of them need telling apart from the six uploads beneath; Taped wall and Simple have one each and the design numbers neither.
+_Avoid_: unpublished, which names a state rather than the answers
+
 ### The template's parts
 
 **Sealed**:

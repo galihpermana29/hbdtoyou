@@ -369,7 +369,7 @@ The Guest List card says that its columns scroll sideways, below 1440 only, beca
 None of these is a deviation to be argued with the designer.
 They are the product at widths the design does not describe, and the moment a frame is drawn at one of them the frame wins.
 
-## The rule also governs MemoRoll, with one deviation
+## The rule also governs MemoRoll, with two deviations
 
 The MemoRoll design (`docs/design/memoroll/`, captured 2026-08-24 from the Figma file "Randos") is followed the same way, and one departure is agreed rather than argued.
 
@@ -380,6 +380,17 @@ Three identical labels is a placeholder, and hbd-sk4 already settled that every 
 So six pills ship: `RAW`, and the five recipes `src/lib/memoroll-film.ts` already renders.
 `RAW` is taken from the design as the label for the no-film option, replacing "None".
 If the designer supplies real names in her own voice, they replace the five and this paragraph goes away.
+
+The second is the padlock on the creator's Venue and Address fields.
+
+Step five of the creator flow draws both fields shaded, each with a padlock at its right edge, under the note "We get this from your digital invitation".
+The note ships exactly as written, and it is asserted, because it is the designer's copy and rewriting it into something currently true would be reporting a design change nobody made.
+The padlock does not ship.
+
+MemoRoll is standalone and the wedding link is deliberately later (ADR 0007), so there is nothing for either field to be got from.
+A padlock says an answer came from somewhere else and is not yours to change; over a field the creator has to fill in themselves, it is the screen contradicting itself, and a creator who believed it would be stuck on step five with no way past.
+The shading stays, since it costs a creator nothing and is the mark the padlock belonged to.
+When the wedding link arrives and there is genuinely something to prefill from, the padlock arrives with it and this paragraph goes away.
 
 Two smaller departures need no argument.
 The iOS status bar and Safari tab bar drawn on every frame are mockery of the browser rather than the product, and are not rendered.
