@@ -178,12 +178,17 @@ export default function GalleryScreen({
           <span aria-hidden className="w-[48px]" />
         </div>
 
-        <div className="relative mt-[12px] overflow-hidden">
+        <div className="relative mt-[12px]">
           {/* The rotated camera, bleeding off the right edge. The design's own
-              artwork, exported, clipped the way its frame clips it. */}
+              artwork, exported - but placed against the frame image rather
+              than the captured bounds: the node is rotated, and a rotated
+              node's bounds in the capture are its unrotated box, which put the
+              camera a row too low and a size too small. In the frame its top
+              edge rides level with the Gallery title's baseline and it spans
+              all three header rows. */}
           <div
             aria-hidden
-            className="pointer-events-none absolute right-[-3px] top-[11.5px] h-[85px] w-[121px] select-none overflow-hidden">
+            className="pointer-events-none absolute right-[-4px] top-[-20px] h-[100px] w-[142px] select-none overflow-hidden">
             <img src={galleryCamera.src} alt="" className="w-full" />
           </div>
 
