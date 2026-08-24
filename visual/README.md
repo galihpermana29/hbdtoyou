@@ -108,7 +108,7 @@ When a position was asked for, the failure says how many were found instead, whi
 ## Screens
 
 `visual/screens.mjs` is the list, and it is the only place a screen is defined.
-Thirty-five screens are covered, from two designs.
+Thirty-seven screens are covered, from two designs.
 
 Twelve are the wedding invitation.
 Seven of those are the Create Flow: the details-and-story step in each of its four designed states, the guest invites step empty and populated, and the published screen.
@@ -116,10 +116,14 @@ One is Wedding Template 1 sealed, which is the invitation as a guest is sent it.
 Three are its Showcase opened, which is one screen rendered with each of the three sets of Example Content - flattering, realistic and hostile.
 One is the RSVP a guest replies on, opened over the invitation.
 
-Twenty-three are MemoRoll, which is a second Figma file and says so: a screen names its own with `figmaFile`, and one that names none means the wedding file every other screen came from.
-Five are the guest's way in - the Cover, the closed door counting down, the handle a guest confirms, and the location gate in both the states the design draws.
+Twenty-five are MemoRoll, which is a second Figma file and says so: a screen names its own with `figmaFile`, and one that names none means the wedding file every other screen came from.
+Seven are the guest's way in - the Cover, the closed door counting down, the handle a guest confirms, the location gate in both the states the design draws, the camera, and the How popup that greets a first entry to it.
 Ten are the creator's: the way in, the eight steps that set a roll up, and the QR bottomsheet the last one hands over.
 Eight are the gallery, which is where the product's two independent gates live, and the eight are chosen to walk both: ALL veiled mid-event and sharp after the Reveal, the guest's own Roll undeveloped, offering Develop at zero shots, mid-develop in the Dark Room, and developed sharp *while "Ends in" still counts* - which is the independence, asserted - then the preview with the shooter still a secret and with the name told.
+
+The camera is reached the way a guest reaches it, through the location gate and its Check Again, and its two screens are two poses of one arrival.
+The popup screen is the first entry, greeted by "Here's how Memoroll works"; the camera screen presses "Got it", turns the dock's lighting dial to a hardware flash - Flash is capability-detected and the checking browser has none to detect, so the dial is the dock's stated stand-in for it - and presses RAW, because the camera opens on Wedding Natural while the design draws its selected pill on RAW, and pressing it checks the designed state and the act of choosing in one move.
+Two of the camera's parts are deliberately unchecked: the Torch pill, which the design never draws and only real hardware offers, and the dead shutter at zero shots, which no frame draws either.
 
 The gallery's states are driven through the demo dock, the same door `memorollBeforeTheEvent` already uses, because they live behind things a check cannot wait for: the event phase is a wedding-day clock and the guest's own Roll is ten trips through the shutter.
 The dock turns those two dials, is folded away again before the capture, and everything after it is pressed the way a guest presses it - the My Roll tab, a sharp print, "Who took this?".
@@ -147,7 +151,7 @@ It claims the card and not the invitation behind it, since three screens already
 
 ### Where it stands
 
-All thirty-five screens match the design, so `npm run visual` exits 0.
+All thirty-seven screens match the design, so `npm run visual` exits 0.
 It last went red on the two differences every template screen shared - every line set 1.5 loose where the design lets the typeface decide (`hbd-a09.13`), and the five bordered controls omitting the 10px the design puts inside them (`hbd-a09.14`) - and both have landed.
 A red run now means a screen has moved away from the design.
 
@@ -254,3 +258,14 @@ It also refuses an expectation that measures something, and validates every expe
 
 It needs no browser and no server.
 When it passes, a red screen means the screen.
+
+## The camera's behaviour
+
+`npm run visual` says a screen looks like the design. It cannot say the camera still
+takes a photograph.
+
+`node visual/shot-e2e.mjs` does: it drives the demo the way a guest does, presses the
+shutter, and asserts that what comes back is a 960x1280 JPEG baked through the film and
+stored in IndexedDB, with the strip opening on Wedding Natural. Run it after anything
+that touches the camera, the film pipeline or the shot store - re-skinning the camera
+could have broken all three without moving a pixel.

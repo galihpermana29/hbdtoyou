@@ -33,6 +33,32 @@ export const ROLL_LABELS: Record<DemoRoll, string> = {
 };
 
 /**
+ * What lighting hardware the camera should believe in. Flash and Torch are
+ * capability-detected and a laptop has neither, so the designed Flash button
+ * would be unreachable on this demo without a stand-in - the same stand-in
+ * the phase and roll dials already are for clocks and shutters. 'detected'
+ * is the truth; the rest pretend, and pretending only ever adds a control.
+ */
+export type DemoLighting = 'detected' | 'flash' | 'torch' | 'both';
+
+export const LIGHTING_LABELS: Record<DemoLighting, string> = {
+  detected: 'Hardware: as detected',
+  flash: 'Hardware: flash',
+  torch: 'Hardware: torch',
+  both: 'Hardware: flash + torch',
+};
+
+export const LIGHTING_SIMULATED: Record<
+  DemoLighting,
+  { flash: boolean; torch: boolean } | undefined
+> = {
+  detected: undefined,
+  flash: { flash: true, torch: false },
+  torch: { flash: false, torch: true },
+  both: { flash: true, torch: true },
+};
+
+/**
  * The guest demo's affordance: the two dials of the two gates, the jumps that
  * put a screen straight on the glass, and the two reset actions, living in the
  * shared DemoDock shell.
@@ -42,6 +68,8 @@ export default function DemoControl({
   onPhaseChange,
   roll,
   onRollChange,
+  lighting,
+  onLightingChange,
   onOpenGallery,
   onPinDarkRoom,
   onReloadFilm,
@@ -51,6 +79,8 @@ export default function DemoControl({
   onPhaseChange: (phase: DemoPhase) => void;
   roll: DemoRoll;
   onRollChange: (roll: DemoRoll) => void;
+  lighting: DemoLighting;
+  onLightingChange: (lighting: DemoLighting) => void;
   onOpenGallery: () => void;
   /** Hold the Dark Room mid-develop, so its chemistry can be looked at. */
   onPinDarkRoom: () => void;
@@ -92,6 +122,21 @@ export default function DemoControl({
             onClick={() => onRollChange(key)}
             className={option(key === roll)}>
             {ROLL_LABELS[key]}
+          </button>
+        ))}
+      </div>
+
+      <p className="mt-3 text-[10px] font-semibold uppercase tracking-[0.14em] text-[#212121]/50">
+        Demo · camera lighting
+      </p>
+      <div className="mt-2 flex flex-col gap-1">
+        {(Object.keys(LIGHTING_LABELS) as DemoLighting[]).map((key) => (
+          <button
+            key={key}
+            type="button"
+            onClick={() => onLightingChange(key)}
+            className={option(key === lighting)}>
+            {LIGHTING_LABELS[key]}
           </button>
         ))}
       </div>

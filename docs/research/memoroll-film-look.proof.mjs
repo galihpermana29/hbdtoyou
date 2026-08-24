@@ -1,7 +1,7 @@
 /**
  * Visual proof + assertion harness for the MemoRoll film renderer (hbd-sk4).
  *
- * Runs the real src/lib/memoroll-film.ts and camera-capabilities.ts
+ * Runs the real src/lib/memoroll-film.ts and memoroll-camera.ts
  * (transpiled with the repo's tsc) in headless Chromium against the
  * reference set. Renders the contact sheet (browse grid at 480 wide plus
  * the exact 960x1280 keeper row), executes the report's region assertions
@@ -27,15 +27,13 @@ const tmp = mkdtempSync(join(tmpdir(), 'memoroll-film-'));
 execSync(
   `npx tsc ${join(REPO, 'src/lib/memoroll-film.ts')} ${join(
     REPO,
-    'src/app/memoroll/demo/camera-capabilities.ts'
+    'src/lib/memoroll-camera.ts'
   )} --target es2020 --module es2015 --lib es2020,dom --skipLibCheck --outDir ${tmp}`,
   { cwd: REPO, stdio: 'inherit' }
 );
 const stripExports = (p) => readFileSync(p, 'utf8').replace(/^export /gm, '');
-const engineJs = stripExports(join(tmp, 'lib', 'memoroll-film.js'));
-const capsJs = stripExports(
-  join(tmp, 'app', 'memoroll', 'demo', 'camera-capabilities.js')
-);
+const engineJs = stripExports(join(tmp, 'memoroll-film.js'));
+const capsJs = stripExports(join(tmp, 'memoroll-camera.js'));
 
 /* 2. Inputs as data URLs (file:// images would taint the canvas). */
 const INPUT_FILES = [
@@ -51,7 +49,8 @@ const present = readdirSync(ASSETS);
 const images = {};
 for (const f of INPUT_FILES) {
   if (!present.includes(f)) throw new Error(`missing input: ${f}`);
-  images[f] = `data:image/jpeg;base64,${readFileSync(join(ASSETS, f)).toString('base64')}`;
+  images[f] =
+    `data:image/jpeg;base64,${readFileSync(join(ASSETS, f)).toString('base64')}`;
 }
 
 /* 3. Regions (report §6), fractional [x0, y0, x1, y1]. */
@@ -243,7 +242,7 @@ function hfEnergy(image) {
     developed[file] = {};
     const cells = [['input', src]];
     for (const look of LOOKS) {
-      const { canvas } = developMemoRollFilm(src, src.width, src.height, look);
+      const { canvas } = bakeMemoRollFilm(src, src.width, src.height, look);
       developed[file][look] = imageDataOf(canvas);
       cells.push([look, canvas]);
     }
@@ -273,7 +272,7 @@ function hfEnergy(image) {
     rl.textContent = 'keeper 960x1280';
     row.appendChild(rl);
     for (const look of ['none', ...LOOKS]) {
-      const { canvas } = developMemoRollFilm(keeperSrc, KEEPER_W, KEEPER_H, look);
+      const { canvas } = bakeMemoRollFilm(keeperSrc, KEEPER_W, KEEPER_H, look);
       const fig = document.createElement('figure');
       fig.appendChild(canvas);
       const fc = document.createElement('figcaption');
@@ -295,7 +294,7 @@ function hfEnergy(image) {
     const CROP = 220;
     const developedKeeper = {};
     for (const look of ['wedding-natural', 'bold-color']) {
-      developedKeeper[look] = developMemoRollFilm(keeperSrc, KEEPER_W, KEEPER_H, look).canvas;
+      developedKeeper[look] = bakeMemoRollFilm(keeperSrc, KEEPER_W, KEEPER_H, look).canvas;
     }
     for (const [spot, [fx, fy]] of Object.entries(CROPS)) {
       const row = document.createElement('div');
@@ -426,7 +425,7 @@ function hfEnergy(image) {
   /* None identity, pre-stamp/pre-encode, bit-exact. */
   {
     const before = imageDataOf(expSrc);
-    const { canvas } = developMemoRollFilm(expSrc, expSrc.width, expSrc.height, 'none');
+    const { canvas } = bakeMemoRollFilm(expSrc, expSrc.width, expSrc.height, 'none');
     const after = imageDataOf(canvas);
     let identical = before.data.length === after.data.length;
     if (identical) {
@@ -439,8 +438,8 @@ function hfEnergy(image) {
 
   /* Determinism + no generated grain, at the exact keeper resolution. */
   for (const look of LOOKS) {
-    const a = imageDataOf(developMemoRollFilm(keeperSrc, KEEPER_W, KEEPER_H, look).canvas);
-    const b = imageDataOf(developMemoRollFilm(keeperSrc, KEEPER_W, KEEPER_H, look).canvas);
+    const a = imageDataOf(bakeMemoRollFilm(keeperSrc, KEEPER_W, KEEPER_H, look).canvas);
+    const b = imageDataOf(bakeMemoRollFilm(keeperSrc, KEEPER_W, KEEPER_H, look).canvas);
     let identical = true;
     for (let i = 0; i < a.data.length; i++) {
       if (a.data[i] !== b.data[i]) { identical = false; break; }
@@ -454,7 +453,7 @@ function hfEnergy(image) {
     fctx.fillStyle = 'rgb(128, 128, 128)';
     fctx.fillRect(0, 0, KEEPER_W, KEEPER_H);
     for (const look of LOOKS) {
-      const out = imageDataOf(developMemoRollFilm(flat, KEEPER_W, KEEPER_H, look).canvas);
+      const out = imageDataOf(bakeMemoRollFilm(flat, KEEPER_W, KEEPER_H, look).canvas);
       const hf = hfEnergy(out);
       check(\`no-grain/\${look}\`, hf < 0.15,
         \`flat-input HF residual=\${hf.toFixed(4)} (grain would add >1)\`);
@@ -467,7 +466,7 @@ function hfEnergy(image) {
     for (const look of [...LOOKS, 'party']) {
       let color = 0, bloom = 0, finalize = 0, encode = 0;
       for (let i = 0; i < N; i++) {
-        const { canvas, timings } = developMemoRollFilm(keeperSrc, KEEPER_W, KEEPER_H, look);
+        const { canvas, timings } = bakeMemoRollFilm(keeperSrc, KEEPER_W, KEEPER_H, look);
         color += timings.colorMs;
         bloom += timings.bloomMs;
         finalize += timings.finalizeMs;
@@ -532,7 +531,9 @@ page.on('pageerror', (e) => {
   process.exitCode = 1;
 });
 await page.setContent(PAGE, { waitUntil: 'load' });
-await page.waitForFunction(() => window.RESULTS !== undefined, { timeout: 180000 });
+await page.waitForFunction(() => window.RESULTS !== undefined, {
+  timeout: 180000,
+});
 const results = await page.evaluate(() => window.RESULTS);
 const sheetPath = join(OUT_DIR, 'memoroll-film-look.contact-sheet.png');
 await page.locator('#sheet').screenshot({ path: sheetPath });

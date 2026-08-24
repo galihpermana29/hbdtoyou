@@ -1,5 +1,7 @@
 /**
- * Lighting capabilities for the MemoRoll camera (hbd-sk4).
+ * Lighting capabilities for the MemoRoll camera (hbd-sk4; moved beside the
+ * film engine per ADR 0006's amendment - the camera's technical stack lives
+ * in src/lib/memoroll-*).
  *
  * Two distinct hardware controls, never conflated and never faked:
  *  - Flash: a synchronized fill light fired by ImageCapture.takePhoto with
@@ -35,8 +37,9 @@ export type ImageCaptureFactory = (
 
 /** Wraps window.ImageCapture where it exists; null everywhere else. */
 export const defaultImageCaptureFactory: ImageCaptureFactory = (track) => {
-  const Ctor = (globalThis as { ImageCapture?: new (t: MediaStreamTrack) => PhotoCapturer })
-    .ImageCapture;
+  const Ctor = (
+    globalThis as { ImageCapture?: new (t: MediaStreamTrack) => PhotoCapturer }
+  ).ImageCapture;
   if (!Ctor) return null;
   try {
     return new Ctor(track);

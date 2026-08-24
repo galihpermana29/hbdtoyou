@@ -12,7 +12,7 @@
  * Compatibility invariants: no ctx.filter anywhere, no SVG filters, blurs
  * only via scale-down/up draws - every pass runs on Safari. The pixel pass
  * mutates ImageData so callers can assert on it pre-encode. Date stamp and
- * watermark remain the camera's job (ADR 0006's develop-at-capture contract
+ * watermark remain the camera's job (ADR 0006's bake-at-capture contract
  * is unchanged; only the artifact's resolution grew to 960x1280).
  */
 
@@ -73,7 +73,9 @@ const PRESETS: Record<Exclude<MemoRollFilmId, 'none'>, PresetParams> = {
     ],
     redOffset: (x) => (x <= 0.75 ? 0 : 0.02 * ((x - 0.75) / 0.25)),
     blueOffset: (x) =>
-      x <= 0.5 ? lerp(-0.055, -0.02, x / 0.5) : lerp(-0.02, -0.04, (x - 0.5) / 0.5),
+      x <= 0.5
+        ? lerp(-0.055, -0.02, x / 0.5)
+        : lerp(-0.02, -0.04, (x - 0.5) / 0.5),
     saturation: 0.15,
     vignetteMinGain: 0.9,
     bloom: null,
@@ -107,7 +109,8 @@ const PRESETS: Record<Exclude<MemoRollFilmId, 'none'>, PresetParams> = {
       [0.92, 0.9],
       [1.0, 0.955],
     ],
-    redOffset: (x) => -0.008 * (smoothstep(0.1, 0.35, x) - smoothstep(0.7, 1, x)),
+    redOffset: (x) =>
+      -0.008 * (smoothstep(0.1, 0.35, x) - smoothstep(0.7, 1, x)),
     blueOffset: (x) =>
       0.018 * (smoothstep(0.05, 0.3, x) - smoothstep(0.75, 1, x)),
     saturation: 0.06,
@@ -213,7 +216,10 @@ function monotoneCubic(points: [number, number][]): (x: number) => number {
     const h01 = -2 * t3 + 3 * t2;
     const h11 = t3 - t2;
     return (
-      h00 * ys[i] + h10 * dx[i] * m[i] + h01 * ys[i + 1] + h11 * dx[i] * m[i + 1]
+      h00 * ys[i] +
+      h10 * dx[i] * m[i] +
+      h01 * ys[i + 1] +
+      h11 * dx[i] * m[i + 1]
     );
   };
 }
@@ -255,7 +261,11 @@ const vignetteCache: Record<string, Float32Array> = {};
  * cos4-shaped radial gain: the natural-falloff curve, rescaled so the
  * corner sits exactly at the preset's minimum gain. Half-angle 30 degrees.
  */
-function vignetteMap(width: number, height: number, minGain: number): Float32Array {
+function vignetteMap(
+  width: number,
+  height: number,
+  minGain: number
+): Float32Array {
   const key = `${width}x${height}:${minGain}`;
   const cached = vignetteCache[key];
   if (cached) return cached;
@@ -279,7 +289,7 @@ function vignetteMap(width: number, height: number, minGain: number): Float32Arr
 
 /* ----------------------- the pixel pass ----------------------- */
 
-export interface DevelopTimings {
+export interface BakeTimings {
   /** LUT + saturation + vignette in one deterministic pass. */
   colorMs: number;
   /** Highlight bloom pass (0 when the preset has none). */
@@ -389,7 +399,9 @@ export function applyHighlightBloom(
   const eighth = document.createElement('canvas');
   eighth.width = Math.max(1, Math.round(qw / 2));
   eighth.height = Math.max(1, Math.round(qh / 2));
-  eighth.getContext('2d')!.drawImage(quarter, 0, 0, eighth.width, eighth.height);
+  eighth
+    .getContext('2d')!
+    .drawImage(quarter, 0, 0, eighth.width, eighth.height);
   qctx.clearRect(0, 0, qw, qh);
   qctx.drawImage(eighth, 0, 0, qw, qh);
 
@@ -403,18 +415,22 @@ export function applyHighlightBloom(
 }
 
 /**
- * Develop a full frame: color pass, then bloom where the preset has one.
+ * Bake a full frame: color pass, then bloom where the preset has one.
  * Draws `source` onto a fresh canvas first, so the caller's canvas is never
  * mutated. Deterministic: the same source and preset always produce the
  * same pixels. The camera adds its date stamp, watermark and JPEG encode
  * after this returns.
+ *
+ * Named for what ADR 0006's amendment calls the pixel pipeline: a Shot is
+ * baked at capture. Developing is the guest's ceremony in the Dark Room,
+ * and happens long after this function has already settled the pixels.
  */
-export function developMemoRollFilm(
+export function bakeMemoRollFilm(
   source: CanvasImageSource,
   width: number,
   height: number,
   preset: MemoRollFilmId
-): { canvas: HTMLCanvasElement; timings: DevelopTimings } {
+): { canvas: HTMLCanvasElement; timings: BakeTimings } {
   const canvas = document.createElement('canvas');
   canvas.width = width;
   canvas.height = height;

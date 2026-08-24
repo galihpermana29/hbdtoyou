@@ -38,6 +38,8 @@ import {
   blocked as memorollLocationBlocked,
 } from './expectations/memoroll-location.mjs';
 import { expectations as memorollUsername } from './expectations/memoroll-username.mjs';
+import { expectations as memorollCamera } from './expectations/memoroll-camera.mjs';
+import { expectations as memorollPopupHow } from './expectations/memoroll-how.mjs';
 import { expectations as memorollCreatorWelcome } from './expectations/memoroll-creator-welcome.mjs';
 import { expectations as memorollCreatorVibe } from './expectations/memoroll-creator-vibe.mjs';
 import { expectations as memorollCreatorName } from './expectations/memoroll-creator-name.mjs';
@@ -541,6 +543,34 @@ async function memorollBeforeTheEvent(page) {
 }
 
 /**
+ * Through the gate to the camera. The demo walks Location Blocked once on the
+ * way in, so the camera is reached the way its check-again guest reaches it -
+ * and a first entry is greeted by the How popup, which is its own screen.
+ */
+async function memorollEnterCamera(page) {
+  await memorollBlockLocation(page);
+  await page.getByRole('button', { name: 'Check Again' }).click();
+}
+
+/**
+ * The camera in the pose the design draws (guest-09): the How popup read and
+ * dismissed, Flash offered, RAW chosen.
+ *
+ * Two of those are driven rather than defaulted, deliberately. Flash is
+ * capability-detected and this browser has no flash to detect, so the dock's
+ * lighting dial stands in for the hardware - the same stated stand-in it is
+ * for clocks and rolls. And the camera opens on Wedding Natural (the film a
+ * wedding wants), while the design draws its selected pill on RAW; pressing
+ * RAW checks the designed state and the act of choosing it in one move.
+ */
+async function memorollCameraDesigned(page) {
+  await memorollEnterCamera(page);
+  await page.getByRole('button', { name: 'Got it' }).click();
+  await memorollDock(page, ['Hardware: flash']);
+  await page.getByRole('radio', { name: 'RAW' }).click();
+}
+
+/**
  * What each creator step asks, in the order the steppers give.
  *
  * Used to wait for a step to actually arrive before pressing on: one screen
@@ -812,6 +842,28 @@ export const screens = [
     baseline: 'memoroll-location-blocked.png',
     expectations: memorollLocationBlocked,
     prepare: memorollBlockLocation,
+  },
+  {
+    id: 'memoroll-camera',
+    title: 'MemoRoll camera, the shots counter over the film that bakes them',
+    route: MEMOROLL_ROUTE,
+    figmaFile: MEMOROLL_FIGMA_FILE_NAME,
+    figmaNodeId: '434-7827',
+    designWidth: TEMPLATE_DESIGN_WIDTH,
+    baseline: 'memoroll-camera.png',
+    expectations: memorollCamera,
+    prepare: memorollCameraDesigned,
+  },
+  {
+    id: 'memoroll-popup-how',
+    title: 'MemoRoll telling a first-time guest how it works',
+    route: MEMOROLL_ROUTE,
+    figmaFile: MEMOROLL_FIGMA_FILE_NAME,
+    figmaNodeId: '472-7895',
+    designWidth: TEMPLATE_DESIGN_WIDTH,
+    baseline: 'memoroll-popup-how.png',
+    expectations: memorollPopupHow,
+    prepare: memorollEnterCamera,
   },
   // The creator's half: the way in, the eight steps in the order the steppers
   // give, and the QR the last one hands over. The frames are laid out in a

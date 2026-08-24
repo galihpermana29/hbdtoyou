@@ -20,10 +20,10 @@ export const metadata: Metadata = {
 
 export default function MemorollDemoPage() {
   return (
-    // Two font sets while the design is replaced screen by screen: the four
-    // families of the 2026-08-24 design, and the two the camera and gallery
-    // still use until hbd-qti.2 and hbd-qti.3 replace them. `./fonts.ts` and
-    // this line go with the last of those screens.
+    // Two font sets still: the four families of the 2026-08-24 design, and
+    // the legacy pair that outlived the screens drawn in it - the camera
+    // bakes its date stamp and watermark in them (hbd-3i5 owns retiring
+    // that), and the mock sign-in and the demo dock still speak them.
     <main className={`${designFonts} ${legacyFonts}`}>
       <MemorollDemo />
     </main>

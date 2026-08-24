@@ -1,8 +1,14 @@
 'use client';
 
+import CameraScreen from '@/components/memoroll/guest/camera-screen';
 import Cover from '@/components/memoroll/guest/cover';
 import CountdownScreen from '@/components/memoroll/guest/countdown-screen';
 import DarkRoomScreen from '@/components/memoroll/guest/darkroom-screen';
+import {
+  DEFAULT_FILM,
+  normalizeStoredFilm,
+  type SelectableFilmId,
+} from '@/components/memoroll/guest/films';
 import GalleryScreen, {
   type GalleryTab,
   type RevealClock,
@@ -16,8 +22,14 @@ import LocationScreen, {
 } from '@/components/memoroll/guest/location-screen';
 import UsernameScreen from '@/components/memoroll/guest/username-screen';
 import { AnimatePresence, motion, useReducedMotion } from 'framer-motion';
-import { useState } from 'react';
-import DemoControl, { DemoPhase, DemoRoll } from './demo-control';
+import { useEffect, useState } from 'react';
+import DemoControl, {
+  DemoLighting,
+  DemoPhase,
+  DemoRoll,
+  LIGHTING_SIMULATED,
+} from './demo-control';
+import { homemadeApple, poppins } from './fonts';
 import {
   GALLERY_REMAINING,
   GALLERY_TALLY,
@@ -26,13 +38,16 @@ import {
   MOCK_WEDDING,
   REVEAL_ENDED_ON,
   SAMPLE_SOURCES,
+  STAMP_DATE,
+  VIEWFINDER_FALLBACK,
   type MockRollPhoto,
 } from './mock';
-import CameraScreen from './screens/camera';
-import OnboardScreen from './screens/onboard';
 import SsoLoginScreen from './screens/sso-login';
 import { useShots, type Shot } from './use-shots';
 import { REDUCED_FADE, screenVariants } from './variants';
+
+/** The guest's last film pick survives a reload along with the roll. */
+const FILM_STORAGE_KEY = 'memoroll-demo:film';
 
 type Screen =
   | 'cover'
@@ -40,7 +55,6 @@ type Screen =
   | 'sso'
   | 'username'
   | 'location'
-  | 'onboard'
   | 'camera'
   | 'gallery'
   | 'darkroom';
@@ -111,8 +125,10 @@ function groupRoll(entries: RollEntry[]): GalleryGroup[] {
  * own Roll answers only to its own develop, and the dock carries them as two
  * separate dials so their independence can be walked, not just read about.
  *
- * The camera and the onboarding are still the old design, replaced by
- * hbd-qti.2.
+ * The camera holds no store of its own (ADR 0007), so this file also owns
+ * what the camera only renders: the guest's film pick and its localStorage
+ * memory, whether the How popup has been seen this walkthrough, and the
+ * dock's stand-in for lighting hardware nobody's laptop has.
  */
 export default function MemorollDemo() {
   const reduce = useReducedMotion();
@@ -123,9 +139,31 @@ export default function MemorollDemo() {
   const [galleryTab, setGalleryTab] = useState<GalleryTab>('all');
   const [darkRoomHeld, setDarkRoomHeld] = useState(false);
   const [swipeCueSeen, setSwipeCueSeen] = useState(false);
+  const [howSeen, setHowSeen] = useState(false);
   const [location, setLocation] = useState<LocationState>('asking');
   const [handle, setHandle] = useState('dhilafadhila');
+  const [film, setFilm] = useState<SelectableFilmId>(DEFAULT_FILM);
+  const [lighting, setLighting] = useState<DemoLighting>('detected');
   const { shots, addShot, clearShots, remaining } = useShots();
+
+  useEffect(() => {
+    try {
+      setFilm(
+        normalizeStoredFilm(window.localStorage.getItem(FILM_STORAGE_KEY))
+      );
+    } catch {
+      // A blocked store just means the roll opens on the default film.
+    }
+  }, []);
+
+  const pickFilm = (id: SelectableFilmId) => {
+    setFilm(id);
+    try {
+      window.localStorage.setItem(FILM_STORAGE_KEY, id);
+    } catch {
+      // Quota or privacy mode: the pick still holds in memory.
+    }
+  };
 
   const enterFromCover = () => {
     setScreen(phase === 'before' ? 'countdown' : 'sso');
@@ -144,7 +182,8 @@ export default function MemorollDemo() {
     }
     setLocation('asking');
     // After the event there is nothing left to shoot: straight to the roll.
-    setScreen(phase === 'during' ? 'onboard' : 'gallery');
+    // The How popup rides over the camera itself, shown once on first entry.
+    setScreen(phase === 'during' ? 'camera' : 'gallery');
   };
 
   const changePhase = (next: DemoPhase) => {
@@ -257,15 +296,23 @@ export default function MemorollDemo() {
             {screen === 'location' && (
               <LocationScreen state={location} onAct={answerLocation} />
             )}
-            {screen === 'onboard' && (
-              <OnboardScreen onDone={() => setScreen('camera')} />
-            )}
             {screen === 'camera' && (
               <CameraScreen
                 remaining={remaining}
-                lastShot={shots.length ? shots[shots.length - 1] : null}
-                onCapture={addShot}
+                galleryCount={allEntries.length}
+                film={film}
+                onPickFilm={pickFilm}
+                onShot={addShot}
                 onOpenGallery={() => setScreen('gallery')}
+                showHow={!howSeen}
+                onHowSeen={() => setHowSeen(true)}
+                fallbackSrc={VIEWFINDER_FALLBACK}
+                stampDate={STAMP_DATE}
+                stampFonts={{
+                  hand: homemadeApple.style.fontFamily,
+                  ui: poppins.style.fontFamily,
+                }}
+                simulatedLighting={LIGHTING_SIMULATED[lighting]}
               />
             )}
             {screen === 'gallery' && (
@@ -311,6 +358,8 @@ export default function MemorollDemo() {
         onPhaseChange={changePhase}
         roll={roll}
         onRollChange={changeRoll}
+        lighting={lighting}
+        onLightingChange={setLighting}
         onOpenGallery={openGallery}
         onPinDarkRoom={pinDarkRoom}
         onReloadFilm={() => {
@@ -321,6 +370,7 @@ export default function MemorollDemo() {
           setLocation('asking');
           setGalleryTab('all');
           setSwipeCueSeen(false);
+          setHowSeen(false);
           setScreen('cover');
         }}
       />
