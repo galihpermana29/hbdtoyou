@@ -354,9 +354,15 @@ function describeBox(styles) {
     if (String(effect.type).includes('BLUR')) {
       parts.push(`${effect.type} ${round(effect.radius)}`);
     } else if (String(effect.type).includes('SHADOW')) {
+      // The colour comes straight off the effect: paint() reads fills, and
+      // handing it an effect returned the effect's own type string, which
+      // swallowed the colour and printed every shadow as colourless. Readers
+      // assumed black, and the CTA shipped its pressed state - the design's
+      // resting shadow is white light on the top edge - until the designer
+      // caught it.
       const o = effect.offset ?? {};
       parts.push(
-        `${effect.type} ${paint(effect) ?? effect.color}@${round(effect.opacity)} ` +
+        `${effect.type} ${effect.color}@${round(effect.opacity)} ` +
           `${round(o.x)},${round(o.y)} blur ${round(effect.radius)} spread ${round(effect.spread ?? 0)}`
       );
     }

@@ -50,7 +50,7 @@ export const cta = (copy) => ({
     backgroundColor: COLOUR.flame,
     borderRadius: '9999px',
     padding: '10px',
-    boxShadow: 'rgba(0, 0, 0, 0.25) 2px 3px 3.2px inset',
+    boxShadow: 'rgba(255, 255, 255, 0.25) 2px 3px 3.2px inset',
   },
 });
 

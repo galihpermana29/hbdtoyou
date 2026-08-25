@@ -4,9 +4,11 @@ import { motion, useReducedMotion } from 'framer-motion';
 import { colour, type } from './tokens';
 
 /**
- * The one button the design uses to move somebody forward: fully round, and an
- * inner shadow set down and to the right so the pill reads as something pressed
- * out of the paper rather than laid on top of it.
+ * The one button the design uses to move somebody forward: fully round, with a
+ * white inner highlight catching its top-left edge so the pill reads as raised
+ * off the paper, waiting to be pressed. The designer flagged the first shipped
+ * version for carrying the same geometry in black - which is this button's
+ * PRESSED state, not its resting one. Same shape, inverted light.
  *
  * Its width is the only thing that changes between screens - 220 on the
  * location ask, the full 343 column on the username confirm, half of it on
@@ -71,7 +73,7 @@ export default function Cta({
       style={{
         ...TONES[tone],
         fontFamily: 'var(--font-mr-body)',
-        boxShadow: 'inset 2px 3px 3.2px rgba(0, 0, 0, 0.25)',
+        boxShadow: 'inset 2px 3px 3.2px rgba(255, 255, 255, 0.25)',
       }}>
       {children}
     </motion.button>

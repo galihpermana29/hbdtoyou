@@ -38,7 +38,7 @@ export const expectations = creatorStep(
         borderStyle: 'solid',
         borderColor: 'rgba(33, 33, 33, 0.2)',
         padding: '10px',
-        boxShadow: 'rgba(0, 0, 0, 0.25) 2px 3px 3.2px inset',
+        boxShadow: 'rgba(255, 255, 255, 0.25) 2px 3px 3.2px inset',
       },
     },
     outlineCta('Preview'),

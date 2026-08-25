@@ -114,7 +114,7 @@ export default function DarkRoomScreen({
           style={{
             background: colour.mauve,
             border: '1px solid rgba(255, 255, 255, 0.4)',
-            boxShadow: 'inset 0 1px 2px rgba(0, 0, 0, 0.25)',
+            boxShadow: 'inset 0 1px 2px rgba(58, 44, 52, 0.25)',
           }}>
           <div
             className="flex items-center justify-center gap-[10px] rounded-[8px] px-[16px] py-[10px]"
