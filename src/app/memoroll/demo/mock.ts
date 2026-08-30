@@ -128,4 +128,4 @@ export const VIEWFINDER_FALLBACK = SAMPLE_SOURCES[10];
  * bakes this date (with the real capture time) so a guest's own shots agree
  * with the mock roll's stamps instead of betraying the demo's date.
  */
-export const STAMP_DATE = '03/05/2026';
+export const STAMP_DATE = '5 3 ‘26';
