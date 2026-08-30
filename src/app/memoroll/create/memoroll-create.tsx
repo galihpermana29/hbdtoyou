@@ -207,10 +207,12 @@ export default function MemorollCreate({
         if (!draft.revealOn || !draft.revealAt) {
           return 'Pick the date and the hour of the reveal.';
         }
+        // Same day is fine - the same minute is not: the roll needs at
+        // least five minutes open, or it reveals before anyone has shot.
         const opens = Date.parse(`${draft.opensOn}T${draft.opensAt}`);
         const reveal = Date.parse(`${draft.revealOn}T${draft.revealAt}`);
-        if (!isNaN(opens) && !isNaN(reveal) && reveal <= opens) {
-          return 'The reveal has to come after the roll opens.';
+        if (!isNaN(opens) && !isNaN(reveal) && reveal < opens + 5 * 60_000) {
+          return 'The reveal has to be at least five minutes after the roll opens.';
         }
         return null;
       }
