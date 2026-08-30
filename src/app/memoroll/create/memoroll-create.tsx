@@ -8,12 +8,15 @@ import {
   INSUFFICIENT_QUOTA,
   WEDDING_ALREADY_LINKED,
 } from '@/action/interfaces';
+// Browser-to-backend since 2026-08-30 (`memoroll-client-api.ts`): the first
+// deployed publish died silently when Vercel's ten-second server-action
+// ceiling met a backend that took ninety - while the backend obeyed anyway.
 import {
-  createMemorollEvent,
-  getOwnedMemorollEvent,
-  listOwnedMemorollEvents,
-  publishMemorollEvent,
-} from '@/action/memoroll-api';
+  createMemorollEventClient as createMemorollEvent,
+  getOwnedMemorollEventClient as getOwnedMemorollEvent,
+  listOwnedMemorollEventsClient as listOwnedMemorollEvents,
+  publishMemorollEventClient as publishMemorollEvent,
+} from '@/action/memoroll-client-api';
 import Cover from '@/components/memoroll/guest/cover';
 import CoverStep from '@/components/memoroll/creator/cover-step';
 import NameStep from '@/components/memoroll/creator/name-step';
@@ -28,16 +31,14 @@ import WelcomeScreen from '@/components/memoroll/creator/welcome-screen';
 import { ChevronLeftIcon } from '@/components/memoroll/ui/icons';
 import { colour } from '@/components/memoroll/ui/tokens';
 import {
+  COVER_STYLES,
   LAST_STEP,
   type MemorollDraft,
 } from '@/components/memoroll/creator/draft';
 import { newUploadImageWithAPI } from '@/lib/upload';
 // The motion constants are the demo's, on purpose: one source, so the product
 // and the walkthrough cannot drift apart in how a step arrives (ADR 0007).
-import {
-  REDUCED_FADE,
-  screenVariants,
-} from '@/app/memoroll/demo/variants';
+import { REDUCED_FADE, screenVariants } from '@/app/memoroll/demo/variants';
 import { buildMemorollPayload } from './payload';
 
 /**
@@ -82,9 +83,7 @@ const WEDDING_TAKEN_PROBLEM =
 const MEMOROLL_TEMPLATE_ID = '66666666-6666-6666-6666-666666666666';
 
 type View =
-  | { kind: 'welcome' }
-  | { kind: 'step'; step: number }
-  | { kind: 'preview' };
+  { kind: 'welcome' } | { kind: 'step'; step: number } | { kind: 'preview' };
 
 /** The created event, and how far towards its guests it has come. */
 interface Published {
@@ -112,9 +111,13 @@ interface Published {
 export default function MemorollCreate({
   initialDraft,
   weddingId,
+  existingRollId = null,
 }: {
   initialDraft: MemorollDraft;
   weddingId: string | null;
+  /** The wedding's already-made roll, when it has one: the welcome's button
+   *  leads to its console instead of into the wizard. */
+  existingRollId?: string | null;
 }) {
   const reduce = useReducedMotion();
   const router = useRouter();
@@ -125,6 +128,23 @@ export default function MemorollCreate({
   const [problem, setProblem] = useState<string | null>(null);
   const [publishing, setPublishing] = useState(false);
   const [published, setPublished] = useState<Published | null>(null);
+  /** The moment of success, said briefly: the toast shows for a beat and
+   *  goes, because the flipped footer is the durable statement. */
+  const [justPublished, setJustPublished] = useState(false);
+  useEffect(() => {
+    if (!justPublished) return;
+    const timer = setTimeout(() => setJustPublished(false), 2000);
+    return () => clearTimeout(timer);
+  }, [justPublished]);
+
+  // Problems are toasts too (owner, 2026-08-30): they say their piece and
+  // go, rather than squatting over the buttons. Long enough to read two
+  // lines; a tap dismisses sooner.
+  useEffect(() => {
+    if (!problem) return;
+    const timer = setTimeout(() => setProblem(null), 2500);
+    return () => clearTimeout(timer);
+  }, [problem]);
   /** How many cover photographs are still travelling to storage. */
   const [uploading, setUploading] = useState(0);
   /** Object URLs previewing photographs whose uploads have not landed. */
@@ -146,8 +166,68 @@ export default function MemorollCreate({
     setView({ kind: 'step', step: Math.min(Math.max(step, 1), LAST_STEP) });
 
   const step = view.kind === 'step' ? view.step : 0;
-  const next = () => goToStep(step + 1);
-  const back = () => goToStep(step - 1);
+  const back = () => {
+    setProblem(null);
+    goToStep(step - 1);
+  };
+
+  /**
+   * What still stops this step, or null when it may be left. Every field is
+   * mandatory (owner's call, 2026-08-30): a roll published with blanks is a
+   * cover with empty frames and a venue nobody can find, so each Continue
+   * refuses with the reason rather than carrying blanks forward. The demo
+   * keeps its unguarded walkthrough - its draft is the design's.
+   */
+  const stillMissingOn = (at: number): string | null => {
+    switch (at) {
+      case 2:
+        return draft.eventName.trim() ? null : 'The roll needs a name.';
+      case 3: {
+        const slots =
+          COVER_STYLES.find((option) => option.key === draft.coverStyle)
+            ?.slots ?? 1;
+        const filled = draft.photos
+          .slice(0, slots)
+          .every((photo) => typeof photo === 'string' && photo !== '');
+        return filled
+          ? null
+          : slots === 1
+            ? 'The cover needs its photograph.'
+            : 'The collage needs all six photographs.';
+      }
+      case 4:
+        return draft.opensOn && draft.opensAt
+          ? null
+          : 'Pick the date and the hour the roll opens.';
+      case 5:
+        return draft.venue.trim() && draft.address.trim()
+          ? null
+          : 'The venue and its address are both needed.';
+      case 7: {
+        if (!draft.revealOn || !draft.revealAt) {
+          return 'Pick the date and the hour of the reveal.';
+        }
+        const opens = Date.parse(`${draft.opensOn}T${draft.opensAt}`);
+        const reveal = Date.parse(`${draft.revealOn}T${draft.revealAt}`);
+        if (!isNaN(opens) && !isNaN(reveal) && reveal <= opens) {
+          return 'The reveal has to come after the roll opens.';
+        }
+        return null;
+      }
+      default:
+        return null;
+    }
+  };
+
+  const next = () => {
+    const missing = stillMissingOn(step);
+    if (missing) {
+      setProblem(missing);
+      return;
+    }
+    setProblem(null);
+    goToStep(step + 1);
+  };
 
   const placePhoto = (slot: number, url: string | null) =>
     setDraft((previous) => {
@@ -242,6 +322,30 @@ export default function MemorollCreate({
   };
 
   /**
+   * The roll a WEDDING_ALREADY_LINKED refusal is talking about. The refusal
+   * is proof the roll exists, so the flow adopts it - by the wedding's own
+   * id, with no time window, because however old it is, it is this
+   * wedding's one roll - and the footer flips to the published state
+   * instead of stranding a Publish that can never succeed (owner,
+   * 2026-08-30).
+   */
+  const adoptWeddingsRoll = async (): Promise<Published | null> => {
+    if (!weddingId) return null;
+    const listing = await listOwnedMemorollEvents('100', '1');
+    if (!listing.success || !listing.data) return null;
+    const match = listing.data.find(
+      (candidate) =>
+        candidate.wedding_id === weddingId && candidate.status !== 'archived'
+    );
+    if (!match) return null;
+    return {
+      id: match.id,
+      live: match.status === 'published',
+      code: match.code || null,
+    };
+  };
+
+  /**
    * The one act, as the creator feels it: press Publish, get the QR. On the
    * wire it is up to three calls - create, publish, and a read-back for the
    * code. The backend has published at create since 2026-08-30 and answers
@@ -256,6 +360,17 @@ export default function MemorollCreate({
     if (publishing) return;
     setProblem(null);
     setPublishing(true);
+    // Whether this press is the one doing the publishing - the toast belongs
+    // to that press alone, never to a later QR re-open.
+    const wasNew = !published?.live;
+    // Hoisted so the catch below can still look for the event a dead
+    // transport may nevertheless have made.
+    let payloadForRescue: { host_name: string; starts_at: string } | null =
+      null;
+    // Set when the press resolved to the wedding's pre-existing roll: the
+    // footer flips, but the toast and the QR sheet stay quiet so the banner
+    // explaining what happened is what gets read.
+    let adoptedExisting = false;
     try {
       let event = published;
 
@@ -273,46 +388,71 @@ export default function MemorollCreate({
           setProblem(built.problem);
           return;
         }
+        payloadForRescue = built.payload;
 
-        const created = await createMemorollEvent({
-          template_id: MEMOROLL_TEMPLATE_ID,
-          ...built.payload,
-        });
-
-        if (!created.success || !created.data?.id) {
-          // The two clean refusals mean the backend heard and said no; a
-          // credit was not spent and nothing was made.
-          if (created.message === INSUFFICIENT_QUOTA) {
-            setProblem(NO_MEMOROLL_CREDIT_PROBLEM);
-            return;
-          }
-          if (created.message === WEDDING_ALREADY_LINKED) {
-            setProblem(WEDDING_TAKEN_PROBLEM);
-            return;
-          }
-          // Anything else is ambiguous - a proxy 502, a dropped connection -
-          // and the event may exist anyway. Look before offering to create
-          // it twice; see adoptOrphanedEvent.
-          const orphan = await adoptOrphanedEvent(built.payload);
-          if (!orphan) {
-            setProblem(
-              `Your roll could not be published: ${
-                created.message || 'the backend sent no answer'
-              }.`
-            );
-            return;
-          }
-          event = orphan;
-          setPublished(orphan);
+        // Look before creating, every press: a prior press's create may
+        // still be cooking on the backend past our 20-second patience, and
+        // a press that created blind would make the event twice. The
+        // listing answers in a second and makes every press safe to repeat.
+        const cooked = await adoptOrphanedEvent(built.payload);
+        if (cooked) {
+          event = cooked;
+          setPublished(cooked);
         } else {
-          // The create answers the code itself since 2026-08-30; the
-          // read-back below stays only for a backend that has not caught up.
-          event = {
-            id: created.data.id,
-            live: false,
-            code: created.data.code || null,
-          };
-          setPublished(event);
+          const created = await createMemorollEvent({
+            template_id: MEMOROLL_TEMPLATE_ID,
+            ...built.payload,
+          });
+
+          if (!created.success || !created.data?.id) {
+            // The two clean refusals mean the backend heard and said no; a
+            // credit was not spent and nothing was made.
+            if (created.message === INSUFFICIENT_QUOTA) {
+              setProblem(NO_MEMOROLL_CREDIT_PROBLEM);
+              return;
+            }
+            if (created.message === WEDDING_ALREADY_LINKED) {
+              // The refusal proves the roll exists: adopt it, flip the
+              // footer, and let the banner explain - a Publish left standing
+              // here could never succeed.
+              const theirs = await adoptWeddingsRoll();
+              if (theirs) {
+                event = theirs;
+                adoptedExisting = true;
+                setPublished(theirs);
+                setProblem(WEDDING_TAKEN_PROBLEM);
+                // Fall through: the shared tail below confirms publish state
+                // and learns the code, then the footer stands published.
+              } else {
+                setProblem(WEDDING_TAKEN_PROBLEM);
+                return;
+              }
+            } else {
+              // Anything else is ambiguous - a proxy 502, a timeout, a
+              // dropped connection - and the event may exist anyway. Look
+              // before offering to create it twice; see adoptOrphanedEvent.
+              const orphan = await adoptOrphanedEvent(built.payload);
+              if (!orphan) {
+                setProblem(
+                  `Your roll could not be published: ${
+                    created.message || 'the backend sent no answer'
+                  }.`
+                );
+                return;
+              }
+              event = orphan;
+              setPublished(orphan);
+            }
+          } else {
+            // The create answers the code itself since 2026-08-30; the
+            // read-back below stays only for a backend that has not caught up.
+            event = {
+              id: created.data.id,
+              live: false,
+              code: created.data.code || null,
+            };
+            setPublished(event);
+          }
         }
       }
 
@@ -343,7 +483,35 @@ export default function MemorollCreate({
         setPublished(event);
       }
 
-      setQrOpen(true);
+      if (!adoptedExisting) {
+        if (wasNew) setJustPublished(true);
+        setQrOpen(true);
+      }
+    } catch (error) {
+      // Nothing in the pipeline should throw - the client calls answer with
+      // envelopes - but the first deployed publish proved what silence costs:
+      // the transport died mid-flight, the backend obeyed anyway, and the
+      // screen said nothing (2026-08-30). So a throw is caught, the orphan
+      // hunt runs the same as for an ambiguous refusal, and whatever the
+      // truth is, the creator reads it.
+      if (!published && payloadForRescue) {
+        const orphan = await adoptOrphanedEvent(payloadForRescue).catch(
+          () => null
+        );
+        if (orphan) {
+          setPublished(orphan);
+          if (orphan.live && orphan.code) {
+            if (wasNew) setJustPublished(true);
+            setQrOpen(true);
+          }
+          return;
+        }
+      }
+      setProblem(
+        `Your roll could not be published: ${
+          error instanceof Error ? error.message : String(error)
+        }. Press Publish again - nothing is charged twice.`
+      );
     } finally {
       setPublishing(false);
     }
@@ -386,7 +554,11 @@ export default function MemorollCreate({
             {view.kind === 'welcome' && (
               <WelcomeScreen
                 photos={WELCOME_PHOTOS}
-                onStart={() => goToStep(1)}
+                onStart={() =>
+                  existingRollId
+                    ? router.push(`/dashboard/memoroll/${existingRollId}`)
+                    : goToStep(1)
+                }
               />
             )}
 
@@ -483,12 +655,32 @@ export default function MemorollCreate({
                 busy={publishing}
                 published={Boolean(published?.live)}
                 onOpenDashboard={() =>
-                  published && router.push(`/dashboard/memoroll/${published.id}`)
+                  published &&
+                  router.push(`/dashboard/memoroll/${published.id}`)
                 }
               />
             )}
           </motion.div>
         </AnimatePresence>
+
+        {/* Success, said briefly: two seconds of toast, then the flipped
+            footer carries the statement. It lingered once and sat over the
+            pills it was announcing (owner, 2026-08-30). */}
+        {justPublished && !problem ? (
+          <div
+            role="status"
+            className="pointer-events-none absolute inset-x-[16px] bottom-[96px] z-30">
+            <p
+              className="rounded-[12px] px-[16px] py-[12px] text-[13px] font-semibold leading-[150%] shadow-lg"
+              style={{
+                background: colour.flame,
+                color: '#ffffff',
+                fontFamily: 'var(--font-mr-body)',
+              }}>
+              Your roll is published. The QR is ready whenever you need it.
+            </p>
+          </div>
+        ) : null}
 
         {/* What stopped the last press, in a sentence, where the thumb that
             pressed is. Product-owned: the designed steps carry no problem

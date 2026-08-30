@@ -431,6 +431,13 @@ export interface IOwnedWeddingInvitationResponse {
   id: string;
   invitation_slug: string;
   status: string;
+  /**
+   * The one memoroll this wedding holds, or null. The creator's door reads
+   * it (2026-08-30): a wedding that already has its roll sends "Setup My
+   * Memoroll" to that roll's console instead of into a wizard whose publish
+   * could only be refused.
+   */
+  linked_memoroll?: { id: string; status: string } | null;
   rsvp_enabled: boolean;
   pov_guest_photo_enabled?: boolean;
   view_count: number;
@@ -678,6 +685,14 @@ export interface IMemorollGalleryPhoto {
   photo_url: string;
   uploader_name: string;
   create_time: string;
+  /**
+   * Whether this photo belongs to the authenticated caller - stamped by the
+   * backend (2026-08-30) so ownership never rides on name-matching, which
+   * two guests picking the same handle would break. Since the same change
+   * the pre-reveal gallery carries other guests' photos too; this flag is
+   * what decides sharp from Veiled.
+   */
+  is_mine?: boolean;
 }
 
 // The gallery, shaped by who asked. Without auth only `phase` and `event`

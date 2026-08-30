@@ -20,10 +20,12 @@
  * answer is the screen's.
  */
 
+// Browser-to-backend since 2026-08-30, for the reason wedding-client-api.ts
+// records: a publish somebody is watching must not die on Vercel's clock.
 import {
-  publishCheckWeddingInvitation,
-  publishWeddingInvitation,
-} from '@/action/wedding-api';
+  publishCheckWeddingInvitationClient as publishCheckWeddingInvitation,
+  publishWeddingInvitationClient as publishWeddingInvitation,
+} from '@/action/wedding-client-api';
 import { problemMessage, UNSTATED_ISSUE } from './invitation-problems';
 
 /** What became of an attempt to publish one invitation. */

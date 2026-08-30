@@ -21,7 +21,9 @@ const handler = NextAuth({
   ],
 
   session: {
-    maxAge: 3 * 60 * 60, // 4 hours
+    // Thirty days, matching the iron-session cookie - the two expire
+    // together or the shorter one signs people out mid-event (2026-08-30).
+    maxAge: 30 * 24 * 60 * 60,
   },
 
   callbacks: {

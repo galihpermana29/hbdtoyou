@@ -164,21 +164,24 @@ Invisible to a guest, who never sees a Shot until they Develop.
 _Avoid_: develop, which now names the thing a guest does
 
 **Develop**:
-Turning a guest's Undeveloped Roll into photographs they can see, through the Dark Room.
-Theirs to trigger once their Shots are spent, and it needs nobody's permission: a guest sees their own Shots whether or not the Reveal has come.
-_Avoid_: reveal, which is when everyone else's Shots open
+Each guest's own act of opening the collective gallery, through the Dark Room, once the Reveal's clock has struck.
+Repurposed on 2026-08-30: it used to unveil a guest's own Roll (now sharp from capture); today the clock alone unveils nothing, and Develop My Roll is how every guest lifts the veil off everyone's prints for themselves.
+_Avoid_: reveal, which is the moment the clock permits developing, not the act
 
 **Undeveloped**:
 A Roll whose Shots have been taken and cannot yet be seen, shown blurred.
-Every Roll starts this way and there is no way to peek: no preview between frames, no thumbnail of the last Shot.
+In the product this is now everyone else's condition, never one's own: a guest's own Shots are sharp from capture (2026-08-30), and the collective stays Undeveloped to each guest until they Develop it.
+The demo walkthrough still performs the original own-roll ceremony.
 
 **Veiled**:
 How a Shot nobody may see yet is drawn: near-black under an 80% veil, softly blurred, with nothing printed on it.
-One treatment for what either gate is holding closed - a guest's own Undeveloped Shots, and everyone else's before the Reveal.
+It guards everyone else's Shots, behind two gates in sequence: the Reveal's clock, and then each guest's own Develop press.
+A guest's own are never veiled to them.
+Since 2026-08-30 the backend sends other guests' photos even before the Reveal, so the veiled wall is real prints, piling up in plain sight.
 _Avoid_: hidden, which says nothing about how it looks.
 
 **Dark Room**:
-The screen a Roll develops in, where the blur lifts off the prints.
+The screen the collective develops in, where the blur lifts off everyone's prints at once - entered by the guest's own Develop press after the Reveal arrives.
 
 **Reveal**:
 The moment the collective gallery opens, set by the creator.

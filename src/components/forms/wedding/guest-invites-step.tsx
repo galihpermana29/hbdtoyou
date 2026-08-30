@@ -2,7 +2,7 @@
 
 import { useEffect, useId, useRef, useState } from 'react';
 
-import { checkInvitationSlug } from '@/action/wedding-api';
+import { checkInvitationSlugClient as checkInvitationSlug } from '@/action/wedding-client-api';
 
 import {
   flowActionAside,

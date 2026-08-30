@@ -51,18 +51,30 @@ export default async function MemorollCreatePage({
 
   let initialDraft = blankMemorollDraft();
   let linkedWeddingId: string | null = null;
+  let existingRollId: string | null = null;
 
   if (weddingId) {
     const wedding = await getOwnedWeddingInvitation(weddingId);
     if (wedding.success && wedding.data) {
       initialDraft = draftFromWedding(wedding.data);
       linkedWeddingId = weddingId;
+      // One wedding, one roll: when it already exists, the welcome's button
+      // becomes the door to its console rather than to a wizard whose
+      // publish could only be refused (owner, 2026-08-30).
+      const linked = wedding.data.linked_memoroll;
+      if (linked && linked.status !== 'archived') {
+        existingRollId = linked.id;
+      }
     }
   }
 
   return (
     <main className={memorollFonts}>
-      <MemorollCreate initialDraft={initialDraft} weddingId={linkedWeddingId} />
+      <MemorollCreate
+        initialDraft={initialDraft}
+        weddingId={linkedWeddingId}
+        existingRollId={existingRollId}
+      />
     </main>
   );
 }

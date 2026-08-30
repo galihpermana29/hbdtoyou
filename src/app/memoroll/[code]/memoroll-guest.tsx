@@ -2,23 +2,26 @@
 
 import { AnimatePresence, motion, useReducedMotion } from 'framer-motion';
 import { signIn } from 'next-auth/react';
-import { useCallback, useEffect, useMemo, useState } from 'react';
+import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 
 import type {
   IMemorollGalleryEvent,
   IMemorollGalleryPhoto,
   MemorollPhase,
 } from '@/action/interfaces';
-import { readMemorollGallery } from '@/action/memoroll-api';
+// Browser-to-backend since 2026-08-30: the join, the refresh and the poll
+// are all calls a guest is actively living inside - see
+// memoroll-client-api.ts for why they skip the server-action middleman.
+import { readMemorollGalleryClient } from '@/action/memoroll-client-api';
 import CameraScreen from '@/components/memoroll/guest/camera-screen';
 import CountdownScreen from '@/components/memoroll/guest/countdown-screen';
 import Cover from '@/components/memoroll/guest/cover';
-import DarkRoomScreen from '@/components/memoroll/guest/darkroom-screen';
 import {
   DEFAULT_FILM,
   normalizeStoredFilm,
   type SelectableFilmId,
 } from '@/components/memoroll/guest/films';
+import DarkRoomScreen from '@/components/memoroll/guest/darkroom-screen';
 import GalleryScreen, {
   type GalleryTab,
   type RevealClock,
@@ -31,6 +34,7 @@ import UsernameScreen from '@/components/memoroll/guest/username-screen';
 import type { Remaining } from '@/components/memoroll/ui/flip-counter';
 import { colour } from '@/components/memoroll/ui/tokens';
 import { useMemoifyProfile, useMemoifySession } from '@/app/session-provider';
+import { removeSession } from '@/store/get-set-session';
 // The motion constants and the camera's stamp faces are the demo's, on
 // purpose: one source each, so the product and the walkthrough cannot drift
 // (ADR 0007; the legacy faces are hbd-3i5's to retire).
@@ -67,11 +71,23 @@ const MONTHS = [
   'Dec',
 ];
 
-/** The date the camera burns into a Shot's corner: "03/05/2026" for May 3rd. */
+/** The gallery's time heading, the way the design writes it: "May 3 at 07:30pm". */
+function groupLabelFor(at: Date): string {
+  const hour12 = ((at.getHours() + 11) % 12) + 1;
+  const half = at.getHours() < 12 ? 'am' : 'pm';
+  const minutes = String(at.getMinutes()).padStart(2, '0');
+  return `${MONTHS[at.getMonth()]} ${at.getDate()} at ${String(
+    hour12
+  ).padStart(2, '0')}:${minutes}${half}`;
+}
+
+/** The Date Stamp the camera burns, in the redesign's own spelling:
+ *  `5 3 ‘26` for May 3rd 2026 - month, day, curly-quoted year (the exact
+ *  string the gallery's mock prints carry as PRINT_STAMP). */
 function stampDateFor(at: Date): string {
-  return `${String(at.getDate()).padStart(2, '0')}/${String(
-    at.getMonth() + 1
-  ).padStart(2, '0')}/${at.getFullYear()}`;
+  return `${at.getMonth() + 1} ${at.getDate()} ‘${String(
+    at.getFullYear() % 100
+  ).padStart(2, '0')}`;
 }
 
 /** "4th" for 4, because the reveal's ended-on line spells its day that way. */
@@ -119,7 +135,7 @@ function groupRoll(entries: RollEntry[]): GalleryGroup[] {
 
 /**
  * The guest walkthrough with the event behind it: Cover -> the closed door or
- * "Get me in" -> "This you?" -> camera -> gallery -> the Dark Room. The same
+ * "Get me in" -> "This you?" -> camera -> gallery. The same
  * screens the demo renders (ADR 0007); this file is the product's half - the
  * reads, the clock, and the Roll on its way to the event.
  *
@@ -131,8 +147,9 @@ function groupRoll(entries: RollEntry[]): GalleryGroup[] {
  * - The phase is the clock's. The server said where the event stood when the
  *   page opened; after that the schedule it handed over is enough, and the
  *   door opens or the Reveal arrives without a reload.
- * - Developing stays this device's ceremony. The blur lifting is local state;
- *   the Shots it lifts off came from the server.
+ * - A guest's own prints are sharp from capture (the develop ceremony was
+ *   retired from the product on 2026-08-30); the Reveal guards only other
+ *   people's Shots.
  * - The handle signs local prints only, until the backend has somewhere to
  *   put it (the display_name ask, 2026-08-29): everything the server echoes
  *   back is signed with the account's own name.
@@ -155,18 +172,22 @@ export default function MemorollGuest({
   const [film, setFilm] = useState<SelectableFilmId>(DEFAULT_FILM);
   const [howSeen, setHowSeen] = useState(false);
   const [swipeCueSeen, setSwipeCueSeen] = useState(false);
-  const [developed, setDeveloped] = useState(false);
   const [joining, setJoining] = useState(false);
   const [problem, setProblem] = useState<string | null>(null);
   /** Whether this device's stored answers have been read yet - the walk-back-in
    *  waits for them, so a returning guest is not asked "This you?" twice. */
   const [deviceKnown, setDeviceKnown] = useState(false);
+  /**
+   * Whether THIS guest has opened the collective: past the Reveal the wall
+   * stays Veiled until they press Develop My Roll and walk the Dark Room
+   * (owner, 2026-08-30 - the unveiling is the guest's own act, not the
+   * clock's). Per person per event, remembered on this device.
+   */
+  const [unveiled, setUnveiled] = useState(false);
   /** This tab pressed "Get me in" and went to Google. Its return finishes the
    *  press; a signed-in person opening the link cold carries no such mark and
    *  still joins by hand. */
   const [returningFromSignIn, setReturningFromSignIn] = useState(false);
-  /** Holding the guest while the last of their Roll finishes uploading. */
-  const [uploadHold, setUploadHold] = useState(false);
 
   /** What the event has answered since joining. */
   const [serverPhotos, setServerPhotos] = useState<IMemorollGalleryPhoto[]>([]);
@@ -222,7 +243,7 @@ export default function MemorollGuest({
   useEffect(() => {
     setHandleConfirmed(false);
     setHowSeen(false);
-    setDeveloped(false);
+    setUnveiled(false);
     if (!userId) return;
     try {
       setFilm(
@@ -234,9 +255,7 @@ export default function MemorollGuest({
         setHandleConfirmed(true);
       }
       setHowSeen(window.localStorage.getItem(storageKey('how-seen')) === '1');
-      setDeveloped(
-        window.localStorage.getItem(storageKey('developed')) === '1'
-      );
+      setUnveiled(window.localStorage.getItem(storageKey('unveiled')) === '1');
     } catch {
       // A blocked store just means the defaults stand for this visit.
     }
@@ -294,7 +313,7 @@ export default function MemorollGuest({
     );
   }, []);
 
-  const { pending, addShot, drain } = useRoll(code, userId, {
+  const { pending, addShot } = useRoll(code, userId, {
     canUpload: phase === 'ongoing',
     displayName: handle,
     onRegistered,
@@ -314,7 +333,7 @@ export default function MemorollGuest({
 
   /** Ask the event where things stand, as the participant this guest now is. */
   const refresh = useCallback(async () => {
-    const answer = await readMemorollGallery(code, 'participant');
+    const answer = await readMemorollGalleryClient(code);
     if (!answer.success || !answer.data) return false;
     setServerPhotos(answer.data.photos ?? []);
     if (answer.data.participant) setParticipant(answer.data.participant);
@@ -383,6 +402,45 @@ export default function MemorollGuest({
     void enterFromCover();
   }, [returningFromSignIn, deviceKnown, session?.accessToken]);
 
+  /**
+   * The walk back in for a guest who was already here: a stored handle for
+   * this person and this roll means they joined on this device before, so a
+   * reload carries them past the Cover instead of asking for a press they
+   * already gave (owner's call, 2026-08-30). First-timers keep the
+   * deliberate "Get me in" - and one attempt only, so a failed resume
+   * leaves the Cover's own button rather than a loop.
+   */
+  const resumed = useRef(false);
+  useEffect(() => {
+    if (resumed.current) return;
+    if (!deviceKnown || !handleConfirmed) return;
+    if (!session?.accessToken || joining || joined) return;
+    if (screen !== 'cover' || phase === 'upcoming') return;
+    resumed.current = true;
+    void enterFromCover();
+  }, [deviceKnown, handleConfirmed, session?.accessToken, joining, joined, screen, phase]);
+
+  /**
+   * Hand the phone to the next guest (owner asked, 2026-08-30): destroy the
+   * session the way the navbar's Logout does, forget this person's handle
+   * for this roll so "This you?" asks the newcomer, and reload signed out -
+   * the full page load is what hands SessionProvider the empty session.
+   */
+  const logout = async () => {
+    try {
+      window.localStorage.removeItem(storageKey('handle'));
+    } catch {
+      // A blocked store still signs out; the handle just lingers for the
+      // same person's return.
+    }
+    try {
+      await removeSession();
+    } catch {
+      // The reload below lands on whatever the truth is either way.
+    }
+    window.location.reload();
+  };
+
   const confirmHandle = (next: string) => {
     setHandle(next);
     setHandleConfirmed(true);
@@ -398,19 +456,27 @@ export default function MemorollGuest({
    * a roll is somebody's whole take on the day, one pile of prints under one
    * name. So My Roll is a single group under the guest's own handle.
    */
+  /**
+   * Whose photo is this? The backend's own word, `is_mine` (2026-08-30) -
+   * never name-matching, which two guests sharing a handle would break. The
+   * fallback below serves only an older backend that has not stamped the
+   * field: before the Reveal such a backend sent only the caller's own, and
+   * after it the name is all there was.
+   */
+  const isMine = useCallback(
+    (photo: IMemorollGalleryPhoto): boolean =>
+      photo.is_mine ??
+      (!revealed ||
+        (!!handle && photo.uploader_name === handle) ||
+        (!!profile?.fullname && photo.uploader_name === profile.fullname)),
+    [handle, profile?.fullname, revealed]
+  );
+
   const ownEntries: RollEntry[] = useMemo(() => {
-    // After the Reveal, own is whatever the event signed with this guest's
-    // name: the confirmed handle now that registrations carry it as
-    // `display_name` (2026-08-30), or the account's fullname for prints sent
-    // before a handle existed.
-    const mine = revealed
-      ? serverPhotos.filter(
-          (photo) =>
-            (handle && photo.uploader_name === handle) ||
-            (profile?.fullname && photo.uploader_name === profile.fullname)
-        )
-      : serverPhotos;
-    const label = handle || profile?.fullname || 'My shots';
+    // Grouped by the minute of capture, the way the design's headings read -
+    // per-person grouping had a day (2026-08-30) and was reverted the same
+    // evening.
+    const mine = serverPhotos.filter(isMine);
     const fromServer = mine.map((photo) => ({
       photo: {
         id: photo.id,
@@ -420,7 +486,7 @@ export default function MemorollGuest({
         shooter: handle || photo.uploader_name,
         own: true,
       },
-      groupLabel: label,
+      groupLabel: groupLabelFor(new Date(photo.create_time)),
     }));
     const fromQueue = pending.map((shot) => ({
       photo: {
@@ -430,26 +496,23 @@ export default function MemorollGuest({
         shooter: handle,
         own: true,
       },
-      groupLabel: label,
+      groupLabel: groupLabelFor(new Date(shot.takenAt)),
     }));
     return [...fromServer, ...fromQueue];
-  }, [handle, pending, profile?.fullname, revealed, serverPhotos]);
+  }, [handle, isMine, pending, serverPhotos]);
 
   /**
-   * ALL is the Collective Gallery, and before the Reveal the event withholds
-   * everyone else's Shots entirely - the count says how much is waiting, and
-   * a guest's own prints are the only ones on the table.
+   * ALL is the Collective Gallery, whole at last: since 2026-08-30 the
+   * backend sends every guest's photos even before the Reveal, so the wall
+   * the design draws is real - other people's prints on the table, Veiled
+   * until the Reveal lifts them (the component keeps that gate: own is
+   * sharp, everyone else's waits on `revealed`). Grouped by the minute of
+   * capture, the design's own headings, so the wall reads as the evening
+   * unfolding rather than as a roster.
    */
   const allEntries: RollEntry[] = useMemo(() => {
-    if (!revealed) return ownEntries;
-    const owned = new Set(ownEntries.map((entry) => entry.photo.id));
-    // One group per person here too: after the Reveal every roll unpacks as
-    // a pile under its shooter's name. This does print the names as headings
-    // that the preview's "Who took this?" used to keep secret - the owner
-    // chose the headings (2026-08-30), and the Reveal has already opened
-    // everything by the time anyone else's group exists.
     const others = serverPhotos
-      .filter((photo) => !owned.has(photo.id))
+      .filter((photo) => !isMine(photo))
       .map((photo) => ({
         photo: {
           id: photo.id,
@@ -458,10 +521,10 @@ export default function MemorollGuest({
           shooter: photo.uploader_name,
           own: false,
         },
-        groupLabel: photo.uploader_name,
+        groupLabel: groupLabelFor(new Date(photo.create_time)),
       }));
     return [...others, ...ownEntries];
-  }, [ownEntries, revealed, serverPhotos]);
+  }, [isMine, ownEntries, serverPhotos]);
 
   /**
    * Who the tally can vouch for: the people whose prints are on the table.
@@ -482,30 +545,12 @@ export default function MemorollGuest({
     ? { state: 'past', endedOn: endedOnLabel(new Date(revealMs)) }
     : { state: 'counting', remaining: remainingUntil(revealMs, now) };
 
-  const eventOver = revealed;
-  const canDevelop =
-    ownEntries.length > 0 && (remaining === 0 || eventOver);
-
-  /**
-   * Develop, with the one hold the design never drew: a Roll whose tail is
-   * still uploading waits here, visibly, so nobody closes the browser on a
-   * half-sent Roll. Decided 2026-08-29; kept as small as honesty allows.
-   */
-  const develop = () => {
-    if (pending.length > 0 && phase === 'ongoing') {
-      setUploadHold(true);
-      void drain();
-      return;
-    }
-    setScreen('darkroom');
-  };
-
-  useEffect(() => {
-    if (uploadHold && pending.length === 0) {
-      setUploadHold(false);
-      setScreen('darkroom');
-    }
-  }, [pending.length, uploadHold]);
+  // A guest's own prints are sharp from the moment they are taken - the
+  // owner retired the develop ceremony from the product on 2026-08-30: the
+  // secret that matters is other people's Shots, and those the Reveal still
+  // guards. The Dark Room and its Develop button survive in the demo
+  // walkthrough; here `ownDeveloped` is simply always true and nothing can
+  // ask to develop.
 
   // The gallery answers change while a guest is elsewhere - other people are
   // shooting too - so walking into the gallery asks the event again.
@@ -609,61 +654,34 @@ export default function MemorollGuest({
                 reveal={reveal}
                 all={groupRoll(allEntries)}
                 own={groupRoll(ownEntries)}
-                ownDeveloped={developed}
-                canDevelop={canDevelop}
+                ownDeveloped={true}
+                othersDeveloped={unveiled}
+                canDevelop={revealed && !unveiled}
                 tab={galleryTab}
                 onTabChange={setGalleryTab}
-                onDevelop={develop}
+                onDevelop={() => setScreen('darkroom')}
                 onBack={() =>
                   setScreen(phase === 'ongoing' && joined ? 'camera' : 'cover')
                 }
+                onLogout={logout}
                 showSwipeCue={!swipeCueSeen}
                 onSwipeCueSeen={() => setSwipeCueSeen(true)}
               />
             )}
             {screen === 'darkroom' && (
               <DarkRoomScreen
-                photos={ownEntries.map((entry) => entry.photo)}
+                photos={allEntries.map((entry) => entry.photo)}
                 hold={false}
                 onDeveloped={() => {
-                  setDeveloped(true);
-                  remember('developed', '1');
-                  setGalleryTab('myroll');
+                  setUnveiled(true);
+                  remember('unveiled', '1');
+                  setGalleryTab('all');
                   setScreen('gallery');
                 }}
               />
             )}
           </motion.div>
         </AnimatePresence>
-
-        {/* The hold between the last Shot and the Dark Room, while the tail
-            of the Roll finishes uploading. Product-owned and deliberately
-            small: one sentence and a count, over the screen that was there. */}
-        {uploadHold ? (
-          <div
-            role="status"
-            className="absolute inset-0 z-40 flex flex-col items-center justify-center gap-[8px] px-[32px] text-center"
-            style={{ background: 'rgba(22,22,22,0.88)' }}>
-            <p
-              className="text-[16px] font-semibold leading-[150%]"
-              style={{
-                color: colour.paper,
-                fontFamily: 'var(--font-mr-body)',
-              }}>
-              Uploading your shots…
-            </p>
-            <p
-              className="text-[13px] leading-[150%]"
-              style={{
-                color: colour.paper,
-                fontFamily: 'var(--font-mr-body)',
-                opacity: 0.7,
-              }}>
-              {pending.length} to go. Keep this page open - your roll develops
-              the moment they land.
-            </p>
-          </div>
-        ) : null}
 
         {problem ? (
           <div
