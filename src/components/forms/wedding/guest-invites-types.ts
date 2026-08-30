@@ -228,6 +228,15 @@ export function guestTokenFrom(value: string | string[] | undefined): string {
 export function invitationLinkFor(slug: string): string | null {
   const value = slug.trim();
   if (value === '') return null;
+  // The subdomain is production's alone: only the deployment serving
+  // memoify.live runs the middleware that resolves it, so on staging and in
+  // dev the pretty address opens the wrong site's landing page (found live,
+  // 2026-08-31). Everywhere that is not production links the path route the
+  // middleware itself rewrites to - the same viewer, an address that
+  // actually answers here.
+  if (process.env.NEXT_PUBLIC_APP_ENV !== 'production') {
+    return `/w/${value}`;
+  }
   return `https://${invitationHostFor(value)}`;
 }
 
