@@ -3,7 +3,9 @@
 import { useCallback, useEffect, useRef, useState } from 'react';
 
 import type { IMemorollGalleryPhoto } from '@/action/interfaces';
-import { submitMemorollPhoto } from '@/action/memoroll-api';
+// Browser-to-backend since 2026-08-30: a Shot registering must not ride a
+// Vercel server action's ten-second clock - see memoroll-client-api.ts.
+import { submitMemorollPhotoClient as submitMemorollPhoto } from '@/action/memoroll-client-api';
 import { newUploadImageWithAPI } from '@/lib/upload';
 
 /**

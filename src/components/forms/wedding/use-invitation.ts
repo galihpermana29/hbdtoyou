@@ -106,11 +106,15 @@ import {
   type IWeddingInvitationPayload,
 } from '@/action/interfaces';
 import { getAllTemplates } from '@/action/user-api';
+// The saves a couple actively waits on go browser-to-backend: a server
+// action on Vercel is a serverless function with a ten-second ceiling, and
+// the backend has been seen honouring a save in ninety (2026-08-30). The
+// listing-cache purge rides inside the client calls themselves.
 import {
-  createWeddingInvitation,
-  getOwnedWeddingInvitation,
-  updateWeddingInvitation,
-} from '@/action/wedding-api';
+  createWeddingInvitationClient as createWeddingInvitation,
+  getOwnedWeddingInvitationClient as getOwnedWeddingInvitation,
+  updateWeddingInvitationClient as updateWeddingInvitation,
+} from '@/action/wedding-client-api';
 import { useMemoifySession } from '@/app/session-provider';
 import {
   NO_WEDDING_CREDIT_PROBLEM,

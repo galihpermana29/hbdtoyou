@@ -10,10 +10,12 @@ import type {
   IMemorollGalleryPhoto,
   IMemorollParticipant,
 } from '@/action/interfaces';
+// Browser-to-backend since 2026-08-30: a save or delete the owner watches
+// must not die on Vercel's server-action clock - see memoroll-client-api.ts.
 import {
-  deleteMemorollPhoto,
-  updateMemorollEvent,
-} from '@/action/memoroll-api';
+  deleteMemorollPhotoClient as deleteMemorollPhoto,
+  updateMemorollEventClient as updateMemorollEvent,
+} from '@/action/memoroll-client-api';
 import {
   FEWEST_SHOTS,
   MOST_SHOTS,
@@ -177,6 +179,13 @@ export default function MemorollConsole({
       }
       setSaid({ kind: 'saved' });
       router.refresh();
+    } catch (error) {
+      // The client call answers with an envelope, so a throw is transport
+      // trouble - and a press that says nothing is the one outcome banned.
+      setSaid({
+        kind: 'failed',
+        problem: error instanceof Error ? error.message : String(error),
+      });
     } finally {
       setSaving(false);
     }
@@ -203,6 +212,12 @@ export default function MemorollConsole({
         return;
       }
       router.refresh();
+    } catch (error) {
+      setDeleteProblem(
+        `That photo could not be deleted: ${
+          error instanceof Error ? error.message : String(error)
+        }.`
+      );
     } finally {
       setDeleting(null);
       setArmed(null);

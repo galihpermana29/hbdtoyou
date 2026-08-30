@@ -587,3 +587,16 @@ export async function submitWeddingRsvp(
     body: JSON.stringify(body),
   });
 }
+
+/**
+ * Drop the cached listing after a save the browser made itself.
+ *
+ * The interactive wedding calls moved into the browser (2026-08-30,
+ * `wedding-client-api.ts`) where `revalidateTag` cannot reach, but this
+ * action still can - and it is the one kind of server action the Vercel
+ * ceiling cannot hurt, because it talks to nobody. Fire-and-forget after a
+ * successful client-side create or update.
+ */
+export async function forgetOwnedListings(): Promise<void> {
+  forgetTheOldListing();
+}
