@@ -125,11 +125,13 @@ export default function GalleryScreen({
   all,
   own,
   ownDeveloped,
+  othersDeveloped = true,
   canDevelop,
   tab,
   onTabChange,
   onDevelop,
   onBack,
+  onLogout,
   showSwipeCue,
   onSwipeCueSeen,
 }: {
@@ -141,12 +143,26 @@ export default function GalleryScreen({
   own: GalleryGroup[];
   /** The guest's own gate: their Roll through the Dark Room, Reveal or not. */
   ownDeveloped: boolean;
+  /**
+   * Everyone else's gate, beyond the clock: even past the Reveal, the
+   * collective stays Veiled until this is true. The product hands the
+   * unveiling to the guest's own press (owner, 2026-08-30) - the Reveal
+   * arrives, and Develop My Roll is how each guest opens it for themselves.
+   * Absent - the demo - the clock alone decides, as the frames drew it.
+   */
+  othersDeveloped?: boolean;
   /** Shots at zero, or the event over with shots unspent - either opens the door. */
   canDevelop: boolean;
   tab: GalleryTab;
   onTabChange: (tab: GalleryTab) => void;
   onDevelop: () => void;
   onBack: () => void;
+  /**
+   * Sign this guest out, when the surface offers it (owner asked,
+   * 2026-08-30 - shared phones at a party change hands). Absent - the demo -
+   * the header keeps its symmetric spacer and nothing new is drawn.
+   */
+  onLogout?: () => void;
   /** The preview's hand cue, early on and never again. */
   showSwipeCue: boolean;
   onSwipeCueSeen: () => void;
@@ -157,8 +173,10 @@ export default function GalleryScreen({
   const revealed = reveal.state === 'past';
   const groups = tab === 'all' ? all : own;
 
-  /** The Reveal gates everyone else's Shots, never a guest's own. */
-  const sharp = (photo: GalleryPhoto) => (photo.own ? ownDeveloped : revealed);
+  /** The Reveal gates everyone else's Shots, never a guest's own - and the
+   *  guest's own press can hold that gate shut past the clock. */
+  const sharp = (photo: GalleryPhoto) =>
+    photo.own ? ownDeveloped : revealed && othersDeveloped;
 
   /** What the preview can flip through: only what this guest may see. */
   const visible = groups.flatMap((group) => group.photos).filter(sharp);
@@ -175,7 +193,37 @@ export default function GalleryScreen({
             style={{ color: colour.ink }}>
             Gallery
           </h1>
-          <span aria-hidden className="w-[48px]" />
+          {/* The spacer that kept the title centred becomes the way out when
+              the surface offers one: same 48px, so the title never moves. */}
+          {onLogout ? (
+            // The bare glyph, nothing drawn around it: this header owns one
+            // strong control - the flame pill - and a second boxed control
+            // was shouting over it. The 48px slot stays as the hit area and
+            // the title's counterweight; the ink is softened so the glyph
+            // sits with the header's quiet text, not its buttons.
+            <button
+              type="button"
+              aria-label="Log out"
+              onClick={onLogout}
+              className="flex h-[44px] w-[48px] items-center justify-center"
+              style={{ color: colour.ink, opacity: 0.55 }}>
+              <svg
+                viewBox="0 0 24 24"
+                className="h-[16px] w-[16px]"
+                fill="none"
+                stroke="currentColor"
+                strokeWidth="1.8"
+                strokeLinecap="round"
+                strokeLinejoin="round"
+                aria-hidden>
+                <path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4" />
+                <polyline points="16 17 21 12 16 7" />
+                <line x1="21" y1="12" x2="9" y2="12" />
+              </svg>
+            </button>
+          ) : (
+            <span aria-hidden className="w-[48px]" />
+          )}
         </div>
 
         <div className="relative mt-[12px]">
@@ -333,7 +381,8 @@ export default function GalleryScreen({
             moment there is nothing left to shoot. It rides above the fold so a
             guest scrolling their veiled Roll is never without it. */}
         <AnimatePresence>
-          {tab === 'myroll' && canDevelop && !ownDeveloped && (
+          {canDevelop &&
+            (tab === 'myroll' ? !ownDeveloped : !othersDeveloped) && (
             <motion.div
               initial={reduce ? { opacity: 0 } : { opacity: 0, y: 12 }}
               animate={{ opacity: 1, y: 0 }}

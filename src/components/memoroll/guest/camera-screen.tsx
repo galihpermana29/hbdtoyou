@@ -89,7 +89,8 @@ export default function CameraScreen({
   onHowSeen?: () => void;
   /** What the viewfinder shows when the browser grants no camera. */
   fallbackSrc: string;
-  /** The date the stamp burns, e.g. "03/05/2026"; the time is capture's. */
+  /** The stamp, burned verbatim in the redesign's own spelling: `5 3 ‘26` -
+   *  month, day, curly-quoted year, no clock (mock.ts PRINT_STAMP). */
   stampDate: string;
   /** The families the bake burns the stamp and watermark in. */
   stampFonts: { hand: string; ui: string };
@@ -697,8 +698,6 @@ async function bakeShot(
   const { canvas } = bakeMemoRollFilm(stage, FRAME_W, FRAME_H, film);
   const ctx = canvas.getContext('2d', { willReadFrequently: true })!;
 
-  ctx.shadowColor = 'rgba(0, 0, 0, 0.55)';
-  ctx.shadowBlur = 8;
   ctx.textBaseline = 'alphabetic';
 
   // Where the marks are burned is dictated by where the prints can crop.
@@ -709,25 +708,35 @@ async function bakeShot(
   // straight into that band - a guest's first real roll came back with the
   // watermark and the date sliced off (found live, 2026-08-29).
   //
-  // Both marks now live in the bottom-LEFT, stacked, above the crop line:
-  // the left corner is where the print's own stamp overlay sits, and the
-  // right corner stays clean for the signature RollPrint draws over My Roll
-  // prints - the old right-aligned date sat exactly under it.
+  // Both marks live in the bottom-LEFT, stacked, above the crop line: the
+  // left corner is where the print's own stamp overlay sits, and the right
+  // corner stays clean for the signature RollPrint draws over My Roll
+  // prints. They speak the redesign's own voice (owner asked for prettier,
+  // 2026-08-30): the date in the flame-orange a point-and-shoot exposes it
+  // in - `colour.stamp`, the exact colour the gallery's overlay stamps use -
+  // small and quiet, with the watermark a whisper beneath it. The legacy
+  // 52px handwriting is gone; this closes what hbd-3i5 opened.
   if (filmStamps(film)) {
-    const at = new Date();
-    const stamp = `${stampDate} ${at.getHours()}:${String(
-      at.getMinutes()
-    ).padStart(2, '0')}`;
-    ctx.font = `52px ${stampFonts.hand}, cursive`;
-    ctx.fillStyle = '#ffffff';
+    // The stamp verbatim, the way the redesign writes it: `5 3 ‘26` - no
+    // slashes, no clock, the curly quote included (mock.ts PRINT_STAMP).
+    ctx.font = `600 34px ${stampFonts.ui}, sans-serif`;
     ctx.textAlign = 'left';
-    ctx.fillText(stamp, 32, FRAME_H - 132);
+    ctx.shadowColor = 'rgba(0, 0, 0, 0.45)';
+    ctx.shadowBlur = 6;
+    // The glow a real date-back burns: the orange itself, bleeding a little.
+    ctx.fillStyle = 'rgba(241, 126, 3, 0.35)';
+    ctx.fillText(stampDate, 33, FRAME_H - 119);
+    ctx.shadowBlur = 0;
+    ctx.fillStyle = '#f17e03';
+    ctx.fillText(stampDate, 32, FRAME_H - 120);
   }
 
-  ctx.font = `500 30px ${stampFonts.ui}, sans-serif`;
-  ctx.fillStyle = 'rgba(255, 255, 255, 0.75)';
+  ctx.font = `500 20px ${stampFonts.ui}, sans-serif`;
+  ctx.shadowColor = 'rgba(0, 0, 0, 0.4)';
+  ctx.shadowBlur = 4;
+  ctx.fillStyle = 'rgba(255, 255, 255, 0.6)';
   ctx.textAlign = 'left';
-  ctx.fillText('memoify.live', 32, FRAME_H - 88);
+  ctx.fillText('memoify.live', 32, FRAME_H - 84);
   ctx.shadowBlur = 0;
 
   return new Promise<Blob>((resolve, reject) => {
