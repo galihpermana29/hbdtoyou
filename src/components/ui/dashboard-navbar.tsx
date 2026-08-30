@@ -20,6 +20,12 @@ const DashboardNavbar = ({ isAdmin }: { isAdmin: boolean }) => {
           className="text-[#182230] font-[600] text-[16px] hover:bg-[#F9FAFB] rounded-[8px] py-[8px] px-[12px]">
           Wedding
         </Link>
+        {/* Like Wedding: the person's own events, outside the admin guard. */}
+        <Link
+          href={'/dashboard/memoroll'}
+          className="text-[#182230] font-[600] text-[16px] hover:bg-[#F9FAFB] rounded-[8px] py-[8px] px-[12px]">
+          MemoRoll
+        </Link>
         {isAdmin && (
           <>
             <Link

@@ -90,6 +90,20 @@ export interface OwnedInvitation {
    * is what `isPublished` is for.
    */
   address: string | null;
+  /**
+   * The bare slug the address is composed from, for the one caller that needs
+   * the path rather than the URL: the card's live preview iframes the
+   * same-origin viewer at `/w/{slug}` (2026-08-30), which is the route the
+   * subdomain middleware itself resolves to.
+   */
+  slug: string | null;
+  /**
+   * The couple's own cover photograph, for the card face when the live
+   * preview cannot render - a draft, whose record the public viewer refuses.
+   * Null when the record holds none, and the card falls back to a monogram
+   * rather than anything invented.
+   */
+  heroPhoto: string | null;
   isPublished: boolean;
   /**
    * Why this invitation cannot be opened, in a sentence, or null when it can.
@@ -199,10 +213,13 @@ export async function ownedWeddingInvitations(
 
   const invitations = rows.map((row): OwnedInvitation => {
     const weddingId = weddingIdFrom(row.detail_content_json_text);
+    const record = weddingContentFrom(row.detail_content_json_text);
     const listed = {
       contentId: row.id,
       couple: coupleOn(row),
       createdOn: row.create_date ?? '',
+      slug: row.slug || row.invitation_slug || null,
+      heroPhoto: record?.heroPhotos?.[0]?.trim() || null,
       // The listing row's own word for it. Trusted here rather than read off
       // the invitation, which is what this screen used to spend a call per row
       // doing - see the note at the top of this file.
