@@ -115,9 +115,12 @@ export function buildMemorollPayload(
     };
   }
 
-  if (!dayjs(revealAt).isAfter(dayjs(startsAt))) {
+  // Same day is welcome; the floor is five minutes of open roll, or the
+  // reveal arrives before anyone has shot (owner's rule, 2026-08-31).
+  if (dayjs(revealAt).diff(dayjs(startsAt), 'minute') < 5) {
     return {
-      problem: 'The reveal has to come after the roll opens.',
+      problem:
+        'The reveal has to be at least five minutes after the roll opens.',
     };
   }
 

@@ -140,10 +140,11 @@ export default function MemorollConsole({
       setSaid({ kind: 'failed', problem: 'Both times need a valid moment.' });
       return;
     }
-    if (Date.parse(revealAt) <= Date.parse(startsAt)) {
+    if (Date.parse(revealAt) < Date.parse(startsAt) + 5 * 60_000) {
       setSaid({
         kind: 'failed',
-        problem: 'The reveal has to come after the roll opens.',
+        problem:
+          'The reveal has to be at least five minutes after the roll opens.',
       });
       return;
     }
