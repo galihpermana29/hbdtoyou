@@ -12,9 +12,10 @@ import StepShell from './step-shell';
  * who they are and then handed a camera.
  *
  * The design draws a date and an hour as two ordinary fields with an icon in
- * each, not as a picker, so that is what they are. Nothing here parses what is
- * typed: a demo that never saves has nothing to parse it for, and the product
- * will read it where it reads everything else.
+ * each, and the first build shipped them as free text. The owner called that
+ * confusing (2026-08-30), so the same two fields now open the platform's own
+ * pickers - the pill, the label and the icon unchanged, the answers arriving
+ * as `YYYY-MM-DD` and `HH:mm`.
  */
 export default function TimeStep({
   opensOn,
@@ -40,6 +41,7 @@ export default function TimeStep({
         <Field
           id="memoroll-opens-on"
           label="Open on"
+          kind="date"
           value={opensOn}
           onChange={(value) => onChange({ opensOn: value })}
           icon={<CalendarIcon className="h-[24px] w-[24px]" />}
@@ -47,6 +49,7 @@ export default function TimeStep({
         <Field
           id="memoroll-opens-at"
           label="At"
+          kind="time"
           value={opensAt}
           onChange={(value) => onChange({ opensAt: value })}
           icon={<ClockIcon className="h-[24px] w-[24px]" />}

@@ -78,10 +78,19 @@ export interface MemorollDraft {
  * The fewest shots a guest can be given.
  *
  * The design draws ten with the minus already unavailable, which is the only
- * thing in the file that says where the floor is. There is no ceiling drawn and
- * none is invented.
+ * thing in the file that says where the floor is.
  */
 export const FEWEST_SHOTS = 10;
+
+/**
+ * The most shots a guest can be given.
+ *
+ * The design draws no ceiling, but the backend enforces one at 100 and the
+ * product chose a tighter one - fifteen, decided 2026-08-29 - so the plus goes
+ * unavailable here rather than the publish failing at the end. It arrives the
+ * same way the floor did: the button greys, nothing is said.
+ */
+export const MOST_SHOTS = 15;
 
 /**
  * The eight steps, in the order the steppers give.

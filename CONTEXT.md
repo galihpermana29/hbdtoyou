@@ -151,6 +151,7 @@ _Avoid_: guest id, which names the row rather than the link.
 **Roll**:
 A guest's whole allotment of Shots for the day.
 When it is spent it is spent: no retakes, no camera-roll uploads.
+The event keeps the count, not the phone: a Roll follows its guest to any device they sign in on, and clearing a browser refunds nothing.
 
 **Shot**:
 One photo a guest takes on their Roll.
@@ -182,6 +183,7 @@ The screen a Roll develops in, where the blur lifts off the prints.
 **Reveal**:
 The moment the collective gallery opens, set by the creator.
 It governs everyone else's Shots and never a guest's own.
+It is also when shooting ends: a Roll can be spent right up to the Reveal, and there is no separate moment the cameras are collected.
 
 **Film**:
 The analog look a Shot Bakes through, chosen by the guest on the camera, per Shot, before it is taken.
@@ -228,6 +230,8 @@ _Avoid_: layout, cover template
 
 **Draft**:
 A MemoRoll that is still being set up: the creator's answers so far, before there is anything for a guest to scan.
+It lives only in the creator's browser; the backend never holds one.
+A MemoRoll is created published, in one act at the end of the creator flow, or it is not created at all.
 A Cover being drawn from a Draft shows the slots still waiting for a photograph; a published one never does, and repeats what it was given instead.
 Collage numbers its waiting slots, because six of them need telling apart from the six uploads beneath; Taped wall and Simple have one each and the design numbers neither.
 _Avoid_: unpublished, which names a state rather than the answers

@@ -701,6 +701,18 @@ async function bakeShot(
   ctx.shadowBlur = 8;
   ctx.textBaseline = 'alphabetic';
 
+  // Where the marks are burned is dictated by where the prints can crop.
+  // Every print window is a taller ratio than the 3:4 frame (the widest,
+  // card and bath at 281.88/338.06, keeps only ~90% of the height under
+  // object-cover), so up to 64px vanishes off the top and the bottom of
+  // this frame on every render. Marks at the old 40px inset were baked
+  // straight into that band - a guest's first real roll came back with the
+  // watermark and the date sliced off (found live, 2026-08-29).
+  //
+  // Both marks now live in the bottom-LEFT, stacked, above the crop line:
+  // the left corner is where the print's own stamp overlay sits, and the
+  // right corner stays clean for the signature RollPrint draws over My Roll
+  // prints - the old right-aligned date sat exactly under it.
   if (filmStamps(film)) {
     const at = new Date();
     const stamp = `${stampDate} ${at.getHours()}:${String(
@@ -708,14 +720,14 @@ async function bakeShot(
     ).padStart(2, '0')}`;
     ctx.font = `52px ${stampFonts.hand}, cursive`;
     ctx.fillStyle = '#ffffff';
-    ctx.textAlign = 'right';
-    ctx.fillText(stamp, FRAME_W - 32, FRAME_H - 40);
+    ctx.textAlign = 'left';
+    ctx.fillText(stamp, 32, FRAME_H - 132);
   }
 
   ctx.font = `500 30px ${stampFonts.ui}, sans-serif`;
   ctx.fillStyle = 'rgba(255, 255, 255, 0.75)';
   ctx.textAlign = 'left';
-  ctx.fillText('memoify.live', 32, FRAME_H - 40);
+  ctx.fillText('memoify.live', 32, FRAME_H - 88);
   ctx.shadowBlur = 0;
 
   return new Promise<Blob>((resolve, reject) => {

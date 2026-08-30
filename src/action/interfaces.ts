@@ -579,3 +579,161 @@ export const GUEST_ALREADY_RESPONDED = 'GUEST_ALREADY_RESPONDED';
 // wrong". Any message that is neither of these two constants stays generic -
 // inventing reasons the backend has not named would be guessing.
 export const RATE_LIMITED = 'RATE_LIMITED';
+
+/* ------------------------------- MemoRoll ------------------------------- */
+
+// What the backend refuses a memoroll create or update with when the wedding
+// it names already has an active memoroll of its own. One wedding, one
+// memoroll: the dashboard card knows this before it navigates, so meeting the
+// refusal at save time means two tabs raced - carried on the message of an
+// unsuccessful result so the flow can point at the existing memoroll rather
+// than print an error nobody caused.
+export const WEDDING_ALREADY_LINKED = 'WEDDING_ALREADY_LINKED';
+
+// What the gallery answers for an event that is not published. Under
+// create-published-or-nothing this is a stale or mistyped link, and the guest
+// page reads it as not-found.
+export const EVENT_NOT_PUBLISHED = 'EVENT_NOT_PUBLISHED';
+
+// What a creator sends when the flow's last step publishes. `ends_at` is
+// always `reveal_at`: shooting runs to the Reveal and there is no separate
+// moment the cameras are collected (CONTEXT.md), so the backend's countdown
+// phase never occurs.
+export interface IMemorollPayload {
+  template_id: string;
+  title: string;
+  host_name: string;
+  caption?: string;
+  wedding_id?: string;
+  detail_content_json_text: string;
+  starts_at: string;
+  ends_at: string;
+  reveal_at: string;
+  shot_limit: number;
+  cover_style: string;
+  cover_photo_urls: string[];
+}
+
+export interface IMemorollCreatedResponse {
+  id: string;
+  /** Answered since 2026-08-30; optional so an older backend still parses. */
+  code?: string;
+  full_url?: string;
+}
+
+// One event as its owner reads it back. The listing rows carry the same shape
+// with `title`, `caption` and `detail_content_json_text` empty - the listing
+// does not join the content table - which is why the dashboard matches rows by
+// `wedding_id` and never reads a name off one.
+export interface IMemorollEventResponse {
+  id: string;
+  content_id: string;
+  template_id: string;
+  wedding_id: string | null;
+  code: string;
+  /** The backend's own answer for where the event lives. Read for the code
+   *  beside it rather than followed: the guest page is `/memoroll/{code}`. */
+  full_url: string;
+  host_name: string;
+  shot_limit: number;
+  cover_style: string;
+  cover_photo_urls: string[] | null;
+  starts_at: string;
+  ends_at: string;
+  reveal_at?: string;
+  status: string;
+  title: string;
+  caption: string;
+  detail_content_json_text: string;
+  create_time: string;
+}
+
+// The five words the gallery uses for where the event stands. `countdown`
+// never occurs on events this app creates (ends_at = reveal_at) and `locked`
+// arrives as a refusal rather than a phase, but both are read if a foreign
+// event ever answers with them.
+export type MemorollPhase =
+  | 'locked'
+  | 'upcoming'
+  | 'ongoing'
+  | 'countdown'
+  | 'revealed';
+
+export interface IMemorollGalleryEvent {
+  code: string;
+  host_name: string;
+  starts_at: string;
+  ends_at: string;
+  shot_limit: number;
+  cover_style: string;
+  cover_photo_urls: string[] | null;
+  full_url: string;
+  /** Not in the recorded contract yet - asked for on 2026-08-29 so the venue
+   *  screen has something to render. Read when the backend starts sending it. */
+  detail_content_json_text?: string;
+}
+
+export interface IMemorollGalleryPhoto {
+  id: string;
+  photo_url: string;
+  uploader_name: string;
+  create_time: string;
+}
+
+// The gallery, shaped by who asked. Without auth only `phase` and `event`
+// come back - the preview a guest reads before "Get me in". With auth the
+// caller is joined as a participant and `participant` appears; `photos` is
+// their own Shots until the Reveal and everybody's after.
+export interface IMemorollGalleryResponse {
+  phase: MemorollPhase;
+  event: IMemorollGalleryEvent;
+  participant?: {
+    shots_used: number;
+    shots_remaining: number;
+  };
+  photo_count?: number;
+  reveal_at?: string;
+  photos?: IMemorollGalleryPhoto[];
+}
+
+// The owner's numbers for one event, off `GET /v1/memoroll/{id}/dashboard`.
+export interface IMemorollDashboardResponse {
+  status: string;
+  phase: MemorollPhase;
+  participant_count: number;
+  photo_count: number;
+  shot_limit: number;
+  starts_at: string;
+  ends_at: string;
+  full_url: string;
+}
+
+// One joined guest as the owner reads them. `display_name` is the handle the
+// guest confirmed on "This you?" (sent with their photo registrations since
+// 2026-08-30); null or empty when they never renamed themselves.
+export interface IMemorollParticipant {
+  id: string;
+  user_id: string;
+  user_name: string;
+  display_name?: string | null;
+  shots_used: number;
+  photo_count: number;
+  joined_at: string;
+}
+
+// A partial update to one event: send only what changed. `title`, `caption`
+// and `detail_content_json_text` land on the content row, the rest on
+// `memoroll_events`. `ends_at` must travel with `reveal_at` and equal it -
+// shooting runs to the Reveal (CONTEXT.md).
+export interface IMemorollUpdatePayload {
+  title?: string;
+  caption?: string;
+  host_name?: string;
+  detail_content_json_text?: string;
+  shot_limit?: number;
+  starts_at?: string;
+  ends_at?: string;
+  reveal_at?: string;
+  cover_style?: string;
+  cover_photo_urls?: string[];
+}

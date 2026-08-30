@@ -22,12 +22,19 @@ export default function QrSheet({
   url,
   onClose,
   onShareLink,
+  onOpenDashboard,
 }: {
   eventName: string;
   /** Where the code points: the roll's own address. */
   url: string;
   onClose: () => void;
   onShareLink: () => void;
+  /**
+   * The owner's way onward once the QR exists: their console for this roll.
+   * Asked for by the owner (2026-08-30); the demo passes nothing and the
+   * sheet stays exactly the drawn one.
+   */
+  onOpenDashboard?: () => void;
 }) {
   const reduce = useReducedMotion();
 
@@ -113,6 +120,12 @@ export default function QrSheet({
           <Cta tone="outline" onClick={onShareLink} className="h-[44px] w-full">
             Share Link
           </Cta>
+
+          {onOpenDashboard ? (
+            <Cta onClick={onOpenDashboard} className="h-[44px] w-full">
+              Open dashboard
+            </Cta>
+          ) : null}
         </div>
       </motion.div>
     </div>

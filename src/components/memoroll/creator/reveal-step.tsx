@@ -44,6 +44,7 @@ export default function RevealStep({
         <Field
           id="memoroll-reveal-on"
           label="Reveal on"
+          kind="date"
           value={revealOn}
           onChange={(value) => onChange({ revealOn: value })}
           icon={<CalendarIcon className="h-[24px] w-[24px]" />}
@@ -51,6 +52,7 @@ export default function RevealStep({
         <Field
           id="memoroll-reveal-at"
           label="At"
+          kind="time"
           value={revealAt}
           onChange={(value) => onChange({ revealAt: value })}
           icon={<ClockIcon className="h-[24px] w-[24px]" />}

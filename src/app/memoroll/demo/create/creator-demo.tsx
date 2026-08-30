@@ -46,14 +46,17 @@ const DESIGNED_DRAFT: MemorollDraft = {
     SAMPLE_SOURCES[1],
     ...Array<null>(COVER_SLOTS - 2).fill(null),
   ],
-  opensOn: '03/05/2026',
-  opensAt: '07:15 PM',
+  // The pickers' own spellings since 2026-08-30: the design wrote 03/05/2026
+  // and 07:15 PM in free-text fields, and these are that same moment as the
+  // native date and time inputs hold it.
+  opensOn: '2026-05-03',
+  opensAt: '19:15',
   venue: 'Park Hyatt Jakarta',
   address: 'Jl. M.H. Thamrin',
   onlyAtTheVenue: true,
   shotsPerGuest: 10,
-  revealOn: '03/05/2026',
-  revealAt: '07:15 PM',
+  revealOn: '2026-05-03',
+  revealAt: '19:15',
 };
 
 /** The stack behind the welcome's sentence. */

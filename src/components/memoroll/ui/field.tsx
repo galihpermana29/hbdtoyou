@@ -27,6 +27,7 @@ export default function Field({
   icon,
   tone = 'paper',
   inputMode,
+  kind = 'text',
 }: {
   id: string;
   label: string;
@@ -44,6 +45,15 @@ export default function Field({
    */
   tone?: 'paper' | 'shaded';
   inputMode?: 'text' | 'numeric';
+  /**
+   * `date` and `time` put the platform's own picker behind the field. The
+   * design drew the clock screens as ordinary fields and the first build
+   * shipped them as free text; the owner called that confusing (2026-08-30)
+   * and chose pickers. The pill, label and icon stay the design's - only
+   * what opens on tap changes. Values are what the platform speaks:
+   * `YYYY-MM-DD` and `HH:mm`.
+   */
+  kind?: 'text' | 'date' | 'time';
 }) {
   return (
     <div className="flex w-full flex-col gap-[12px]">
@@ -79,6 +89,7 @@ export default function Field({
           ) : null}
           <input
             id={id}
+            type={kind}
             value={value}
             onChange={(event) => onChange(event.target.value)}
             inputMode={inputMode}

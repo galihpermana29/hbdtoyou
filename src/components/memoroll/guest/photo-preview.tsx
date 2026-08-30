@@ -56,6 +56,7 @@ export default function PhotoPreview({
   const reduce = useReducedMotion();
   const [revealed, setRevealed] = useState(false);
   const [direction, setDirection] = useState(1);
+  const [downloading, setDownloading] = useState(false);
 
   const photo = photos[index];
   /**
@@ -88,6 +89,38 @@ export default function PhotoPreview({
   const ask = () => {
     onSwipeCueSeen();
     setRevealed(true);
+  };
+
+  /**
+   * Hand the shown print over as a file. Asked for by the owner on
+   * 2026-08-30 - the drawn frames carry no download control, so this is the
+   * quiet outline pill under the flame CTA rather than anything new.
+   *
+   * Fetched as a blob first, because a cross-origin `download` attribute is
+   * ignored and the print's pixels live on Cloudinary; what is saved is the
+   * baked JPEG itself, marks and all (ADR 0006 - there is nothing else). A
+   * fetch the host refuses falls back to opening the print, where a long
+   * press saves it by hand.
+   */
+  const download = async () => {
+    onSwipeCueSeen();
+    if (downloading) return;
+    setDownloading(true);
+    try {
+      const response = await fetch(photo.src);
+      if (!response.ok) throw new Error(String(response.status));
+      const blob = await response.blob();
+      const url = URL.createObjectURL(blob);
+      const anchor = document.createElement('a');
+      anchor.href = url;
+      anchor.download = `memoroll-${photo.id}.jpg`;
+      anchor.click();
+      URL.revokeObjectURL(url);
+    } catch {
+      window.open(photo.src, '_blank', 'noopener');
+    } finally {
+      setDownloading(false);
+    }
   };
 
   return (
@@ -235,6 +268,15 @@ export default function PhotoPreview({
         <div className="mt-[27px] flex justify-center">
           <Cta onClick={ask} className="w-[276px]">
             Who took this?
+          </Cta>
+        </div>
+        <div className="mt-[12px] flex justify-center">
+          <Cta
+            tone="outline"
+            onClick={download}
+            disabled={downloading}
+            className="w-[276px]">
+            {downloading ? 'Saving…' : 'Download'}
           </Cta>
         </div>
       </div>

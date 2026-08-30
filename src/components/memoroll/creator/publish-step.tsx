@@ -31,6 +31,9 @@ export default function PublishStep({
   onPreview,
   onShowQr,
   onPublish,
+  busy = false,
+  published,
+  onOpenDashboard,
 }: {
   eventName: string;
   coverStyle: CoverStyle;
@@ -39,6 +42,25 @@ export default function PublishStep({
   onPreview: () => void;
   onShowQr: () => void;
   onPublish: () => void;
+  /**
+   * Whether the publish is in flight. The first live run had the backend's
+   * proxy hold the create for 92 seconds while this button said nothing
+   * (2026-08-30); a press that starts real work says so until the work
+   * answers.
+   */
+  busy?: boolean;
+  /**
+   * Where the roll stands, and what the footer therefore offers - the
+   * owner's rules, 2026-08-30. `false` is a roll that does not exist yet:
+   * only Publish, because Edit is the Back button's job and a QR of nothing
+   * helps nobody. `true` is a published roll: the three pills appear and
+   * the one big button becomes the way onward, See In Dashboard. Left
+   * `undefined` - the demo - the footer stays exactly the drawn frame
+   * (creator-11), all four controls at once.
+   */
+  published?: boolean;
+  /** Where See In Dashboard goes: the owner's console for this roll. */
+  onOpenDashboard?: () => void;
 }) {
   return (
     <StepShell
@@ -46,24 +68,39 @@ export default function PublishStep({
       heading="Your roll is ready"
       footer={
         <>
-          <div className="flex gap-[12px]">
-            <Cta tone="outline" onClick={onEdit} className="h-[44px] flex-1">
-              Edit
+          {published !== false && (
+            <div className="flex gap-[12px]">
+              <Cta tone="outline" onClick={onEdit} className="h-[44px] flex-1">
+                Edit
+              </Cta>
+              <Cta
+                tone="outline"
+                onClick={onShowQr}
+                label="Share QR Code"
+                className="h-[44px] flex-1">
+                <QrIcon className="h-[24px] w-[24px]" />
+              </Cta>
+              <Cta
+                tone="outline"
+                onClick={onPreview}
+                className="h-[44px] flex-1">
+                Preview
+              </Cta>
+            </div>
+          )}
+          {published === true ? (
+            <Cta onClick={onOpenDashboard} className="w-full">
+              See In Dashboard
             </Cta>
+          ) : (
             <Cta
-              tone="outline"
-              onClick={onShowQr}
-              label="Share QR Code"
-              className="h-[44px] flex-1">
-              <QrIcon className="h-[24px] w-[24px]" />
+              onClick={onPublish}
+              disabled={busy}
+              className="w-full"
+              label={busy ? 'Publishing' : undefined}>
+              {busy ? 'Publishing…' : 'Publish'}
             </Cta>
-            <Cta tone="outline" onClick={onPreview} className="h-[44px] flex-1">
-              Preview
-            </Cta>
-          </div>
-          <Cta onClick={onPublish} className="w-full">
-            Publish
-          </Cta>
+          )}
         </>
       }>
       <div className="flex w-full justify-center">

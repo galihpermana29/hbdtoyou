@@ -3,7 +3,7 @@
 import { MinusIcon, PlusIcon } from '../ui/icons';
 import { colour, type } from '../ui/tokens';
 import StepShell from './step-shell';
-import { FEWEST_SHOTS } from './draft';
+import { FEWEST_SHOTS, MOST_SHOTS } from './draft';
 
 /**
  * Step six: how many shots each guest gets (creator-09).
@@ -13,8 +13,9 @@ import { FEWEST_SHOTS } from './draft';
  * ten is ten - the line under the heading says as much, and it is why the
  * design pushes 165 of empty paper between the two.
  *
- * The design draws ten with the minus already grey, so ten is the floor. It
- * draws no ceiling, and none is invented here.
+ * The design draws ten with the minus already grey, so ten is the floor. The
+ * ceiling is the product's (see MOST_SHOTS) and it arrives the same way: the
+ * plus greys at fifteen exactly as the minus does at ten.
  */
 export default function ShotsStep({
   shotsPerGuest,
@@ -28,6 +29,7 @@ export default function ShotsStep({
   onContinue: () => void;
 }) {
   const atFloor = shotsPerGuest <= FEWEST_SHOTS;
+  const atCeiling = shotsPerGuest >= MOST_SHOTS;
 
   return (
     <StepShell
@@ -61,9 +63,13 @@ export default function ShotsStep({
           <button
             type="button"
             aria-label="One more shot each"
+            disabled={atCeiling}
             onClick={() => onChange(shotsPerGuest + 1)}
             className="h-[44px] w-[44px] shrink-0 rounded-full"
-            style={{ background: colour.flame, color: colour.paper }}>
+            style={{
+              background: atCeiling ? '#d9d9d9' : colour.flame,
+              color: colour.paper,
+            }}>
             <PlusIcon className="h-full w-full" />
           </button>
         </div>
