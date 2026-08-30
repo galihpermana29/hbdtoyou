@@ -4,10 +4,7 @@ import { useEditor, EditorContent } from '@tiptap/react';
 import StarterKit from '@tiptap/starter-kit';
 import TextAlign from '@tiptap/extension-text-align';
 import { useEffect } from 'react';
-import {
-  List,
-
-} from 'lucide-react';
+import { List } from 'lucide-react';
 
 interface MemoRichTextProps {
   defaultContent?: string;
@@ -91,8 +88,9 @@ const MemoRichText = ({
       <div className="flex items-center gap-1 p-2 border-b border-gray-200 bg-gray-50 rounded-t-md">
         <button
           onClick={() => editor.chain().focus().toggleBulletList().run()}
-          className={`p-2 rounded hover:bg-gray-200 ${editor.isActive('bulletList') ? 'bg-gray-300' : ''
-            }`}
+          className={`p-2 rounded hover:bg-gray-200 ${
+            editor.isActive('bulletList') ? 'bg-gray-300' : ''
+          }`}
           type="button">
           <List size={16} />
         </button>

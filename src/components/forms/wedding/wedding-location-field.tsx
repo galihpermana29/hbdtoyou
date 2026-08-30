@@ -27,7 +27,6 @@ import FlowMarkedField from './flow-marked-field';
  * takes one back.
  */
 
-
 export interface WeddingLocationFieldProps {
   /** Whether the field must be answered, which draws the mark beside its label. */
   required?: boolean;

@@ -1,6 +1,10 @@
 import { Metadata } from 'next';
 import { redirect } from 'next/navigation';
 
+import {
+  START_ON_EXAMPLE_PARAM,
+  exampleContentToStartOn,
+} from './example-content-to-start-on';
 import WeddingInvitationCreateClientside from './wedding-invitation-create-clientside';
 import { FlowLanguageProvider } from '@/components/forms/wedding/flow-language';
 import {
@@ -62,6 +66,29 @@ export default async function WeddingInvitationCreatePage({
   const gateStoodDown =
     process.env.WEDDING_FLOW_UNGATED === 'true' &&
     process.env.NODE_ENV !== 'production';
+
+  // A wedding already written, for somebody who came to look at the flow
+  // rather than to fill it in. Off in production - see
+  // `exampleContentToStartOn`.
+  const startOnExample = exampleContentToStartOn(
+    searchParams[START_ON_EXAMPLE_PARAM]
+  );
+
+  // Creating is creating. This address always opens a blank flow, whatever a
+  // couple has saved before, because that is what somebody who came here to
+  // make an invitation asked for.
+  //
+  // It used to resume the newest unpublished invitation instead, to stop a
+  // couple who saved a draft and came back from silently making a second one.
+  // The problem was real and the cure was worse: it never said it had done it,
+  // and there was no way to ask for a blank one, so a couple with any draft at
+  // all could never start another invitation from this screen again.
+  //
+  // Continuing a draft has its own door, and it says what it is: Edit, on the
+  // couple's own listing at `/dashboard/wedding`, which opens that invitation
+  // by its identifier into this same flow. Duplicate drafts are the price, and
+  // they are visible on that listing where a couple can delete or finish them,
+  // which is more than the silent resume ever offered them.
   if (!gateStoodDown) {
     const session = await getSession();
     if (!session?.accessToken) {
@@ -80,6 +107,7 @@ export default async function WeddingInvitationCreatePage({
     <FlowLanguageProvider>
       <WeddingInvitationCreateClientside
         slug={slugFrom(searchParams[SLUG_PARAM])}
+        startOnExample={startOnExample ?? undefined}
       />
     </FlowLanguageProvider>
   );

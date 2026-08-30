@@ -11,9 +11,7 @@ const PlansPage = async () => {
 
   const res = await getListPackages();
 
-  return (
-    <PlansClient initialData={res.success && res.data ? res.data : []} />
-  );
+  return <PlansClient initialData={res.success && res.data ? res.data : []} />;
 };
 
 export default PlansPage;

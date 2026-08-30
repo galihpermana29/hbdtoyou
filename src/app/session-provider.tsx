@@ -74,8 +74,8 @@ const premiumAds: AdContent[] = [
     image:
       'https://res.cloudinary.com/dztygf08a/image/upload/v1775671149/au_ads_1_kxqtks.png',
     type: 'image',
-  }
-]
+  },
+];
 
 // Array of promotional content
 const promotionalContent: AdContent[] = [
@@ -161,6 +161,17 @@ function isProductRouteWithoutAds(pathname: string): boolean {
   );
 }
 
+/**
+ * The MemoRoll demo draws the designer's screens edge to edge, so the site
+ * chrome stays off it the same way it stays off a gift: no footer beneath the
+ * walkthrough and no advertisement over it. It is not a gift, though, so it
+ * does not belong in `drawsAGift` - it answers the chrome question here on
+ * its own.
+ */
+function isMemorollDemo(pathname: string): boolean {
+  return pathname === '/memoroll' || pathname.startsWith('/memoroll/');
+}
+
 const SessionProvider = ({
   children,
   session,
@@ -207,7 +218,9 @@ const SessionProvider = ({
   const isPremium = userProfile?.type === 'premium';
 
   const isGift = drawsAGift(segments, contentId);
-  const isHideAds = isGift || isProductRouteWithoutAds(pathname);
+  const isChromeFreeDemo = isMemorollDemo(pathname);
+  const isHideAds =
+    isGift || isChromeFreeDemo || isProductRouteWithoutAds(pathname);
 
   const PREMIUM_ADS_KEY = 'memoify_premium_ads_count';
   const PREMIUM_ADS_LIMIT = 3;
@@ -224,7 +237,7 @@ const SessionProvider = ({
     try {
       const current = getPremiumAdsCount();
       localStorage.setItem(PREMIUM_ADS_KEY, String(current + 1));
-    } catch { }
+    } catch {}
   };
 
   useEffect(() => {
@@ -246,22 +259,25 @@ const SessionProvider = ({
 
   useEffect(() => {
     if (parsedSession.accessToken) {
-      const interval = setInterval(async () => {
-        setLoading(true);
-        const spotifySession = await getSpotifyAccessToken();
-        const newSession = {
-          spotify: {
-            accessToken: spotifySession.data.access_token,
-            refreshToken: '',
-            expiresIn: dayjs()
-              .add(spotifySession.data.expires_in, 'seconds')
-              .format('YYYY-MM-DD HH:mm:ss'),
-          },
-        };
+      const interval = setInterval(
+        async () => {
+          setLoading(true);
+          const spotifySession = await getSpotifyAccessToken();
+          const newSession = {
+            spotify: {
+              accessToken: spotifySession.data.access_token,
+              refreshToken: '',
+              expiresIn: dayjs()
+                .add(spotifySession.data.expires_in, 'seconds')
+                .format('YYYY-MM-DD HH:mm:ss'),
+            },
+          };
 
-        await setSessionSpecific(newSession.spotify, 'spotify');
-        setLoading(false);
-      }, 1000 * 60 * 30);
+          await setSessionSpecific(newSession.spotify, 'spotify');
+          setLoading(false);
+        },
+        1000 * 60 * 30
+      );
 
       return () => {
         clearInterval(interval);
@@ -284,17 +300,20 @@ const SessionProvider = ({
     }
     if (isPremium && getPremiumAdsCount() >= PREMIUM_ADS_LIMIT) return;
 
-    const interval = setInterval(() => {
-      if (isPremium) {
-        if (getPremiumAdsCount() >= PREMIUM_ADS_LIMIT) {
-          clearInterval(interval);
-          return;
+    const interval = setInterval(
+      () => {
+        if (isPremium) {
+          if (getPremiumAdsCount() >= PREMIUM_ADS_LIMIT) {
+            clearInterval(interval);
+            return;
+          }
+          incrementPremiumAdsCount();
         }
-        incrementPremiumAdsCount();
-      }
-      setCurrentAdContent(selectRandomContent());
-      setAdsModalVisible(true);
-    }, 1000 * 60 * 1);
+        setCurrentAdContent(selectRandomContent());
+        setAdsModalVisible(true);
+      },
+      1000 * 60 * 1
+    );
 
     return () => {
       clearInterval(interval);
@@ -387,7 +406,7 @@ const SessionProvider = ({
       {/* The site footer would intrude on the page a recipient came to see, so
           it stays off a gift. The Create Flow that builds one is ordinary
           product UI and keeps it. */}
-      {!isGift && <Footer />}
+      {!isGift && !isChromeFreeDemo && <Footer />}
     </SessionContext.Provider>
   );
 };

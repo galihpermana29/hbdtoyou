@@ -19,8 +19,8 @@ function formatTime(seconds: number): string {
 
 function WaveformBars() {
   const bars = [
-    3, 5, 8, 4, 7, 10, 6, 9, 5, 8, 12, 7, 4, 9, 6, 11, 5, 8, 3, 7, 10, 6,
-    4, 8, 5, 9, 7, 11, 6, 3, 8, 5, 10, 7, 4, 9, 6, 8, 5, 3,
+    3, 5, 8, 4, 7, 10, 6, 9, 5, 8, 12, 7, 4, 9, 6, 11, 5, 8, 3, 7, 10, 6, 4, 8,
+    5, 9, 7, 11, 6, 3, 8, 5, 10, 7, 4, 9, 6, 8, 5, 3,
   ];
 
   return (
@@ -85,8 +85,7 @@ export default function VinylVoiceModal({
         <div className="w-full flex items-center gap-3 mb-2">
           <button
             onClick={togglePlay}
-            className="w-11 h-11 rounded-full bg-[#5a3e2e] flex items-center justify-center flex-shrink-0 hover:bg-[#4a3020] transition-colors"
-          >
+            className="w-11 h-11 rounded-full bg-[#5a3e2e] flex items-center justify-center flex-shrink-0 hover:bg-[#4a3020] transition-colors">
             {isPlaying ? (
               <Pause size={18} className="text-white" />
             ) : (
@@ -114,12 +113,8 @@ export default function VinylVoiceModal({
         ref={audioRef}
         src={audioUrl}
         preload="metadata"
-        onTimeUpdate={() =>
-          setCurrentTime(audioRef.current?.currentTime ?? 0)
-        }
-        onLoadedMetadata={() =>
-          setDuration(audioRef.current?.duration ?? 0)
-        }
+        onTimeUpdate={() => setCurrentTime(audioRef.current?.currentTime ?? 0)}
+        onLoadedMetadata={() => setDuration(audioRef.current?.duration ?? 0)}
         onEnded={() => setIsPlaying(false)}
       />
     </ModalWrapper>

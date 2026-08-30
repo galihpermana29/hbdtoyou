@@ -62,7 +62,9 @@ export default function MemoRollSection() {
           the application's; ours would otherwise run across the illustration.
           See `docs/adr/0002-figma-is-literal-truth.md` on the typeface. */}
       <div className="relative grid grid-cols-[minmax(0,1fr)_106px] items-center gap-x-[12px]">
-        <h3 className={`col-start-1 ${flowSectionName}`}>{copy.memoRollEnable}</h3>
+        <h3 className={`col-start-1 ${flowSectionName}`}>
+          {copy.memoRollEnable}
+        </h3>
         <p className={`col-start-1 ${flowHint}`}>{copy.memoRollDescription}</p>
         <p className={LEARN_MORE}>Learn more</p>
         <Form.Item name="memoRollEnabled" noStyle>

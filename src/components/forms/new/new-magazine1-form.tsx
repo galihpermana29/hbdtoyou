@@ -159,7 +159,7 @@ const NewMagazineV1Form = ({
         disabled={loading}
         form={form}
         layout="vertical"
-      // onFinish={(val) => handleSubmit(val)}
+        // onFinish={(val) => handleSubmit(val)}
       >
         {selectedSongs && (
           <div className="max-w-[400px] my-[12px]">
@@ -189,9 +189,9 @@ const NewMagazineV1Form = ({
             options={
               searchedOptions.length > 0
                 ? searchedOptions.map((item: any) => ({
-                  label: item.artistName + ' - ' + item.songName,
-                  value: item.id,
-                }))
+                    label: item.artistName + ' - ' + item.songName,
+                    value: item.id,
+                  }))
                 : []
             }
           />

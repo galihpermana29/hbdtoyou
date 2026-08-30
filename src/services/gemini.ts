@@ -28,9 +28,11 @@ export interface GraduationInput {
   movieGenre: string;
 }
 
-export async function generateGraduationStory(input: GraduationInput): Promise<GraduationData> {
+export async function generateGraduationStory(
+  input: GraduationInput
+): Promise<GraduationData> {
   // Access the model
-  const model = genAI.getGenerativeModel({ model: "gemini-2.5-flash" });
+  const model = genAI.getGenerativeModel({ model: 'gemini-2.5-flash' });
 
   const prompt = `
     Primary Instruction: Generate a Netflix-style graduation story using simple, accessible English for a non-native audience.
@@ -80,7 +82,8 @@ export async function generateGraduationStory(input: GraduationInput): Promise<G
     const text = result.response.text();
 
     // Extract the JSON from the response
-    const jsonMatch = text.match(/```json\n([\s\S]*?)\n```/) || text.match(/\{[\s\S]*\}/);
+    const jsonMatch =
+      text.match(/```json\n([\s\S]*?)\n```/) || text.match(/\{[\s\S]*\}/);
     const jsonContent = jsonMatch ? jsonMatch[1] || jsonMatch[0] : text;
 
     const generatedContent = JSON.parse(jsonContent);

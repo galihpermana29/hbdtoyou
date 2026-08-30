@@ -132,7 +132,7 @@ const NewNewspaper1Form = ({
         disabled={loading}
         form={form}
         layout="vertical"
-      // onFinish={(val) => handleSubmit(val)}
+        // onFinish={(val) => handleSubmit(val)}
       >
         <Form.Item
           rules={[
@@ -168,7 +168,9 @@ const NewNewspaper1Form = ({
             placeholder="This is how me express love. In the meantime you will understand how my brain works. lorem ipsum"
           />
         </Form.Item>
-        <Form.List name="stories" initialValue={[{ imageUrl: '', title: '', desc: '' }]}>
+        <Form.List
+          name="stories"
+          initialValue={[{ imageUrl: '', title: '', desc: '' }]}>
           {(fields, { add, remove }) => (
             <>
               <div className="mt-[10px] mb-[5px]">

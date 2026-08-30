@@ -1,7 +1,6 @@
 'use server';
 
-import { getSession, setSessionSpecific } from '@/store/get-set-session';
-import dayjs from 'dayjs';
+import { getSession } from '@/store/get-set-session';
 
 export async function getSpotifyAccessToken() {
   const SPOTIFY_TOKEN_URL = 'https://accounts.spotify.com/api/token';
@@ -49,7 +48,7 @@ export async function getSpotifyAccessToken() {
       data: data,
       success: true,
     };
-  } catch (error) {
+  } catch {
     return {
       message: '500:Failed to fetch access token',
       data: null,

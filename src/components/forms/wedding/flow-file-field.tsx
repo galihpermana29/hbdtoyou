@@ -92,7 +92,9 @@ export default function FlowFileField({
 
   return (
     <div className={flowFieldParts}>
-      <label htmlFor={id} className={`${flowLabel}${required ? ' wedding-required-label' : ''}`}>
+      <label
+        htmlFor={id}
+        className={`${flowLabel}${required ? ' wedding-required-label' : ''}`}>
         {label}
       </label>
 

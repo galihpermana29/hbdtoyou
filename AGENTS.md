@@ -9,7 +9,7 @@ that actually went wrong, so most of it is a trap rather than a description.
 npm install
 npm run dev -- -p 3000        # port 3000, and it matters - see Traps
 npx tsc --noEmit              # typecheck
-npm run visual                # the check: 12 screens against the Figma design
+npm run visual                # the check: 27 screens against two Figma designs
 npm run visual:self-check     # the check on the checker, browser-free
 
 # verify - the loop gates on this

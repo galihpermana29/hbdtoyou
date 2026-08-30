@@ -1,9 +1,10 @@
 import type { Metadata } from 'next';
 
-import { ownedWeddingInvitations } from './owned-invitations';
-import WeddingListing from './wedding-listing';
 import { isAdminEmail } from '@/lib/admin';
 import { getSession } from '@/store/get-set-session';
+import { linkedMemorolls } from './linked-memorolls';
+import { ownedWeddingInvitations } from './owned-invitations';
+import WeddingListing from './wedding-listing';
 
 export const metadata: Metadata = {
   title: 'Wedding | Memoify',
@@ -41,16 +42,18 @@ export default async function WeddingDashboardPage() {
   }
 
   const isAdmin = isAdminEmail(session.email);
-  const { invitations, problem, moreThanShown } = await ownedWeddingInvitations(
-    isAdmin ? null : (session.userId as string)
-  );
-
+  const [{ invitations, problem, moreThanShown }, memorolls] =
+    await Promise.all([
+      ownedWeddingInvitations(isAdmin ? null : (session.userId as string)),
+      linkedMemorolls(),
+    ]);
   return (
     <WeddingListing
       invitations={invitations}
       problem={problem}
       moreThanShown={moreThanShown}
       isAdmin={isAdmin}
+      memorolls={memorolls}
     />
   );
 }

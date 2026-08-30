@@ -91,16 +91,22 @@ The seventh Section is named "Photo Collection", following the other three.
 So there is no frame of record for that step.
 Each disagreement was decided on its own, and neither frame can be trusted wholesale where they differ again.
 
-The web domain field is read-only and prints nothing under it, where the design draws it as the couple's to type.
+The web domain field was read-only, where the design draws it as the couple's to type. That deviation is withdrawn.
 
-An addition was agreed here once and has been withdrawn.
-The step used to print a line stating the rules a slug is held to - "Letters, numbers and hyphens only, 3 to 63 characters, starting and ending with a letter or a number" - because a couple who cannot see the rules can only find them by being refused, which is what user story 34 on `hbd-byb` exists to prevent.
-That reasoning ended when the typing did.
-There is no endpoint that can say whether a slug is free, so a couple choosing one could only be told it was taken after failing; the backend generates the slug instead and the field shows it.
-Rules for typing something nobody types, and a message naming a fault nobody can have caused, are both words a couple cannot act on, so neither is drawn.
+It was never a disagreement with the design, only with what the backend could answer.
+The design draws the address as theirs to choose and shows a chosen name being confirmed as available; there was no endpoint that could say whether a name was free, so a couple choosing one could only have been told it was taken after failing.
+The rules line went with it - "Letters, numbers and hyphens only, 3 to 63 characters, starting and ending with a letter or a number" - because rules for typing something nobody types are words a couple cannot act on.
 
-The field is still a field rather than a line of text: it is the address they are about to send, so it stays reachable, selectable and copyable.
-`visual/expectations/guest-invites.mjs` claims the box and its value and no longer claims a hint, so the line cannot come back unnoticed either.
+The v2 backend answers it: `GET /v1/wedding/slug-availability` says whether a name is free, and `PUT /v1/wedding/{id}` takes a chosen one.
+So the field takes what it shows again, the rules line is back where user story 34 on `hbd-byb` wanted it, and the confirmation the design draws is a control the couple presses.
+What the backend answers is a courtesy rather than a promise - somebody else's save can take a name between the answer and the attempt - so the refusal on save is what finally decides, and it is printed in its own words rather than as a general failure.
+Verified on 2026-08-17: the endpoint is owner-authenticated, which the backend's guide does not say.
+
+One thing the design draws is still not read from the frame: how the check control and its two answers are treated.
+They are drawn in the step's own type and colours until somebody reads the frame - `hbd-bmi` carries that, and this is the deviation to withdraw next.
+
+A published invitation's field stops taking anything, which the design does not draw either.
+From publish the address is in the hands of everybody who was sent it, and a shared link must never die - see `docs/adr/0005-an-invitation-answers-at-its-own-subdomain.md`.
 
 Two additions are agreed and recorded: the Gift Registry Section and the Background Track field each carry a switch the design does not draw.
 
@@ -153,6 +159,27 @@ Nothing about this moves a cell or changes the design's arrangement: Action is s
 The check does not catch this and could not have.
 Reaching the far side of a scrolling region is a question about where an element is, and every property that could answer it is a dimension - which is exactly the class of claim the harness refuses.
 What found it was reading the capture, which is the job screenshots are kept for, and what the check does still guarantee is that pinning the column changed none of the twenty-one values already asserted about those cells.
+
+That cell carries four actions where the design draws two, and it carries them as one control rather than as four.
+
+The design's Action cell holds Edit and Delete side by side.
+A guest now also has a personal invitation message to be sent to them and a personal link to open, and both are per-guest rather than per-invitation: the message names them and the link carries their own token.
+Neither has anywhere else to live.
+A couple who cannot reach them from the guest's own row has to assemble both by hand, which is the same fault the six columns were added to answer.
+
+Four controls do not fit a cell drawn for two, and a fifth column for each new action walks straight back into the width problem the pinning was needed for.
+So the cell becomes one antd button carrying an ellipsis, and everything a couple can do to that guest is in the menu it opens.
+Copy invitation message, Open invitation, Edit and Remove are in that list, Remove last and marked as the destructive one.
+An action with nothing behind it is left out rather than offered dead, so a guest with no personal link yet has no Open invitation to press.
+
+A named button beside the ellipsis was tried first and taken out again.
+It read Actions, which says nothing about which of the four it does, and the one it did - Edit - was in the menu underneath it as well.
+Two routes to the same action, one of them unlabelled, is a worse cell than one route that names what it reaches.
+
+The button is antd's and wears antd's own metrics, so the check asserts that each row has exactly one and where it sits, and says nothing about its type.
+That is the deviation itself rather than drift, and asserting the design's type on a control the design does not draw would be inventing a claim.
+Its accessible name carries the guest's own - a column of identical icons is otherwise a column of identically named controls - and the check cannot read it, because it reaches a label only through a `label` element.
+The cell's own hairline, padding and pinning are unmoved, and the row still ends where the design ends it.
 
 Two more states of that card are drawn that the design has no frame for, because the Guest List now reaches a backend.
 
@@ -277,7 +304,9 @@ A couple was therefore waiting out an upload no guest would ever see, which is t
 The designer settled where it lives rather than adding a tenth section: the camera keepsake at the foot of the Love Story, whose screen the design draws showing the venue's map under a pin.
 The film takes the screen, and the map and its pin retire with the `mapPhoto` the saved record carried for them - that value was a copy of the first Venue Details photograph rather than anything a couple answered, so nothing of theirs is lost, and old records still carrying one are read and ignored.
 
-For now the screen plays the same film on every invitation, because the uploads endpoint refuses video/mp4 (`hbd-zzl`) and a couple has no way to hand their own over.
+That deviation is withdrawn on 2026-08-18.
+The uploads endpoint takes video/mp4 - confirmed by the owner by hand, and documented at 50MB a file - so the Create Flow asks every couple for their own teaser and the camera plays what they gave.
+The screen is empty on a draft that has not been given one yet, which is what a camera with no film in it looks like.
 Which film is `hbd-1qh`'s question: the one the owner chose, `DQgtgRZqhws`, has embedding disabled on YouTube and renders "Video tidak tersedia" inside the camera, so until embedding is enabled or another video is named the screen plays a plainly marked placeholder, `FALLBACK_TEASER_VIDEO` in `LoveStory.tsx`.
 That makes it the product's one Fallback, and CONTEXT.md's Fallback entry names it as the exception: invented at render time, standing in for a value no couple can yet give, and never reaching the backend.
 It is temporary by construction - the invitation already prefers `loveStoryVideo` whenever a record holds one, so the moment the backend takes mp4 a couple's own film takes the screen and the shared one is never drawn for them again.
@@ -339,3 +368,30 @@ The Guest List card says that its columns scroll sideways, below 1440 only, beca
 
 None of these is a deviation to be argued with the designer.
 They are the product at widths the design does not describe, and the moment a frame is drawn at one of them the frame wins.
+
+## The rule also governs MemoRoll, with two deviations
+
+The MemoRoll design (`docs/design/memoroll/`, captured 2026-08-24 from the Figma file "Randos") is followed the same way, and one departure is agreed rather than argued.
+
+The camera's film pills read `RAW`, then `Portra 400` three times over.
+Ship the placeholder and the product carries Kodak's trademark on a paid surface; ship it three times and it carries a roster that does not exist.
+Three identical labels is a placeholder, and hbd-sk4 already settled that every MemoRoll look is an original recipe rather than a named film stock.
+
+So six pills ship: `RAW`, and the five recipes `src/lib/memoroll-film.ts` already renders.
+`RAW` is taken from the design as the label for the no-film option, replacing "None".
+If the designer supplies real names in her own voice, they replace the five and this paragraph goes away.
+
+The second is the padlock on the creator's Venue and Address fields.
+
+Step five of the creator flow draws both fields shaded, each with a padlock at its right edge, under the note "We get this from your digital invitation".
+The note ships exactly as written, and it is asserted, because it is the designer's copy and rewriting it into something currently true would be reporting a design change nobody made.
+The padlock does not ship.
+
+MemoRoll is standalone and the wedding link is deliberately later (ADR 0007), so there is nothing for either field to be got from.
+A padlock says an answer came from somewhere else and is not yours to change; over a field the creator has to fill in themselves, it is the screen contradicting itself, and a creator who believed it would be stuck on step five with no way past.
+The shading stays, since it costs a creator nothing and is the mark the padlock belonged to.
+When the wedding link arrives and there is genuinely something to prefill from, the padlock arrives with it and this paragraph goes away.
+
+Two smaller departures need no argument.
+The iOS status bar and Safari tab bar drawn on every frame are mockery of the browser rather than the product, and are not rendered.
+The Landing and Dark Room animations are approximations, because the references she attached are Gumlet video links that cannot be read from here; they are marked as approximations until she supplies them.

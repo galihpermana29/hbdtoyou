@@ -13,10 +13,13 @@
  * its message to the top of them until the page is reloaded, because there is
  * nowhere else for it to go.
  *
- * A guest replying on their own invitation is answered by the couple's backend
- * instead, and their message does not appear here: it is the couple's to read,
- * and a message on this wall would tell the guest their words were on the
- * invitation when only the couple can see them. See `RsvpCard.tsx`.
+ * A guest replying on their own invitation is answered by the couple's backend,
+ * and their message joins the wall from the other side: the invitation asks for
+ * its public Guest Messages again as soon as the reply lands, and what comes
+ * back is what is drawn. Their card is shown straight away all the same, so the
+ * thanks they were just given has something to point at. Attendance and the
+ * plus one never appear here - those are the couple's to read. See
+ * `RsvpCard.tsx` and `WeddingTemplate1.tsx`.
  */
 
 import { motion } from 'framer-motion';
@@ -213,9 +216,15 @@ function GuestMessageCard({
           />
         </div>
         <div className="relative flex min-w-px flex-[1_0_0] flex-col items-start gap-[2px] leading-[normal] text-black [word-break:break-word]">
-          <p className="relative w-full shrink-0 font-[family-name:var(--font-wt1-mono)] text-[16px] font-semibold">
-            {name}
-          </p>
+          {/* A message the backend did not name prints no name, rather than a
+              blank line where one should be or something invented to fill it.
+              The date carries the card on its own, and the words are what the
+              guest came to read. */}
+          {name ? (
+            <p className="relative w-full shrink-0 font-[family-name:var(--font-wt1-mono)] text-[16px] font-semibold">
+              {name}
+            </p>
+          ) : null}
           <p className="relative w-full shrink-0 font-[family-name:var(--font-wt1-mono)] text-[10px] font-normal">
             {date}
           </p>

@@ -77,14 +77,8 @@ const CloudinaryUsagePage = async () => {
           value={d.transform_usage.toLocaleString()}
           sub={`Limit: ${d.transform_limit.toLocaleString()}`}
         />
-        <StatCard
-          label="Requests"
-          value={d.requests.toLocaleString()}
-        />
-        <StatCard
-          label="Resources"
-          value={d.resources.toLocaleString()}
-        />
+        <StatCard label="Requests" value={d.requests.toLocaleString()} />
+        <StatCard label="Resources" value={d.resources.toLocaleString()} />
         <StatCard
           label="Derived Resources"
           value={d.derived_resources.toLocaleString()}

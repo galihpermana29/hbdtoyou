@@ -47,7 +47,9 @@ export default function PricingSection() {
                     <h1 className="text-[#1B1B1B] font-[700] text-[36px]">
                       IDR {dx.price}
                     </h1>
-                    <p className="mt-[16px] text-[20px] font-[600]">{dx.name}</p>
+                    <p className="mt-[16px] text-[20px] font-[600]">
+                      {dx.name}
+                    </p>
                     <p className="text-[#7B7B7B] text-[16px] font-[400]">
                       {dx.description}
                     </p>

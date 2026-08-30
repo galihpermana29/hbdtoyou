@@ -314,7 +314,10 @@ const PlansClient = ({
             <Form.Item name="is_active" label="Active" valuePropName="checked">
               <Switch />
             </Form.Item>
-            <Form.Item name="is_popular" label="Popular" valuePropName="checked">
+            <Form.Item
+              name="is_popular"
+              label="Popular"
+              valuePropName="checked">
               <Switch />
             </Form.Item>
           </div>

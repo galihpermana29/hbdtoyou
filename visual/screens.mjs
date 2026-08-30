@@ -31,6 +31,35 @@ import {
   expectations as weddingTemplate1,
   sealed as weddingTemplate1Sealed,
 } from './expectations/wedding-template-1.mjs';
+import { expectations as memorollCountdown } from './expectations/memoroll-countdown.mjs';
+import { expectations as memorollCover } from './expectations/memoroll-cover.mjs';
+import {
+  asking as memorollLocationAsking,
+  blocked as memorollLocationBlocked,
+} from './expectations/memoroll-location.mjs';
+import { expectations as memorollUsername } from './expectations/memoroll-username.mjs';
+import { expectations as memorollCamera } from './expectations/memoroll-camera.mjs';
+import { expectations as memorollPopupHow } from './expectations/memoroll-how.mjs';
+import { expectations as memorollCreatorWelcome } from './expectations/memoroll-creator-welcome.mjs';
+import { expectations as memorollCreatorVibe } from './expectations/memoroll-creator-vibe.mjs';
+import { expectations as memorollCreatorName } from './expectations/memoroll-creator-name.mjs';
+import { expectations as memorollCreatorCover } from './expectations/memoroll-creator-cover.mjs';
+import { expectations as memorollCreatorTime } from './expectations/memoroll-creator-time.mjs';
+import { expectations as memorollCreatorVenue } from './expectations/memoroll-creator-venue.mjs';
+import { expectations as memorollCreatorShots } from './expectations/memoroll-creator-shots.mjs';
+import { expectations as memorollCreatorReveal } from './expectations/memoroll-creator-reveal.mjs';
+import { expectations as memorollCreatorPublish } from './expectations/memoroll-creator-publish.mjs';
+import { expectations as memorollCreatorQr } from './expectations/memoroll-creator-qr.mjs';
+import { expectations as memorollGalleryAllDuring } from './expectations/memoroll-gallery-all-during.mjs';
+import { expectations as memorollGalleryAllAfter } from './expectations/memoroll-gallery-all-after.mjs';
+import { expectations as memorollMyRollUndeveloped } from './expectations/memoroll-gallery-myroll-undeveloped.mjs';
+import { expectations as memorollMyRollDevelopCta } from './expectations/memoroll-gallery-myroll-develop-cta.mjs';
+import { expectations as memorollMyRollDeveloped } from './expectations/memoroll-gallery-myroll-developed.mjs';
+import { expectations as memorollDarkRoom } from './expectations/memoroll-darkroom.mjs';
+import {
+  secret as memorollPreviewSecret,
+  told as memorollPreviewTold,
+} from './expectations/memoroll-preview.mjs';
 
 /** The width the design is defined at. Nothing below this is checked. */
 export const DESIGN_WIDTH = 1440;
@@ -45,7 +74,14 @@ export const DESIGN_WIDTH = 1440;
 export const TEMPLATE_DESIGN_WIDTH = 375;
 
 /** The Figma file the design is read from, for the export instructions. */
+/**
+ * The Figma file a screen was read from. Two files are checked now: the wedding
+ * invitation's, and "Randos", where MemoRoll is drawn. A screen names its own
+ * with `figmaFile`; unnamed means the wedding one, which is what every screen
+ * meant when there was only the one.
+ */
 export const FIGMA_FILE_NAME = 'Wedding Invitations';
+export const MEMOROLL_FIGMA_FILE_NAME = 'Randos';
 
 const DETAILS_AND_STORY_ROUTE = '/create/wedding-invitation';
 
@@ -187,7 +223,6 @@ async function editTheLoveStory(page) {
   await pressSection(page, 'Love Story');
   await pressSection(page, 'Cover Header');
 }
-
 
 /**
  * A one-pixel PNG, which is all a photograph has to be here.
@@ -334,7 +369,6 @@ async function fillTheDetailsAndStory(page) {
     'Paste the embed code from Google Maps',
     '<iframe src="https://www.google.com/maps/embed?pb=!1m18!1m12" width="600" height="450"></iframe>'
   );
-
 }
 
 /**
@@ -463,6 +497,187 @@ async function openTheRsvp(page) {
  * Content, and finally the RSVP a guest replies on. Each names the frame it was
  * read from and how to drive the page into it.
  */
+/* ------------------------------- MemoRoll -------------------------------- */
+
+/**
+ * The MemoRoll demo, which is where these screens can be seen without an
+ * account, a venue or a clock. It renders the same components the real product
+ * will (ADR 0007), so what is checked here is what ships there.
+ */
+const MEMOROLL_ROUTE = '/memoroll/demo';
+const MEMOROLL_CREATOR_ROUTE = '/memoroll/demo/create';
+
+/**
+ * Go in. "Get me in" is the sign-in: the real product fires Google's own
+ * OAuth sheet here - the system's screen, not a designed one - and lands on
+ * "This you?". The demo signs in on the press itself.
+ */
+async function memorollSignIn(page) {
+  await page.getByRole('button', { name: 'Get me in' }).click();
+}
+
+/** Confirm the handle, which is the last thing asked before the location gate. */
+async function memorollConfirmHandle(page) {
+  await memorollSignIn(page);
+  await page.getByRole('button', { name: 'Yup, let’s shoot!' }).click();
+}
+
+/**
+ * Refuse the location, which the demo does once on the way in so the designed
+ * blocked state is reachable without standing 500m from a wedding.
+ */
+async function memorollBlockLocation(page) {
+  await memorollConfirmHandle(page);
+  await page.getByRole('button', { name: 'Allow My Location' }).click();
+}
+
+/**
+ * Wind the demo clock back, then knock on the door.
+ *
+ * Turning the clock back while the Cover is still up deliberately does not
+ * navigate - the Cover is what a guest is sent whenever they follow the link,
+ * and the door is only reached by asking to go in. So the phase is set first
+ * and the Cover's own button is pressed after it.
+ */
+async function memorollBeforeTheEvent(page) {
+  await page.getByRole('button', { name: /^demo · / }).click();
+  await page.getByRole('button', { name: 'Before the event' }).click();
+  await page.getByRole('button', { name: 'Get me in' }).click();
+}
+
+/**
+ * Through the gate to the camera. The demo walks Location Blocked once on the
+ * way in, so the camera is reached the way its check-again guest reaches it -
+ * and a first entry is greeted by the How popup, which is its own screen.
+ */
+async function memorollEnterCamera(page) {
+  await memorollBlockLocation(page);
+  await page.getByRole('button', { name: 'Check Again' }).click();
+}
+
+/**
+ * The camera in the pose the design draws (guest-09): the How popup read and
+ * dismissed, Flash offered, RAW chosen.
+ *
+ * Two of those are driven rather than defaulted, deliberately. Flash is
+ * capability-detected and this browser has no flash to detect, so the dock's
+ * lighting dial stands in for the hardware - the same stated stand-in it is
+ * for clocks and rolls. And the camera opens on Wedding Natural (the film a
+ * wedding wants), while the design draws its selected pill on RAW; pressing
+ * RAW checks the designed state and the act of choosing it in one move.
+ */
+async function memorollCameraDesigned(page) {
+  await memorollEnterCamera(page);
+  await page.getByRole('button', { name: 'Got it' }).click();
+  await memorollDock(page, ['Hardware: flash']);
+  await page.getByRole('radio', { name: 'RAW' }).click();
+}
+
+/**
+ * What each creator step asks, in the order the steppers give.
+ *
+ * Used to wait for a step to actually arrive before pressing on: one screen
+ * leaves as the next enters, and a second Continue pressed into that gap lands
+ * on the button of the screen already on its way out, which asks to go to the
+ * step the demo is already on. The flow then quietly stops advancing and every
+ * screen after it is checked in the wrong state.
+ */
+const CREATOR_HEADINGS = [
+  'This Memoroll is for?',
+  'What’s the event called?',
+  'Put some photos on',
+  'When does the roll open?',
+  'Where’s the party?',
+  'How many shots does everyone get?',
+  'When should the roll develop',
+  'Your roll is ready',
+];
+
+/**
+ * Walk the creator to one of the eight steps, the way a creator reaches it.
+ *
+ * Pressing through is deliberate rather than lazy. The demo could be handed a
+ * step to open on, and then every screen would be checked in a state nothing
+ * ever arrives in; pressing Continue seven times checks that the seventh screen
+ * is reachable as well as that it is right. It costs a few seconds and it is
+ * the same decision the Create Flow's own screens make.
+ *
+ * The answers are already the design's own, so nothing is typed on the way.
+ */
+async function memorollCreatorStep(page, step) {
+  await page.getByRole('button', { name: 'Setup My Memoroll' }).click();
+  await page
+    .getByRole('heading', { name: CREATOR_HEADINGS[0], exact: true })
+    .waitFor();
+
+  for (let reached = 1; reached < step; reached += 1) {
+    // The seventh step is the last thing asked, so its button says so.
+    const forward = reached === 7 ? 'Create Now' : 'Continue';
+    await page.getByRole('button', { name: forward, exact: true }).click();
+    await page
+      .getByRole('heading', { name: CREATOR_HEADINGS[reached], exact: true })
+      .waitFor();
+  }
+}
+
+/** The QR bottomsheet, reached from the middle button of the last step. */
+async function memorollCreatorQrSheet(page) {
+  await memorollCreatorStep(page, 8);
+  await page.getByRole('button', { name: 'Share QR Code' }).click();
+}
+
+/**
+ * Turn the demo dock's dials, then fold it away again.
+ *
+ * The gallery's states live behind the dock because they live behind clocks
+ * and cameras: the event phase is a wedding-day clock and the guest's own
+ * Roll is ten trips through the shutter, and neither is something a check can
+ * wait for. The dock is the demo's stated stand-in for both (the same door
+ * `memorollBeforeTheEvent` already uses), and it is closed afterwards so the
+ * captured screen is the designed one and nothing else.
+ */
+async function memorollDock(page, presses) {
+  await page.getByRole('button', { name: /^demo · / }).click();
+  for (const name of presses) {
+    await page.getByRole('button', { name, exact: true }).click();
+  }
+  await page.getByRole('button', { name: /^demo · / }).click();
+}
+
+/** ALL mid-event: the demo opens during the event, so straight in. */
+const memorollGalleryDuring = (page) =>
+  memorollDock(page, ['Open the gallery']);
+
+/** ALL after the Reveal. */
+const memorollGalleryAfter = (page) =>
+  memorollDock(page, ['After · revealed', 'Open the gallery']);
+
+/** My Roll with the dock's roll dial at one of its designed states. */
+async function memorollMyRoll(page, rollState) {
+  await memorollDock(page, [rollState, 'Open the gallery']);
+  await page.getByRole('button', { name: 'My Roll', exact: true }).click();
+}
+
+/**
+ * The Dark Room, pinned mid-develop. The ceremony a guest sees runs through
+ * to their developed Roll; the pin is the dock's way of keeping the chemistry
+ * on the glass long enough to be checked.
+ */
+const memorollDarkRoomHeld = (page) =>
+  memorollDock(page, ['Pin the Dark Room open']);
+
+/** The preview, opened the way a guest opens it: on a sharp print, after the Reveal. */
+async function memorollPreview(page) {
+  await memorollGalleryAfter(page);
+  await page.getByRole('button', { name: 'Open this shot' }).first().click();
+}
+
+/** The preview with the secret told: "Who took this?" pressed. */
+async function memorollPreviewAnswered(page) {
+  await memorollPreview(page);
+  await page.getByRole('button', { name: 'Who took this?' }).click();
+}
+
 export const screens = [
   {
     id: 'details-and-story-collapsed',
@@ -576,6 +791,286 @@ export const screens = [
     baseline: 'wedding-template-1-rsvp.png',
     expectations: weddingTemplate1Rsvp,
     prepare: openTheRsvp,
+  },
+  {
+    id: 'memoroll-cover',
+    title: 'MemoRoll Cover, the first screen a guest is sent',
+    route: MEMOROLL_ROUTE,
+    figmaFile: MEMOROLL_FIGMA_FILE_NAME,
+    figmaNodeId: '450-13476',
+    designWidth: TEMPLATE_DESIGN_WIDTH,
+    baseline: 'memoroll-cover.png',
+    expectations: memorollCover,
+  },
+  {
+    id: 'memoroll-countdown',
+    title: 'MemoRoll before the roll opens, counting down',
+    route: MEMOROLL_ROUTE,
+    figmaFile: MEMOROLL_FIGMA_FILE_NAME,
+    figmaNodeId: '434-7640',
+    designWidth: TEMPLATE_DESIGN_WIDTH,
+    baseline: 'memoroll-countdown.png',
+    expectations: memorollCountdown,
+    prepare: memorollBeforeTheEvent,
+  },
+  {
+    id: 'memoroll-username',
+    title: 'MemoRoll asking a signed-in guest whether the handle is theirs',
+    route: MEMOROLL_ROUTE,
+    figmaFile: MEMOROLL_FIGMA_FILE_NAME,
+    figmaNodeId: '450-13751',
+    designWidth: TEMPLATE_DESIGN_WIDTH,
+    baseline: 'memoroll-username.png',
+    expectations: memorollUsername,
+    prepare: memorollSignIn,
+  },
+  {
+    id: 'memoroll-location-asking',
+    title: 'MemoRoll asking for the location that proves a guest is there',
+    route: MEMOROLL_ROUTE,
+    figmaFile: MEMOROLL_FIGMA_FILE_NAME,
+    figmaNodeId: '434-7429',
+    designWidth: TEMPLATE_DESIGN_WIDTH,
+    baseline: 'memoroll-location-asking.png',
+    expectations: memorollLocationAsking,
+    prepare: memorollConfirmHandle,
+  },
+  {
+    id: 'memoroll-location-blocked',
+    title: 'MemoRoll refusing a guest who is outside the venue',
+    route: MEMOROLL_ROUTE,
+    figmaFile: MEMOROLL_FIGMA_FILE_NAME,
+    figmaNodeId: '434-7485',
+    designWidth: TEMPLATE_DESIGN_WIDTH,
+    baseline: 'memoroll-location-blocked.png',
+    expectations: memorollLocationBlocked,
+    prepare: memorollBlockLocation,
+  },
+  {
+    id: 'memoroll-camera',
+    title: 'MemoRoll camera, the shots counter over the film that bakes them',
+    route: MEMOROLL_ROUTE,
+    figmaFile: MEMOROLL_FIGMA_FILE_NAME,
+    figmaNodeId: '434-7827',
+    designWidth: TEMPLATE_DESIGN_WIDTH,
+    baseline: 'memoroll-camera.png',
+    expectations: memorollCamera,
+    prepare: memorollCameraDesigned,
+  },
+  {
+    id: 'memoroll-popup-how',
+    title: 'MemoRoll telling a first-time guest how it works',
+    route: MEMOROLL_ROUTE,
+    figmaFile: MEMOROLL_FIGMA_FILE_NAME,
+    figmaNodeId: '472-7895',
+    designWidth: TEMPLATE_DESIGN_WIDTH,
+    baseline: 'memoroll-popup-how.png',
+    expectations: memorollPopupHow,
+    prepare: memorollEnterCamera,
+  },
+  // The creator's half: the way in, the eight steps in the order the steppers
+  // give, and the QR the last one hands over. The frames are laid out in a
+  // different order than they run, and the marks on them are what settles it.
+  {
+    id: 'memoroll-creator-welcome',
+    title: 'MemoRoll creator welcome, the way in',
+    route: MEMOROLL_CREATOR_ROUTE,
+    figmaFile: MEMOROLL_FIGMA_FILE_NAME,
+    figmaNodeId: '434-8531',
+    designWidth: TEMPLATE_DESIGN_WIDTH,
+    baseline: 'memoroll-creator-welcome.png',
+    expectations: memorollCreatorWelcome,
+  },
+  {
+    id: 'memoroll-creator-vibe',
+    title: 'MemoRoll creator step 1, what the roll is for',
+    route: MEMOROLL_CREATOR_ROUTE,
+    figmaFile: MEMOROLL_FIGMA_FILE_NAME,
+    figmaNodeId: '442-11307',
+    designWidth: TEMPLATE_DESIGN_WIDTH,
+    baseline: 'memoroll-creator-vibe.png',
+    expectations: memorollCreatorVibe,
+    prepare: (page) => memorollCreatorStep(page, 1),
+  },
+  {
+    id: 'memoroll-creator-name',
+    title: 'MemoRoll creator step 2, what the event is called',
+    route: MEMOROLL_CREATOR_ROUTE,
+    figmaFile: MEMOROLL_FIGMA_FILE_NAME,
+    figmaNodeId: '442-11372',
+    designWidth: TEMPLATE_DESIGN_WIDTH,
+    baseline: 'memoroll-creator-name.png',
+    expectations: memorollCreatorName,
+    prepare: (page) => memorollCreatorStep(page, 2),
+  },
+  {
+    id: 'memoroll-creator-cover',
+    title: 'MemoRoll creator step 3, the Cover and the photographs on it',
+    route: MEMOROLL_CREATOR_ROUTE,
+    figmaFile: MEMOROLL_FIGMA_FILE_NAME,
+    figmaNodeId: '442-11433',
+    designWidth: TEMPLATE_DESIGN_WIDTH,
+    baseline: 'memoroll-creator-cover.png',
+    expectations: memorollCreatorCover,
+    prepare: (page) => memorollCreatorStep(page, 3),
+  },
+  {
+    id: 'memoroll-creator-time',
+    title: 'MemoRoll creator step 4, when the roll opens',
+    route: MEMOROLL_CREATOR_ROUTE,
+    figmaFile: MEMOROLL_FIGMA_FILE_NAME,
+    figmaNodeId: '442-11556',
+    designWidth: TEMPLATE_DESIGN_WIDTH,
+    baseline: 'memoroll-creator-time.png',
+    expectations: memorollCreatorTime,
+    prepare: (page) => memorollCreatorStep(page, 4),
+  },
+  {
+    id: 'memoroll-creator-venue',
+    title: 'MemoRoll creator step 5, where the party is',
+    route: MEMOROLL_CREATOR_ROUTE,
+    figmaFile: MEMOROLL_FIGMA_FILE_NAME,
+    figmaNodeId: '442-11622',
+    designWidth: TEMPLATE_DESIGN_WIDTH,
+    baseline: 'memoroll-creator-venue.png',
+    expectations: memorollCreatorVenue,
+    prepare: (page) => memorollCreatorStep(page, 5),
+  },
+  {
+    id: 'memoroll-creator-shots',
+    title: 'MemoRoll creator step 6, how many shots each guest gets',
+    route: MEMOROLL_CREATOR_ROUTE,
+    figmaFile: MEMOROLL_FIGMA_FILE_NAME,
+    figmaNodeId: '442-11697',
+    designWidth: TEMPLATE_DESIGN_WIDTH,
+    baseline: 'memoroll-creator-shots.png',
+    expectations: memorollCreatorShots,
+    prepare: (page) => memorollCreatorStep(page, 6),
+  },
+  {
+    id: 'memoroll-creator-reveal',
+    title: 'MemoRoll creator step 7, when the roll develops',
+    route: MEMOROLL_CREATOR_ROUTE,
+    figmaFile: MEMOROLL_FIGMA_FILE_NAME,
+    figmaNodeId: '442-11766',
+    designWidth: TEMPLATE_DESIGN_WIDTH,
+    baseline: 'memoroll-creator-reveal.png',
+    expectations: memorollCreatorReveal,
+    prepare: (page) => memorollCreatorStep(page, 7),
+  },
+  {
+    id: 'memoroll-creator-publish',
+    title: 'MemoRoll creator step 8, the roll ready to publish',
+    route: MEMOROLL_CREATOR_ROUTE,
+    figmaFile: MEMOROLL_FIGMA_FILE_NAME,
+    figmaNodeId: '442-11832',
+    designWidth: TEMPLATE_DESIGN_WIDTH,
+    baseline: 'memoroll-creator-publish.png',
+    expectations: memorollCreatorPublish,
+    prepare: (page) => memorollCreatorStep(page, 8),
+  },
+  {
+    id: 'memoroll-creator-qr',
+    title: 'MemoRoll creator, the QR bottomsheet a guest scans',
+    route: MEMOROLL_CREATOR_ROUTE,
+    figmaFile: MEMOROLL_FIGMA_FILE_NAME,
+    figmaNodeId: '472-9444',
+    designWidth: TEMPLATE_DESIGN_WIDTH,
+    baseline: 'memoroll-creator-qr.png',
+    expectations: memorollCreatorQr,
+    prepare: memorollCreatorQrSheet,
+  },
+  // The gallery, behind its two independent gates. Four of these eight are the
+  // guest's own Roll walking through its gate - undeveloped, the Develop CTA,
+  // the Dark Room, developed - and that gate never waits for the other one:
+  // the developed screen is checked with "Ends in" still counting.
+  {
+    id: 'memoroll-gallery-all-during',
+    title: 'MemoRoll gallery, ALL veiled while the event runs',
+    route: MEMOROLL_ROUTE,
+    figmaFile: MEMOROLL_FIGMA_FILE_NAME,
+    figmaNodeId: '434-7907',
+    designWidth: TEMPLATE_DESIGN_WIDTH,
+    baseline: 'memoroll-gallery-all-during.png',
+    expectations: memorollGalleryAllDuring,
+    prepare: memorollGalleryDuring,
+  },
+  {
+    id: 'memoroll-gallery-all-after',
+    title: 'MemoRoll gallery, ALL sharp after the Reveal',
+    route: MEMOROLL_ROUTE,
+    figmaFile: MEMOROLL_FIGMA_FILE_NAME,
+    figmaNodeId: '470-6015',
+    designWidth: TEMPLATE_DESIGN_WIDTH,
+    baseline: 'memoroll-gallery-all-after.png',
+    expectations: memorollGalleryAllAfter,
+    prepare: memorollGalleryAfter,
+  },
+  {
+    id: 'memoroll-gallery-myroll-undeveloped',
+    title: 'MemoRoll gallery, My Roll undeveloped with shots left',
+    route: MEMOROLL_ROUTE,
+    figmaFile: MEMOROLL_FIGMA_FILE_NAME,
+    figmaNodeId: '470-6458',
+    designWidth: TEMPLATE_DESIGN_WIDTH,
+    baseline: 'memoroll-gallery-myroll-undeveloped.png',
+    expectations: memorollMyRollUndeveloped,
+    prepare: (page) => memorollMyRoll(page, 'One shot left'),
+  },
+  {
+    id: 'memoroll-gallery-myroll-develop-cta',
+    title: 'MemoRoll gallery, My Roll at zero shots offering Develop',
+    route: MEMOROLL_ROUTE,
+    figmaFile: MEMOROLL_FIGMA_FILE_NAME,
+    figmaNodeId: '470-7092',
+    designWidth: TEMPLATE_DESIGN_WIDTH,
+    baseline: 'memoroll-gallery-myroll-develop-cta.png',
+    expectations: memorollMyRollDevelopCta,
+    prepare: (page) => memorollMyRoll(page, 'All ten spent'),
+  },
+  {
+    id: 'memoroll-darkroom',
+    title: 'MemoRoll Dark Room, the blur mid-lift under the red light',
+    route: MEMOROLL_ROUTE,
+    figmaFile: MEMOROLL_FIGMA_FILE_NAME,
+    figmaNodeId: '470-7362',
+    designWidth: TEMPLATE_DESIGN_WIDTH,
+    baseline: 'memoroll-darkroom.png',
+    expectations: memorollDarkRoom,
+    prepare: memorollDarkRoomHeld,
+  },
+  {
+    id: 'memoroll-gallery-myroll-developed',
+    title: 'MemoRoll gallery, My Roll developed mid-event',
+    route: MEMOROLL_ROUTE,
+    figmaFile: MEMOROLL_FIGMA_FILE_NAME,
+    figmaNodeId: '470-6601',
+    designWidth: TEMPLATE_DESIGN_WIDTH,
+    baseline: 'memoroll-gallery-myroll-developed.png',
+    expectations: memorollMyRollDeveloped,
+    prepare: (page) => memorollMyRoll(page, 'Developed'),
+  },
+  {
+    id: 'memoroll-preview-secret',
+    title: 'MemoRoll preview, the shooter still a secret',
+    route: MEMOROLL_ROUTE,
+    figmaFile: MEMOROLL_FIGMA_FILE_NAME,
+    figmaNodeId: '470-7628',
+    designWidth: TEMPLATE_DESIGN_WIDTH,
+    baseline: 'memoroll-preview-secret.png',
+    expectations: memorollPreviewSecret,
+    prepare: memorollPreview,
+  },
+  {
+    id: 'memoroll-preview-told',
+    title: 'MemoRoll preview, the shooter’s name told',
+    route: MEMOROLL_ROUTE,
+    figmaFile: MEMOROLL_FIGMA_FILE_NAME,
+    figmaNodeId: '472-7952',
+    designWidth: TEMPLATE_DESIGN_WIDTH,
+    baseline: 'memoroll-preview-told.png',
+    expectations: memorollPreviewTold,
+    prepare: memorollPreviewAnswered,
   },
 ];
 

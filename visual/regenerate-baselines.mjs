@@ -47,11 +47,18 @@ function main() {
   }
 
   console.log(
-    `Export from "${FIGMA_FILE_NAME}" (${fileKey}) through the Figma plugin bridge.\n` +
-      'Open the bridge plugin in the Figma desktop application first: it cannot read the\n' +
-      'file otherwise. Export each frame at 1x, at the width shown, over the path shown.\n'
+    'Export through the Figma plugin bridge, opened in the Figma desktop application\n' +
+      'first: it cannot read a file otherwise. Export each frame at 1x, at the width\n' +
+      `shown, over the path shown. The key given is ${fileKey}; a screen in another file\n` +
+      'needs that file open and its own key.\n'
   );
+  let file = null;
   for (const screen of exportable) {
+    const screenFile = screen.figmaFile ?? FIGMA_FILE_NAME;
+    if (screenFile !== file) {
+      file = screenFile;
+      console.log(`\n  from "${file}":`);
+    }
     const width = screen.designWidth ?? DESIGN_WIDTH;
     console.log(
       `  node ${screen.figmaNodeId}  ->  ${asRepoPath('baseline', screen.baseline)}  (${width}px wide)`

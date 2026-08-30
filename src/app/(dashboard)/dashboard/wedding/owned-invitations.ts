@@ -17,10 +17,23 @@
  * or whether it has been published.
  *
  * So the identifier is read out of the record's own content, where the Create
- * Flow writes it - see `WEDDING_ID_KEY` - and the address and the status are
- * read off the invitation itself, one call each. Those calls are made together
- * rather than in turn, because a person with a dozen invitations should not wait
- * a dozen round trips for a list.
+ * Flow writes it - see `WEDDING_ID_KEY`.
+ *
+ * ## One call, not one per invitation
+ *
+ * The address and the publish state used to be read off each invitation in
+ * turn - a `GET /wedding/{id}` per row, fired together, because a person with a
+ * dozen invitations should not wait a dozen round trips. Both now come off the
+ * listing row itself: `status`, which the row has always carried, and
+ * `invitation_slug`, which the backend was asked for on 2026-08-18 so that this
+ * screen could stop asking twice for what one call could answer.
+ *
+ * Two things follow from trusting the row, and both are the backend's to keep
+ * true. `status` on a content row did not follow the wedding's own status when
+ * this was written - a published invitation's row still read `draft`, verified
+ * on staging - so a listing that shows every invitation as a draft is that
+ * desync rather than this screen. And a row that carries no `invitation_slug`
+ * yet shows a card with no address, which is what the field arriving fixes.
  *
  * ## What it does when it cannot
  *
@@ -30,25 +43,15 @@
  * when it is not.
  */
 
-import { getOwnedWeddingInvitation } from '@/action/wedding-api';
-import { getAllTemplates, getContentByUserId } from '@/action/user-api';
 import type { IContent } from '@/action/interfaces';
+import { getAllTemplates, getContentByUserId } from '@/action/user-api';
 import { invitationLinkFor } from '@/components/forms/wedding/guest-invites-types';
 import {
   coupleNamedIn,
+  WEDDING_TEMPLATE_SLUG,
   weddingContentFrom,
   weddingIdFrom,
 } from '@/components/forms/wedding/wedding-invitation-types';
-
-/**
- * The backend template a wedding invitation is made from, found by its slug.
- *
- * By slug rather than by the UUID, because the UUID differs between
- * environments - the same reason `use-invitation.ts` looks it up this way, and
- * the two must agree or a listing would be filtered to a template nothing was
- * created under.
- */
-const WEDDING_TEMPLATE_SLUG = 'wedding-inv';
 
 /**
  * How many invitations one page of this listing covers.
@@ -87,6 +90,20 @@ export interface OwnedInvitation {
    * is what `isPublished` is for.
    */
   address: string | null;
+  /**
+   * The bare slug the address is composed from, for the one caller that needs
+   * the path rather than the URL: the card's live preview iframes the
+   * same-origin viewer at `/w/{slug}` (2026-08-30), which is the route the
+   * subdomain middleware itself resolves to.
+   */
+  slug: string | null;
+  /**
+   * The couple's own cover photograph, for the card face when the live
+   * preview cannot render - a draft, whose record the public viewer refuses.
+   * Null when the record holds none, and the card falls back to a monogram
+   * rather than anything invented.
+   */
+  heroPhoto: string | null;
   isPublished: boolean;
   /**
    * Why this invitation cannot be opened, in a sentence, or null when it can.
@@ -136,15 +153,25 @@ const UNNAMED_RECORD =
   'the record does not say which one it is. Everything on it is safe; there ' +
   'is nothing here that can reach it yet.';
 
-const unreadable = (reason: string) =>
-  `This invitation could not be read back: ${reason}.`;
-
 /**
  * Every wedding invitation the given person owns, or every one there is.
  *
  * `userId` null is the admin case, which is how the dashboard's other listing
  * spells "everybody" too.
  */
+/**
+ * Where a listed invitation answers, or null while the row does not say.
+ *
+ * A couple's own domain wins over the subdomain when they have one, because it
+ * is the address they would give somebody. Neither is composed here - see
+ * `invitationLinkFor`, which is the one place an address is spelled.
+ */
+function addressOn(row: IContent): string | null {
+  if (row.custom_domain) return `https://${row.custom_domain}`;
+  const slug = row.slug || row.invitation_slug;
+  return slug ? invitationLinkFor(slug) : null;
+}
+
 export async function ownedWeddingInvitations(
   userId: string | null
 ): Promise<OwnedInvitations> {
@@ -184,45 +211,33 @@ export async function ownedWeddingInvitations(
 
   const rows = contents.data ?? [];
 
-  const invitations = await Promise.all(
-    rows.map(async (row): Promise<OwnedInvitation> => {
-      const weddingId = weddingIdFrom(row.detail_content_json_text);
-      const listed = {
-        contentId: row.id,
-        weddingId,
-        couple: coupleOn(row),
-        createdOn: row.create_date ?? '',
-      };
+  const invitations = rows.map((row): OwnedInvitation => {
+    const weddingId = weddingIdFrom(row.detail_content_json_text);
+    const record = weddingContentFrom(row.detail_content_json_text);
+    const listed = {
+      contentId: row.id,
+      couple: coupleOn(row),
+      createdOn: row.create_date ?? '',
+      slug: row.slug || row.invitation_slug || null,
+      heroPhoto: record?.heroPhotos?.[0]?.trim() || null,
+      // The listing row's own word for it. Trusted here rather than read off
+      // the invitation, which is what this screen used to spend a call per row
+      // doing - see the note at the top of this file.
+      isPublished: row.status === PUBLISHED,
+      // Composed rather than taken whole, so `invitation-host.ts` stays the one
+      // place an address is spelled (ADR 0005). Null until the row carries a
+      // slug, which is what a card with no address to print is.
+      //
+      // Either spelling: the content table calls it `slug` and the wedding
+      // domain calls it `invitation_slug`, and which one a row carries is the
+      // backend's business rather than this screen's.
+      address: addressOn(row),
+    };
 
-      if (!weddingId) {
-        return {
-          ...listed,
-          address: null,
-          isPublished: false,
-          unreachable: UNNAMED_RECORD,
-        };
-      }
-
-      const invitation = await getOwnedWeddingInvitation(weddingId);
-      if (!invitation.success || !invitation.data) {
-        return {
-          ...listed,
-          address: null,
-          isPublished: false,
-          unreachable: unreadable(
-            invitation.message || 'the backend did not say why'
-          ),
-        };
-      }
-
-      return {
-        ...listed,
-        address: invitationLinkFor(invitation.data.invitation_slug ?? ''),
-        isPublished: invitation.data.status === PUBLISHED,
-        unreachable: null,
-      };
-    })
-  );
+    return weddingId
+      ? { ...listed, weddingId, unreachable: null }
+      : { ...listed, weddingId: null, unreachable: UNNAMED_RECORD };
+  });
 
   return {
     invitations,

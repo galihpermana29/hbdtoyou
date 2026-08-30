@@ -334,15 +334,44 @@ const headingsOf = (column: GuestColumn) =>
   );
 
 /**
- * The file a couple downloads to fill in: the six headings and nothing else.
+ * The two guests the downloaded file is filled in with.
  *
- * No example row, because a row this file carried would be read as a guest by
- * the couple who forgot to delete it, and a wedding with a stranger on the list
- * is a worse outcome than a couple wondering what to type.
+ * Written as one row per column-order so a couple opening the file in a
+ * spreadsheet sees what belongs under each heading rather than six empty
+ * columns and a guess. Two rather than one, because a single row reads as the
+ * shape of the file while two read as a list - and the second one answers the
+ * questions the first leaves open: that a group may repeat, that a plus one
+ * may be none, and that the last three columns can simply be left empty.
+ *
+ * Obviously nobody's guests. The file used to carry the headings alone, on the
+ * reasoning that a row left undeleted would be read as a real guest at
+ * somebody's wedding; the owner asked for examples on 2026-08-23, and these
+ * names are the answer to that risk rather than an exception to it. A couple
+ * who forgets to delete "Example Guest" finds a guest called Example Guest,
+ * which is a mistake that announces itself on their own screen before a single
+ * invitation goes out - and the Guest List step shows every row it read.
  */
-export const GUEST_LIST_TEMPLATE = `${GUEST_COLUMNS.map(
-  (column) => column.heading
-).join(',')}\n`;
+const GUEST_LIST_TEMPLATE_EXAMPLES = [
+  [
+    'Example Guest',
+    'Family',
+    '+62 812 3456 7890',
+    'guest@example.com',
+    '1',
+    'Vegetarian',
+  ],
+  ['Second Example', 'Family', '', '', '0', ''],
+];
+
+/**
+ * The file a couple downloads to fill in: the six headings, and two example
+ * guests underneath them.
+ */
+export const GUEST_LIST_TEMPLATE = [
+  GUEST_COLUMNS.map((column) => column.heading).join(','),
+  ...GUEST_LIST_TEMPLATE_EXAMPLES.map((row) => row.join(',')),
+  '',
+].join('\n');
 
 /** What the downloaded file is called, and the words offering it. */
 export const GUEST_LIST_TEMPLATE_NAME = 'guest-list-template.csv';

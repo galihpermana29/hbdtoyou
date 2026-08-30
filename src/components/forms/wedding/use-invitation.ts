@@ -100,7 +100,11 @@ import { useRef, useState } from 'react';
 
 import type { FormInstance } from 'antd';
 
-import type { IWeddingInvitationPayload } from '@/action/interfaces';
+import {
+  INSUFFICIENT_QUOTA,
+  SLUG_TAKEN,
+  type IWeddingInvitationPayload,
+} from '@/action/interfaces';
 import { getAllTemplates } from '@/action/user-api';
 import {
   createWeddingInvitation,
@@ -108,25 +112,20 @@ import {
   updateWeddingInvitation,
 } from '@/action/wedding-api';
 import { useMemoifySession } from '@/app/session-provider';
-import { NOT_SIGNED_IN_PROBLEM, problemMessage } from './invitation-problems';
+import {
+  NO_WEDDING_CREDIT_PROBLEM,
+  NOT_SIGNED_IN_PROBLEM,
+  problemMessage,
+  SLUG_TAKEN_PROBLEM,
+} from './invitation-problems';
 import { attemptPublish } from './publish-invitation';
 import {
   formValuesToInvitationPayload,
   invitationSlugFrom,
   namesTheCouple,
+  WEDDING_TEMPLATE_SLUG,
   type WeddingInvitationFormValues,
 } from './wedding-invitation-types';
-
-/**
- * The backend template this flow fills in, found by its slug.
- *
- * By slug rather than by the UUID itself, because the UUID differs between
- * environments and a literal one would save into whichever wedding happened to
- * carry that id elsewhere. This is the same lookup the photobox flow does for
- * the same reason, and it goes away when a couple can choose between wedding
- * templates and the choice carries the id.
- */
-const WEDDING_TEMPLATE_SLUG = 'wedding-inv';
 
 /** What became of a save. */
 export type SaveOutcome =
@@ -158,7 +157,15 @@ export interface Invitation {
    * words their families will read and then publishes an invitation without them
    * has lost the one thing on that step that is theirs to write.
    */
-  save: (greetingMessage: string) => Promise<SaveOutcome>;
+  save: (
+    greetingMessage: string,
+    /**
+     * The address the couple chose, when it is theirs rather than the minted
+     * one. Left out on an invitation that has already gone out: the step stops
+     * offering it, and the save refuses it again.
+     */
+    chosenSlug?: string
+  ) => Promise<SaveOutcome>;
   /**
    * The invitation this flow has created, or null while it has none.
    *
@@ -316,6 +323,16 @@ export function useInvitation(
    */
   const namedAddressOffered = useRef(opened?.namesTheCouple ?? false);
 
+  /**
+   * Whether the couple has chosen an address of their own.
+   *
+   * What stops the automatic offer from writing over somebody who typed one,
+   * and what stops the flow reading the minted address back over the top of
+   * theirs. A ref rather than state: nothing renders from it, and it has to be
+   * true for the rest of the same save that set it.
+   */
+  const chosenAddress = useRef(false);
+
   /** The backend's id for the template this flow fills in. */
   async function weddingTemplateId(): Promise<
     { id: string } | { problem: string }
@@ -404,7 +421,11 @@ export function useInvitation(
     payload: Omit<IWeddingInvitationPayload, 'template_id'>,
     values: WeddingInvitationFormValues
   ) {
+    // A couple who chose their own address outranks the offer: the whole
+    // point of the offer is to spare people who do not care about URLs from
+    // a hex suffix, and somebody who typed one has said they care.
     if (published.current || namedAddressOffered.current) return;
+    if (chosenAddress.current) return;
     if (!namesTheCouple(values.groomName, values.brideName)) return;
 
     // This save is the one where both nicknames first exist, so the offer is
@@ -430,7 +451,20 @@ export function useInvitation(
     setOutstanding(null);
   }
 
-  async function save(greetingMessage: string): Promise<SaveOutcome> {
+  async function save(
+    greetingMessage: string,
+    /**
+     * The address the couple typed, when it is theirs rather than the one the
+     * backend minted.
+     *
+     * Carried on the update that saves everything else, so choosing an address
+     * is not a second press and cannot half-happen. A published invitation
+     * never sends one: the step stops taking it, and this refuses it again
+     * here, because the rule that a shared link must never die is worth
+     * keeping in both places.
+     */
+    chosenSlug?: string
+  ): Promise<SaveOutcome> {
     if (!session?.accessToken) return 'NOT_SIGNED_IN';
 
     setIsSaving(true);
@@ -454,13 +488,28 @@ export function useInvitation(
       );
 
       if (invitationId.current) {
+        const chosen =
+          chosenSlug && !published.current ? chosenSlug.trim() : undefined;
         const updated = await updateWeddingInvitation(
-          payload,
+          chosen ? { ...payload, invitation_slug: chosen } : payload,
           invitationId.current
         );
         if (!updated.success) {
-          setProblem(problemMessage('saved', updated.message));
+          // A name somebody else got to first is not a fault: the couple is
+          // told which of the two things went wrong, so that "try another"
+          // and "try again" are not the same sentence.
+          setProblem(
+            updated.message === SLUG_TAKEN
+              ? SLUG_TAKEN_PROBLEM
+              : problemMessage('saved', updated.message)
+          );
           return 'FAILED';
+        }
+        // Theirs from the moment the backend took it, so the flow stops
+        // reading the minted one back over the top of it.
+        if (chosen) {
+          chosenAddress.current = true;
+          setSlug(chosen);
         }
         await learnTheAddress(invitationId.current);
         // If this was the save where both nicknames first existed, their
@@ -482,11 +531,17 @@ export function useInvitation(
         ...payload,
       });
       if (!created.success || !created.data?.id) {
+        // A couple out of credit has not failed at anything, and telling them
+        // to try again would be telling them to fail again - the create is
+        // what spends the credit, so there is nothing to retry until they have
+        // one. Named the way the taken address is named, and for the reason.
         setProblem(
-          problemMessage(
-            'saved',
-            created.message || 'the backend sent no invitation'
-          )
+          created.message === INSUFFICIENT_QUOTA
+            ? NO_WEDDING_CREDIT_PROBLEM
+            : problemMessage(
+                'saved',
+                created.message || 'the backend sent no invitation'
+              )
         );
         return 'FAILED';
       }

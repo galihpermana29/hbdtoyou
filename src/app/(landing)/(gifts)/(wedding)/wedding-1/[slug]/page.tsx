@@ -1,6 +1,10 @@
-import { INVITATION_NOT_PUBLISHED } from '@/action/interfaces';
+import {
+  guestMessageName,
+  INVITATION_NOT_PUBLISHED,
+} from '@/action/interfaces';
 import {
   getPublicWeddingInvitation,
+  publicWeddingRsvpMessages,
   resolveWeddingGuest,
 } from '@/action/wedding-api';
 import {
@@ -11,6 +15,7 @@ import {
   weddingContentFrom,
   type WeddingTemplate1Content,
 } from '@/components/forms/wedding/wedding-invitation-types';
+import type { Rsvp } from '@/components/wedding/wedding-template-1/RsvpCard';
 import WeddingTemplate1 from '@/components/wedding/wedding-template-1/WeddingTemplate1';
 import { weddingTemplate1Fonts } from '@/components/wedding/wedding-template-1/fonts';
 
@@ -95,6 +100,30 @@ export default async function WeddingInvitationViewerPage({
       ? await resolveWeddingGuest(params.slug, token)
       : null;
 
+  // What guests have already written, so the wall opens with the wedding's own
+  // messages instead of empty. Asked for only once there is an invitation to
+  // show them on, and a refusal is simply an empty wall: a guest who came to
+  // read an invitation should not be turned away because other people's good
+  // wishes could not be read.
+  //
+  // The endpoint names them: `invitee_name`, confirmed by the backend on
+  // 2026-08-24, which `guestMessageName` reads along with the older spellings
+  // in case a deployment still answers one of those. That closes `hbd-ox7.1`.
+  //
+  // A message that still arrives unnamed is shown unsigned rather than signed
+  // with something invented: the card prints the words and the date, and the
+  // line where a name would go is simply not there. An identifier stood in
+  // once and was worse - a guest reading somebody's good wishes over a UUID
+  // learns nothing and sees a fault.
+  const written = content ? await publicWeddingRsvpMessages(params.slug) : null;
+  const alreadyWritten: Rsvp[] = (written?.data ?? []).map((entry) => ({
+    name: guestMessageName(entry) ?? '',
+    attending: true,
+    plusOne: false,
+    message: entry.message,
+    repliedAt: new Date(entry.submitted_at),
+  }));
+
   // A link carrying no token asked about no guest, and that is not a failure:
   // it is the invitation itself, which anybody the couple hands the address to
   // can read, and which draws no name across the envelope.
@@ -124,6 +153,7 @@ export default async function WeddingInvitationViewerPage({
       {content && guestIsKnown ? (
         <WeddingTemplate1
           content={content}
+          written={alreadyWritten}
           addressee={addressee}
           guest={
             guestRow
@@ -176,5 +206,7 @@ function refusal(
   message: string
 ): Unavailable {
   if (content && !guestIsKnown) return 'GUEST_NOT_CONFIRMED';
-  return message === INVITATION_NOT_PUBLISHED ? 'NOT_READY' : 'CANNOT_BE_OPENED';
+  return message === INVITATION_NOT_PUBLISHED
+    ? 'NOT_READY'
+    : 'CANNOT_BE_OPENED';
 }

@@ -282,7 +282,6 @@ const between = (count, most, ratio) =>
 const WIDE = '4:3 or 16:9';
 const STANDARD = '4:3';
 
-
 /**
  * Every dashed area the form takes a file in, keyed by the field it belongs to,
  * with the words the design writes in and under each.

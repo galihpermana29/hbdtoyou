@@ -21,20 +21,59 @@ import {
   flowSectionName,
 } from '@/components/forms/wedding/create-flow-treatment';
 import GuestListField from '@/components/forms/wedding/guest-list-field';
+import {
+  guestLinkFor,
+  invitationPreviewLinkFor,
+  renderGuestMessage,
+} from '@/components/forms/wedding/guest-invites-types';
+import type { Guest } from '@/components/forms/wedding/guest-list';
 import { useGuestRoster } from '@/components/forms/wedding/use-guest-roster';
+import type { WeddingTemplate1Content } from '@/components/forms/wedding/wedding-invitation-types';
 
 export interface GuestListScreenProps {
   weddingId: string;
   /** The couple, as far as the record names them, or empty when it does not. */
   couple: string;
+  /** The invitation's address, which every guest's personal link is built on. */
+  slug: string;
+  /** What the couple saved, which is where their greeting message lives. */
+  content: WeddingTemplate1Content | null;
 }
 
 export default function GuestListScreen({
   weddingId,
   couple,
+  slug,
+  content,
 }: GuestListScreenProps) {
   const { guestList, upload, correct, remove, problem, isBusy } =
     useGuestRoster(weddingId);
+
+  /**
+   * One guest's invitation, as that guest will read it.
+   *
+   * The couple's own message with this guest's name and personal link in it,
+   * so sending two hundred invitations is two hundred presses rather than two
+   * hundred edits. The same composition the Create Flow's own Guest List does
+   * - see `guest-invites-step.tsx` - because it is the same list and the same
+   * message either side of a save.
+   *
+   * Null where the message or the link is missing: an invitation saved before
+   * there was anywhere to keep a greeting, or a guest the backend has not
+   * minted a token for. A message still carrying its placeholders looks
+   * finished and is not.
+   */
+  function inviteFor(guest: Guest): string | null {
+    const message = content?.greetingMessage?.trim();
+    const link = guest.token ? guestLinkFor(slug, guest.token) : null;
+    if (!message || !link) return null;
+    return renderGuestMessage(message, {
+      brideNickname: content?.brideName ?? '',
+      groomNickname: content?.groomName ?? '',
+      guestName: guest.name,
+      guestLink: link,
+    });
+  }
 
   const invited = guestList?.guests.length ?? 0;
 
@@ -73,8 +112,8 @@ export default function GuestListScreen({
             : `${invited} ${invited === 1 ? 'guest' : 'guests'} on this list`}
         </h2>
         <p className={flowHint}>
-          Uploading a file replaces the whole list. Everybody it names is given a
-          personal link, and anybody it leaves out loses theirs.
+          Uploading a file replaces the whole list. Everybody it names is given
+          a personal link, and anybody it leaves out loses theirs.
         </p>
 
         <GuestListField
@@ -82,6 +121,10 @@ export default function GuestListScreen({
           onUpload={upload}
           onCorrect={correct}
           onDelete={remove}
+          inviteFor={inviteFor}
+          openInvitationAt={(guest) =>
+            invitationPreviewLinkFor(slug, guest.token ?? '')
+          }
           problem={problem}
           isBusy={isBusy}
         />

@@ -53,6 +53,10 @@ export interface GuestListFieldProps {
    */
   onCorrect: (guest: Guest) => Promise<boolean>;
   onDelete: (id: string) => void;
+  /** One guest's invitation message, filled in - see `GuestListTable`. */
+  inviteFor?: (guest: Guest) => string | null;
+  /** Where to open one guest's invitation - see `GuestListTable`. */
+  openInvitationAt?: (guest: Guest) => string | null;
   /**
    * What went wrong with the last thing done to the list, or nothing.
    *
@@ -70,6 +74,8 @@ export default function GuestListField({
   onUpload,
   onCorrect,
   onDelete,
+  inviteFor,
+  openInvitationAt,
   problem,
   isBusy,
 }: GuestListFieldProps) {
@@ -85,6 +91,8 @@ export default function GuestListField({
           onUpload={onUpload}
           onCorrect={onCorrect}
           onDelete={onDelete}
+          inviteFor={inviteFor}
+          openInvitationAt={openInvitationAt}
           isBusy={isBusy}
         />
       ) : (

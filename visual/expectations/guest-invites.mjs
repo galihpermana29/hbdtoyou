@@ -21,13 +21,11 @@
  *
  * ## The field the design draws as the couple's to type
  *
- * The web domain field is read-only. There is no endpoint that can say whether
- * a slug is free, so a couple choosing one could only be told it was taken
- * after failing; the backend generates it and the field shows it. Nothing is
- * printed under the box either, because rules for typing something nobody types
- * are words a couple cannot act on. The design draws no hint there, so the
- * screen and the frame agree again; the deviation that used to live here is
- * recorded, withdrawn, in `docs/adr/0002-figma-is-literal-truth.md`.
+ * The web domain field takes what it shows, as the design draws it. The
+ * endpoint whose absence once kept it read-only exists now
+ * (`slug-availability`), so the rules line is back under the box and the
+ * chosen name can be confirmed as available - the withdrawal of that deviation
+ * is recorded in `docs/adr/0002-figma-is-literal-truth.md`.
  *
  * What the box holds is not asserted. The slug belongs to the invitation rather
  * than to the design, the same way the couple's own writing in the message does,

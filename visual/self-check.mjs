@@ -99,6 +99,19 @@ function checkTheVocabulary() {
   );
 
   same('fontSize', 14, '14px', 'a bare number is a pixel length');
+  same(
+    'filter',
+    'blur(4)',
+    'blur(4px)',
+    'a blur is a length however it is spelled'
+  );
+  same('filter', 'none', 'none', 'no filter is no filter');
+  differ(
+    'filter',
+    'blur(4px)',
+    'blur(10px)',
+    'a print at the wrong stage of developing is a change'
+  );
   same('padding', '0', '0px', 'zero is zero pixels');
   same('fontWeight', 'bold', 700, 'bold is seven hundred');
   same('fontWeight', 'normal', '400', 'normal is four hundred');

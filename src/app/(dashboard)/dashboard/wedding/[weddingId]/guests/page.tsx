@@ -1,9 +1,7 @@
 import type { Metadata } from 'next';
 
 import GuestListScreen from './guest-list-screen';
-import InvitationRefusal, {
-  couldNotBeOpened,
-} from '../../invitation-refusal';
+import InvitationRefusal, { couldNotBeOpened } from '../../invitation-refusal';
 import { getOwnedWeddingInvitation } from '@/action/wedding-api';
 import { FlowLanguageProvider } from '@/components/forms/wedding/flow-language';
 import {
@@ -56,6 +54,8 @@ export default async function WeddingGuestsPage({
         couple={coupleNamedIn(
           weddingContentFrom(invitation.data.detail_content_json_text)
         )}
+        slug={invitation.data.invitation_slug ?? ''}
+        content={weddingContentFrom(invitation.data.detail_content_json_text)}
       />
     </FlowLanguageProvider>
   );

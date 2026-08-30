@@ -1,6 +1,8 @@
 'use client';
 
-import { useEffect, useId, useRef } from 'react';
+import { useEffect, useId, useRef, useState } from 'react';
+
+import { checkInvitationSlug } from '@/action/wedding-api';
 
 import {
   flowActionAside,
@@ -18,6 +20,9 @@ import FlowLanguageField from './flow-language-field';
 import GuestInvitesPreview from './guest-invites-preview';
 import {
   guestLinkFor,
+  invitationPreviewLinkFor,
+  isSlugShaped,
+  renderGuestMessage,
   SAMPLE_GUEST_NAME,
   SAMPLE_GUEST_TOKEN,
   SLUG_SUFFIX,
@@ -36,11 +41,16 @@ import { type Guest, type GuestList } from './guest-list';
  * backend may refuse. Everything else on the step is composed from what the flow
  * already holds.
  *
- * The address is not one of the things a couple fills in. The design draws the
- * web domain as theirs to choose and shows the chosen name being confirmed as
- * available; there is no endpoint that can answer whether a name is free, so a
- * couple choosing one could only be told it was taken after failing. The backend
- * generates the slug instead, and the field shows it rather than taking it.
+ * The address is the couple's to choose, as the design draws it. The backend
+ * mints one from their title so a couple who never touches the field still has
+ * an address, and `slug-availability` answers whether a name they would rather
+ * have is free - the endpoint whose absence once kept this field read-only, and
+ * whose arrival is what withdrew that deviation from
+ * `docs/adr/0002-figma-is-literal-truth.md`. An answer is a courtesy rather
+ * than a promise: the save is what finally takes the name, and a refusal there
+ * is what a couple is told about. Published invitations stop taking anything,
+ * because from then on the address is in the hands of everybody who was sent
+ * it.
  *
  * The Guest List has the two states the design draws, and which one is showing
  * is decided by nothing but whether there is a Guest List: an area saying what
@@ -49,10 +59,11 @@ import { type Guest, type GuestList } from './guest-list';
  * sends every change to it - so what this step does with a chosen file is hand
  * it over, and what it does with a correction or a deletion is ask for one.
  *
- * On an invitation opened again the Guest List is not here at all: the couple
- * manages it on its own screen, `/dashboard/wedding/{id}/guests`, and the same
- * list drawn in two places would be the same six columns this step was too
- * narrow for. Creating keeps the card, exactly as the design draws it.
+ * On the dashboard the Guest List is not here at all: an invitation opened
+ * there manages it on its own screen, `/dashboard/wedding/{id}/guests`, and
+ * the same list drawn in two places would be the same six columns this step
+ * was too narrow for. The Create Flow at its own address keeps the card,
+ * exactly as the design draws it - creating and resuming alike.
  */
 
 export interface GuestInvitesStepProps {
@@ -101,14 +112,25 @@ export interface GuestInvitesStepProps {
    */
   isAlreadyPublished?: boolean;
   /**
-   * Whether the invitation being filled in is one opened again from the
-   * couple's own listing, rather than one being made.
+   * The address the invitation already answers at, or empty while it has none.
    *
-   * An opened invitation's Guest List lives on its own screen in the
-   * dashboard, so this step does not draw the card and nothing here replaces
-   * it. A couple creating still sees it, exactly as the design draws it.
+   * Only ever read to keep the couple from being told their own address is
+   * taken: it is, by them, which is true and no use to anybody. The address in
+   * the box is `values.slug` - this is the one the backend is holding.
    */
-  isOpenedAgain?: boolean;
+  mintedAddress?: string;
+  /**
+   * Whether this invitation's Guest List is managed on its own screen rather
+   * than here.
+   *
+   * True on the dashboard, where an opened invitation's guests have
+   * `/dashboard/wedding/{id}/guests` and this step does not draw the card,
+   * because the same list drawn in two places would go wrong in two places.
+   * The Create Flow at its own address always draws it - a couple resuming a
+   * saved invitation there is still mid-creation, and this is the one place
+   * they can hand a list over.
+   */
+  guestListLivesElsewhere?: boolean;
   /** Go back to the details and story step. */
   onPreviousStep: () => void;
   /**
@@ -145,6 +167,13 @@ export interface GuestInvitesStepProps {
 }
 
 /**
+ * How long a couple has to stop typing before the address in the box is asked
+ * about, in milliseconds. Long enough that a name is not asked about letter by
+ * letter, short enough that an answer feels like part of the typing.
+ */
+const QUIET_BEFORE_ASKING_MS = 500;
+
+/**
  * Keep a textarea exactly as tall as what it holds.
  *
  * The design draws the greeting message at its content's height rather than at
@@ -177,7 +206,8 @@ export default function GuestInvitesStep({
   guestListProblem,
   isGuestListBusy,
   isAlreadyPublished = false,
-  isOpenedAgain = false,
+  mintedAddress = '',
+  guestListLivesElsewhere = false,
   onPreviousStep,
   onConfirm,
   onSaveAsDraft,
@@ -187,8 +217,102 @@ export default function GuestInvitesStep({
 }: GuestInvitesStepProps) {
   const slugId = useId();
   const slugLabelId = useId();
+  const slugHintId = useId();
   const messageId = useId();
   const copy = useFlowCopy();
+
+  /**
+   * What the backend last said about the address in the box, or nothing.
+   *
+   * Kept with the address it was said about, so an answer is only ever shown
+   * beside the name it answers for: a couple who types on is not told their
+   * new address is taken because their old one was.
+   *
+   * A check that could not be made is also nothing. A couple whose request
+   * failed has not chosen a bad name, and saying free or taken on the strength
+   * of a failure would be inventing an answer nobody gave.
+   */
+  const [freedom, setFreedom] = useState<{
+    slug: string;
+    available: boolean;
+  } | null>(null);
+  const [isChecking, setIsChecking] = useState(false);
+
+  const typedAddress = values.slug.trim();
+  const answeredFor = freedom?.slug === typedAddress ? freedom : null;
+
+  /**
+   * One guest's invitation, as that guest will read it.
+   *
+   * The same words the preview beside this step shows, with this guest's name
+   * where the sample name stands and their own personal link where the sample
+   * link does - which is the whole difference between a message a couple can
+   * send and one they would have to edit two hundred times.
+   *
+   * Null where there is no link to put in it: a guest the backend has not
+   * minted a token for yet, or an invitation with no address. A message whose
+   * link is still a placeholder is worse than no message, because it looks
+   * finished.
+   */
+  function inviteFor(guest: Guest): string | null {
+    const link = guest.token ? guestLinkFor(values.slug, guest.token) : null;
+    if (!link) return null;
+    return renderGuestMessage(values.greetingMessage, {
+      brideNickname,
+      groomNickname,
+      guestName: guest.name,
+      guestLink: link,
+    });
+  }
+
+  /**
+   * Whether this address is worth asking the backend about at all.
+   *
+   * Not a published invitation's, which cannot change. Not a shape the rule
+   * already refuses, because the answer is known and a request would be spent
+   * learning it. And not the address the invitation already answers at: it is
+   * taken, by them, and telling a couple their own address is unavailable is
+   * true and useless.
+   */
+  const worthAsking =
+    !isAlreadyPublished &&
+    isSlugShaped(typedAddress) &&
+    typedAddress !== mintedAddress;
+
+  /**
+   * Ask as they type, rather than making them press for it.
+   *
+   * A quiet moment after the last keystroke rather than one request per
+   * letter: somebody typing an address is not asking about every prefix of it.
+   * An answer that arrives after they have typed on is dropped - `live` closes
+   * over the address it was asked for, and `answeredFor` will not show an
+   * answer beside a different name in any case.
+   */
+  useEffect(() => {
+    if (!worthAsking) {
+      setIsChecking(false);
+      return;
+    }
+    let live = true;
+    const waiting = window.setTimeout(async () => {
+      setIsChecking(true);
+      try {
+        const answered = await checkInvitationSlug(typedAddress);
+        if (!live) return;
+        setFreedom(
+          answered.success && answered.data
+            ? { slug: typedAddress, available: answered.data.available }
+            : null
+        );
+      } finally {
+        if (live) setIsChecking(false);
+      }
+    }, QUIET_BEFORE_ASKING_MS);
+    return () => {
+      live = false;
+      window.clearTimeout(waiting);
+    };
+  }, [typedAddress, worthAsking]);
 
   const messageRef = useHeightOfContent(values.greetingMessage, isCurrent);
 
@@ -249,18 +373,28 @@ export default function GuestInvitesStep({
                     role="group"
                     aria-labelledby={slugLabelId}
                     className={`flex items-stretch ${flowFieldBox}`}>
-                    {/* Read-only rather than disabled, and still an input: the
-                        couple does not choose this, but it is the address they
-                        are about to send, so it has to be reachable, selectable
-                        and copyable. Nothing is said underneath it either - rules
-                        for typing something nobody types, and a message naming a
-                        fault nobody can have caused, would both be words a couple
-                        cannot act on. */}
+                    {/* The couple's to type while the invitation is theirs
+                        alone. Read-only once it is published, because from
+                        that moment the address is in somebody's hands and a
+                        shared link must never die - the same rule the flow
+                        keeps above, said here in the one place a couple could
+                        otherwise break it. */}
                     <input
                       id={slugId}
                       type="text"
-                      readOnly
+                      readOnly={isAlreadyPublished}
                       value={values.slug}
+                      onChange={(event) =>
+                        onChange({
+                          ...values,
+                          // Lowercased on the way in rather than refused
+                          // afterwards: an address has no capitals, and a
+                          // couple who typed one meant the letter, not a
+                          // mistake worth a message.
+                          slug: event.target.value.trim().toLowerCase(),
+                        })
+                      }
+                      aria-describedby={slugHintId}
                       className="min-w-0 flex-1 rounded-l-[8px] bg-white px-[14px] py-[12px] text-[16px] font-[400] leading-[24px] text-[#101828] outline-none placeholder:text-[#667085]"
                     />
                     {/* The slug is served as the subdomain, so the fixed part of the address
@@ -272,6 +406,38 @@ export default function GuestInvitesStep({
                       {SLUG_SUFFIX}
                     </span>
                   </div>
+                  {/* The rules, and then whatever the last check had to say.
+                      Nothing under a published invitation's address: there is
+                      nothing left to type and no answer to give. */}
+                  {!isAlreadyPublished && (
+                    <div className="flex flex-wrap items-center gap-x-[12px] gap-y-[4px]">
+                      <p
+                        id={slugHintId}
+                        className="text-[14px] font-[400] leading-[20px] text-[#667085]">
+                        {copy.slugRuleHint}
+                      </p>
+                      {isChecking && (
+                        <p
+                          role="status"
+                          className="text-[14px] font-[400] leading-[20px] text-[#667085]">
+                          {copy.slugChecking}
+                        </p>
+                      )}
+                      {!isChecking && answeredFor && (
+                        <p
+                          role="status"
+                          className={`text-[14px] font-[600] leading-[20px] ${
+                            answeredFor.available
+                              ? 'text-[#079455]'
+                              : 'text-[#D92D20]'
+                          }`}>
+                          {answeredFor.available
+                            ? copy.slugAvailable
+                            : copy.slugTaken}
+                        </p>
+                      )}
+                    </div>
+                  )}
                 </div>
 
                 <div className="flex flex-col gap-[6px]">
@@ -294,7 +460,7 @@ export default function GuestInvitesStep({
               </div>
             </section>
 
-            {isOpenedAgain ? null : (
+            {guestListLivesElsewhere ? null : (
               <section className="flex flex-col">
                 <h3 className={flowSectionName}>{copy.addGuestList}</h3>
                 <p className={flowHint}>
@@ -307,6 +473,10 @@ export default function GuestInvitesStep({
                   onUpload={onUploadGuestList}
                   onCorrect={onCorrectGuest}
                   onDelete={onDeleteGuest}
+                  inviteFor={inviteFor}
+                  openInvitationAt={(guest) =>
+                    invitationPreviewLinkFor(values.slug, guest.token ?? '')
+                  }
                   problem={guestListProblem}
                   isBusy={isGuestListBusy}
                 />

@@ -25,11 +25,21 @@ const ACCEPTED_TYPE = '.mp4';
 const ACCEPTED_MIME_TYPE = 'video/mp4';
 
 /** The largest teaser the design takes, in megabytes. */
+/**
+ * The number the design writes under this field, and the number enforced.
+ *
+ * Smaller than the 50MB the backend takes, deliberately: a teaser is a minute
+ * of film and a guest opens an invitation on a phone. The words under the field
+ * are printed from this constant, so what a couple is told and what they are
+ * held to cannot disagree.
+ */
 const MAX_SIZE_MB = 15;
 
 export interface VideoDropZoneProps {
   /** The words above the area, as the design writes them. */
   label: string;
+  /** Whether the invitation cannot go out without one. */
+  required?: boolean;
   /**
    * The field's identifier, supplied by `Form.Item` from the field's name.
    */
@@ -41,6 +51,7 @@ export interface VideoDropZoneProps {
 
 export default function VideoDropZone({
   label,
+  required,
   id,
   value,
   onChange,
@@ -106,6 +117,7 @@ export default function VideoDropZone({
       id={fieldId}
       accept={ACCEPTED_TYPE}
       multiple={false}
+      required={required}
       title={isUploading ? 'Adding Your Video' : 'Add a Video'}
       prompt="Drag & drop video file from your gallery"
       hint={`Max video size ${MAX_SIZE_MB}MB`}
