@@ -1,9 +1,15 @@
-import { Play, Plus } from 'lucide-react';
+import { Play } from 'lucide-react';
 import Image from 'next/image';
 import SimilarShows from '@/components/disney+/SimilarShows';
 import TrailerSection from '@/components/disney+/TrailerSection';
 import { Button } from '@/components/disney+/ui/button';
 import EpisodeList from '@/components/disney+/EpisodeList';
+
+// TODO(placeholder-images): these are temporary stock photos served from Cloudinary
+// cloud `dfwrmapr4`, standing in for the sample images lost when cloud `dxuumohme`
+// hit its plan limit and started returning 401 (audited 2026-09-12). They are cropped
+// per slot with `c_fill,ar_*,g_auto`. Move them into `public/` so no Cloudinary
+// account can break them again, or swap in real art for this template.
 
 export default function DisneyPage() {
   return (
@@ -11,7 +17,7 @@ export default function DisneyPage() {
       {/* Hero Section */}
       <div className="relative h-[100vh] w-full">
         <Image
-          src="https://res.cloudinary.com/dxuumohme/image/upload/v1736524166/veevebpg774vy4n326su.jpg"
+          src="https://res.cloudinary.com/dfwrmapr4/image/upload/c_fill,ar_16:9,g_auto/v1789284325/placeholder/Casual_Blazer_Outfits_for_Women___Chic_Everyday_Street_Style_Looks_bg1q3s.jpg"
           alt="The Tyrant Hero"
           fill
           className="object-cover brightness-50"

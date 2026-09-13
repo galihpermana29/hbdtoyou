@@ -1,4 +1,5 @@
 import { IAllTemplateResponse } from '@/action/interfaces';
+import { templateThumbnail } from '@/lib/template-thumbnail';
 import disneyplusv1 from '@/assets/templates/disneyv1.png';
 import formula1 from '@/assets/templates/formula1.png';
 import graduation from '@/assets/templates/graduation.png';
@@ -123,9 +124,12 @@ export const DataToCardColor = {
 const CardTemplateTag = ({
   data,
   type = 'preview',
+  thumbnailSrc,
 }: {
   data: IAllTemplateResponse;
   type?: 'creation' | 'preview' | 'scrapbook';
+  /** Overrides the card art. Used where the card leads somewhere other than `/<route>`. */
+  thumbnailSrc?: string;
 }) => {
   return (
     <div>
@@ -191,7 +195,7 @@ const CardTemplateTag = ({
         </div>
         <div className="mt-[16px]">
           <img
-            src={data.thumbnail_uri}
+            src={thumbnailSrc ?? templateThumbnail(data)}
             alt={data.name}
             className="w-full aspect-video object-cover rounded-md"
           />

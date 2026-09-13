@@ -9,10 +9,18 @@ export const fadeUp = {
 };
 
 interface RevealProps extends HTMLMotionProps<'div'> {
-  /** Seconds to wait before the reveal starts — use to stagger siblings. */
+  /** Seconds to wait before the reveal starts - use to stagger siblings. */
   delay?: number;
-  /** Fraction of the element that must be visible before triggering (0–1). */
-  amount?: number;
+  /**
+   * How much of the element must be visible before triggering: a fraction, or
+   * `'some'` / `'all'`.
+   *
+   * Defaults to `'some'`. A numeric threshold is measured against the element's own
+   * height, so anything taller than the viewport can never reach it and stays stuck at
+   * `opacity: 0` forever - which is what left `/journal` rendering as a blank white page,
+   * its 67,000px list of entries never revealing.
+   */
+  amount?: 'some' | 'all' | number;
 }
 
 /**
@@ -28,7 +36,7 @@ interface RevealProps extends HTMLMotionProps<'div'> {
 export default function Reveal({
   children,
   delay = 0,
-  amount = 0.2,
+  amount = 'some',
   transition,
   ...props
 }: RevealProps) {

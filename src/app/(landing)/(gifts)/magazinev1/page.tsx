@@ -7,18 +7,24 @@ import DragElements from '@/components/fancy/drag-elements';
 import { useMediaQuery } from '@mui/material';
 import dynamic from 'next/dynamic';
 import unoLogo from '@/assets/uno-logo.png';
+
+// TODO(placeholder-images): these are temporary stock photos served from Cloudinary
+// cloud `dfwrmapr4`, standing in for the sample images lost when cloud `dxuumohme`
+// hit its plan limit and started returning 401 (audited 2026-09-12). They are cropped
+// per slot with `c_fill,ar_*,g_auto`. Move them into `public/` so no Cloudinary
+// account can break them again, or swap in real art for this template.
 const Typewriter = dynamic(() => import('@/components/fancy/typewriter'), {
   ssr: false,
 });
 
 const urls = [
-  'https://res.cloudinary.com/dxuumohme/image/upload/v1737116192/fsludxptpdvunuz6p4fz.jpg',
-  'https://res.cloudinary.com/dxuumohme/image/upload/v1737117148/syivskbgwy9pbf1tn458.jpg',
-  'https://res.cloudinary.com/dxuumohme/image/upload/v1736870046/jubvja6nrjdzwqwwcmaf.jpg',
-  'https://res.cloudinary.com/dxuumohme/image/upload/v1737117237/a5cdiddufsnw7hdwqxma.jpg',
-  'https://res.cloudinary.com/dxuumohme/image/upload/v1737117387/d8wjvos0u7bjedkbdye9.jpg',
-  'https://res.cloudinary.com/dxuumohme/image/upload/v1737117573/h8biwglwfxi0woctxfk2.jpg',
-  'https://res.cloudinary.com/dxuumohme/image/upload/v1736873773/zkfbpr2d5yr4c3r4oq6q.jpg',
+  'https://res.cloudinary.com/dfwrmapr4/image/upload/c_fill,ar_4:5,g_auto/v1789284277/placeholder/Classy_Spring_Workwear_2026_Light_Aesthetic_Business_Casual_Outfits_Women_wefqc5.jpg',
+  'https://res.cloudinary.com/dfwrmapr4/image/upload/c_fill,ar_4:5,g_auto/v1789284279/placeholder/Minimalist_Black_Tee_Wide-Leg_Trousers_Outfit___Chic_Quiet_Luxury_Women_s_Fashion_2026_kiyext.jpg',
+  'https://res.cloudinary.com/dfwrmapr4/image/upload/c_fill,ar_4:5,g_auto/v1789284278/placeholder/Monday_to_Friday_Business_Casual_Outfits__Your_Weekly_Wardrobe_hrpkgr.jpg',
+  'https://res.cloudinary.com/dfwrmapr4/image/upload/c_fill,ar_4:5,g_auto/v1789284278/placeholder/Polished_Spring_Workwear_2026_-_Light_Capsule_Wardrobe_Ideas_for_Modern_Women_ydbdxk.jpg',
+  'https://res.cloudinary.com/dfwrmapr4/image/upload/c_fill,ar_4:5,g_auto/v1789284277/placeholder/__1_z5hfhd.jpg',
+  'https://res.cloudinary.com/dfwrmapr4/image/upload/c_fill,ar_4:5,g_auto/v1789284277/placeholder/__2_km7zqq.jpg',
+  'https://res.cloudinary.com/dfwrmapr4/image/upload/c_fill,ar_4:5,g_auto/v1789284307/placeholder/__3_h2qoju.jpg',
 ];
 
 const randomInt = (min: number, max: number) => {

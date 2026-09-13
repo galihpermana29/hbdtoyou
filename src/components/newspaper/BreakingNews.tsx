@@ -3,6 +3,12 @@
 import dayjs from 'dayjs';
 import NewsImage from './NewsImage';
 
+// TODO(placeholder-images): these are temporary stock photos served from Cloudinary
+// cloud `dfwrmapr4`, standing in for the sample images lost when cloud `dxuumohme`
+// hit its plan limit and started returning 401 (audited 2026-09-12). They are cropped
+// per slot with `c_fill,ar_*,g_auto`. Move them into `public/` so no Cloudinary
+// account can break them again, or swap in real art for this template.
+
 export default function BreakingNews({ content }: { content?: any }) {
   return (
     <section>
@@ -12,7 +18,7 @@ export default function BreakingNews({ content }: { content?: any }) {
           src={
             content
               ? content.jumbotronImage
-              : 'https://res.cloudinary.com/dxuumohme/image/upload/v1735831970/fxalkf0dcjuxneqpisjo.jpg'
+              : 'https://res.cloudinary.com/dfwrmapr4/image/upload/c_fill,ar_16:9,g_auto/v1789284278/placeholder/Butter_Color_Dress__Elegant_Spring_Formal_Look_luzpa3.jpg'
           }
           alt="Wedding catering"
           className="aspect-[16/9] mb-4 rounded-lg"

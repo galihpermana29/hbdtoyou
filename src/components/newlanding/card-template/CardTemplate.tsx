@@ -1,4 +1,5 @@
 import { IAllTemplateResponse } from '@/action/interfaces';
+import { templateThumbnail } from '@/lib/template-thumbnail';
 import disneyplusv1 from '@/assets/templates/disneyv1.png';
 import formula1 from '@/assets/templates/formula1.png';
 import graduation from '@/assets/templates/graduation.png';
@@ -139,7 +140,7 @@ const CardTemplate = ({
         </div>
         <div>
           <img
-            src={data.thumbnail_uri}
+            src={templateThumbnail(data)}
             alt={data.name}
             className="w-full aspect-video object-cover rounded-md"
           />

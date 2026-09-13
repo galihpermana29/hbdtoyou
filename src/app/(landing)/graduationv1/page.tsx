@@ -4,54 +4,60 @@ import { Dropdown } from 'antd';
 import { Ellipsis } from 'lucide-react';
 import Image from 'next/image';
 
+// TODO(placeholder-images): these are temporary stock photos served from Cloudinary
+// cloud `dfwrmapr4`, standing in for the sample images lost when cloud `dxuumohme`
+// hit its plan limit and started returning 401 (audited 2026-09-12). They are cropped
+// per slot with `c_fill,ar_*,g_auto`. Move them into `public/` so no Cloudinary
+// account can break them again, or swap in real art for this template.
+
 const projects = [
   {
     id: '100100',
     title: '100100',
     image:
-      'https://res.cloudinary.com/dxuumohme/image/upload/v1736878627/bubjbkztn7xfrxmusjtp.jpg',
+      'https://res.cloudinary.com/dfwrmapr4/image/upload/c_fill,ar_1:1,g_auto/v1789284276/placeholder/Business_Formal_Outfit_for_Women_kl6jkx.jpg',
   },
   {
     id: 'spyder23',
     title: 'SPYDER 23',
     image:
-      'https://res.cloudinary.com/dxuumohme/image/upload/v1736880564/zm9qkwdjbbnugbohko9x.jpg',
+      'https://res.cloudinary.com/dfwrmapr4/image/upload/c_fill,ar_1:1,g_auto/v1789284278/placeholder/Butter_Color_Dress__Elegant_Spring_Formal_Look_luzpa3.jpg',
   },
   {
     id: 'demoda',
     title: 'DEMODA',
     image:
-      'https://res.cloudinary.com/dxuumohme/image/upload/v1736880576/kdf19qhcabj6gnaoxx7s.jpg',
+      'https://res.cloudinary.com/dfwrmapr4/image/upload/c_fill,ar_1:1,g_auto/v1789284325/placeholder/Casual_Blazer_Outfits_for_Women___Chic_Everyday_Street_Style_Looks_bg1q3s.jpg',
   },
   {
     id: 'crisp',
     title: 'CRISP',
     image:
-      'https://res.cloudinary.com/dxuumohme/image/upload/v1736880581/ajhrmyr1qz4n1u1fscha.jpg',
+      'https://res.cloudinary.com/dfwrmapr4/image/upload/c_fill,ar_1:1,g_auto/v1789284278/placeholder/City_tram_window_daydate_outfit_cwrxma.jpg',
   },
   {
     id: 'bacon',
     title: 'BACON & PEPPR',
     image:
-      'https://res.cloudinary.com/dxuumohme/image/upload/v1736880586/mwnbkxb11oo2ew2squ1z.jpg',
+      'https://res.cloudinary.com/dfwrmapr4/image/upload/c_fill,ar_1:1,g_auto/v1789284277/placeholder/Classy_Spring_Workwear_2026_Light_Aesthetic_Business_Casual_Outfits_Women_wefqc5.jpg',
   },
   {
     id: 'office',
     title: 'OFFICE',
     image:
-      'https://res.cloudinary.com/dxuumohme/image/upload/v1736880592/sc6uynh62vjcvquu1dur.jpg',
+      'https://res.cloudinary.com/dfwrmapr4/image/upload/c_fill,ar_1:1,g_auto/v1789284279/placeholder/Minimalist_Black_Tee_Wide-Leg_Trousers_Outfit___Chic_Quiet_Luxury_Women_s_Fashion_2026_kiyext.jpg',
   },
   {
     id: 'chance',
     title: 'CHANCE',
     image:
-      'https://res.cloudinary.com/dxuumohme/image/upload/v1736880662/pm1dz6f6cq1ttk8b1vjh.jpg',
+      'https://res.cloudinary.com/dfwrmapr4/image/upload/c_fill,ar_1:1,g_auto/v1789284278/placeholder/Monday_to_Friday_Business_Casual_Outfits__Your_Weekly_Wardrobe_hrpkgr.jpg',
   },
   {
     id: 'percent',
     title: '20 PERCENT',
     image:
-      'https://res.cloudinary.com/dxuumohme/image/upload/v1736880667/jzdtgs5klr20uyyngxae.jpg',
+      'https://res.cloudinary.com/dfwrmapr4/image/upload/c_fill,ar_1:1,g_auto/v1789284278/placeholder/Polished_Spring_Workwear_2026_-_Light_Capsule_Wardrobe_Ideas_for_Modern_Women_ydbdxk.jpg',
   },
 ];
 
@@ -83,6 +89,7 @@ export default function GraduationV1Page() {
           </a>
           <a
             target="_blank"
+            rel="noreferrer"
             href="https://memoify.live"
             className="hover:text-gray-300 text-sm md:text-base">
             MEMOIFY
@@ -162,7 +169,7 @@ export default function GraduationV1Page() {
         </h2>
         <div className="relative w-32 h-32 md:w-48 md:h-48 mx-auto mt-8 overflow-hidden rounded-lg">
           <Image
-            src="https://res.cloudinary.com/dxuumohme/image/upload/v1736878627/bubjbkztn7xfrxmusjtp.jpg"
+            src="https://res.cloudinary.com/dfwrmapr4/image/upload/c_fill,ar_1:1,g_auto/v1789284276/placeholder/Business_Formal_Outfit_for_Women_kl6jkx.jpg"
             alt="Breathe life"
             fill
             className="object-cover transition-transform duration-700 ease-in-out hover:scale-105"
