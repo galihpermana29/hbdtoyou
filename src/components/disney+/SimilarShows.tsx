@@ -2,36 +2,42 @@
 
 import Image from 'next/image';
 
+// TODO(placeholder-images): these are temporary stock photos served from Cloudinary
+// cloud `dfwrmapr4`, standing in for the sample images lost when cloud `dxuumohme`
+// hit its plan limit and started returning 401 (audited 2026-09-12). They are cropped
+// per slot with `c_fill,ar_*,g_auto`. Move them into `public/` so no Cloudinary
+// account can break them again, or swap in real art for this template.
+
 const similarShows = [
   {
     id: 1,
     title: 'The Fiery Fist II',
     image:
-      'https://res.cloudinary.com/dxuumohme/image/upload/v1736524133/jqvhwsg2jeztjznxwbph.jpg',
+      'https://res.cloudinary.com/dfwrmapr4/image/upload/c_fill,ar_2:3,g_auto/v1789284277/placeholder/__1_z5hfhd.jpg',
   },
   {
     id: 2,
     title: 'Shop for Killers',
     image:
-      'https://res.cloudinary.com/dxuumohme/image/upload/v1736524123/nzdbzleig7ssk6sf7ch5.jpg',
+      'https://res.cloudinary.com/dfwrmapr4/image/upload/c_fill,ar_2:3,g_auto/v1789284277/placeholder/__2_km7zqq.jpg',
   },
   {
     id: 3,
     title: 'Shop for Killers',
     image:
-      'https://res.cloudinary.com/dxuumohme/image/upload/v1736524116/wexe6mglvlsfzyji0fq4.jpg',
+      'https://res.cloudinary.com/dfwrmapr4/image/upload/c_fill,ar_2:3,g_auto/v1789284307/placeholder/__3_h2qoju.jpg',
   },
   {
     id: 21,
     title: 'Shop for Killers',
     image:
-      'https://res.cloudinary.com/dxuumohme/image/upload/v1736524119/lji4u4epdrf0nr1vbq4x.jpg',
+      'https://res.cloudinary.com/dfwrmapr4/image/upload/c_fill,ar_2:3,g_auto/v1789284277/placeholder/__db1ief.jpg',
   },
   {
     id: 22,
     title: 'Shop for Killers',
     image:
-      'https://res.cloudinary.com/dxuumohme/image/upload/v1736524120/xvpfzciuktzzjcpnicjt.jpg',
+      'https://res.cloudinary.com/dfwrmapr4/image/upload/c_fill,ar_2:3,g_auto/v1789284278/placeholder/museum_Date_Outfit_Ideas___Academic_Chic_Poetcore_Style_n5nvg7.jpg',
   },
   // Add more shows as needed
 ];

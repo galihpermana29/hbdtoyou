@@ -1,5 +1,11 @@
 'use client';
 
+// TODO(placeholder-images): these are temporary stock photos served from Cloudinary
+// cloud `dfwrmapr4`, standing in for the sample images lost when cloud `dxuumohme`
+// hit its plan limit and started returning 401 (audited 2026-09-12). They are cropped
+// per slot with `c_fill,ar_*,g_auto`. Move them into `public/` so no Cloudinary
+// account can break them again, or swap in real art for this template.
+
 export default function PlayerTrackInfo({ imageUri }: { imageUri?: string }) {
   return (
     <div className="flex items-center gap-2 md:gap-4 w-[30%] min-w-[120px]">
@@ -7,7 +13,7 @@ export default function PlayerTrackInfo({ imageUri }: { imageUri?: string }) {
         src={
           imageUri
             ? imageUri
-            : 'https://res.cloudinary.com/dxuumohme/image/upload/v1735231561/gemsi8y1c20pwhdespcf.jpg'
+            : 'https://res.cloudinary.com/dfwrmapr4/image/upload/c_fill,ar_1:1,g_auto/v1789284277/placeholder/Classy_Spring_Workwear_2026_Light_Aesthetic_Business_Casual_Outfits_Women_wefqc5.jpg'
         }
         alt="Now playing"
         className="h-9 w-9 md:h-14 md:w-14 rounded object-cover"
@@ -26,7 +32,7 @@ export const dataForm = {
   momentOfYou: [
     {
       imageUrl:
-        'https://res.cloudinary.com/dxuumohme/image/upload/v1735231561/gemsi8y1c20pwhdespcf.jpg',
+        'https://res.cloudinary.com/dfwrmapr4/image/upload/c_fill,ar_1:1,g_auto/v1789284277/placeholder/Classy_Spring_Workwear_2026_Light_Aesthetic_Business_Casual_Outfits_Women_wefqc5.jpg',
       location: 'At Jokopi, Malang, Indonesia',
     },
   ],

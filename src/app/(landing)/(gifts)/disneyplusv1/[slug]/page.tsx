@@ -8,6 +8,12 @@ import TrailerSection from '@/components/disney+/TrailerSection';
 import MusicPlayer from '@/components/ui/music-player/music-player';
 import WatchModal from './component/WatchModal';
 
+// TODO(placeholder-images): these are temporary stock photos served from Cloudinary
+// cloud `dfwrmapr4`, standing in for the sample images lost when cloud `dxuumohme`
+// hit its plan limit and started returning 401 (audited 2026-09-12). They are cropped
+// per slot with `c_fill,ar_*,g_auto`. Move them into `public/` so no Cloudinary
+// account can break them again, or swap in real art for this template.
+
 const getDetailDataNew = async (id: string) => {
   const res = await getDetailContent(id);
   return res;
@@ -36,7 +42,7 @@ export default async function DynamicDisneyPage({ params }: { params: any }) {
           src={
             parsedData
               ? parsedData.jumbotronImage
-              : 'https://res.cloudinary.com/dxuumohme/image/upload/v1735327059/s6s3nrvpvueyhkhavfy9.jpg'
+              : 'https://res.cloudinary.com/dfwrmapr4/image/upload/c_fill,ar_16:9,g_auto/v1789284278/placeholder/City_tram_window_daydate_outfit_cwrxma.jpg'
           }
           alt="Jumbotron"
           fill

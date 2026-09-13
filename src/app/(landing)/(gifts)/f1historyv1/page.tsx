@@ -1,6 +1,12 @@
 import { Carousel } from 'antd';
-import { ArrowDownRight, MoveDownRight } from 'lucide-react';
+import { ArrowDownRight } from 'lucide-react';
 import Image from 'next/image';
+
+// TODO(placeholder-images): these are temporary stock photos served from Cloudinary
+// cloud `dfwrmapr4`, standing in for the sample images lost when cloud `dxuumohme`
+// hit its plan limit and started returning 401 (audited 2026-09-12). They are cropped
+// per slot with `c_fill,ar_*,g_auto`. Move them into `public/` so no Cloudinary
+// account can break them again, or swap in real art for this template.
 
 const F1Historyv1Page = () => {
   return (
@@ -174,7 +180,7 @@ const F1Historyv1Page = () => {
             <div>
               <div className="h-[292px] w-[292px] overflow-hidden">
                 <Image
-                  src="https://res.cloudinary.com/dxuumohme/image/upload/v1739380083/images-api/exdybuaeubkmlwsoxqxl.png"
+                  src="https://res.cloudinary.com/dfwrmapr4/image/upload/c_fill,ar_3:4,g_auto/v1789284279/placeholder/Minimalist_Black_Tee_Wide-Leg_Trousers_Outfit___Chic_Quiet_Luxury_Women_s_Fashion_2026_kiyext.jpg"
                   alt="driver-2"
                   width={292}
                   className="object-cover"
@@ -200,7 +206,7 @@ const F1Historyv1Page = () => {
                 <Image
                   className="object-cover"
                   src={
-                    'https://res.cloudinary.com/dxuumohme/image/upload/v1739383207/images-api/xl6ml0bm6tdgulnpjw3o.png'
+                    'https://res.cloudinary.com/dfwrmapr4/image/upload/c_fill,ar_16:9,g_auto/v1789284278/placeholder/Monday_to_Friday_Business_Casual_Outfits__Your_Weekly_Wardrobe_hrpkgr.jpg'
                   }
                   alt="lando"
                   fill

@@ -3,6 +3,12 @@
 import Image from 'next/image';
 import { Play } from 'lucide-react';
 
+// TODO(placeholder-images): these are temporary stock photos served from Cloudinary
+// cloud `dfwrmapr4`, standing in for the sample images lost when cloud `dxuumohme`
+// hit its plan limit and started returning 401 (audited 2026-09-12). They are cropped
+// per slot with `c_fill,ar_*,g_auto`. Move them into `public/` so no Cloudinary
+// account can break them again, or swap in real art for this template.
+
 const episodes = [
   {
     id: 1,
@@ -13,7 +19,7 @@ const episodes = [
     description:
       'lorem ipsum dolor sit amet consectetur adipisicing elit. Voluptate, quia.',
     thumbnail:
-      'https://res.cloudinary.com/dxuumohme/image/upload/v1736524166/zs1dfqmiui2oqnd2hi5a.jpg',
+      'https://res.cloudinary.com/dfwrmapr4/image/upload/c_fill,ar_8:5,g_auto/v1789284276/placeholder/Business_Formal_Outfit_for_Women_kl6jkx.jpg',
   },
   {
     id: 2,
@@ -24,7 +30,7 @@ const episodes = [
     description:
       'Lim Sang receives an order to eliminate Miyong and his men who were involved in the assault.',
     thumbnail:
-      'https://res.cloudinary.com/dxuumohme/image/upload/v1736524137/hinwkuumdhkwghn0o6gj.jpg',
+      'https://res.cloudinary.com/dfwrmapr4/image/upload/c_fill,ar_8:5,g_auto/v1789284278/placeholder/Butter_Color_Dress__Elegant_Spring_Formal_Look_luzpa3.jpg',
   },
   // Add more episodes as needed
 ];

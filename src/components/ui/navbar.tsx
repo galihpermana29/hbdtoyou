@@ -1,27 +1,11 @@
 'use client';
 
 import { Google } from '@mui/icons-material';
-import {
-  Avatar,
-  Badge,
-  Button,
-  Cascader,
-  Divider,
-  Dropdown,
-  MenuProps,
-  message,
-  Modal,
-  Tag,
-  Tooltip,
-} from 'antd';
+import { Avatar, Button, Cascader, Dropdown, MenuProps, message } from 'antd';
 import Link from 'next/link';
 import { useEffect, useState } from 'react';
-import { signIn, signOut } from 'next-auth/react';
-import {
-  useMemoifyProfile,
-  useMemoifySession,
-  useMemoifyUpgradePlan,
-} from '@/app/session-provider';
+import { signIn } from 'next-auth/react';
+import { useMemoifySession } from '@/app/session-provider';
 import { IProfileResponse } from '@/action/interfaces';
 import { removeSession } from '@/store/get-set-session';
 import Image from 'next/image';
@@ -36,14 +20,11 @@ import {
   LogOut,
   Menu,
   Newspaper,
-  Settings,
   Settings2,
   Zap,
 } from 'lucide-react';
-import dynamic from 'next/dynamic';
 // Lazy load the jumbotron image
 import jumbotronImage from '@/assets/fitur-1-image.png';
-import GasMeterOutlined from '@mui/icons-material/GasMeterOutlined';
 import './stlye.css';
 import { formatNumberWithComma } from '@/lib/utils';
 import { getUserProfile } from '@/action/user-api';
@@ -429,9 +410,9 @@ const NavigationBar = () => {
           <Link href={'/'} className="font-bold">
             <Image
               src={
-                'https://res.cloudinary.com/dxuumohme/image/upload/v1737048992/vz6tqrzgcht45fstloxc.png'
+                'https://res.cloudinary.com/dfwrmapr4/image/upload/v1789303095/placeholder/69b085d3b98c04a8b06e3e58ecfa136e95641109_ynodbj.png'
               }
-              alt="asd"
+              alt="Memoify"
               width={40}
               height={40}
               priority
