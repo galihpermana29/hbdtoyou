@@ -4,8 +4,8 @@
   "terminals": [
     {
       "name": "next-dev",
-      "command": "npm run dev",
-      "description": "Next.js dev server on http://localhost:3000"
+      "command": "npm run dev:prod",
+      "description": "Next.js dev server (production backend via APP_ENV=production) on http://localhost:3000"
     }
   ],
   "ports": [
