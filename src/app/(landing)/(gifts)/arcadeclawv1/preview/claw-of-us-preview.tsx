@@ -61,6 +61,16 @@ type Phase = 'idle' | 'dropping' | 'grabbing' | 'lifting' | 'returning';
 const wait = (duration: number) =>
   new Promise<void>((resolve) => window.setTimeout(resolve, duration));
 
+// #region agent log
+const dbg = (location: string, message: string, data: Record<string, unknown>, hypothesisId: string) => {
+  fetch('/api/debug-log', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ location, message, data, timestamp: Date.now(), hypothesisId }),
+  }).catch(() => {});
+};
+// #endregion
+
 export default function ClawOfUsPreview() {
   const [clawX, setClawX] = useState(50);
   const [phase, setPhase] = useState<Phase>('idle');
@@ -73,7 +83,13 @@ export default function ClawOfUsPreview() {
   const moveTimerRef = useRef<number | null>(null);
 
   useEffect(() => {
+    // #region agent log
+    dbg('claw-of-us-preview.tsx:effect-setup', 'mount effect setup', { mountedBefore: mountedRef.current }, 'A');
+    // #endregion
     return () => {
+      // #region agent log
+      dbg('claw-of-us-preview.tsx:effect-cleanup', 'mount effect cleanup sets mounted=false', { mountedBefore: mountedRef.current }, 'A');
+      // #endregion
       mountedRef.current = false;
       if (moveTimerRef.current) window.clearInterval(moveTimerRef.current);
     };
@@ -97,6 +113,9 @@ export default function ClawOfUsPreview() {
   };
 
   const dropClaw = async () => {
+    // #region agent log
+    dbg('claw-of-us-preview.tsx:dropClaw-entry', 'dropClaw called', { phase, revealed: !!revealedMemory, mounted: mountedRef.current, clawX }, 'B');
+    // #endregion
     if (phase !== 'idle' || revealedMemory) return;
 
     const available = MEMORIES.filter((memory) => !wonIds.includes(memory.id));
@@ -110,10 +129,19 @@ export default function ClawOfUsPreview() {
 
     setStatus('Claw going down…');
     setPhase('dropping');
+    // #region agent log
+    dbg('claw-of-us-preview.tsx:dropClaw-pre-wait', 'set dropping, awaiting 700ms', { caughtId: caught?.id ?? null, mounted: mountedRef.current }, 'C');
+    // #endregion
     await wait(700);
+    // #region agent log
+    dbg('claw-of-us-preview.tsx:dropClaw-post-wait', 'after first wait mounted check', { mounted: mountedRef.current, willEarlyReturn: !mountedRef.current, caughtId: caught?.id ?? null }, 'B');
+    // #endregion
     if (!mountedRef.current) return;
 
     if (!caught) {
+      // #region agent log
+      dbg('claw-of-us-preview.tsx:dropClaw-miss', 'miss branch entered', { mounted: mountedRef.current }, 'D');
+      // #endregion
       setStatus(COPY.miss);
       setPhase('lifting');
       await wait(700);
@@ -122,6 +150,9 @@ export default function ClawOfUsPreview() {
       return;
     }
 
+    // #region agent log
+    dbg('claw-of-us-preview.tsx:dropClaw-hit', 'hit branch entered', { caughtId: caught.id, mounted: mountedRef.current }, 'C');
+    // #endregion
     setHeldMemory(caught);
     setStatus('Got one!');
     setPhase('grabbing');
@@ -141,6 +172,9 @@ export default function ClawOfUsPreview() {
     setPhase('idle');
     setRevealedMemory(caught);
     setStatus(COPY.instructions);
+    // #region agent log
+    dbg('claw-of-us-preview.tsx:dropClaw-done', 'dropClaw completed reveal', { caughtId: caught.id, wonCount: nextWonIds.length }, 'C');
+    // #endregion
   };
 
   const continuePlaying = () => {
