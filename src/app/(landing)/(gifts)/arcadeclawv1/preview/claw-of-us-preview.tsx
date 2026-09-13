@@ -83,8 +83,11 @@ export default function ClawOfUsPreview() {
   const moveTimerRef = useRef<number | null>(null);
 
   useEffect(() => {
+    // Restore true after Strict Mode remount (cleanup sets false; setup must flip it back).
+    const mountedBefore = mountedRef.current;
+    mountedRef.current = true;
     // #region agent log
-    dbg('claw-of-us-preview.tsx:effect-setup', 'mount effect setup', { mountedBefore: mountedRef.current }, 'A');
+    dbg('claw-of-us-preview.tsx:effect-setup', 'mount effect setup', { mountedBefore, mountedAfter: mountedRef.current, runId: 'post-fix' }, 'A');
     // #endregion
     return () => {
       // #region agent log
@@ -114,7 +117,7 @@ export default function ClawOfUsPreview() {
 
   const dropClaw = async () => {
     // #region agent log
-    dbg('claw-of-us-preview.tsx:dropClaw-entry', 'dropClaw called', { phase, revealed: !!revealedMemory, mounted: mountedRef.current, clawX }, 'B');
+    dbg('claw-of-us-preview.tsx:dropClaw-entry', 'dropClaw called', { phase, revealed: !!revealedMemory, mounted: mountedRef.current, clawX, runId: 'post-fix' }, 'B');
     // #endregion
     if (phase !== 'idle' || revealedMemory) return;
 
@@ -130,17 +133,17 @@ export default function ClawOfUsPreview() {
     setStatus('Claw going down…');
     setPhase('dropping');
     // #region agent log
-    dbg('claw-of-us-preview.tsx:dropClaw-pre-wait', 'set dropping, awaiting 700ms', { caughtId: caught?.id ?? null, mounted: mountedRef.current }, 'C');
+    dbg('claw-of-us-preview.tsx:dropClaw-pre-wait', 'set dropping, awaiting 700ms', { caughtId: caught?.id ?? null, mounted: mountedRef.current, runId: 'post-fix' }, 'C');
     // #endregion
     await wait(700);
     // #region agent log
-    dbg('claw-of-us-preview.tsx:dropClaw-post-wait', 'after first wait mounted check', { mounted: mountedRef.current, willEarlyReturn: !mountedRef.current, caughtId: caught?.id ?? null }, 'B');
+    dbg('claw-of-us-preview.tsx:dropClaw-post-wait', 'after first wait mounted check', { mounted: mountedRef.current, willEarlyReturn: !mountedRef.current, caughtId: caught?.id ?? null, runId: 'post-fix' }, 'B');
     // #endregion
     if (!mountedRef.current) return;
 
     if (!caught) {
       // #region agent log
-      dbg('claw-of-us-preview.tsx:dropClaw-miss', 'miss branch entered', { mounted: mountedRef.current }, 'D');
+      dbg('claw-of-us-preview.tsx:dropClaw-miss', 'miss branch entered', { mounted: mountedRef.current, runId: 'post-fix' }, 'D');
       // #endregion
       setStatus(COPY.miss);
       setPhase('lifting');
@@ -151,7 +154,7 @@ export default function ClawOfUsPreview() {
     }
 
     // #region agent log
-    dbg('claw-of-us-preview.tsx:dropClaw-hit', 'hit branch entered', { caughtId: caught.id, mounted: mountedRef.current }, 'C');
+    dbg('claw-of-us-preview.tsx:dropClaw-hit', 'hit branch entered', { caughtId: caught.id, mounted: mountedRef.current, runId: 'post-fix' }, 'C');
     // #endregion
     setHeldMemory(caught);
     setStatus('Got one!');
@@ -173,7 +176,7 @@ export default function ClawOfUsPreview() {
     setRevealedMemory(caught);
     setStatus(COPY.instructions);
     // #region agent log
-    dbg('claw-of-us-preview.tsx:dropClaw-done', 'dropClaw completed reveal', { caughtId: caught.id, wonCount: nextWonIds.length }, 'C');
+    dbg('claw-of-us-preview.tsx:dropClaw-done', 'dropClaw completed reveal', { caughtId: caught.id, wonCount: nextWonIds.length, runId: 'post-fix' }, 'C');
     // #endregion
   };
 
