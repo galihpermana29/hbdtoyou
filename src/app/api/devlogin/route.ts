@@ -13,8 +13,11 @@ export const dynamic = 'force-dynamic';
  * testing).
  *
  * Safety: this endpoint is inert unless `ALLOW_DEV_LOGIN === 'true'` AND the app
- * is not running in production (`APP_ENV !== 'production'`). It must never be
- * enabled in a production environment.
+ * is running a dev server (`NODE_ENV !== 'production'`, i.e. `next dev`). This
+ * intentionally still allows pointing at the production backend
+ * (`APP_ENV=production`) from a dev server, while a real production build
+ * (`next start`, where `NODE_ENV === 'production'`) can never enable it. Never
+ * set ALLOW_DEV_LOGIN on the real production deployment.
  *
  * Required env when enabled:
  *   - DEV_LOGIN_TOKEN    backend access token to impersonate
@@ -27,7 +30,7 @@ export const dynamic = 'force-dynamic';
 function isEnabled() {
   return (
     process.env.ALLOW_DEV_LOGIN === 'true' &&
-    process.env.APP_ENV !== 'production'
+    process.env.NODE_ENV !== 'production'
   );
 }
 
