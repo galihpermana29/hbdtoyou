@@ -529,6 +529,9 @@
   z-index: 20;
   inset: 0;
   display: grid;
+  /* minmax(0, 1fr) keeps the card inside the viewport instead of letting a wide
+     photo frame stretch the grid track. */
+  grid-template-columns: minmax(0, 1fr);
   place-items: center;
   /* Keeps a tall card reachable on short screens instead of clipping its top. */
   place-items: safe center;
@@ -559,10 +562,14 @@
 }
 
 .revealPhoto {
+  /* The frame takes the photo's own shape, so portrait shots are not letterboxed. */
+  --reveal-max: min(50vh, 420px);
   position: relative;
-  width: 100%;
-  height: min(50vh, 420px);
-  margin-top: 12px;
+  width: calc(var(--reveal-max) * var(--reveal-ratio, 1.3333));
+  max-width: 100%;
+  aspect-ratio: var(--reveal-ratio, 1.3333);
+  max-height: var(--reveal-max);
+  margin: 12px auto 0;
   overflow: hidden;
   border: 3px solid var(--ink);
   border-radius: 16px;
