@@ -355,7 +355,7 @@ export default function ClawOfUs({ data }: { data: ArcadeClawData }) {
                   `A shared memory for ${data.recipientName}`
                 }
                 fill
-                sizes="(max-width: 480px) 78vw, 330px"
+                sizes="(max-width: 480px) 86vw, 394px"
               />
             </div>
             <p className={styles.caption}>

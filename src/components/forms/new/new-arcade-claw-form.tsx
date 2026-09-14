@@ -8,7 +8,7 @@ import DraggerUpload, { AccountType } from '@/components/ui/uploader/uploader';
 import { reset } from '@/lib/uploadSlice';
 import { MinusCircleOutlined, PlusOutlined } from '@ant-design/icons';
 import { Button, Form, Input, message, Modal } from 'antd';
-import { useForm } from 'antd/es/form/Form';
+import { useForm, useWatch } from 'antd/es/form/Form';
 import TextArea from 'antd/es/input/TextArea';
 import dayjs from 'dayjs';
 import { useEffect } from 'react';
@@ -45,6 +45,7 @@ export default function NewArcadeClawForm({
   editData,
 }: NewArcadeClawFormProps) {
   const [form] = useForm<ArcadeClawFormValues>();
+  const memories = useWatch('memories', form);
   const profile = useMemoifyProfile();
   const dispatch = useDispatch();
   const isFreeAccount = profile?.quota < 1;
@@ -228,11 +229,7 @@ export default function NewArcadeClawForm({
                         ]}
                       >
                         <DraggerUpload
-                          profileImageURL={form.getFieldValue([
-                            'memories',
-                            name,
-                            'imageUrl',
-                          ])}
+                          profileImageURL={memories?.[name]?.imageUrl}
                           form={form}
                           formItemName={['memories', name, 'imageUrl']}
                           type={
