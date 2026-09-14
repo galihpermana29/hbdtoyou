@@ -81,12 +81,13 @@ export default function ClawOfUs({ data }: { data: ArcadeClawData }) {
   const audioRef = useRef<Partial<Record<SoundName, HTMLAudioElement>>>({});
 
   useEffect(() => {
+    const audioElements = audioRef.current;
     // Restore true after Strict Mode remount (cleanup sets false; setup must flip it back).
     mountedRef.current = true;
     return () => {
       mountedRef.current = false;
       if (moveTimerRef.current) window.clearInterval(moveTimerRef.current);
-      Object.values(audioRef.current).forEach((audio) => audio?.pause());
+      Object.values(audioElements).forEach((audio) => audio?.pause());
     };
   }, []);
 

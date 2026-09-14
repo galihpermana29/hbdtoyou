@@ -19,6 +19,19 @@ interface NewArcadeClawFormProps extends Partial<UseCreateContentReturn> {
   editData?: IDetailContentResponse;
 }
 
+interface ArcadeClawFormValues {
+  title: string;
+  recipientName: string;
+  memories: Array<{ imageUrl: string; caption?: string }>;
+  finalMessage: string;
+  title2?: string;
+  caption?: string;
+  date_scheduled?: Parameters<typeof dayjs>[0];
+  dest_email?: string;
+  is_scheduled?: boolean;
+  message?: string;
+}
+
 const EMPTY_MEMORY = { imageUrl: '', caption: '' };
 
 export default function NewArcadeClawForm({
@@ -31,13 +44,13 @@ export default function NewArcadeClawForm({
   handleCompleteCreation,
   editData,
 }: NewArcadeClawFormProps) {
-  const [form] = useForm();
+  const [form] = useForm<ArcadeClawFormValues>();
   const profile = useMemoifyProfile();
   const dispatch = useDispatch();
   const isFreeAccount = profile?.quota < 1;
 
   const handleSubmit = async (
-    values: any,
+    values: ArcadeClawFormValues,
     status: 'draft' | 'published' = 'published'
   ) => {
     setLoading(true);
