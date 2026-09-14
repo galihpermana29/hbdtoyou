@@ -1,0 +1,23 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 800 600" role="img" aria-labelledby="title">
+  <title id="title">A little car driving through green hills</title>
+  <defs>
+    <linearGradient id="sky" x2="0" y2="1"><stop stop-color="#9c8ee8"/><stop offset="1" stop-color="#d5e8ff"/></linearGradient>
+  </defs>
+  <rect width="800" height="600" fill="url(#sky)"/>
+  <circle cx="650" cy="104" r="58" fill="#fff3a8"/>
+  <path d="M0 365Q120 205 278 348Q430 160 612 348Q714 245 800 312V600H0Z" fill="#8bd2a8"/>
+  <path d="M0 440Q170 286 342 431Q503 290 800 427V600H0Z" fill="#50a982"/>
+  <path d="M255 600q24-143 152-199t252-32q-161 59-142 231z" fill="#51476e"/>
+  <path d="M316 600q20-108 119-153t179-43" fill="none" stroke="#fff3b1" stroke-width="15" stroke-dasharray="44 38"/>
+  <g transform="translate(235 328)">
+    <path d="M40 88l39-70h167l60 70z" fill="#ffe1ae" stroke="#382e51" stroke-width="12" stroke-linejoin="round"/>
+    <path d="M107 26h114l40 61H75z" fill="#bcecf0" stroke="#382e51" stroke-width="10"/>
+    <path d="M80 18q15-44 47 0M195 18q15-44 47 0" fill="none" stroke="#382e51" stroke-width="9"/>
+    <rect x="15" y="84" width="316" height="101" rx="35" fill="#ff7e94" stroke="#382e51" stroke-width="12"/>
+    <circle cx="86" cy="182" r="37" fill="#382e51"/><circle cx="263" cy="182" r="37" fill="#382e51"/>
+    <circle cx="86" cy="182" r="15" fill="#c8baff"/><circle cx="263" cy="182" r="15" fill="#c8baff"/>
+    <circle cx="59" cy="122" r="17" fill="#fff3a8"/><circle cx="287" cy="122" r="17" fill="#fff3a8"/>
+    <path d="M141 139q35 27 70 0" fill="none" stroke="#382e51" stroke-width="9" stroke-linecap="round"/>
+  </g>
+  <g fill="#fff" opacity=".7"><circle cx="95" cy="95" r="12"/><circle cx="124" cy="91" r="18"/><circle cx="151" cy="99" r="11"/></g>
+</svg>

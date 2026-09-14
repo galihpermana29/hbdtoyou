@@ -28,6 +28,7 @@ import NewGraduation1Form from '@/components/forms/new/new-graduation1-form';
 import NewGraduation2Form from '@/components/forms/new/new-graduation2-form';
 import NewVinylForm from '@/components/forms/new/new-vinyl-form';
 import NewTarotForm from '@/components/forms/new/new-tarot-form';
+import NewArcadeClawForm from '@/components/forms/new/new-arcade-claw-form';
 
 const StepsCustom = [
   {
@@ -168,6 +169,7 @@ const CreatePage = () => {
     albumgraduation1: AlbumGraduationv1,
     vinylv1: NewVinylForm,
     tarotv1: NewTarotForm,
+    arcadeclawv1: NewArcadeClawForm,
   };
 
   useEffect(() => {

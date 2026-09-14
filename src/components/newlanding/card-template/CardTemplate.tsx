@@ -10,6 +10,7 @@ import newspaperv3 from '@/assets/templates/newspaperv3.png';
 import journal from '@/assets/templates/scopus.png';
 import scrapbookv1 from '@/assets/templates/scrapbookv1.jpg';
 import spotifyv1 from '@/assets/templates/spotifyv1.png';
+import arcadeclawv1 from '@/assets/templates/arcadeclawv1.svg';
 import clsx from 'clsx';
 import { ArrowRight } from 'lucide-react';
 import Image from 'next/image';
@@ -79,6 +80,11 @@ export const DataToCardColor = {
     color: 'bg-[#000000]',
     logo: newspaperv1,
     text: 'text-[#000000]',
+  },
+  arcadeclawv1: {
+    color: 'bg-[#ffedf3]',
+    logo: arcadeclawv1,
+    text: 'text-[#dd426c]',
   },
 };
 

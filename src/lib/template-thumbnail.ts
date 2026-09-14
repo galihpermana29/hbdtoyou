@@ -29,6 +29,7 @@ const LOCAL_THUMBNAILS = new Set([
   'graduationv2',
   'newspaperv1',
   'newspaperv3',
+  'arcadeclawv1',
   // scrapbook5's backend thumbnail still resolves, so it is deliberately not listed
   'scrapbook1',
   'scrapbook2',
