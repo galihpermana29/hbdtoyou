@@ -215,11 +215,6 @@ const NewDisneyForm = ({
                         ]}
                         name={[name, 'imageUrl']}>
                         <DraggerUpload
-                          profileImageURL={form.getFieldValue([
-                            'episodes',
-                            name,
-                            'imageUrl',
-                          ])}
                           form={form}
                           formItemName={['episodes', name, 'imageUrl']}
                           type={

@@ -314,8 +314,7 @@
 }
 
 .heldPrize img,
-.prizeImage img,
-.revealPhoto img {
+.prizeImage img {
   object-fit: cover;
 }
 
@@ -530,7 +529,13 @@
   z-index: 20;
   inset: 0;
   display: grid;
+  /* minmax(0, 1fr) keeps the card inside the viewport instead of letting a wide
+     photo frame stretch the grid track. */
+  grid-template-columns: minmax(0, 1fr);
   place-items: center;
+  /* Keeps a tall card reachable on short screens instead of clipping its top. */
+  place-items: safe center;
+  overflow-y: auto;
   padding: 24px 20px;
   background: rgba(39, 31, 70, 0.74);
   backdrop-filter: blur(7px);
@@ -552,18 +557,29 @@
 }
 
 .memoryCard {
+  width: min(100%, 400px);
   padding: 20px 20px 22px;
 }
 
 .revealPhoto {
+  /* The frame takes the photo's own shape, so portrait shots are not letterboxed. */
+  --reveal-max: min(50vh, 420px);
   position: relative;
-  width: 100%;
-  aspect-ratio: 4 / 3;
-  margin-top: 12px;
+  width: calc(var(--reveal-max) * var(--reveal-ratio, 1.3333));
+  max-width: 100%;
+  aspect-ratio: var(--reveal-ratio, 1.3333);
+  max-height: var(--reveal-max);
+  margin: 12px auto 0;
   overflow: hidden;
   border: 3px solid var(--ink);
   border-radius: 16px;
-  background: #ddd5ff;
+  background: #2f2750;
+}
+
+.revealPhoto img {
+  /* Portrait and phone-camera photos must stay whole, not be cropped to fit. */
+  object-fit: contain;
+  image-orientation: from-image;
 }
 
 .caption {

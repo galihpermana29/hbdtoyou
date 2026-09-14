@@ -305,11 +305,6 @@ const NewVinylForm = ({
                         ]}
                         name={[name, 'imageUrl']}>
                         <DraggerUpload
-                          profileImageURL={form.getFieldValue([
-                            'memories',
-                            name,
-                            'imageUrl',
-                          ])}
                           form={form}
                           formItemName={['memories', name, 'imageUrl']}
                           type={

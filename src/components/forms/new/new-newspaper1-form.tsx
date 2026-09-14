@@ -194,11 +194,6 @@ const NewNewspaper1Form = ({
                         ]}
                         name={[name, 'imageUrl']}>
                         <DraggerUpload
-                          profileImageURL={form.getFieldValue([
-                            'stories',
-                            name,
-                            'imageUrl',
-                          ])}
                           form={form}
                           formItemName={['stories', name, 'imageUrl']}
                           type={

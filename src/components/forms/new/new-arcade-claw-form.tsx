@@ -228,11 +228,6 @@ export default function NewArcadeClawForm({
                         ]}
                       >
                         <DraggerUpload
-                          profileImageURL={form.getFieldValue([
-                            'memories',
-                            name,
-                            'imageUrl',
-                          ])}
                           form={form}
                           formItemName={['memories', name, 'imageUrl']}
                           type={

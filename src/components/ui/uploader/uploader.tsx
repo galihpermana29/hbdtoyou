@@ -16,6 +16,9 @@ export enum AccountType {
 
 interface DraggerUploadI {
   profileImageURL?: string | string[];
+  // Injected by the wrapping Form.Item, so it always holds the live field value
+  // even when the parent has not re-rendered since the upload finished.
+  value?: string | string[];
   formItemName: string | (string | number)[];
   form: FormInstance<any>;
   type: AccountType;
@@ -29,6 +32,7 @@ interface DraggerUploadI {
 
 const DraggerUpload = ({
   profileImageURL,
+  value,
   form,
   formItemName,
   limit = 1,
@@ -161,9 +165,11 @@ const DraggerUpload = ({
     return [];
   };
 
+  const previewSource = value !== undefined ? value : profileImageURL;
+
   useEffect(() => {
-    setFileList(updateFileList(profileImageURL!));
-  }, [profileImageURL]);
+    setFileList(updateFileList(previewSource!));
+  }, [previewSource]);
 
   return (
     <div className="flex flex-col items-start">

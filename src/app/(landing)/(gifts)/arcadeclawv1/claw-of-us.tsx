@@ -1,7 +1,7 @@
 'use client';
 
 import Image from 'next/image';
-import { useEffect, useMemo, useRef, useState } from 'react';
+import { CSSProperties, useEffect, useMemo, useRef, useState } from 'react';
 import styles from './claw-of-us.module.css';
 
 const COPY = {
@@ -74,6 +74,7 @@ export default function ClawOfUs({ data }: { data: ArcadeClawData }) {
   const [revealedMemory, setRevealedMemory] = useState<PositionedMemory | null>(
     null
   );
+  const [revealRatio, setRevealRatio] = useState<number | null>(null);
   const [showPayoff, setShowPayoff] = useState(false);
   const [status, setStatus] = useState(COPY.instructions);
   const mountedRef = useRef(true);
@@ -172,6 +173,7 @@ export default function ClawOfUs({ data }: { data: ArcadeClawData }) {
     setWonIds(nextWonIds);
     setHeldMemory(null);
     setPhase('idle');
+    setRevealRatio(null);
     setRevealedMemory(caught);
     setStatus(COPY.instructions);
   };
@@ -347,7 +349,14 @@ export default function ClawOfUs({ data }: { data: ArcadeClawData }) {
         <div className={styles.overlay} role="dialog" aria-modal="true">
           <article className={styles.memoryCard}>
             <p className={styles.cardLabel}>{COPY.revealLabel}</p>
-            <div className={styles.revealPhoto}>
+            <div
+              className={styles.revealPhoto}
+              style={
+                revealRatio
+                  ? ({ '--reveal-ratio': revealRatio } as CSSProperties)
+                  : undefined
+              }
+            >
               <Image
                 src={revealedMemory.imageUrl}
                 alt={
@@ -355,7 +364,13 @@ export default function ClawOfUs({ data }: { data: ArcadeClawData }) {
                   `A shared memory for ${data.recipientName}`
                 }
                 fill
-                sizes="(max-width: 480px) 78vw, 330px"
+                sizes="(max-width: 480px) 86vw, 394px"
+                onLoad={(event) => {
+                  const { naturalWidth, naturalHeight } = event.currentTarget;
+                  if (naturalWidth && naturalHeight) {
+                    setRevealRatio(naturalWidth / naturalHeight);
+                  }
+                }}
               />
             </div>
             <p className={styles.caption}>
