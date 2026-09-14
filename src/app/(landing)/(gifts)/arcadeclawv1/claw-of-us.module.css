@@ -784,7 +784,7 @@
   }
 }
 
-@media (max-height: 760px) {
+@media (max-height: 760px) and (max-width: 699px) {
   .game {
     padding-top: 10px;
   }
