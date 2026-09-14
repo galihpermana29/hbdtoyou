@@ -20,7 +20,8 @@ export function PostHogProvider({ children }: { children: React.ReactNode }) {
 
   useEffect(() => {
     posthog.set_config({
-      disable_surveys_automatic_display: pathname === "/arcadeclawv1/preview",
+      disable_surveys_automatic_display:
+        pathname === "/arcadeclawv1" || pathname.startsWith("/arcadeclawv1/"),
     })
   }, [pathname])
 

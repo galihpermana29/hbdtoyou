@@ -1,5 +1,6 @@
 import type { Metadata } from 'next';
-import ClawOfUsPreview from './claw-of-us-preview';
+import ClawOfUs from '../claw-of-us';
+import { ARCADE_CLAW_SAMPLE_DATA } from '../sample-data';
 
 export const metadata: Metadata = {
   title: 'Claw of Us — Memoify Preview',
@@ -7,5 +8,5 @@ export const metadata: Metadata = {
 };
 
 export default function ArcadeClawPreviewPage() {
-  return <ClawOfUsPreview />;
+  return <ClawOfUs data={ARCADE_CLAW_SAMPLE_DATA} />;
 }

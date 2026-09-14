@@ -1,12 +1,11 @@
 'use client';
 
 import Image from 'next/image';
-import { useEffect, useRef, useState } from 'react';
-import styles from './claw-of-us-preview.module.css';
+import { useEffect, useMemo, useRef, useState } from 'react';
+import styles from './claw-of-us.module.css';
 
 const COPY = {
-  eyebrow: 'A little game for you',
-  title: 'Claw of Us',
+  eyebrow: 'A little game for',
   instructions: 'Move the claw, then grab a memory.',
   progress: 'memories collected',
   drop: 'Grab',
@@ -14,63 +13,72 @@ const COPY = {
   miss: 'So close! Line up with a memory and try again.',
   revealLabel: 'You found a memory',
   payoffLabel: 'Jackpot unlocked',
+  payoffTitle: 'You got them all',
   replay: 'Play again',
 };
 
-const MEMORIES = [
-  {
-    id: 'sunset',
-    x: 18,
-    image: '/arcadeclawv1/sunset-date.svg',
-    alt: 'Two people watching a pink sunset by the sea',
-    caption: 'The sunset that made us forget the time.',
-  },
-  {
-    id: 'coffee',
-    x: 38,
-    image: '/arcadeclawv1/coffee-date.svg',
-    alt: 'Two coffee cups beside a vase of flowers',
-    caption: 'Our tiny table, our very big conversations.',
-  },
-  {
-    id: 'roadtrip',
-    x: 60,
-    image: '/arcadeclawv1/road-trip.svg',
-    alt: 'A little car driving through green hills',
-    caption: 'Wrong turns, loud songs, perfect company.',
-  },
-  {
-    id: 'picnic',
-    x: 78,
-    image: '/arcadeclawv1/picnic-day.svg',
-    alt: 'A picnic blanket under a leafy tree',
-    caption: 'A slow afternoon I would replay forever.',
-  },
-  {
-    id: 'stargazing',
-    x: 88,
-    image: '/arcadeclawv1/stargazing.svg',
-    alt: 'Two people sitting under a starry night sky',
-    caption: 'The night the sky felt like it was just ours.',
-  },
-] as const;
+export interface ArcadeClawMemory {
+  imageUrl: string;
+  caption?: string;
+  alt?: string;
+}
 
-type Memory = (typeof MEMORIES)[number];
+export interface ArcadeClawData {
+  title: string;
+  recipientName: string;
+  memories: ArcadeClawMemory[];
+  finalMessage: string;
+}
+
+interface PositionedMemory extends ArcadeClawMemory {
+  id: string;
+  x: number;
+}
+
 type Phase = 'idle' | 'dropping' | 'grabbing' | 'lifting' | 'returning';
+type SoundName = 'slide' | 'drop' | 'grab' | 'payoff';
+
+const SOUND_FILES: Record<SoundName, string> = {
+  slide: '/arcadeclawv1/sounds/slide.wav',
+  drop: '/arcadeclawv1/sounds/drop.wav',
+  grab: '/arcadeclawv1/sounds/grab.wav',
+  payoff: '/arcadeclawv1/sounds/payoff.wav',
+};
+
+const SOUND_VOLUMES: Record<SoundName, number> = {
+  slide: 0.12,
+  drop: 0.16,
+  grab: 0.18,
+  payoff: 0.2,
+};
 
 const wait = (duration: number) =>
   new Promise<void>((resolve) => window.setTimeout(resolve, duration));
 
-export default function ClawOfUsPreview() {
+export default function ClawOfUs({ data }: { data: ArcadeClawData }) {
+  const memories = useMemo<PositionedMemory[]>(() => {
+    const safeMemories = data.memories.slice(0, 6);
+    const spacing =
+      safeMemories.length > 1 ? 72 / (safeMemories.length - 1) : 0;
+
+    return safeMemories.map((memory, index) => ({
+      ...memory,
+      id: `memory-${index}`,
+      x: safeMemories.length === 1 ? 50 : 14 + spacing * index,
+    }));
+  }, [data.memories]);
   const [clawX, setClawX] = useState(50);
   const [phase, setPhase] = useState<Phase>('idle');
   const [wonIds, setWonIds] = useState<string[]>([]);
-  const [heldMemory, setHeldMemory] = useState<Memory | null>(null);
-  const [revealedMemory, setRevealedMemory] = useState<Memory | null>(null);
+  const [heldMemory, setHeldMemory] = useState<PositionedMemory | null>(null);
+  const [revealedMemory, setRevealedMemory] = useState<PositionedMemory | null>(
+    null
+  );
   const [showPayoff, setShowPayoff] = useState(false);
   const [status, setStatus] = useState(COPY.instructions);
   const mountedRef = useRef(true);
   const moveTimerRef = useRef<number | null>(null);
+  const audioRef = useRef<Partial<Record<SoundName, HTMLAudioElement>>>({});
 
   useEffect(() => {
     // Restore true after Strict Mode remount (cleanup sets false; setup must flip it back).
@@ -78,11 +86,27 @@ export default function ClawOfUsPreview() {
     return () => {
       mountedRef.current = false;
       if (moveTimerRef.current) window.clearInterval(moveTimerRef.current);
+      Object.values(audioRef.current).forEach((audio) => audio?.pause());
     };
   }, []);
 
+  const playSound = (name: SoundName) => {
+    let audio = audioRef.current[name];
+    if (!audio) {
+      audio = new Audio(SOUND_FILES[name]);
+      audio.preload = 'auto';
+      audio.volume = SOUND_VOLUMES[name];
+      audioRef.current[name] = audio;
+    }
+    audio.currentTime = 0;
+    void audio.play().catch(() => {
+      // Browsers may reject audio before a user gesture; gameplay still continues.
+    });
+  };
+
   const moveClaw = (direction: -1 | 1) => {
     if (phase !== 'idle' || revealedMemory) return;
+    playSound('slide');
     setClawX((current) => Math.max(10, Math.min(90, current + direction * 7)));
   };
 
@@ -101,15 +125,20 @@ export default function ClawOfUsPreview() {
   const dropClaw = async () => {
     if (phase !== 'idle' || revealedMemory) return;
 
-    const available = MEMORIES.filter((memory) => !wonIds.includes(memory.id));
-    const nearest = available.reduce<Memory | null>((closest, memory) => {
-      if (!closest) return memory;
-      return Math.abs(memory.x - clawX) < Math.abs(closest.x - clawX)
-        ? memory
-        : closest;
-    }, null);
-    const caught = nearest && Math.abs(nearest.x - clawX) <= 13 ? nearest : null;
+    const available = memories.filter((memory) => !wonIds.includes(memory.id));
+    const nearest = available.reduce<PositionedMemory | null>(
+      (closest, memory) => {
+        if (!closest) return memory;
+        return Math.abs(memory.x - clawX) < Math.abs(closest.x - clawX)
+          ? memory
+          : closest;
+      },
+      null
+    );
+    const caught =
+      nearest && Math.abs(nearest.x - clawX) <= 13 ? nearest : null;
 
+    playSound('drop');
     setStatus('Claw going down…');
     setPhase('dropping');
     await wait(700);
@@ -125,6 +154,7 @@ export default function ClawOfUsPreview() {
     }
 
     setHeldMemory(caught);
+    playSound('grab');
     setStatus('Got one!');
     setPhase('grabbing');
     await wait(350);
@@ -148,7 +178,10 @@ export default function ClawOfUsPreview() {
   const continuePlaying = () => {
     const isFinalGrab = wonIds.length === 3;
     setRevealedMemory(null);
-    if (isFinalGrab) setShowPayoff(true);
+    if (isFinalGrab) {
+      playSound('payoff');
+      setShowPayoff(true);
+    }
   };
 
   const replay = () => {
@@ -166,8 +199,10 @@ export default function ClawOfUsPreview() {
       <div className={styles.ambientGlow} aria-hidden="true" />
       <section className={styles.game} aria-label="Claw of Us memory game">
         <header className={styles.header}>
-          <p className={styles.eyebrow}>{COPY.eyebrow}</p>
-          <h1>{COPY.title}</h1>
+          <p className={styles.eyebrow}>
+            {COPY.eyebrow} {data.recipientName}
+          </p>
+          <h1>{data.title}</h1>
           <div className={styles.progressWrap}>
             <div className={styles.progressDots} aria-hidden="true">
               {[0, 1, 2].map((index) => (
@@ -195,31 +230,28 @@ export default function ClawOfUsPreview() {
               <div
                 className={`${styles.clawRig} ${clawIsLow ? styles.clawLow : ''}`}
                 style={{ left: `${clawX}%` }}
-                aria-hidden="true">
+                aria-hidden="true"
+              >
                 <div className={styles.railConnector} />
                 <div className={styles.cable} />
                 <div className={styles.clawHead} />
                 <div
                   className={`${styles.clawPincer} ${
                     clawIsClosed ? styles.clawClosed : ''
-                  }`}>
+                  }`}
+                >
                   <span />
                   <span />
                 </div>
                 {heldMemory ? (
                   <div className={styles.heldPrize}>
-                    <Image
-                      src={heldMemory.image}
-                      alt=""
-                      fill
-                      sizes="56px"
-                    />
+                    <Image src={heldMemory.imageUrl} alt="" fill sizes="56px" />
                   </div>
                 ) : null}
               </div>
 
               <div className={styles.prizeShelf}>
-                {MEMORIES.map((memory, index) => {
+                {memories.map((memory, index) => {
                   const isWon = wonIds.includes(memory.id);
                   return (
                     <div
@@ -232,10 +264,11 @@ export default function ClawOfUsPreview() {
                         transform: `translateX(-50%) rotate(${
                           index % 2 === 0 ? -5 : 5
                         }deg)`,
-                      }}>
+                      }}
+                    >
                       <div className={styles.prizeImage}>
                         <Image
-                          src={memory.image}
+                          src={memory.imageUrl}
                           alt=""
                           fill
                           sizes="64px"
@@ -277,7 +310,8 @@ export default function ClawOfUsPreview() {
                 onPointerUp={stopMoving}
                 onPointerLeave={stopMoving}
                 onPointerCancel={stopMoving}
-                disabled={phase !== 'idle'}>
+                disabled={phase !== 'idle'}
+              >
                 ‹
               </button>
               <span aria-hidden="true" />
@@ -288,7 +322,8 @@ export default function ClawOfUsPreview() {
                 onPointerUp={stopMoving}
                 onPointerLeave={stopMoving}
                 onPointerCancel={stopMoving}
-                disabled={phase !== 'idle'}>
+                disabled={phase !== 'idle'}
+              >
                 ›
               </button>
             </div>
@@ -299,7 +334,8 @@ export default function ClawOfUsPreview() {
               type="button"
               onClick={dropClaw}
               disabled={phase !== 'idle'}
-              aria-label="Drop claw to grab a memory">
+              aria-label="Drop claw to grab a memory"
+            >
               <span>{COPY.drop}</span>
             </button>
           </div>
@@ -312,13 +348,18 @@ export default function ClawOfUsPreview() {
             <p className={styles.cardLabel}>{COPY.revealLabel}</p>
             <div className={styles.revealPhoto}>
               <Image
-                src={revealedMemory.image}
-                alt={revealedMemory.alt}
+                src={revealedMemory.imageUrl}
+                alt={
+                  revealedMemory.alt ||
+                  `A shared memory for ${data.recipientName}`
+                }
                 fill
                 sizes="(max-width: 480px) 78vw, 330px"
               />
             </div>
-            <p className={styles.caption}>{revealedMemory.caption}</p>
+            <p className={styles.caption}>
+              {revealedMemory.caption || 'A memory worth keeping.'}
+            </p>
             <button type="button" onClick={continuePlaying} autoFocus>
               {wonIds.length === 3 ? 'Open your surprise' : COPY.continue}
               <span aria-hidden="true"> →</span>
@@ -339,13 +380,11 @@ export default function ClawOfUsPreview() {
             <div className={styles.payoffIcon} aria-hidden="true">
               ♥
             </div>
-            <h2>Happy birthday, my favorite person!</h2>
-            <p>
-              If I could keep every little moment with you, I would. Until then,
-              here are three reminders that life is brighter, funnier, and much
-              more beautiful with you in it.
-            </p>
-            <p className={styles.signature}>Always on your team, Alex</p>
+            <h2>
+              {COPY.payoffTitle}, {data.recipientName}!
+            </h2>
+            <p>{data.finalMessage}</p>
+            <p className={styles.signature}>Made just for you ♥</p>
             <button type="button" onClick={replay}>
               {COPY.replay}
             </button>
