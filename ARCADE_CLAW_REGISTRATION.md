@@ -1,10 +1,13 @@
 # Claw of Us template registration
 
-The frontend reads template records from the external Memoify API. After this
-branch is deployed, an admin must add the record from **Dashboard → Templates →
-Create Template**. This uses the existing `POST /templates` action.
+The frontend reads template records from the external Memoify API. The record
+was created through the existing authenticated `POST /templates` action in both
+the live and staging environments on 14 September 2026, then verified through the matching
+category query. It now appears in **Dashboard → Templates** and the `/create`
+picker.
 
-Use these values:
+If the record ever needs to be recreated, use **Dashboard → Templates → Create
+Template** with these values:
 
 ```json
 {
