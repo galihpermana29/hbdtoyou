@@ -9,7 +9,6 @@ import { Tour, TourProps } from 'antd';
 import { usePathname, useRouter, useSearchParams } from 'next/navigation';
 import TruncateText from '@/components/newlanding/TruncateText';
 import { addLineBreaksEveryThreeSentences } from '@/lib/utils';
-import noImage from '@/assets/empty.png';
 import { motion } from 'framer-motion';
 export default function Featured({
   title,
@@ -115,7 +114,7 @@ export default function Featured({
           id="style-1">
           <div className="relative h-[42%] min-h-[220px] w-full">
             <Image
-              src={jumbotronImage ?? noImage}
+              src={jumbotronImage ?? widya}
               alt=""
               fill
               sizes="(max-width: 768px) 90vw, 768px"
