@@ -45,11 +45,7 @@ export const metadata: Metadata = {
 
 const MoreTemplatesPage = async () => {
   const data = await getAllTemplates();
-  return (
-    <div className="">
-      <NewTemplates data={data.success ? data.data : []} />
-    </div>
-  );
+  return <NewTemplates data={data.success && data.data ? data.data : []} />;
 };
 
 export default MoreTemplatesPage;
