@@ -21,10 +21,13 @@ import {
 import { formatNumberWithComma } from '@/lib/utils';
 import { getUserProfile } from '@/action/user-api';
 
-// Pricing lives in a section on the landing page, so buyers can compare plans
-// without hitting the login-walled checkout URL first.
+// Each product gets its own top-level entry rather than hiding behind a
+// grouped "Features" menu. Pricing points at the landing page section so
+// buyers can compare plans without hitting the login-walled checkout URL.
 const NAV_LINKS = [
-  { label: 'Templates', href: '/templates' },
+  { label: 'Birthday gift', href: '/templates' },
+  { label: 'Scrapbook', href: '/scrapbook' },
+  { label: 'Journal', href: '/journal' },
   { label: 'Inspiration', href: '/inspiration' },
   { label: 'Pricing', href: '/#pricing' },
 ];
@@ -154,7 +157,7 @@ const NavigationBar = () => {
             <Link
               key={link.label}
               href={link.href}
-              className="hidden md:block text-[16px] text-[#7B7B7B] font-[500] hover:text-[#1B1B1B]">
+              className="hidden lg:block whitespace-nowrap text-[16px] text-[#7B7B7B] font-[500] hover:text-[#1B1B1B]">
               {link.label}
             </Link>
           ))}
@@ -216,7 +219,7 @@ const NavigationBar = () => {
           {!session.accessToken && (
             <Button
               size="large"
-              className="!hidden md:!inline-flex !border-[#D0D5DD] !text-[#344054] !bg-white !font-[600] !text-[14px] !rounded-[8px]"
+              className="!hidden lg:!inline-flex !border-[#D0D5DD] !text-[#344054] !bg-white !font-[600] !text-[14px] !rounded-[8px]"
               onClick={() => signIn('google')}>
               Sign in
             </Button>
@@ -230,7 +233,7 @@ const NavigationBar = () => {
             </Button>
           </Link>
           <Menu
-            className="cursor-pointer md:hidden"
+            className="cursor-pointer lg:hidden"
             onClick={() => {
               setSidebar(!sidebar);
             }}
