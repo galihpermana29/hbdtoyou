@@ -25,7 +25,7 @@ import { useMemo, useState } from 'react';
 type CategoryFilter = 'All' | TemplateCategory;
 
 const tileClasses: Record<TemplateTileSize, string> = {
-  large: 'md:col-span-6 lg:col-span-6 md:min-h-[600px] lg:min-h-[620px]',
+  large: 'md:col-span-6 md:min-h-[600px] lg:min-h-[620px]',
   medium: 'md:col-span-6 lg:col-span-6 md:min-h-[500px] lg:min-h-[500px]',
   small: 'md:col-span-6 lg:col-span-4 md:min-h-[450px] lg:min-h-[440px]',
 };
@@ -74,9 +74,11 @@ function TemplateArtwork({
 function TemplateCard({
   template,
   size,
+  index,
 }: {
   template: IAllTemplateResponse;
   size: TemplateTileSize;
+  index: number;
 }) {
   const previewHref = getTemplatePreviewHref(template);
   const comingSoon = isTemplateComingSoon(template);
@@ -85,7 +87,8 @@ function TemplateCard({
     <article
       className={clsx(
         'group flex min-h-[440px] flex-col overflow-hidden rounded-[28px] bg-white p-5 shadow-[0_1px_0_rgba(0,0,0,0.02)] transition duration-300 hover:-translate-y-1 hover:shadow-[0_20px_50px_rgba(28,28,30,0.08)] md:p-6',
-        tileClasses[size]
+        tileClasses[size],
+        size === 'large' && (index === 0 ? 'lg:col-span-8' : 'lg:col-span-4')
       )}
     >
       <div className="flex items-start justify-between gap-4">
@@ -256,6 +259,7 @@ const NewTemplates = ({ data }: { data: IAllTemplateResponse[] }) => {
                   key={template.id}
                   template={template}
                   size={getTemplateTileSize(index)}
+                  index={index}
                 />
               ))}
             </div>
