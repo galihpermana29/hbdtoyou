@@ -1,6 +1,7 @@
 'use client';
 
-import { ChevronRight } from 'lucide-react';
+import { Clock3, Heart, MoreHorizontal, Play } from 'lucide-react';
+import { motion } from 'framer-motion';
 import PlaylistCard from './playlist-card';
 import PlaylistSection from './playlist-section';
 import { PhotoProvider } from 'react-photo-view';
@@ -65,45 +66,122 @@ const playlists = [
 export default function MainContent({
   momentOfYou,
   songsForYou,
+  title,
   ref2,
   ref3,
 }: {
   momentOfYou?: any[];
   songsForYou?: any[];
+  title?: string;
   ref2?: any;
   ref3?: any;
 }) {
-  const data = momentOfYou
+  const moments = momentOfYou
     ? typeof momentOfYou === 'string'
-      ? [momentOfYou].map((dx: any, idx) => ({
-          title: `#${idx + 1}`,
-          description: '',
-          image: dx,
-        }))
-      : momentOfYou.map((dx: any, idx) => ({
-          title: `#${idx + 1}`,
-          description: '',
-          image: dx,
-        }))
+      ? [momentOfYou]
+      : momentOfYou
     : playlists;
+  const data = moments.map((dx: any, idx) => ({
+    title: `Memory #${idx + 1}`,
+    description:
+      typeof dx === 'object'
+        ? dx.caption || dx.location || dx.description || ''
+        : '',
+    image: typeof dx === 'object' ? dx.imageUrl || dx.image : dx,
+  }));
+  const cover = data.find((item) => item.image)?.image || playlists[0].image;
 
   return (
-    <div>
-      <div ref={ref2}>
-        <PlaylistSection songsForYou={songsForYou} />
-      </div>
-      <div className="p-4 md:p-6 bg-gradient-to-b from-[#1e1e1e] to-[#121212] rounded-[8px]">
-        <section className="mb-8">
-          <div className="flex items-center justify-between mb-4">
-            <h2 className="text-xl md:text-2xl font-bold text-white" ref={ref3}>
-              Moment of You
-            </h2>
-            <button className="text-sm font-semibold text-neutral-400 hover:text-white transition flex items-center gap-1">
-              Show all
-              <ChevronRight className="h-4 w-4" />
-            </button>
+    <div className="min-h-full bg-[#121212] pb-28 text-white">
+      <section className="relative overflow-hidden px-5 pb-7 pt-14 md:px-8 md:pb-8 md:pt-20">
+        <div
+          className="absolute inset-0 scale-110 bg-cover bg-center opacity-35 blur-3xl"
+          style={{ backgroundImage: `url("${cover}")` }}
+        />
+        <div className="absolute inset-0 bg-gradient-to-b from-black/5 via-[#18251f]/70 to-[#121212]" />
+        <motion.div
+          initial={{ opacity: 0, y: 24 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.65 }}
+          className="relative flex flex-col items-center gap-6 md:flex-row md:items-end">
+          <motion.img
+            initial={{ scale: 0.92, rotate: -2 }}
+            animate={{ scale: 1, rotate: 0 }}
+            transition={{ duration: 0.65 }}
+            src={cover}
+            alt=""
+            className="aspect-square w-[min(68vw,260px)] rounded-md object-cover shadow-[0_24px_70px_rgba(0,0,0,0.55)] md:w-56"
+          />
+          <div className="w-full min-w-0 text-center md:text-left">
+            <p className="mb-2 text-xs font-bold uppercase tracking-[0.18em]">
+              Playlist
+            </p>
+            <h1 className="truncate text-4xl font-black leading-none tracking-[-0.04em] drop-shadow md:text-6xl lg:text-7xl">
+              {title?.trim() || 'Moments of You'}
+            </h1>
+            <p className="mt-4 text-sm text-white/70">
+              A collection of moments, songs, and everything worth replaying.
+            </p>
+            <p className="mt-2 text-sm">
+              <strong>Memoify</strong>
+              <span className="text-white/65"> • {data.length} memories</span>
+            </p>
           </div>
-          <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-4 md:gap-6">
+        </motion.div>
+      </section>
+
+      <div className="px-4 md:px-8">
+        <div className="flex items-center gap-5 py-6">
+          <button
+            type="button"
+            aria-label="Play memories"
+            className="relative flex h-14 w-14 items-center justify-center rounded-full bg-[#1ed760] text-black shadow-lg transition hover:scale-105 hover:bg-[#3be477] before:absolute before:inset-0 before:rounded-full before:animate-ping before:bg-[#1ed760]/20">
+            <Play className="relative ml-1 h-6 w-6 fill-black" />
+          </button>
+          <Heart className="h-7 w-7 text-[#1ed760]" fill="currentColor" />
+          <MoreHorizontal className="h-7 w-7 text-white/60" />
+        </div>
+
+        <section ref={ref3}>
+          <div className="grid grid-cols-[36px_minmax(0,1fr)_auto] items-center gap-3 border-b border-white/10 px-2 pb-2 text-xs uppercase tracking-[0.14em] text-white/45 md:grid-cols-[36px_minmax(0,1fr)_minmax(120px,0.6fr)_50px]">
+            <span>#</span>
+            <span>Title</span>
+            <span className="hidden md:block">Album</span>
+            <Clock3 className="h-4 w-4" />
+          </div>
+          <PhotoProvider>
+            {data.map((memory, index) => (
+              <motion.div
+                key={`${memory.image}-${index}`}
+                initial={{ opacity: 0, y: 12 }}
+                whileInView={{ opacity: 1, y: 0 }}
+                viewport={{ once: true }}
+                transition={{ delay: Math.min(index * 0.05, 0.3) }}
+                className="group grid grid-cols-[36px_minmax(0,1fr)_auto] items-center gap-3 rounded-md px-2 py-2 transition hover:bg-white/10 md:grid-cols-[36px_minmax(0,1fr)_minmax(120px,0.6fr)_50px]">
+                <span className="text-center text-sm text-white/50 group-hover:hidden">
+                  {index + 1}
+                </span>
+                <Play className="hidden h-4 w-4 fill-white group-hover:block" />
+                <div className="flex min-w-0 items-center gap-3">
+                  <PlaylistCard playlist={memory} compact />
+                </div>
+                <span className="hidden truncate text-sm text-white/45 md:block">
+                  Moments of You
+                </span>
+                <span className="text-xs text-white/45">3:{String(12 + index).padStart(2, '0')}</span>
+              </motion.div>
+            ))}
+          </PhotoProvider>
+        </section>
+
+        <div ref={ref2} className="mt-8 border-t border-white/10 pt-2">
+          <h2 className="px-3 pt-5 text-2xl font-bold">Songs for You</h2>
+          <PlaylistSection songsForYou={songsForYou} />
+        </div>
+
+        <section className="mt-4">
+          <h2 className="mb-4 text-2xl font-bold">Album art</h2>
+          <div className="grid grid-cols-2 gap-4 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5">
             <PhotoProvider>
               {data.map((playlist, index) => (
                 <PlaylistCard key={index} playlist={playlist} />

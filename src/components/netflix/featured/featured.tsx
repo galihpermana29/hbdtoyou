@@ -3,13 +3,13 @@
 import { InfoOutlined, PlayArrow } from '@mui/icons-material';
 import Image from 'next/image';
 import widya from '@/assets/widya/after/2.jpg';
-import { useRef, useState } from 'react';
+import { useState } from 'react';
 import Modal from './modal';
 import { Tour, TourProps } from 'antd';
 import { usePathname, useRouter, useSearchParams } from 'next/navigation';
 import TruncateText from '@/components/newlanding/TruncateText';
 import { addLineBreaksEveryThreeSentences } from '@/lib/utils';
-import noImage from '@/assets/empty.png';
+import { motion } from 'framer-motion';
 export default function Featured({
   title,
   subTitle,
@@ -96,7 +96,7 @@ export default function Featured({
   ];
 
   return (
-    <div className="relative h-[80vh] mb-[20px]">
+    <section className="relative h-[82svh] min-h-[560px] overflow-hidden">
       {/* Modal */}
       <Tour
         open={isTutorial === 'true'}
@@ -110,18 +110,20 @@ export default function Featured({
       />
       <Modal show={showModal} onClose={handleCloseModal}>
         <div
-          className="w-full max-w-3xl h-[60vh] overflow-y-auto bg-black rounded-lg"
+          className="h-[70vh] w-full max-w-3xl overflow-y-auto rounded-xl bg-[#141414]"
           id="style-1">
-          <div className="w-full h-[400px] relative">
+          <div className="relative h-[42%] min-h-[220px] w-full">
             <Image
-              src={jumbotronImage ?? noImage}
-              alt="Widya"
-              layout="fill"
-              objectFit="cover"
+              src={jumbotronImage ?? widya}
+              alt=""
+              fill
+              sizes="(max-width: 768px) 90vw, 768px"
+              className="object-cover"
               ref={ref1}
             />
+            <div className="absolute inset-0 bg-gradient-to-t from-[#141414] via-transparent to-transparent" />
           </div>
-          <div className="mt-5">
+          <div className="px-5 pb-8 md:px-8">
             <div className="text-base space-y-4">
               <p
                 dangerouslySetInnerHTML={{
@@ -137,16 +139,25 @@ export default function Featured({
       <Image
         src={jumbotronImage ?? widya}
         alt="Background"
-        layout="fill"
-        objectFit="cover"
-        className="object-center"
+        fill
+        sizes="100vw"
+        className="scale-[1.04] object-cover object-center motion-safe:animate-[netflix-ken-burns_16s_ease-out_forwards]"
+        priority
       />
-      <div className="absolute inset-0 bg-black opacity-50"></div>
-      <div className="absolute top-[50%] translate-y-[-50%] text-white p-[20px] space-y-6 md:max-w-[60%] lg:max-w-[50%] md:left-[40px] mt-[50px]">
-        <h1 className="md:text-5xl text-[30px] font-bold" ref={ref2}>
+      <div className="absolute inset-0 bg-gradient-to-r from-black via-black/45 to-transparent" />
+      <div className="absolute inset-0 bg-gradient-to-t from-[#050505] via-transparent to-black/20" />
+      <motion.div
+        initial={{ opacity: 0, y: 24 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{ delay: 0.15, duration: 0.65 }}
+        className="absolute bottom-28 left-0 space-y-5 p-5 text-white md:bottom-36 md:left-8 md:max-w-[58%] md:p-8 lg:max-w-[48%]">
+        <p className="text-xs font-semibold uppercase tracking-[0.3em] text-[#e50914]">
+          A Memoify Original
+        </p>
+        <h1 className="text-4xl font-black leading-[0.95] tracking-tight drop-shadow-2xl md:text-6xl" ref={ref2}>
           {title ?? 'Happy Birthday!'}
         </h1>
-        <div className="md:text-lg text-[15px] max-w-[600px]" ref={ref3}>
+        <div className="max-w-[600px] text-sm leading-relaxed text-neutral-200 drop-shadow md:text-lg" ref={ref3}>
           {subTitle ? (
             <TruncateText showSeeMore={true} text={subTitle} maxLength={130} />
           ) : (
@@ -158,24 +169,23 @@ export default function Featured({
               maxLength={130}
             />
           )}
-          <br />
-          <br />
-          Click Play to see the details.
         </div>
-        <div className="flex space-x-4">
+        <div className="flex flex-wrap gap-3">
           <button
             ref={ref4}
-            className="bg-white text-gray-900 px-4 py-2 rounded flex items-center space-x-2"
+            className="flex items-center gap-2 rounded bg-white px-6 py-2.5 font-semibold text-gray-900 transition hover:bg-white/80 focus-visible:outline focus-visible:outline-2 focus-visible:outline-white"
             onClick={handleOpenModal}>
             <PlayArrow />
             <span>Play</span>
           </button>
-          <button className="bg-gray-500 text-white px-4 py-2 rounded flex items-center space-x-2">
+          <button
+            className="flex items-center gap-2 rounded bg-neutral-500/70 px-5 py-2.5 font-semibold text-white backdrop-blur transition hover:bg-neutral-500/50"
+            onClick={handleOpenModal}>
             <InfoOutlined />
-            <span>Info</span>
+            <span>More Info</span>
           </button>
         </div>
-      </div>
-    </div>
+      </motion.div>
+    </section>
   );
 }

@@ -1,10 +1,26 @@
 'use client';
 
-import Featured from '@/components/netflix/featured/featured';
-import List from '@/components/netflix/list/list';
-import Navbar from '@/components/netflix/navbar/navbar';
+import NetflixExperience from '@/components/netflix/netflix-experience';
 import { useRef } from 'react';
 import 'react-photo-view/dist/react-photo-view.css';
+
+import widyaOne from '@/assets/widya/after/1.jpg';
+import widyaTwo from '@/assets/widya/after/2.jpg';
+
+// Same sample photos the Featured/ListItem fallbacks already ship, resolved to
+// URLs so the lightbox and `next/image` both receive plain strings.
+const SAMPLE_JUMBOTRON = widyaTwo.src;
+const SAMPLE_IMAGES = [
+  widyaOne.src,
+  widyaTwo.src,
+  widyaOne.src,
+  widyaTwo.src,
+  widyaOne.src,
+  widyaTwo.src,
+  widyaOne.src,
+  widyaTwo.src,
+];
+
 const RootExamplePage = () => {
   const ref1 = useRef(null);
   const ref2 = useRef(null);
@@ -13,27 +29,12 @@ const RootExamplePage = () => {
   const ref5 = useRef(null);
 
   return (
-    <div className="bg-black overflow-x-hidden">
-      <Navbar />
-      <Featured ref1={ref1} ref2={ref2} ref3={ref3} ref4={ref4} ref5={ref5} />
-      <List
-        ref5={ref5}
-        title={'You Before Meet Me'}
-        tData={[null, null, null, null, null, null, null]}
-      />
-      <List
-        title={'You After Meet Me'}
-        tData={[null, null, null, null, null, null, null]}
-      />
-      <List
-        title={'Top Searches'}
-        tData={[null, null, null, null, null, null, null]}
-      />
-      <List
-        title={'Series & Shows'}
-        tData={[null, null, null, null, null, null, null]}
-      />
-    </div>
+    <NetflixExperience
+      refs={{ ref1, ref2, ref3, ref4, ref5 }}
+      title="Happy Birthday!"
+      jumbotronImage={SAMPLE_JUMBOTRON}
+      images={SAMPLE_IMAGES}
+    />
   );
 };
 

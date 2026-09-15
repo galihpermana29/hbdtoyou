@@ -52,20 +52,34 @@ export default function SimilarShows({ data }: { data?: string[] }) {
     : similarShows;
   return (
     <div className="mt-12">
-      <h2 className="text-xl font-bold mb-6">More Like This</h2>
-      <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-4">
-        {dx.map((show) => (
+      <div className="mb-5 flex items-end justify-between">
+        <div>
+          <p className="mb-1 text-xs font-bold uppercase tracking-[0.22em] text-[#00b9ff]">
+            Curated for you
+          </p>
+          <h2 className="text-2xl font-bold">More Like This</h2>
+        </div>
+        <span className="text-sm text-white/50">{dx.length} memories</span>
+      </div>
+      <div className="flex snap-x snap-mandatory gap-4 overflow-x-auto py-3 [scrollbar-width:none] [&::-webkit-scrollbar]:hidden">
+        {dx.map((show, index) => (
           <div
             key={show.id}
-            className="relative aspect-[2/3] rounded-lg overflow-hidden group">
+            className="group relative aspect-[2/3] w-[48vw] max-w-[230px] shrink-0 snap-start overflow-hidden rounded-lg bg-white/5 shadow-xl transition duration-300 hover:-translate-y-2 hover:shadow-[0_18px_45px_rgba(0,185,255,0.18)] sm:w-[32vw] md:w-[22vw] lg:w-[18vw]">
             <Image
               src={show.image}
               alt={show.title}
               fill
-              className="object-cover transition-transform group-hover:scale-105"
+              sizes="(max-width: 640px) 48vw, (max-width: 1024px) 22vw, 18vw"
+              className="object-cover transition-transform duration-500 group-hover:scale-105"
             />
-            <div className="absolute inset-0 bg-gradient-to-t from-black/80 to-transparent opacity-0 group-hover:opacity-100 transition-opacity flex items-end p-4">
-              <h3 className="text-sm font-bold">{show.title}</h3>
+            <div className="absolute inset-0 flex items-end bg-gradient-to-t from-[#040714] via-transparent to-transparent p-4">
+              <div>
+                <p className="text-[10px] font-bold uppercase tracking-[0.18em] text-[#00b9ff]">
+                  Memory {index + 1}
+                </p>
+                <h3 className="mt-1 text-sm font-bold">{show.title}</h3>
+              </div>
             </div>
           </div>
         ))}

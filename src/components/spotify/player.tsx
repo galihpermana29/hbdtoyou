@@ -14,7 +14,7 @@ export default function Player({
   ref4?: any;
 }) {
   return (
-    <div className="fixed bottom-0 left-0 right-0 bg-black border-t border-[#282828] px-2 md:px-4 py-2 md:py-3 z-[9999]">
+    <div className="fixed bottom-0 left-0 right-0 z-[9999] border-t border-white/10 bg-gradient-to-r from-[#0b1510] via-black to-[#120e13] px-2 py-2 shadow-[0_-12px_40px_rgba(0,0,0,0.35)] md:px-4 md:py-3">
       <div className="flex items-center justify-between gap-2" ref={ref4}>
         <PlayerTrackInfo imageUri={imageUri} />
         <PlayerControls modalContent={modalContent} />
