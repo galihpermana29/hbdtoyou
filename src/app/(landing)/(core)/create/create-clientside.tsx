@@ -29,6 +29,7 @@ import NewGraduation2Form from '@/components/forms/new/new-graduation2-form';
 import NewVinylForm from '@/components/forms/new/new-vinyl-form';
 import NewTarotForm from '@/components/forms/new/new-tarot-form';
 import NewArcadeClawForm from '@/components/forms/new/new-arcade-claw-form';
+import { visibleTemplates } from '@/lib/template-catalog';
 
 const StepsCustom = [
   {
@@ -69,7 +70,7 @@ const StepsCustom = [
   },
 ];
 
-const CreatePage = () => {
+const CreatePage = ({ initialTemplateId }: { initialTemplateId?: string }) => {
   const {
     loading,
     current,
@@ -77,7 +78,6 @@ const CreatePage = () => {
     modalState,
     setModalState,
     session,
-    profile,
     contextHolder,
     openNotification,
     handleCompleteCreation,
@@ -85,8 +85,6 @@ const CreatePage = () => {
     setSelectedTemplate,
     setCurrent,
   } = useCreateContent();
-  const isFreeAccount = profile?.quota < 1;
-
   const [templateFilter, setTemplateFilter] = useState('All');
 
   const [templates, setTemplates] = useState<IAllTemplateResponse[] | null>(
@@ -103,27 +101,27 @@ const CreatePage = () => {
     IAllTemplateResponse[] | null
   >(null);
 
-  // The `photobox-newspaper` template only exists on the backend as a hack so
-  // the /photobox-newspaper feature can persist its generated image through the
-  // standard `createContent` flow. It is NOT a real fill-in-a-form digital gift,
-  // so hide it from every /create template list.
-  const HIDDEN_TEMPLATE_SLUGS = ['photobox-newspaper'];
-  const excludeHidden = (list: IAllTemplateResponse[] | null) =>
-    list?.filter((tpl) => !HIDDEN_TEMPLATE_SLUGS.includes(tpl.slug)) ?? null;
-
   const handleGetTemplates = async () => {
     const data = await getOriginalTemplates();
     if (data.success) {
-      setTemplates(excludeHidden(data.data));
+      const original = visibleTemplates(data.data);
+      setTemplates(original);
       const dx = await getPopularTemplates();
       if (dx.success) {
-        setPopularTemplates(excludeHidden(dx.data));
+        const popular = visibleTemplates(dx.data);
+        setPopularTemplates(popular);
+        if (initialTemplateId) {
+          const requestedTemplate = [...original, ...popular].find(
+            (template) => template.id === initialTemplateId
+          );
+          if (requestedTemplate) handleTemplateClick(requestedTemplate);
+        }
       } else {
         message.error(dx.message);
       }
       const gx = await getGraduationTemplates();
       if (gx.success) {
-        setGraduationTemplates(excludeHidden(gx.data));
+        setGraduationTemplates(visibleTemplates(gx.data));
       } else {
         message.error(gx.message);
       }
@@ -145,6 +143,14 @@ const CreatePage = () => {
 
     if (template.name.includes('scrapbook')) {
       return router.push(`/scrapbook/create`);
+    }
+
+    if (template.type === 'wedding') {
+      return router.push('/wedding-invitation');
+    }
+
+    if (template.type === 'photobox') {
+      return router.push('/photobox');
     }
 
     // if (template.label === 'premium' && isFreeAccount) {
@@ -271,18 +277,21 @@ const CreatePage = () => {
                         }}
                         className="!bg-[#E34013] !text-white !rounded-[8px] !text-[16px] !font-[600] !h-[48px] !w-[170px]"
                         type="primary"
-                        size="large">
+                        size="large"
+                      >
                         Copy link
                       </Button>
                       <Link
                         target="_blank"
                         href={`/${modalState.data}`}
-                        className="cursor-pointer">
+                        className="cursor-pointer"
+                      >
                         {' '}
                         <Button
                           className="!bg-[#fff] !text-[#E34013] !border-[1px] !border-[#E34013] !rounded-[8px] !text-[16px] !font-[600] !h-[48px] !w-[170px]"
                           type="primary"
-                          size="large">
+                          size="large"
+                        >
                           Open in new tab
                         </Button>
                       </Link>

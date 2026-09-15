@@ -35,7 +35,11 @@ export const metadata: Metadata = {
   },
 };
 
-const CreatePageServer = () => {
+const CreatePageServer = ({
+  searchParams,
+}: {
+  searchParams?: { template?: string };
+}) => {
   if (process.env.IS_MAINTENANCE === 'true') {
     return (
       <div className="flex flex-col items-center justify-center min-h-[70vh] px-4 text-center">
@@ -51,7 +55,8 @@ const CreatePageServer = () => {
           <div className="mt-6">
             <a
               href="/"
-              className="inline-flex items-center px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700 transition-colors">
+              className="inline-flex items-center px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700 transition-colors"
+            >
               Return to Home
             </a>
           </div>
@@ -59,7 +64,7 @@ const CreatePageServer = () => {
       </div>
     );
   }
-  return <CreatePage />;
+  return <CreatePage initialTemplateId={searchParams?.template} />;
 };
 
 export default CreatePageServer;
