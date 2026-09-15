@@ -2,7 +2,11 @@
 
 import { IAllTemplateResponse } from '@/action/interfaces';
 import NavigationBar from '@/components/ui/navbar';
-import { templateThumbnail } from '@/lib/template-thumbnail';
+import {
+  isMattedThumbnail,
+  MATTED_THUMBNAIL_MAT,
+  templateThumbnail,
+} from '@/lib/template-thumbnail';
 import {
   getTemplateCategory,
   getTemplateCreateHref,
@@ -45,19 +49,28 @@ function TemplateArtwork({
 }) {
   const [imageFailed, setImageFailed] = useState(false);
   const thumbnail = templateThumbnail(template);
+  const matted =
+    isMattedThumbnail(template) && Boolean(thumbnail) && !imageFailed;
 
   return (
     <div
       className={clsx(
-        'relative mt-7 flex flex-1 items-center justify-center overflow-hidden rounded-[22px] bg-gradient-to-br from-[#f3ebe6] via-[#f8f6f2] to-[#e6e8ec]',
+        'relative mt-7 flex flex-1 items-center justify-center overflow-hidden rounded-[22px]',
+        !matted &&
+          'bg-gradient-to-br from-[#f3ebe6] via-[#f8f6f2] to-[#e6e8ec]',
         imageClasses[size]
       )}
+      style={matted ? { backgroundColor: MATTED_THUMBNAIL_MAT } : undefined}
     >
       {thumbnail && !imageFailed ? (
         <img
           src={thumbnail}
           alt={`${getTemplateDisplayName(template)} preview`}
-          className="absolute inset-0 h-full w-full object-cover transition duration-500 group-hover:scale-[1.02]"
+          className={clsx(
+            'absolute inset-0 h-full w-full transition duration-500 group-hover:scale-[1.02]',
+            // A matted shot carries its own padding, so it is fitted rather than cropped.
+            matted ? 'object-contain' : 'object-cover'
+          )}
           onError={() => setImageFailed(true)}
         />
       ) : (
