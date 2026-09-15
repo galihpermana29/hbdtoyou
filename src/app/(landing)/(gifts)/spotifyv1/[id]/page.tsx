@@ -23,23 +23,31 @@ export default async function HomePage({ params }: any) {
   // gift was created by a free-tier account (`user_type === 'free'`).
   const lockedContent =
     data.data.status === 'locked' || data.data.user_type === 'free';
+  const firstMoment = Array.isArray(parsedData?.momentOfYou)
+    ? parsedData.momentOfYou[0]
+    : parsedData?.momentOfYou;
+  const coverImage =
+    typeof firstMoment === 'object'
+      ? firstMoment?.imageUrl || firstMoment?.image
+      : firstMoment;
 
   const content = (
-    <div className="h-screen bg-black">
-      <div className="flex h-[calc(100%-96px)] gap-[20px]">
+    <div className="h-[100svh] overflow-hidden bg-black">
+      <div className="flex h-full gap-0 pb-[76px] md:pb-[88px]">
         <div className="hidden lg:block w-[320px]" />
         <Sidebar ourSongs={parsedData?.ourSongs} />
         <MusicPlayer />
-        <main className="flex-1 overflow-y-auto">
-          <Header imageUri={parsedData?.momentOfYou[0]} />
+        <main className="min-w-0 flex-1 overflow-y-auto">
+          <Header imageUri={coverImage} />
           <MainContent
             momentOfYou={parsedData?.momentOfYou}
             songsForYou={parsedData?.songsForYou}
+            title={data.data.title}
           />
         </main>
       </div>
       <Player
-        imageUri={parsedData?.momentOfYou[0]}
+        imageUri={coverImage}
         modalContent={parsedData?.modalContent}
       />
     </div>

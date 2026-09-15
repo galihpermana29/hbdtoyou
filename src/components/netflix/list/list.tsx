@@ -1,139 +1,77 @@
 'use client';
 
-import {
-  ArrowBackIosOutlined,
-  ArrowForwardIosOutlined,
-} from '@mui/icons-material';
-import { useEffect, useRef, useState } from 'react';
+import { ArrowBackIosOutlined, ArrowForwardIosOutlined } from '@mui/icons-material';
+import { motion } from 'framer-motion';
+import { useRef } from 'react';
 import ListItem from './listitem';
 import { PhotoProvider } from 'react-photo-view';
+
 interface ListProps {
   title: string;
-  tData: any;
+  tData?: any[];
   ref5?: any;
 }
 
-export default function List({ title, tData, ref5 }: ListProps) {
-  const [isMoved, setIsMoved] = useState(false);
-  const [slideNumber, setSlideNumber] = useState(0);
-  const [isTransitioning, setIsTransitioning] = useState(false);
+export default function List({ title, tData = [], ref5 }: ListProps) {
   const listRef = useRef<HTMLDivElement>(null);
-  const itemWidth = 225; // Width of each ListItem
-  const itemMargin = 1; // Margin between items
-  const itemFullWidth = itemWidth + itemMargin; // Total width including margin
-  const visibleItems = 5; // Number of items visible at once
-  const totalItems = tData.length;
+  const items = tData.length ? tData : Array(7).fill(null);
 
-  // Reset position when reaching the end or beginning
-  useEffect(() => {
-    if (isTransitioning) {
-      const timer = setTimeout(() => {
-        if (listRef.current) {
-          // If we're at the "clone" items, jump to the real items without animation
-          if (slideNumber >= totalItems) {
-            listRef.current.style.transition = 'none';
-            setSlideNumber(0);
-            const distance = -50; // Reset to beginning
-            listRef.current.style.transform = `translateX(${distance}px)`;
-
-            // Force a reflow to make the transition removal take effect
-            listRef.current.offsetHeight;
-
-            // Re-enable transitions for future slides
-            setTimeout(() => {
-              if (listRef.current) {
-                listRef.current.style.transition =
-                  'transform 500ms ease-in-out';
-              }
-            }, 10);
-          } else if (slideNumber < 0) {
-            listRef.current.style.transition = 'none';
-            setSlideNumber(totalItems - 1);
-            const jumpDistance = -((totalItems - 1) * itemFullWidth) - 50;
-            listRef.current.style.transform = `translateX(${jumpDistance}px)`;
-
-            // Force a reflow
-            listRef.current.offsetHeight;
-
-            // Re-enable transitions
-            setTimeout(() => {
-              if (listRef.current) {
-                listRef.current.style.transition =
-                  'transform 500ms ease-in-out';
-              }
-            }, 10);
-          }
-        }
-        setIsTransitioning(false);
-      }, 500); // Match this with the CSS transition duration
-
-      return () => clearTimeout(timer);
-    }
-  }, [isTransitioning, slideNumber, totalItems]);
-
-  const handleClick = (direction: 'left' | 'right') => {
-    if (isTransitioning || !listRef.current) return;
-
-    setIsMoved(true);
-    setIsTransitioning(true);
-
-    // Calculate base position (50px offset from left edge)
-    const basePosition = -50;
-
-    if (direction === 'left') {
-      setSlideNumber(slideNumber - 1);
-      const newPosition = basePosition - (slideNumber - 1) * itemFullWidth;
-      listRef.current.style.transform = `translateX(${newPosition}px)`;
-    } else {
-      setSlideNumber(slideNumber + 1);
-      const newPosition = basePosition - (slideNumber + 1) * itemFullWidth;
-      listRef.current.style.transform = `translateX(${newPosition}px)`;
-    }
-  };
-
-  // Create array with clones for infinite effect
-  const getItemsWithClones = () => {
-    if (!tData || tData.length === 0) return [];
-
-    // Add last items at the beginning and first items at the end
-    return [
-      ...tData.slice(-1), // Last item clone at beginning
-      ...tData,
-      ...tData.slice(0, 1), // First item clone at end
-    ];
+  const scroll = (direction: -1 | 1) => {
+    listRef.current?.scrollBy({
+      left: direction * Math.min(window.innerWidth * 0.8, 900),
+      behavior: 'smooth',
+    });
   };
 
   return (
-    <div className="w-full pt-[10px] bg-black" ref={ref5}>
-      <span className="text-white text-lg font-medium ml-12 mb-[20px] block">
+    <motion.section
+      initial={{ opacity: 0, y: 28 }}
+      whileInView={{ opacity: 1, y: 0 }}
+      viewport={{ once: true, amount: 0.2 }}
+      transition={{ duration: 0.5 }}
+      className="group/rail w-full py-3"
+      ref={ref5}>
+      <div className="mb-2 flex items-center justify-between px-4 md:px-12">
+        <h2 className="text-lg font-semibold tracking-tight text-white md:text-2xl">
         {title}
-      </span>
-      <div className="relative overflow-visible" style={{ padding: '20px 0' }}>
-        <ArrowBackIosOutlined
-          className="absolute top-0 bottom-0 left-0 z-[100] m-auto text-white cursor-pointer w-12 h-full bg-black bg-opacity-50"
-          onClick={() => handleClick('left')}
-        />
+        </h2>
+        <span className="text-xs font-medium uppercase tracking-[0.18em] text-neutral-500">
+          {items.length} memories
+        </span>
+      </div>
+      <div className="relative">
+        <button
+          type="button"
+          aria-label={`Scroll ${title} left`}
+          className="absolute inset-y-0 left-0 z-20 hidden w-11 items-center justify-center bg-black/60 text-white opacity-0 backdrop-blur-sm transition hover:bg-black/80 group-hover/rail:opacity-100 md:flex"
+          onClick={() => scroll(-1)}>
+          <ArrowBackIosOutlined />
+        </button>
         <div
-          className="flex mt-2 w-max transition-transform duration-500 ease-in-out"
-          style={{ 
-            transform: 'translateX(-50px)'
-          }} 
-          ref={listRef}>
+          ref={listRef}
+          className="flex snap-x snap-mandatory gap-2 overflow-x-auto px-4 py-5 [scrollbar-width:none] [&::-webkit-scrollbar]:hidden md:px-12">
           <PhotoProvider>
-            {getItemsWithClones().map((dx: any, idx: any) => (
-              <div key={`${idx}-${dx}`} className="mx-[3px]">
-                {' '}
-                {/* Increased spacing between items */}
+            {items.map((dx: any, idx: number) => (
+              <motion.div
+                key={`${idx}-${dx || 'fallback'}`}
+                initial={{ opacity: 0, y: 16 }}
+                whileInView={{ opacity: 1, y: 0 }}
+                viewport={{ once: true }}
+                transition={{ delay: Math.min(idx * 0.06, 0.35) }}
+                className="shrink-0 snap-start">
                 <ListItem index={idx} data={dx} />
-              </div>
+              </motion.div>
             ))}
           </PhotoProvider>
         </div>
-        <ArrowForwardIosOutlined
-          className="absolute top-0 bottom-0 right-0 z-[100] m-auto text-white cursor-pointer w-12 h-full bg-black bg-opacity-50"
-          onClick={() => handleClick('right')}
-        />
+        <button
+          type="button"
+          aria-label={`Scroll ${title} right`}
+          className="absolute inset-y-0 right-0 z-20 hidden w-11 items-center justify-center bg-black/60 text-white opacity-0 backdrop-blur-sm transition hover:bg-black/80 group-hover/rail:opacity-100 md:flex"
+          onClick={() => scroll(1)}>
+          <ArrowForwardIosOutlined />
+        </button>
       </div>
-    </div>
+    </motion.section>
   );
 }

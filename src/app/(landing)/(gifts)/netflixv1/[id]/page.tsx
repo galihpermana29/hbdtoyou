@@ -1,11 +1,9 @@
 import { getDetailContent } from '@/action/user-api';
-import Featured from '@/components/netflix/featured/featured';
-import List from '@/components/netflix/list/list';
-import Navbar from '@/components/netflix/navbar/navbar';
+import NetflixExperience from '@/components/netflix/netflix-experience';
 import MusicPlayer from '@/components/ui/music-player/music-player';
 import LockScreen from '@/components/ui/lock-screen';
-import { headers } from 'next/headers';
 import 'react-photo-view/dist/react-photo-view.css';
+
 const getDetailDataNew = async (id: string) => {
   const res = await getDetailContent(id);
   return res;
@@ -20,10 +18,6 @@ const RootUserPage = async ({ params }: any) => {
   }
 
   const parsedData = JSON.parse(data.data.detail_content_json_text);
-  const totalItems = parsedData?.images?.length || 0; // Get the total number of items
-  const midIndex = Math.ceil(totalItems / 2); // Calculate the middle index
-
-  if (!totalItems) return <div className="min-h-screen">No data</div>;
 
   // Gate the viewer when the backend flags content as `locked`, OR when the
   // gift was created by a free-tier account (`user_type === 'free'`).
@@ -31,35 +25,14 @@ const RootUserPage = async ({ params }: any) => {
     data.data.status === 'locked' || data.data.user_type === 'free';
 
   const content = (
-    <div className="bg-black overflow-x-hidden">
+    <NetflixExperience
+      jumbotronImage={parsedData?.jumbotronImage}
+      title={parsedData?.title}
+      subTitle={parsedData?.subTitle}
+      modalContent={parsedData?.modalContent}
+      images={parsedData?.images}>
       <MusicPlayer />
-      <Navbar jumbotronImage={parsedData?.jumbotronImage} />
-      <Featured
-        jumbotronImage={
-          parsedData?.jumbotronImage ||
-          parsedData?.images?.slice(0, midIndex)[0]
-        }
-        title={parsedData?.title}
-        subTitle={parsedData?.subTitle}
-        modalContent={parsedData?.modalContent}
-      />
-      <List
-        title={'You Before Meet Me'}
-        tData={parsedData?.images?.slice(0, midIndex)} // First half
-      />
-      <List
-        title={'You After Meet Me'}
-        tData={parsedData?.images?.slice(midIndex)} // Second half
-      />
-      <List
-        title={'Top Searches'}
-        tData={parsedData?.images?.slice(0, midIndex)} // First half
-      />
-      <List
-        title={'Series & Shows'}
-        tData={parsedData?.images?.slice(midIndex)} // Second half
-      />
-    </div>
+    </NetflixExperience>
   );
 
   if (lockedContent) {
