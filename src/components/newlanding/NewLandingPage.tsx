@@ -14,19 +14,13 @@ import {
 } from 'antd';
 import { useState } from 'react';
 
-import {
-  ArrowRight,
-  BookOpen,
-  Gamepad2,
-  Gift,
-  Heart,
-  Play,
-} from 'lucide-react';
+import { ArrowRight, Gift } from 'lucide-react';
 import Image from 'next/image';
 import Link from 'next/link';
 import NavigationBar from '../ui/navbar';
 import Reveal from '@/components/ui/reveal';
 import PricingSection from './PricingSection';
+import HeroGiftPreview from './HeroGiftPreview';
 
 import fictional1 from '@/assets/fictional-1.png';
 import fictional3 from '@/assets/fictional-3.png';
@@ -41,136 +35,7 @@ import c2 from '@/assets/c2.png';
 import c3 from '@/assets/c3.png';
 import c4 from '@/assets/c4.png';
 
-import giftHero from '@/assets/widya/after/2.jpg';
-import giftMoment from '@/assets/widya/after/1.jpg';
 const { Text } = Typography;
-
-const TEMPLATE_CHIPS = [
-  {
-    label: 'Netflix parody',
-    detail: 'A binge-worthy story',
-    href: '/netflixv1',
-    icon: Play,
-  },
-  {
-    label: 'AI Scrapbook',
-    detail: 'Photos become pages',
-    href: '/scrapbook',
-    icon: BookOpen,
-  },
-  {
-    label: 'Claw of Us',
-    detail: 'A playful arcade gift',
-    href: '/arcadeclawv1',
-    icon: Gamepad2,
-  },
-];
-
-function GiftProductSurface() {
-  return (
-    <div className="overflow-hidden rounded-[16px] border border-black/15 bg-[#111] shadow-[0_30px_80px_rgba(28,18,12,0.18)] md:rounded-[22px]">
-      <div className="flex h-10 items-center border-b border-white/10 bg-[#f4f4f2] px-3 md:h-12 md:px-5">
-        <div className="flex gap-1.5" aria-hidden="true">
-          <span className="h-2.5 w-2.5 rounded-full bg-[#ff665c]" />
-          <span className="h-2.5 w-2.5 rounded-full bg-[#ffbd44]" />
-          <span className="h-2.5 w-2.5 rounded-full bg-[#00ca4e]" />
-        </div>
-        <div className="mx-auto rounded-md border border-black/10 bg-white px-5 py-1 text-[9px] font-medium text-[#737373] md:px-16 md:text-[11px]">
-          memoify.live/for/someone-special
-        </div>
-        <div className="w-10" aria-hidden="true" />
-      </div>
-
-      <div className="bg-[#0b0b0b] text-white">
-        <div className="flex h-11 items-center justify-between px-4 md:h-14 md:px-8">
-          <span className="text-[13px] font-extrabold tracking-[0.18em] text-[#e50914] md:text-lg">
-            MEMOFLIX
-          </span>
-          <div className="hidden items-center gap-6 text-[10px] text-white/70 sm:flex md:text-xs">
-            <span>Home</span>
-            <span>Our story</span>
-            <span>Favorite moments</span>
-          </div>
-          <Heart
-            className="h-4 w-4 fill-white text-white md:h-5 md:w-5"
-            aria-hidden="true"
-          />
-        </div>
-
-        <div className="relative h-[260px] overflow-hidden sm:h-[360px] lg:h-[460px]">
-          <Image
-            src={giftHero}
-            alt="A completed Netflix-inspired birthday gift with a personal photo"
-            fill
-            priority
-            sizes="(max-width: 1280px) 100vw, 1200px"
-            className="object-cover object-center"
-          />
-          <div className="absolute inset-0 bg-gradient-to-r from-black via-black/55 to-transparent" />
-          <div className="absolute inset-x-0 bottom-0 h-28 bg-gradient-to-t from-[#0b0b0b] to-transparent" />
-          <div className="absolute left-5 top-1/2 max-w-[72%] -translate-y-1/2 md:left-10 lg:left-14">
-            <p className="mb-2 text-[9px] font-bold uppercase tracking-[0.24em] text-[#ff6a61] md:text-xs">
-              A Memoify original
-            </p>
-            <h2 className="text-2xl font-extrabold leading-tight sm:text-4xl lg:text-5xl">
-              Happy birthday, Love!
-            </h2>
-            <p className="mt-3 max-w-md text-[10px] leading-relaxed text-white/75 sm:text-sm md:mt-4 md:text-base">
-              Our favorite memories, collected into one little corner of the
-              internet—made just for you.
-            </p>
-            <div className="mt-4 flex items-center gap-2 md:mt-6">
-              <span className="flex items-center gap-1.5 rounded bg-white px-3 py-2 text-[10px] font-bold text-black md:px-4 md:text-xs">
-                <Play className="h-3 w-3 fill-black" aria-hidden="true" />
-                Open your letter
-              </span>
-              <span className="rounded bg-white/20 px-3 py-2 text-[10px] font-semibold backdrop-blur-sm md:px-4 md:text-xs">
-                12 memories
-              </span>
-            </div>
-          </div>
-        </div>
-
-        <div className="-mt-4 px-5 pb-6 md:-mt-8 md:px-10 md:pb-10">
-          <div className="mb-3 flex items-end justify-between">
-            <div>
-              <p className="text-[9px] font-semibold uppercase tracking-[0.2em] text-white/45 md:text-[11px]">
-                Season one
-              </p>
-              <p className="mt-1 text-xs font-bold md:text-base">
-                The moments that made us
-              </p>
-            </div>
-            <p className="text-[9px] text-white/45 md:text-[11px]">
-              Birthday edition
-            </p>
-          </div>
-          <div className="grid grid-cols-3 gap-2 md:gap-4">
-            {[giftMoment, giftHero, giftMoment].map((image, index) => (
-              <div
-                className="relative aspect-[16/9] overflow-hidden rounded-sm bg-white/5 md:rounded-md"
-                key={index}>
-                <Image
-                  src={image}
-                  alt=""
-                  fill
-                  sizes="(max-width: 768px) 30vw, 360px"
-                  className={`object-cover ${
-                    index === 0 ? 'object-top' : 'object-center'
-                  }`}
-                />
-                <div className="absolute inset-0 bg-gradient-to-t from-black/70 via-transparent to-transparent" />
-                <p className="absolute bottom-1.5 left-2 text-[8px] font-semibold sm:text-[10px] md:bottom-3 md:left-3 md:text-xs">
-                  {['The first hello', 'Best day ever', 'Always us'][index]}
-                </p>
-              </div>
-            ))}
-          </div>
-        </div>
-      </div>
-    </div>
-  );
-}
 
 export default function NewLandingPage() {
   const [email, setEmail] = useState('');
@@ -221,39 +86,11 @@ export default function NewLandingPage() {
             </div>
 
             <div className="mt-12 md:mt-16">
-              <GiftProductSurface />
+              <HeroGiftPreview />
               <p className="mt-4 text-center text-[12px] font-medium text-[#8b8179] md:text-[13px]">
-                A real gift experience, personalized with your story
+                Click around inside the gift — this is the real product, not a
+                mock
               </p>
-            </div>
-
-            <div className="mx-auto mt-8 grid max-w-4xl grid-cols-1 gap-3 sm:grid-cols-3">
-              {TEMPLATE_CHIPS.map((template) => {
-                const Icon = template.icon;
-                return (
-                  <Link
-                    key={template.label}
-                    href={template.href}
-                    prefetch={true}
-                    className="group flex items-center gap-3 rounded-xl border border-[#e5ded7] bg-white px-4 py-3.5 text-left transition hover:-translate-y-0.5 hover:border-[#c9b8aa] hover:shadow-md">
-                    <span className="flex h-9 w-9 shrink-0 items-center justify-center rounded-lg bg-[#fff0e9] text-[#E34013]">
-                      <Icon className="h-[18px] w-[18px]" aria-hidden="true" />
-                    </span>
-                    <span className="min-w-0">
-                      <span className="block text-[13px] font-bold text-[#292929]">
-                        {template.label}
-                      </span>
-                      <span className="block truncate text-[11px] text-[#817a74]">
-                        {template.detail}
-                      </span>
-                    </span>
-                    <ArrowRight
-                      className="ml-auto h-4 w-4 shrink-0 text-[#b4aaa1] transition-transform group-hover:translate-x-0.5 group-hover:text-[#E34013]"
-                      aria-hidden="true"
-                    />
-                  </Link>
-                );
-              })}
             </div>
           </div>
         </section>

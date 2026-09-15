@@ -55,7 +55,13 @@ const SOUND_VOLUMES: Record<SoundName, number> = {
 const wait = (duration: number) =>
   new Promise<void>((resolve) => window.setTimeout(resolve, duration));
 
-export default function ClawOfUs({ data }: { data: ArcadeClawData }) {
+export default function ClawOfUs({
+  data,
+  compact = false,
+}: {
+  data: ArcadeClawData;
+  compact?: boolean;
+}) {
   const memories = useMemo<PositionedMemory[]>(() => {
     const safeMemories = data.memories.slice(0, 6);
     const spacing =
@@ -198,7 +204,7 @@ export default function ClawOfUs({ data }: { data: ArcadeClawData }) {
   const clawIsClosed = phase !== 'idle' && phase !== 'dropping';
 
   return (
-    <main className={styles.page}>
+    <main className={`${styles.page} ${compact ? styles.compact : ''}`}>
       <div className={styles.ambientGlow} aria-hidden="true" />
       <section className={styles.game} aria-label="Claw of Us memory game">
         <header className={styles.header}>
