@@ -300,12 +300,13 @@ const NavigationBar = () => {
               Create a gift
             </Button>
           </Link>
-          <Menu
-            className="cursor-pointer lg:hidden"
-            onClick={() => {
-              setSidebar(!sidebar);
-            }}
-          />
+          <button
+            type="button"
+            aria-label={sidebar ? 'Close menu' : 'Open menu'}
+            className="lg:hidden inline-flex h-10 w-10 items-center justify-center"
+            onClick={() => setSidebar(!sidebar)}>
+            <Menu className="cursor-pointer" />
+          </button>
         </div>
       </div>
     </div>
