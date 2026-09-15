@@ -1,315 +1,403 @@
 'use client';
 
-import { Avatar, Button, Dropdown, MenuProps, message } from 'antd';
-import Link from 'next/link';
-import { useEffect, useState } from 'react';
-import { signIn } from 'next-auth/react';
-import { useMemoifySession } from '@/app/session-provider';
-import { IProfileResponse } from '@/action/interfaces';
-import { removeSession } from '@/store/get-set-session';
-import Image from 'next/image';
-import { useRouter } from 'next/navigation';
+import { Avatar, Dropdown, MenuProps } from 'antd';
 import {
   BadgeDollarSign,
+  Camera,
   ChevronDown,
+  Gift,
   House,
+  Lightbulb,
   LogOut,
   Menu,
   Settings2,
+  Sparkles,
+  X,
   Zap,
 } from 'lucide-react';
+import Image from 'next/image';
+import Link from 'next/link';
+import { signIn } from 'next-auth/react';
+import { useRouter } from 'next/navigation';
+import { useEffect, useState } from 'react';
+
+import {
+  useMemoifyProfile,
+  useMemoifySession,
+} from '@/app/session-provider';
 import { formatNumberWithComma } from '@/lib/utils';
-import { getUserProfile } from '@/action/user-api';
+import { removeSession } from '@/store/get-set-session';
 
 type NavItem = {
   key: string;
-  href?: string;
+  href: string;
   desktopLabel: string;
   mobileLabel: string;
-  comingSoon?: boolean;
 };
 
-// Flattened Features products sit on the primary bar as spoilers/entry
-// points. Compact desktop labels keep all five visible without a dropdown.
-const NAV_LINKS: NavItem[] = [
-  {
-    key: 'wedding',
-    desktopLabel: 'Wedding',
-    mobileLabel: 'Wedding Invitations',
-    comingSoon: true,
-  },
-  {
-    key: 'photobox',
-    href: '/photobox-newspaper',
-    desktopLabel: 'Photobox',
-    mobileLabel: 'Newspaper Photobox',
-  },
+const PRIMARY_LINKS: NavItem[] = [
   {
     key: 'website-gift',
     href: '/templates',
     desktopLabel: 'Website gift',
-    mobileLabel: 'Website Gift',
+    mobileLabel: 'Website gift',
   },
   {
     key: 'scrapbook',
     href: '/scrapbook',
     desktopLabel: 'Scrapbook',
-    mobileLabel: 'Digital Scrapbook',
+    mobileLabel: 'Digital scrapbook',
   },
   {
     key: 'journal',
     href: '/journal',
     desktopLabel: 'Journal',
-    mobileLabel: 'Personal Journal',
+    mobileLabel: 'Personal journal',
+  },
+];
+
+const FEATURE_LINKS: NavItem[] = [
+  {
+    key: 'photobox',
+    href: '/photobox-newspaper',
+    desktopLabel: 'Photobox',
+    mobileLabel: 'Newspaper photobox',
   },
   {
     key: 'inspiration',
     href: '/inspiration',
     desktopLabel: 'Inspiration',
-    mobileLabel: 'Inspiration',
-  },
-  {
-    key: 'pricing',
-    href: '/#pricing',
-    desktopLabel: 'Pricing',
-    mobileLabel: 'Pricing',
+    mobileLabel: 'Gift inspiration',
   },
 ];
 
 const NavigationBar = () => {
-  const [sidebar, setSidebar] = useState<boolean>(false);
+  const [sidebar, setSidebar] = useState(false);
   const session = useMemoifySession();
-  const [userProfile, setUserProfile] = useState<IProfileResponse | null>(null);
+  const userProfile = useMemoifyProfile();
   const router = useRouter();
-  const items: MenuProps['items'] = [
-    {
-      key: '1',
-      label: (
-        <div className="flex items-center gap-[8px]">
-          <Avatar size={40}>{userProfile?.fullname.charAt(0)}</Avatar>
-          <div>
-            <h1 className="text-[14px] font-[600] text-[#344054] capitalize">
-              {userProfile ? userProfile.fullname?.toLowerCase() : ''}
-            </h1>
-            <p className="text-[14px] font-[400] text-[#475467]">
-              {userProfile ? userProfile.email : ''}
-            </p>
-          </div>
-        </div>
-      ),
-    },
-    {
-      type: 'divider',
-    },
+  const isLoggedIn = Boolean(session.accessToken);
+  const displayName = userProfile?.fullname || session.fullName || 'Account';
+  const email = userProfile?.email || session.email || '';
+  const initial = displayName.trim().charAt(0).toUpperCase() || 'M';
+  const shortName = displayName.trim().split(/\s+/)[0];
 
-    {
-      key: '10',
-      label: (
-        <div className="flex items-center gap-2">
-          <h1 className="text-[14px] font-[500] text-[#344054] my-[5px]">
-            Dashboard
-          </h1>
-        </div>
-      ),
-      icon: <House size={18} className="text-[#667085]" />,
-      onClick: () => {
-        router.push('/dashboard');
-      },
-    },
-    {
-      type: 'divider',
-    },
-    {
-      key: '4',
-      label: <p onClick={() => router.push('/payment')}>Upgrade Plan</p>,
-      icon: <Zap size={18} className="text-[#667085]" />,
-    },
-    {
-      key: '6',
-      label: userProfile
-        ? `${formatNumberWithComma(userProfile?.quota || 0)} Credit`
-        : '0 Credit',
-      icon: <BadgeDollarSign size={18} className="text-[#667085]" />,
-      style: {
-        cursor: 'default',
-      },
-    },
-    {
-      key: '9',
-      label: userProfile
-        ? `${formatNumberWithComma(userProfile?.token_scrapbook || 0)} Token`
-        : '0 Token',
-      icon: <Settings2 size={18} className="text-[#667085]" />,
-      style: {
-        cursor: 'default',
-      },
-    },
-    {
-      type: 'divider',
-    },
-    {
-      key: '5',
-      label: (
-        <p
-          className="text-red-500 my-[5px]"
-          onClick={async () => {
-            await removeSession();
-            setTimeout(() => {
-              window.location.href = '/';
-            }, 1000);
-          }}>
-          Logout
-        </p>
-      ),
-      icon: <LogOut size={18} className="text-red-500" />,
-    },
-  ];
-
-  const handleGetProfile = async () => {
-    const res = await getUserProfile();
-    if (res.success) {
-      setUserProfile(res.data);
-    } else {
-      message.error(res.message);
+  const openPricing = () => {
+    setSidebar(false);
+    if (isLoggedIn) {
+      router.push('/payment');
+      return;
     }
+
+    signIn('google', { callbackUrl: '/payment' });
   };
 
   useEffect(() => {
-    if (session.accessToken) {
-      handleGetProfile();
-    }
-  }, [session]);
+    if (!sidebar) return;
+
+    const closeOnEscape = (event: KeyboardEvent) => {
+      if (event.key === 'Escape') setSidebar(false);
+    };
+
+    document.body.style.overflow = 'hidden';
+    window.addEventListener('keydown', closeOnEscape);
+
+    return () => {
+      document.body.style.overflow = '';
+      window.removeEventListener('keydown', closeOnEscape);
+    };
+  }, [sidebar]);
+
+  const accountItems: MenuProps['items'] = [
+    {
+      key: 'account-summary',
+      disabled: true,
+      label: (
+        <div className="min-w-0 py-1">
+          <p className="truncate text-[14px] font-semibold capitalize text-[#344054]">
+            {displayName.toLowerCase()}
+          </p>
+          <p className="max-w-[240px] truncate text-[13px] text-[#667085]">
+            {email}
+          </p>
+        </div>
+      ),
+    },
+    { type: 'divider' },
+    {
+      key: 'dashboard',
+      label: 'Dashboard',
+      icon: <House size={17} className="text-[#667085]" />,
+      onClick: () => router.push('/dashboard'),
+    },
+    {
+      key: 'upgrade',
+      label: 'Upgrade plan',
+      icon: <Zap size={17} className="text-[#667085]" />,
+      onClick: () => router.push('/payment'),
+    },
+    {
+      key: 'credit',
+      label: `${formatNumberWithComma(userProfile?.quota || 0)} Credit`,
+      icon: <BadgeDollarSign size={17} className="text-[#667085]" />,
+      disabled: true,
+    },
+    {
+      key: 'token',
+      label: `${formatNumberWithComma(
+        userProfile?.token_scrapbook || 0
+      )} Token`,
+      icon: <Settings2 size={17} className="text-[#667085]" />,
+      disabled: true,
+    },
+    { type: 'divider' },
+    {
+      key: 'logout',
+      danger: true,
+      label: 'Log out',
+      icon: <LogOut size={17} />,
+      onClick: async () => {
+        await removeSession();
+        window.location.href = '/';
+      },
+    },
+  ];
+
+  const featureItems: MenuProps['items'] = FEATURE_LINKS.map((link) => ({
+    key: link.key,
+    label: (
+      <Link
+        href={link.href}
+        className="flex min-w-[170px] items-center gap-3 py-1">
+        {link.key === 'photobox' ? (
+          <Camera size={17} className="text-[#E34013]" />
+        ) : (
+          <Lightbulb size={17} className="text-[#E34013]" />
+        )}
+        <span>{link.desktopLabel}</span>
+      </Link>
+    ),
+  }));
 
   return (
-    <div className="border-b-[1px] bg-white">
+    <header className="relative isolate z-[100] h-20 border-b border-[#EAECF0] bg-white shadow-[0_1px_2px_rgba(16,24,40,0.04)]">
       <div
         suppressHydrationWarning
-        className="flex item justify-between  py-[20px] max-w-6xl 2xl:max-w-7xl px-[20px] mx-auto  ">
-        <div className="flex items-center gap-[8px] lg:gap-[14px] xl:gap-[18px] text-[14px]">
-          <Link href={'/'} className="font-bold shrink-0">
+        className="flex h-full w-full items-center justify-between gap-4 px-4 sm:px-6 xl:px-8">
+        <div className="flex min-w-0 items-center gap-5 xl:gap-7">
+          <Link href="/" className="shrink-0" aria-label="Memoify home">
             <Image
-              src={
-                'https://res.cloudinary.com/dfwrmapr4/image/upload/v1789303095/placeholder/69b085d3b98c04a8b06e3e58ecfa136e95641109_ynodbj.png'
-              }
+              src="https://res.cloudinary.com/dfwrmapr4/image/upload/v1789303095/placeholder/69b085d3b98c04a8b06e3e58ecfa136e95641109_ynodbj.png"
               alt="Memoify"
               width={40}
               height={40}
               priority
             />
           </Link>
-          {NAV_LINKS.map((link) =>
-            link.comingSoon ? (
-              <span
-                key={link.key}
-                className="hidden lg:inline-flex items-center gap-1.5 whitespace-nowrap text-[14px] text-[#98A2B3] font-[500] cursor-default"
-                aria-disabled="true">
-                {link.desktopLabel}
-                <span className="rounded-full bg-[#FCEBE6] px-1.5 py-0.5 text-[10px] font-[600] leading-none text-[#E34013]">
-                  Soon
-                </span>
+
+          <nav
+            className="hidden items-center gap-4 text-[14px] xl:flex 2xl:gap-6"
+            aria-label="Primary navigation">
+            <span
+              className="inline-flex cursor-default items-center gap-1.5 whitespace-nowrap font-medium text-[#98A2B3]"
+              aria-disabled="true">
+              Wedding
+              <span className="rounded-full bg-[#FCEBE6] px-1.5 py-0.5 text-[10px] font-semibold leading-none text-[#E34013]">
+                Soon
               </span>
-            ) : (
+            </span>
+
+            {PRIMARY_LINKS.map((link) => (
               <Link
                 key={link.key}
-                href={link.href!}
-                className="hidden lg:block whitespace-nowrap text-[14px] text-[#7B7B7B] font-[500] hover:text-[#1B1B1B]">
+                href={link.href}
+                className="whitespace-nowrap font-medium text-[#667085] transition-colors hover:text-[#1B1B1B]">
                 {link.desktopLabel}
               </Link>
-            )
-          )}
+            ))}
 
-          {sidebar && (
-            <div className="fixed z-[9999] left-[55%] bottom-0 top-[83px] right-0 bg-white shadow-lg">
-              <div className="flex flex-col h-full justify-start gap-[20px] items-start py-[20px] px-[20px]">
-                {NAV_LINKS.map((link) =>
-                  link.comingSoon ? (
-                    <span
-                      key={link.key}
-                      className="inline-flex items-center gap-2 text-[16px] text-[#98A2B3] font-[500] cursor-default"
-                      aria-disabled="true">
-                      {link.mobileLabel}
-                      <span className="rounded-full bg-[#FCEBE6] px-2 py-0.5 text-[11px] font-[600] leading-none text-[#E34013]">
-                        Coming soon
-                      </span>
-                    </span>
-                  ) : (
-                    <Link
-                      key={link.key}
-                      href={link.href!}
-                      onClick={() => setSidebar(false)}
-                      className="md:block text-[16px] text-[#7B7B7B] font-[500]">
-                      {link.mobileLabel}
-                    </Link>
-                  )
-                )}
-                {!session.accessToken && (
-                  <div
-                    className="text-[16px] text-[#7B7B7B] font-[500] cursor-pointer"
-                    onClick={() => signIn('google')}>
-                    Sign in
-                  </div>
-                )}
-                {session.accessToken && userProfile?.type !== 'pending' && (
-                  <div
-                    className="text-[16px] text-[#7B7B7B] font-[500] cursor-pointer"
-                    onClick={() => router.push('/payment')}>
-                    Upgrade
-                  </div>
-                )}
-              </div>
-            </div>
-          )}
-        </div>
-        <div className="flex gap-4 items-center">
-          {session.accessToken && (
-            <Button
-              icon={<Zap size={18} className="text-[#E34013]" />}
-              type="primary"
-              size="large"
-              className="!border-[#E34013] !text-[#E34013] !bg-white !font-[500] !text-[14px] !rounded-[8px] !hidden !md:block"
-              onClick={() => router.push('/payment')}>
-              <p>Upgrade to Premium</p>
-            </Button>
-          )}
-          {session.accessToken && (
-            <Dropdown menu={{ items }}>
-              <div className="flex items-center gap-2 cursor-pointer">
-                <Avatar size={40}>{userProfile?.fullname.charAt(0)}</Avatar>
-                <div className='hidden md:block'>
-                  <p className="font-bold text-[14px]">{userProfile?.fullname}</p>
-                  <p className="text-[#7B7B7B] text-[12px]">{userProfile?.email}</p>
-                </div>
-                <ChevronDown size={16} className='hidden md:block' />
-              </div>
+            <Dropdown
+              menu={{ items: featureItems }}
+              trigger={['hover']}
+              placement="bottomLeft">
+              <button
+                type="button"
+                className="inline-flex items-center gap-1 whitespace-nowrap font-medium text-[#667085] transition-colors hover:text-[#1B1B1B]">
+                Features
+                <ChevronDown size={14} aria-hidden="true" />
+              </button>
             </Dropdown>
-          )}
 
-          {!session.accessToken && (
-            <Button
-              size="large"
-              className="!hidden lg:!inline-flex !border-[#D0D5DD] !text-[#344054] !bg-white !font-[600] !text-[14px] !rounded-[8px]"
+            <button
+              type="button"
+              onClick={openPricing}
+              className="whitespace-nowrap font-medium text-[#667085] transition-colors hover:text-[#1B1B1B]">
+              Pricing
+            </button>
+          </nav>
+        </div>
+
+        <div className="flex shrink-0 items-center gap-2 sm:gap-3">
+          {isLoggedIn ? (
+            <Dropdown
+              menu={{ items: accountItems }}
+              trigger={['click']}
+              placement="bottomRight">
+              <button
+                type="button"
+                aria-label={`Open account menu for ${displayName}`}
+                className="hidden h-10 items-center gap-2 rounded-full border border-[#EAECF0] bg-white pl-1 pr-2 transition-colors hover:bg-[#F9FAFB] sm:inline-flex">
+                <Avatar size={32}>{initial}</Avatar>
+                <span className="hidden max-w-20 truncate text-[13px] font-semibold text-[#344054] 2xl:inline">
+                  {shortName}
+                </span>
+                <ChevronDown
+                  size={14}
+                  className="text-[#667085]"
+                  aria-hidden="true"
+                />
+              </button>
+            </Dropdown>
+          ) : (
+            <button
+              type="button"
+              className="hidden h-10 items-center rounded-lg border border-[#D0D5DD] px-4 text-[14px] font-semibold text-[#344054] transition-colors hover:bg-[#F9FAFB] lg:inline-flex"
               onClick={() => signIn('google')}>
               Sign in
-            </Button>
+            </button>
           )}
-          <Link href={'/create'} prefetch={true}>
-            <Button
-              type="primary"
-              size="large"
-              className="!bg-[#E34013] !text-white !font-[600] !text-[14px] !rounded-[8px]">
-              Create a gift
-            </Button>
+
+          <Link
+            href="/create"
+            prefetch
+            className="hidden h-10 items-center gap-2 rounded-lg bg-[#E34013] px-4 text-[14px] font-semibold text-white shadow-sm transition-colors hover:bg-[#C9340E] md:inline-flex">
+            <Gift size={16} aria-hidden="true" />
+            Create a gift
           </Link>
+
           <button
             type="button"
             aria-label={sidebar ? 'Close menu' : 'Open menu'}
-            className="lg:hidden inline-flex h-10 w-10 items-center justify-center"
-            onClick={() => setSidebar(!sidebar)}>
-            <Menu className="cursor-pointer" />
+            aria-expanded={sidebar}
+            aria-controls="mobile-navigation"
+            className="inline-flex h-10 w-10 items-center justify-center rounded-lg border border-[#EAECF0] text-[#344054] transition-colors hover:bg-[#F9FAFB] xl:hidden"
+            onClick={() => setSidebar((isOpen) => !isOpen)}>
+            {sidebar ? <X size={20} /> : <Menu size={20} />}
           </button>
         </div>
       </div>
-    </div>
+
+      {sidebar ? (
+        <div className="fixed inset-x-0 bottom-0 top-20 z-[110] xl:hidden">
+          <button
+            type="button"
+            aria-label="Close navigation"
+            className="absolute inset-0 bg-[#101828]/35 backdrop-blur-[2px]"
+            onClick={() => setSidebar(false)}
+          />
+          <aside
+            id="mobile-navigation"
+            aria-label="Mobile navigation"
+            className="absolute bottom-0 right-0 top-0 flex w-full max-w-[380px] flex-col border-l border-[#EAECF0] bg-white shadow-2xl">
+            <div className="flex-1 overflow-y-auto px-5 py-6">
+              {isLoggedIn ? (
+                <Dropdown
+                  menu={{ items: accountItems }}
+                  trigger={['click']}
+                  placement="bottomLeft">
+                  <button
+                    type="button"
+                    className="mb-6 flex w-full items-center gap-3 rounded-xl border border-[#EAECF0] bg-[#F9FAFB] p-3 text-left">
+                    <Avatar size={38}>{initial}</Avatar>
+                    <div className="min-w-0 flex-1">
+                      <p className="truncate text-[14px] font-semibold text-[#344054]">
+                        {displayName}
+                      </p>
+                      <p className="text-[12px] text-[#667085]">
+                        View account
+                      </p>
+                    </div>
+                    <ChevronDown size={16} className="text-[#667085]" />
+                  </button>
+                </Dropdown>
+              ) : null}
+
+              <div className="mb-6">
+                <p className="mb-2 px-2 text-[11px] font-bold uppercase tracking-[0.12em] text-[#98A2B3]">
+                  Create
+                </p>
+                <div className="space-y-1">
+                  <div
+                    className="flex items-center justify-between rounded-lg px-3 py-2.5 text-[15px] font-medium text-[#98A2B3]"
+                    aria-disabled="true">
+                    <span>Wedding invitations</span>
+                    <span className="rounded-full bg-[#FCEBE6] px-2 py-1 text-[10px] font-semibold leading-none text-[#E34013]">
+                      Coming soon
+                    </span>
+                  </div>
+                  {PRIMARY_LINKS.map((link) => (
+                    <Link
+                      key={link.key}
+                      href={link.href}
+                      onClick={() => setSidebar(false)}
+                      className="block rounded-lg px-3 py-2.5 text-[15px] font-semibold text-[#344054] transition-colors hover:bg-[#F9FAFB]">
+                      {link.mobileLabel}
+                    </Link>
+                  ))}
+                </div>
+              </div>
+
+              <div className="mb-6">
+                <p className="mb-2 px-2 text-[11px] font-bold uppercase tracking-[0.12em] text-[#98A2B3]">
+                  Explore
+                </p>
+                <div className="space-y-1">
+                  {FEATURE_LINKS.map((link) => (
+                    <Link
+                      key={link.key}
+                      href={link.href}
+                      onClick={() => setSidebar(false)}
+                      className="flex items-center gap-3 rounded-lg px-3 py-2.5 text-[15px] font-semibold text-[#344054] transition-colors hover:bg-[#F9FAFB]">
+                      {link.key === 'photobox' ? (
+                        <Camera size={17} className="text-[#E34013]" />
+                      ) : (
+                        <Sparkles size={17} className="text-[#E34013]" />
+                      )}
+                      {link.mobileLabel}
+                    </Link>
+                  ))}
+                  <button
+                    type="button"
+                    onClick={openPricing}
+                    className="flex w-full items-center gap-3 rounded-lg px-3 py-2.5 text-left text-[15px] font-semibold text-[#344054] transition-colors hover:bg-[#F9FAFB]">
+                    <BadgeDollarSign size={17} className="text-[#E34013]" />
+                    Pricing
+                  </button>
+                </div>
+              </div>
+            </div>
+
+            <div className="border-t border-[#EAECF0] bg-white p-5">
+              <Link
+                href="/create"
+                onClick={() => setSidebar(false)}
+                className="flex h-11 w-full items-center justify-center gap-2 rounded-lg bg-[#E34013] px-4 text-[15px] font-semibold text-white shadow-sm transition-colors hover:bg-[#C9340E]">
+                <Gift size={17} />
+                Create a gift
+              </Link>
+              {!isLoggedIn ? (
+                <button
+                  type="button"
+                  className="mt-2 h-11 w-full rounded-lg text-[14px] font-semibold text-[#475467] transition-colors hover:bg-[#F9FAFB]"
+                  onClick={() => signIn('google')}>
+                  Sign in
+                </button>
+              ) : null}
+            </div>
+          </aside>
+        </div>
+      ) : null}
+    </header>
   );
 };
 

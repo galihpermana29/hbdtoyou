@@ -84,7 +84,7 @@ export default function HeroGiftPreview() {
         })}
       </div>
 
-      <div className="overflow-hidden rounded-[16px] border border-black/15 bg-[#111] shadow-[0_30px_80px_rgba(28,18,12,0.18)] md:rounded-[22px]">
+      <div className="relative isolate z-0 overflow-hidden rounded-[16px] border border-black/15 bg-[#111] shadow-[0_30px_80px_rgba(28,18,12,0.18)] md:rounded-[22px]">
         <div className="flex h-10 items-center border-b border-white/10 bg-[#f4f4f2] px-3 md:h-12 md:px-5">
           <div className="flex gap-1.5" aria-hidden="true">
             <span className="h-2.5 w-2.5 rounded-full bg-[#ff665c]" />
