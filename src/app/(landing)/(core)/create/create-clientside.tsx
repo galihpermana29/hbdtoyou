@@ -78,7 +78,6 @@ const CreatePage = ({ initialTemplateId }: { initialTemplateId?: string }) => {
     modalState,
     setModalState,
     session,
-    profile,
     contextHolder,
     openNotification,
     handleCompleteCreation,
@@ -86,8 +85,6 @@ const CreatePage = ({ initialTemplateId }: { initialTemplateId?: string }) => {
     setSelectedTemplate,
     setCurrent,
   } = useCreateContent();
-  const isFreeAccount = profile?.quota < 1;
-
   const [templateFilter, setTemplateFilter] = useState('All');
 
   const [templates, setTemplates] = useState<IAllTemplateResponse[] | null>(
