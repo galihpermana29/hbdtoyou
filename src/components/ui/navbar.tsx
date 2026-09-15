@@ -1,7 +1,6 @@
 'use client';
 
-import { Google } from '@mui/icons-material';
-import { Avatar, Button, Cascader, Dropdown, MenuProps, message } from 'antd';
+import { Avatar, Button, Dropdown, MenuProps, message } from 'antd';
 import Link from 'next/link';
 import { useEffect, useState } from 'react';
 import { signIn } from 'next-auth/react';
@@ -12,22 +11,23 @@ import Image from 'next/image';
 import { useRouter } from 'next/navigation';
 import {
   BadgeDollarSign,
-  Book,
-  BookA,
   ChevronDown,
-  Heart,
   House,
   LogOut,
   Menu,
-  Newspaper,
   Settings2,
   Zap,
 } from 'lucide-react';
-// Lazy load the jumbotron image
-import jumbotronImage from '@/assets/fitur-1-image.png';
-import './stlye.css';
 import { formatNumberWithComma } from '@/lib/utils';
 import { getUserProfile } from '@/action/user-api';
+
+// Pricing lives in a section on the landing page, so buyers can compare plans
+// without hitting the login-walled checkout URL first.
+const NAV_LINKS = [
+  { label: 'Templates', href: '/templates' },
+  { label: 'Inspiration', href: '/inspiration' },
+  { label: 'Pricing', href: '/#pricing' },
+];
 
 const NavigationBar = () => {
   const [sidebar, setSidebar] = useState<boolean>(false);
@@ -118,274 +118,6 @@ const NavigationBar = () => {
     },
   ];
 
-  const options = [
-    {
-      value: 'wedding',
-      disabled: true,
-      label: (
-        <div className="flex items-start gap-2 opacity-60 cursor-not-allowed">
-          <Heart size={18} className="text-[#E34013] mt-[10px]" />
-          <div>
-            <h1 className="text-[16px] font-[600] text-[#101828] text-ellipsis flex items-center gap-2">
-              Wedding Invitations
-              <span className="text-[10px] font-[600] text-[#E34013] bg-[#FDECE5] rounded-full px-[8px] py-[2px]">
-                Coming soon
-              </span>
-            </h1>
-            <p className="text-[14px] font-[400] text-[#7B7B7B] mt-[2px]">
-              Design beautiful digital wedding <br /> invitations as
-              unforgettable as your “I do!”
-            </p>
-          </div>
-        </div>
-      ),
-    },
-    {
-      value: 'photobox-newspaper',
-      label: (
-        <div
-          className="flex items-start gap-2"
-          onClick={() => router.push('/photobox-newspaper')}>
-          <Newspaper size={18} className="text-[#E34013] mt-[10px]" />
-          <div>
-            <h1 className="text-[16px] font-[600] text-[#101828] text-ellipsis flex items-center gap-2">
-              Newspaper Photobox
-              <span className="text-[10px] font-[600] text-[#E34013] bg-[#FDECE5] rounded-full px-[8px] py-[2px]">
-                New
-              </span>
-            </h1>
-            <p className="text-[14px] font-[400] text-[#7B7B7B] mt-[2px]">
-              Snap a live selfie straight into a <br /> vintage newspaper front
-              page.
-            </p>
-          </div>
-        </div>
-      ),
-    },
-    {
-      value: 'gift',
-      label: (
-        <div
-          className="flex items-start gap-2"
-          onClick={() => router.push('/templates')}>
-          <Book size={18} className="text-[#E34013] mt-[10px]" />
-          <div>
-            <h1 className="text-[16px] font-[600] text-[#101828] text-ellipsis">
-              Website Gift
-            </h1>
-            <p className="text-[14px] font-[400] text-[#7B7B7B] mt-[2px]">
-              Create custom websites inspired <br /> by your favorite platforms
-              like Netflix, Spotify
-            </p>
-          </div>
-        </div>
-      ),
-
-      children: [
-        {
-          value: '',
-          label: (
-            <div className="min-h-[400px]">
-              <Image
-                className="max-w-[240px]"
-                src={jumbotronImage}
-                alt="jumbotron"
-                width={240}
-                height={136}
-              />
-              <div className="mt-[20px]">
-                <h1 className="text-[16px] font-[600] text-[#101828] text-ellipsis">
-                  We`ve just released an update!
-                </h1>
-                <p className="text-[14px] font-[400] text-[#7B7B7B] mt-[2px]">
-                  Check out the our new template <br /> called “Formula 1 Sites”
-                </p>
-              </div>
-            </div>
-          ),
-        },
-      ],
-    },
-    {
-      value: 'scrapbook',
-      label: (
-        <div
-          className="flex items-start gap-2"
-          onClick={() => router.push('/scrapbook')}>
-          <BookA size={18} className="text-[#E34013] mt-[10px]" />
-          <div>
-            <h1 className="text-[16px] font-[600] text-[#101828] text-ellipsis">
-              Digital Scrapbook
-            </h1>
-            <p className="text-[14px] font-[400] text-[#7B7B7B] mt-[2px]">
-              Create your own digital scrapbook <br /> with your favorite photos
-              as a gift
-            </p>
-          </div>
-        </div>
-      ),
-    },
-
-    {
-      value: 'journal',
-      label: (
-        <div
-          className="flex items-start gap-2"
-          onClick={() => router.push('/journal')}>
-          <BookA size={18} className="text-[#E34013] mt-[10px]" />
-          <div>
-            <h1 className="text-[16px] font-[600] text-[#101828] text-ellipsis">
-              Personal Journal
-            </h1>
-            <p className="text-[14px] font-[400] text-[#7B7B7B] mt-[2px]">
-              Create your personal journal <br /> to capture your life`s moments
-            </p>
-          </div>
-        </div>
-      ),
-    },
-    // Photobox temporarily hidden — superseded by Newspaper Photobox above.
-    // {
-    //   value: 'photobox',
-    //   label: (
-    //     <div
-    //       className="flex items-start gap-2"
-    //       onClick={() => router.push('/photobox')}>
-    //       <Sparkles size={18} className="text-[#E34013] mt-[10px]" />
-    //       <div>
-    //         <h1 className="text-[16px] font-[600] text-[#101828] text-ellipsis">
-    //           Photobox
-    //         </h1>
-    //         <p className="text-[14px] font-[400] text-[#7B7B7B] mt-[2px]">
-    //           Make every picture a keepsake <br /> with Memoify`s Photobox!
-    //         </p>
-    //       </div>
-    //     </div>
-    //   ),
-    // },
-  ];
-
-  const options2 = [
-    {
-      value: 'wedding',
-      disabled: true,
-      label: (
-        <div className="flex items-start gap-2 opacity-60 cursor-not-allowed">
-          <Heart size={18} className="text-[#E34013] mt-[10px]" />
-          <div>
-            <h1 className="text-[14px] font-[600] text-[#101828] text-ellipsis flex items-center gap-2">
-              Wedding Invitations
-              <span className="text-[10px] font-[600] text-[#E34013] bg-[#FDECE5] rounded-full px-[6px] py-[1px]">
-                Coming soon
-              </span>
-            </h1>
-            <p className="text-[12px] font-[400] text-[#7B7B7B] mt-[2px]">
-              Design beautiful digital wedding <br /> invitations in minutes
-            </p>
-          </div>
-        </div>
-      ),
-    },
-    {
-      value: 'photobox-newspaper',
-      label: (
-        <div
-          className="flex items-start gap-2"
-          onClick={() => router.push('/photobox-newspaper')}>
-          <Newspaper size={18} className="text-[#E34013] mt-[10px]" />
-          <div>
-            <h1 className="text-[14px] font-[600] text-[#101828] text-ellipsis flex items-center gap-2">
-              Newspaper Photobox
-              <span className="text-[10px] font-[600] text-[#E34013] bg-[#FDECE5] rounded-full px-[6px] py-[1px]">
-                New
-              </span>
-            </h1>
-            <p className="text-[12px] font-[400] text-[#7B7B7B] mt-[2px]">
-              Snap a live selfie straight into a <br /> vintage newspaper front
-              page.
-            </p>
-          </div>
-        </div>
-      ),
-    },
-    {
-      value: 'gift',
-      label: (
-        <div
-          className="flex items-start gap-2"
-          onClick={() => router.push('/templates')}>
-          <Book size={18} className="text-[#E34013] mt-[10px]" />
-          <div>
-            <h1 className="text-[14px] font-[600] text-[#101828] text-ellipsis">
-              Website Gift
-            </h1>
-            <p className="text-[12px] font-[400] text-[#7B7B7B] mt-[2px]">
-              Create custom websites <br /> inspired by your favorite <br />{' '}
-              platforms like Netflix, Spotify
-            </p>
-          </div>
-        </div>
-      ),
-    },
-    {
-      value: 'scrapbook',
-      label: (
-        <div
-          className="flex items-start gap-2"
-          onClick={() => router.push('/scrapbook')}>
-          <BookA size={18} className="text-[#E34013] mt-[10px]" />
-          <div>
-            <h1 className="text-[14px] font-[600] text-[#101828] text-ellipsis">
-              Digital Scrapbook
-            </h1>
-            <p className="text-[12px] font-[400] text-[#7B7B7B] mt-[2px]">
-              Create your own digital scrapbook <br /> with your favorite photos
-              as a gift
-            </p>
-          </div>
-        </div>
-      ),
-    },
-
-    {
-      value: 'journal',
-      label: (
-        <div
-          className="flex items-start gap-2"
-          onClick={() => router.push('/journal')}>
-          <BookA size={18} className="text-[#E34013] mt-[10px]" />
-          <div>
-            <h1 className="text-[14px] font-[600] text-[#101828] text-ellipsis">
-              Personal Journal
-            </h1>
-            <p className="text-[12px] font-[400] text-[#7B7B7B] mt-[2px]">
-              Create your personal journal <br /> to capture your life`s moments
-            </p>
-          </div>
-        </div>
-      ),
-    },
-    // Photobox temporarily hidden — superseded by Newspaper Photobox above.
-    // {
-    //   value: 'photobox',
-    //   label: (
-    //     <div
-    //       className="flex items-start gap-2"
-    //       onClick={() => router.push('/photobox')}>
-    //       <Sparkles size={18} className="text-[#E34013] mt-[10px]" />
-    //       <div>
-    //         <h1 className="text-[14px] font-[600] text-[#101828] text-ellipsis">
-    //           Photobox
-    //         </h1>
-    //         <p className="text-[12px] font-[400] text-[#7B7B7B] mt-[2px]">
-    //           Make every picture a keepsake <br /> with Memoify`s Photobox!
-    //         </p>
-    //       </div>
-    //     </div>
-    //   ),
-    // },
-  ];
-
   const handleGetProfile = async () => {
     const res = await getUserProfile();
     if (res.success) {
@@ -418,88 +150,47 @@ const NavigationBar = () => {
               priority
             />
           </Link>
-          <Link
-            href={'/'}
-            className="hidden md:block text-[16px] text-[#7B7B7B] font-[500]">
-            Home
-          </Link>
-
-          <Link
-            href={'/inspiration'}
-            className="hidden md:block text-[16px] text-[#7B7B7B] font-[500]">
-            Inspiration
-          </Link>
-          <Link
-            href={'/payment?plan_id=291eba3b-f13f-47db-a793-bde0683b10ca'}
-            className={`hidden md:block text-[16px] text-[#7B7B7B] font-[500]`}>
-            Pricing
-          </Link>
-          <Cascader expandTrigger="hover" options={options}>
-            <a className="hidden md:block text-[16px] text-[#7B7B7B] font-[500] cursor-pointer">
-              Features
-            </a>
-          </Cascader>
-          {/* <Link
-            href={'/contact'}
-            className={`hidden md:block text-[16px] text-[#7B7B7B] font-[500]`}>
-            Contact
-          </Link> */}
-          <Link
-            href={'/templates'}
-            className={`hidden md:block text-[16px] text-[#7B7B7B] font-[500]`}>
-            Templates
-          </Link>
+          {NAV_LINKS.map((link) => (
+            <Link
+              key={link.label}
+              href={link.href}
+              className="hidden md:block text-[16px] text-[#7B7B7B] font-[500] hover:text-[#1B1B1B]">
+              {link.label}
+            </Link>
+          ))}
 
           {sidebar && (
             <div className="fixed z-[9999] left-[55%] bottom-0 top-[83px] right-0 bg-white shadow-lg">
               <div className="flex flex-col h-full justify-start gap-[20px] items-start py-[20px] px-[20px]">
-                {userProfile?.type !== 'pending' && (
+                {NAV_LINKS.map((link) => (
+                  <Link
+                    key={link.label}
+                    href={link.href}
+                    onClick={() => setSidebar(false)}
+                    className="md:block text-[16px] text-[#7B7B7B] font-[500]">
+                    {link.label}
+                  </Link>
+                ))}
+                <Link
+                  href={'/create'}
+                  onClick={() => setSidebar(false)}
+                  className="text-[16px] text-[#E34013] font-[600]">
+                  Create a gift
+                </Link>
+                {!session.accessToken && (
                   <div
-                    className="md:block text-[16px] text-[#7B7B7B] font-[500] cursor-pointer"
-                    onClick={() => {
-                      if (session?.accessToken) {
-                        router.push('/payment');
-                      } else {
-                        signIn('google');
-                      }
-                    }}>
+                    className="text-[16px] text-[#7B7B7B] font-[500] cursor-pointer"
+                    onClick={() => signIn('google')}>
+                    Sign in
+                  </div>
+                )}
+                {session.accessToken && userProfile?.type !== 'pending' && (
+                  <div
+                    className="text-[16px] text-[#7B7B7B] font-[500] cursor-pointer"
+                    onClick={() => router.push('/payment')}>
                     Upgrade
                   </div>
                 )}
-                <Link
-                  href={'/'}
-                  className="md:block text-[16px] text-[#7B7B7B] font-[500]">
-                  Home
-                </Link>
-
-                <Link
-                  href={'/inspiration'}
-                  className="md:block text-[16px] text-[#7B7B7B] font-[500]">
-                  Inspiration
-                </Link>
-                <Link
-                  href={'/payment?plan_id=291eba3b-f13f-47db-a793-bde0683b10ca'}
-                  className={`md:block text-[16px] text-[#7B7B7B] font-[500]`}>
-                  Pricing
-                </Link>
-                <Cascader
-                  placement="topRight"
-                  expandTrigger="hover"
-                  options={options2}>
-                  <a className="md:block text-[16px] text-[#7B7B7B] font-[500] cursor-pointer">
-                    Features
-                  </a>
-                </Cascader>
-                {/* <Link
-                  href={'/contact'}
-                  className={`md:block text-[16px] text-[#7B7B7B] font-[500]`}>
-                  Contact
-                </Link> */}
-                <Link
-                  href={'/templates'}
-                  className={`md:block text-[16px] text-[#7B7B7B] font-[500]`}>
-                  Templates
-                </Link>
               </div>
             </div>
           )}
@@ -530,15 +221,27 @@ const NavigationBar = () => {
 
           {!session.accessToken && (
             <Button
+              size="large"
+              className="!hidden md:!inline-flex !border-[#D0D5DD] !text-[#344054] !bg-white !font-[600] !text-[14px] !rounded-[8px]"
+              onClick={() => signIn('google')}>
+              Sign in
+            </Button>
+          )}
+          <Link href={'/create'} prefetch={true} className="hidden md:block">
+            <Button
               type="primary"
               size="large"
-              className="!bg-[#E34013] !text-white !rounded-[8px]"
+              className="!bg-[#E34013] !text-white !font-[600] !text-[14px] !rounded-[8px]">
+              Create a gift
+            </Button>
+          </Link>
+          {!session.accessToken && (
+            <Button
+              type="primary"
+              size="large"
+              className="!bg-[#E34013] !text-white !rounded-[8px] md:!hidden"
               onClick={() => signIn('google')}>
-              <div className=" items-center gap-2 hidden md:flex">
-                <p>Continue with</p>
-                <Google />
-              </div>
-              <p className="block md:hidden">Login</p>
+              Sign in
             </Button>
           )}
           <Menu

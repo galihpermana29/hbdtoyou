@@ -28,7 +28,9 @@ export default function PricingSection() {
   });
 
   return (
-    <div className="mx-auto max-w-6xl 2xl:max-w-7xl px-[20px] py-[90px]">
+    <div
+      id="pricing"
+      className="mx-auto max-w-6xl 2xl:max-w-7xl px-[20px] py-[90px] scroll-mt-[81px]">
       <h1 className="mb-[20px] text-center text-[#1B1B1B] font-[700] text-[30px] md:text-[36px]">
         Pricing plans
       </h1>
