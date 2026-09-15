@@ -81,17 +81,6 @@
   font-style: normal;
 }
 
-/* Two-slide hero carousel on the home page — make the dots visible on the
-   light/cream slide backgrounds and brand the active one. */
-.hero-carousel .slick-dots li button {
-  background: #1b1b1b !important;
-  opacity: 0.35;
-}
-.hero-carousel .slick-dots li.slick-active button {
-  background: #e34013 !important;
-  opacity: 1;
-}
-
 /* Aged-broadsheet type for the photobox-newspaper template. */
 .blackletter-font {
   font-family: 'UnifrakturMaguntia', 'Playfair Display', serif;
