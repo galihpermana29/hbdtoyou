@@ -3,20 +3,25 @@
 import {
   Button,
   Card,
-  Carousel,
   Col,
   Collapse,
   Form,
   Input,
   Row,
   Segmented,
-  Space,
   Statistic,
-  Typography
+  Typography,
 } from 'antd';
 import { useState } from 'react';
 
-import { ArrowRight } from 'lucide-react';
+import {
+  ArrowRight,
+  BookOpen,
+  Gamepad2,
+  Gift,
+  Heart,
+  Play,
+} from 'lucide-react';
 import Image from 'next/image';
 import Link from 'next/link';
 import NavigationBar from '../ui/navbar';
@@ -29,9 +34,6 @@ import fictional4 from '@/assets/fictional-4.png';
 import fictional5 from '@/assets/fictional-5.png';
 import fictional2 from '@/assets/fictional2.png';
 
-import mockup1 from '@/assets/mockup1.png';
-import mockup2 from '@/assets/mockup2.png';
-import mockup3 from '@/assets/mockup3.png';
 import { faqDataEnglish, faqDataIndonesian } from '@/lib/faqData';
 
 import c1 from '@/assets/c1.png';
@@ -39,34 +41,133 @@ import c2 from '@/assets/c2.png';
 import c3 from '@/assets/c3.png';
 import c4 from '@/assets/c4.png';
 
-import sampleBobo from '@/assets/sample-bobo.jpeg';
-import sampleBroadsheet from '@/assets/sample-broadsheet.jpeg';
-import sampleClassic from '@/assets/sample-classic.jpeg';
+import giftHero from '@/assets/widya/after/2.jpg';
+import giftMoment from '@/assets/widya/after/1.jpg';
 const { Text } = Typography;
 
-// Real exported sample front pages shown in the Newspaper Photobox marquee, so
-// visitors see the full range of templates (bright Bobo edition + sweet
-// broadsheet + viral political satire).
-const SAMPLE_EDITIONS = [
-  { src: sampleBobo, alt: 'Belajar Memaafkan — Bobo edition' },
-  { src: sampleBroadsheet, alt: 'Love of The Week — broadsheet edition' },
-  { src: sampleClassic, alt: 'Suara Rakyat — political edition' },
+const TEMPLATE_CHIPS = [
+  {
+    label: 'Netflix parody',
+    detail: 'A binge-worthy story',
+    href: '/netflixv1',
+    icon: Play,
+  },
+  {
+    label: 'AI Scrapbook',
+    detail: 'Photos become pages',
+    href: '/scrapbook',
+    icon: BookOpen,
+  },
+  {
+    label: 'Claw of Us',
+    detail: 'A playful arcade gift',
+    href: '/arcadeclawv1',
+    icon: Gamepad2,
+  },
 ];
 
-const CLIP_ROTATIONS = ['-rotate-2', 'rotate-1', '-rotate-1', 'rotate-2'];
-
-/** A real exported front page used as a marquee clipping. */
-function NewspaperClipping({ edition, index }: { edition: any; index: number }) {
+function GiftProductSurface() {
   return (
-    <div
-      className={`shrink-0 ${
-        CLIP_ROTATIONS[index % CLIP_ROTATIONS.length]
-      } transition-transform duration-300 hover:rotate-0 hover:scale-[1.03]`}>
-      <Image
-        src={edition.src}
-        alt={edition.alt}
-        className="h-[420px] w-auto border border-black/10 rounded-[6px] shadow-[0_14px_34px_rgba(0,0,0,0.18)]"
-      />
+    <div className="overflow-hidden rounded-[16px] border border-black/15 bg-[#111] shadow-[0_30px_80px_rgba(28,18,12,0.18)] md:rounded-[22px]">
+      <div className="flex h-10 items-center border-b border-white/10 bg-[#f4f4f2] px-3 md:h-12 md:px-5">
+        <div className="flex gap-1.5" aria-hidden="true">
+          <span className="h-2.5 w-2.5 rounded-full bg-[#ff665c]" />
+          <span className="h-2.5 w-2.5 rounded-full bg-[#ffbd44]" />
+          <span className="h-2.5 w-2.5 rounded-full bg-[#00ca4e]" />
+        </div>
+        <div className="mx-auto rounded-md border border-black/10 bg-white px-5 py-1 text-[9px] font-medium text-[#737373] md:px-16 md:text-[11px]">
+          memoify.live/for/someone-special
+        </div>
+        <div className="w-10" aria-hidden="true" />
+      </div>
+
+      <div className="bg-[#0b0b0b] text-white">
+        <div className="flex h-11 items-center justify-between px-4 md:h-14 md:px-8">
+          <span className="text-[13px] font-extrabold tracking-[0.18em] text-[#e50914] md:text-lg">
+            MEMOFLIX
+          </span>
+          <div className="hidden items-center gap-6 text-[10px] text-white/70 sm:flex md:text-xs">
+            <span>Home</span>
+            <span>Our story</span>
+            <span>Favorite moments</span>
+          </div>
+          <Heart
+            className="h-4 w-4 fill-white text-white md:h-5 md:w-5"
+            aria-hidden="true"
+          />
+        </div>
+
+        <div className="relative h-[260px] overflow-hidden sm:h-[360px] lg:h-[460px]">
+          <Image
+            src={giftHero}
+            alt="A completed Netflix-inspired birthday gift with a personal photo"
+            fill
+            priority
+            sizes="(max-width: 1280px) 100vw, 1200px"
+            className="object-cover object-center"
+          />
+          <div className="absolute inset-0 bg-gradient-to-r from-black via-black/55 to-transparent" />
+          <div className="absolute inset-x-0 bottom-0 h-28 bg-gradient-to-t from-[#0b0b0b] to-transparent" />
+          <div className="absolute left-5 top-1/2 max-w-[72%] -translate-y-1/2 md:left-10 lg:left-14">
+            <p className="mb-2 text-[9px] font-bold uppercase tracking-[0.24em] text-[#ff6a61] md:text-xs">
+              A Memoify original
+            </p>
+            <h2 className="text-2xl font-extrabold leading-tight sm:text-4xl lg:text-5xl">
+              Happy birthday, Love!
+            </h2>
+            <p className="mt-3 max-w-md text-[10px] leading-relaxed text-white/75 sm:text-sm md:mt-4 md:text-base">
+              Our favorite memories, collected into one little corner of the
+              internet—made just for you.
+            </p>
+            <div className="mt-4 flex items-center gap-2 md:mt-6">
+              <span className="flex items-center gap-1.5 rounded bg-white px-3 py-2 text-[10px] font-bold text-black md:px-4 md:text-xs">
+                <Play className="h-3 w-3 fill-black" aria-hidden="true" />
+                Open your letter
+              </span>
+              <span className="rounded bg-white/20 px-3 py-2 text-[10px] font-semibold backdrop-blur-sm md:px-4 md:text-xs">
+                12 memories
+              </span>
+            </div>
+          </div>
+        </div>
+
+        <div className="-mt-4 px-5 pb-6 md:-mt-8 md:px-10 md:pb-10">
+          <div className="mb-3 flex items-end justify-between">
+            <div>
+              <p className="text-[9px] font-semibold uppercase tracking-[0.2em] text-white/45 md:text-[11px]">
+                Season one
+              </p>
+              <p className="mt-1 text-xs font-bold md:text-base">
+                The moments that made us
+              </p>
+            </div>
+            <p className="text-[9px] text-white/45 md:text-[11px]">
+              Birthday edition
+            </p>
+          </div>
+          <div className="grid grid-cols-3 gap-2 md:gap-4">
+            {[giftMoment, giftHero, giftMoment].map((image, index) => (
+              <div
+                className="relative aspect-[16/9] overflow-hidden rounded-sm bg-white/5 md:rounded-md"
+                key={index}>
+                <Image
+                  src={image}
+                  alt=""
+                  fill
+                  sizes="(max-width: 768px) 30vw, 360px"
+                  className={`object-cover ${
+                    index === 0 ? 'object-top' : 'object-center'
+                  }`}
+                />
+                <div className="absolute inset-0 bg-gradient-to-t from-black/70 via-transparent to-transparent" />
+                <p className="absolute bottom-1.5 left-2 text-[8px] font-semibold sm:text-[10px] md:bottom-3 md:left-3 md:text-xs">
+                  {['The first hello', 'Best day ever', 'Always us'][index]}
+                </p>
+              </div>
+            ))}
+          </div>
+        </div>
+      </div>
     </div>
   );
 }
@@ -85,136 +186,77 @@ export default function NewLandingPage() {
 
       {/* Hero Section */}
       <div className="mt-[81px]">
-        <Carousel
-          autoplay
-          autoplaySpeed={6000}
-          pauseOnHover
-          dots
-          className="hero-carousel">
-        {/* Slide 1 - main hero (inner wrapper, same reason) */}
-        <div>
-        <div className=" py-[30px] md:py-0 flex flex-col-reverse md:flex-row justify-between items-center mx-auto max-w-6xl 2xl:max-w-7xl px-[20px] min-h-screen">
-          <div className="max-w-[600px] mr-[20px] flex-1 mt-[20px] md:mt-0">
-            <div className="flex gap-[5px] border-[1px] border-[#D0D5DD] rounded-[6px] max-w-max p-[5px] text-[14px] text-[#1B1B1B] font-[500]">
-              <p className="border-[1px] border-[#D0D5DD] rounded-[6px]">
-                • Scrapbook AI is now available!
-              </p>{' '}
-              <span>Try it now!</span>
-            </div>
-            <p className="mt-[16px] font-[700] text-[35px] md:text-[50px] lg:text-[60px] leading-[1.2]">
-              Unforgettable celebration with Memoify
-            </p>
-            <p className="text-[16px] md:text-[20px] font-[400] leading-[30px] text-[#7B7B7B] mt-[24px] mb-[48px]">
-              Create custom websites inspired by your favorite platforms like
-              Netflix, Spotify, or YouTube. Keep your memories alive with
-              Memoify.
-            </p>
-            <Space size="middle">
-              <Link
-                prefetch={true}
-                href={'/templates'}
-                className="cursor-pointer">
-                <Button
-                  className="!bg-[#E34013] !text-white !rounded-[8px] !text-[16px] !font-[600] !h-[60px] !w-[150px]"
-                  type="primary"
-                  size="large">
-                  Get Started
-                </Button>
-              </Link>
-              <Link prefetch={true} href={'/vinylv1'}>
-                <Button
-                  size="large"
-                  className="!border-[1px] !border-[#E34013] !text-[#E34013] !font-[600] !h-[60px] !w-[150px]">
-                  What is new?
-                </Button>
-              </Link>
-            </Space>
-          </div>
-          <div className="flex-1 min-w-[350px] flex justify-center items-center">
-            <Carousel
-              autoplay
-              autoplaySpeed={9000}
-              className="w-[350px] md:w-[500px] lg:w-[600px]">
-              <Image
-                src={mockup1}
-                alt="jumbotron"
-                width={770}
-                height={650}
-                priority
-              />
-              <Image
-                src={mockup2}
-                alt="jumbotron"
-                width={770}
-                height={650}
-                priority
-              />
-              <Image
-                src={mockup3}
-                alt="jumbotron"
-                width={770}
-                height={650}
-                priority
-              />
-            </Carousel>
-          </div>
-        </div>
-        </div>
-        {/* Slide 2 - Newspaper Photobox (inner wrapper so slick styling
-            doesn't override the layout) */}
-        <div>
-        <div
-          className="min-h-screen flex flex-col justify-center py-[60px]"
-          style={{ background: '#f4f1ea' }}>
-            {/* Centered intro */}
-            <div className="mx-auto max-w-3xl px-[20px] text-center">
-              <span className="inline-block text-[12px] font-[700] tracking-[0.2em] text-[#E34013] bg-[#FDECE5] rounded-full px-[14px] py-[6px]">
-                NEW · NEWSPAPER PHOTOBOX
-              </span>
-              <h2 className="text-[#1B1B1B] font-[800] text-[34px] md:text-[48px] leading-tight mt-[20px]">
-                You, hot off the press.
-              </h2>
-              <p className="text-[#5b5b5b] text-[16px] md:text-[19px] font-[400] mt-[16px]">
-                Strike a pose and watch your selfie drop straight onto a vintage
-                front page - sweet broadsheet or viral political satire. Capture,
-                pick your edition, download. No design skills, just main-character
-                energy.
+        <section className="overflow-hidden bg-[#fffdf9] px-5 pb-16 pt-16 md:pb-24 md:pt-20">
+          <div className="mx-auto max-w-7xl">
+            <div className="mx-auto max-w-4xl text-center">
+              <div className="mx-auto flex w-max items-center gap-2 rounded-full border border-[#e8ddd3] bg-white px-3.5 py-2 text-[12px] font-semibold text-[#6b4b3e] shadow-sm md:text-[13px]">
+                <Gift className="h-4 w-4 text-[#E34013]" aria-hidden="true" />
+                Digital gifts made personal
+              </div>
+              <h1 className="mx-auto mt-6 max-w-4xl text-[39px] font-extrabold leading-[1.08] tracking-[-0.04em] text-[#1B1B1B] sm:text-[54px] md:text-[68px]">
+                Turn your memories into a gift they can open
+              </h1>
+              <p className="mx-auto mt-6 max-w-2xl text-[16px] leading-7 text-[#6f6f6f] md:text-[19px] md:leading-8">
+                Pick a playful template, add your photos and notes, then share
+                one unforgettable link for their birthday or anniversary.
               </p>
-              <div className="flex items-center justify-center mt-[28px]">
-                <Link href={'/photobox-newspaper'} prefetch={true}>
-                  <Button
-                    iconPosition="end"
-                    size="large"
-                    icon={<ArrowRight size={18} />}
-                    className="!bg-[#E34013] !text-white !font-[600] !h-[46px]">
-                    Try Newspaper Photobox
-                  </Button>
+              <div className="mt-8 flex flex-col items-stretch justify-center gap-3 sm:flex-row sm:items-center">
+                <Link
+                  prefetch={true}
+                  href="/create"
+                  className="group inline-flex items-center justify-center gap-2 rounded-lg bg-[#E34013] px-6 py-3.5 text-[15px] font-bold text-white shadow-[0_8px_24px_rgba(227,64,19,0.22)] transition hover:bg-[#c9340e]">
+                  Create a gift
+                  <ArrowRight
+                    className="h-4 w-4 transition-transform group-hover:translate-x-0.5"
+                    aria-hidden="true"
+                  />
+                </Link>
+                <Link
+                  prefetch={true}
+                  href="/templates"
+                  className="inline-flex items-center justify-center rounded-lg border border-[#d7d2cd] bg-white px-6 py-3.5 text-[15px] font-bold text-[#292929] transition hover:border-[#aaa39c] hover:bg-[#faf8f5]">
+                  Browse templates
                 </Link>
               </div>
             </div>
 
-            {/* Full-bleed auto-scrolling marquee of sample front pages */}
-            <div className="wedding-marquee mt-[50px]">
-              <div className="wedding-marquee-track wedding-marquee-track--left gap-[24px] py-[10px] px-[12px]">
-                {/* One marquee "half" must be wider than the viewport or the
-                    -50% loop shows a blank gap. We repeat the few editions to
-                    fill a half, then render the half twice for a seamless loop. */}
-                {[
-                  ...SAMPLE_EDITIONS,
-                  ...SAMPLE_EDITIONS,
-                  ...SAMPLE_EDITIONS,
-                  ...SAMPLE_EDITIONS,
-                  ...SAMPLE_EDITIONS,
-                  ...SAMPLE_EDITIONS,
-                ].map((ed, i) => (
-                  <NewspaperClipping key={i} edition={ed} index={i} />
-                ))}
-              </div>
+            <div className="mt-12 md:mt-16">
+              <GiftProductSurface />
+              <p className="mt-4 text-center text-[12px] font-medium text-[#8b8179] md:text-[13px]">
+                A real gift experience, personalized with your story
+              </p>
+            </div>
+
+            <div className="mx-auto mt-8 grid max-w-4xl grid-cols-1 gap-3 sm:grid-cols-3">
+              {TEMPLATE_CHIPS.map((template) => {
+                const Icon = template.icon;
+                return (
+                  <Link
+                    key={template.label}
+                    href={template.href}
+                    prefetch={true}
+                    className="group flex items-center gap-3 rounded-xl border border-[#e5ded7] bg-white px-4 py-3.5 text-left transition hover:-translate-y-0.5 hover:border-[#c9b8aa] hover:shadow-md">
+                    <span className="flex h-9 w-9 shrink-0 items-center justify-center rounded-lg bg-[#fff0e9] text-[#E34013]">
+                      <Icon className="h-[18px] w-[18px]" aria-hidden="true" />
+                    </span>
+                    <span className="min-w-0">
+                      <span className="block text-[13px] font-bold text-[#292929]">
+                        {template.label}
+                      </span>
+                      <span className="block truncate text-[11px] text-[#817a74]">
+                        {template.detail}
+                      </span>
+                    </span>
+                    <ArrowRight
+                      className="ml-auto h-4 w-4 shrink-0 text-[#b4aaa1] transition-transform group-hover:translate-x-0.5 group-hover:text-[#E34013]"
+                      aria-hidden="true"
+                    />
+                  </Link>
+                );
+              })}
             </div>
           </div>
-        </div>
-
-        </Carousel>
+        </section>
 
         {/* Photobox Section */}
         <Reveal>

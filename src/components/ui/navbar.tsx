@@ -445,9 +445,9 @@ const NavigationBar = () => {
             Contact
           </Link> */}
           <Link
-            href={'/career'}
+            href={'/templates'}
             className={`hidden md:block text-[16px] text-[#7B7B7B] font-[500]`}>
-            Program
+            Templates
           </Link>
 
           {sidebar && (
@@ -496,9 +496,9 @@ const NavigationBar = () => {
                   Contact
                 </Link> */}
                 <Link
-                  href={'/career'}
+                  href={'/templates'}
                   className={`md:block text-[16px] text-[#7B7B7B] font-[500]`}>
-                  Program
+                  Templates
                 </Link>
               </div>
             </div>
