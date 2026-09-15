@@ -45,7 +45,7 @@ export default function NewLandingPage() {
 
   return (
     <div>
-      <div className="fixed top-0 left-0 w-full z-10 ">
+      <div className="fixed left-0 top-0 z-[1000] w-full isolate">
         <NavigationBar />
       </div>
 
