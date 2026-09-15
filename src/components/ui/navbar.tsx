@@ -171,12 +171,6 @@ const NavigationBar = () => {
                     {link.label}
                   </Link>
                 ))}
-                <Link
-                  href={'/create'}
-                  onClick={() => setSidebar(false)}
-                  className="text-[16px] text-[#E34013] font-[600]">
-                  Create a gift
-                </Link>
                 {!session.accessToken && (
                   <div
                     className="text-[16px] text-[#7B7B7B] font-[500] cursor-pointer"
@@ -227,7 +221,7 @@ const NavigationBar = () => {
               Sign in
             </Button>
           )}
-          <Link href={'/create'} prefetch={true} className="hidden md:block">
+          <Link href={'/create'} prefetch={true}>
             <Button
               type="primary"
               size="large"
@@ -235,15 +229,6 @@ const NavigationBar = () => {
               Create a gift
             </Button>
           </Link>
-          {!session.accessToken && (
-            <Button
-              type="primary"
-              size="large"
-              className="!bg-[#E34013] !text-white !rounded-[8px] md:!hidden"
-              onClick={() => signIn('google')}>
-              Sign in
-            </Button>
-          )}
           <Menu
             className="cursor-pointer md:hidden"
             onClick={() => {
