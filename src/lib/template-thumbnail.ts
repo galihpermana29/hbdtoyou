@@ -11,15 +11,16 @@
  * screenshots of each template's own preview route, checked into the repo so no
  * image host can break the card art again.
  *
- * To add one: screenshot the template's preview route at a 1280-wide viewport, save it
- * as `public/thumbnails/<route>.jpg` at 800px wide, and add the route below.
+ * To add one: follow `scripts/thumbnails/catalog-thumbnails.json` and
+ * `scripts/thumbnails/mat-thumbnail.mjs`, save the 1600x900 result as
+ * `public/thumbnails/<route>.jpg`, and add the route below.
  *
  * Once the backend rows are updated to point at
  * `https://memoify.live/thumbnails/<route>.jpg`, a route can be dropped from this list
  * and the backend value will be used again.
  *
- * `netflixv1` is the first route to use the matted product-shot treatment described
- * under MATTED_THUMBNAILS below; `scripts/thumbnails/mat-thumbnail.mjs` produces it.
+ * Every local thumbnail uses the matted product-shot treatment described under
+ * MATTED_THUMBNAILS below.
  */
 
 /** Routes with card art checked in at `public/thumbnails/<route>.jpg`. */
@@ -56,7 +57,7 @@ const LOCAL_THUMBNAILS = new Set([
  *
  * Cards with a fixed 16:9 art box (`/create`, `/dashboard`) need no special handling.
  */
-const MATTED_THUMBNAILS = new Set(['netflixv1']);
+const MATTED_THUMBNAILS = LOCAL_THUMBNAILS;
 
 /** The mat colour baked into every matted thumbnail. */
 export const MATTED_THUMBNAIL_MAT = '#f2f0ed';
