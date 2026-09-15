@@ -1,10 +1,8 @@
 'use client';
 
 import { AnimatePresence, motion } from 'framer-motion';
-import Image, { StaticImageData } from 'next/image';
+import Image from 'next/image';
 import { ReactNode, useState } from 'react';
-
-import noImage from '@/assets/empty.png';
 
 import Featured from './featured/featured';
 import List from './list/list';
@@ -41,8 +39,8 @@ export default function NetflixExperience({
   const [hasEntered, setHasEntered] = useState(false);
   const safeImages = Array.isArray(images) ? images.filter(Boolean) : [];
   const featuredImage = jumbotronImage || safeImages[0];
-  const profileImage: string | StaticImageData = featuredImage || noImage;
   const profileLabel = title?.trim() || 'Memories';
+  const profileInitial = profileLabel.charAt(0).toUpperCase();
   const midIndex = Math.ceil(safeImages.length / 2);
   const firstHalf = safeImages.slice(0, midIndex);
   const secondHalf = safeImages.slice(midIndex);
@@ -87,15 +85,23 @@ export default function NetflixExperience({
               aria-label={`Watch ${profileLabel}`}
               className="group flex max-w-[180px] flex-col items-center gap-4 focus:outline-none focus-visible:ring-2 focus-visible:ring-white">
               <span className="relative block aspect-square w-32 overflow-hidden rounded-md border-2 border-transparent bg-neutral-800 shadow-2xl transition-colors group-hover:border-white md:w-40">
-                <Image
-                  src={profileImage}
-                  alt=""
-                  fill
-                  sizes="160px"
-                  className="object-cover transition-transform duration-500 group-hover:scale-105"
-                  priority
-                />
-                <span className="absolute inset-0 bg-gradient-to-t from-black/25 to-transparent" />
+                {featuredImage ? (
+                  <>
+                    <Image
+                      src={featuredImage}
+                      alt=""
+                      fill
+                      sizes="160px"
+                      className="object-cover transition-transform duration-500 group-hover:scale-105"
+                      priority
+                    />
+                    <span className="absolute inset-0 bg-gradient-to-t from-black/25 to-transparent" />
+                  </>
+                ) : (
+                  <span className="flex h-full w-full items-center justify-center bg-gradient-to-br from-[#e50914] to-[#6d0309] text-5xl font-black text-white md:text-6xl">
+                    {profileInitial}
+                  </span>
+                )}
               </span>
               <span className="max-w-full truncate text-lg text-neutral-400 transition-colors group-hover:text-white md:text-xl">
                 {profileLabel}
