@@ -21,15 +21,59 @@ import {
 import { formatNumberWithComma } from '@/lib/utils';
 import { getUserProfile } from '@/action/user-api';
 
-// Each product gets its own top-level entry rather than hiding behind a
-// grouped "Features" menu. Pricing points at the landing page section so
-// buyers can compare plans without hitting the login-walled checkout URL.
-const NAV_LINKS = [
-  { label: 'Birthday gift', href: '/templates' },
-  { label: 'Scrapbook', href: '/scrapbook' },
-  { label: 'Journal', href: '/journal' },
-  { label: 'Inspiration', href: '/inspiration' },
-  { label: 'Pricing', href: '/#pricing' },
+type NavItem = {
+  key: string;
+  href?: string;
+  desktopLabel: string;
+  mobileLabel: string;
+  comingSoon?: boolean;
+};
+
+// Flattened Features products sit on the primary bar as spoilers/entry
+// points. Compact desktop labels keep all five visible without a dropdown.
+const NAV_LINKS: NavItem[] = [
+  {
+    key: 'wedding',
+    desktopLabel: 'Wedding',
+    mobileLabel: 'Wedding Invitations',
+    comingSoon: true,
+  },
+  {
+    key: 'photobox',
+    href: '/photobox-newspaper',
+    desktopLabel: 'Photobox',
+    mobileLabel: 'Newspaper Photobox',
+  },
+  {
+    key: 'website-gift',
+    href: '/templates',
+    desktopLabel: 'Website gift',
+    mobileLabel: 'Website Gift',
+  },
+  {
+    key: 'scrapbook',
+    href: '/scrapbook',
+    desktopLabel: 'Scrapbook',
+    mobileLabel: 'Digital Scrapbook',
+  },
+  {
+    key: 'journal',
+    href: '/journal',
+    desktopLabel: 'Journal',
+    mobileLabel: 'Personal Journal',
+  },
+  {
+    key: 'inspiration',
+    href: '/inspiration',
+    desktopLabel: 'Inspiration',
+    mobileLabel: 'Inspiration',
+  },
+  {
+    key: 'pricing',
+    href: '/#pricing',
+    desktopLabel: 'Pricing',
+    mobileLabel: 'Pricing',
+  },
 ];
 
 const NavigationBar = () => {
@@ -141,8 +185,8 @@ const NavigationBar = () => {
       <div
         suppressHydrationWarning
         className="flex item justify-between  py-[20px] max-w-6xl 2xl:max-w-7xl px-[20px] mx-auto  ">
-        <div className="flex items-center gap-[8px] md:gap-[24px] text-[14px]">
-          <Link href={'/'} className="font-bold">
+        <div className="flex items-center gap-[8px] lg:gap-[14px] xl:gap-[18px] text-[14px]">
+          <Link href={'/'} className="font-bold shrink-0">
             <Image
               src={
                 'https://res.cloudinary.com/dfwrmapr4/image/upload/v1789303095/placeholder/69b085d3b98c04a8b06e3e58ecfa136e95641109_ynodbj.png'
@@ -153,27 +197,51 @@ const NavigationBar = () => {
               priority
             />
           </Link>
-          {NAV_LINKS.map((link) => (
-            <Link
-              key={link.label}
-              href={link.href}
-              className="hidden lg:block whitespace-nowrap text-[16px] text-[#7B7B7B] font-[500] hover:text-[#1B1B1B]">
-              {link.label}
-            </Link>
-          ))}
+          {NAV_LINKS.map((link) =>
+            link.comingSoon ? (
+              <span
+                key={link.key}
+                className="hidden lg:inline-flex items-center gap-1.5 whitespace-nowrap text-[14px] text-[#98A2B3] font-[500] cursor-default"
+                aria-disabled="true">
+                {link.desktopLabel}
+                <span className="rounded-full bg-[#FCEBE6] px-1.5 py-0.5 text-[10px] font-[600] leading-none text-[#E34013]">
+                  Soon
+                </span>
+              </span>
+            ) : (
+              <Link
+                key={link.key}
+                href={link.href!}
+                className="hidden lg:block whitespace-nowrap text-[14px] text-[#7B7B7B] font-[500] hover:text-[#1B1B1B]">
+                {link.desktopLabel}
+              </Link>
+            )
+          )}
 
           {sidebar && (
             <div className="fixed z-[9999] left-[55%] bottom-0 top-[83px] right-0 bg-white shadow-lg">
               <div className="flex flex-col h-full justify-start gap-[20px] items-start py-[20px] px-[20px]">
-                {NAV_LINKS.map((link) => (
-                  <Link
-                    key={link.label}
-                    href={link.href}
-                    onClick={() => setSidebar(false)}
-                    className="md:block text-[16px] text-[#7B7B7B] font-[500]">
-                    {link.label}
-                  </Link>
-                ))}
+                {NAV_LINKS.map((link) =>
+                  link.comingSoon ? (
+                    <span
+                      key={link.key}
+                      className="inline-flex items-center gap-2 text-[16px] text-[#98A2B3] font-[500] cursor-default"
+                      aria-disabled="true">
+                      {link.mobileLabel}
+                      <span className="rounded-full bg-[#FCEBE6] px-2 py-0.5 text-[11px] font-[600] leading-none text-[#E34013]">
+                        Coming soon
+                      </span>
+                    </span>
+                  ) : (
+                    <Link
+                      key={link.key}
+                      href={link.href!}
+                      onClick={() => setSidebar(false)}
+                      className="md:block text-[16px] text-[#7B7B7B] font-[500]">
+                      {link.mobileLabel}
+                    </Link>
+                  )
+                )}
                 {!session.accessToken && (
                   <div
                     className="text-[16px] text-[#7B7B7B] font-[500] cursor-pointer"
