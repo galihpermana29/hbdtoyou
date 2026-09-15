@@ -3,25 +3,24 @@
 import {
   Button,
   Card,
-  Carousel,
   Col,
   Collapse,
   Form,
   Input,
   Row,
   Segmented,
-  Space,
   Statistic,
-  Typography
+  Typography,
 } from 'antd';
 import { useState } from 'react';
 
-import { ArrowRight } from 'lucide-react';
+import { ArrowRight, Gift } from 'lucide-react';
 import Image from 'next/image';
 import Link from 'next/link';
 import NavigationBar from '../ui/navbar';
 import Reveal from '@/components/ui/reveal';
 import PricingSection from './PricingSection';
+import HeroGiftPreview from './HeroGiftPreview';
 
 import fictional1 from '@/assets/fictional-1.png';
 import fictional3 from '@/assets/fictional-3.png';
@@ -29,9 +28,6 @@ import fictional4 from '@/assets/fictional-4.png';
 import fictional5 from '@/assets/fictional-5.png';
 import fictional2 from '@/assets/fictional2.png';
 
-import mockup1 from '@/assets/mockup1.png';
-import mockup2 from '@/assets/mockup2.png';
-import mockup3 from '@/assets/mockup3.png';
 import { faqDataEnglish, faqDataIndonesian } from '@/lib/faqData';
 
 import c1 from '@/assets/c1.png';
@@ -39,37 +35,7 @@ import c2 from '@/assets/c2.png';
 import c3 from '@/assets/c3.png';
 import c4 from '@/assets/c4.png';
 
-import sampleBobo from '@/assets/sample-bobo.jpeg';
-import sampleBroadsheet from '@/assets/sample-broadsheet.jpeg';
-import sampleClassic from '@/assets/sample-classic.jpeg';
 const { Text } = Typography;
-
-// Real exported sample front pages shown in the Newspaper Photobox marquee, so
-// visitors see the full range of templates (bright Bobo edition + sweet
-// broadsheet + viral political satire).
-const SAMPLE_EDITIONS = [
-  { src: sampleBobo, alt: 'Belajar Memaafkan — Bobo edition' },
-  { src: sampleBroadsheet, alt: 'Love of The Week — broadsheet edition' },
-  { src: sampleClassic, alt: 'Suara Rakyat — political edition' },
-];
-
-const CLIP_ROTATIONS = ['-rotate-2', 'rotate-1', '-rotate-1', 'rotate-2'];
-
-/** A real exported front page used as a marquee clipping. */
-function NewspaperClipping({ edition, index }: { edition: any; index: number }) {
-  return (
-    <div
-      className={`shrink-0 ${
-        CLIP_ROTATIONS[index % CLIP_ROTATIONS.length]
-      } transition-transform duration-300 hover:rotate-0 hover:scale-[1.03]`}>
-      <Image
-        src={edition.src}
-        alt={edition.alt}
-        className="h-[420px] w-auto border border-black/10 rounded-[6px] shadow-[0_14px_34px_rgba(0,0,0,0.18)]"
-      />
-    </div>
-  );
-}
 
 export default function NewLandingPage() {
   const [email, setEmail] = useState('');
@@ -85,136 +51,49 @@ export default function NewLandingPage() {
 
       {/* Hero Section */}
       <div className="mt-[81px]">
-        <Carousel
-          autoplay
-          autoplaySpeed={6000}
-          pauseOnHover
-          dots
-          className="hero-carousel">
-        {/* Slide 1 - main hero (inner wrapper, same reason) */}
-        <div>
-        <div className=" py-[30px] md:py-0 flex flex-col-reverse md:flex-row justify-between items-center mx-auto max-w-6xl 2xl:max-w-7xl px-[20px] min-h-screen">
-          <div className="max-w-[600px] mr-[20px] flex-1 mt-[20px] md:mt-0">
-            <div className="flex gap-[5px] border-[1px] border-[#D0D5DD] rounded-[6px] max-w-max p-[5px] text-[14px] text-[#1B1B1B] font-[500]">
-              <p className="border-[1px] border-[#D0D5DD] rounded-[6px]">
-                • Scrapbook AI is now available!
-              </p>{' '}
-              <span>Try it now!</span>
-            </div>
-            <p className="mt-[16px] font-[700] text-[35px] md:text-[50px] lg:text-[60px] leading-[1.2]">
-              Unforgettable celebration with Memoify
-            </p>
-            <p className="text-[16px] md:text-[20px] font-[400] leading-[30px] text-[#7B7B7B] mt-[24px] mb-[48px]">
-              Create custom websites inspired by your favorite platforms like
-              Netflix, Spotify, or YouTube. Keep your memories alive with
-              Memoify.
-            </p>
-            <Space size="middle">
-              <Link
-                prefetch={true}
-                href={'/templates'}
-                className="cursor-pointer">
-                <Button
-                  className="!bg-[#E34013] !text-white !rounded-[8px] !text-[16px] !font-[600] !h-[60px] !w-[150px]"
-                  type="primary"
-                  size="large">
-                  Get Started
-                </Button>
-              </Link>
-              <Link prefetch={true} href={'/vinylv1'}>
-                <Button
-                  size="large"
-                  className="!border-[1px] !border-[#E34013] !text-[#E34013] !font-[600] !h-[60px] !w-[150px]">
-                  What is new?
-                </Button>
-              </Link>
-            </Space>
-          </div>
-          <div className="flex-1 min-w-[350px] flex justify-center items-center">
-            <Carousel
-              autoplay
-              autoplaySpeed={9000}
-              className="w-[350px] md:w-[500px] lg:w-[600px]">
-              <Image
-                src={mockup1}
-                alt="jumbotron"
-                width={770}
-                height={650}
-                priority
-              />
-              <Image
-                src={mockup2}
-                alt="jumbotron"
-                width={770}
-                height={650}
-                priority
-              />
-              <Image
-                src={mockup3}
-                alt="jumbotron"
-                width={770}
-                height={650}
-                priority
-              />
-            </Carousel>
-          </div>
-        </div>
-        </div>
-        {/* Slide 2 - Newspaper Photobox (inner wrapper so slick styling
-            doesn't override the layout) */}
-        <div>
-        <div
-          className="min-h-screen flex flex-col justify-center py-[60px]"
-          style={{ background: '#f4f1ea' }}>
-            {/* Centered intro */}
-            <div className="mx-auto max-w-3xl px-[20px] text-center">
-              <span className="inline-block text-[12px] font-[700] tracking-[0.2em] text-[#E34013] bg-[#FDECE5] rounded-full px-[14px] py-[6px]">
-                NEW · NEWSPAPER PHOTOBOX
-              </span>
-              <h2 className="text-[#1B1B1B] font-[800] text-[34px] md:text-[48px] leading-tight mt-[20px]">
-                You, hot off the press.
-              </h2>
-              <p className="text-[#5b5b5b] text-[16px] md:text-[19px] font-[400] mt-[16px]">
-                Strike a pose and watch your selfie drop straight onto a vintage
-                front page - sweet broadsheet or viral political satire. Capture,
-                pick your edition, download. No design skills, just main-character
-                energy.
+        <section className="overflow-hidden bg-[#fffdf9] px-5 pb-16 pt-16 md:pb-24 md:pt-20">
+          <div className="mx-auto max-w-7xl">
+            <div className="mx-auto max-w-4xl text-center">
+              <div className="mx-auto flex w-max items-center gap-2 rounded-full border border-[#e8ddd3] bg-white px-3.5 py-2 text-[12px] font-semibold text-[#6b4b3e] shadow-sm md:text-[13px]">
+                <Gift className="h-4 w-4 text-[#E34013]" aria-hidden="true" />
+                Digital gifts made personal
+              </div>
+              <h1 className="mx-auto mt-6 max-w-4xl text-[39px] font-extrabold leading-[1.08] tracking-[-0.04em] text-[#1B1B1B] sm:text-[54px] md:text-[68px]">
+                Turn your memories into a gift they can open
+              </h1>
+              <p className="mx-auto mt-6 max-w-2xl text-[16px] leading-7 text-[#6f6f6f] md:text-[19px] md:leading-8">
+                Pick a playful template, add your photos and notes, then share
+                one unforgettable link for their birthday or anniversary.
               </p>
-              <div className="flex items-center justify-center mt-[28px]">
-                <Link href={'/photobox-newspaper'} prefetch={true}>
-                  <Button
-                    iconPosition="end"
-                    size="large"
-                    icon={<ArrowRight size={18} />}
-                    className="!bg-[#E34013] !text-white !font-[600] !h-[46px]">
-                    Try Newspaper Photobox
-                  </Button>
+              <div className="mt-8 flex flex-col items-stretch justify-center gap-3 sm:flex-row sm:items-center">
+                <Link
+                  prefetch={true}
+                  href="/create"
+                  className="group inline-flex items-center justify-center gap-2 rounded-lg bg-[#E34013] px-6 py-3.5 text-[15px] font-bold text-white shadow-[0_8px_24px_rgba(227,64,19,0.22)] transition hover:bg-[#c9340e]">
+                  Create a gift
+                  <ArrowRight
+                    className="h-4 w-4 transition-transform group-hover:translate-x-0.5"
+                    aria-hidden="true"
+                  />
+                </Link>
+                <Link
+                  prefetch={true}
+                  href="/templates"
+                  className="inline-flex items-center justify-center rounded-lg border border-[#d7d2cd] bg-white px-6 py-3.5 text-[15px] font-bold text-[#292929] transition hover:border-[#aaa39c] hover:bg-[#faf8f5]">
+                  Browse templates
                 </Link>
               </div>
             </div>
 
-            {/* Full-bleed auto-scrolling marquee of sample front pages */}
-            <div className="wedding-marquee mt-[50px]">
-              <div className="wedding-marquee-track wedding-marquee-track--left gap-[24px] py-[10px] px-[12px]">
-                {/* One marquee "half" must be wider than the viewport or the
-                    -50% loop shows a blank gap. We repeat the few editions to
-                    fill a half, then render the half twice for a seamless loop. */}
-                {[
-                  ...SAMPLE_EDITIONS,
-                  ...SAMPLE_EDITIONS,
-                  ...SAMPLE_EDITIONS,
-                  ...SAMPLE_EDITIONS,
-                  ...SAMPLE_EDITIONS,
-                  ...SAMPLE_EDITIONS,
-                ].map((ed, i) => (
-                  <NewspaperClipping key={i} edition={ed} index={i} />
-                ))}
-              </div>
+            <div className="mt-12 md:mt-16">
+              <HeroGiftPreview />
+              <p className="mt-4 text-center text-[12px] font-medium text-[#8b8179] md:text-[13px]">
+                Click around inside the gift — this is the real product, not a
+                mock
+              </p>
             </div>
           </div>
-        </div>
-
-        </Carousel>
+        </section>
 
         {/* Photobox Section */}
         <Reveal>
