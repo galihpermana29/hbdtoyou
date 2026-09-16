@@ -13,28 +13,6 @@ import { usePathname } from 'next/navigation';
 import React, { createContext, useContext, useEffect, useState } from 'react';
 import { Provider } from 'react-redux';
 
-// #region agent log
-const dbg = (
-  hypothesisId: string,
-  location: string,
-  message: string,
-  data: Record<string, unknown> = {}
-) => {
-  fetch('/api/debug-log', {
-    method: 'POST',
-    headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify({
-      hypothesisId,
-      location,
-      message,
-      data,
-      timestamp: Date.now(),
-      runId: 'pre-fix',
-    }),
-  }).catch(() => {});
-};
-// #endregion
-
 // Define the context type
 interface SessionContextType {
   parsedSession: SessionData;
@@ -260,13 +238,6 @@ const SessionProvider = ({
       }
       setCurrentAdContent(selectRandomContent());
       setAdsModalVisible(true);
-      // #region agent log
-      dbg('D', 'session-provider.tsx:ads-open', 'Ads modal opened', {
-        pathname,
-        ctaLink: (isPremium ? premiumAds : promotionalContent)[0]?.ctaLink,
-        isPremium,
-      });
-      // #endregion
     }, 1000 * 60 * 1);
 
     return () => {
@@ -313,12 +284,6 @@ const SessionProvider = ({
           <div
             className="cursor-pointer"
             onClick={() => {
-              // #region agent log
-              dbg('D', 'session-provider.tsx:ads-click', 'Ads image CTA clicked → navigate', {
-                ctaLink: currentAdContent?.ctaLink || '/',
-                pathname,
-              });
-              // #endregion
               window.location.href = currentAdContent?.ctaLink || '/';
               setAdsModalVisible(false);
             }}>
