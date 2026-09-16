@@ -206,6 +206,16 @@ export default function BoardOfUs({ data }: { data: BoardOfUsData }) {
     reveal && reveal.type !== 'memory'
       ? SPECIAL_COPY[reveal.type]
       : null;
+  const specialBody =
+    reveal?.type === 'chance'
+      ? reveal.text
+      : reveal?.type === 'hug'
+        ? SPECIAL_COPY.hug.body
+        : reveal?.type === 'wish'
+          ? SPECIAL_COPY.wish.body
+          : reveal?.type === 'timeout'
+            ? SPECIAL_COPY.timeout.body
+            : '';
 
   return (
     <main
@@ -351,13 +361,7 @@ export default function BoardOfUs({ data }: { data: BoardOfUsData }) {
               {specialReveal.icon}
             </span>
             <h2>{specialReveal.title}</h2>
-            <p>
-              {reveal!.type === 'chance'
-                ? (reveal as Extract<Reveal, { type: 'chance' }>).text
-                : 'body' in specialReveal
-                  ? specialReveal.body
-                  : ''}
-            </p>
+            <p>{specialBody}</p>
             <button type="button" onClick={() => setReveal(null)} autoFocus>
               Back to the board <span aria-hidden="true">→</span>
             </button>
