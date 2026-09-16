@@ -3,9 +3,31 @@
 import { Mail, Phone, MapPin, Instagram } from 'lucide-react';
 import Link from 'next/link';
 
+// #region agent log
+const dbg = (
+  hypothesisId: string,
+  location: string,
+  message: string,
+  data: Record<string, unknown> = {}
+) => {
+  fetch('/api/debug-log', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({
+      hypothesisId,
+      location,
+      message,
+      data,
+      timestamp: Date.now(),
+      runId: 'pre-fix',
+    }),
+  }).catch(() => {});
+};
+// #endregion
+
 export function Footer() {
   return (
-    <footer className="bg-black text-white">
+    <footer className="bg-black text-white" data-debug-footer="1">
       <div className="max-w-7xl mx-auto px-4 py-12 grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8">
         {/* Logo Section */}
         <div className="space-y-4">
@@ -26,7 +48,7 @@ export function Footer() {
               <a
                 href="mailto:contact@company.com"
                 className="hover:text-gray-300">
-                memoify.live@gmail.com
+                [REDACTED]
               </a>
             </div>
             <div className="flex items-center space-x-3">
@@ -58,7 +80,28 @@ export function Footer() {
             </li>
 
             <li>
-              <Link href="/career" className="hover:text-gray-300">
+              <Link
+                href="/career"
+                className="hover:text-gray-300"
+                onClick={(e) => {
+                  // #region agent log
+                  const t = e.currentTarget.getBoundingClientRect();
+                  dbg('B/C', 'footer.tsx:career-click', 'Footer /career link clicked', {
+                    clientX: e.clientX,
+                    clientY: e.clientY,
+                    scrollY: window.scrollY,
+                    innerH: window.innerHeight,
+                    linkRect: {
+                      top: t.top,
+                      left: t.left,
+                      bottom: t.bottom,
+                      right: t.right,
+                    },
+                    pathname: window.location.pathname,
+                  });
+                  // #endregion
+                }}
+              >
                 Program
               </Link>
             </li>

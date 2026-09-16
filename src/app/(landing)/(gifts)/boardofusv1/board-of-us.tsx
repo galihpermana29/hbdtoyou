@@ -4,6 +4,28 @@ import Image from 'next/image';
 import { CSSProperties, useEffect, useRef, useState } from 'react';
 import styles from './board-of-us.module.css';
 
+// #region agent log
+const dbg = (
+  hypothesisId: string,
+  location: string,
+  message: string,
+  data: Record<string, unknown> = {}
+) => {
+  fetch('/api/debug-log', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({
+      hypothesisId,
+      location,
+      message,
+      data,
+      timestamp: Date.now(),
+      runId: 'pre-fix',
+    }),
+  }).catch(() => {});
+};
+// #endregion
+
 export interface BoardOfUsMemory {
   imageUrl: string;
   label: string;
@@ -116,6 +138,95 @@ export default function BoardOfUs({ data }: { data: BoardOfUsData }) {
       mountedRef.current = false;
     };
   }, []);
+
+  // #region agent log
+  useEffect(() => {
+    if (!reveal && !showFinish) return;
+
+    const describeEl = (el: Element | null) => {
+      if (!el || !(el instanceof HTMLElement)) return null;
+      const a = el.closest('a');
+      return {
+        tag: el.tagName,
+        id: el.id || null,
+        className: String(el.className || '').slice(0, 160),
+        text: (el.innerText || '').slice(0, 80),
+        href: a?.getAttribute('href') || null,
+        role: el.getAttribute('role'),
+        antModal: !!el.closest('.ant-modal-wrap, .ant-modal-root, .ant-modal'),
+      };
+    };
+
+    const onPointerDown = (event: PointerEvent) => {
+      const target = event.target as Element | null;
+      const atPoint = document.elementFromPoint(event.clientX, event.clientY);
+      const overlay = document.querySelector(`.${styles.overlay}`);
+      const modalBtn = overlay?.querySelector('button');
+      const careerLink = document.querySelector('a[href="/career"]');
+      const adsWrap = document.querySelector('.ant-modal-wrap');
+      dbg('A/B/C/E', 'board-of-us.tsx:pointerdown', 'pointer while reveal/finish open', {
+        clientX: event.clientX,
+        clientY: event.clientY,
+        pageX: event.pageX,
+        pageY: event.pageY,
+        scrollY: window.scrollY,
+        innerH: window.innerHeight,
+        innerW: window.innerWidth,
+        revealType: reveal?.type ?? null,
+        showFinish,
+        target: describeEl(target),
+        atPoint: describeEl(atPoint),
+        targetIsModalBtn: !!(target && modalBtn && modalBtn.contains(target)),
+        atPointIsModalBtn: !!(atPoint && modalBtn && modalBtn.contains(atPoint)),
+        targetIsCareer: !!(target && (target as Element).closest?.('a[href="/career"]')),
+        atPointIsCareer: !!(atPoint && (atPoint as Element).closest?.('a[href="/career"]')),
+        overlayRect: overlay?.getBoundingClientRect?.()
+          ? ((r) => ({ top: r.top, left: r.left, bottom: r.bottom, right: r.right, w: r.width, h: r.height }))(
+              overlay.getBoundingClientRect()
+            )
+          : null,
+        modalBtnRect: modalBtn?.getBoundingClientRect?.()
+          ? ((r) => ({ top: r.top, left: r.left, bottom: r.bottom, right: r.right, w: r.width, h: r.height }))(
+              modalBtn.getBoundingClientRect()
+            )
+          : null,
+        careerRect: careerLink?.getBoundingClientRect?.()
+          ? ((r) => ({ top: r.top, left: r.left, bottom: r.bottom, right: r.right, w: r.width, h: r.height }))(
+              careerLink.getBoundingClientRect()
+            )
+          : null,
+        adsVisible: !!(adsWrap && getComputedStyle(adsWrap).display !== 'none'),
+        adsZ: adsWrap ? getComputedStyle(adsWrap).zIndex : null,
+        overlayZ: overlay ? getComputedStyle(overlay).zIndex : null,
+        pointerEventsOverlay: overlay ? getComputedStyle(overlay).pointerEvents : null,
+      });
+    };
+
+    const onClickCapture = (event: MouseEvent) => {
+      const target = event.target as Element | null;
+      dbg('A/B/C', 'board-of-us.tsx:click-capture', 'click capture while reveal open', {
+        clientX: event.clientX,
+        clientY: event.clientY,
+        target: describeEl(target),
+        defaultPrevented: event.defaultPrevented,
+      });
+    };
+
+    document.addEventListener('pointerdown', onPointerDown, true);
+    document.addEventListener('click', onClickCapture, true);
+    dbg('D', 'board-of-us.tsx:reveal-open', 'reveal/finish overlay mounted', {
+      revealType: reveal?.type ?? null,
+      showFinish,
+      pathname: window.location.pathname,
+      scrollY: window.scrollY,
+    });
+
+    return () => {
+      document.removeEventListener('pointerdown', onPointerDown, true);
+      document.removeEventListener('click', onClickCapture, true);
+    };
+  }, [reveal, showFinish]);
+  // #endregion
 
   const revealLanding = (squareIndex: number, roll: number) => {
     const square = BOARD_SQUARES[squareIndex];
@@ -346,7 +457,19 @@ export default function BoardOfUs({ data }: { data: BoardOfUsData }) {
             </div>
             <h2>{reveal.memory.label}</h2>
             <p>{reveal.memory.caption}</p>
-            <button type="button" onClick={() => setReveal(null)} autoFocus>
+            <button
+              type="button"
+              onClick={() => {
+                // #region agent log
+                dbg('A', 'board-of-us.tsx:keep-moving', 'Keep moving onClick fired', {
+                  revealType: reveal?.type,
+                  pathname: window.location.pathname,
+                });
+                // #endregion
+                setReveal(null);
+              }}
+              autoFocus
+            >
               Keep moving <span aria-hidden="true">→</span>
             </button>
           </article>
@@ -362,7 +485,19 @@ export default function BoardOfUs({ data }: { data: BoardOfUsData }) {
             </span>
             <h2>{specialReveal.title}</h2>
             <p>{specialBody}</p>
-            <button type="button" onClick={() => setReveal(null)} autoFocus>
+            <button
+              type="button"
+              onClick={() => {
+                // #region agent log
+                dbg('A', 'board-of-us.tsx:back-to-board', 'Back to the board onClick fired', {
+                  revealType: reveal?.type,
+                  pathname: window.location.pathname,
+                });
+                // #endregion
+                setReveal(null);
+              }}
+              autoFocus
+            >
               Back to the board <span aria-hidden="true">→</span>
             </button>
           </article>
