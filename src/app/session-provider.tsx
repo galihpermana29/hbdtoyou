@@ -334,7 +334,8 @@ const SessionProvider = ({
         {/* {parsedSession.accessToken ? userProfile ? children : <></> : children} */}
       </Provider>
       {!['/spotify', '/magazinev1', 'journal'].includes(pathname) &&
-        !isClawGift && <Footer />}
+        !isClawGift &&
+        !isBoardOfUsGift && <Footer />}
     </SessionContext.Provider>
   );
 };
