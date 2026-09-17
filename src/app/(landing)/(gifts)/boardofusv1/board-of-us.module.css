@@ -398,12 +398,13 @@
   width: min(100%, 360px);
   margin: 0 auto;
   display: grid;
-  grid-template-columns: 1fr 1.05fr;
+  grid-template-columns: minmax(0, 1fr) minmax(0, 1.05fr);
   gap: 10px;
 }
 
 .tokenLabel,
 .dieButton {
+  min-width: 0;
   min-height: 67px;
   border: 2.5px solid var(--ink);
   border-radius: 18px;
