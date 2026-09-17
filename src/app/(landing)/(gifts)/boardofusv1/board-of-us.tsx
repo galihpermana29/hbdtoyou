@@ -1,27 +1,12 @@
 'use client';
 
 import Image from 'next/image';
-import { CSSProperties, useEffect, useRef, useState } from 'react';
+import { CSSProperties, useEffect, useMemo, useRef, useState } from 'react';
+import type {
+  BoardOfUsData,
+  BoardOfUsMemory,
+} from './board-of-us-data';
 import styles from './board-of-us.module.css';
-
-export interface BoardOfUsMemory {
-  imageUrl: string;
-  label: string;
-  caption: string;
-  alt: string;
-}
-
-export interface BoardOfUsData {
-  title: string;
-  recipientName: string;
-  token: {
-    nickname: string;
-    color: string;
-  };
-  memories: BoardOfUsMemory[];
-  chanceTexts: string[];
-  finishMessage: string;
-}
 
 type Square =
   | { type: 'go' | 'chance' | 'hug' | 'wish' | 'timeout' | 'finish' }
@@ -34,7 +19,7 @@ type Reveal =
 
 const DIE_FACES = ['⚀', '⚁', '⚂', '⚃', '⚄', '⚅'];
 const FINISH_INDEX = 15;
-const BOARD_SQUARES: Square[] = [
+const BASE_BOARD_SQUARES: Square[] = [
   { type: 'go' },
   { type: 'memory', memoryIndex: 0 },
   { type: 'chance' },
@@ -52,6 +37,26 @@ const BOARD_SQUARES: Square[] = [
   { type: 'memory', memoryIndex: 7 },
   { type: 'finish' },
 ];
+const EXTRA_MEMORY_POSITIONS = [10, 6, 12, 8];
+const SOUND_FILES = {
+  roll: '/boardofusv1/audio/dice-roll.wav',
+  tap: '/boardofusv1/audio/board-tap.wav',
+  bgm: '/boardofusv1/audio/our-little-lap.wav',
+} as const;
+const SOUND_VOLUMES = { roll: 0.28, tap: 0.18, bgm: 0.09 };
+const MUTE_STORAGE_KEY = 'memoify-boardofus-muted';
+
+function buildBoardSquares(memoryCount: number): Square[] {
+  const squares = BASE_BOARD_SQUARES.map((square) => ({ ...square }));
+
+  EXTRA_MEMORY_POSITIONS.slice(0, Math.max(0, memoryCount - 8)).forEach(
+    (position, index) => {
+      squares[position] = { type: 'memory', memoryIndex: index + 8 };
+    }
+  );
+
+  return squares;
+}
 
 const BOARD_POSITIONS = [
   [5, 1],
@@ -102,23 +107,88 @@ const wait = (duration: number) =>
   new Promise<void>((resolve) => window.setTimeout(resolve, duration));
 
 export default function BoardOfUs({ data }: { data: BoardOfUsData }) {
+  const boardSquares = useMemo(
+    () => buildBoardSquares(data.memories.length),
+    [data.memories.length]
+  );
   const [currentSquare, setCurrentSquare] = useState(0);
+  const [visitedSquares, setVisitedSquares] = useState<number[]>([0]);
+  const [loveTokens, setLoveTokens] = useState(0);
   const [die, setDie] = useState(1);
   const [isRolling, setIsRolling] = useState(false);
   const [reveal, setReveal] = useState<Reveal | null>(null);
   const [showFinish, setShowFinish] = useState(false);
+  const [isMuted, setIsMuted] = useState(false);
   const [status, setStatus] = useState('Tap the die to begin our little lap.');
   const mountedRef = useRef(true);
+  const audioRef = useRef<
+    Partial<Record<keyof typeof SOUND_FILES, HTMLAudioElement>>
+  >({});
 
   useEffect(() => {
+    const audioElements = audioRef.current;
     mountedRef.current = true;
+    setIsMuted(window.localStorage.getItem(MUTE_STORAGE_KEY) === 'true');
+
     return () => {
       mountedRef.current = false;
+      Object.values(audioElements).forEach((audio) => audio?.pause());
     };
   }, []);
 
+  const getAudio = (name: keyof typeof SOUND_FILES) => {
+    let audio = audioRef.current[name];
+    if (!audio) {
+      audio = new Audio(SOUND_FILES[name]);
+      audio.preload = 'auto';
+      audio.volume = SOUND_VOLUMES[name];
+      if (name === 'bgm') audio.loop = true;
+      audioRef.current[name] = audio;
+    }
+    return audio;
+  };
+
+  const playSound = (name: 'roll' | 'tap') => {
+    if (isMuted) return;
+    const audio = getAudio(name);
+    audio.currentTime = 0;
+    void audio.play().catch(() => {
+      // Audio support must never block the gift.
+    });
+  };
+
+  const startMusic = () => {
+    if (isMuted) return;
+    const music = getAudio('bgm');
+    void music.play().catch(() => {
+      // Mobile browsers unlock audio after a user gesture; Roll retries it.
+    });
+  };
+
+  const toggleMute = () => {
+    const nextMuted = !isMuted;
+    setIsMuted(nextMuted);
+    window.localStorage.setItem(MUTE_STORAGE_KEY, String(nextMuted));
+
+    if (nextMuted) {
+      Object.values(audioRef.current).forEach((audio) => audio?.pause());
+      return;
+    }
+
+    const music = getAudio('bgm');
+    void music.play().catch(() => {
+      // The next Roll gesture will retry if the browser blocks this attempt.
+    });
+  };
+
   const revealLanding = (squareIndex: number, roll: number) => {
-    const square = BOARD_SQUARES[squareIndex];
+    const square = boardSquares[squareIndex];
+    const isFirstVisit = !visitedSquares.includes(squareIndex);
+
+    setVisitedSquares((visited) =>
+      visited.includes(squareIndex) ? visited : [...visited, squareIndex]
+    );
+    playSound('tap');
 
     if (square.type === 'finish') {
       setStatus(`You made it, ${data.recipientName}!`);
@@ -127,6 +197,7 @@ export default function BoardOfUs({ data }: { data: BoardOfUsData }) {
     }
 
     if (square.type === 'memory') {
+      if (isFirstVisit) setLoveTokens((count) => count + 1);
       setStatus(`Memory unlocked: ${data.memories[square.memoryIndex].label}`);
       setReveal({
         type: 'memory',
@@ -144,7 +215,14 @@ export default function BoardOfUs({ data }: { data: BoardOfUsData }) {
       return;
     }
 
-    if (square.type === 'hug' || square.type === 'wish' || square.type === 'timeout') {
+    if (
+      square.type === 'hug' ||
+      square.type === 'wish' ||
+      square.type === 'timeout'
+    ) {
+      if (square.type === 'wish' && isFirstVisit) {
+        setLoveTokens((count) => count + 1);
+      }
       setStatus(SPECIAL_COPY[square.type].title);
       setReveal({ type: square.type });
       return;
@@ -156,6 +234,8 @@ export default function BoardOfUs({ data }: { data: BoardOfUsData }) {
   const rollDie = async () => {
     if (isRolling || reveal || showFinish) return;
 
+    playSound('roll');
+    startMusic();
     setIsRolling(true);
     setStatus(`${data.token.nickname} is rolling…`);
 
@@ -184,6 +264,8 @@ export default function BoardOfUs({ data }: { data: BoardOfUsData }) {
 
   const replay = () => {
     setCurrentSquare(0);
+    setVisitedSquares([0]);
+    setLoveTokens(0);
     setDie(1);
     setShowFinish(false);
     setReveal(null);
@@ -216,6 +298,12 @@ export default function BoardOfUs({ data }: { data: BoardOfUsData }) {
           : reveal?.type === 'timeout'
             ? SPECIAL_COPY.timeout.body
             : '';
+  const finishTitle =
+    data.occasion === 'anniversary'
+      ? `Happy Anniversary, ${data.recipientName}!`
+      : data.occasion === 'both'
+        ? `Here's to us, ${data.recipientName}!`
+        : `Happy Birthday, ${data.recipientName}!`;
 
   return (
     <main
@@ -230,6 +318,16 @@ export default function BoardOfUs({ data }: { data: BoardOfUsData }) {
       </div>
 
       <section className={styles.game} aria-label="Board of Us memory game">
+        <button
+          className={styles.soundButton}
+          type="button"
+          onClick={toggleMute}
+          aria-label={isMuted ? 'Turn sound on' : 'Mute sound'}
+          aria-pressed={isMuted}
+        >
+          <span aria-hidden="true">{isMuted ? '♪̸' : '♪'}</span>
+          {isMuted ? 'Sound off' : 'Sound on'}
+        </button>
         <header className={styles.header}>
           <p>A tiny birthday game for {data.recipientName}</p>
           <h1>{data.title}</h1>
@@ -240,11 +338,14 @@ export default function BoardOfUs({ data }: { data: BoardOfUsData }) {
             </div>
             <span>{FINISH_INDEX}</span>
           </div>
+          <p className={styles.tokenIntro}>
+            Move {data.token.nickname} • memory stops earn love tokens
+          </p>
         </header>
 
         <div className={styles.boardShell}>
           <div className={styles.board}>
-            {BOARD_SQUARES.map((square, index) => {
+            {boardSquares.map((square, index) => {
               const [row, column] = BOARD_POSITIONS[index];
               const isMemory = square.type === 'memory';
               const memory = isMemory
@@ -256,6 +357,10 @@ export default function BoardOfUs({ data }: { data: BoardOfUsData }) {
                   key={`${square.type}-${index}`}
                   className={`${styles.square} ${styles[square.type]} ${
                     currentSquare === index ? styles.current : ''
+                  } ${
+                    visitedSquares.includes(index) && currentSquare !== index
+                      ? styles.visited
+                      : ''
                   }`}
                   style={{ gridRow: row, gridColumn: column }}
                   aria-label={`${index}: ${getSquareLabel(square)}`}
@@ -300,9 +405,9 @@ export default function BoardOfUs({ data }: { data: BoardOfUsData }) {
             })}
 
             <div className={styles.boardCenter}>
-              <p>Made of</p>
-              <strong>our favorite<br />little moments</strong>
-              <span>one short lap • all heart</span>
+              <p>Made with</p>
+              <strong>Memoify</strong>
+              <span>every memory earns a ♥</span>
             </div>
           </div>
         </div>
@@ -313,10 +418,10 @@ export default function BoardOfUs({ data }: { data: BoardOfUsData }) {
 
         <div className={styles.controls}>
           <div className={styles.tokenLabel}>
-            <span>{data.token.nickname.slice(0, 1)}</span>
+            <span aria-hidden="true">♥</span>
             <div>
-              <small>Your token</small>
-              <strong>{data.token.nickname}</strong>
+              <small>Love tokens</small>
+              <strong>{loveTokens} collected</strong>
             </div>
           </div>
           <button
@@ -339,7 +444,10 @@ export default function BoardOfUs({ data }: { data: BoardOfUsData }) {
             <div className={styles.memoryPhoto}>
               <Image
                 src={reveal.memory.imageUrl}
-                alt={reveal.memory.alt}
+                alt={
+                  reveal.memory.alt ||
+                  `${reveal.memory.label} memory for ${data.recipientName}`
+                }
                 fill
                 sizes="(max-width: 480px) 84vw, 360px"
               />
@@ -379,7 +487,13 @@ export default function BoardOfUs({ data }: { data: BoardOfUsData }) {
             </div>
             <p className={styles.cardEyebrow}>Finish line unlocked</p>
             <span className={styles.finishBadge} aria-hidden="true">★</span>
-            <h2>Happy Birthday, {data.recipientName}!</h2>
+            <h2>{finishTitle}</h2>
+            <div className={styles.tokenPayoff}>
+              <span aria-hidden="true">♥</span>
+              <strong>
+                {loveTokens} love {loveTokens === 1 ? 'token' : 'tokens'} collected
+              </strong>
+            </div>
             <p>{data.finishMessage}</p>
             <button type="button" onClick={replay} autoFocus>
               Play another lap

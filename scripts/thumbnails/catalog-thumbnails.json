@@ -54,6 +54,12 @@
     "captureNotes": "Capture the claw machine as the one centered hero subject."
   },
   {
+    "route": "boardofusv1",
+    "previewPath": "/boardofusv1",
+    "cropHeightCss": 790,
+    "captureNotes": "Capture the full Board of Us play surface, title, love-token counter, and Roll control."
+  },
+  {
     "route": "scrapbook1",
     "previewPath": "/scrapbook1",
     "cropHeightCss": 790,

@@ -1,8 +1,9 @@
-import type { BoardOfUsData } from './board-of-us';
+import type { BoardOfUsData } from './board-of-us-data';
 
 export const BOARD_OF_US_SAMPLE_DATA: BoardOfUsData = {
   title: 'Board of Us',
   recipientName: 'Jamie',
+  occasion: 'birthday',
   token: {
     nickname: 'Lovebug',
     color: '#f05f78',

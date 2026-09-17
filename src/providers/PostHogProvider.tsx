@@ -23,8 +23,8 @@ export function PostHogProvider({ children }: { children: React.ReactNode }) {
       disable_surveys_automatic_display:
         pathname === "/arcadeclawv1" ||
         pathname.startsWith("/arcadeclawv1/") ||
-        pathname === "/boardofusv1/preview" ||
-        pathname.startsWith("/boardofusv1/preview/"),
+        pathname === "/boardofusv1" ||
+        pathname.startsWith("/boardofusv1/"),
     })
   }, [pathname])
 

@@ -29,6 +29,7 @@ import NewGraduation2Form from '@/components/forms/new/new-graduation2-form';
 import NewVinylForm from '@/components/forms/new/new-vinyl-form';
 import NewTarotForm from '@/components/forms/new/new-tarot-form';
 import NewArcadeClawForm from '@/components/forms/new/new-arcade-claw-form';
+import NewBoardOfUsForm from '@/components/forms/new/new-board-of-us-form';
 import { visibleTemplates } from '@/lib/template-catalog';
 
 const StepsCustom = [
@@ -176,6 +177,7 @@ const CreatePage = ({ initialTemplateId }: { initialTemplateId?: string }) => {
     vinylv1: NewVinylForm,
     tarotv1: NewTarotForm,
     arcadeclawv1: NewArcadeClawForm,
+    boardofusv1: NewBoardOfUsForm,
   };
 
   useEffect(() => {
