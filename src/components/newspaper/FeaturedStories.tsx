@@ -1,10 +1,16 @@
 'use client';
 
 import NewsImage from './NewsImage';
+
+// TODO(placeholder-images): these are temporary stock photos served from Cloudinary
+// cloud `dfwrmapr4`, standing in for the sample images lost when cloud `dxuumohme`
+// hit its plan limit and started returning 401 (audited 2026-09-12). They are cropped
+// per slot with `c_fill,ar_*,g_auto`. Move them into `public/` so no Cloudinary
+// account can break them again, or swap in real art for this template.
 const stories = [
   {
     image:
-      'https://res.cloudinary.com/dxuumohme/image/upload/v1735831970/fxalkf0dcjuxneqpisjo.jpg',
+      'https://res.cloudinary.com/dfwrmapr4/image/upload/c_fill,ar_4:3,g_auto/v1789284276/placeholder/Business_Formal_Outfit_for_Women_kl6jkx.jpg',
     category: 'ARTS',
     title: 'The Most Fascinating Show? The Met Trying to Fix Itself',
     excerpt:
@@ -12,7 +18,7 @@ const stories = [
   },
   {
     image:
-      'https://res.cloudinary.com/dxuumohme/image/upload/v1735831493/panpzbc8csgld9wx1j3q.jpg',
+      'https://res.cloudinary.com/dfwrmapr4/image/upload/c_fill,ar_4:3,g_auto/v1789284277/placeholder/__db1ief.jpg',
     category: 'SPORTS',
     title: 'Where Is The Most Warm Place In The World Beside You?',
     excerpt:
@@ -20,7 +26,7 @@ const stories = [
   },
   {
     image:
-      'https://res.cloudinary.com/dxuumohme/image/upload/v1735831490/jdufuo1tjqn1bpbhzucf.jpg',
+      'https://res.cloudinary.com/dfwrmapr4/image/upload/c_fill,ar_4:3,g_auto/v1789284278/placeholder/museum_Date_Outfit_Ideas___Academic_Chic_Poetcore_Style_n5nvg7.jpg',
     category: 'TRANSIT',
     title: 'Which New York City Subway MetroCard to Buy?',
     excerpt:

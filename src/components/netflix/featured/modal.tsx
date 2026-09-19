@@ -21,15 +21,29 @@ const Modal = ({
     };
   }, [show]);
 
+  useEffect(() => {
+    const handleKeyDown = (event: KeyboardEvent) => {
+      if (event.key === 'Escape') onClose();
+    };
+    if (show) window.addEventListener('keydown', handleKeyDown);
+    return () => window.removeEventListener('keydown', handleKeyDown);
+  }, [onClose, show]);
+
   if (!show) {
     return null;
   }
 
   return (
-    <div className="fixed inset-0 flex items-center justify-center bg-black bg-opacity-50 z-50">
-      <div className="relative bg-black text-white rounded-lg md:w-[70%] w-[90%] max-w-3xl p-6">
+    <div
+      className="fixed inset-0 z-50 flex items-center justify-center bg-black/75 p-4 backdrop-blur-sm"
+      onMouseDown={(event) => {
+        if (event.currentTarget === event.target) onClose();
+      }}
+      role="dialog"
+      aria-modal="true">
+      <div className="relative w-full max-w-3xl rounded-xl bg-[#141414] p-2 text-white shadow-2xl md:w-[70%] md:p-4">
         <button
-          className="absolute top-3 right-3 text-2xl font-semibold text-white hover:text-gray-400"
+          className="absolute right-4 top-4 z-10 flex h-9 w-9 items-center justify-center rounded-full bg-[#181818] text-2xl font-semibold text-white shadow hover:bg-neutral-700"
           onClick={onClose}
           aria-label="Close">
           &times;

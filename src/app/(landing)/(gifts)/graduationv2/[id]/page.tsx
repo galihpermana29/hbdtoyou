@@ -34,7 +34,7 @@ export default async function Graduationv2Page({ params }: { params: any }) {
               className="hover:text-gray-300 text-sm md:text-base">
               <Image
                 src={
-                  'https://res.cloudinary.com/dxuumohme/image/upload/v1737048992/vz6tqrzgcht45fstloxc.png'
+                  'https://res.cloudinary.com/dfwrmapr4/image/upload/v1789303095/placeholder/69b085d3b98c04a8b06e3e58ecfa136e95641109_ynodbj.png'
                 }
                 alt="asd"
                 width={60}

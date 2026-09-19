@@ -8,7 +8,6 @@ import { useMemoifyProfile } from '@/app/session-provider';
 import { createContent, editContent, submitFeedback } from '@/action/user-api';
 import { IDetailContentResponse } from '@/action/interfaces';
 import dayjs from 'dayjs';
-import { useRouter } from 'next/navigation';
 import { useDispatch } from 'react-redux';
 import { reset } from '@/lib/uploadSlice';
 import FinalModal from '../final-modal';
@@ -31,7 +30,6 @@ const NewDisneyForm = ({
 }: NewDisneyFormProps) => {
   const profile = useMemoifyProfile();
   const isFreeAccount = profile?.quota < 1;
-  const router = useRouter();
   const [form] = useForm();
   const dispatch = useDispatch();
 
@@ -201,7 +199,7 @@ const NewDisneyForm = ({
                 </p>
               </div>
               <div className="flex flex-wrap gap-[10px] ">
-                {fields.map(({ key, name, fieldKey, ...restField }, index) => (
+                {fields.map(({ key, name, ...restField }) => (
                   <div key={key} className="flex gap-[8px] items-start w-full">
                     <div className="max-w-[200px] w-full">
                       <Form.Item
@@ -215,11 +213,6 @@ const NewDisneyForm = ({
                         ]}
                         name={[name, 'imageUrl']}>
                         <DraggerUpload
-                          profileImageURL={form.getFieldValue([
-                            'episodes',
-                            name,
-                            'imageUrl',
-                          ])}
                           form={form}
                           formItemName={['episodes', name, 'imageUrl']}
                           type={

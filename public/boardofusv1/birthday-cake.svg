@@ -1,0 +1,30 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 800 600" role="img" aria-labelledby="title">
+  <title id="title">Two people celebrating beside a birthday cake</title>
+  <defs>
+    <linearGradient id="bg" x2="1" y2="1">
+      <stop stop-color="#8fd8c7"/>
+      <stop offset="1" stop-color="#75a7d8"/>
+    </linearGradient>
+  </defs>
+  <rect width="800" height="600" fill="url(#bg)"/>
+  <g fill="#fff3c1" opacity=".85">
+    <circle cx="88" cy="96" r="13"/><circle cx="702" cy="113" r="9"/><circle cx="620" cy="48" r="14"/><circle cx="183" cy="62" r="8"/>
+    <path d="m367 39 10 23 25 3-19 17 6 25-22-13-22 13 6-25-19-17 25-3z"/>
+  </g>
+  <g transform="translate(105 118)">
+    <circle cx="125" cy="105" r="54" fill="#8b5b46" stroke="#263238" stroke-width="12"/>
+    <path d="M58 268q5-120 71-120t82 120v214H58z" fill="#f5c95d" stroke="#263238" stroke-width="13"/>
+    <circle cx="468" cy="110" r="51" fill="#c47f5b" stroke="#263238" stroke-width="12"/>
+    <path d="M398 275q5-117 74-117t83 117v207H398z" fill="#f05f78" stroke="#263238" stroke-width="13"/>
+    <path d="M115 105q19 18 38 0M453 113q18 17 36 0" fill="none" stroke="#fff" stroke-width="8" stroke-linecap="round"/>
+    <path d="M180 204q62 71 140 29M410 208q-51 53-104 35" fill="none" stroke="#263238" stroke-width="18" stroke-linecap="round"/>
+    <path d="M178 70 96 38l37-42zM425 70l87-35-35-43z" fill="#f05f78" stroke="#263238" stroke-width="9"/>
+  </g>
+  <g transform="translate(275 310)">
+    <path d="M20 118h210v144H20z" fill="#fff5db" stroke="#263238" stroke-width="12"/>
+    <path d="M10 117q23-55 47 0 26-55 52 0 26-55 52 0 26-55 55 0h24v53H10z" fill="#f39ab0" stroke="#263238" stroke-width="12" stroke-linejoin="round"/>
+    <path d="M75 19v71M125 4v86M175 23v67" stroke="#263238" stroke-width="10"/>
+    <path d="M75 18q-20-23 0-42 20 19 0 42M125 3q-20-23 0-42 20 19 0 42M175 22q-20-23 0-42 20 19 0 42" fill="#f5c95d" stroke="#263238" stroke-width="7"/>
+    <path d="M54 207h142" stroke="#f05f78" stroke-width="18" stroke-linecap="round"/>
+  </g>
+</svg>

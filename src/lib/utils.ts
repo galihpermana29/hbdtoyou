@@ -30,7 +30,20 @@ export function addLineBreaksEveryThreeSentences(text) {
 
 export function mapContentToCard(contents: IContent[], purpose = 'client') {
   return contents.map((show) => {
-    const jsonContent = JSON.parse(show?.detail_content_json_text || '{}');
+    // Some records store invalid/corrupt JSON in detail_content_json_text.
+    // Parse defensively and skip such records instead of crashing the listing.
+    let jsonContent: any;
+    try {
+      jsonContent = JSON.parse(show?.detail_content_json_text || '{}');
+    } catch {
+      return;
+    }
+
+    // Some records (legacy/malformed) have a template_name without the expected
+    // `{type}-{...} {route}` shape. Extract the route defensively so a single bad
+    // record can't crash the whole listing (e.g. the dashboard).
+    const templateName = show?.template_name || '';
+    const route = templateName.split('-')[1]?.split(' ')[1];
 
     // add docs
     // this function is used to get the jumbotron image from the json content
@@ -40,15 +53,11 @@ export function mapContentToCard(contents: IContent[], purpose = 'client') {
       // Matched with includes() because its slug contains a dash, which the
       // split('-')[1].split(' ')[1] extraction below would mangle into just
       // "photobox" and drop the card.
-      if (show.template_name.includes('photobox-newspaper')) {
+      if (templateName.includes('photobox-newspaper')) {
         return jsonContent?.image;
       }
 
-      if (
-        ['albumgraduation1'].includes(
-          show.template_name.split('-')[1].split(' ')[1]
-        )
-      ) {
+      if (['albumgraduation1'].includes(route)) {
         return jsonContent
           ? Array.isArray(jsonContent?.images)
             ? jsonContent?.images.length > 0
@@ -70,16 +79,12 @@ export function mapContentToCard(contents: IContent[], purpose = 'client') {
           'scrapbook8',
           'scrapbook9',
           'scrapbook10',
-        ].includes(show.template_name.split('-')[1].split(' ')[1])
+        ].includes(route)
       ) {
         return jsonContent?.coverImage;
       }
 
-      if (
-        ['magazinev1', 'spotifyv1', 'magazinev1'].includes(
-          show.template_name.split('-')[1].split(' ')[1]
-        )
-      ) {
+      if (['magazinev1', 'spotifyv1', 'magazinev1'].includes(route)) {
         return Array.isArray(jsonContent.momentOfYou)
           ? jsonContent.momentOfYou.length > 0
             ? jsonContent.momentOfYou[0]
@@ -89,30 +94,26 @@ export function mapContentToCard(contents: IContent[], purpose = 'client') {
 
       if (
         ['netflixv1', 'disneyplusv1', 'newspaperv3', 'newspaperv1'].includes(
-          show.template_name.split('-')[1].split(' ')[1]
+          route
         )
       ) {
         return jsonContent.jumbotronImage;
       }
 
-      if (
-        ['f1historyv1'].includes(show.template_name.split('-')[1].split(' ')[1])
-      ) {
+      if (['f1historyv1'].includes(route)) {
         return jsonContent?.images.length > 0
           ? jsonContent.images[0]
           : 'https://res.cloudinary.com/ddlus5qur/image/upload/v1746085724/phu2rbi6fqnp71hytjex.jpg';
       }
 
-      if (
-        ['vinylv1'].includes(show.template_name.split('-')[1].split(' ')[1])
-      ) {
+      if (['vinylv1', 'arcadeclawv1', 'boardofusv1'].includes(route)) {
         return Array.isArray(jsonContent?.memories) &&
           jsonContent.memories.length > 0
           ? jsonContent.memories[0].imageUrl
           : 'https://res.cloudinary.com/ddlus5qur/image/upload/v1746085724/phu2rbi6fqnp71hytjex.jpg';
       }
 
-      if (show.template_name.includes('journal')) {
+      if (templateName.includes('journal')) {
         return 'journal';
       }
     };
@@ -138,15 +139,15 @@ export function mapContentToCard(contents: IContent[], purpose = 'client') {
                 jsonContent.modalContent?.toLowerCase()
               )?.slice(0, 12)
             : 'A title',
-      link: show.template_name.includes('journal')
+      link: templateName.includes('journal')
         ? `/journal/${show.id}`
-        : show.template_name.includes('photobox-newspaper')
+        : templateName.includes('photobox-newspaper')
           ? `/photobox-newspaper/${show.id}`
-          : `/${show.template_name.split('-')[1].split(' ')[1]}/${show.id}`,
+          : `/${route}/${show.id}`,
       desc: show?.caption
         ? show?.caption
         : jsonContent?.subTitle || 'A description',
-      type: show.template_name.split('-')[0],
+      type: templateName.split('-')[0],
     };
   });
 }

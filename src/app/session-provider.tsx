@@ -216,7 +216,6 @@ const SessionProvider = ({
   const [loading, setLoading] = useState(true);
 
   const isPremium = userProfile?.type === 'premium';
-
   const isGift = drawsAGift(segments, contentId);
   const isChromeFreeDemo = isMemorollDemo(pathname);
   const isHideAds =
@@ -405,7 +404,8 @@ const SessionProvider = ({
       </Provider>
       {/* The site footer would intrude on the page a recipient came to see, so
           it stays off a gift. The Create Flow that builds one is ordinary
-          product UI and keeps it. */}
+          product UI and keeps it. Arcade Claw and Board of Us sit in (gifts),
+          so drawsAGift already covers them. */}
       {!isGift && !isChromeFreeDemo && <Footer />}
     </SessionContext.Provider>
   );

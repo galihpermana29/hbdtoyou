@@ -1,0 +1,104 @@
+[
+  {
+    "route": "netflixv1",
+    "previewPath": "/netflixv1",
+    "cropHeightCss": 790,
+    "captureNotes": "At 1440x900, click the Who's watching profile; capture the billboard and the top of Our Story."
+  },
+  {
+    "route": "spotifyv1",
+    "previewPath": "/spotifyv1",
+    "cropHeightCss": 790,
+    "captureNotes": "Capture the playlist home with its sidebar, hero cover, track list, and bottom player."
+  },
+  {
+    "route": "disneyplusv1",
+    "previewPath": "/disneyplusv1",
+    "cropHeightCss": 790,
+    "captureNotes": "Capture the full billboard with a hint of the first season row."
+  },
+  {
+    "route": "magazinev1",
+    "previewPath": "/magazinev1",
+    "cropHeightCss": 790,
+    "captureNotes": "Capture the calm black opening billboard with the photo stack."
+  },
+  {
+    "route": "graduationv1",
+    "previewPath": "/graduationv1",
+    "cropHeightCss": 790,
+    "captureNotes": "Capture the GRADUATION masthead and the top of the first portrait row."
+  },
+  {
+    "route": "graduationv2",
+    "previewPath": "/graduationv2",
+    "cropHeightCss": 790,
+    "captureNotes": "Capture the editorial profile header and the first masonry portrait group."
+  },
+  {
+    "route": "newspaperv1",
+    "previewPath": "/newspaperv1",
+    "cropHeightCss": 790,
+    "captureNotes": "Capture the newspaper masthead and the main article grid."
+  },
+  {
+    "route": "newspaperv3",
+    "previewPath": "/newspaperv3",
+    "cropHeightCss": 790,
+    "captureNotes": "Capture the single newspaper front page centered with its surrounding margin."
+  },
+  {
+    "route": "arcadeclawv1",
+    "previewPath": "/arcadeclawv1",
+    "cropHeightCss": 790,
+    "captureNotes": "Capture the claw machine as the one centered hero subject."
+  },
+  {
+    "route": "boardofusv1",
+    "previewPath": "/boardofusv1",
+    "cropHeightCss": 790,
+    "captureNotes": "Capture the full Board of Us play surface, title, love-token counter, and Roll control."
+  },
+  {
+    "route": "scrapbook1",
+    "previewPath": "/scrapbook1",
+    "cropHeightCss": 790,
+    "captureNotes": "Flip once, hide Memoify navigation, controls, and footer, then capture only the open spread."
+  },
+  {
+    "route": "scrapbook2",
+    "previewPath": "/scrapbook2",
+    "cropHeightCss": 790,
+    "captureNotes": "Flip once, hide Memoify navigation, controls, and footer, then capture only the open spread."
+  },
+  {
+    "route": "scrapbook3",
+    "previewPath": "/scrapbook3",
+    "cropHeightCss": 790,
+    "captureNotes": "Flip once, hide Memoify navigation, controls, and footer, then capture only the open spread."
+  },
+  {
+    "route": "scrapbook4",
+    "previewPath": "/scrapbook4",
+    "cropHeightCss": 790,
+    "captureNotes": "Flip once, hide Memoify navigation, controls, and footer, then capture only the open spread."
+  },
+  {
+    "route": "scrapbook6",
+    "previewPath": "/scrapbook6",
+    "cropHeightCss": 790,
+    "captureNotes": "Flip once, hide Memoify navigation, controls, and footer, then capture only the open spread."
+  },
+  {
+    "route": "scrapbook7",
+    "previewPath": "/scrapbook7",
+    "cropHeightCss": 790,
+    "captureNotes": "Flip once, hide Memoify navigation, controls, and footer, then capture only the open spread."
+  },
+  {
+    "route": "scrapbook8",
+    "previewPath": "/scrapbook8",
+    "cropHeightCss": 790,
+    "captureNotes": "Flip once, hide Memoify navigation, controls, and footer, then capture only the open spread."
+  }
+]

@@ -1,0 +1,26 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 800 600" role="img" aria-labelledby="title">
+  <title id="title">A picnic blanket under a leafy tree</title>
+  <rect width="800" height="600" fill="#b9e5df"/>
+  <circle cx="675" cy="96" r="56" fill="#fff1a0"/>
+  <path d="M0 394Q155 335 300 394T600 385T900 390V600H0Z" fill="#7bc78a"/>
+  <path d="M109 0q122 148 154 399" fill="none" stroke="#654060" stroke-width="72" stroke-linecap="round"/>
+  <g fill="#5aad7d" stroke="#3d6e63" stroke-width="6">
+    <circle cx="70" cy="62" r="76"/><circle cx="174" cy="58" r="87"/><circle cx="281" cy="77" r="75"/>
+    <circle cx="120" cy="145" r="81"/><circle cx="236" cy="158" r="80"/><circle cx="35" cy="170" r="70"/>
+  </g>
+  <path d="M242 465l373-40 98 149-430 26z" fill="#fff1d8" stroke="#3b3157" stroke-width="11"/>
+  <path d="M285 465l100 126M401 449l104 136M517 436l99 134M268 520l395-37M289 574l405-38" fill="none" stroke="#ff8fa7" stroke-width="17" opacity=".8"/>
+  <g stroke="#3b3157" stroke-width="9">
+    <path d="M417 414h104l18 102H397z" fill="#ffd55c"/>
+    <path d="M435 413q-1-65 48-65t48 65" fill="none"/>
+  </g>
+  <g transform="translate(555 380)">
+    <circle cx="0" cy="0" r="32" fill="#ff8099" stroke="#3b3157" stroke-width="8"/>
+    <path d="M-48 71q48-48 96 0" fill="#8c6bca" stroke="#3b3157" stroke-width="8"/>
+  </g>
+  <g transform="translate(326 400)">
+    <circle cx="0" cy="0" r="31" fill="#f3ad8b" stroke="#3b3157" stroke-width="8"/>
+    <path d="M-48 72q48-49 96 0" fill="#ff7c96" stroke="#3b3157" stroke-width="8"/>
+  </g>
+  <path d="M356 453q82 56 175 4" fill="none" stroke="#3b3157" stroke-width="14" stroke-linecap="round"/>
+</svg>

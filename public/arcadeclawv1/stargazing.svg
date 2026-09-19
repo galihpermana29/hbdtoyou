@@ -1,0 +1,32 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 800 600" role="img" aria-labelledby="title">
+  <title id="title">Two people sitting under a starry night sky</title>
+  <defs>
+    <linearGradient id="night" x2="0" y2="1"><stop stop-color="#27234f"/><stop offset="1" stop-color="#705c9f"/></linearGradient>
+  </defs>
+  <rect width="800" height="600" fill="url(#night)"/>
+  <circle cx="645" cy="123" r="63" fill="#fff0ad"/>
+  <circle cx="674" cy="96" r="63" fill="#312a5c"/>
+  <g fill="#ffe991">
+    <path d="M110 90l8 18 20 2-15 13 4 20-17-10-18 10 5-20-15-13 20-2z"/>
+    <path d="M367 95l5 12 14 1-11 9 4 14-12-7-12 7 4-14-11-9 14-1z"/>
+    <path d="M560 221l5 12 14 1-11 9 4 14-12-7-12 7 4-14-11-9 14-1z"/>
+  </g>
+  <g fill="#fff" opacity=".75">
+    <circle cx="220" cy="73" r="5"/><circle cx="280" cy="188" r="7"/><circle cx="464" cy="63" r="5"/>
+    <circle cx="704" cy="250" r="5"/><circle cx="76" cy="242" r="6"/><circle cx="438" cy="234" r="4"/>
+    <circle cx="184" cy="275" r="4"/><circle cx="746" cy="68" r="4"/>
+  </g>
+  <path d="M0 456Q180 332 360 453Q560 316 800 437V600H0Z" fill="#252746"/>
+  <path d="M0 510Q190 411 371 503Q582 397 800 492V600H0Z" fill="#1d2038"/>
+  <g transform="translate(304 388)">
+    <circle cx="0" cy="0" r="39" fill="#f0a57e"/>
+    <path d="M-58 132q4-93 58-93t58 93" fill="#ff718f"/>
+    <path d="M-18-36q-29 13-30 48 32-19 72-5 10-38-42-43z" fill="#493453"/>
+  </g>
+  <g transform="translate(447 399)">
+    <circle cx="0" cy="0" r="38" fill="#b97965"/>
+    <path d="M-57 121q4-84 57-84t58 84" fill="#8471cf"/>
+    <path d="M-35-23q39-37 74 5l1 25q-35-21-75 2z" fill="#332c4f"/>
+  </g>
+  <path d="M348 462q50 38 87 0" fill="none" stroke="#ff718f" stroke-width="14" stroke-linecap="round"/>
+</svg>

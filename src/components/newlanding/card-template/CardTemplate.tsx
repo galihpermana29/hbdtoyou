@@ -1,4 +1,5 @@
 import { IAllTemplateResponse } from '@/action/interfaces';
+import { templateThumbnail } from '@/lib/template-thumbnail';
 import disneyplusv1 from '@/assets/templates/disneyv1.png';
 import formula1 from '@/assets/templates/formula1.png';
 import graduation from '@/assets/templates/graduation.png';
@@ -9,6 +10,8 @@ import newspaperv3 from '@/assets/templates/newspaperv3.png';
 import journal from '@/assets/templates/scopus.png';
 import scrapbookv1 from '@/assets/templates/scrapbookv1.jpg';
 import spotifyv1 from '@/assets/templates/spotifyv1.png';
+import arcadeclawv1 from '@/assets/templates/arcadeclawv1.svg';
+import boardofusv1 from '@/assets/templates/boardofusv1.svg';
 import clsx from 'clsx';
 import { ArrowRight } from 'lucide-react';
 import Image from 'next/image';
@@ -79,6 +82,16 @@ export const DataToCardColor = {
     logo: newspaperv1,
     text: 'text-[#000000]',
   },
+  arcadeclawv1: {
+    color: 'bg-[#ffedf3]',
+    logo: arcadeclawv1,
+    text: 'text-[#dd426c]',
+  },
+  boardofusv1: {
+    color: 'bg-[#e7f7f2]',
+    logo: boardofusv1,
+    text: 'text-[#c9425d]',
+  },
 };
 
 const CardTemplate = ({
@@ -139,7 +152,7 @@ const CardTemplate = ({
         </div>
         <div>
           <img
-            src={data.thumbnail_uri}
+            src={templateThumbnail(data)}
             alt={data.name}
             className="w-full aspect-video object-cover rounded-md"
           />

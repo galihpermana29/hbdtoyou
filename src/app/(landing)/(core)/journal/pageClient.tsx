@@ -10,7 +10,7 @@ import { SearchIcon } from 'lucide-react';
 import dynamic from 'next/dynamic';
 import Image from 'next/image';
 import { useRouter } from 'next/navigation';
-import { useEffect, useState } from 'react';
+import { useEffect, useMemo, useState } from 'react';
 import { signIn } from 'next-auth/react';
 const JournalCard = dynamic(() => import('./view/JournalCard'), { ssr: false });
 
@@ -23,16 +23,34 @@ const isJournalPublic = (journal: IContent): boolean => {
   }
 };
 
+/** How many journal cards to mount at a time. */
+const JOURNALS_PER_PAGE = 24;
+
 const EJournal = ({ journalsData }: { journalsData: IContent[] }) => {
   const router = useRouter();
   const { accessToken } = useMemoifySession();
 
-  const publicJournals = journalsData.filter(isJournalPublic);
+  // Memoised because this feeds the search effect's dependency array. Rebuilding the
+  // array on every render made that effect fire on every render, and it sets state from
+  // the array, so the component re-rendered forever ("Maximum update depth exceeded").
+  // That loop kept the main thread busy enough that the scroll-reveal animations never
+  // ran, which is why the page scrolled as a blank white screen.
+  const publicJournals = useMemo(
+    () => journalsData.filter(isJournalPublic),
+    [journalsData]
+  );
 
   const [searchQuery, setSearchQuery] = useState('');
   const [filteredJournals, setFilteredJournals] =
     useState<IContent[]>(publicJournals);
   const [activeFeature, setActiveFeature] = useState(0);
+  const [visibleCount, setVisibleCount] = useState(JOURNALS_PER_PAGE);
+
+  // Every card mounts a Framer Motion element and JSON.parses a full journal blob, so
+  // rendering all of them at once (there are hundreds) locks the main thread hard enough
+  // that scroll animations never get a frame. Render a page at a time instead.
+  const visibleJournals = filteredJournals.slice(0, visibleCount);
+  const hasMore = filteredJournals.length > visibleCount;
 
   const features = [
     {
@@ -53,6 +71,9 @@ const EJournal = ({ journalsData }: { journalsData: IContent[] }) => {
   ];
 
   useEffect(() => {
+    // A new search starts from the first page again.
+    setVisibleCount(JOURNALS_PER_PAGE);
+
     if (!searchQuery.trim()) {
       setFilteredJournals(publicJournals);
       return;
@@ -245,12 +266,25 @@ const EJournal = ({ journalsData }: { journalsData: IContent[] }) => {
             </div>
           </div>
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 max-w-7xl mx-auto w-full max-md:px-4 px-8">
-            {filteredJournals.length > 0
-              ? filteredJournals.map((entry) => (
+            {visibleJournals.length > 0
+              ? visibleJournals.map((entry) => (
                   <JournalCard key={entry.id} entry={entry} />
                 ))
               : 'No Journals Available'}
           </div>
+          {hasMore && (
+            <div className="flex justify-center mt-10">
+              <Button
+                size="large"
+                onClick={() =>
+                  setVisibleCount((count) => count + JOURNALS_PER_PAGE)
+                }
+                className="!h-12 !px-8 !rounded-lg !font-semibold">
+                Show more journals ({filteredJournals.length - visibleCount}{' '}
+                left)
+              </Button>
+            </div>
+          )}
         </div>
       </Reveal>
       <Reveal>

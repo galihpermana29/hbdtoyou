@@ -1,0 +1,26 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 800 600" role="img" aria-labelledby="title">
+  <title id="title">Two coffee cups beside a vase of flowers</title>
+  <rect width="800" height="600" fill="#f4b9aa"/>
+  <path d="M0 0h800v188Q610 142 430 184T0 170Z" fill="#ffe5c4"/>
+  <circle cx="115" cy="95" r="64" fill="#ffc96c"/>
+  <rect y="380" width="800" height="220" fill="#8f6ac8"/>
+  <path d="M0 404q194-48 405 4t395-7v199H0Z" fill="#6f57ad"/>
+  <path d="M355 260h90l-12 164h-66z" fill="#c1ecdf" stroke="#3c3158" stroke-width="12"/>
+  <g fill="none" stroke="#3c3158" stroke-width="10" stroke-linecap="round">
+    <path d="M401 270q-60-108-94-125"/><path d="M405 270q55-113 102-136"/><path d="M404 268q-2-130 19-165"/>
+  </g>
+  <g>
+    <circle cx="306" cy="144" r="34" fill="#ff718d"/><circle cx="508" cy="132" r="38" fill="#ffd653"/>
+    <circle cx="426" cy="100" r="34" fill="#ff8bb5"/><circle cx="306" cy="144" r="10" fill="#ffda64"/>
+    <circle cx="508" cy="132" r="11" fill="#ff7695"/><circle cx="426" cy="100" r="10" fill="#fff0a6"/>
+  </g>
+  <g stroke="#3c3158" stroke-width="12">
+    <path d="M124 405h205v84q0 57-57 57h-91q-57 0-57-57z" fill="#ffda66"/>
+    <path d="M329 432h27q57 0 57 45t-64 45" fill="none"/>
+    <path d="M493 405h180v84q0 57-57 57h-66q-57 0-57-57z" fill="#ff8fa7"/>
+    <path d="M493 437h-27q-52 0-52 42t63 42" fill="none"/>
+  </g>
+  <g fill="none" stroke="#fff5df" stroke-width="10" stroke-linecap="round" opacity=".8">
+    <path d="M198 375q-30-37 7-67t4-65"/><path d="M578 375q32-36-3-68t7-66"/>
+  </g>
+</svg>

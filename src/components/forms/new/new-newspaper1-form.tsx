@@ -8,7 +8,6 @@ import { useMemoifyProfile } from '@/app/session-provider';
 import { createContent, editContent, submitFeedback } from '@/action/user-api';
 import { IDetailContentResponse } from '@/action/interfaces';
 import dayjs from 'dayjs';
-import { useRouter } from 'next/navigation';
 import FinalModal from '../final-modal';
 import DraggerUpload, { AccountType } from '@/components/ui/uploader/uploader';
 import { UseCreateContentReturn } from '@/app/(landing)/(core)/create/usecase/useCreateContent';
@@ -31,7 +30,6 @@ const NewNewspaper1Form = ({
   const profile = useMemoifyProfile();
   const isFreeAccount = profile?.quota < 1;
   const jumbotronImage = useWatch('jumbotronImage', form);
-  const router = useRouter();
 
   const handleSubmit = async (
     val: any,
@@ -182,7 +180,7 @@ const NewNewspaper1Form = ({
                 </p>
               </div>
               <div className="flex flex-wrap gap-[10px] ">
-                {fields.map(({ key, name, fieldKey, ...restField }, index) => (
+                {fields.map(({ key, name, ...restField }) => (
                   <div key={key} className="flex gap-[8px] items-start w-full">
                     <div className="max-w-[200px] w-full">
                       <Form.Item
@@ -196,11 +194,6 @@ const NewNewspaper1Form = ({
                         ]}
                         name={[name, 'imageUrl']}>
                         <DraggerUpload
-                          profileImageURL={form.getFieldValue([
-                            'stories',
-                            name,
-                            'imageUrl',
-                          ])}
                           form={form}
                           formItemName={['stories', name, 'imageUrl']}
                           type={
