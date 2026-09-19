@@ -2,11 +2,14 @@ import { Metadata } from 'next';
 
 export const metadata: Metadata = {
   title: 'Photobox for Digital Gifts, Scrapbooks & Albums | Memoify',
-  description: 'Capture and frame your special moments with our stylish Photobox feature. Create beautiful framed photos to add to your digital gifts, digital scrapbooks, and digital albums.',
-  keywords: 'digital gift, digital scrapbook, digital album, virtual present, online gift, electronic memory book, digital photo collection, memory collection, virtual album, online scrapbook, e-gift, hadiah ulang tahun digital, kado digital, scrapbook digital, album foto digital, kenangan digital, kado online, bingkai foto digital, koleksi foto, photobox, photo frames, digital frames, photo capture, framed photos, Memoify',
+  description:
+    'Capture and frame your special moments with our stylish Photobox feature. Create beautiful framed photos to add to your digital gifts, digital scrapbooks, and digital albums.',
+  keywords:
+    'digital gift, digital scrapbook, digital album, virtual present, online gift, electronic memory book, digital photo collection, memory collection, virtual album, online scrapbook, e-gift, hadiah ulang tahun digital, kado digital, scrapbook digital, album foto digital, kenangan digital, kado online, bingkai foto digital, koleksi foto, photobox, photo frames, digital frames, photo capture, framed photos, Memoify',
   openGraph: {
     title: 'Photobox for Digital Gifts, Scrapbooks & Albums | Memoify',
-    description: 'Capture and frame your special moments with our stylish Photobox feature. Create beautiful framed photos to add to your digital gifts, digital scrapbooks, and digital albums.',
+    description:
+      'Capture and frame your special moments with our stylish Photobox feature. Create beautiful framed photos to add to your digital gifts, digital scrapbooks, and digital albums.',
     url: 'https://memoify.live/photobox',
     siteName: 'Memoify',
     images: [
@@ -23,7 +26,10 @@ export const metadata: Metadata = {
   twitter: {
     card: 'summary_large_image',
     title: 'Photobox for Digital Gifts, Scrapbooks & Albums | Memoify',
-    description: 'Capture and frame your special moments with our stylish Photobox feature. Create beautiful framed photos to add to your digital gifts, digital scrapbooks, and digital albums.',
-    images: ['https://res.cloudinary.com/dqipjpy1w/image/upload/v1751298448/brave_screenshot_memoify.live_mhwzfs.png'],
+    description:
+      'Capture and frame your special moments with our stylish Photobox feature. Create beautiful framed photos to add to your digital gifts, digital scrapbooks, and digital albums.',
+    images: [
+      'https://res.cloudinary.com/dqipjpy1w/image/upload/v1751298448/brave_screenshot_memoify.live_mhwzfs.png',
+    ],
   },
 };

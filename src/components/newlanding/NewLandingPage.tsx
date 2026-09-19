@@ -88,7 +88,7 @@ export default function NewLandingPage() {
             <div className="mt-12 md:mt-16">
               <HeroGiftPreview />
               <p className="mt-4 text-center text-[12px] font-medium text-[#8b8179] md:text-[13px]">
-                Click around inside the gift — this is the real product, not a
+                Click around inside the gift - this is the real product, not a
                 mock
               </p>
             </div>
@@ -104,7 +104,7 @@ export default function NewLandingPage() {
                 Your memories deserve more than just a gallery
               </p>
               <p className="text-[#7b7b7b] text-[16px] md:text-[20px] font-[400] mt-[20px]">
-                Craft beautiful scrapbooks that capture your favorite moments —
+                Craft beautiful scrapbooks that capture your favorite moments -
                 with photos, notes, and a touch of you
               </p>
               <Link href={'/scrapbook'} prefetch={true}>
@@ -202,7 +202,7 @@ export default function NewLandingPage() {
                 <p className="text-[#7b7b7b] text-[16px] md:text-[20px] font-[400] mt-[20px]">
                   Personalize your memories like never before. lets you create
                   stunning, interactive web inspired by your favorite
-                  platforms—whether it&apos;s Netflix, Spotify, etc.
+                  platforms - whether it&apos;s Netflix, Spotify, etc.
                 </p>
               </div>
               <div className="flex flex-col gap-y-6">

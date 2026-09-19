@@ -1,11 +1,12 @@
 import { getAllTemplates } from '@/action/user-api';
+import { isAdminEmail } from '@/lib/admin';
 import { getSession } from '@/store/get-set-session';
 import { redirect } from 'next/navigation';
 import TemplatesClient from './TemplatesClient';
 
 const TemplatesPage = async () => {
   const session = await getSession();
-  const isAdmin = session?.email === 'memoify.live@gmail.com';
+  const isAdmin = isAdminEmail(session?.email);
   if (!isAdmin) redirect('/dashboard');
 
   const res = await getAllTemplates();

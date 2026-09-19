@@ -38,7 +38,12 @@ export default function TarotCard({
           scale: isSelected && !isFlipped ? 1.05 : 1,
           y: isSelected && !isFlipped ? -10 : 0,
         }}
-        transition={{ duration: 0.6, type: 'spring', stiffness: 260, damping: 20 }}
+        transition={{
+          duration: 0.6,
+          type: 'spring',
+          stiffness: 260,
+          damping: 20,
+        }}
         className={`w-full h-full relative transition-all duration-500 ${
           isSelected && !isFlipped
             ? 'shadow-[0_0_25px_rgba(197,160,89,0.4)]'

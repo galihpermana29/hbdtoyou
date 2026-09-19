@@ -48,9 +48,7 @@ const JournaServer = async () => {
     ? dx.data.filter((dx) => dx.template_name.includes('journal'))
     : [];
 
-  return (
-    <EJournal journalsData={journalsData} />
-  );
+  return <EJournal journalsData={journalsData} />;
 };
 
 export default JournaServer;

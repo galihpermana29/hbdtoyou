@@ -4,13 +4,24 @@ import { IProfileResponse } from '@/action/interfaces';
 import { getSpotifyAccessToken } from '@/action/spotify-api';
 import { getUserProfile } from '@/action/user-api';
 import { Footer } from '@/components/ui/footer';
+import { drawsAGift } from '@/lib/gift-routes';
 import { store } from '@/lib/store';
 import { setSessionSpecific } from '@/store/get-set-session';
 import { SessionData } from '@/store/iron-session';
 import { Button, Image, Modal, Space } from 'antd';
 import dayjs from 'dayjs';
-import { usePathname } from 'next/navigation';
-import React, { createContext, useContext, useEffect, useState } from 'react';
+import {
+  useParams,
+  usePathname,
+  useSelectedLayoutSegments,
+} from 'next/navigation';
+import React, {
+  createContext,
+  useContext,
+  useEffect,
+  useMemo,
+  useState,
+} from 'react';
 import { Provider } from 'react-redux';
 
 // Define the context type
@@ -63,8 +74,8 @@ const premiumAds: AdContent[] = [
     image:
       'https://res.cloudinary.com/dztygf08a/image/upload/v1775671149/au_ads_1_kxqtks.png',
     type: 'image',
-  }
-]
+  },
+];
 
 // Array of promotional content
 const promotionalContent: AdContent[] = [
@@ -120,6 +131,47 @@ const promotionalContent: AdContent[] = [
   // },
 ];
 
+/**
+ * The product's own routes that an advertisement would interrupt: the flow
+ * somebody builds a gift in and the flow they pay us in. Each one covers the
+ * route itself and everything beneath it, so `/create` also covers
+ * `/create/wedding-invitation` and `/payment` also covers the page PayPal
+ * returns to.
+ *
+ * These are named one by one because no rule gathers them, and each addition is
+ * a deliberate decision about our own UI. No gift route belongs here: a gift is
+ * kept clear by the same question the footer asks, so a template added tomorrow
+ * is covered without anybody remembering this file exists.
+ *
+ * The scrapbook and journal build pages hang off their product's own route
+ * rather than under `/create`, so they are named here too: somebody assembling
+ * a scrapbook or writing a journal is building, and an advertisement over the
+ * work interrupts it the same way it would in the Create Flow.
+ */
+const PRODUCT_ROUTES_WITHOUT_ADS = [
+  '/create',
+  '/payment',
+  '/scrapbook/create',
+  '/journal/create',
+];
+
+function isProductRouteWithoutAds(pathname: string): boolean {
+  return PRODUCT_ROUTES_WITHOUT_ADS.some(
+    (route) => pathname === route || pathname.startsWith(`${route}/`)
+  );
+}
+
+/**
+ * The MemoRoll demo draws the designer's screens edge to edge, so the site
+ * chrome stays off it the same way it stays off a gift: no footer beneath the
+ * walkthrough and no advertisement over it. It is not a gift, though, so it
+ * does not belong in `drawsAGift` - it answers the chrome question here on
+ * its own.
+ */
+function isMemorollDemo(pathname: string): boolean {
+  return pathname === '/memoroll' || pathname.startsWith('/memoroll/');
+}
+
 const SessionProvider = ({
   children,
   session,
@@ -129,7 +181,15 @@ const SessionProvider = ({
   session: string;
   initialProfileData: IProfileResponse | null;
 }) => {
-  const parsedSession: SessionData = session ? JSON.parse(session) : {};
+  // Parsed once per distinct cookie rather than once per render. A server
+  // action makes Next re-render everything that reads the router, and this
+  // provider reads it three times over, so a fresh object here would hand every
+  // consumer a session that looks new on each of those renders - which is
+  // exactly how an effect keyed on the session turns into an endless loop.
+  const parsedSession: SessionData = useMemo(
+    () => (session ? JSON.parse(session) : {}),
+    [session]
+  );
   const [userProfile, setUserProfile] = useState<IProfileResponse | null>(
     initialProfileData
   );
@@ -140,6 +200,8 @@ const SessionProvider = ({
   });
 
   const pathname = usePathname();
+  const segments = useSelectedLayoutSegments();
+  const { id: contentId } = useParams();
 
   const [uploadStateLoading, setUploadStateLoading] = useState(false);
 
@@ -154,14 +216,10 @@ const SessionProvider = ({
   const [loading, setLoading] = useState(true);
 
   const isPremium = userProfile?.type === 'premium';
-  const isClawGift =
-    pathname === '/arcadeclawv1' || pathname.startsWith('/arcadeclawv1/');
-  const isBoardOfUsGift =
-    pathname === '/boardofusv1' || pathname.startsWith('/boardofusv1/');
+  const isGift = drawsAGift(segments, contentId);
+  const isChromeFreeDemo = isMemorollDemo(pathname);
   const isHideAds =
-    ['/create', '/payment'].includes(pathname) ||
-    isClawGift ||
-    isBoardOfUsGift;
+    isGift || isChromeFreeDemo || isProductRouteWithoutAds(pathname);
 
   const PREMIUM_ADS_KEY = 'memoify_premium_ads_count';
   const PREMIUM_ADS_LIMIT = 3;
@@ -178,7 +236,7 @@ const SessionProvider = ({
     try {
       const current = getPremiumAdsCount();
       localStorage.setItem(PREMIUM_ADS_KEY, String(current + 1));
-    } catch { }
+    } catch {}
   };
 
   useEffect(() => {
@@ -200,22 +258,25 @@ const SessionProvider = ({
 
   useEffect(() => {
     if (parsedSession.accessToken) {
-      const interval = setInterval(async () => {
-        setLoading(true);
-        const spotifySession = await getSpotifyAccessToken();
-        const newSession = {
-          spotify: {
-            accessToken: spotifySession.data.access_token,
-            refreshToken: '',
-            expiresIn: dayjs()
-              .add(spotifySession.data.expires_in, 'seconds')
-              .format('YYYY-MM-DD HH:mm:ss'),
-          },
-        };
+      const interval = setInterval(
+        async () => {
+          setLoading(true);
+          const spotifySession = await getSpotifyAccessToken();
+          const newSession = {
+            spotify: {
+              accessToken: spotifySession.data.access_token,
+              refreshToken: '',
+              expiresIn: dayjs()
+                .add(spotifySession.data.expires_in, 'seconds')
+                .format('YYYY-MM-DD HH:mm:ss'),
+            },
+          };
 
-        await setSessionSpecific(newSession.spotify, 'spotify');
-        setLoading(false);
-      }, 1000 * 60 * 30);
+          await setSessionSpecific(newSession.spotify, 'spotify');
+          setLoading(false);
+        },
+        1000 * 60 * 30
+      );
 
       return () => {
         clearInterval(interval);
@@ -230,20 +291,28 @@ const SessionProvider = ({
   };
 
   useEffect(() => {
-    if (isHideAds) return;
+    if (isHideAds) {
+      // This provider outlives a navigation, so an ad opened on a page that
+      // allows one is still open on arrival at a page that does not.
+      setAdsModalVisible(false);
+      return;
+    }
     if (isPremium && getPremiumAdsCount() >= PREMIUM_ADS_LIMIT) return;
 
-    const interval = setInterval(() => {
-      if (isPremium) {
-        if (getPremiumAdsCount() >= PREMIUM_ADS_LIMIT) {
-          clearInterval(interval);
-          return;
+    const interval = setInterval(
+      () => {
+        if (isPremium) {
+          if (getPremiumAdsCount() >= PREMIUM_ADS_LIMIT) {
+            clearInterval(interval);
+            return;
+          }
+          incrementPremiumAdsCount();
         }
-        incrementPremiumAdsCount();
-      }
-      setCurrentAdContent(selectRandomContent());
-      setAdsModalVisible(true);
-    }, 1000 * 60 * 1);
+        setCurrentAdContent(selectRandomContent());
+        setAdsModalVisible(true);
+      },
+      1000 * 60 * 1
+    );
 
     return () => {
       clearInterval(interval);
@@ -333,9 +402,11 @@ const SessionProvider = ({
         {children}
         {/* {parsedSession.accessToken ? userProfile ? children : <></> : children} */}
       </Provider>
-      {!['/spotify', '/magazinev1', 'journal'].includes(pathname) &&
-        !isClawGift &&
-        !isBoardOfUsGift && <Footer />}
+      {/* The site footer would intrude on the page a recipient came to see, so
+          it stays off a gift. The Create Flow that builds one is ordinary
+          product UI and keeps it. Arcade Claw and Board of Us sit in (gifts),
+          so drawsAGift already covers them. */}
+      {!isGift && !isChromeFreeDemo && <Footer />}
     </SessionContext.Provider>
   );
 };

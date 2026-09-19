@@ -21,11 +21,28 @@ const handler = NextAuth({
   ],
 
   session: {
-    maxAge: 3 * 60 * 60, // 4 hours
+    // Thirty days, matching the iron-session cookie - the two expire
+    // together or the shorter one signs people out mid-event (2026-08-30).
+    maxAge: 30 * 24 * 60 * 60,
   },
 
   callbacks: {
-    async redirect({ baseUrl }) {
+    async redirect({ url, baseUrl }) {
+      // Signing in returns to the page that asked. Every signIn() call names
+      // that page - explicitly, as the wedding landing does with the Create
+      // Flow, or implicitly, since NextAuth defaults the callback to the page
+      // sign-in started on - so any same-origin callback is honoured. This
+      // callback runs twice per sign-in - once when the callback URL is
+      // stored, receiving the relative path, and once when Google returns,
+      // receiving the absolute URL the first run answered - so both forms are
+      // read. A foreign origin, or anything that cannot be read as a URL at
+      // all, lands on home rather than wherever it pointed.
+      try {
+        const asked = new URL(url, baseUrl);
+        if (asked.origin === baseUrl) {
+          return asked.href;
+        }
+      } catch {}
       return baseUrl;
     },
     async session({ session, token }) {

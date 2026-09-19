@@ -38,7 +38,7 @@ const ScrapbookPage = () => {
         pageOneCanvasRef,
         pageTwoCanvasRef,
         pageThreeCanvasRef,
-        pageFourCanvasRef
+        pageFourCanvasRef,
       },
       templateId,
       router,

@@ -1,4 +1,19 @@
 #!/usr/bin/env sh
 . "$(dirname -- "$0")/_/husky.sh"
 
+# No em dash lands in this repository: the working agreement writes a plain
+# dash instead, and hbd-prd swept the last of them out. Only added lines are
+# checked, so editing or moving a file never blocks on history, and the
+# `*.local.json` fixtures are left alone because they record what the backend
+# and its users actually said. The character is spelled as bytes so this hook
+# does not trip over itself.
+EM_DASH=$(printf '\342\200\224')
+if git diff --cached --unified=0 --no-color -- ':(exclude)*.local.json' |
+  grep -q "^+.*$EM_DASH"; then
+  echo "pre-commit: an em dash is staged. Write a plain dash \"-\" instead:" >&2
+  git diff --cached --unified=0 --no-color -- ':(exclude)*.local.json' |
+    grep "^+.*$EM_DASH" | head -20 >&2
+  exit 1
+fi
+
 npx lint-staged

@@ -23,6 +23,11 @@ export const sessionOptions: SessionOptions = {
     httpOnly: true,
     // Secure only works in `https` environments. So if the environment is `https`, it'll return true.
     secure: process.env.NODE_ENV === 'production',
-    maxAge: 60 * 60 * 3, // One hour
+    // Thirty days, and it is a hard deadline rather than an idle timeout:
+    // nothing re-saves the session on reads, so the clock runs from login.
+    // This was three hours (mislabelled "one hour"), which signed people out
+    // mid-wedding - found 2026-08-30 when a signed-in guest's reload bounced
+    // to Google. NextAuth's session maxAge matches it.
+    maxAge: 60 * 60 * 24 * 30,
   },
 };

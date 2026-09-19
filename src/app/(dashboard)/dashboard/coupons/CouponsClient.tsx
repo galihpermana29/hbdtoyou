@@ -166,7 +166,9 @@ const CouponsClient = ({ initialData }: { initialData: ICoupon[] }) => {
       dataIndex: 'discount_value',
       key: 'discount_value',
       render: (val: number, record: ICoupon) =>
-        record.discount_type === 'percent' ? `${val}%` : `Rp ${val.toLocaleString()}`,
+        record.discount_type === 'percent'
+          ? `${val}%`
+          : `Rp ${val.toLocaleString()}`,
     },
     {
       title: 'Max Uses',
@@ -193,7 +195,7 @@ const CouponsClient = ({ initialData }: { initialData: ICoupon[] }) => {
       dataIndex: 'expired_at',
       key: 'expired_at',
       render: (val: string | null) =>
-        val ? dayjs(val).format('YYYY-MM-DD HH:mm') : '—',
+        val ? dayjs(val).format('YYYY-MM-DD HH:mm') : '-',
     },
     {
       title: 'Created',

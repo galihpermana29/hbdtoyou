@@ -16,8 +16,8 @@ type LockScreenProps = {
   contentId: string;
   type?: 'gift' | 'scrapbook';
   /**
-   * 'default' — heavy dark veil over the content (standard digital gifts).
-   * 'subtle'  — faint dim + a floating card so the user can still SEE their
+   * 'default' - heavy dark veil over the content (standard digital gifts).
+   * 'subtle'  - faint dim + a floating card so the user can still SEE their
    *             result clearly (but not interact). Used by /photobox-newspaper.
    */
   lockVariant?: 'default' | 'subtle';
@@ -103,7 +103,8 @@ const LockScreen = ({
                 : 'text-white'
             }`}>
             <h2 className="text-2xl font-semibold">{title}</h2>
-            <p className={`text-sm ${subtle ? 'text-gray-600' : 'text-gray-200'}`}>
+            <p
+              className={`text-sm ${subtle ? 'text-gray-600' : 'text-gray-200'}`}>
               {message}
             </p>
             <div className="flex items-center justify-center gap-2">

@@ -1,0 +1,37 @@
+# Path URLs, not per-invitation subdomains
+
+Superseded by `0005-an-invitation-answers-at-its-own-subdomain.md`: the infrastructure this decision waited on is now owned, and the invitation answers at its subdomain.
+
+The wedding invitation design shows a couple choosing a custom domain and the published invitation living at `FreeAtLastWithElias.memoify.live`.
+We hold the invitation's Invitation Slug and serve the invitation from a path, `memoify.live/wedding-1/<slug>`, rather than a subdomain.
+
+A real subdomain per invitation needs wildcard DNS, a wildcard TLS certificate, and host-to-content mapping in middleware.
+None of that is frontend work and nobody owns it yet, whereas the entire user-facing flow works identically on a path.
+
+## The path carries the template
+
+`wedding-1` is Wedding Template 1, which is the one wedding template that exists.
+More are expected, and they are separate templates rather than skins of one, so an address that named only the slug would leave a route with no way to tell which template it was asked for.
+Naming it in the path answers that where the address is read, rather than by looking the invitation up first to find out how to draw it.
+
+## What the couple is shown
+
+The field a couple reads their slug in shows `memoify.live/wedding-1/` ahead of the box, rather than the `.memoify.live` the design draws after it.
+
+Following the design there would promise an address the product does not serve.
+A couple would read "your invitation is at FreeAtLastWithElias.memoify.live" on one step and be handed a different address on the next, which is what `hbd-byb.18` was raised for.
+The fixed part of the address is therefore read first, left to right, exactly as the finished link reads.
+
+The slug itself is no longer the couple's to choose.
+There is no endpoint that can say whether a name is free, so a couple picking one could only be told it was taken after failing.
+The backend generates a slug when an invitation is created without one, and the field is read-only.
+
+One exception was decided later (hbd-08l), and it is still not the couple choosing.
+The title now names the couple, so an invitation whose nicknames exist by its first save is minted a name-derived slug by the backend's own generator; a couple who drafted before typing names got a generic one, and on the save where both nicknames first exist - only while the invitation is unpublished - the flow sends a slug derived from them, so their URL says who they are.
+Refused means the generated slug stands and nothing is said, and from the moment the invitation is published the slug is frozen forever, because a shared link must never die.
+
+## Consequences
+
+The slug is unique and visible in the shared link, so the address the couple sends behaves as the design's does.
+The URL's shape differs, and so does who names it.
+Moving to subdomains later is a middleware change plus a redirect from the old paths, because the slug is already the identifier.

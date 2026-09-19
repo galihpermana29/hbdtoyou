@@ -3,7 +3,7 @@ import ClawOfUs from './claw-of-us';
 import { ARCADE_CLAW_SAMPLE_DATA } from './sample-data';
 
 export const metadata: Metadata = {
-  title: 'Claw of Us — Memoify',
+  title: 'Claw of Us - Memoify',
   description: 'Play a claw-machine gift filled with shared memories.',
 };
 

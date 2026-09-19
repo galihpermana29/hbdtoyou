@@ -28,10 +28,7 @@ const DashboardCard = ({
 
   if (isJournal) {
     return (
-      <DashboardJournalCard
-        content={content}
-        setModalType={setModalType}
-      />
+      <DashboardJournalCard content={content} setModalType={setModalType} />
     );
   }
 
@@ -73,7 +70,8 @@ const DashboardCard = ({
             }
             onClick={() => {
               router.push(
-                `/dashboard/edit/${content?.id
+                `/dashboard/edit/${
+                  content?.id
                 }?templateName=${templateNameToRoute(
                   content?.template_name
                 )}&templateId=${content?.template_id}`

@@ -34,11 +34,7 @@ export default function VinylVideoModal({
       </h2>
 
       <div className="rounded-xl overflow-hidden">
-        <video
-          src={videoUrl}
-          controls
-          className="w-full aspect-video"
-        />
+        <video src={videoUrl} controls className="w-full aspect-video" />
       </div>
     </ModalWrapper>
   );

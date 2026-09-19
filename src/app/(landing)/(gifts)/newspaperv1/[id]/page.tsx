@@ -32,7 +32,9 @@ export default async function NewspaperPage({ params }: { params: any }) {
       <header className="border-b">
         <div className="container mx-auto px-4 py-6">
           <div className="flex justify-between items-center mb-4">
-            <div className="text-sm font-lora text-gray-600">January 2, 2024</div>
+            <div className="text-sm font-lora text-gray-600">
+              January 2, 2024
+            </div>
             <div className="flex space-x-4 text-sm font-lora">
               <a href="#" className="hover:text-gray-600">
                 HOME
@@ -59,7 +61,9 @@ export default async function NewspaperPage({ params }: { params: any }) {
         <div className="grid grid-cols-1 lg:grid-cols-12 gap-8">
           {/* Latest Articles Sidebar */}
           <aside className="lg:col-span-3">
-            <h2 className="text-lg font-playfair font-semibold mb-4">LATEST ARTICLES</h2>
+            <h2 className="text-lg font-playfair font-semibold mb-4">
+              LATEST ARTICLES
+            </h2>
             <ul className="space-y-4">
               {[
                 "The Ultimate Guide to New York's Hidden Food",

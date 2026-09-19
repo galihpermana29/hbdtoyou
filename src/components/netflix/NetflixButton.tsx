@@ -57,8 +57,7 @@ const NetflixButton = ({
       icon={icon}
       iconPosition={iconPosition}
       className={`${baseClasses} ${variantClasses[variant]} ${widthClasses} ${className} geist-font flex items-center justify-center gap-x-2`}
-      {...props}
-    >
+      {...props}>
       {children}
     </Button>
   );

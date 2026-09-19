@@ -33,7 +33,8 @@
   height: 100%;
 }
 
-.page-img, .cover-image {
+.page-img,
+.cover-image {
   width: 100%;
   height: 100%;
   object-fit: cover;
@@ -84,7 +85,7 @@
   .scrapbook-container {
     margin-top: 20px;
   }
-  
+
   .cover-title h2 {
     font-size: 1.8rem;
   }

@@ -195,15 +195,15 @@ export const downloadCanvasAsImage = (
 ): void => {
   // Create a temporary link element
   const link = document.createElement('a');
-  
+
   try {
     // Convert canvas to data URL as JPEG format with 0.9 quality
     const dataUrl = canvas.toDataURL('image/jpeg', 0.9);
-    
+
     // Set link attributes
     link.download = `${fileName}.jpg`;
     link.href = dataUrl;
-    
+
     // Append to body, click to trigger download, then remove
     document.body.appendChild(link);
     link.click();

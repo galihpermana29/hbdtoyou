@@ -75,7 +75,8 @@ const PageFlipScrapbook: React.FC<PageFlipScrapbookProps> = ({
     'portrait'
   );
   // Use the new client-side GIF export hook
-  const { exportToGif, isExporting, exportProgress, exportError } = useGifExport();
+  const { exportToGif, isExporting, exportProgress, exportError } =
+    useGifExport();
 
   const onInit = () => {
     // Wait a moment for the component to fully initialize
@@ -124,8 +125,8 @@ const PageFlipScrapbook: React.FC<PageFlipScrapbookProps> = ({
         try {
           await navigator.clipboard.write([
             new ClipboardItem({
-              'image/gif': blob
-            })
+              'image/gif': blob,
+            }),
           ]);
           message.success('GIF copied to clipboard and downloaded!');
         } catch (clipboardError) {
@@ -133,7 +134,9 @@ const PageFlipScrapbook: React.FC<PageFlipScrapbookProps> = ({
           message.success('GIF downloaded! (Clipboard copy not supported)');
         }
       } else {
-        message.success('GIF downloaded! (Clipboard copy not supported on this browser)');
+        message.success(
+          'GIF downloaded! (Clipboard copy not supported on this browser)'
+        );
       }
 
       // Download the GIF (same download logic)
@@ -146,7 +149,6 @@ const PageFlipScrapbook: React.FC<PageFlipScrapbookProps> = ({
 
       // Clean up the blob URL
       URL.revokeObjectURL(link.href);
-
     } catch (error) {
       console.error('Export error:', error);
       message.error('Failed to export GIF. Please try again.');
@@ -224,8 +226,7 @@ const PageFlipScrapbook: React.FC<PageFlipScrapbookProps> = ({
               <div className="w-full bg-gray-200 rounded-full h-2">
                 <div
                   className="bg-[#E34013] h-2 rounded-full transition-all duration-300"
-                  style={{ width: `${exportProgress}%` }}
-                ></div>
+                  style={{ width: `${exportProgress}%` }}></div>
               </div>
             </div>
           )}

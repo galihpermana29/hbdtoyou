@@ -11,7 +11,7 @@ import {
   generateQRIS,
   getDetailPayment,
   getListPackages,
-  previewCoupon
+  previewCoupon,
 } from '@/action/user-api';
 import NavigationBar from '@/components/ui/navbar';
 import { Button, Input, Select, Typography, message } from 'antd';
@@ -55,7 +55,8 @@ const NewClientPagePayment = () => {
 
   const [couponCode, setCouponCode] = useState(DEFAULT_COUPON_CODE);
   const [couponLoading, setCouponLoading] = useState(false);
-  const [couponPreview, setCouponPreview] = useState<ICouponPreviewResponse | null>(null);
+  const [couponPreview, setCouponPreview] =
+    useState<ICouponPreviewResponse | null>(null);
 
   const [listPackages, setListPackages] = useState<
     IListPackageResponse[] | null
@@ -89,7 +90,10 @@ const NewClientPagePayment = () => {
       return;
     }
     setCouponLoading(true);
-    const res = await previewCoupon({ code: couponCode.trim(), package_id: planId });
+    const res = await previewCoupon({
+      code: couponCode.trim(),
+      package_id: planId,
+    });
     if (res.success && res.data) {
       setCouponPreview(res.data);
       message.success('Coupon applied!');
@@ -310,7 +314,9 @@ const NewClientPagePayment = () => {
                         </Title>
                         <p className="text-sm text-gray-500 mt-1">
                           Upgrade your plan to unlock all premium features.{' '}
-                          <Link href="/#faq-section" className="text-[#E34013] underline font-medium">
+                          <Link
+                            href="/#faq-section"
+                            className="text-[#E34013] underline font-medium">
                             FAQ
                           </Link>
                         </p>
@@ -319,7 +325,9 @@ const NewClientPagePayment = () => {
                       {/* Order Summary Card */}
                       {listPackages && listPackages.length > 0 && (
                         <div className="border border-gray-200 rounded-xl p-5 mb-5">
-                          <p className="text-xs font-semibold text-gray-400 uppercase tracking-wide mb-3">Order Summary</p>
+                          <p className="text-xs font-semibold text-gray-400 uppercase tracking-wide mb-3">
+                            Order Summary
+                          </p>
 
                           <div className="flex justify-between items-center">
                             <Text className="text-gray-600">Package</Text>
@@ -342,7 +350,12 @@ const NewClientPagePayment = () => {
 
                           <div className="flex justify-between items-center mt-3">
                             <Text className="text-gray-600">Subtotal</Text>
-                            <Text className={couponPreview ? 'line-through text-gray-400' : 'font-semibold'}>
+                            <Text
+                              className={
+                                couponPreview
+                                  ? 'line-through text-gray-400'
+                                  : 'font-semibold'
+                              }>
                               IDR {detailPackages?.price?.toLocaleString()}
                             </Text>
                           </div>
@@ -354,7 +367,9 @@ const NewClientPagePayment = () => {
                                 <Input
                                   placeholder="Coupon code"
                                   value={couponCode}
-                                  onChange={(e) => setCouponCode(e.target.value.toUpperCase())}
+                                  onChange={(e) =>
+                                    setCouponCode(e.target.value.toUpperCase())
+                                  }
                                   onPressEnter={handlePreviewCoupon}
                                   className="flex-1"
                                 />
@@ -368,7 +383,13 @@ const NewClientPagePayment = () => {
                             ) : (
                               <div className="flex items-center justify-between bg-green-50 rounded-lg px-3 py-2">
                                 <span className="text-green-600 text-sm font-medium">
-                                  {couponCode} ({Math.round((couponPreview.discount_amount / couponPreview.original_price) * 100)}% off)
+                                  {couponCode} (
+                                  {Math.round(
+                                    (couponPreview.discount_amount /
+                                      couponPreview.original_price) *
+                                      100
+                                  )}
+                                  % off)
                                 </span>
                                 <button
                                   onClick={handleRemoveCoupon}
@@ -381,18 +402,24 @@ const NewClientPagePayment = () => {
 
                           {couponPreview && (
                             <div className="flex justify-between items-center mt-3">
-                              <Text className="text-green-600 text-sm">Discount</Text>
+                              <Text className="text-green-600 text-sm">
+                                Discount
+                              </Text>
                               <Text className="text-green-600 text-sm font-medium">
-                                - IDR {couponPreview.discount_amount.toLocaleString()}
+                                - IDR{' '}
+                                {couponPreview.discount_amount.toLocaleString()}
                               </Text>
                             </div>
                           )}
 
                           <div className="border-t border-gray-200 mt-4 pt-3">
                             <div className="flex justify-between items-center">
-                              <Text strong className="text-base">Total</Text>
+                              <Text strong className="text-base">
+                                Total
+                              </Text>
                               <Text strong className="text-xl text-[#E34013]">
-                                IDR {couponPreview
+                                IDR{' '}
+                                {couponPreview
                                   ? couponPreview.final_price.toLocaleString()
                                   : detailPackages?.price?.toLocaleString()}
                               </Text>
@@ -424,7 +451,9 @@ const NewClientPagePayment = () => {
 
                         <div className="flex items-center my-4">
                           <div className="flex-1 border-t border-gray-200" />
-                          <span className="mx-3 text-gray-400 text-xs uppercase">or pay with</span>
+                          <span className="mx-3 text-gray-400 text-xs uppercase">
+                            or pay with
+                          </span>
                           <div className="flex-1 border-t border-gray-200" />
                         </div>
 
@@ -432,10 +461,16 @@ const NewClientPagePayment = () => {
                           <Button
                             onClick={handlePaypal}
                             loading={loading.paypal}
-                            type={paymentMethod === 'paypal' ? 'primary' : 'default'}
+                            type={
+                              paymentMethod === 'paypal' ? 'primary' : 'default'
+                            }
                             className="flex-1 !h-[44px] !flex !items-center !justify-center !rounded-lg"
                             style={{ minWidth: 0 }}>
-                            <svg viewBox="0 0 24 24" width="18" height="18" xmlns="http://www.w3.org/2000/svg">
+                            <svg
+                              viewBox="0 0 24 24"
+                              width="18"
+                              height="18"
+                              xmlns="http://www.w3.org/2000/svg">
                               <path
                                 fill="#003087"
                                 d="M 7.076 21.337 L 7.515 18.773 L 6.715 18.758 L 3.483 18.758 C 3.284 18.758 3.111 18.624 3.074 18.429 L 1.212 6.471 C 1.186 6.339 1.241 6.206 1.348 6.119 C 1.455 6.032 1.597 5.991 1.734 6.008 L 8.894 6.008 C 10.248 6.008 11.399 6.264 12.212 6.78 C 12.576 6.995 12.861 7.255 13.074 7.555 C 13.293 7.866 13.443 8.222 13.521 8.618 C 13.602 9.023 13.612 9.493 13.549 10.022 C 13.542 10.069 13.534 10.116 13.526 10.164 C 13.349 11.233 12.987 12.109 12.448 12.775 C 11.939 13.406 11.298 13.888 10.545 14.211 C 9.819 14.523 8.993 14.72 8.093 14.798 C 7.773 14.828 7.437 14.844 7.089 14.844 L 6.737 14.844 C 6.395 14.844 6.069 14.95 5.813 15.147 C 5.557 15.344 5.387 15.622 5.329 15.935 L 5.309 16.035 L 4.709 19.764 L 4.694 19.84 C 4.687 19.88 4.677 19.9 4.662 19.915 C 4.648 19.93 4.629 19.938 4.608 19.938 L 4.587 19.938 Z"
@@ -452,12 +487,28 @@ const NewClientPagePayment = () => {
                             disabled
                             className="flex-1 !h-[44px] !flex !items-center !justify-center !rounded-lg"
                             style={{ minWidth: 0 }}>
-                            <svg viewBox="0 0 24 24" width="18" height="18" xmlns="http://www.w3.org/2000/svg">
+                            <svg
+                              viewBox="0 0 24 24"
+                              width="18"
+                              height="18"
+                              xmlns="http://www.w3.org/2000/svg">
                               <g transform="matrix(1, 0, 0, 1, 27.009001, -39.238998)">
-                                <path fill="#4285F4" d="M -3.264 51.509 C -3.264 50.719 -3.334 49.969 -3.454 49.239 L -14.754 49.239 L -14.754 53.749 L -8.284 53.749 C -8.574 55.229 -9.424 56.479 -10.684 57.329 L -10.684 60.329 L -6.824 60.329 C -4.564 58.239 -3.264 55.159 -3.264 51.509 Z" />
-                                <path fill="#34A853" d="M -14.754 63.239 C -11.514 63.239 -8.804 62.159 -6.824 60.329 L -10.684 57.329 C -11.764 58.049 -13.134 58.489 -14.754 58.489 C -17.884 58.489 -20.534 56.379 -21.484 53.529 L -25.464 53.529 L -25.464 56.619 C -23.494 60.539 -19.444 63.239 -14.754 63.239 Z" />
-                                <path fill="#FBBC05" d="M -21.484 53.529 C -21.734 52.809 -21.864 52.039 -21.864 51.239 C -21.864 50.439 -21.724 49.669 -21.484 48.949 L -21.484 45.859 L -25.464 45.859 C -26.284 47.479 -26.754 49.299 -26.754 51.239 C -26.754 53.179 -26.284 54.999 -25.464 56.619 L -21.484 53.529 Z" />
-                                <path fill="#EA4335" d="M -14.754 43.989 C -12.984 43.989 -11.404 44.599 -10.154 45.789 L -6.734 42.369 C -8.804 40.429 -11.514 39.239 -14.754 39.239 C -19.444 39.239 -23.494 41.939 -25.464 45.859 L -21.484 48.949 C -20.534 46.099 -17.884 43.989 -14.754 43.989 Z" />
+                                <path
+                                  fill="#4285F4"
+                                  d="M -3.264 51.509 C -3.264 50.719 -3.334 49.969 -3.454 49.239 L -14.754 49.239 L -14.754 53.749 L -8.284 53.749 C -8.574 55.229 -9.424 56.479 -10.684 57.329 L -10.684 60.329 L -6.824 60.329 C -4.564 58.239 -3.264 55.159 -3.264 51.509 Z"
+                                />
+                                <path
+                                  fill="#34A853"
+                                  d="M -14.754 63.239 C -11.514 63.239 -8.804 62.159 -6.824 60.329 L -10.684 57.329 C -11.764 58.049 -13.134 58.489 -14.754 58.489 C -17.884 58.489 -20.534 56.379 -21.484 53.529 L -25.464 53.529 L -25.464 56.619 C -23.494 60.539 -19.444 63.239 -14.754 63.239 Z"
+                                />
+                                <path
+                                  fill="#FBBC05"
+                                  d="M -21.484 53.529 C -21.734 52.809 -21.864 52.039 -21.864 51.239 C -21.864 50.439 -21.724 49.669 -21.484 48.949 L -21.484 45.859 L -25.464 45.859 C -26.284 47.479 -26.754 49.299 -26.754 51.239 C -26.754 53.179 -26.284 54.999 -25.464 56.619 L -21.484 53.529 Z"
+                                />
+                                <path
+                                  fill="#EA4335"
+                                  d="M -14.754 43.989 C -12.984 43.989 -11.404 44.599 -10.154 45.789 L -6.734 42.369 C -8.804 40.429 -11.514 39.239 -14.754 39.239 C -19.444 39.239 -23.494 41.939 -25.464 45.859 L -21.484 48.949 C -20.534 46.099 -17.884 43.989 -14.754 43.989 Z"
+                                />
                               </g>
                             </svg>
                             <span className="ml-2">GPay</span>
@@ -467,7 +518,11 @@ const NewClientPagePayment = () => {
                             disabled
                             className="flex-1 !h-[44px] !flex !items-center !justify-center !rounded-lg"
                             style={{ minWidth: 0 }}>
-                            <svg viewBox="0 0 24 24" width="18" height="18" xmlns="http://www.w3.org/2000/svg">
+                            <svg
+                              viewBox="0 0 24 24"
+                              width="18"
+                              height="18"
+                              xmlns="http://www.w3.org/2000/svg">
                               <path d="M17.6 13.8c0-3 2.5-4.5 2.6-4.6-1.4-2.1-3.6-2.3-4.4-2.4-1.9-.2-3.6 1.1-4.6 1.1-.9 0-2.4-1.1-4-1-2 0-3.9 1.2-5 3-2.1 3.7-.5 9.1 1.5 12.1 1 1.5 2.2 3.1 3.8 3 1.5-.1 2.1-1 3.9-1s2.4.9 4 .9 2.7-1.5 3.7-2.9c1.2-1.7 1.6-3.3 1.7-3.4-.1-.1-3.2-1.3-3.2-4.8zm-3.1-8.9c.8-1 1.4-2.4 1.2-3.8-1.2 0-2.7.8-3.5 1.8-.8.9-1.5 2.3-1.3 3.7 1.4.1 2.8-.7 3.6-1.7z" />
                             </svg>
                             <span className="ml-2">Apple</span>

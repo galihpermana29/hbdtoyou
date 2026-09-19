@@ -247,7 +247,11 @@ export default function TarotReader({ data }: TarotReaderProps) {
                       initial={{ opacity: 0, scale: 0.8, x: 50 }}
                       animate={{ opacity: 1, scale: 1, x: 0 }}
                       exit={{ opacity: 0, scale: 0.8, x: -50 }}
-                      transition={{ type: 'spring', damping: 25, stiffness: 120 }}
+                      transition={{
+                        type: 'spring',
+                        damping: 25,
+                        stiffness: 120,
+                      }}
                       className="w-full h-full cursor-grab active:cursor-grabbing">
                       <TarotCard
                         id={selectedCards[currentIndex].id}

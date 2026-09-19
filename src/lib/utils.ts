@@ -133,18 +133,17 @@ export function mapContentToCard(contents: IContent[], purpose = 'client') {
       title: show?.title
         ? show.title
         : Object.prototype.hasOwnProperty.call(jsonContent, 'title')
-        ? capitalizeFirstLetter(jsonContent.title?.toLowerCase())
-        : Object.prototype.hasOwnProperty.call(jsonContent, 'modalContent')
-        ? capitalizeFirstLetter(jsonContent.modalContent?.toLowerCase())?.slice(
-            0,
-            12
-          )
-        : 'A title',
+          ? capitalizeFirstLetter(jsonContent.title?.toLowerCase())
+          : Object.prototype.hasOwnProperty.call(jsonContent, 'modalContent')
+            ? capitalizeFirstLetter(
+                jsonContent.modalContent?.toLowerCase()
+              )?.slice(0, 12)
+            : 'A title',
       link: templateName.includes('journal')
         ? `/journal/${show.id}`
         : templateName.includes('photobox-newspaper')
-        ? `/photobox-newspaper/${show.id}`
-        : `/${route}/${show.id}`,
+          ? `/photobox-newspaper/${show.id}`
+          : `/${route}/${show.id}`,
       desc: show?.caption
         ? show?.caption
         : jsonContent?.subTitle || 'A description',

@@ -24,7 +24,7 @@ const ResultWrapper = ({
           All Done! Your Scrapbook is Ready to Share
         </h1>
         <p className="text-[#666D80] text-[16px] font-[400] ">
-          We have saved your scrapbook — you can revisit it anytime using the
+          We have saved your scrapbook - you can revisit it anytime using the
           link above.
         </p>
       </div>

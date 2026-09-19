@@ -1,8 +1,8 @@
 'use client';
 import { IContent } from '@/action/interfaces';
 import { deleteContentById } from '@/action/user-api';
-import { Button, message, Modal, Tag } from 'antd';
-import { SquarePen, Trash, Trash2 } from 'lucide-react';
+import { Button, message, Modal } from 'antd';
+import { SquarePen, Trash2 } from 'lucide-react';
 import { useRouter } from 'next/navigation';
 import { useEffect, useState } from 'react';
 import DetailContentModal from './DetailContentModal';

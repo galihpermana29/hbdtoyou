@@ -178,7 +178,7 @@ const PlansClient = ({
       title: 'Duration',
       dataIndex: 'duration_days',
       key: 'duration_days',
-      render: (val: number) => (val ? `${val} days` : '—'),
+      render: (val: number) => (val ? `${val} days` : '-'),
     },
     {
       title: 'Active',
@@ -314,7 +314,10 @@ const PlansClient = ({
             <Form.Item name="is_active" label="Active" valuePropName="checked">
               <Switch />
             </Form.Item>
-            <Form.Item name="is_popular" label="Popular" valuePropName="checked">
+            <Form.Item
+              name="is_popular"
+              label="Popular"
+              valuePropName="checked">
               <Switch />
             </Form.Item>
           </div>

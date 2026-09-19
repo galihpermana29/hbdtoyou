@@ -8,7 +8,6 @@ import { useMemoifyProfile } from '@/app/session-provider';
 import { createContent, editContent, submitFeedback } from '@/action/user-api';
 import { IDetailContentResponse } from '@/action/interfaces';
 import dayjs from 'dayjs';
-import { useRouter } from 'next/navigation';
 import { useDispatch } from 'react-redux';
 import { reset } from '@/lib/uploadSlice';
 import FinalModal from '../final-modal';
@@ -31,7 +30,6 @@ const NewVinylForm = ({
 }: NewVinylFormProps) => {
   const profile = useMemoifyProfile();
   const isFreeAccount = profile?.quota < 1;
-  const router = useRouter();
   const [form] = useForm();
   const dispatch = useDispatch();
 
@@ -223,7 +221,7 @@ const NewVinylForm = ({
           label={
             <div>
               <h3 className="text-[15px] font-semibold">
-                Voice Note (MP3) — Optional
+                Voice Note (MP3) - Optional
               </h3>
               <p className="text-[13px] text-gray-600 max-w-[400px]">
                 Upload a voice note that plays when the recipient clicks the
@@ -245,7 +243,7 @@ const NewVinylForm = ({
         </Form.Item>
 
         {/* Voice Note Quote */}
-        <Form.Item name={'voiceNoteQuote'} label="Voice Note Quote — Optional">
+        <Form.Item name={'voiceNoteQuote'} label="Voice Note Quote - Optional">
           <Input
             size="large"
             placeholder={`e.g., "You feel like home to me, in a way I can't explain."`}
@@ -258,7 +256,7 @@ const NewVinylForm = ({
           label={
             <div>
               <h3 className="text-[15px] font-semibold">
-                Video (MP4) — Optional
+                Video (MP4) - Optional
               </h3>
               <p className="text-[13px] text-gray-600 max-w-[400px]">
                 Upload a video that plays when the recipient clicks the

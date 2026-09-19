@@ -1,10 +1,11 @@
 import DashboardNavbar from '@/components/ui/dashboard-navbar';
 import NavigationBar from '@/components/ui/navbar';
+import { isAdminEmail } from '@/lib/admin';
 import { getSession } from '@/store/get-set-session';
 
 const DashboardLayout = async ({ children }: { children: React.ReactNode }) => {
   const session = await getSession();
-  const isAdmin = session?.email === 'memoify.live@gmail.com';
+  const isAdmin = isAdminEmail(session?.email);
 
   return (
     <div className="min-h-screen mb-[80px]">

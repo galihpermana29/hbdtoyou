@@ -5,8 +5,7 @@
   "htmlWhitespaceSensitivity": "css",
   "insertPragma": false,
   "singleAttributePerLine": false,
-  "bracketSameLine": false,
-  "jsxBracketSameLine": true,
+  "bracketSameLine": true,
   "jsxSingleQuote": false,
   "proseWrap": "preserve",
   "quoteProps": "as-needed",
@@ -17,6 +16,5 @@
   "trailingComma": "es5",
   "useTabs": false,
   "embeddedLanguageFormatting": "auto",
-  "vueIndentScriptAndStyle": false,
-  "parser": "typescript"
+  "vueIndentScriptAndStyle": false
 }

@@ -232,9 +232,9 @@ const NewSpotifyForm = ({
                       options={
                         searchedOptions.length > 0
                           ? searchedOptions.map((item: any) => ({
-                            label: item.artistName + ' - ' + item.songName,
-                            value: item.id,
-                          }))
+                              label: item.artistName + ' - ' + item.songName,
+                              value: item.id,
+                            }))
                           : []
                       }
                     />
@@ -315,9 +315,9 @@ const NewSpotifyForm = ({
                       options={
                         searchedOptions.length > 0
                           ? searchedOptions.map((item: any) => ({
-                            label: item.artistName + ' - ' + item.songName,
-                            value: item.id,
-                          }))
+                              label: item.artistName + ' - ' + item.songName,
+                              value: item.id,
+                            }))
                           : []
                       }
                     />

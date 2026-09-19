@@ -10,7 +10,7 @@ const PREVIEW_DATA = {
 
 From the moment our paths crossed, everything changed. The world became softer, warmer, painted in colors I never knew existed.
 
-Every moment with you feels like a song I want to replay forever — the quiet mornings, the late-night whispers, the way you laugh when you think nobody's watching.
+Every moment with you feels like a song I want to replay forever - the quiet mornings, the late-night whispers, the way you laugh when you think nobody's watching.
 
 You are my favorite chapter, my most beautiful melody, my home.
 
@@ -19,8 +19,7 @@ I carry you with me in every heartbeat.
 Forever yours,`,
   voiceNoteUrl:
     'https://res.cloudinary.com/dztygf08a/video/upload/v1775312959/Sal_Priadi_-_Mencintaimu_Official_Audio_afbgj8.mp3',
-  voiceNoteQuote:
-    '"You feel like home to me, in a way I can\'t explain."',
+  voiceNoteQuote: '"You feel like home to me, in a way I can\'t explain."',
   videoUrl:
     'https://res.cloudinary.com/dztygf08a/video/upload/v1775396289/cutted_vgnc3x.mp4',
   memories: [

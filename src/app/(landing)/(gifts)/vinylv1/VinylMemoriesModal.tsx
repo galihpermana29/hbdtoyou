@@ -63,8 +63,7 @@ export default function VinylMemoriesModal({
       <div className="flex items-center justify-center gap-4 mt-4">
         <button
           onClick={prev}
-          className="w-9 h-9 rounded-full border border-[#d4c4b4] flex items-center justify-center hover:bg-[#f0e6dc] transition-colors"
-        >
+          className="w-9 h-9 rounded-full border border-[#d4c4b4] flex items-center justify-center hover:bg-[#f0e6dc] transition-colors">
           <ChevronLeft size={18} className="text-[#5a4a3a]" />
         </button>
 
@@ -81,8 +80,7 @@ export default function VinylMemoriesModal({
 
         <button
           onClick={next}
-          className="w-9 h-9 rounded-full border border-[#d4c4b4] flex items-center justify-center hover:bg-[#f0e6dc] transition-colors"
-        >
+          className="w-9 h-9 rounded-full border border-[#d4c4b4] flex items-center justify-center hover:bg-[#f0e6dc] transition-colors">
           <ChevronRight size={18} className="text-[#5a4a3a]" />
         </button>
       </div>

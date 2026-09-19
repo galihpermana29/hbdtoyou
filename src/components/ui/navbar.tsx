@@ -198,14 +198,11 @@ const NavigationBar = () => {
           <nav
             className="hidden items-center gap-4 text-[14px] xl:flex 2xl:gap-6"
             aria-label="Primary navigation">
-            <span
-              className="inline-flex cursor-default items-center gap-1.5 whitespace-nowrap font-medium text-[#98A2B3]"
-              aria-disabled="true">
+            <Link
+              href="/wedding-invitation"
+              className="whitespace-nowrap font-medium text-[#667085] transition-colors hover:text-[#1B1B1B]">
               Wedding
-              <span className="rounded-full bg-[#FCEBE6] px-1.5 py-0.5 text-[10px] font-semibold leading-none text-[#E34013]">
-                Soon
-              </span>
-            </span>
+            </Link>
 
             {PRIMARY_LINKS.map((link) => (
               <Link
@@ -327,14 +324,12 @@ const NavigationBar = () => {
                   Create
                 </p>
                 <div className="space-y-1">
-                  <div
-                    className="flex items-center justify-between rounded-lg px-3 py-2.5 text-[15px] font-medium text-[#98A2B3]"
-                    aria-disabled="true">
-                    <span>Wedding invitations</span>
-                    <span className="rounded-full bg-[#FCEBE6] px-2 py-1 text-[10px] font-semibold leading-none text-[#E34013]">
-                      Coming soon
-                    </span>
-                  </div>
+                  <Link
+                    href="/wedding-invitation"
+                    onClick={() => setSidebar(false)}
+                    className="block rounded-lg px-3 py-2.5 text-[15px] font-semibold text-[#344054] transition-colors hover:bg-[#F9FAFB]">
+                    Wedding invitations
+                  </Link>
                   {PRIMARY_LINKS.map((link) => (
                     <Link
                       key={link.key}
