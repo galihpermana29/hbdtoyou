@@ -1,0 +1,27 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 800 600" role="img" aria-labelledby="title">
+  <title id="title">Two people dancing together in a colorful kitchen</title>
+  <defs>
+    <linearGradient id="wall" x2="0" y2="1">
+      <stop stop-color="#f8c9a8"/>
+      <stop offset="1" stop-color="#fff0cf"/>
+    </linearGradient>
+  </defs>
+  <rect width="800" height="600" fill="url(#wall)"/>
+  <path d="M0 430h800v170H0z" fill="#78b9aa"/>
+  <path d="M0 430h800" stroke="#263238" stroke-width="12"/>
+  <path d="M45 155h230v250H45zM525 155h230v250H525z" fill="#ef7b73" stroke="#263238" stroke-width="13"/>
+  <path d="M74 185h78v85H74zM168 185h78v85h-78zM554 185h78v85h-78zM648 185h78v85h-78z" fill="#f9dfa7" stroke="#263238" stroke-width="8"/>
+  <g transform="translate(270 120)">
+    <circle cx="105" cy="105" r="51" fill="#8b5b46" stroke="#263238" stroke-width="11"/>
+    <path d="M48 258q5-112 61-112t70 112v182H48z" fill="#f05f78" stroke="#263238" stroke-width="12"/>
+    <circle cx="259" cy="123" r="48" fill="#c47f5b" stroke="#263238" stroke-width="11"/>
+    <path d="M196 273q5-110 66-110t74 110v167H196z" fill="#75a7d8" stroke="#263238" stroke-width="12"/>
+    <path d="M88 174q78 79 145 21M219 199q-61 38-119 85" fill="none" stroke="#263238" stroke-width="17" stroke-linecap="round"/>
+    <path d="M90 107q18 17 35 0M244 126q16 15 32 0" fill="none" stroke="#fff" stroke-width="7" stroke-linecap="round"/>
+  </g>
+  <g fill="#fff7d1">
+    <path d="m354 61 11 25 27 3-20 18 6 27-24-14-24 14 6-27-20-18 27-3z"/>
+    <circle cx="470" cy="77" r="12"/>
+    <circle cx="303" cy="74" r="8"/>
+  </g>
+</svg>

@@ -36,37 +36,16 @@ export const metadata: Metadata = {
   },
 };
 
-const templates = [
-  {
-    id: 1,
-    name: 'Netflix v1',
-    label: 'free',
-    thumbnail_uri:
-      'https://res.cloudinary.com/dxuumohme/image/upload/v1735569040/db4lflw3rz2oou05a6gx.png',
-  },
-  {
-    id: 2,
-    name: 'Spotify v1',
-    label: 'premium',
-    thumbnail_uri:
-      'https://res.cloudinary.com/dxuumohme/image/upload/v1735569034/iqfshzifagwsyggwgizh.png',
-  },
-  {
-    id: 2,
-    name: 'Disney+ v1',
-    label: 'premium',
-    thumbnail_uri:
-      'https://res.cloudinary.com/dxuumohme/image/upload/v1735569034/yljqxtimvwbdasyp7ljn.png',
-  },
-];
+// The card art for this page comes from the backend as `thumbnail_uri` on each template
+// row (see <NewTemplates data={...} /> below). A hardcoded `templates` array used to sit
+// here pointing at Cloudinary cloud `dxuumohme`, but nothing ever rendered it, so it was
+// removed on 2026-09-13 when that cloud started returning 401.
+// Replacement card art is checked in at `public/thumbnails/` and, once deployed, is
+// reachable at https://memoify.live/thumbnails/<template>.jpg for the backend rows to use.
 
 const MoreTemplatesPage = async () => {
   const data = await getAllTemplates();
-  return (
-    <div className="">
-      <NewTemplates data={data.success ? data.data : []} />
-    </div>
-  );
+  return <NewTemplates data={data.success && data.data ? data.data : []} />;
 };
 
 export default MoreTemplatesPage;

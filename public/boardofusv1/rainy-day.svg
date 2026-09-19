@@ -1,0 +1,25 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 800 600" role="img" aria-labelledby="title">
+  <title id="title">Two people walking together beneath an umbrella</title>
+  <defs>
+    <linearGradient id="sky" x2="0" y2="1">
+      <stop stop-color="#657ba0"/>
+      <stop offset="1" stop-color="#b8d0d1"/>
+    </linearGradient>
+  </defs>
+  <rect width="800" height="600" fill="url(#sky)"/>
+  <path d="M0 463q155-47 307 5t493-13v145H0z" fill="#4f8c78"/>
+  <path d="M128 72 94 131M239 38l-34 59M613 62l-34 59M710 142l-34 59M86 263l-34 59M694 300l-34 59" stroke="#d9f3f2" stroke-width="13" stroke-linecap="round" opacity=".75"/>
+  <path d="M169 260q231-249 462 0-58-40-116 0-58-40-116 0-58-40-116 0-57-40-114 0z" fill="#f05f78" stroke="#263238" stroke-width="13" stroke-linejoin="round"/>
+  <path d="M400 258v248q0 51 48 51 42 0 42-41" fill="none" stroke="#263238" stroke-width="14" stroke-linecap="round"/>
+  <g transform="translate(250 240)">
+    <circle cx="86" cy="96" r="45" fill="#9a6347" stroke="#263238" stroke-width="11"/>
+    <path d="M30 232q4-97 60-97t66 97v130H30z" fill="#f5c95d" stroke="#263238" stroke-width="12"/>
+    <circle cx="238" cy="100" r="43" fill="#d18a60" stroke="#263238" stroke-width="11"/>
+    <path d="M181 230q4-92 60-92t66 92v132H181z" fill="#8fd8c7" stroke="#263238" stroke-width="12"/>
+    <path d="M116 169q62 57 100 1" fill="none" stroke="#263238" stroke-width="16" stroke-linecap="round"/>
+    <path d="M71 102q15 13 29 0M224 106q15 13 29 0" fill="none" stroke="#fff" stroke-width="7" stroke-linecap="round"/>
+  </g>
+  <g fill="#d9f3f2" opacity=".72">
+    <circle cx="123" cy="400" r="8"/><circle cx="170" cy="368" r="5"/><circle cx="663" cy="416" r="8"/><circle cx="714" cy="380" r="5"/>
+  </g>
+</svg>

@@ -6,17 +6,43 @@ interface PlaylistCardProps {
     description: string;
     image: string;
   };
+  compact?: boolean;
 }
 
-export default function PlaylistCard({ playlist }: PlaylistCardProps) {
+export default function PlaylistCard({
+  playlist,
+  compact = false,
+}: PlaylistCardProps) {
+  if (compact) {
+    return (
+      <>
+        <PhotoView src={playlist.image}>
+          <img
+            src={playlist.image}
+            alt=""
+            className="h-11 w-11 shrink-0 rounded object-cover shadow"
+          />
+        </PhotoView>
+        <div className="min-w-0">
+          <h3 className="truncate text-sm font-medium text-white">
+            {playlist.title}
+          </h3>
+          <p className="truncate text-xs text-white/45">
+            {playlist.description || 'A moment worth replaying'}
+          </p>
+        </div>
+      </>
+    );
+  }
+
   return (
-    <div className="bg-[#181818] p-3 md:p-4 rounded-lg hover:bg-[#282828] transition cursor-pointer group">
+    <div className="group cursor-pointer rounded-lg bg-[#181818] p-3 transition duration-300 hover:-translate-y-1 hover:bg-[#282828] md:p-4">
       <div className="mb-4 relative">
         <PhotoView src={playlist.image}>
           <img
             src={playlist.image}
             alt={playlist.title}
-            className="w-full aspect-square object-cover rounded-md"
+            className="aspect-square w-full rounded-md object-cover shadow-lg transition-transform duration-300 group-hover:scale-[1.02]"
           />
         </PhotoView>
       </div>

@@ -1,0 +1,17 @@
+{
+  "name": "Memoify (xollet-fe)",
+  "install": "npm ci",
+  "terminals": [
+    {
+      "name": "next-dev",
+      "command": "npm run dev:prod",
+      "description": "Next.js dev server (production backend via APP_ENV=production) on http://localhost:3000"
+    }
+  ],
+  "ports": [
+    {
+      "name": "web",
+      "port": 3000
+    }
+  ]
+}

@@ -1,14 +1,11 @@
 'use client';
-import { Badge, Button, Divider, Form, Input, message, Select } from 'antd';
+import { Button, Divider, Form, Input, message, Select } from 'antd';
 import { useMemoifyProfile } from '@/app/session-provider';
 import { IAllTemplateResponse } from '@/action/interfaces';
 import { useEffect, useState } from 'react';
-import {
-  createContent,
-  getPopularTemplates,
-  warmUpAIModel,
-} from '@/action/user-api';
+import { getPopularTemplates, warmUpAIModel } from '@/action/user-api';
 import CardTemplateTag from '@/components/newlanding/card-template/CardTemplateTag';
+import { scrapbookCreateThumbnail } from '@/lib/template-thumbnail';
 import { CheckIcon } from 'lucide-react';
 import clsx from 'clsx';
 import { useRouter, useSearchParams } from 'next/navigation';
@@ -24,6 +21,9 @@ import {
   templatePrompts,
 } from '@/lib/scrapbook-constant';
 import { createContentClientSide } from '@/action/client-api';
+
+/** The scrapbook the picker opens on when the URL does not name one. */
+const DEFAULT_SCRAPBOOK_ROUTE = 'scrapbook7';
 
 interface FormGenerationProps {
   openNotification: (progress: number, key: any, isError?: boolean) => void;
@@ -57,25 +57,44 @@ const FormGeneration = ({
     useState<string>(stringInitialPrompt);
 
   const handleGetTemplates = async () => {
-    await warmUpAIModel();
+    // Warm the AI model in the background. Nothing on this screen reads its result, but
+    // awaiting it used to hold the template fetch back by more than a second on a cold
+    // load, so the picker and the preview both sat empty until it returned.
+    warmUpAIModel();
+
     const dx = await getPopularTemplates();
     if (dx.success) {
       const filteredTemplates =
         dx.data?.filter((dx) => dx.name.includes('Scrapbook')) || [];
       setPopularTemplates(filteredTemplates);
 
-      // Set the first template as selected by default if available
       if (filteredTemplates.length > 0) {
-        const scrapbook1Data = filteredTemplates.find(
-          (dx) => dx.name?.split('- ')[1] === 'scrapbook7'
-        );
-        setSelectedTemplateId(scrapbook1Data?.id || '');
-        router.push(
-          `/scrapbook/create?templateId=${scrapbook1Data?.id}&route=${
-            scrapbook1Data?.name?.split('- ')[1]
-          }`
-        );
-        form.setFieldValue('templateId', scrapbook1Data?.id);
+        const routeOf = (t: IAllTemplateResponse) => t.name?.split('- ')[1];
+
+        // Honour a route already in the URL so a shared or reloaded link opens the
+        // scrapbook it names; fall back to the default only when there is none.
+        const requested = templateName
+          ? filteredTemplates.find((t) => routeOf(t) === templateName)
+          : undefined;
+        const selected =
+          requested ??
+          filteredTemplates.find(
+            (t) => routeOf(t) === DEFAULT_SCRAPBOOK_ROUTE
+          ) ??
+          filteredTemplates[0];
+
+        setSelectedTemplateId(selected?.id || '');
+        form.setFieldValue('templateId', selected?.id);
+
+        // Only rewrite the URL when it is not already pointing at this template, and
+        // replace rather than push so the default does not become a history entry.
+        if (!requested) {
+          router.replace(
+            `/scrapbook/create?templateId=${selected?.id}&route=${routeOf(
+              selected
+            )}`
+          );
+        }
       }
     } else {
       message.error(dx.message);
@@ -91,7 +110,6 @@ const FormGeneration = ({
       if (!parsedPrompt) {
         return; // Error messages already shown by parser
       }
-      console.log('Parsed prompt:', parsedPrompt, value.model);
     }
 
     // return;
@@ -265,7 +283,11 @@ const FormGeneration = ({
                       <CheckIcon size={16} color="white" />
                     </div>
                   )}
-                  <CardTemplateTag data={template} type="scrapbook" />
+                  <CardTemplateTag
+                    data={template}
+                    type="scrapbook"
+                    thumbnailSrc={scrapbookCreateThumbnail(template)}
+                  />
                 </div>
               ))
             ) : (

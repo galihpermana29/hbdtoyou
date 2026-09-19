@@ -3,9 +3,14 @@
 import { ArrowDropDown, Notifications, Search } from '@mui/icons-material';
 
 import { useEffect, useState } from 'react';
-import widya from '@/assets/widya/after/2.jpg';
 import Image from 'next/image';
 import { useRouter } from 'next/navigation';
+
+// Hotlinked from Wikimedia. The previous URL asked for a 2560px render of a source
+// that is narrower than that, so Wikimedia answered 400 and the wordmark silently
+// vanished from the nav. Keep the width at 1280 or below.
+const NETFLIX_WORDMARK =
+  'https://upload.wikimedia.org/wikipedia/commons/thumb/0/08/Netflix_2015_logo.svg/1280px-Netflix_2015_logo.svg.png';
 
 const Navbar = ({ jumbotronImage }: { jumbotronImage?: string }) => {
   const [isScrolled, setIsScrolled] = useState(false);
@@ -27,8 +32,8 @@ const Navbar = ({ jumbotronImage }: { jumbotronImage?: string }) => {
         <div className="flex items-center space-x-5">
           <img
             onClick={() => router.push('/')}
-            src="https://upload.wikimedia.org/wikipedia/commons/thumb/0/08/Netflix_2015_logo.svg/2560px-Netflix_2015_logo.svg.png"
-            alt=""
+            src={NETFLIX_WORDMARK}
+            alt="Netflix"
             className="h-6 mr-10 cursor-pointer"
           />
           <span className="cursor-pointer hidden lg:block">Homepage</span>
@@ -43,13 +48,17 @@ const Navbar = ({ jumbotronImage }: { jumbotronImage?: string }) => {
           <Search className="cursor-pointer" />
           <span className="cursor-pointer hidden lg:block">ADULT</span>
           <Notifications className="cursor-pointer" />
-          <Image
-            width={32}
-            height={32}
-            src={jumbotronImage ?? ''}
-            alt=""
-            className="w-8 h-8 rounded-md object-cover cursor-pointer"
-          />
+          {jumbotronImage ? (
+            <Image
+              width={32}
+              height={32}
+              src={jumbotronImage}
+              alt=""
+              className="w-8 h-8 rounded-md object-cover cursor-pointer"
+            />
+          ) : (
+            <div className="w-8 h-8 rounded-md bg-neutral-700 cursor-pointer" />
+          )}
           <div className="relative group">
             <ArrowDropDown className="cursor-pointer" />
             <div className="absolute right-0 mt-2 hidden bg-black text-white rounded-md group-hover:flex flex-col">

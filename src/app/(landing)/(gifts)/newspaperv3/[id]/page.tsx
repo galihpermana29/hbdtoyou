@@ -5,6 +5,12 @@ import dayjs from 'dayjs';
 import Image from 'next/image';
 import LockScreen from '@/components/ui/lock-screen';
 
+// TODO(placeholder-images): these are temporary stock photos served from Cloudinary
+// cloud `dfwrmapr4`, standing in for the sample images lost when cloud `dxuumohme`
+// hit its plan limit and started returning 401 (audited 2026-09-12). They are cropped
+// per slot with `c_fill,ar_*,g_auto`. Move them into `public/` so no Cloudinary
+// account can break them again, or swap in real art for this template.
+
 const getDetailDataNew = async (id: string) => {
   const res = await getDetailContent(id);
   return res;
@@ -75,7 +81,7 @@ export default async function Home({ params }: { params: any }) {
               src={
                 parsedData
                   ? parsedData?.jumbotronImage
-                  : 'https://res.cloudinary.com/dxuumohme/image/upload/v1735834469/tccbqffnucbsyeeioutb.jpg'
+                  : 'https://res.cloudinary.com/dfwrmapr4/image/upload/c_fill,ar_16:9,g_auto/v1789284325/placeholder/Casual_Blazer_Outfits_for_Women___Chic_Everyday_Street_Style_Looks_bg1q3s.jpg'
               }
               alt="Black and white landscape view"
               fill

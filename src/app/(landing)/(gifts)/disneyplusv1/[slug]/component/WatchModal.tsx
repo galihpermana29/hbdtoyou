@@ -11,17 +11,21 @@ const WatchModal = ({ content }: { content: string }) => {
     <div>
       <Button
         onClick={() => setModalState(true)}
-        className="bg-white text-black hover:bg-gray-200 gap-2">
-        <Play className="h-5 w-5" />
-        Click Me
-        <span className="text-sm ml-2">S1 E1</span>
+        className="!flex !h-11 !items-center !gap-2 !rounded !border-0 !bg-white !px-6 !font-bold !text-black hover:!bg-white/80">
+        <Play className="h-5 w-5 fill-black" />
+        Start Watching
       </Button>
       <Modal
-        title="About You"
+        centered
+        title="A Story Made For You"
         footer={null}
         open={modalState}
-        onCancel={() => setModalState(false)}>
-        <div className="text-base space-y-4">
+        onCancel={() => setModalState(false)}
+        styles={{
+          content: { background: '#0b1020', color: 'white' },
+          header: { background: '#0b1020' },
+        }}>
+        <div className="space-y-4 text-base leading-relaxed text-white/80">
           <p
             dangerouslySetInnerHTML={{
               __html: content

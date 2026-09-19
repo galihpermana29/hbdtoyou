@@ -59,7 +59,7 @@ export default function HomePage() {
   const pathname = usePathname();
 
   return (
-    <div className="h-screen bg-black">
+    <div className="h-[100svh] overflow-hidden bg-black">
       <Tour
         open={isTutorial === 'true'}
         steps={steps}
@@ -73,12 +73,16 @@ export default function HomePage() {
           router.replace(pathname);
         }}
       />
-      <div className="flex h-[calc(100%-96px)] gap-[20px]">
+      <div className="flex h-full gap-0 pb-[76px] md:pb-[88px]">
         <div className="hidden lg:block w-[320px]" />
         <Sidebar ref1={ref1} />
-        <main className="flex-1 overflow-y-auto">
+        <main className="min-w-0 flex-1 overflow-y-auto">
           <Header />
-          <MainContent ref2={ref2} ref3={ref3} />
+          <MainContent
+            ref2={ref2}
+            ref3={ref3}
+            title="Moments of You"
+          />
         </main>
       </div>
       <Player ref4={ref4} />

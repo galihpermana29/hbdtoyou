@@ -1,0 +1,26 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 800 600" role="img" aria-labelledby="title">
+  <title id="title">Two people watching a pink sunset by the sea</title>
+  <defs>
+    <linearGradient id="sky" x2="0" y2="1">
+      <stop stop-color="#8c79dc"/>
+      <stop offset=".58" stop-color="#ff9aa8"/>
+      <stop offset="1" stop-color="#ffd99b"/>
+    </linearGradient>
+    <linearGradient id="sea" x2="0" y2="1">
+      <stop stop-color="#765ab9"/>
+      <stop offset="1" stop-color="#36365f"/>
+    </linearGradient>
+  </defs>
+  <rect width="800" height="600" fill="url(#sky)"/>
+  <circle cx="610" cy="238" r="70" fill="#fff1ac" opacity=".95"/>
+  <path d="M0 360Q160 325 320 360T640 358T960 360V600H0Z" fill="url(#sea)"/>
+  <path d="M0 390Q150 365 300 393T600 390T900 395" fill="none" stroke="#fad4d9" stroke-width="9" opacity=".45"/>
+  <path d="M272 600v-94c0-45 29-77 67-77s68 32 68 77v94" fill="#2f2b50"/>
+  <circle cx="340" cy="388" r="42" fill="#442f51"/>
+  <path d="M407 600v-83c0-40 26-69 60-69s61 29 61 69v83" fill="#4f396c"/>
+  <circle cx="468" cy="410" r="38" fill="#5c3b5f"/>
+  <path d="M390 483q42 35 71 4" fill="none" stroke="#2f2b50" stroke-width="17" stroke-linecap="round"/>
+  <g fill="#fff" opacity=".72">
+    <circle cx="104" cy="98" r="7"/><circle cx="140" cy="140" r="4"/><circle cx="694" cy="92" r="5"/>
+  </g>
+</svg>

@@ -13,6 +13,8 @@ import NewNewspaper3Form from '@/components/forms/new/new-newspaper3-form';
 import NewSpotifyForm from '@/components/forms/new/new-spotify-form';
 import NewVinylForm from '@/components/forms/new/new-vinyl-form';
 import NewTarotForm from '@/components/forms/new/new-tarot-form';
+import NewArcadeClawForm from '@/components/forms/new/new-arcade-claw-form';
+import NewBoardOfUsForm from '@/components/forms/new/new-board-of-us-form';
 import DashboardNavbar from '@/components/ui/dashboard-navbar';
 import NavigationBar from '@/components/ui/navbar';
 import { Button, message } from 'antd';
@@ -66,6 +68,8 @@ const EditContentDashboardPage = () => {
     albumgraduationv1: AlbumGraduationv1,
     vinylv1: NewVinylForm,
     tarotv1: NewTarotForm,
+    arcadeclawv1: NewArcadeClawForm,
+    boardofusv1: NewBoardOfUsForm,
   };
 
   useEffect(() => {

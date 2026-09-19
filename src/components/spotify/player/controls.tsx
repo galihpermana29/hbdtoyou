@@ -66,7 +66,8 @@ export default function PlayerControls({
           <SkipBack className="h-5 w-5" />
         </button>
         <button
-          className="bg-white rounded-full p-2 hover:scale-105 transition"
+          aria-label="Open your letter"
+          className="relative rounded-full bg-white p-2 transition hover:scale-105 after:absolute after:inset-[-5px] after:rounded-full after:border after:border-[#1ed760]/50 after:content-[''] motion-safe:after:animate-pulse"
           onClick={showModal}>
           <Play className="h-4 w-4 md:h-5 md:w-5 text-black" fill="black" />
         </button>
