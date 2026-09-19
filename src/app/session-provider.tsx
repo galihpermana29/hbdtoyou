@@ -156,7 +156,12 @@ const SessionProvider = ({
   const isPremium = userProfile?.type === 'premium';
   const isClawGift =
     pathname === '/arcadeclawv1' || pathname.startsWith('/arcadeclawv1/');
-  const isHideAds = ['/create', '/payment'].includes(pathname) || isClawGift;
+  const isBoardOfUsGift =
+    pathname === '/boardofusv1' || pathname.startsWith('/boardofusv1/');
+  const isHideAds =
+    ['/create', '/payment'].includes(pathname) ||
+    isClawGift ||
+    isBoardOfUsGift;
 
   const PREMIUM_ADS_KEY = 'memoify_premium_ads_count';
   const PREMIUM_ADS_LIMIT = 3;
@@ -329,7 +334,8 @@ const SessionProvider = ({
         {/* {parsedSession.accessToken ? userProfile ? children : <></> : children} */}
       </Provider>
       {!['/spotify', '/magazinev1', 'journal'].includes(pathname) &&
-        !isClawGift && <Footer />}
+        !isClawGift &&
+        !isBoardOfUsGift && <Footer />}
     </SessionContext.Provider>
   );
 };

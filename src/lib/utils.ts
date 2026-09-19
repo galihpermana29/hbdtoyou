@@ -106,7 +106,7 @@ export function mapContentToCard(contents: IContent[], purpose = 'client') {
           : 'https://res.cloudinary.com/ddlus5qur/image/upload/v1746085724/phu2rbi6fqnp71hytjex.jpg';
       }
 
-      if (['vinylv1', 'arcadeclawv1'].includes(route)) {
+      if (['vinylv1', 'arcadeclawv1', 'boardofusv1'].includes(route)) {
         return Array.isArray(jsonContent?.memories) &&
           jsonContent.memories.length > 0
           ? jsonContent.memories[0].imageUrl
