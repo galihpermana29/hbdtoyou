@@ -27,7 +27,9 @@ export default async function BoardOfUsGiftPage({
 
   const content = <BoardOfUs data={data} />;
   const lockedContent =
-    response.data.status === 'locked' || response.data.user_type === 'free';
+    response.data.status === 'locked' ||
+    (response.data.user_type === 'free' &&
+      response.data.template_label === 'premium');
 
   if (lockedContent) {
     return (
@@ -35,8 +37,7 @@ export default async function BoardOfUsGiftPage({
         contentId={params.id}
         initiallyLocked
         title="Content locked for free users"
-        message="Unlock this Board of Us gift. Upgrade your plan for full access."
-      >
+        message="Unlock this Board of Us gift. Upgrade your plan for full access.">
         {content}
       </LockScreen>
     );

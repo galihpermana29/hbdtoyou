@@ -21,10 +21,12 @@ export default async function PhotoboxNewspaperViewer({
     parsed = {};
   }
 
-  // Same gating logic as the digital gift viewers (e.g. newspaperv3):
-  // locked by backend status, or created by a free-tier account.
+  // Same gating logic as the digital gift viewers (e.g. newspaperv3): locked by
+  // backend status, or a free-tier account on a premium template. A free
+  // template is capped per day by the backend at create instead.
   const lockedContent =
-    data.data.status === 'locked' || data.data.user_type === 'free';
+    data.data.status === 'locked' ||
+    (data.data.user_type === 'free' && data.data.template_label === 'premium');
 
   const content = (
     <main className="min-h-screen bg-[#f4f1ea] flex flex-col items-center gap-8 py-12 px-4">
