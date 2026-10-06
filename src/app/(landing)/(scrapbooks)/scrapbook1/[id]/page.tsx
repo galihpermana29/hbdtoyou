@@ -2,7 +2,6 @@ import { getDetailContent } from '@/action/user-api';
 import PageFlipScrapbook from '@/components/PageFlipScrapbook';
 import { ErrorBoundaryCustom } from '@/components/ui/error-boundary';
 import NavigationBar from '@/components/ui/navbar';
-import ClientResult from '../../client-result';
 import ResultWrapper from '../../result-wrapper';
 import { Metadata } from 'next';
 import LockScreen from '@/components/ui/lock-screen';
@@ -76,7 +75,6 @@ const ScrapbookResult = async ({
   // Cover images
   const coverImage = parsedData?.coverImage || '';
   const backCoverImage = parsedData?.backCoverImage || '';
-  console.log('data', data.data);
   const structuredPages = parsedData?.pages || [];
 
   return (
@@ -90,8 +88,11 @@ const ScrapbookResult = async ({
           type="scrapbook"
           contentId={id}
           initiallyLocked={
-            // Locked by backend status, or created by a free-tier account.
-            data.data.status === 'locked' || data.data.user_type === 'free'
+            // Locked by backend status, or a free-tier account on a premium
+            // template. A free template is capped per day at create instead.
+            data.data.status === 'locked' ||
+            (data.data.user_type === 'free' &&
+              data.data.template_label === 'premium')
           }>
           <PageFlipScrapbook
             pages={structuredPages}

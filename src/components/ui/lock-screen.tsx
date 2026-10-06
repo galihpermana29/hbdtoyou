@@ -1,10 +1,18 @@
 'use client';
 
-import { unlockContent } from '@/action/user-api';
+import { getPromotedCoupon, unlockContent } from '@/action/user-api';
+import { ICoupon } from '@/action/interfaces';
 import { useMemoifyProfile } from '@/app/session-provider';
 import { Button, notification } from 'antd';
-import { useState, type ReactNode } from 'react';
+import { useEffect, useState, type ReactNode } from 'react';
 import { useRouter } from 'next/navigation';
+
+/**
+ * Where "Buy Premium" sends somebody. No plan id: the payment page resolves
+ * `type` against the live packages, which is also how this stops pointing at
+ * whichever plan happened to be seeded when the button was written.
+ */
+const BUY_PREMIUM_DESTINATION = '/payment?type=premium';
 
 type LockScreenProps = {
   children: ReactNode;
@@ -40,7 +48,27 @@ const LockScreen = ({
     type === 'gift' ? profile?.quota < 1 : profile?.token_scrapbook < 1;
   const [isLocked, setIsLocked] = useState(initiallyLocked);
   const [lockedLoading, setLockedLoading] = useState(false);
+  const [promotedCoupon, setPromotedCoupon] = useState<ICoupon | null>(null);
   const router = useRouter();
+
+  // The lock screen is where somebody meets the paywall, so it is where a live
+  // discount is worth the most. Only fetched while the veil is actually up.
+  useEffect(() => {
+    if (!isLocked) return;
+    let cancelled = false;
+    getPromotedCoupon().then((res) => {
+      if (!cancelled && res.success && res.data) setPromotedCoupon(res.data);
+    });
+    return () => {
+      cancelled = true;
+    };
+  }, [isLocked]);
+
+  const discountLabel = promotedCoupon
+    ? promotedCoupon.discount_type === 'percent'
+      ? `${promotedCoupon.discount_value}% off`
+      : `IDR ${promotedCoupon.discount_value.toLocaleString()} off`
+    : null;
   const handleUnlock = async () => {
     setLockedLoading(true);
     if (isFreeAccount) {
@@ -107,6 +135,25 @@ const LockScreen = ({
               className={`text-sm ${subtle ? 'text-gray-600' : 'text-gray-200'}`}>
               {message}
             </p>
+
+            {promotedCoupon && (
+              <p
+                className={`mx-auto w-fit rounded-full border border-dashed px-4 py-1.5 text-[13px] ${
+                  subtle
+                    ? 'border-[#E34013] bg-[#FEF3F0] text-[#7B4034]'
+                    : 'border-white/50 bg-white/10 text-white'
+                }`}>
+                Use code{' '}
+                <span
+                  className={`font-mono font-bold tracking-[0.06em] ${
+                    subtle ? 'text-[#E34013]' : 'text-white'
+                  }`}>
+                  {promotedCoupon.code}
+                </span>{' '}
+                for {discountLabel}
+              </p>
+            )}
+
             <div className="flex items-center justify-center gap-2">
               <Button
                 loading={lockedLoading}
@@ -119,11 +166,7 @@ const LockScreen = ({
                 {buttonText}
               </Button>{' '}
               <Button
-                onClick={() =>
-                  router.push(
-                    '/payment?plan_id=291eba3b-f13f-47db-a793-bde0683b10ca'
-                  )
-                }
+                onClick={() => router.push(BUY_PREMIUM_DESTINATION)}
                 type="primary"
                 size="middle">
                 Buy Premium

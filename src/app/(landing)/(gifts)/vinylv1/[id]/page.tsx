@@ -16,10 +16,13 @@ export default async function VinylDynamicPage({ params }: any) {
   }
 
   const parsedData = JSON.parse(data.data.detail_content_json_text);
-  // Gate the viewer when the backend flags content as `locked`, OR when the
-  // gift was created by a free-tier account (`user_type === 'free'`).
+  // Gate the viewer when the backend flags content as `locked`, OR when a
+  // free-tier account made a *premium* template. A free account on a free
+  // template is capped per day by the backend at create time, surfaced there as
+  // an error - it must not come back here as a lock on the finished gift.
   const lockedContent =
-    data.data.status === 'locked' || data.data.user_type === 'free';
+    data.data.status === 'locked' ||
+    (data.data.user_type === 'free' && data.data.template_label === 'premium');
 
   const content = (
     <VinylDynamic

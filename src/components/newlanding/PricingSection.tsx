@@ -1,6 +1,6 @@
 'use client';
 
-import { getListPackages } from '@/action/user-api';
+import { getListPackages, getPromotedCoupon } from '@/action/user-api';
 import { useMemoifySession } from '@/app/session-provider';
 import { useQuery } from '@tanstack/react-query';
 import { Button, Card, Col, List, Row } from 'antd';
@@ -27,6 +27,23 @@ export default function PricingSection() {
     },
   });
 
+  // Whatever promotion is live right now, so the plans advertise the same code
+  // the payment form will prefill. Absent when nothing is running, and the
+  // section simply says nothing rather than inventing a discount.
+  const { data: promotedCoupon } = useQuery({
+    queryKey: ['promoted-coupon'],
+    queryFn: async () => {
+      const res = await getPromotedCoupon();
+      return res.data ?? null;
+    },
+  });
+
+  const discountLabel = promotedCoupon
+    ? promotedCoupon.discount_type === 'percent'
+      ? `${promotedCoupon.discount_value}% off`
+      : `IDR ${promotedCoupon.discount_value.toLocaleString()} off`
+    : null;
+
   return (
     <div
       id="pricing"
@@ -38,6 +55,18 @@ export default function PricingSection() {
         Simple, transparent pricing that grows with you. Try any plan free for
         30 days.
       </p>
+
+      {promotedCoupon && (
+        <div className="mb-[35px] flex justify-center">
+          <p className="m-0 rounded-full border border-dashed border-[#E34013] bg-[#FEF3F0] px-5 py-2 text-center text-[14px] md:text-[15px] text-[#7B4034]">
+            Use code{' '}
+            <span className="font-mono font-[700] tracking-[0.06em] text-[#E34013]">
+              {promotedCoupon.code}
+            </span>{' '}
+            at checkout for {discountLabel}
+          </p>
+        </div>
+      )}
 
       <Row gutter={[24, 24]} justify="center">
         {!isFetching &&
