@@ -21,10 +21,7 @@ import { signIn } from 'next-auth/react';
 import { useRouter } from 'next/navigation';
 import { useEffect, useState } from 'react';
 
-import {
-  useMemoifyProfile,
-  useMemoifySession,
-} from '@/app/session-provider';
+import { useMemoifyProfile, useMemoifySession } from '@/app/session-provider';
 import { formatNumberWithComma } from '@/lib/utils';
 import { removeSession } from '@/store/get-set-session';
 
@@ -34,6 +31,22 @@ type NavItem = {
   desktopLabel: string;
   mobileLabel: string;
 };
+
+/**
+ * Wedding invitations are built but not announced yet, so nothing in the navbar
+ * points at them. `/wedding-invitation` itself stays reachable on purpose: the
+ * visual check drives that flow, and anyone already holding a link keeps it.
+ * Flip this to `true` on launch day and both entries come back.
+ */
+const WEDDING_RELEASED = false;
+
+/**
+ * Pricing lands on the Premium plan already chosen, rather than on a payment
+ * page with no plan selected. No plan id here on purpose: the payment page
+ * resolves `type` against the live packages, so renaming or re-seeding a plan
+ * cannot leave a stale id behind in the navbar.
+ */
+const PRICING_DESTINATION = '/payment?type=premium';
 
 const PRIMARY_LINKS: NavItem[] = [
   {
@@ -85,11 +98,11 @@ const NavigationBar = () => {
   const openPricing = () => {
     setSidebar(false);
     if (isLoggedIn) {
-      router.push('/payment');
+      router.push(PRICING_DESTINATION);
       return;
     }
 
-    signIn('google', { callbackUrl: '/payment' });
+    signIn('google', { callbackUrl: PRICING_DESTINATION });
   };
 
   useEffect(() => {
@@ -198,12 +211,6 @@ const NavigationBar = () => {
           <nav
             className="hidden items-center gap-4 text-[14px] xl:flex 2xl:gap-6"
             aria-label="Primary navigation">
-            <Link
-              href="/wedding-invitation"
-              className="whitespace-nowrap font-medium text-[#667085] transition-colors hover:text-[#1B1B1B]">
-              Wedding
-            </Link>
-
             {PRIMARY_LINKS.map((link) => (
               <Link
                 key={link.key}
@@ -231,6 +238,14 @@ const NavigationBar = () => {
               className="whitespace-nowrap font-medium text-[#667085] transition-colors hover:text-[#1B1B1B]">
               Pricing
             </button>
+
+            {WEDDING_RELEASED && (
+              <Link
+                href="/wedding-invitation"
+                className="whitespace-nowrap font-medium text-[#667085] transition-colors hover:text-[#1B1B1B]">
+                Wedding
+              </Link>
+            )}
           </nav>
         </div>
 
@@ -310,9 +325,7 @@ const NavigationBar = () => {
                       <p className="truncate text-[14px] font-semibold text-[#344054]">
                         {displayName}
                       </p>
-                      <p className="text-[12px] text-[#667085]">
-                        View account
-                      </p>
+                      <p className="text-[12px] text-[#667085]">View account</p>
                     </div>
                     <ChevronDown size={16} className="text-[#667085]" />
                   </button>
@@ -324,12 +337,6 @@ const NavigationBar = () => {
                   Create
                 </p>
                 <div className="space-y-1">
-                  <Link
-                    href="/wedding-invitation"
-                    onClick={() => setSidebar(false)}
-                    className="block rounded-lg px-3 py-2.5 text-[15px] font-semibold text-[#344054] transition-colors hover:bg-[#F9FAFB]">
-                    Wedding invitations
-                  </Link>
                   {PRIMARY_LINKS.map((link) => (
                     <Link
                       key={link.key}
@@ -339,6 +346,14 @@ const NavigationBar = () => {
                       {link.mobileLabel}
                     </Link>
                   ))}
+                  {WEDDING_RELEASED && (
+                    <Link
+                      href="/wedding-invitation"
+                      onClick={() => setSidebar(false)}
+                      className="block rounded-lg px-3 py-2.5 text-[15px] font-semibold text-[#344054] transition-colors hover:bg-[#F9FAFB]">
+                      Wedding invitations
+                    </Link>
+                  )}
                 </div>
               </div>
 

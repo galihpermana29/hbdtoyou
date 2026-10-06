@@ -1,6 +1,7 @@
 'use client';
 
 import {
+  ICoupon,
   ICouponPreviewResponse,
   IGetDetailPayment,
   IListPackageResponse,
@@ -11,6 +12,7 @@ import {
   generateQRIS,
   getDetailPayment,
   getListPackages,
+  getPromotedCoupon,
   previewCoupon,
 } from '@/action/user-api';
 import NavigationBar from '@/components/ui/navbar';
@@ -18,7 +20,7 @@ import { Button, Input, Select, Typography, message } from 'antd';
 import { motion } from 'framer-motion';
 import Image from 'next/image';
 import Link from 'next/link';
-import { useEffect, useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 
 import { useMemoifySession } from '@/app/session-provider';
 import qrisImage from '@/assets/qris-logo.png';
@@ -27,12 +29,21 @@ import { useRouter, useSearchParams } from 'next/navigation';
 
 const { Title, Text } = Typography;
 
-const DEFAULT_COUPON_CODE = 'JUNJUNE';
-
 function isValidUUIDv4(uuid: string): boolean {
   const uuidv4Regex =
     /^[0-9a-f]{8}-[0-9a-f]{4}-4[0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i;
   return uuidv4Regex.test(uuid);
+}
+
+/**
+ * This page rewrites its own query string, and writes the literal strings
+ * `null` and `undefined` into it when it has nothing to put there. Reading one
+ * of those back as a plan id makes every `planId` truthy, so an absent plan
+ * looks present. Treat them as absent.
+ */
+function readQueryValue(raw: string | null): string | null {
+  if (!raw || raw === 'null' || raw === 'undefined') return null;
+  return raw;
 }
 
 const NewClientPagePayment = () => {
@@ -50,13 +61,18 @@ const NewClientPagePayment = () => {
   const router = useRouter();
   const query = useSearchParams();
   const id = query.get('id');
-  const type = query.get('type');
-  const planId = query.get('plan_id');
+  const type = readQueryValue(query.get('type'));
+  const planId = readQueryValue(query.get('plan_id'));
 
-  const [couponCode, setCouponCode] = useState(DEFAULT_COUPON_CODE);
+  const [couponCode, setCouponCode] = useState('');
   const [couponLoading, setCouponLoading] = useState(false);
   const [couponPreview, setCouponPreview] =
     useState<ICouponPreviewResponse | null>(null);
+  const [promotedCoupon, setPromotedCoupon] = useState<ICoupon | null>(null);
+  // The prefill is a starting value, not a binding one: once the shopper has
+  // cleared or edited the field, a late-arriving promotion must not overwrite
+  // what they typed.
+  const couponPrefilled = useRef(false);
 
   const [listPackages, setListPackages] = useState<
     IListPackageResponse[] | null
@@ -105,6 +121,7 @@ const NewClientPagePayment = () => {
   };
 
   const handleRemoveCoupon = () => {
+    couponPrefilled.current = true;
     setCouponCode('');
     setCouponPreview(null);
   };
@@ -176,11 +193,42 @@ const NewClientPagePayment = () => {
     }
   }, [qrisData, router]);
 
+  // Not gated on `planId`: arriving as `/payment?type=premium` with no plan at
+  // all is a supported entry point (the navbar's Pricing link), and the plan is
+  // resolved from these packages below.
   useEffect(() => {
-    if (planId && session?.accessToken) {
+    if (session?.accessToken) {
       handleGetListPackages();
     }
-  }, [planId, session?.accessToken]);
+  }, [session?.accessToken]);
+
+  // Pin the URL to the plan that `type` names, so `planId` stays the single
+  // source of truth for the coupon preview and both checkout calls.
+  useEffect(() => {
+    if (planId || !listPackages?.length) return;
+    const wanted = (type || 'premium').toLowerCase();
+    const match = listPackages.find((item) =>
+      item.name?.toLowerCase().startsWith(wanted)
+    );
+    if (match) {
+      router.replace(`/payment?type=${wanted}&plan_id=${match.id}`);
+    }
+  }, [planId, type, listPackages, router]);
+
+  // Offer whatever promotion is live, rather than a code pasted in at build
+  // time - a hardcoded one goes stale the moment an admin deactivates it, and
+  // then every shopper is shown a code the backend will reject.
+  useEffect(() => {
+    getPromotedCoupon().then((res) => {
+      if (res.success && res.data) setPromotedCoupon(res.data);
+    });
+  }, []);
+
+  useEffect(() => {
+    if (!promotedCoupon || couponPrefilled.current) return;
+    couponPrefilled.current = true;
+    setCouponCode(promotedCoupon.code);
+  }, [promotedCoupon]);
 
   useEffect(() => {
     if (id && isValidUUIDv4(id)) {
@@ -339,7 +387,7 @@ const NewClientPagePayment = () => {
                               }))}
                               onChange={(value) => {
                                 setCouponPreview(null);
-                                setCouponCode(DEFAULT_COUPON_CODE);
+                                setCouponCode(promotedCoupon?.code ?? '');
                                 router.replace(
                                   `/payment?id=null&type=${type}&plan_id=${value}`
                                 );
@@ -380,7 +428,29 @@ const NewClientPagePayment = () => {
                                   Apply
                                 </Button>
                               </div>
-                            ) : (
+                            ) : null}
+
+                            {!couponPreview &&
+                              promotedCoupon &&
+                              couponCode.trim() !== promotedCoupon.code && (
+                                <p className="mt-2 mb-0 text-[12px] text-gray-500">
+                                  Use code{' '}
+                                  <button
+                                    onClick={() =>
+                                      setCouponCode(promotedCoupon.code)
+                                    }
+                                    className="font-semibold text-[#E34013] underline underline-offset-2 cursor-pointer">
+                                    {promotedCoupon.code}
+                                  </button>{' '}
+                                  for{' '}
+                                  {promotedCoupon.discount_type === 'percent'
+                                    ? `${promotedCoupon.discount_value}% off`
+                                    : `IDR ${promotedCoupon.discount_value.toLocaleString()} off`}
+                                  .
+                                </p>
+                              )}
+
+                            {couponPreview && (
                               <div className="flex items-center justify-between bg-green-50 rounded-lg px-3 py-2">
                                 <span className="text-green-600 text-sm font-medium">
                                   {couponCode} (

@@ -1730,6 +1730,48 @@ export async function previewCoupon(
   return { success: true, message: 'success', data };
 }
 
+/**
+ * The one coupon a shopper should be offered right now, or `null` when there is
+ * no live promotion.
+ *
+ * `/coupons?is_active=true` answers what an admin toggled on, which is not the
+ * same as what a shopper can actually redeem: a coupon can be active and still
+ * be spent out or past its expiry. Both the pricing section and the payment
+ * form promote a code, so the filtering lives here rather than in either of
+ * them - two copies of this rule is how one page advertises a code the other
+ * then refuses.
+ *
+ * Several live coupons is a valid state the admin screen allows, so when it
+ * happens the newest wins: that is the one somebody just created to run.
+ */
+export async function getPromotedCoupon(): Promise<
+  IGlobalResponse<null | ICoupon>
+> {
+  const res = await getCoupons({ is_active: 'true' });
+  if (!res.success || !Array.isArray(res.data)) {
+    return { success: false, message: res.message, data: null };
+  }
+
+  const now = Date.now();
+  const redeemable = res.data.filter((coupon) => {
+    if (!coupon.is_active) return false;
+    // `max_uses: 0` is the backend's "no ceiling", not "no uses left".
+    if (coupon.max_uses > 0 && coupon.used_count >= coupon.max_uses) {
+      return false;
+    }
+    if (!coupon.expired_at) return true;
+    const expiry = new Date(coupon.expired_at).getTime();
+    return Number.isNaN(expiry) ? true : expiry > now;
+  });
+
+  redeemable.sort(
+    (a, b) =>
+      new Date(b.create_time).getTime() - new Date(a.create_time).getTime()
+  );
+
+  return { success: true, message: 'success', data: redeemable[0] ?? null };
+}
+
 export async function createTemplate(
   payload: ITemplatePayload
 ): Promise<IGlobalResponse<null | { id: string }>> {
