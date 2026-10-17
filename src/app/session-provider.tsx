@@ -162,14 +162,14 @@ function isProductRouteWithoutAds(pathname: string): boolean {
 }
 
 /**
- * The MemoRoll demo draws the designer's screens edge to edge, so the site
+ * The MemoRoll demo and guest viewer draw the designer's screens edge to edge, so the site
  * chrome stays off it the same way it stays off a gift: no footer beneath the
  * walkthrough and no advertisement over it. It is not a gift, though, so it
  * does not belong in `drawsAGift` - it answers the chrome question here on
  * its own.
  */
 function isMemorollDemo(pathname: string): boolean {
-  return pathname === '/memoroll' || pathname.startsWith('/memoroll/');
+  return pathname.startsWith('/memoroll/');
 }
 
 const SessionProvider = ({

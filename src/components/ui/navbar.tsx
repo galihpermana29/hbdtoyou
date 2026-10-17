@@ -30,6 +30,7 @@ type NavItem = {
   href: string;
   desktopLabel: string;
   mobileLabel: string;
+  badge?: string;
 };
 
 /**
@@ -67,7 +68,20 @@ const PRIMARY_LINKS: NavItem[] = [
     desktopLabel: 'Journal',
     mobileLabel: 'Personal journal',
   },
+  {
+    key: 'memoroll',
+    href: '/memoroll',
+    desktopLabel: 'Memoroll',
+    mobileLabel: 'Memoroll',
+    badge: 'NEW!',
+  },
 ];
+
+const NewBadge = ({ label }: { label: string }) => (
+  <span className="ml-1.5 inline-flex items-center rounded-full bg-[#E34013] px-1.5 py-0.5 align-middle text-[10px] font-bold leading-none tracking-wide text-white">
+    {label}
+  </span>
+);
 
 const FEATURE_LINKS: NavItem[] = [
   {
@@ -217,6 +231,7 @@ const NavigationBar = () => {
                 href={link.href}
                 className="whitespace-nowrap font-medium text-[#667085] transition-colors hover:text-[#1B1B1B]">
                 {link.desktopLabel}
+                {link.badge && <NewBadge label={link.badge} />}
               </Link>
             ))}
 
@@ -344,6 +359,7 @@ const NavigationBar = () => {
                       onClick={() => setSidebar(false)}
                       className="block rounded-lg px-3 py-2.5 text-[15px] font-semibold text-[#344054] transition-colors hover:bg-[#F9FAFB]">
                       {link.mobileLabel}
+                      {link.badge && <NewBadge label={link.badge} />}
                     </Link>
                   ))}
                   {WEDDING_RELEASED && (
