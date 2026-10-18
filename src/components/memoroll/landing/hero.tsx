@@ -4,19 +4,6 @@ import HeroCarousel from './hero-carousel';
 import StackedWordmark from './stacked-wordmark';
 
 /**
- * The peach glow behind the hero. The design puts it on the whole 1440x1090
- * frame, navbar included, as a radial gradient from #FFBEAC to the same hue
- * at zero opacity, centred 214px down: 134px below the navbar, which is where
- * this section starts. Figma stores it as a transform on a unit square; worked
- * through for this frame it is an ellipse 1118px wide and 846px tall.
- *
- * In pixels rather than percentages, because the design is a 1440 frame and a
- * wider screen should show more white around the glow, not a larger glow.
- */
-const GLOW =
-  'radial-gradient(1118px 846px at 50% 134px, #FFBEAC 0%, rgba(255, 243, 240, 0) 100%)';
-
-/**
  * The MemoRoll landing's first screen: the arc of prints, the logo, the line
  * and the one action. The heading sits over the bottom of the arc, which is
  * why the content is pulled up by the same amount the hero is overscanned.
@@ -24,8 +11,8 @@ const GLOW =
 export default function MemorollHero() {
   return (
     <section
-      className="relative flex flex-col items-center bg-white"
-      style={{ fontFamily: 'var(--font-mr-body)', backgroundImage: GLOW }}>
+      className="relative flex flex-col items-center bg-[#FFEFEB]"
+      style={{ fontFamily: 'var(--font-mr-body)' }}>
       <div className="relative h-[338px] w-full overflow-hidden sm:h-[525px] lg:h-[750px]">
         <HeroCarousel />
       </div>
