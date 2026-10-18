@@ -1,6 +1,6 @@
 'use client';
 
-import { useEffect, useRef, useState } from 'react';
+import React, { useEffect, useRef, useState } from 'react';
 
 type Slide = {
   text: React.ReactNode;
@@ -15,6 +15,14 @@ function Hi({ children }: { children: React.ReactNode }) {
 }
 
 const SLIDES: Slide[] = [
+  {
+    lead: true,
+    text: (
+      <>
+        Why would I want this <Hi>Memoroll</Hi>?
+      </>
+    ),
+  },
   {
     lead: true,
     text: (
@@ -51,7 +59,7 @@ const SLIDES: Slide[] = [
     text: (
       <>
         You won&apos;t see all of it while it&apos;s happening.{' '}
-        <span className="text-[#e34013]">But someone will.</span>
+        <Hi>But someone will.</Hi>
       </>
     ),
   },
@@ -67,6 +75,62 @@ const SLIDES: Slide[] = [
 
 /** Scroll distance, in viewport heights, that each slide is held for. */
 const VH_PER_SLIDE = 0.7;
+
+/** Delay between one word starting to rise and the next, in ms. */
+const WORD_STAGGER_MS = 45;
+
+/**
+ * Word-by-word text reveal: each word sits in its own clipped line box and
+ * rises into place from below, one after another, whenever `show` turns on.
+ * Hiding resets every word at once so the next reveal starts clean.
+ *
+ * The text is walked recursively so words inside an accent span (`Hi`) keep
+ * their colour. Plain spaces stay between the words so the line still wraps.
+ */
+function RevealWords({
+  children,
+  show,
+}: {
+  children: React.ReactNode;
+  show: boolean;
+}) {
+  let index = 0;
+
+  const walk = (node: React.ReactNode): React.ReactNode => {
+    if (typeof node === 'string') {
+      return node.split(/(\s+)/).map((part, k) => {
+        if (part === '') return null;
+        if (/^\s+$/.test(part)) return part;
+        const delay = index++ * WORD_STAGGER_MS;
+        return (
+          <span
+            key={k}
+            className="-mb-[0.2em] inline-block overflow-hidden pb-[0.2em] align-top">
+            <span
+              className={`inline-block ease-[cubic-bezier(0.22,1,0.36,1)] motion-reduce:translate-y-0 motion-reduce:transition-none ${
+                show
+                  ? 'translate-y-0 transition-transform duration-700'
+                  : 'translate-y-[115%]'
+              }`}
+              style={{ transitionDelay: show ? `${delay}ms` : '0ms' }}>
+              {part}
+            </span>
+          </span>
+        );
+      });
+    }
+    if (React.isValidElement<{ children?: React.ReactNode }>(node)) {
+      return React.cloneElement(
+        node,
+        undefined,
+        React.Children.map(node.props.children, walk)
+      );
+    }
+    return node;
+  };
+
+  return <>{React.Children.map(children, walk)}</>;
+}
 
 function PolaroidPhoto({ src }: { src: string }) {
   return (
@@ -137,27 +201,17 @@ export default function MemorollWhy() {
       }}>
       <div className="sticky top-0 flex h-screen flex-col items-center justify-center px-4 py-12 md:px-10">
         <div className="flex w-full max-w-[1280px] flex-col items-center">
-          <span className="inline-flex items-center rounded-full border border-[#e6e6e6] px-3 py-1.5 text-[14px] font-medium capitalize tracking-[-0.28px] text-[#e34013]">
-            Why would I want this?
-          </span>
-
           <div className="flex min-h-[420px] w-full items-center gap-6 lg:min-h-[498px] lg:gap-12">
             <div className="relative flex-1 self-stretch">
               {SLIDES.map((slide, i) => (
                 <div
                   key={i}
                   aria-hidden={i !== active}
-                  className={`absolute inset-0 flex flex-col items-center justify-center gap-8 transition-[opacity,transform] duration-500 ease-out motion-reduce:transition-none lg:gap-12 ${
+                  className={`absolute inset-0 flex flex-col items-center justify-center gap-8 transition-opacity duration-500 ease-out motion-reduce:transition-none lg:gap-12 ${
                     slide.photo?.side === 'left'
                       ? 'lg:flex-row'
                       : 'lg:flex-row-reverse'
-                  } ${
-                    i === active
-                      ? 'translate-y-0 opacity-100'
-                      : i < active
-                        ? '-translate-y-6 opacity-0'
-                        : 'translate-y-6 opacity-0'
-                  }`}>
+                  } ${i === active ? 'opacity-100' : 'opacity-0'}`}>
                   {slide.photo && <PolaroidPhoto src={slide.photo.src} />}
                   <p
                     className={`text-center text-[#1b1b1b] lg:flex-1 ${
@@ -167,7 +221,7 @@ export default function MemorollWhy() {
                           ? 'text-[28px] font-medium md:text-[48px]'
                           : 'w-full text-[28px] font-medium md:text-[48px]'
                     }`}>
-                    {slide.text}
+                    <RevealWords show={i === active}>{slide.text}</RevealWords>
                   </p>
                 </div>
               ))}
