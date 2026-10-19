@@ -47,7 +47,7 @@ export default function MemorollPlanCallout() {
       style={{ fontFamily: 'var(--font-mr-body)' }}>
       <div className="relative mx-auto flex w-full max-w-[1280px] flex-col gap-10 overflow-hidden rounded-2xl p-6 md:p-10 lg:block lg:h-[460px] lg:p-0">
         <img
-          src="/memoroll-landing/callout-bg.png"
+          src="/memoroll-landing/callout-bg.jpg"
           alt=""
           className="pointer-events-none absolute inset-0 size-full object-cover"
         />
@@ -67,7 +67,7 @@ export default function MemorollPlanCallout() {
           <div className="flex flex-wrap items-center gap-4 pt-2">
             <a
               href="/create/wedding-invitation"
-              className="flex h-[60px] items-center justify-center rounded-lg bg-white px-6 text-[18px] font-semibold text-[#e34013] shadow-[0_1px_1px_rgba(16,24,40,0.05)]">
+              className="flex h-12 items-center justify-center rounded-lg bg-white px-5 text-[16px] md:h-[60px] md:px-6 md:text-[18px] font-semibold text-[#e34013] shadow-[0_1px_1px_rgba(16,24,40,0.05)]">
               Get the Wedding Plan
             </a>
             <a

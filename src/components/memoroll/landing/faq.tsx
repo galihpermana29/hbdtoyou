@@ -34,7 +34,7 @@ const FAQS = [
   },
 ];
 
-const EMAIL = 'memoify.live@gmail.com';
+const EMAIL = 'memoify@memoify.live';
 
 export default function MemorollFaq() {
   const [open, setOpen] = useState<number | null>(0);
@@ -75,7 +75,7 @@ export default function MemorollFaq() {
             </p>
             <a
               href={`mailto:${EMAIL}`}
-              className="inline-flex items-center gap-2 rounded-full bg-[#1b1b1b] px-[18px] py-3 text-[14px] font-semibold text-white">
+              className="inline-flex max-w-full items-center gap-2 break-all rounded-full bg-[#1b1b1b] px-[18px] py-3 text-[14px] font-semibold text-white">
               {EMAIL}
               <img
                 src="/memoroll-landing/faq-arrow.svg"
@@ -127,9 +127,17 @@ export default function MemorollFaq() {
                 <div
                   id={`faq-panel-${i}`}
                   role="region"
-                  hidden={!isOpen}
-                  className="pb-7 pl-[52px] pr-4 md:pr-[60px]">
-                  <p className="text-[16px] leading-6 text-[#4a4642]">{f.a}</p>
+                  aria-hidden={!isOpen}
+                  className={`grid transition-[grid-template-rows,opacity,visibility] duration-300 ease-out motion-reduce:transition-none ${
+                    isOpen
+                      ? 'visible grid-rows-[1fr] opacity-100'
+                      : 'invisible grid-rows-[0fr] opacity-0'
+                  }`}>
+                  <div className="overflow-hidden">
+                    <p className="pb-7 pl-[52px] pr-4 text-[16px] leading-6 text-[#4a4642] md:pr-[60px]">
+                      {f.a}
+                    </p>
+                  </div>
                 </div>
               </div>
             );

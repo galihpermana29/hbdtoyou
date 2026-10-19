@@ -26,7 +26,7 @@ export default function MemorollLandingPage() {
   return (
     <div className={`${memorollFonts} ${landingFonts}`}>
       <NavigationBar />
-      <main>
+      <main className="overflow-x-clip">
         <MemorollHero />
         <MemorollIdea />
         <MemorollHowItWorks />

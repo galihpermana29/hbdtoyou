@@ -160,7 +160,7 @@ export default function MemorollWhy() {
     <section
       ref={trackRef}
       aria-label="Why would I want this?"
-      className="relative bg-white"
+      className="relative overflow-x-clip bg-white"
       style={{
         fontFamily: 'var(--font-mr-body)',
         height: `${(1 + SLIDES.length * VH_PER_SLIDE) * 100}vh`,
