@@ -1,6 +1,7 @@
 import { FlipNumber } from '../ui/flip-counter';
 import DevelopingPhoto from './developing-photo';
 import StackedWordmark from './stacked-wordmark';
+import { RevealHeading } from './reveal-words';
 
 /**
  * "The Idea!": the one-line pitch, the gallery the guests end up in, and the
@@ -213,9 +214,9 @@ export default function MemorollIdea() {
             <span className="inline-flex items-center rounded-full border border-[#e6e6e6] bg-white px-3 py-1.5 text-[14px] font-medium capitalize leading-[normal] tracking-[-0.28px] text-[#e34013]">
               The Idea!
             </span>
-            <h2 className="text-[28px] font-semibold leading-[36px] tracking-[-0.72px] text-white md:text-[36px] md:leading-[44px]">
+            <RevealHeading className="text-[28px] font-semibold leading-[36px] tracking-[-0.72px] text-white md:text-[36px] md:leading-[44px]">
               Everyone gets a camera. Nobody gets a preview. Then, the reveal.
-            </h2>
+            </RevealHeading>
           </div>
           <p className="text-[16px] font-normal leading-[26px] text-[#b9b2aa] md:text-[18px] md:leading-[29px] lg:w-[400px] lg:shrink-0">
             No reviewing, deleting, or missing the party to stare at a screen.

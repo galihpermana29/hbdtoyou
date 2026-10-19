@@ -2,6 +2,8 @@
 
 import React, { useEffect, useRef, useState } from 'react';
 
+import { RevealWords } from './reveal-words';
+
 type Slide = {
   text: React.ReactNode;
   /** The first slide is set larger than the rest. */
@@ -76,65 +78,29 @@ const SLIDES: Slide[] = [
 /** Scroll distance, in viewport heights, that each slide is held for. */
 const VH_PER_SLIDE = 0.7;
 
-/** Delay between one word starting to rise and the next, in ms. */
-const WORD_STAGGER_MS = 45;
-
 /**
- * Word-by-word text reveal: each word sits in its own clipped line box and
- * rises into place from below, one after another, whenever `show` turns on.
- * Hiding resets every word at once so the next reveal starts clean.
- *
- * The text is walked recursively so words inside an accent span (`Hi`) keep
- * their colour. Plain spaces stay between the words so the line still wraps.
+ * The print slides in from the side it sits on (and back out again when the
+ * slide goes), easing to a stop; the text reveals alongside it.
  */
-function RevealWords({
-  children,
+function PolaroidPhoto({
+  src,
+  side,
   show,
 }: {
-  children: React.ReactNode;
+  src: string;
+  side: 'left' | 'right';
   show: boolean;
 }) {
-  let index = 0;
-
-  const walk = (node: React.ReactNode): React.ReactNode => {
-    if (typeof node === 'string') {
-      return node.split(/(\s+)/).map((part, k) => {
-        if (part === '') return null;
-        if (/^\s+$/.test(part)) return part;
-        const delay = index++ * WORD_STAGGER_MS;
-        return (
-          <span
-            key={k}
-            className="-mb-[0.2em] inline-block overflow-hidden pb-[0.2em] align-top">
-            <span
-              className={`inline-block ease-[cubic-bezier(0.22,1,0.36,1)] motion-reduce:translate-y-0 motion-reduce:transition-none ${
-                show
-                  ? 'translate-y-0 transition-transform duration-700'
-                  : 'translate-y-[115%]'
-              }`}
-              style={{ transitionDelay: show ? `${delay}ms` : '0ms' }}>
-              {part}
-            </span>
-          </span>
-        );
-      });
-    }
-    if (React.isValidElement<{ children?: React.ReactNode }>(node)) {
-      return React.cloneElement(
-        node,
-        undefined,
-        React.Children.map(node.props.children, walk)
-      );
-    }
-    return node;
-  };
-
-  return <>{React.Children.map(children, walk)}</>;
-}
-
-function PolaroidPhoto({ src }: { src: string }) {
+  const offset = side === 'left' ? '-14vw' : '14vw';
   return (
-    <div className="flex w-full max-w-[531px] shrink-0 items-center justify-center lg:w-[531px]">
+    <div
+      style={{
+        transform: show ? 'none' : `translateX(${offset})`,
+        transition: show
+          ? 'transform 900ms cubic-bezier(0.22, 1, 0.36, 1) 100ms'
+          : 'transform 500ms ease-in',
+      }}
+      className="flex w-full max-w-[531px] shrink-0 items-center justify-center motion-reduce:!transform-none motion-reduce:!transition-none lg:w-[531px]">
       <div className="relative aspect-[519/353] w-[97.7%] rotate-[2.09deg] shadow-[0_0.6px_0.6px_rgba(255,255,255,0.22),0_2.3px_2.3px_rgba(255,255,255,0.19),0_10px_10px_rgba(255,255,255,0.08)]">
         <img
           src="/memoroll-landing/why-paper.png"
@@ -212,7 +178,13 @@ export default function MemorollWhy() {
                       ? 'lg:flex-row'
                       : 'lg:flex-row-reverse'
                   } ${i === active ? 'opacity-100' : 'opacity-0'}`}>
-                  {slide.photo && <PolaroidPhoto src={slide.photo.src} />}
+                  {slide.photo && (
+                    <PolaroidPhoto
+                      src={slide.photo.src}
+                      side={slide.photo.side}
+                      show={i === active}
+                    />
+                  )}
                   <p
                     className={`text-center text-[#1b1b1b] lg:flex-1 ${
                       slide.lead

@@ -1,10 +1,13 @@
 import type { Metadata } from 'next';
 
+import MemorollFaq from '@/components/memoroll/landing/faq';
 import { landingFonts } from '@/components/memoroll/landing/fonts';
 import MemorollHero from '@/components/memoroll/landing/hero';
 import MemorollHowItWorks from '@/components/memoroll/landing/how-it-works';
 import MemorollIdea from '@/components/memoroll/landing/idea';
 import MemorollOccasions from '@/components/memoroll/landing/occasions';
+import MemorollPlanCallout from '@/components/memoroll/landing/plan-callout';
+import MemorollTestimonials from '@/components/memoroll/landing/testimonials';
 import MemorollWhy from '@/components/memoroll/landing/why';
 import { memorollFonts } from '@/components/memoroll/ui/fonts';
 import NavigationBar from '@/components/ui/navbar';
@@ -29,6 +32,9 @@ export default function MemorollLandingPage() {
         <MemorollHowItWorks />
         <MemorollWhy />
         <MemorollOccasions />
+        <MemorollTestimonials />
+        <MemorollFaq />
+        <MemorollPlanCallout />
       </main>
     </div>
   );

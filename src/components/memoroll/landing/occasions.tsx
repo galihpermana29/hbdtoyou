@@ -1,6 +1,7 @@
 'use client';
 
 import { useEffect, useRef, useState } from 'react';
+import { RevealHeading } from './reveal-words';
 
 const OCCASIONS = [
   {
@@ -127,9 +128,9 @@ export default function MemorollOccasions() {
               <span className="inline-flex items-center rounded-full border border-[#e6e6e6] px-3 py-1.5 text-[14px] font-medium capitalize tracking-[-0.28px] text-[#e34013]">
                 For any Occasions
               </span>
-              <h2 className="text-center text-[28px] font-semibold leading-[1.2] tracking-[-0.72px] text-[#1b1b1b] md:text-[36px] md:leading-[44px]">
+              <RevealHeading className="text-center text-[28px] font-semibold leading-[1.2] tracking-[-0.72px] text-[#1b1b1b] md:text-[36px] md:leading-[44px]">
                 Made for moments worth remembering
-              </h2>
+              </RevealHeading>
             </div>
 
             <div className="flex w-full flex-col items-center gap-6 lg:flex-row lg:items-start lg:gap-[99px]">
