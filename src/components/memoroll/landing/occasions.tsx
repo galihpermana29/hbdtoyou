@@ -5,15 +5,15 @@ import { useEffect, useRef, useState } from 'react';
 const OCCASIONS = [
   {
     title: 'Birthdays',
-    body: 'we craft user-centric designs that elevate your online presence – from lightning-fast e-commerce sites to sleek, informative landing pages.',
+    body: 'Your day, through everyone else’s eyes. Catch the candles, the chaos, and the little moments you were too busy celebrating to see.',
   },
   {
     title: 'Weddings',
-    body: 'Mobile designs that are as beautiful as they are effective. We optimize every pixel for seamless navigation, boosting engagement and driving conversions across all devices.',
+    body: 'A day, a hundred perspectives. From the first look to the dance floor, relive the moments that made your day yours.',
   },
   {
     title: 'Friends & Gatherings',
-    body: "From first impressions to lasting loyalty, we'll craft a brand identity that speaks to your ideal customer. With logos, style guides, and stunning visuals, we'll make sure your startup stands out.",
+    body: 'The nights you wish could last longer. Let everyone capture their own little piece of the chaos, the laughter, and the memories you’ll talk about for years.',
   },
 ];
 
@@ -23,11 +23,24 @@ const VH_PER_STEP = 0.7;
 const PRINT_SHADOW =
   'shadow-[0_0.5px_0.5px_rgba(255,255,255,0.22),0_2px_2px_rgba(255,255,255,0.19),0_8.8px_8.8px_rgba(255,255,255,0.08)]';
 
-/** Both groups slide up 60px into place as they arrive. */
-const arrive = (shown: boolean) =>
-  `transition-[opacity,transform] duration-700 ease-out motion-reduce:transition-none ${
-    shown ? 'translate-y-0 opacity-100' : 'translate-y-[60px] opacity-0'
-  }`;
+/**
+ * The scroll window, as a fraction of the pinned scroll, in which each later
+ * occasion rises into place. The first is there from the start.
+ */
+const WINDOWS = [
+  [0.05, 0.5],
+  [0.5, 0.95],
+];
+
+/**
+ * A card and its print rise from below the screen, tilted, and settle flat as
+ * `--t{n}` (0 -> 1, set from the scroll position) reaches 1.
+ */
+const rise = (n: 1 | 2): React.CSSProperties => ({
+  transform: `translateY(calc((1 - var(--t${n})) * 80vh)) rotate(calc((1 - var(--t${n})) * -8deg))`,
+  opacity: `min(1, calc(var(--t${n}) * 4))`,
+  willChange: 'transform, opacity',
+});
 
 function Print({
   photo,
@@ -58,8 +71,9 @@ function Print({
 
 /**
  * "For any occasions" - the section is pinned while the page scrolls through
- * it. Scrolling down brings in the next occasion's card and its print; scrolling
- * back up takes them away again.
+ * it. Scrolling down, the next occasion's card and its print rise in from
+ * below, tilted, and settle onto the ones already there; scrolling back up
+ * sends them back down. The motion follows the scroll position directly.
  */
 export default function MemorollOccasions() {
   const trackRef = useRef<HTMLDivElement>(null);
@@ -69,14 +83,24 @@ export default function MemorollOccasions() {
     const track = trackRef.current;
     if (!track) return;
 
+    const reduceMotion = window.matchMedia(
+      '(prefers-reduced-motion: reduce)'
+    ).matches;
+
     const update = () => {
       const { top, height } = track.getBoundingClientRect();
       const scrollable = height - window.innerHeight;
       const progress =
         scrollable > 0 ? Math.min(1, Math.max(0, -top / scrollable)) : 0;
-      setActive(
-        Math.min(OCCASIONS.length - 1, Math.floor(progress * OCCASIONS.length))
-      );
+      let shown = 0;
+      WINDOWS.forEach(([from, to], i) => {
+        const t = reduceMotion
+          ? 1
+          : Math.min(1, Math.max(0, (progress - from) / (to - from)));
+        track.style.setProperty(`--t${i + 1}`, String(1 - (1 - t) ** 3));
+        if (t > 0) shown = i + 1;
+      });
+      setActive(shown);
     };
 
     update();
@@ -95,7 +119,7 @@ export default function MemorollOccasions() {
       style={{ fontFamily: 'var(--font-mr-body)' }}>
       <div
         ref={trackRef}
-        className="relative"
+        className="relative [--t1:0] [--t2:0]"
         style={{ height: `${(1 + OCCASIONS.length * VH_PER_STEP) * 100}vh` }}>
         <div className="sticky top-0 flex h-screen flex-col items-center justify-center px-4 py-8 md:px-10">
           <div className="flex w-full max-w-[1280px] flex-col items-center gap-8 lg:gap-12">
@@ -114,7 +138,8 @@ export default function MemorollOccasions() {
                   <div
                     key={o.title}
                     aria-hidden={i > active}
-                    className={`rounded-[20px] bg-[#fff6f5] p-3 shadow-[0_0_0_1px_#f0f0f0,0_4px_8px_-5px_rgba(0,0,0,0.14)] md:p-5 ${arrive(i <= active)} ${
+                    style={i > 0 ? rise(i as 1 | 2) : undefined}
+                    className={`rounded-[20px] bg-[#fff6f5] p-3 shadow-[0_0_0_1px_#f0f0f0,0_4px_8px_-5px_rgba(0,0,0,0.14)] md:p-5 ${
                       i > 0 && i > active ? 'pointer-events-none' : ''
                     }`}>
                     <div className="flex flex-col gap-2 rounded-[10px] bg-white p-5 font-medium lg:h-[156px]">
@@ -150,7 +175,8 @@ export default function MemorollOccasions() {
 
                   {/* Weddings */}
                   <div
-                    className={`absolute left-0 top-[212.5px] h-[311.7px] w-[527px] ${arrive(active >= 1)}`}>
+                    style={rise(1)}
+                    className="absolute left-0 top-[212.5px] h-[311.7px] w-[527px]">
                     <Print
                       photo="/memoroll-landing/occasions-wedding.jpg"
                       className="absolute left-[68.8px] top-0 h-[311.7px] w-[458.3px]"
@@ -168,7 +194,8 @@ export default function MemorollOccasions() {
 
                   {/* Friends & Gatherings */}
                   <div
-                    className={`absolute left-[69.7px] top-[352px] flex h-[332px] w-[541.7px] items-center justify-center ${arrive(active >= 2)}`}>
+                    style={rise(2)}
+                    className="absolute left-[69.7px] top-[352px] flex h-[332px] w-[541.7px] items-center justify-center">
                     <div
                       className={`relative h-[324.9px] w-[537.5px] rotate-[0.75deg] ${PRINT_SHADOW}`}>
                       <img

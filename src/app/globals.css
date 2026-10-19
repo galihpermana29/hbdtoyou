@@ -345,3 +345,39 @@
     scroll-behavior: auto !important;
   }
 }
+
+/* MemoRoll "The Idea!" - the card and the polaroid drift beside the phone. */
+@keyframes memoroll-float-card {
+  0%,
+  100% {
+    transform: translate3d(0, 0, 0) rotate(0deg);
+  }
+  50% {
+    transform: translate3d(3px, -8px, 0) rotate(-1deg);
+  }
+}
+
+@keyframes memoroll-float-polaroid {
+  0%,
+  100% {
+    transform: translate3d(0, 0, 0) rotate(0deg);
+  }
+  50% {
+    transform: translate3d(-3px, 7px, 0) rotate(1.5deg);
+  }
+}
+
+.memoroll-float-card {
+  animation: memoroll-float-card 5s ease-in-out infinite;
+}
+
+.memoroll-float-polaroid {
+  animation: memoroll-float-polaroid 6s ease-in-out -2s infinite;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .memoroll-float-card,
+  .memoroll-float-polaroid {
+    animation: none;
+  }
+}

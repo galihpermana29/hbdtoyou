@@ -20,10 +20,12 @@ import PhotoCard, { PRINT_HEIGHT, PRINT_WIDTH } from './photo-card';
  *
  * That is done with two copies of the whole arc rather than a mask per print.
  * Underneath, every print is sharp. On top, every print is undeveloped, and
- * that copy is clipped to everything left of the line. Both copies are moved
- * by the same numbers, so a print is simply split by a vertical line in screen
- * space however far it has turned, which a per-print mask would have to work
- * out in the print's own rotated frame.
+ * that copy is masked to everything left of the line, with an edge as soft as
+ * the blur on the dark block itself (the design's half-developed print fades
+ * out over about 20px, not at a cut). Both copies are moved by the same
+ * numbers, so a print is simply split by a vertical line in screen space
+ * however far it has turned, which a per-print mask would have to work out in
+ * the print's own rotated frame.
  *
  * The positions are the design's: the seven slots it draws, in order, with the
  * two either side of them that sit outside the hero's clip. A print is placed
@@ -52,10 +54,43 @@ const SLOTS = [
 const FIRST_SLOT = -4;
 const COUNT = SLOTS.length;
 
+/**
+ * The photographs on the arc, handed out to the prints in turn. There are nine
+ * prints and six photographs, so three photographs appear twice; the repeats
+ * land three prints apart, never beside their twin.
+ */
+const PHOTOS = [1, 2, 3, 4, 5, 6].map((n) => `/memoroll-landing/arc-${n}.jpg`);
+
 /** Where the flame line stands, in the ring's own coordinates. */
 const LINE_X = 876;
 const RING = 1738;
 const LINE_HEIGHT = 342;
+
+/**
+ * Where the dark copy fades out, as the cumulative edge of a 4.866px Gaussian
+ * blur: nearly all dark 10px before the line, half at it, nearly clear 10px
+ * after. Offsets are from the line.
+ */
+const FADE = [
+  [-12, 1],
+  [-10, 0.98],
+  [-5, 0.85],
+  [0, 0.5],
+  [5, 0.15],
+  [10, 0.02],
+  [12, 0],
+] as const;
+
+/**
+ * A mask only paints inside its own box, and the prints reach well outside the
+ * ring (the left-most one starts 207px left of it), so the masked layer is
+ * drawn on a box that is bigger than the ring by this much on each side.
+ */
+const MASK_ROOM = 800;
+const MASK_STOPS = FADE.map(
+  ([offset, alpha]) =>
+    `rgba(0, 0, 0, ${alpha}) ${MASK_ROOM + LINE_X + offset}px`
+).join(', ');
 
 /** How far from the line a print's middle can be and still light it: half a print, plus a lead. */
 const REACH = PRINT_WIDTH / 2 + 34;
@@ -113,7 +148,7 @@ function Print({
     <motion.div
       className="absolute left-0 top-0 will-change-transform"
       style={{ x, y, rotate }}>
-      <PhotoCard undeveloped={undeveloped} />
+      <PhotoCard src={PHOTOS[index % PHOTOS.length]} undeveloped={undeveloped} />
     </motion.div>
   );
 }
@@ -162,11 +197,20 @@ export default function HeroCarousel() {
           ))}
         </div>
         <div
-          className="absolute inset-0"
-          style={{ clipPath: `inset(-2000px ${RING - LINE_X}px -2000px -2000px)` }}>
-          {prints.map((index) => (
-            <Print key={index} index={index} phase={phase} undeveloped />
-          ))}
+          className="absolute"
+          style={{
+            left: -MASK_ROOM,
+            top: -MASK_ROOM,
+            width: RING + 2 * MASK_ROOM,
+            height: RING + 2 * MASK_ROOM,
+            maskImage: `linear-gradient(90deg, ${MASK_STOPS})`,
+            WebkitMaskImage: `linear-gradient(90deg, ${MASK_STOPS})`,
+          }}>
+          <div className="absolute" style={{ left: MASK_ROOM, top: MASK_ROOM }}>
+            {prints.map((index) => (
+              <Print key={index} index={index} phase={phase} undeveloped />
+            ))}
+          </div>
         </div>
         <div className="absolute top-0" style={{ left: LINE_X }}>
           <FlameLine height={LINE_HEIGHT} crossing={crossing} sway={sway} />

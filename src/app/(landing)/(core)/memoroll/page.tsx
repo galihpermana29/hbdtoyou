@@ -2,6 +2,7 @@ import type { Metadata } from 'next';
 
 import MemorollHero from '@/components/memoroll/landing/hero';
 import MemorollHowItWorks from '@/components/memoroll/landing/how-it-works';
+import MemorollIdea from '@/components/memoroll/landing/idea';
 import MemorollOccasions from '@/components/memoroll/landing/occasions';
 import MemorollWhy from '@/components/memoroll/landing/why';
 import { memorollFonts } from '@/components/memoroll/ui/fonts';
@@ -23,6 +24,7 @@ export default function MemorollLandingPage() {
       <NavigationBar />
       <main>
         <MemorollHero />
+        <MemorollIdea />
         <MemorollHowItWorks />
         <MemorollWhy />
         <MemorollOccasions />
