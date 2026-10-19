@@ -74,6 +74,7 @@ export default function MemorollHowItWorks() {
 
   return (
     <section
+      id="how-it-works"
       className="flex flex-col items-center gap-12 bg-white px-4 py-16 md:px-10 lg:py-24"
       style={{ fontFamily: 'var(--font-mr-body)' }}>
       <span className="relative inline-flex items-center rounded-full border border-[#e6e6e6] px-3 py-1.5 text-[14px] font-medium capitalize tracking-[-0.28px] text-[#e34013]">

@@ -1,38 +1,92 @@
+'use client';
+
+import { motion, useTransform, type MotionValue } from 'framer-motion';
+
 /**
- * The face of one print on the hero's arc: a white-bordered photograph, either
- * sharp or undeveloped. Undeveloped is a solid #1b1b1b block over the whole
- * photograph, blurred by 4.866px, so its edges fade into the photograph
- * beneath rather than stopping at the border: the dark never reaches the edge
- * of the frame, and a sliver of the photograph shows round it.
+ * One print on the hero's arc: a white polaroid, 240 wide, with a 216x262
+ * picture and a line of writing under it.
  *
- * Where a print sits and how far it is turned belongs to the carousel, not to
- * the print, because both change every frame. A print that is half developed
- * is not a third kind of face: it is the sharp face showing on one side of the
- * flame line and the undeveloped one on the other (see `hero-carousel.tsx`).
+ * It is either developed (the photograph, with what a guest wrote on it in
+ * their own hand) or undeveloped (a dark brown plate, with the camera's own
+ * frame count in mono type where the writing will go). A print half way
+ * through is not a third kind: it is the developed one showing on one side of
+ * the flame line and the undeveloped one on the other (see `hero-carousel.tsx`).
+ *
+ * The one thing both copies agree on is the writing under a print that is on
+ * the line: a developing print says so, in the flame orange, whichever side of
+ * the line you read it from. Left alone the two copies would each write their
+ * own words either side of the line, half a label beside half a caption.
  */
-export const PRINT_WIDTH = 233.561;
-export const PRINT_HEIGHT = 342;
+export const PRINT_WIDTH = 240;
+export const PRINT_HEIGHT = 328;
+
+/** Under every print, the one shadow the design gives them. */
+const SHADOW = '0 18px 40px rgba(90, 42, 18, 0.133)';
+
+function useFade(developing: MotionValue<number>) {
+  return useTransform(developing, (value) => 1 - value);
+}
+
+export type Photo = { src: string; caption: string };
 
 export default function PhotoCard({
-  src,
+  photo,
+  exposure,
+  developing,
   undeveloped = false,
 }: {
-  src: string;
+  photo: Photo;
+  /** 0 to 1: how much this print is on the line, and so how much it says "developing…". */
+  developing: MotionValue<number>;
+  /** What the undeveloped print says about itself: "EXP 16/27". */
+  exposure: string;
   undeveloped?: boolean;
 }) {
   return (
     <div
-      className="flex items-center justify-center bg-[#fdfdfd] p-[5.561px]"
-      style={{ width: PRINT_WIDTH, height: PRINT_HEIGHT }}>
-      <div className="relative h-[330.878px] w-[222.439px] shrink-0 overflow-clip">
-        <img
-          src={src}
-          alt=""
-          className="absolute inset-0 size-full max-w-none object-cover"
-        />
-        {undeveloped && (
-          <div className="pointer-events-none absolute -left-[0.55px] top-[0.02px] h-[330.878px] w-[223.134px] bg-[#1b1b1b] blur-[4.866px]" />
+      className="flex flex-col items-start gap-[10px] bg-white px-3 pb-4 pt-3"
+      style={{
+        width: PRINT_WIDTH,
+        height: PRINT_HEIGHT,
+        // Only the developed copy casts the shadow: the undeveloped copy lies
+        // exactly over it, and two shadows would darken the half of a print
+        // that is still waiting.
+        boxShadow: undeveloped ? undefined : SHADOW,
+      }}>
+      <div className="relative h-[262px] w-[216px] shrink-0 overflow-clip">
+        {undeveloped ? (
+          <div className="absolute inset-0 bg-gradient-to-b from-[#2a231e] to-[#4a3e35]" />
+        ) : (
+          <img
+            src={photo.src}
+            alt=""
+            className="absolute inset-0 size-full max-w-none object-cover"
+          />
         )}
+      </div>
+      <div className="relative">
+        <motion.p
+          className={
+            undeveloped
+              ? 'whitespace-pre text-[11px] leading-[normal] tracking-[1.2px] text-[#a39a91]'
+              : 'whitespace-pre text-[22px] font-normal leading-[normal] text-[#4a4642]'
+          }
+          style={{
+            fontFamily: undeveloped
+              ? 'var(--font-mr-label)'
+              : 'var(--font-mr-hand)',
+            opacity: useFade(developing),
+          }}>
+          {undeveloped ? exposure : photo.caption}
+        </motion.p>
+        <motion.p
+          className="absolute left-0 top-0 whitespace-pre text-[11px] leading-[normal] tracking-[1.2px] text-[#ff3e09]"
+          style={{
+            fontFamily: 'var(--font-mr-label)',
+            opacity: developing,
+          }}>
+          developing…
+        </motion.p>
       </div>
     </div>
   );

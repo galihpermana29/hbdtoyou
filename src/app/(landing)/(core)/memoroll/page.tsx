@@ -1,5 +1,6 @@
 import type { Metadata } from 'next';
 
+import { landingFonts } from '@/components/memoroll/landing/fonts';
 import MemorollHero from '@/components/memoroll/landing/hero';
 import MemorollHowItWorks from '@/components/memoroll/landing/how-it-works';
 import MemorollIdea from '@/components/memoroll/landing/idea';
@@ -20,7 +21,7 @@ export const metadata: Metadata = {
  */
 export default function MemorollLandingPage() {
   return (
-    <div className={memorollFonts}>
+    <div className={`${memorollFonts} ${landingFonts}`}>
       <NavigationBar />
       <main>
         <MemorollHero />

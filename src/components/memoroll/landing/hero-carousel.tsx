@@ -7,64 +7,57 @@ import {
   useTransform,
   type MotionValue,
 } from 'framer-motion';
-import { useEffect } from 'react';
+import { useEffect, type ReactNode } from 'react';
 
 import FlameLine from './flame-line';
-import PhotoCard, { PRINT_HEIGHT, PRINT_WIDTH } from './photo-card';
+import PhotoCard, { PRINT_HEIGHT, PRINT_WIDTH, type Photo } from './photo-card';
 
 /**
  * The arc of prints behind the hero heading. Prints travel left to right along
  * the arc; each is undeveloped until it crosses the flame line in the middle,
- * and develops as it passes: the part of a print left of the line is still
- * dark and blurred, the part right of it is the photograph.
+ * and develops as it passes: the part of a print left of the line is still a
+ * dark plate, the part right of it is the photograph.
  *
  * That is done with two copies of the whole arc rather than a mask per print.
- * Underneath, every print is sharp. On top, every print is undeveloped, and
- * that copy is masked to everything left of the line, with an edge as soft as
- * the blur on the dark block itself (the design's half-developed print fades
- * out over about 20px, not at a cut). Both copies are moved by the same
+ * Underneath, every print is developed. On top, every print is undeveloped,
+ * and that copy is masked to everything left of the line, with an edge as soft
+ * as the blur the design gives that edge. Both copies are moved by the same
  * numbers, so a print is simply split by a vertical line in screen space
  * however far it has turned, which a per-print mask would have to work out in
  * the print's own rotated frame.
  *
- * The positions are the design's: the seven slots it draws, in order, with the
- * two either side of them that sit outside the hero's clip. A print is placed
- * between slots with a Catmull-Rom spline, so it keeps moving smoothly through
- * each slot instead of changing direction at it. The arc always moves,
- * whatever the visitor's reduced-motion setting: it is the hero's whole
- * picture, and a still arc would show the design's frozen frame as the page.
+ * The prints stand on a circle. Read off the design, their centres sit 903px
+ * from a point 721px across and 1127px down the 1440x970 frame, 16 degrees
+ * apart, and each is turned by the same angle as its place on the circle. So
+ * a print is placed by one number, how many places it is from the middle, and
+ * moving it is changing that number. Thirteen prints are laid out, six places
+ * either side of the middle: the two outermost are below the frame, where a
+ * print can be handed from one end of the arc to the other unseen.
  *
- * The ring is laid out at the design's 1440px width and scaled down below it
+ * The frame is laid out at the design's 1440px width and scaled down below it
  * rather than re-flowed, because an arc has no meaningful reflow: on a phone
  * it is the same picture, smaller.
  */
 
-/** Centre and turn of a print standing in each slot, left to right. */
-const SLOTS = [
-  { x: -170, y: 960, angle: -75 }, // outside the clip
-  { x: -0.52, y: 714.6, angle: -60 },
-  { x: 206.49, y: 400.49, angle: -45 },
-  { x: 543.06, y: 219.4, angle: -15 },
-  { x: 871.78, y: 171, angle: 0 },
-  { x: 1200.06, y: 219.4, angle: 15 },
-  { x: 1537.49, y: 408.49, angle: 45 },
-  { x: 1781.48, y: 707.63, angle: 60 },
-  { x: 1900, y: 960, angle: 75 }, // outside the clip
-];
-const FIRST_SLOT = -4;
-const COUNT = SLOTS.length;
+const FRAME = { width: 1440, height: 970 };
+const CIRCLE = { x: 721, y: 1127, radius: 903 };
+const DEGREES_PER_PLACE = 16;
+
+const FIRST_PLACE = -6;
+const COUNT = 13;
+
+/** Where the flame line stands in the frame, and the stretch of picture it runs down. */
+const LINE_X = 730;
+const LINE_TOP = 72;
+const LINE_HEIGHT = 262;
 
 /**
- * The photographs on the arc, handed out to the prints in turn. There are nine
- * prints and six photographs, so three photographs appear twice; the repeats
- * land three prints apart, never beside their twin.
+ * How far from the line a print's middle can be and still light it: half a
+ * print, plus a lead.
  */
-const PHOTOS = [1, 2, 3, 4, 5, 6].map((n) => `/memoroll-landing/arc-${n}.jpg`);
-
-/** Where the flame line stands, in the ring's own coordinates. */
-const LINE_X = 876;
-const RING = 1738;
-const LINE_HEIGHT = 342;
+const REACH = PRINT_WIDTH / 2 + 34;
+/** How far the line's bright strip tilts as a print goes by, in degrees. */
+const SWAY = 2.5;
 
 /**
  * Where the dark copy fades out, as the cumulative edge of a 4.866px Gaussian
@@ -83,8 +76,8 @@ const FADE = [
 
 /**
  * A mask only paints inside its own box, and the prints reach well outside the
- * ring (the left-most one starts 207px left of it), so the masked layer is
- * drawn on a box that is bigger than the ring by this much on each side.
+ * frame, so the masked layer is drawn on a box bigger than the frame by this
+ * much on each side.
  */
 const MASK_ROOM = 800;
 const MASK_STOPS = FADE.map(
@@ -92,39 +85,59 @@ const MASK_STOPS = FADE.map(
     `rgba(0, 0, 0, ${alpha}) ${MASK_ROOM + LINE_X + offset}px`
 ).join(', ');
 
-/** How far from the line a print's middle can be and still light it: half a print, plus a lead. */
-const REACH = PRINT_WIDTH / 2 + 34;
-/** How far the line's bright strip tilts as a print goes by, in degrees. */
-const SWAY = 2.5;
+/**
+ * The photographs on the arc, and what was written under each, handed out to
+ * the prints in turn. There are thirteen prints and six photographs, so some
+ * appear twice; the repeats land six places apart, never beside their twin.
+ */
+const PHOTOS: Photo[] = [
+  { src: '/memoroll-landing/arc-1.jpg', caption: 'Elias & Freya ♡' },
+  { src: '/memoroll-landing/arc-2.jpg', caption: 'first dance!!' },
+  { src: '/memoroll-landing/arc-3.jpg', caption: 'the send-off' },
+  { src: '/memoroll-landing/arc-4.jpg', caption: 'the kiss, finally' },
+  { src: '/memoroll-landing/arc-5.jpg', caption: "grandpa's dessert" },
+  { src: '/memoroll-landing/arc-6.jpg', caption: 'the speeches, 9:12pm' },
+];
+
+/** What the undeveloped prints say about themselves, in turn. */
+const EXPOSURES = [
+  'EXP 21/27',
+  'EXP 19/27',
+  'EXP 16/27 · ALMOST',
+  'EXP 16/27',
+  'EXP 12/27',
+  'EXP 24/27',
+  'EXP 08/27',
+];
 
 /**
- * How long a print takes to move one slot. A print needs roughly two of these
- * to cross the line, which is the pace the reveal is meant to be watched at.
+ * How long a print takes to move one place. A print needs roughly two and a
+ * half of these to cross the line, which is the pace the reveal is meant to be
+ * watched at.
  */
-const SLOT_SECONDS = 2.5;
+const PLACE_SECONDS = 2.5;
 
-type Field = 'x' | 'y' | 'angle';
+/**
+ * How much of a print the line has to be inside before it says "developing…":
+ * it fades in over the first 24px of the print the line passes, and out over
+ * the last 24px.
+ */
+const DEVELOPING_RAMP = 24;
 
-function spline(field: Field, index: number, t: number) {
-  const last = COUNT - 1;
-  const p0 = SLOTS[Math.max(index - 1, 0)][field];
-  const p1 = SLOTS[index][field];
-  const p2 = SLOTS[Math.min(index + 1, last)][field];
-  const p3 = SLOTS[Math.min(index + 2, last)][field];
+const round = (value: number) => Math.round(value * 1000) / 1000;
 
-  return (
-    0.5 *
-    (2 * p1 +
-      (p2 - p0) * t +
-      (2 * p0 - 5 * p1 + 4 * p2 - p3) * t * t +
-      (3 * p1 - p0 - 3 * p2 + p3) * t * t * t)
-  );
-}
+/** A place on the circle: where a print's middle is, and how far it is turned. */
+function at(place: number) {
+  const angle = place * DEGREES_PER_PLACE;
+  const radians = (angle * Math.PI) / 180;
 
-/** Position of a print at `slot`, where 0 is the middle one and -4..4 span them all. */
-function at(field: Field, slot: number) {
-  const index = Math.min(Math.floor(slot - FIRST_SLOT), COUNT - 1);
-  return spline(field, index, slot - FIRST_SLOT - index);
+  // Rounded because the server and the browser disagree about sin and cos in
+  // the last digit or two, which React reports as a mismatch on hydration.
+  return {
+    x: round(CIRCLE.x + CIRCLE.radius * Math.sin(radians)),
+    y: round(CIRCLE.y - CIRCLE.radius * Math.cos(radians)),
+    angle,
+  };
 }
 
 function Print({
@@ -136,24 +149,34 @@ function Print({
   phase: MotionValue<number>;
   undeveloped: boolean;
 }) {
-  const slot = useTransform(
+  const place = useTransform(
     phase,
-    (value) => ((index + value) % COUNT) + FIRST_SLOT
+    (value) => ((index + value) % COUNT) + FIRST_PLACE
   );
-  const x = useTransform(slot, (s) => at('x', s) - PRINT_WIDTH / 2);
-  const y = useTransform(slot, (s) => at('y', s) - PRINT_HEIGHT / 2);
-  const rotate = useTransform(slot, (s) => at('angle', s));
+  const x = useTransform(place, (p) => at(p).x - PRINT_WIDTH / 2);
+  const y = useTransform(place, (p) => at(p).y - PRINT_HEIGHT / 2);
+  const rotate = useTransform(place, (p) => at(p).angle);
+
+  const developing = useTransform(place, (p) => {
+    const inside = PRINT_WIDTH / 2 - Math.abs(at(p).x - LINE_X);
+    return Math.min(Math.max(inside / DEVELOPING_RAMP, 0), 1);
+  });
 
   return (
     <motion.div
       className="absolute left-0 top-0 will-change-transform"
       style={{ x, y, rotate }}>
-      <PhotoCard src={PHOTOS[index % PHOTOS.length]} undeveloped={undeveloped} />
+      <PhotoCard
+        developing={developing}
+        photo={PHOTOS[index % PHOTOS.length]}
+        exposure={EXPOSURES[index % EXPOSURES.length]}
+        undeveloped={undeveloped}
+      />
     </motion.div>
   );
 }
 
-export default function HeroCarousel() {
+export default function HeroCarousel({ children }: { children?: ReactNode }) {
   const phase = useMotionValue(0);
   const prints = Array.from({ length: COUNT }, (_, index) => index);
 
@@ -161,8 +184,8 @@ export default function HeroCarousel() {
   const nearest = useTransform(phase, (value) => {
     let closest = Infinity;
     for (let index = 0; index < COUNT; index++) {
-      const slot = ((index + value) % COUNT) + FIRST_SLOT;
-      const distance = at('x', slot) - LINE_X;
+      const place = ((index + value) % COUNT) + FIRST_PLACE;
+      const distance = at(place).x - LINE_X;
       if (Math.abs(distance) < Math.abs(closest)) closest = distance;
     }
     return closest;
@@ -171,13 +194,14 @@ export default function HeroCarousel() {
     const t = Math.min(Math.max(1 - Math.abs(distance) / REACH, 0), 1);
     return t * t * (3 - 2 * t);
   });
-  const sway = useTransform(nearest, (distance) =>
-    Math.min(Math.max(distance / (PRINT_WIDTH / 2), -1), 1) * SWAY
+  const sway = useTransform(
+    nearest,
+    (distance) => Math.min(Math.max(distance / (PRINT_WIDTH / 2), -1), 1) * SWAY
   );
 
   useEffect(() => {
     const loop = animate(phase, COUNT, {
-      duration: COUNT * SLOT_SECONDS,
+      duration: COUNT * PLACE_SECONDS,
       ease: 'linear',
       repeat: Infinity,
     });
@@ -187,35 +211,33 @@ export default function HeroCarousel() {
   return (
     <div
       aria-hidden="true"
-      className="absolute left-1/2 top-[25px] size-[1738px] origin-top -translate-x-1/2 scale-[0.45] sm:top-[39px] sm:scale-[0.7] lg:top-[56px] lg:scale-100">
-      {/* The design's ring is centred 24px left of the hero (left -173 in a
-          1440 frame), so the whole arc and its line shift together. */}
-      <div className="absolute inset-0 -translate-x-6">
-        <div className="absolute inset-0">
+      className="absolute left-1/2 top-0 origin-top -translate-x-1/2 scale-[0.45] sm:scale-[0.7] lg:scale-100"
+      style={{ width: FRAME.width, height: FRAME.height }}>
+      <div className="absolute inset-0">
+        {prints.map((index) => (
+          <Print key={index} index={index} phase={phase} undeveloped={false} />
+        ))}
+      </div>
+      <div
+        className="absolute"
+        style={{
+          left: -MASK_ROOM,
+          top: -MASK_ROOM,
+          width: FRAME.width + 2 * MASK_ROOM,
+          height: FRAME.height + 2 * MASK_ROOM,
+          maskImage: `linear-gradient(90deg, ${MASK_STOPS})`,
+          WebkitMaskImage: `linear-gradient(90deg, ${MASK_STOPS})`,
+        }}>
+        <div className="absolute" style={{ left: MASK_ROOM, top: MASK_ROOM }}>
           {prints.map((index) => (
-            <Print key={index} index={index} phase={phase} undeveloped={false} />
+            <Print key={index} index={index} phase={phase} undeveloped />
           ))}
         </div>
-        <div
-          className="absolute"
-          style={{
-            left: -MASK_ROOM,
-            top: -MASK_ROOM,
-            width: RING + 2 * MASK_ROOM,
-            height: RING + 2 * MASK_ROOM,
-            maskImage: `linear-gradient(90deg, ${MASK_STOPS})`,
-            WebkitMaskImage: `linear-gradient(90deg, ${MASK_STOPS})`,
-          }}>
-          <div className="absolute" style={{ left: MASK_ROOM, top: MASK_ROOM }}>
-            {prints.map((index) => (
-              <Print key={index} index={index} phase={phase} undeveloped />
-            ))}
-          </div>
-        </div>
-        <div className="absolute top-0" style={{ left: LINE_X }}>
-          <FlameLine height={LINE_HEIGHT} crossing={crossing} sway={sway} />
-        </div>
       </div>
+      <div className="absolute" style={{ left: LINE_X, top: LINE_TOP }}>
+        <FlameLine height={LINE_HEIGHT} crossing={crossing} sway={sway} />
+      </div>
+      {children}
     </div>
   );
 }

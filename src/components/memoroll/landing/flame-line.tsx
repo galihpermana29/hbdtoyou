@@ -7,8 +7,8 @@ import { motion, type MotionValue } from 'framer-motion';
  * developed. Three things, taken from how the reference carousel draws its
  * own centre line, in the flame orange instead of its violet:
  *
- *  - a resting line with a wide soft glow, built from three stacked shadows
- *    rather than one blur so it falls off in steps and not in a ring;
+ *  - a resting line, 2px of the paper's own off-white, with the design's two
+ *    orange glows stacked round it so it falls off in steps and not in a ring;
  *  - a brighter strip with a white core that fades in only while a print is on
  *    the line, and sways a few degrees as the print goes past, the way the
  *    reference's does;
@@ -23,8 +23,7 @@ const FLAME = '255, 62, 9';
 
 const RESTING_GLOW = [
   `0 0 20px 0 rgba(${FLAME}, 0.6)`,
-  `0 0 30px 16px rgba(${FLAME}, 0.4)`,
-  `0 0 40px 30px rgba(${FLAME}, 0.2)`,
+  `0 0 40px 0 rgba(${FLAME}, 0.4)`,
 ].join(', ');
 
 const STRIP_GLOW = [
@@ -35,23 +34,22 @@ const STRIP_GLOW = [
 const STRIP_FILL = `linear-gradient(90deg, rgba(${FLAME}, 0), rgba(255, 255, 255, 0.8) 15%, #ffd9cc 50%, rgba(255, 190, 172, 0.8) 85%, rgba(${FLAME}, 0))`;
 
 /**
- * Where each spark starts, as an offset from the line and a height down it,
- * with its size and how long it lives. Written out rather than random so the
- * server and the browser draw the same sparks.
+ * Where each spark starts: an offset from the line and a height down it, the
+ * brightness it peaks at, and how long it lives. The positions and brightness
+ * are the design's nine; the lifetimes are not in a still, so they are mine.
+ * Written out rather than random so the server and the browser draw the same
+ * sparks.
  */
 const SPARKS = [
-  { dx: -38, y: 24, size: 2, seconds: 3.4 },
-  { dx: 22, y: 60, size: 1.5, seconds: 4.2 },
-  { dx: -14, y: 98, size: 2, seconds: 3.0 },
-  { dx: 46, y: 130, size: 1.5, seconds: 4.6 },
-  { dx: -56, y: 160, size: 1.5, seconds: 3.8 },
-  { dx: 12, y: 190, size: 2, seconds: 3.2 },
-  { dx: -28, y: 228, size: 1.5, seconds: 4.4 },
-  { dx: 34, y: 262, size: 2, seconds: 3.6 },
-  { dx: -48, y: 296, size: 1.5, seconds: 4.0 },
-  { dx: 18, y: 322, size: 1.5, seconds: 3.3 },
-  { dx: -8, y: 120, size: 1.5, seconds: 4.8 },
-  { dx: 58, y: 210, size: 1.5, seconds: 3.9 },
+  { dx: -15, y: -30, peak: 0.9, seconds: 3.4 },
+  { dx: 21, y: -8, peak: 0.6, seconds: 4.2 },
+  { dx: -7, y: 30, peak: 0.4, seconds: 3.0 },
+  { dx: 29, y: 60, peak: 0.8, seconds: 4.6 },
+  { dx: -27, y: 110, peak: 0.5, seconds: 3.8 },
+  { dx: 11, y: 150, peak: 0.9, seconds: 3.2 },
+  { dx: -21, y: 210, peak: 0.3, seconds: 4.4 },
+  { dx: 25, y: 250, peak: 0.7, seconds: 3.6 },
+  { dx: 3, y: -52, peak: 0.5, seconds: 4.0 },
 ];
 
 export default function FlameLine({
@@ -66,7 +64,7 @@ export default function FlameLine({
   return (
     <div className="absolute top-0" style={{ height }}>
       <div
-        className="absolute inset-y-0 -left-px w-px bg-[#ff3e09] opacity-75"
+        className="absolute inset-y-0 -left-px w-[2px] bg-[#f7f5f3]"
         style={{ boxShadow: RESTING_GLOW }}
       />
       <motion.div
@@ -81,16 +79,14 @@ export default function FlameLine({
       {SPARKS.map((spark, index) => (
         <motion.span
           key={index}
-          className="absolute rounded-full bg-[#ffd9cc]"
+          className="absolute size-[3px] rounded-[1.5px] bg-[#ffd9cc]"
           style={{
             left: spark.dx,
             top: spark.y,
-            width: spark.size,
-            height: spark.size,
-            boxShadow: `0 0 4px 1px rgba(${FLAME}, 0.7)`,
+            boxShadow: `0 0 6px 0 rgba(${FLAME}, 0.7)`,
           }}
           initial={{ opacity: 0, y: 0 }}
-          animate={{ opacity: [0, 0.9, 0], y: [0, -26] }}
+          animate={{ opacity: [0, spark.peak, 0], y: [0, -26] }}
           transition={{
             duration: spark.seconds,
             delay: index * 0.37,

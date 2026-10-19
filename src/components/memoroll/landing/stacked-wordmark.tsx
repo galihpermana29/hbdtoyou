@@ -16,35 +16,47 @@ import Image from 'next/image';
 const run =
   'absolute font-bold [font-family:var(--font-mr-display)] not-italic leading-[1.5] tracking-[-0.011em] text-[#232323] text-[86.331px] [text-box:trim-both_cap_alphabetic]';
 
-export default function StackedWordmark({ className = '' }: { className?: string }) {
+export default function StackedWordmark({
+  className = '',
+  scale = 1,
+}: {
+  className?: string;
+  /** 1 is the 230x120 the first design draws; the redesign draws it at 0.6335. */
+  scale?: number;
+}) {
   return (
     <div
       role="img"
       aria-label="MemoRoll"
-      className={`relative h-[120px] w-[229.64px] shrink-0 overflow-clip ${className}`}>
-      <p
-        aria-hidden="true"
-        className={`${run} left-[110.5px] top-[1.73px] w-[221.007px] -translate-x-1/2 text-center`}>
-        MEMO
-      </p>
-      <p
-        aria-hidden="true"
-        className={`${run} left-0 top-[66.47px] w-[50.935px]`}>
-        R
-      </p>
-      <p
-        aria-hidden="true"
-        className={`${run} left-[227.91px] top-[66.47px] w-[73.381px] -translate-x-full text-right`}>
-        LL
-      </p>
-      <Image
-        src="/memoroll-landing/camera.svg"
-        alt=""
-        width={107.05}
-        height={56.1152}
-        className="absolute left-[48.35px] top-[63.88px] h-[56.115px] w-[107.051px] max-w-none"
-        unoptimized
-      />
+      className={`relative shrink-0 ${className}`}
+      style={{ width: 229.64 * scale, height: 120 * scale }}>
+      <div
+        className="absolute left-0 top-0 h-[120px] w-[229.64px] overflow-clip"
+        style={{ transform: `scale(${scale})`, transformOrigin: '0 0' }}>
+        <p
+          aria-hidden="true"
+          className={`${run} left-[110.5px] top-[1.73px] w-[221.007px] -translate-x-1/2 text-center`}>
+          MEMO
+        </p>
+        <p
+          aria-hidden="true"
+          className={`${run} left-0 top-[66.47px] w-[50.935px]`}>
+          R
+        </p>
+        <p
+          aria-hidden="true"
+          className={`${run} left-[227.91px] top-[66.47px] w-[73.381px] -translate-x-full text-right`}>
+          LL
+        </p>
+        <Image
+          src="/memoroll-landing/camera.svg"
+          alt=""
+          width={107.05}
+          height={56.1152}
+          className="absolute left-[48.35px] top-[63.88px] h-[56.115px] w-[107.051px] max-w-none"
+          unoptimized
+        />
+      </div>
     </div>
   );
 }
