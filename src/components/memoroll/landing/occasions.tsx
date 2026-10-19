@@ -116,14 +116,14 @@ export default function MemorollOccasions() {
   return (
     <section
       aria-label="For any occasions"
-      className="bg-white py-[120px]"
+      className="bg-white py-16 md:py-[120px]"
       style={{ fontFamily: 'var(--font-mr-body)' }}>
       <div
         ref={trackRef}
         className="relative [--t1:0] [--t2:0]"
         style={{ height: `${(1 + OCCASIONS.length * VH_PER_STEP) * 100}vh` }}>
-        <div className="sticky top-0 flex h-screen flex-col items-center justify-center px-4 py-8 md:px-10">
-          <div className="flex w-full max-w-[1280px] flex-col items-center gap-8 lg:gap-12">
+        <div className="sticky top-0 flex h-screen flex-col items-center justify-center px-4 py-4 md:px-10 md:py-8">
+          <div className="flex w-full max-w-[1280px] flex-col items-center gap-5 sm:gap-8 lg:gap-12">
             <div className="flex flex-col items-center gap-3">
               <span className="inline-flex items-center rounded-full border border-[#e6e6e6] px-3 py-1.5 text-[14px] font-medium capitalize tracking-[-0.28px] text-[#e34013]">
                 For any Occasions
@@ -133,14 +133,16 @@ export default function MemorollOccasions() {
               </RevealHeading>
             </div>
 
-            <div className="flex w-full flex-col items-center gap-6 lg:flex-row lg:items-start lg:gap-[99px]">
-              <div className="flex w-full flex-col gap-5 lg:w-[580px] lg:shrink-0">
+            <div className="flex w-full flex-col items-center gap-3 sm:gap-6 lg:flex-row lg:items-start lg:gap-[99px]">
+              {/* Below lg the cards share one grid cell, so the pinned view holds a
+                  single card at a time and fits a phone screen. */}
+              <div className="grid w-full gap-5 lg:flex lg:w-[580px] lg:shrink-0 lg:flex-col">
                 {OCCASIONS.map((o, i) => (
                   <div
                     key={o.title}
                     aria-hidden={i > active}
                     style={i > 0 ? rise(i as 1 | 2) : undefined}
-                    className={`rounded-[20px] bg-[#fff6f5] p-3 shadow-[0_0_0_1px_#f0f0f0,0_4px_8px_-5px_rgba(0,0,0,0.14)] md:p-5 ${
+                    className={`col-start-1 row-start-1 rounded-[20px] bg-[#fff6f5] p-3 shadow-[0_0_0_1px_#f0f0f0,0_4px_8px_-5px_rgba(0,0,0,0.14)] md:p-5 ${
                       i > 0 && i > active ? 'pointer-events-none' : ''
                     }`}>
                     <div className="flex flex-col gap-2 rounded-[10px] bg-white p-5 font-medium lg:h-[156px]">
@@ -152,9 +154,9 @@ export default function MemorollOccasions() {
               </div>
 
               {/* The collage is drawn at its 601x684 design size and scaled to 0.92x
-                (0.55x of that on narrow screens). */}
-              <div className="relative h-[346px] w-[304px] shrink-0 sm:h-[629px] sm:w-[553px]">
-                <div className="absolute left-0 top-0 h-[684px] w-[601px] origin-top-left scale-[0.506] sm:scale-[0.92]">
+                (0.48x of that on narrow screens). */}
+              <div className="relative order-first h-[300px] w-[264px] shrink-0 sm:h-[629px] sm:w-[553px] lg:order-none">
+                <div className="absolute left-0 top-0 h-[684px] w-[601px] origin-top-left scale-[0.44] sm:scale-[0.92]">
                   {/* Birthdays */}
                   <div className="absolute left-[34.9px] top-0 h-[368px] w-[558px]">
                     <div className="absolute left-[88.7px] top-[40.2px] flex h-[328px] w-[469px] items-center justify-center">
