@@ -315,7 +315,7 @@ const NavigationBar = () => {
       </div>
 
       {sidebar ? (
-        <div className="fixed inset-x-0 bottom-0 top-20 z-[110] xl:hidden">
+        <div className="fixed inset-x-0 bottom-0 top-[calc(5rem+var(--site-strip,0px))] z-[110] xl:hidden">
           <button
             type="button"
             aria-label="Close navigation"

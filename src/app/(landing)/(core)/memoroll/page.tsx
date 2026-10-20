@@ -26,8 +26,10 @@ export const metadata: Metadata = {
 export default function MemorollLandingPage() {
   return (
     <div className={`${memorollFonts} ${landingFonts}`}>
-      <MemorollAnnouncementStrip />
-      <NavigationBar />
+      <div className="sticky top-0 z-[100] [--site-strip:40px]">
+        <MemorollAnnouncementStrip />
+        <NavigationBar />
+      </div>
       <main className="overflow-x-clip">
         <MemorollHero />
         <MemorollIdea />

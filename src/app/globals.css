@@ -393,10 +393,54 @@
   animation: memoroll-live 1.6s ease-in-out infinite;
 }
 
+/* The announcement strip's split-flap letters: the old half folds down, the
+   new half folds in under it. The arrow nudges toward the link. */
+@keyframes mr-flap-top {
+  from {
+    transform: rotateX(0deg);
+  }
+  to {
+    transform: rotateX(-90deg);
+  }
+}
+
+@keyframes mr-flap-bottom {
+  from {
+    transform: rotateX(90deg);
+  }
+  to {
+    transform: rotateX(0deg);
+  }
+}
+
+@keyframes mr-strip-arrow {
+  0%,
+  100% {
+    transform: translateX(0);
+  }
+  50% {
+    transform: translateX(4px);
+  }
+}
+
+.mr-flap-top {
+  animation: mr-flap-top 50ms ease-in forwards;
+}
+
+.mr-flap-bottom {
+  transform: rotateX(90deg);
+  animation: mr-flap-bottom 50ms ease-out 50ms forwards;
+}
+
+.mr-strip-arrow {
+  animation: mr-strip-arrow 1.6s ease-in-out infinite;
+}
+
 @media (prefers-reduced-motion: reduce) {
   .memoroll-float-card,
   .memoroll-float-polaroid,
-  .memoroll-live-dot {
+  .memoroll-live-dot,
+  .mr-strip-arrow {
     animation: none;
   }
 }
