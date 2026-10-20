@@ -65,9 +65,12 @@ export function RevealWords({
 export function RevealHeading({
   children,
   className,
+  as: Tag = 'h2',
 }: {
   children: React.ReactNode;
   className?: string;
+  /** The page's own title is an h1; every other section headline is an h2. */
+  as?: 'h1' | 'h2';
 }) {
   const ref = useRef<HTMLHeadingElement>(null);
   const [show, setShow] = useState(false);
@@ -84,8 +87,8 @@ export function RevealHeading({
   }, []);
 
   return (
-    <h2 ref={ref} className={className}>
+    <Tag ref={ref} className={className}>
       <RevealWords show={show}>{children}</RevealWords>
-    </h2>
+    </Tag>
   );
 }

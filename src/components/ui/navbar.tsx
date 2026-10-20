@@ -21,6 +21,8 @@ import { signIn } from 'next-auth/react';
 import { useRouter } from 'next/navigation';
 import { useEffect, useState } from 'react';
 
+import MemorollAnnouncementStrip from '@/components/memoroll/landing/announcement-strip';
+import { landingFonts } from '@/components/memoroll/landing/fonts';
 import { useMemoifyProfile, useMemoifySession } from '@/app/session-provider';
 import { formatNumberWithComma } from '@/lib/utils';
 import { removeSession } from '@/store/get-set-session';
@@ -67,6 +69,13 @@ const PRIMARY_LINKS: NavItem[] = [
     href: '/journal',
     desktopLabel: 'Journal',
     mobileLabel: 'Personal journal',
+  },
+  {
+    key: 'digital-invitation',
+    href: '/wedding-invitation',
+    desktopLabel: 'Digital invitation',
+    mobileLabel: 'Digital invitation',
+    badge: 'NEW!',
   },
   {
     key: 'memoroll',
@@ -207,223 +216,228 @@ const NavigationBar = () => {
   }));
 
   return (
-    <header className="relative isolate z-[100] h-20 border-b border-[#EAECF0] bg-white shadow-[0_1px_2px_rgba(16,24,40,0.04)]">
-      <div
-        suppressHydrationWarning
-        className="flex h-full w-full items-center justify-between gap-4 px-4 sm:px-6 xl:px-8">
-        <div className="flex min-w-0 items-center gap-5 xl:gap-7">
-          <Link href="/" className="shrink-0" aria-label="Memoify home">
-            <Image
-              src="https://res.cloudinary.com/dfwrmapr4/image/upload/v1789303095/placeholder/69b085d3b98c04a8b06e3e58ecfa136e95641109_ynodbj.png"
-              alt="Memoify"
-              width={40}
-              height={40}
-              priority
-            />
-          </Link>
+    <div className={`${landingFonts} [--site-strip:40px]`}>
+      <MemorollAnnouncementStrip />
+      <header className="relative isolate z-[100] h-20 border-b border-[#EAECF0] bg-white shadow-[0_1px_2px_rgba(16,24,40,0.04)]">
+        <div
+          suppressHydrationWarning
+          className="flex h-full w-full items-center justify-between gap-4 px-4 sm:px-6 xl:px-8">
+          <div className="flex min-w-0 items-center gap-5 xl:gap-7">
+            <Link href="/" className="shrink-0" aria-label="Memoify home">
+              <Image
+                src="https://res.cloudinary.com/dfwrmapr4/image/upload/v1789303095/placeholder/69b085d3b98c04a8b06e3e58ecfa136e95641109_ynodbj.png"
+                alt="Memoify"
+                width={40}
+                height={40}
+                priority
+              />
+            </Link>
 
-          <nav
-            className="hidden items-center gap-4 text-[14px] xl:flex 2xl:gap-6"
-            aria-label="Primary navigation">
-            {PRIMARY_LINKS.map((link) => (
-              <Link
-                key={link.key}
-                href={link.href}
-                className="whitespace-nowrap font-medium text-[#667085] transition-colors hover:text-[#1B1B1B]">
-                {link.desktopLabel}
-                {link.badge && <NewBadge label={link.badge} />}
-              </Link>
-            ))}
+            <nav
+              className="hidden items-center gap-4 text-[14px] xl:flex 2xl:gap-6"
+              aria-label="Primary navigation">
+              {PRIMARY_LINKS.map((link) => (
+                <Link
+                  key={link.key}
+                  href={link.href}
+                  className="whitespace-nowrap font-medium text-[#667085] transition-colors hover:text-[#1B1B1B]">
+                  {link.desktopLabel}
+                  {link.badge && <NewBadge label={link.badge} />}
+                </Link>
+              ))}
 
-            <Dropdown
-              menu={{ items: featureItems }}
-              trigger={['hover']}
-              placement="bottomLeft">
-              <button
-                type="button"
-                className="inline-flex items-center gap-1 whitespace-nowrap font-medium text-[#667085] transition-colors hover:text-[#1B1B1B]">
-                Features
-                <ChevronDown size={14} aria-hidden="true" />
-              </button>
-            </Dropdown>
-
-            <button
-              type="button"
-              onClick={openPricing}
-              className="whitespace-nowrap font-medium text-[#667085] transition-colors hover:text-[#1B1B1B]">
-              Pricing
-            </button>
-
-            {WEDDING_RELEASED && (
-              <Link
-                href="/wedding-invitation"
-                className="whitespace-nowrap font-medium text-[#667085] transition-colors hover:text-[#1B1B1B]">
-                Wedding
-              </Link>
-            )}
-          </nav>
-        </div>
-
-        <div className="flex shrink-0 items-center gap-2 sm:gap-3">
-          {isLoggedIn ? (
-            <Dropdown
-              menu={{ items: accountItems }}
-              trigger={['click']}
-              placement="bottomRight">
-              <button
-                type="button"
-                aria-label={`Open account menu for ${displayName}`}
-                className="hidden h-10 items-center gap-2 rounded-full border border-[#EAECF0] bg-white pl-1 pr-2 transition-colors hover:bg-[#F9FAFB] sm:inline-flex">
-                <Avatar size={32}>{initial}</Avatar>
-                <span className="hidden max-w-20 truncate text-[13px] font-semibold text-[#344054] 2xl:inline">
-                  {shortName}
-                </span>
-                <ChevronDown
-                  size={14}
-                  className="text-[#667085]"
-                  aria-hidden="true"
-                />
-              </button>
-            </Dropdown>
-          ) : (
-            <button
-              type="button"
-              className="hidden h-10 items-center rounded-lg border border-[#D0D5DD] px-4 text-[14px] font-semibold text-[#344054] transition-colors hover:bg-[#F9FAFB] lg:inline-flex"
-              onClick={() => signIn('google')}>
-              Sign in
-            </button>
-          )}
-
-          <Link
-            href="/create"
-            prefetch
-            className="hidden h-10 items-center gap-2 rounded-lg bg-[#E34013] px-4 text-[14px] font-semibold text-white shadow-sm transition-colors hover:bg-[#C9340E] md:inline-flex">
-            <Gift size={16} aria-hidden="true" />
-            Create a gift
-          </Link>
-
-          <button
-            type="button"
-            aria-label={sidebar ? 'Close menu' : 'Open menu'}
-            aria-expanded={sidebar}
-            aria-controls="mobile-navigation"
-            className="inline-flex h-10 w-10 items-center justify-center rounded-lg border border-[#EAECF0] text-[#344054] transition-colors hover:bg-[#F9FAFB] xl:hidden"
-            onClick={() => setSidebar((isOpen) => !isOpen)}>
-            {sidebar ? <X size={20} /> : <Menu size={20} />}
-          </button>
-        </div>
-      </div>
-
-      {sidebar ? (
-        <div className="fixed inset-x-0 bottom-0 top-[calc(5rem+var(--site-strip,0px))] z-[110] xl:hidden">
-          <button
-            type="button"
-            aria-label="Close navigation"
-            className="absolute inset-0 bg-[#101828]/35 backdrop-blur-[2px]"
-            onClick={() => setSidebar(false)}
-          />
-          <aside
-            id="mobile-navigation"
-            aria-label="Mobile navigation"
-            className="absolute bottom-0 right-0 top-0 flex w-full max-w-[380px] flex-col border-l border-[#EAECF0] bg-white shadow-2xl">
-            <div className="flex-1 overflow-y-auto px-5 py-6">
-              {isLoggedIn ? (
-                <Dropdown
-                  menu={{ items: accountItems }}
-                  trigger={['click']}
-                  placement="bottomLeft">
-                  <button
-                    type="button"
-                    className="mb-6 flex w-full items-center gap-3 rounded-xl border border-[#EAECF0] bg-[#F9FAFB] p-3 text-left">
-                    <Avatar size={38}>{initial}</Avatar>
-                    <div className="min-w-0 flex-1">
-                      <p className="truncate text-[14px] font-semibold text-[#344054]">
-                        {displayName}
-                      </p>
-                      <p className="text-[12px] text-[#667085]">View account</p>
-                    </div>
-                    <ChevronDown size={16} className="text-[#667085]" />
-                  </button>
-                </Dropdown>
-              ) : null}
-
-              <div className="mb-6">
-                <p className="mb-2 px-2 text-[11px] font-bold uppercase tracking-[0.12em] text-[#98A2B3]">
-                  Create
-                </p>
-                <div className="space-y-1">
-                  {PRIMARY_LINKS.map((link) => (
-                    <Link
-                      key={link.key}
-                      href={link.href}
-                      onClick={() => setSidebar(false)}
-                      className="block rounded-lg px-3 py-2.5 text-[15px] font-semibold text-[#344054] transition-colors hover:bg-[#F9FAFB]">
-                      {link.mobileLabel}
-                      {link.badge && <NewBadge label={link.badge} />}
-                    </Link>
-                  ))}
-                  {WEDDING_RELEASED && (
-                    <Link
-                      href="/wedding-invitation"
-                      onClick={() => setSidebar(false)}
-                      className="block rounded-lg px-3 py-2.5 text-[15px] font-semibold text-[#344054] transition-colors hover:bg-[#F9FAFB]">
-                      Wedding invitations
-                    </Link>
-                  )}
-                </div>
-              </div>
-
-              <div className="mb-6">
-                <p className="mb-2 px-2 text-[11px] font-bold uppercase tracking-[0.12em] text-[#98A2B3]">
-                  Explore
-                </p>
-                <div className="space-y-1">
-                  {FEATURE_LINKS.map((link) => (
-                    <Link
-                      key={link.key}
-                      href={link.href}
-                      onClick={() => setSidebar(false)}
-                      className="flex items-center gap-3 rounded-lg px-3 py-2.5 text-[15px] font-semibold text-[#344054] transition-colors hover:bg-[#F9FAFB]">
-                      {link.key === 'photobox' ? (
-                        <Camera size={17} className="text-[#E34013]" />
-                      ) : (
-                        <Sparkles size={17} className="text-[#E34013]" />
-                      )}
-                      {link.mobileLabel}
-                    </Link>
-                  ))}
-                  <button
-                    type="button"
-                    onClick={openPricing}
-                    className="flex w-full items-center gap-3 rounded-lg px-3 py-2.5 text-left text-[15px] font-semibold text-[#344054] transition-colors hover:bg-[#F9FAFB]">
-                    <BadgeDollarSign size={17} className="text-[#E34013]" />
-                    Pricing
-                  </button>
-                </div>
-              </div>
-            </div>
-
-            <div className="border-t border-[#EAECF0] bg-white p-5">
-              <Link
-                href="/create"
-                onClick={() => setSidebar(false)}
-                className="flex h-11 w-full items-center justify-center gap-2 rounded-lg bg-[#E34013] px-4 text-[15px] font-semibold text-white shadow-sm transition-colors hover:bg-[#C9340E]">
-                <Gift size={17} />
-                Create a gift
-              </Link>
-              {!isLoggedIn ? (
+              <Dropdown
+                menu={{ items: featureItems }}
+                trigger={['hover']}
+                placement="bottomLeft">
                 <button
                   type="button"
-                  className="mt-2 h-11 w-full rounded-lg text-[14px] font-semibold text-[#475467] transition-colors hover:bg-[#F9FAFB]"
-                  onClick={() => signIn('google')}>
-                  Sign in
+                  className="inline-flex items-center gap-1 whitespace-nowrap font-medium text-[#667085] transition-colors hover:text-[#1B1B1B]">
+                  Features
+                  <ChevronDown size={14} aria-hidden="true" />
                 </button>
-              ) : null}
-            </div>
-          </aside>
+              </Dropdown>
+
+              <button
+                type="button"
+                onClick={openPricing}
+                className="whitespace-nowrap font-medium text-[#667085] transition-colors hover:text-[#1B1B1B]">
+                Pricing
+              </button>
+
+              {WEDDING_RELEASED && (
+                <Link
+                  href="/wedding-invitation"
+                  className="whitespace-nowrap font-medium text-[#667085] transition-colors hover:text-[#1B1B1B]">
+                  Wedding
+                </Link>
+              )}
+            </nav>
+          </div>
+
+          <div className="flex shrink-0 items-center gap-2 sm:gap-3">
+            {isLoggedIn ? (
+              <Dropdown
+                menu={{ items: accountItems }}
+                trigger={['click']}
+                placement="bottomRight">
+                <button
+                  type="button"
+                  aria-label={`Open account menu for ${displayName}`}
+                  className="hidden h-10 items-center gap-2 rounded-full border border-[#EAECF0] bg-white pl-1 pr-2 transition-colors hover:bg-[#F9FAFB] sm:inline-flex">
+                  <Avatar size={32}>{initial}</Avatar>
+                  <span className="hidden max-w-20 truncate text-[13px] font-semibold text-[#344054] 2xl:inline">
+                    {shortName}
+                  </span>
+                  <ChevronDown
+                    size={14}
+                    className="text-[#667085]"
+                    aria-hidden="true"
+                  />
+                </button>
+              </Dropdown>
+            ) : (
+              <button
+                type="button"
+                className="hidden h-10 items-center rounded-lg border border-[#D0D5DD] px-4 text-[14px] font-semibold text-[#344054] transition-colors hover:bg-[#F9FAFB] lg:inline-flex"
+                onClick={() => signIn('google')}>
+                Sign in
+              </button>
+            )}
+
+            <Link
+              href="/create"
+              prefetch
+              className="hidden h-10 items-center gap-2 rounded-lg bg-[#E34013] px-4 text-[14px] font-semibold text-white shadow-sm transition-colors hover:bg-[#C9340E] md:inline-flex">
+              <Gift size={16} aria-hidden="true" />
+              Create a gift
+            </Link>
+
+            <button
+              type="button"
+              aria-label={sidebar ? 'Close menu' : 'Open menu'}
+              aria-expanded={sidebar}
+              aria-controls="mobile-navigation"
+              className="inline-flex h-10 w-10 items-center justify-center rounded-lg border border-[#EAECF0] text-[#344054] transition-colors hover:bg-[#F9FAFB] xl:hidden"
+              onClick={() => setSidebar((isOpen) => !isOpen)}>
+              {sidebar ? <X size={20} /> : <Menu size={20} />}
+            </button>
+          </div>
         </div>
-      ) : null}
-    </header>
+
+        {sidebar ? (
+          <div className="fixed inset-x-0 bottom-0 top-[calc(5rem+var(--site-strip,0px))] z-[110] xl:hidden">
+            <button
+              type="button"
+              aria-label="Close navigation"
+              className="absolute inset-0 bg-[#101828]/35 backdrop-blur-[2px]"
+              onClick={() => setSidebar(false)}
+            />
+            <aside
+              id="mobile-navigation"
+              aria-label="Mobile navigation"
+              className="absolute bottom-0 right-0 top-0 flex w-full max-w-[380px] flex-col border-l border-[#EAECF0] bg-white shadow-2xl">
+              <div className="flex-1 overflow-y-auto px-5 py-6">
+                {isLoggedIn ? (
+                  <Dropdown
+                    menu={{ items: accountItems }}
+                    trigger={['click']}
+                    placement="bottomLeft">
+                    <button
+                      type="button"
+                      className="mb-6 flex w-full items-center gap-3 rounded-xl border border-[#EAECF0] bg-[#F9FAFB] p-3 text-left">
+                      <Avatar size={38}>{initial}</Avatar>
+                      <div className="min-w-0 flex-1">
+                        <p className="truncate text-[14px] font-semibold text-[#344054]">
+                          {displayName}
+                        </p>
+                        <p className="text-[12px] text-[#667085]">
+                          View account
+                        </p>
+                      </div>
+                      <ChevronDown size={16} className="text-[#667085]" />
+                    </button>
+                  </Dropdown>
+                ) : null}
+
+                <div className="mb-6">
+                  <p className="mb-2 px-2 text-[11px] font-bold uppercase tracking-[0.12em] text-[#98A2B3]">
+                    Create
+                  </p>
+                  <div className="space-y-1">
+                    {PRIMARY_LINKS.map((link) => (
+                      <Link
+                        key={link.key}
+                        href={link.href}
+                        onClick={() => setSidebar(false)}
+                        className="block rounded-lg px-3 py-2.5 text-[15px] font-semibold text-[#344054] transition-colors hover:bg-[#F9FAFB]">
+                        {link.mobileLabel}
+                        {link.badge && <NewBadge label={link.badge} />}
+                      </Link>
+                    ))}
+                    {WEDDING_RELEASED && (
+                      <Link
+                        href="/wedding-invitation"
+                        onClick={() => setSidebar(false)}
+                        className="block rounded-lg px-3 py-2.5 text-[15px] font-semibold text-[#344054] transition-colors hover:bg-[#F9FAFB]">
+                        Wedding invitations
+                      </Link>
+                    )}
+                  </div>
+                </div>
+
+                <div className="mb-6">
+                  <p className="mb-2 px-2 text-[11px] font-bold uppercase tracking-[0.12em] text-[#98A2B3]">
+                    Explore
+                  </p>
+                  <div className="space-y-1">
+                    {FEATURE_LINKS.map((link) => (
+                      <Link
+                        key={link.key}
+                        href={link.href}
+                        onClick={() => setSidebar(false)}
+                        className="flex items-center gap-3 rounded-lg px-3 py-2.5 text-[15px] font-semibold text-[#344054] transition-colors hover:bg-[#F9FAFB]">
+                        {link.key === 'photobox' ? (
+                          <Camera size={17} className="text-[#E34013]" />
+                        ) : (
+                          <Sparkles size={17} className="text-[#E34013]" />
+                        )}
+                        {link.mobileLabel}
+                      </Link>
+                    ))}
+                    <button
+                      type="button"
+                      onClick={openPricing}
+                      className="flex w-full items-center gap-3 rounded-lg px-3 py-2.5 text-left text-[15px] font-semibold text-[#344054] transition-colors hover:bg-[#F9FAFB]">
+                      <BadgeDollarSign size={17} className="text-[#E34013]" />
+                      Pricing
+                    </button>
+                  </div>
+                </div>
+              </div>
+
+              <div className="border-t border-[#EAECF0] bg-white p-5">
+                <Link
+                  href="/create"
+                  onClick={() => setSidebar(false)}
+                  className="flex h-11 w-full items-center justify-center gap-2 rounded-lg bg-[#E34013] px-4 text-[15px] font-semibold text-white shadow-sm transition-colors hover:bg-[#C9340E]">
+                  <Gift size={17} />
+                  Create a gift
+                </Link>
+                {!isLoggedIn ? (
+                  <button
+                    type="button"
+                    className="mt-2 h-11 w-full rounded-lg text-[14px] font-semibold text-[#475467] transition-colors hover:bg-[#F9FAFB]"
+                    onClick={() => signIn('google')}>
+                    Sign in
+                  </button>
+                ) : null}
+              </div>
+            </aside>
+          </div>
+        ) : null}
+      </header>
+    </div>
   );
 };
 
