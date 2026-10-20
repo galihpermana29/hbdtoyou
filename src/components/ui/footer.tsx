@@ -61,7 +61,8 @@ const COLUMNS = [
   },
 ];
 
-const linkClass = 'transition-colors hover:text-[#ff3e09]';
+/** The padding grows the tap area to ~33px; the negative margin keeps the layout. */
+const linkClass = '-my-[7px] py-[7px] transition-colors hover:text-[#ff3e09]';
 
 export function Footer() {
   return (

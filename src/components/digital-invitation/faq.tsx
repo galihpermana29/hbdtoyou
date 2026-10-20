@@ -75,7 +75,7 @@ export default function InvitationFaq() {
             </p>
             <a
               href={`mailto:${EMAIL}`}
-              className="inline-flex max-w-full items-center gap-2 break-all rounded-full bg-[#1b1b1b] px-[18px] py-3 text-[14px] font-semibold text-white">
+              className="inline-flex max-w-full items-center gap-2 break-all rounded-full bg-[#1b1b1b] px-[18px] py-3 text-[14px] font-semibold text-white transition-transform duration-150 ease-out active:scale-[0.97]">
               {EMAIL}
               <img
                 src="/digital-invitation/faq-arrow.svg"

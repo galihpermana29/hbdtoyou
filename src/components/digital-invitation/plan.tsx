@@ -32,12 +32,12 @@ export default function InvitationPlan() {
             extra checkout.
           </p>
           <div className="flex w-full flex-col items-stretch gap-4 pt-2 sm:w-auto sm:flex-row sm:items-center">
-            <StartInvitationLink className="inline-flex h-[60px] items-center justify-center rounded-lg bg-[#1b1b1b] px-6 text-[18px] font-semibold leading-7 text-white shadow-[0_1px_1px_rgba(16,24,40,0.05)] transition-colors hover:bg-black">
+            <StartInvitationLink className="inline-flex h-[60px] items-center justify-center rounded-lg bg-[#1b1b1b] px-6 text-[18px] font-semibold leading-7 text-white shadow-[0_1px_1px_rgba(16,24,40,0.05)] transition-[transform,background-color] duration-150 ease-out hover:bg-black active:scale-[0.97]">
               Start your invitation
             </StartInvitationLink>
             <Link
               href="/payment?type=premium"
-              className="px-2 py-2 text-center text-[16px] font-semibold leading-6 text-white underline-offset-4 hover:underline">
+              className="flex min-h-[44px] items-center justify-center px-2 text-center text-[16px] font-semibold leading-6 text-white underline-offset-4 hover:underline">
               See what&apos;s in the plan
             </Link>
           </div>

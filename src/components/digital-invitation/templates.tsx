@@ -107,7 +107,7 @@ const move = (properties: string): CSSProperties => ({
 });
 
 const CTA_CLASS =
-  'flex h-[47px] items-center justify-between rounded-lg px-5 text-[15px] font-semibold transition-colors';
+  'flex h-[47px] items-center justify-between rounded-lg px-5 text-[15px] font-semibold transition-[transform,background-color] duration-150 ease-out active:scale-[0.97]';
 
 function Details({ template }: { template: Template }) {
   const { available } = template;
@@ -290,7 +290,11 @@ function Accordion({
   );
 }
 
-/** Below lg there is no room to fold four cards: one open card, a thumbnail row. */
+/**
+ * Below lg there is no room to fold four cards: a thumbnail selector with one
+ * open card under it. The selector sits above the card so a tap changes what
+ * is right below the finger, instead of a card scrolled out of view.
+ */
 function Stack({
   active,
   onSelect,
@@ -301,7 +305,32 @@ function Stack({
   const template = TEMPLATES[active];
 
   return (
-    <div className="lg:hidden">
+    <div className="flex flex-col gap-4 lg:hidden">
+      <div className="grid grid-cols-4 gap-2 sm:gap-3">
+        {TEMPLATES.map((item, i) => (
+          <button
+            key={item.id}
+            type="button"
+            aria-label={`Show ${item.name}`}
+            aria-pressed={i === active}
+            onClick={() => onSelect(i)}
+            className={`rounded-xl bg-[#fffdfa] p-1.5 text-left outline-offset-2 transition-[box-shadow,opacity,transform] duration-200 ease-out focus-visible:outline focus-visible:outline-2 focus-visible:outline-[#e34013] active:scale-[0.97] ${
+              i === active
+                ? 'shadow-[0_0_0_2px_#e34013]'
+                : 'opacity-70 hover:opacity-100'
+            }`}>
+            <img
+              src={item.src}
+              alt=""
+              className="aspect-[196/320] w-full rounded-lg object-cover"
+            />
+            <span className="mt-2 line-clamp-2 block min-h-[2.4em] px-0.5 text-[11px] font-semibold leading-[1.2] text-[#1b1b1b] sm:text-[12px]">
+              {item.name}
+            </span>
+          </button>
+        ))}
+      </div>
+
       <div
         className="overflow-hidden rounded-3xl p-5 sm:p-7"
         style={{
@@ -320,31 +349,6 @@ function Stack({
             <Details template={template} />
           </div>
         </div>
-      </div>
-
-      <div className="mt-4 grid grid-cols-4 gap-3">
-        {TEMPLATES.map((item, i) => (
-          <button
-            key={item.id}
-            type="button"
-            aria-label={`Show ${item.name}`}
-            aria-pressed={i === active}
-            onClick={() => onSelect(i)}
-            className={`rounded-xl bg-[#fffdfa] p-1.5 text-left outline-offset-2 transition-[box-shadow,opacity] duration-500 focus-visible:outline focus-visible:outline-2 focus-visible:outline-[#e34013] ${
-              i === active
-                ? 'shadow-[0_0_0_2px_#e34013]'
-                : 'opacity-70 hover:opacity-100'
-            }`}>
-            <img
-              src={item.src}
-              alt=""
-              className="aspect-[196/320] w-full rounded-lg object-cover"
-            />
-            <span className="mt-2 block truncate px-0.5 text-[12px] font-semibold text-[#1b1b1b]">
-              {item.name}
-            </span>
-          </button>
-        ))}
       </div>
     </div>
   );
