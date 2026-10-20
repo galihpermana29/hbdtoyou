@@ -1,5 +1,6 @@
 import type { Metadata } from 'next';
 
+import MemorollAnnouncementStrip from '@/components/memoroll/landing/announcement-strip';
 import MemorollFaq from '@/components/memoroll/landing/faq';
 import { landingFonts } from '@/components/memoroll/landing/fonts';
 import MemorollHero from '@/components/memoroll/landing/hero';
@@ -25,6 +26,7 @@ export const metadata: Metadata = {
 export default function MemorollLandingPage() {
   return (
     <div className={`${memorollFonts} ${landingFonts}`}>
+      <MemorollAnnouncementStrip />
       <NavigationBar />
       <main className="overflow-x-clip">
         <MemorollHero />

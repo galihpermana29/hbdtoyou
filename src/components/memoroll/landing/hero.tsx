@@ -65,12 +65,12 @@ export default function MemorollHero() {
         <div className="flex flex-wrap items-center justify-center gap-[14px]">
           <Link
             href="/memoroll/create"
-            className="flex h-12 w-full max-w-[235px] items-center justify-center rounded-lg bg-[#e34013] px-5 text-[16px] md:h-[60px] md:w-[235.094px] md:px-6 md:py-4 md:text-[18px] font-semibold leading-7 text-white shadow-[0_1px_1px_rgba(16,24,40,0.05)] transition-colors hover:bg-[#C9340E]">
+            className="flex h-12 items-center justify-center whitespace-nowrap rounded-lg bg-[#e34013] px-5 text-[16px] md:h-[60px] md:px-6 md:py-4 md:text-[18px] font-semibold leading-7 text-white shadow-[0_1px_1px_rgba(16,24,40,0.05)] transition-colors hover:bg-[#C9340E]">
             Create your Memoroll
           </Link>
           <Link
             href="#how-it-works"
-            className="flex h-12 items-center justify-center gap-[10px] rounded-lg border border-[#d0d5dd] px-5 text-[16px] md:h-[62px] md:px-6 md:py-4 md:text-[18px] font-semibold leading-7 text-[#344054] transition-colors hover:bg-white/60">
+            className="flex h-12 items-center justify-center gap-[10px] whitespace-nowrap rounded-lg border border-[#d0d5dd] px-5 text-[16px] md:h-[62px] md:px-6 md:py-4 md:text-[18px] font-semibold leading-7 text-[#344054] transition-colors hover:bg-white/60">
             <Image
               src="/memoroll-landing/play.svg"
               alt=""
