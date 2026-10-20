@@ -28,7 +28,7 @@ export default function InvitationPlan() {
             One plan. The invitation, the RSVPs, and every guest&apos;s camera.
           </RevealHeading>
           <p className="max-w-[480px] text-[16px] leading-[26px] text-[#fffdfa]/90 md:text-[18px] md:leading-7">
-            MemoRoll is included free with the Wedding Plan. No add-ons, no
+            Memoroll is included free with the Wedding Plan. No add-ons, no
             extra checkout.
           </p>
           <div className="flex w-full flex-col items-stretch gap-4 pt-2 sm:w-auto sm:flex-row sm:items-center">
@@ -82,7 +82,7 @@ export default function InvitationPlan() {
             <p
               className="flex items-center justify-between text-[13px] text-[#1b1b1b]"
               style={mono}>
-              MemoRoll camera
+              Memoroll camera
               <span className="text-[#ff3e09]" style={mono}>
                 INCLUDED
               </span>
@@ -90,9 +90,9 @@ export default function InvitationPlan() {
             <div className="my-5 h-px bg-[#1b1b1b]" />
             <div className="flex items-end justify-between gap-4">
               <p
-                className="text-[12px] tracking-[1.2px] text-[#1b1b1b]"
+                className="uppercase text-[12px] tracking-[1.2px] text-[#1b1b1b]"
                 style={mono}>
-                EXTRA COST FOR MEMOROLL
+                Extra cost for Memoroll
               </p>
               <p
                 className="text-[48px] leading-[48px] text-[#ff3e09]"

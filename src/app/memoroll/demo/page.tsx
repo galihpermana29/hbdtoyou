@@ -12,7 +12,7 @@ import MemorollDemo from './memoroll-demo';
  * runtime meaning this demo must not inherit.
  */
 export const metadata: Metadata = {
-  title: 'MemoRoll · guest demo | Memoify',
+  title: 'Memoroll · guest demo | Memoify',
   description:
     'A shared disposable camera for a wedding: ten shots each, one collective gallery, blurred until the reveal. Clickable demo.',
   robots: { index: false },

@@ -27,7 +27,7 @@ export default function StackedWordmark({
   return (
     <div
       role="img"
-      aria-label="MemoRoll"
+      aria-label="Memoroll"
       className={`relative shrink-0 ${className}`}
       style={{ width: 229.64 * scale, height: 120 * scale }}>
       <div

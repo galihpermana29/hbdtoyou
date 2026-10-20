@@ -56,7 +56,7 @@ const WELCOME_PHOTOS = SAMPLE_SOURCES.slice(2, 6);
  * and every answer they gave is still on the screen waiting.
  */
 const NO_MEMOROLL_CREDIT_PROBLEM =
-  'Your account has no MemoRoll credits left, so this roll could not be ' +
+  'Your account has no Memoroll credits left, so this roll could not be ' +
   'published. Everything you have entered is still here - add credits to ' +
   'your plan and press Publish again.';
 
@@ -67,7 +67,7 @@ const NO_MEMOROLL_CREDIT_PROBLEM =
  * publishing it.
  */
 const WEDDING_TAKEN_PROBLEM =
-  'This wedding already has a MemoRoll. Open your wedding dashboard to find ' +
+  'This wedding already has a Memoroll. Open your wedding dashboard to find ' +
   'it - a wedding can only have one.';
 
 /**

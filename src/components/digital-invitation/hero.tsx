@@ -5,7 +5,7 @@ import StartInvitationLink from './start-invitation-link';
 
 const STATS = [
   { value: '100+', label: 'COUPLES ON MEMOIFY' },
-  { value: 'FREE', label: 'MEMOROLL CAMERA' },
+  { value: 'FREE', label: 'Memoroll camera' },
 ];
 
 /**
@@ -167,7 +167,7 @@ export default function InvitationHero() {
           <p className="max-w-[520px] text-[17px] max-md:order-3 leading-[27px] text-[#4a4642] md:text-[19px] md:leading-[29px]">
             Build a wedding invitation website with your story, RSVPs and
             schedule in minutes. Then let guests capture the night with
-            MemoRoll, free with the Wedding Plan.
+            Memoroll, free with the Wedding Plan.
           </p>
           <div className="flex w-full flex-col gap-3.5 max-md:order-4 sm:w-auto sm:flex-row sm:flex-wrap sm:items-center md:w-full md:flex-col md:items-stretch lg:w-auto lg:flex-row lg:flex-wrap lg:items-center">
             <StartInvitationLink className="inline-flex h-[60px] items-center justify-center gap-2.5 rounded-lg bg-[#e34013] whitespace-nowrap px-6 text-[18px] font-semibold leading-7 lg:px-5 lg:text-[16px] xl:px-6 xl:text-[18px] text-white shadow-[0_1px_1px_rgba(16,24,40,0.05)] transition-[transform,background-color] duration-150 ease-out hover:bg-[#c9340e] active:scale-[0.97]">
@@ -218,7 +218,7 @@ export default function InvitationHero() {
                   {stat.value}
                 </p>
                 <p
-                  className="text-[12px] leading-[16.5px] tracking-[1.2px] text-[#8a847d] max-[400px]:text-[11px] max-[400px]:tracking-[1px] md:text-[11px] md:leading-normal md:tracking-[1.2px]"
+                  className="uppercase text-[12px] leading-[16.5px] tracking-[1.2px] text-[#8a847d] max-[400px]:text-[11px] max-[400px]:tracking-[1px] md:text-[11px] md:leading-normal md:tracking-[1.2px]"
                   style={{ fontFamily: 'var(--font-mr-label)' }}>
                   {stat.label}
                 </p>

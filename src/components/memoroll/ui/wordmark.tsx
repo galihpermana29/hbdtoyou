@@ -16,7 +16,7 @@
 export default function Wordmark({
   className = '',
   flame = '#ff3e09',
-  title = 'MemoRoll',
+  title = 'Memoroll',
 }: {
   className?: string;
   /** The lens. Only ever overridden by a screen that has no orange on it. */

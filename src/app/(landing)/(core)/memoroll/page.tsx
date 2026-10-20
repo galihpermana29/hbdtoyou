@@ -13,7 +13,7 @@ import { memorollFonts } from '@/components/memoroll/ui/fonts';
 import NavigationBar from '@/components/ui/navbar';
 
 export const metadata: Metadata = {
-  title: 'MemoRoll | Memoify',
+  title: 'Memoroll | Memoify',
   description:
     'Give every guest a disposable camera and collect the moments you could not be there to see.',
 };

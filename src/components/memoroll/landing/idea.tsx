@@ -174,7 +174,7 @@ function Gallery() {
   return (
     <div
       role="img"
-      aria-label="The MemoRoll gallery for Elias & Freya's Wedding: 615 photos from 100 participants, with a countdown to the reveal"
+      aria-label="The Memoroll gallery for Elias & Freya's Wedding: 615 photos from 100 participants, with a countdown to the reveal"
       className="relative h-[460px] w-[608px] origin-top-left scale-[0.55] rounded-[28px] bg-white md:scale-[0.85] lg:scale-100">
       <div className="absolute left-[160px] top-[-9.11px] h-[469px] w-[289px] overflow-hidden">
         <img

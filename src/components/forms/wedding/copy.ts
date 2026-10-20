@@ -208,8 +208,8 @@ export const FLOW_COPY = {
   photoGallery: { en: 'Photo Gallery', id: 'Galeri Foto' },
 
   // MemoRoll.
-  memoRollName: { en: 'MemoRoll', id: 'MemoRoll' },
-  memoRollEnable: { en: 'Enable MemoRoll?', id: 'Aktifkan MemoRoll?' },
+  memoRollName: { en: 'Memoroll', id: 'Memoroll' },
+  memoRollEnable: { en: 'Enable Memoroll?', id: 'Aktifkan Memoroll?' },
   memoRollDescription: {
     en: "Create a collective photo experience for the wedding. Capture your wedding through every guest's lens.",
     id: 'Buat pengalaman foto bersama untuk pernikahanmu. Abadikan harimu dari sudut pandang setiap tamu.',

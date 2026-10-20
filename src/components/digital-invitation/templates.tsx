@@ -36,7 +36,7 @@ const TEMPLATES: Template[] = [
       'Wax-seal opening',
       'Guest name greeting',
       'RSVP + schedule',
-      'MemoRoll camera',
+      'Memoroll camera',
     ],
     top: 40,
     height: 500,
@@ -53,7 +53,7 @@ const TEMPLATES: Template[] = [
       'Letterpress arch cover',
       'Guest name greeting',
       'RSVP + schedule',
-      'MemoRoll camera',
+      'Memoroll camera',
     ],
     top: 40,
     height: 500,
@@ -70,7 +70,7 @@ const TEMPLATES: Template[] = [
       'Pressed-botanical cover',
       'Guest name greeting',
       'RSVP + schedule',
-      'MemoRoll camera',
+      'Memoroll camera',
     ],
     top: 40,
     height: 500,
@@ -87,7 +87,7 @@ const TEMPLATES: Template[] = [
       'Gilded mirror frame',
       'Guest name greeting',
       'RSVP + schedule',
-      'MemoRoll camera',
+      'Memoroll camera',
     ],
     top: 40,
     height: 500,
@@ -372,7 +372,7 @@ export default function InvitationTemplates() {
           </div>
           <p className="max-w-[380px] text-[16px] leading-[26px] text-[#4a4642] md:text-[17px]">
             Invitation websites designed for modern celebrations. Every template
-            includes MemoRoll, free with the Wedding Plan.
+            includes Memoroll, free with the Wedding Plan.
           </p>
         </div>
 

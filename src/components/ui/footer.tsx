@@ -39,7 +39,7 @@ const COLUMNS = [
     title: 'PRODUCTS',
     items: [
       { text: 'Digital Invitations', href: '/wedding-invitation' },
-      { text: 'MemoRoll', href: '/memoroll' },
+      { text: 'Memoroll', href: '/memoroll' },
       { text: 'Photobox', href: '/photobox' },
       { text: 'Digital Gift', href: '/templates' },
     ],

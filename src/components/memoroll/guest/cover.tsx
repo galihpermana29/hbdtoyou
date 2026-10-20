@@ -75,7 +75,7 @@ function Waiting({ number }: { number?: number }) {
       className="relative h-full w-full overflow-hidden"
       style={{ background: colour.waiting }}>
       {/* The wordmark, laid across the slot on the diagonal, about two thirds
-          of it wide - so a slot reads as MemoRoll's own paper rather than as a
+          of it wide - so a slot reads as Memoroll's own paper rather than as a
           texture. The box is wider and taller than the slot it fills, so the
           pattern runs off every edge instead of ending inside one. */}
       <div

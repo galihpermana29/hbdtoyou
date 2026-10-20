@@ -11,7 +11,7 @@ import CreatorDemo from './creator-demo';
  * the guest demo is.
  */
 export const metadata: Metadata = {
-  title: 'MemoRoll · creator demo | Memoify',
+  title: 'Memoroll · creator demo | Memoify',
   description:
     'Set up a shared disposable camera: the vibe, the name, the cover, when it opens, where it is, how many shots each guest gets, when it develops, and the QR for the tables. Clickable demo.',
   robots: { index: false },

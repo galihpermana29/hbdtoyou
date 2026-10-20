@@ -97,7 +97,7 @@ export default function CreateFlowSection({
             one does.
 
             The switch is the last thing in the row, at the card's right edge,
-            which is where the MemoRoll Section puts its own. */}
+            which is where the Memoroll Section puts its own. */}
         <div className="col-start-2 row-span-2 row-start-1 flex items-center gap-[12px] self-center">
           <button
             type="button"

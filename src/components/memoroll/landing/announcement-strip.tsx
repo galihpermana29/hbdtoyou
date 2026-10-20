@@ -10,8 +10,8 @@ import { useEffect, useState } from 'react';
  * random glyphs before it lands - and it re-flips every few seconds.
  */
 
-const LONG_TEXT = 'NEW - MEMOROLL IS NOW INCLUDED FREE WITH THE WEDDING PLAN';
-const SHORT_TEXT = 'NEW - MEMOROLL FREE WITH THE WEDDING PLAN';
+const LONG_TEXT = 'NEW - Memoroll is now included free with the Wedding Plan';
+const SHORT_TEXT = 'NEW - Memoroll free with the Wedding Plan';
 
 const GLYPHS = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789';
 const FLIP_MS = 100;
@@ -73,7 +73,12 @@ function Flap({
       <Half pos="bottom" char={animating ? prev : cur} />
       {animating && (
         <>
-          <Half key={`t${tick}`} pos="top" char={prev} className="mr-flap-top" />
+          <Half
+            key={`t${tick}`}
+            pos="top"
+            char={prev}
+            className="mr-flap-top"
+          />
           <Half
             key={`b${tick}`}
             pos="bottom"
@@ -120,9 +125,12 @@ function FlapLine({ text, cycle }: { text: string; cycle: number }) {
       aria-label={text}
       className="inline-flex gap-[0.5px] text-[10px] leading-[20px] md:gap-[1.2px] md:text-[11px] text-[#fbf4ec]"
       style={{ fontFamily: 'var(--font-mr-label)' }}>
-      {text.split('').map((ch, i) => (
-        <Flap key={i} target={ch} index={i} cycle={cycle} />
-      ))}
+      {text
+        .toUpperCase()
+        .split('')
+        .map((ch, i) => (
+          <Flap key={i} target={ch} index={i} cycle={cycle} />
+        ))}
     </span>
   );
 }
