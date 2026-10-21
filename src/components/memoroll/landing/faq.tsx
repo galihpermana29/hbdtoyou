@@ -112,14 +112,26 @@ export default function MemorollFaq() {
                       {f.q}
                     </span>
                     <span
-                      className={`flex size-9 shrink-0 items-center justify-center rounded-full ${
+                      className={`relative flex size-9 shrink-0 items-center justify-center rounded-full transition-colors duration-[250ms] ease-[cubic-bezier(0.77,0,0.175,1)] ${
                         isOpen ? 'bg-[#ff3e09]' : ''
                       }`}>
                       <img
-                        src={`/memoroll-landing/faq-${isOpen ? 'minus' : 'plus'}.svg`}
+                        src="/memoroll-landing/faq-plus.svg"
                         alt=""
                         width={18}
                         height={18}
+                        className={`absolute inset-0 m-auto transition-[transform,opacity] duration-[250ms] ease-[cubic-bezier(0.77,0,0.175,1)] motion-reduce:!transform-none ${
+                          isOpen ? 'rotate-90 opacity-0' : 'rotate-0 opacity-100'
+                        }`}
+                      />
+                      <img
+                        src="/memoroll-landing/faq-minus.svg"
+                        alt=""
+                        width={18}
+                        height={18}
+                        className={`absolute inset-0 m-auto transition-[transform,opacity] duration-[250ms] ease-[cubic-bezier(0.77,0,0.175,1)] motion-reduce:!transform-none ${
+                          isOpen ? 'rotate-0 opacity-100' : '-rotate-90 opacity-0'
+                        }`}
                       />
                     </span>
                   </button>

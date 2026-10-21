@@ -216,8 +216,7 @@ const NavigationBar = () => {
   }));
 
   return (
-    <div
-      className={`${landingFonts} sticky top-0 z-[100] [--site-strip:40px]`}>
+    <div className={`${landingFonts} sticky top-0 z-[100] [--site-strip:40px]`}>
       <MemorollAnnouncementStrip />
       <header className="relative isolate z-[100] h-20 border-b border-[#EAECF0] bg-white shadow-[0_1px_2px_rgba(16,24,40,0.04)]">
         <div
@@ -326,117 +325,135 @@ const NavigationBar = () => {
           </div>
         </div>
 
-        {sidebar ? (
-          <div className="fixed inset-x-0 bottom-0 top-[calc(5rem+var(--site-strip,0px))] z-[110] xl:hidden">
-            <button
-              type="button"
-              aria-label="Close navigation"
-              className="absolute inset-0 bg-[#101828]/35 backdrop-blur-[2px]"
-              onClick={() => setSidebar(false)}
-            />
-            <aside
-              id="mobile-navigation"
-              aria-label="Mobile navigation"
-              className="absolute bottom-0 right-0 top-0 flex w-full max-w-[380px] flex-col border-l border-[#EAECF0] bg-white shadow-2xl">
-              <div className="flex-1 overflow-y-auto px-5 py-6">
-                {isLoggedIn ? (
-                  <Dropdown
-                    menu={{ items: accountItems }}
-                    trigger={['click']}
-                    placement="bottomLeft">
-                    <button
-                      type="button"
-                      className="mb-6 flex w-full items-center gap-3 rounded-xl border border-[#EAECF0] bg-[#F9FAFB] p-3 text-left">
-                      <Avatar size={38}>{initial}</Avatar>
-                      <div className="min-w-0 flex-1">
-                        <p className="truncate text-[14px] font-semibold text-[#344054]">
-                          {displayName}
-                        </p>
-                        <p className="text-[12px] text-[#667085]">
-                          View account
-                        </p>
-                      </div>
-                      <ChevronDown size={16} className="text-[#667085]" />
-                    </button>
-                  </Dropdown>
-                ) : null}
-
-                <div className="mb-6">
-                  <p className="mb-2 px-2 text-[11px] font-bold uppercase tracking-[0.12em] text-[#98A2B3]">
-                    Create
-                  </p>
-                  <div className="space-y-1">
-                    {PRIMARY_LINKS.map((link) => (
-                      <Link
-                        key={link.key}
-                        href={link.href}
-                        onClick={() => setSidebar(false)}
-                        className="block rounded-lg px-3 py-2.5 text-[15px] font-semibold text-[#344054] transition-colors hover:bg-[#F9FAFB]">
-                        {link.mobileLabel}
-                        {link.badge && <NewBadge label={link.badge} />}
-                      </Link>
-                    ))}
-                    {WEDDING_RELEASED && (
-                      <Link
-                        href="/wedding-invitation"
-                        onClick={() => setSidebar(false)}
-                        className="block rounded-lg px-3 py-2.5 text-[15px] font-semibold text-[#344054] transition-colors hover:bg-[#F9FAFB]">
-                        Wedding invitations
-                      </Link>
-                    )}
-                  </div>
-                </div>
-
-                <div className="mb-6">
-                  <p className="mb-2 px-2 text-[11px] font-bold uppercase tracking-[0.12em] text-[#98A2B3]">
-                    Explore
-                  </p>
-                  <div className="space-y-1">
-                    {FEATURE_LINKS.map((link) => (
-                      <Link
-                        key={link.key}
-                        href={link.href}
-                        onClick={() => setSidebar(false)}
-                        className="flex items-center gap-3 rounded-lg px-3 py-2.5 text-[15px] font-semibold text-[#344054] transition-colors hover:bg-[#F9FAFB]">
-                        {link.key === 'photobox' ? (
-                          <Camera size={17} className="text-[#E34013]" />
-                        ) : (
-                          <Sparkles size={17} className="text-[#E34013]" />
-                        )}
-                        {link.mobileLabel}
-                      </Link>
-                    ))}
-                    <button
-                      type="button"
-                      onClick={openPricing}
-                      className="flex w-full items-center gap-3 rounded-lg px-3 py-2.5 text-left text-[15px] font-semibold text-[#344054] transition-colors hover:bg-[#F9FAFB]">
-                      <BadgeDollarSign size={17} className="text-[#E34013]" />
-                      Pricing
-                    </button>
-                  </div>
-                </div>
-              </div>
-
-              <div className="border-t border-[#EAECF0] bg-white p-5">
-                <Link
-                  href="/create"
-                  onClick={() => setSidebar(false)}
-                  className="flex h-11 w-full items-center justify-center gap-2 rounded-lg bg-[#E34013] px-4 text-[15px] font-semibold text-white shadow-sm transition-colors hover:bg-[#C9340E]">
-                  <Gift size={17} />
-                  Create a gift
-                </Link>
-                {!isLoggedIn ? (
+        <div
+          aria-hidden={!sidebar}
+          {...(!sidebar ? ({ inert: '' } as Record<string, string>) : {})}
+          style={{
+            transition: 'visibility 0s linear',
+            transitionDelay: sidebar ? '0s' : '220ms',
+          }}
+          className={`fixed inset-x-0 bottom-0 top-[calc(5rem+var(--site-strip,0px))] z-[110] xl:hidden ${
+            sidebar
+              ? 'pointer-events-auto visible'
+              : 'invisible pointer-events-none'
+          }`}>
+          <button
+            type="button"
+            aria-label="Close navigation"
+            tabIndex={sidebar ? 0 : -1}
+            className={`absolute inset-0 bg-[#101828]/35 backdrop-blur-[2px] transition-opacity duration-200 ease-out motion-reduce:duration-150 ${
+              sidebar ? 'opacity-100' : 'opacity-0'
+            }`}
+            onClick={() => setSidebar(false)}
+          />
+          <aside
+            id="mobile-navigation"
+            aria-label="Mobile navigation"
+            style={{
+              transform: sidebar ? 'none' : 'translateX(100%)',
+              transition: sidebar
+                ? 'transform 320ms cubic-bezier(0.32,0.72,0,1)'
+                : 'transform 220ms cubic-bezier(0.23,1,0.32,1)',
+            }}
+            className={`absolute bottom-0 right-0 top-0 flex w-full max-w-[380px] flex-col border-l border-[#EAECF0] bg-white shadow-2xl motion-reduce:!transform-none motion-reduce:![transition:opacity_150ms_ease-out] ${
+              sidebar ? 'motion-reduce:opacity-100' : 'motion-reduce:opacity-0'
+            }`}>
+            <div className="flex-1 overflow-y-auto px-5 py-6">
+              {isLoggedIn ? (
+                <Dropdown
+                  menu={{ items: accountItems }}
+                  trigger={['click']}
+                  placement="bottomLeft">
                   <button
                     type="button"
-                    className="mt-2 h-11 w-full rounded-lg text-[14px] font-semibold text-[#475467] transition-colors hover:bg-[#F9FAFB]"
-                    onClick={() => signIn('google')}>
-                    Sign in
+                    className="mb-6 flex w-full items-center gap-3 rounded-xl border border-[#EAECF0] bg-[#F9FAFB] p-3 text-left">
+                    <Avatar size={38}>{initial}</Avatar>
+                    <div className="min-w-0 flex-1">
+                      <p className="truncate text-[14px] font-semibold text-[#344054]">
+                        {displayName}
+                      </p>
+                      <p className="text-[12px] text-[#667085]">View account</p>
+                    </div>
+                    <ChevronDown size={16} className="text-[#667085]" />
                   </button>
-                ) : null}
+                </Dropdown>
+              ) : null}
+
+              <div className="mb-6">
+                <p className="mb-2 px-2 text-[11px] font-bold uppercase tracking-[0.12em] text-[#98A2B3]">
+                  Create
+                </p>
+                <div className="space-y-1">
+                  {PRIMARY_LINKS.map((link) => (
+                    <Link
+                      key={link.key}
+                      href={link.href}
+                      onClick={() => setSidebar(false)}
+                      className="block rounded-lg px-3 py-2.5 text-[15px] font-semibold text-[#344054] transition-colors hover:bg-[#F9FAFB]">
+                      {link.mobileLabel}
+                      {link.badge && <NewBadge label={link.badge} />}
+                    </Link>
+                  ))}
+                  {WEDDING_RELEASED && (
+                    <Link
+                      href="/wedding-invitation"
+                      onClick={() => setSidebar(false)}
+                      className="block rounded-lg px-3 py-2.5 text-[15px] font-semibold text-[#344054] transition-colors hover:bg-[#F9FAFB]">
+                      Wedding invitations
+                    </Link>
+                  )}
+                </div>
               </div>
-            </aside>
-          </div>
-        ) : null}
+
+              <div className="mb-6">
+                <p className="mb-2 px-2 text-[11px] font-bold uppercase tracking-[0.12em] text-[#98A2B3]">
+                  Explore
+                </p>
+                <div className="space-y-1">
+                  {FEATURE_LINKS.map((link) => (
+                    <Link
+                      key={link.key}
+                      href={link.href}
+                      onClick={() => setSidebar(false)}
+                      className="flex items-center gap-3 rounded-lg px-3 py-2.5 text-[15px] font-semibold text-[#344054] transition-colors hover:bg-[#F9FAFB]">
+                      {link.key === 'photobox' ? (
+                        <Camera size={17} className="text-[#E34013]" />
+                      ) : (
+                        <Sparkles size={17} className="text-[#E34013]" />
+                      )}
+                      {link.mobileLabel}
+                    </Link>
+                  ))}
+                  <button
+                    type="button"
+                    onClick={openPricing}
+                    className="flex w-full items-center gap-3 rounded-lg px-3 py-2.5 text-left text-[15px] font-semibold text-[#344054] transition-colors hover:bg-[#F9FAFB]">
+                    <BadgeDollarSign size={17} className="text-[#E34013]" />
+                    Pricing
+                  </button>
+                </div>
+              </div>
+            </div>
+
+            <div className="border-t border-[#EAECF0] bg-white p-5">
+              <Link
+                href="/create"
+                onClick={() => setSidebar(false)}
+                className="flex h-11 w-full items-center justify-center gap-2 rounded-lg bg-[#E34013] px-4 text-[15px] font-semibold text-white shadow-sm transition-colors hover:bg-[#C9340E]">
+                <Gift size={17} />
+                Create a gift
+              </Link>
+              {!isLoggedIn ? (
+                <button
+                  type="button"
+                  className="mt-2 h-11 w-full rounded-lg text-[14px] font-semibold text-[#475467] transition-colors hover:bg-[#F9FAFB]"
+                  onClick={() => signIn('google')}>
+                  Sign in
+                </button>
+              ) : null}
+            </div>
+          </aside>
+        </div>
       </header>
     </div>
   );
