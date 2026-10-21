@@ -2,6 +2,7 @@ import Link from 'next/link';
 
 import { RevealHeading } from '@/components/memoroll/landing/reveal-words';
 import MemorollPreview from './memoroll-preview';
+import Reveal from './reveal';
 import SectionPill from './section-pill';
 
 const STEPS = [
@@ -57,11 +58,18 @@ export default function InvitationHowItWorks() {
         </div>
 
         <ol className="grid grid-cols-1 gap-y-10 sm:grid-cols-2 lg:grid-cols-4 lg:gap-y-0">
-          {STEPS.map((step) => (
-            <li key={step.title} className="flex flex-col gap-7">
+          {STEPS.map((step, index) => (
+            <Reveal
+              as="li"
+              key={step.title}
+              delay={index * 80}
+              className="flex flex-col gap-7">
               <div className="flex items-center" aria-hidden="true">
                 <span className="size-3.5 shrink-0 rounded-full bg-[#1b1b1b]" />
-                <span className="h-px flex-1 bg-[#fbf4ec]/25" />
+                <span
+                  className="h-px flex-1 origin-left scale-x-0 bg-[#fbf4ec]/25 transition-transform duration-[600ms] ease-[cubic-bezier(0.22,1,0.36,1)] group-data-[revealed=true]:scale-x-100 motion-reduce:scale-x-100 motion-reduce:transition-none"
+                  style={{ transitionDelay: `${index * 80 + 150}ms` }}
+                />
               </div>
               <div className="flex flex-col gap-3 pr-10">
                 <p
@@ -81,9 +89,12 @@ export default function InvitationHowItWorks() {
                   {step.body}
                 </p>
               </div>
-            </li>
+            </Reveal>
           ))}
-          <li className="flex flex-col gap-7">
+          <Reveal
+            as="li"
+            delay={STEPS.length * 80}
+            className="flex flex-col gap-7">
             <div className="flex items-center" aria-hidden="true">
               <span className="size-3.5 shrink-0 rounded-full bg-[#ff3e09]" />
             </div>
@@ -118,7 +129,7 @@ export default function InvitationHowItWorks() {
                 </Link>
               </p>
             </div>
-          </li>
+          </Reveal>
         </ol>
       </div>
     </section>

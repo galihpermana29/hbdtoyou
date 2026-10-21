@@ -1,7 +1,12 @@
+import type { CSSProperties } from 'react';
 import Link from 'next/link';
 
 import { RevealHeading } from '@/components/memoroll/landing/reveal-words';
 import StartInvitationLink from './start-invitation-link';
+
+/** Entrance delay, read by the .inv-hero-rise / .inv-hero-fade classes. */
+const delay = (ms: number) =>
+  ({ '--inv-delay': `${ms}ms` }) as CSSProperties;
 
 const STATS = [
   { value: '100+', label: 'COUPLES ON MEMOIFY' },
@@ -63,8 +68,9 @@ function MobileCollage() {
       className="relative mx-auto aspect-[361/422] w-full max-w-[520px] [container-type:inline-size] max-md:order-2 md:hidden"
       aria-hidden="true">
       <div
-        className="absolute bg-[#fffdfa]"
+        className="inv-hero-fade absolute bg-[#fffdfa]"
         style={{
+          ...delay(0),
           left: mq(16.83),
           top: mq(48.69),
           width: mq(321.85),
@@ -72,11 +78,12 @@ function MobileCollage() {
           borderRadius: `${mq(160.93)} ${mq(160.93)} 0 0`,
         }}
       />
-      {MOBILE_PHONES.map((phone) => (
+      {MOBILE_PHONES.map((phone, index) => (
         <div
           key={phone.src}
-          className="absolute bg-[#1b1b1b]"
+          className="inv-hero-rise absolute bg-[#1b1b1b]"
           style={{
+            ...delay(120 + index * 90),
             left: mq(phone.x),
             top: mq(phone.y),
             width: mq(phone.w),
@@ -95,8 +102,9 @@ function MobileCollage() {
       ))}
 
       <div
-        className="absolute flex flex-col bg-[#fffdfa]"
+        className="inv-hero-rise absolute flex flex-col bg-[#fffdfa]"
         style={{
+          ...delay(520),
           left: mq(6.11),
           top: mq(329.78),
           width: mq(90.55),
@@ -135,15 +143,25 @@ function MobileCollage() {
       </div>
 
       <p
-        className="absolute rotate-[4deg] whitespace-nowrap text-[#4a4642]"
-        style={{ left: mq(264.3), top: mq(97), ...mobileNote }}>
+        className="inv-hero-fade absolute rotate-[4deg] whitespace-nowrap text-[#4a4642]"
+        style={{
+          left: mq(264.3),
+          top: mq(97),
+          ...mobileNote,
+          ...delay(640),
+        }}>
         greets every guest
         <br />
         <span style={{ marginLeft: mq(12.84), ...mobileNote }}>by name</span>
       </p>
       <p
-        className="absolute -rotate-[4deg] whitespace-nowrap text-center text-[#4a4642]"
-        style={{ left: mq(19.2), top: mq(72), ...mobileNote }}>
+        className="inv-hero-fade absolute -rotate-[4deg] whitespace-nowrap text-center text-[#4a4642]"
+        style={{
+          left: mq(19.2),
+          top: mq(72),
+          ...mobileNote,
+          ...delay(700),
+        }}>
         Flexible customizable
         <br />
         template
@@ -234,8 +252,9 @@ export default function InvitationHero() {
             className="relative mx-auto aspect-[616/720] w-full max-w-[616px] [container-type:inline-size]"
             aria-hidden="true">
             <div
-              className="absolute bg-[#fffdfa]"
+              className="inv-hero-fade absolute bg-[#fffdfa]"
               style={{
+                ...delay(0),
                 left: cq(4),
                 top: cq(56),
                 width: cq(600),
@@ -243,11 +262,12 @@ export default function InvitationHero() {
                 borderRadius: `${cq(300)} ${cq(300)} 0 0`,
               }}
             />
-            {PHONES.map((phone) => (
+            {PHONES.map((phone, index) => (
               <div
                 key={phone.src}
-                className="absolute bg-[#1b1b1b] shadow-[0_24px_24px_rgba(27,27,27,0.15)]"
+                className="inv-hero-rise absolute bg-[#1b1b1b] shadow-[0_24px_24px_rgba(27,27,27,0.15)]"
                 style={{
+                  ...delay(120 + index * 90),
                   left: cq(phone.x),
                   top: cq(phone.y),
                   width: cq(phone.w),
@@ -265,8 +285,8 @@ export default function InvitationHero() {
             ))}
 
             <div
-              className="absolute left-0 flex h-[84px] w-[150px] flex-col gap-2 rounded-2xl bg-[#fffdfa] px-4 py-3.5 shadow-[0_12px_16px_rgba(27,27,27,0.08)] sm:max-md:-left-4 sm:max-md:h-[95px] sm:max-md:w-[169px] sm:max-md:gap-2.5 sm:max-md:px-5 sm:max-md:py-4 lg:-left-4 lg:h-[95px] lg:w-[169px] lg:gap-2.5 lg:px-5 lg:py-4"
-              style={{ top: cq(580) }}>
+              className="inv-hero-rise absolute left-0 flex h-[84px] w-[150px] flex-col gap-2 rounded-2xl bg-[#fffdfa] px-4 py-3.5 shadow-[0_12px_16px_rgba(27,27,27,0.08)] sm:max-md:-left-4 sm:max-md:h-[95px] sm:max-md:w-[169px] sm:max-md:gap-2.5 sm:max-md:px-5 sm:max-md:py-4 lg:-left-4 lg:h-[95px] lg:w-[169px] lg:gap-2.5 lg:px-5 lg:py-4"
+              style={{ top: cq(580), ...delay(520) }}>
               <p
                 className="whitespace-nowrap text-[10px] tracking-[1.2px] text-[#8a847d]"
                 style={{ fontFamily: 'var(--font-mr-label)' }}>
@@ -285,8 +305,9 @@ export default function InvitationHero() {
             </div>
 
             <p
-              className="absolute rotate-[4deg] whitespace-nowrap text-[#4a4642]"
+              className="inv-hero-fade absolute rotate-[4deg] whitespace-nowrap text-[#4a4642]"
               style={{
+                ...delay(640),
                 left: cq(465),
                 top: cq(146),
                 fontFamily: 'var(--font-mr-hand)',
@@ -304,8 +325,9 @@ export default function InvitationHero() {
               </span>
             </p>
             <p
-              className="absolute -rotate-[4deg] whitespace-nowrap text-center text-[#4a4642]"
+              className="inv-hero-fade absolute -rotate-[4deg] whitespace-nowrap text-center text-[#4a4642]"
               style={{
+                ...delay(700),
                 left: cq(8),
                 top: cq(101),
                 fontFamily: 'var(--font-mr-hand)',

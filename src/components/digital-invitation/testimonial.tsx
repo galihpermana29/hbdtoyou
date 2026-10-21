@@ -1,3 +1,4 @@
+import Reveal from './reveal';
 import SectionPill from './section-pill';
 
 const STATS = [
@@ -16,7 +17,7 @@ export default function InvitationTestimonial() {
       className="px-4 pb-16 pt-16 sm:px-6 md:px-10 md:pb-[120px] md:pt-[140px] xl:px-20">
       <div className="mx-auto flex w-full max-w-[1280px] flex-col gap-12 md:gap-14">
         <figure className="flex flex-col items-center gap-10 md:flex-row md:gap-16 lg:gap-24">
-          <div className="flex w-full max-w-[344px] shrink-0 flex-col items-center gap-4 md:w-[300px] lg:w-[400px] lg:max-w-none">
+          <Reveal className="flex w-full max-w-[344px] shrink-0 flex-col items-center gap-4 md:w-[300px] lg:w-[400px] lg:max-w-none">
             <img
               src="/digital-invitation/testimonial.jpg"
               alt="Guests lifting the groom on the dance floor"
@@ -27,9 +28,11 @@ export default function InvitationTestimonial() {
               style={{ fontFamily: 'var(--font-mr-hand)' }}>
               from Elias &amp; Freya&apos;s roll, 11:42pm
             </figcaption>
-          </div>
+          </Reveal>
 
-          <div className="flex min-w-0 flex-col items-start gap-6">
+          <Reveal
+            delay={120}
+            className="flex min-w-0 flex-col items-start gap-6">
             <SectionPill>Kind Words</SectionPill>
             <p
               aria-hidden="true"
@@ -52,7 +55,7 @@ export default function InvitationTestimonial() {
                 WEDDING · 100 GUESTS · 615 PHOTOS
               </p>
             </div>
-          </div>
+          </Reveal>
         </figure>
 
         <dl className="grid grid-cols-2 border-t border-[#e8ded3] lg:grid-cols-4">

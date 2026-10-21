@@ -1,6 +1,7 @@
 import Link from 'next/link';
 
 import { RevealHeading } from '@/components/memoroll/landing/reveal-words';
+import Reveal from './reveal';
 import SectionPill from './section-pill';
 import StartInvitationLink from './start-invitation-link';
 
@@ -43,7 +44,9 @@ export default function InvitationPlan() {
           </div>
         </div>
 
-        <div className="mx-auto w-full max-w-[460px] shrink-0 lg:mx-0 lg:w-[460px]">
+        <Reveal
+          className="mx-auto w-full max-w-[460px] shrink-0 lg:mx-0 lg:w-[460px]"
+          delay={100}>
           <div className="-rotate-2 rounded bg-[#fffdfa] px-6 py-8 shadow-[0_30px_30px_rgba(27,27,27,0.2)] sm:px-8 sm:py-9">
             <div className="flex flex-col items-center gap-1.5">
               <img
@@ -63,7 +66,7 @@ export default function InvitationPlan() {
             <ul
               className="flex flex-col gap-5 text-[13px] text-[#1b1b1b]"
               style={mono}>
-              {INCLUDED.map((item) => (
+              {INCLUDED.map((item, i) => (
                 <li
                   key={item}
                   className="flex items-center justify-between gap-4"
@@ -71,8 +74,8 @@ export default function InvitationPlan() {
                   {item}
                   <span
                     aria-label="included"
-                    className="text-[#ff3e09]"
-                    style={mono}>
+                    className="inline-block scale-[0.6] text-[#ff3e09] opacity-0 transition-[transform,opacity] duration-200 ease-out group-data-[revealed=true]:scale-100 group-data-[revealed=true]:opacity-100 motion-reduce:scale-100 motion-reduce:opacity-100 motion-reduce:transition-none"
+                    style={{ ...mono, transitionDelay: `${500 + i * 70}ms` }}>
                     ✓
                   </span>
                 </li>
@@ -106,7 +109,7 @@ export default function InvitationPlan() {
               see you on the altar of love♡
             </p>
           </div>
-        </div>
+        </Reveal>
       </div>
     </section>
   );
