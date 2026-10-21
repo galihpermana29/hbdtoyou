@@ -216,7 +216,8 @@ const NavigationBar = () => {
   }));
 
   return (
-    <div className={`${landingFonts} [--site-strip:40px]`}>
+    <div
+      className={`${landingFonts} sticky top-0 z-[100] [--site-strip:40px]`}>
       <MemorollAnnouncementStrip />
       <header className="relative isolate z-[100] h-20 border-b border-[#EAECF0] bg-white shadow-[0_1px_2px_rgba(16,24,40,0.04)]">
         <div
