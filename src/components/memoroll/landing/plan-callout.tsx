@@ -4,6 +4,7 @@ import { useInView, useReducedMotion } from 'framer-motion';
 import Link from 'next/link';
 import { useRef } from 'react';
 
+import { useLandingCopy } from './language-provider';
 import { RevealHeading } from './reveal-words';
 
 /** Delay between one asset popping up and the next, in ms. */
@@ -27,10 +28,11 @@ export default function MemorollPlanCallout() {
   const clusterRef = useRef<HTMLDivElement>(null);
   const inView = useInView(clusterRef, { amount: 0.3 });
   const show = useReducedMotion() || inView;
+  const copy = useLandingCopy().plan;
 
   return (
     <section
-      aria-label="Included in the Wedding Plan"
+      aria-label={copy.pill}
       className="bg-[#fbf4ec] px-4 pb-16 pt-12 md:px-10 md:pb-[120px] md:pt-24"
       style={{ fontFamily: 'var(--font-mr-body)' }}>
       <div className="relative mx-auto flex w-full max-w-[1280px] flex-col gap-10 overflow-hidden rounded-2xl p-6 md:p-10 lg:block lg:h-[460px] lg:p-0">
@@ -44,26 +46,24 @@ export default function MemorollPlanCallout() {
 
         <div className="relative flex max-w-[600px] flex-col items-start gap-6 lg:absolute lg:left-16 lg:top-[63px]">
           <span className="inline-flex items-center rounded-full border border-white/35 bg-white/15 px-3 py-1.5 text-[14px] font-medium tracking-[-0.28px] text-white">
-            Included in the Wedding Plan
+            {copy.pill}
           </span>
           <RevealHeading className="text-[28px] font-semibold leading-[1.2] tracking-[-0.72px] text-white md:text-[36px] md:leading-[44px]">
-            MemoRoll is on the house with your Wedding Plan.
+            {copy.heading}
           </RevealHeading>
           <p className="max-w-[520px] text-[18px] leading-[30px] text-[#ffe9e0]">
-            No add-on, no extra checkout. Every guest gets a camera and the
-            whole roll opens together at the Reveal you choose - all included
-            when you book the Wedding Plan.
+            {copy.body}
           </p>
           <div className="flex flex-wrap items-center gap-4 pt-2">
             <Link
               href="/create/wedding-invitation"
               className="flex h-12 items-center justify-center rounded-lg bg-white px-5 text-[16px] md:h-[60px] md:px-6 md:text-[18px] font-semibold text-[#e34013] shadow-[0_1px_1px_rgba(16,24,40,0.05)]">
-              Get the Wedding Plan
+              {copy.cta}
             </Link>
             <a
               href="#plan-details"
               className="text-[16px] font-semibold text-white">
-              See what&apos;s in the plan
+              {copy.details}
             </a>
           </div>
         </div>
@@ -95,7 +95,7 @@ export default function MemorollPlanCallout() {
                 className="flex h-[373px] w-[380px] -rotate-4 flex-col gap-[18px] rounded-2xl bg-[#fffdfa] p-7 drop-shadow-[0_20px_20px_rgba(122,31,0,0.28)]">
                 <div className="flex items-center justify-between">
                   <p className="text-[14px] font-medium tracking-[-0.28px] text-[#8a847d]">
-                    Memoify · Wedding Plan
+                    {copy.cardBrand}
                   </p>
                   <img
                     loading="lazy"
@@ -107,7 +107,7 @@ export default function MemorollPlanCallout() {
                   />
                 </div>
                 <p className="text-[22px] font-semibold leading-[33px] text-[#1b1b1b]">
-                  What&apos;s in your plan
+                  {copy.cardTitle}
                 </p>
                 <div className="h-px bg-[#e8ded3]" />
                 <div className="flex h-[43px] items-center gap-3">
@@ -123,11 +123,9 @@ export default function MemorollPlanCallout() {
                   </span>
                   <div className="flex flex-col gap-0.5 text-[14px]">
                     <p className="font-semibold leading-[21px] text-[#1b1b1b]">
-                      Wedding Plan
+                      {copy.planName}
                     </p>
-                    <p className="leading-5 text-[#4a4642]">
-                      Everything for your big day
-                    </p>
+                    <p className="leading-5 text-[#4a4642]">{copy.planBody}</p>
                   </div>
                 </div>
                 <div className="flex items-center gap-3 rounded-xl bg-[#ffede5] p-[14px]">
@@ -146,18 +144,18 @@ export default function MemorollPlanCallout() {
                       MemoRoll
                     </p>
                     <p className="text-[14px] leading-5 text-[#4a4642]">
-                      A camera for every guest
+                      {copy.memorollBody}
                     </p>
                   </div>
                   <div className="flex flex-col items-end gap-0.5 text-[14px] font-medium leading-[21px] tracking-[-0.28px]">
-                    <p className="text-[#8a847d]">Add-on</p>
-                    <p className="text-[#ff3e09]">Free</p>
+                    <p className="text-[#8a847d]">{copy.addOn}</p>
+                    <p className="text-[#ff3e09]">{copy.free}</p>
                   </div>
                 </div>
                 <div className="border-t border-[#e8ded3]" />
                 <div className="flex items-center justify-between">
                   <p className="text-[14px] font-medium leading-[21px] text-[#4a4642]">
-                    Extra cost for MemoRoll
+                    {copy.extraCost}
                   </p>
                   <p className="text-[24px] font-semibold leading-9 text-[#ff3e09]">
                     Rp0

@@ -1,6 +1,9 @@
+'use client';
+
 import { FlipNumber } from '../ui/flip-counter';
 import DevelopingPhoto from './developing-photo';
 import Eyebrow from './eyebrow';
+import { useLandingCopy } from './language-provider';
 import LiveDot from './live-dot';
 import { RevealHeading } from './reveal-words';
 import StackedWordmark from './stacked-wordmark';
@@ -18,24 +21,6 @@ import StackedWordmark from './stacked-wordmark';
  * inside it, so the shadows are drawn once and carried along. On the moving
  * box itself they would be redrawn on every frame of the drift.
  */
-
-const RULES = [
-  {
-    number: '01',
-    title: 'No peeking',
-    body: "Everyone else's Shots stay Veiled until the Reveal. The surprise is the point.",
-  },
-  {
-    number: '02',
-    title: 'No retakes',
-    body: 'A limited roll per guest means every frame is a choice, not a burst.',
-  },
-  {
-    number: '03',
-    title: 'One shared reveal',
-    body: "Every guest's Roll lands in one gallery, at the Reveal you set.",
-  },
-];
 
 /** The card's own shadow: five stacked, so it falls off the way the design's does. */
 const CARD_SHADOW = [
@@ -102,6 +87,7 @@ function EndsIn() {
 }
 
 function GalleryCard() {
+  const copy = useLandingCopy().idea;
   return (
     <div className="memoroll-float-card absolute left-[205.84px] top-[-25.1px] w-[337.523px]">
       <div
@@ -110,7 +96,7 @@ function GalleryCard() {
         <div className="flex items-center justify-between px-[14.363px]">
           <BackPill />
           <p className="w-[223.519px] text-center text-[17.953px] font-bold leading-[1.5] tracking-[-0.1975px] text-[#232323]">
-            Gallery
+            {copy.gallery}
           </p>
           <BackPill hidden />
         </div>
@@ -132,17 +118,17 @@ function GalleryCard() {
             <div className="flex w-[207.361px] flex-col gap-[3.591px]">
               <div className="flex items-center gap-[5.386px]">
                 <p className="whitespace-nowrap text-[10.772px] font-bold leading-[1.5] tracking-[-0.1185px] text-[#232323]">
-                  Ends in
+                  {copy.endsIn}
                 </p>
                 <EndsIn />
               </div>
               <p className="text-[17.953px] font-extrabold leading-[1.5] tracking-[-0.1975px] text-[#232323]">
-                Elias &amp; Freya’s Wedding
+                {copy.event}
               </p>
               <p className="flex items-center gap-[3.591px] whitespace-nowrap text-[10.772px] font-medium leading-[1.5] tracking-[-0.1185px] text-[#232323]">
-                615 Photos
+                {copy.photos}
                 <span className="text-[12.567px] tracking-[-0.1382px]">・</span>
-                100 Participants
+                {copy.participants}
               </p>
             </div>
           </div>
@@ -185,10 +171,11 @@ function Polaroid() {
 }
 
 function Gallery() {
+  const copy = useLandingCopy().idea;
   return (
     <div
       role="img"
-      aria-label="The MemoRoll gallery for Elias & Freya's Wedding: 615 photos from 100 participants, with a countdown to the reveal"
+      aria-label={copy.galleryLabel}
       className="relative h-[460px] w-[608px] origin-top-left scale-[0.55] rounded-[28px] bg-white md:scale-[0.85] lg:scale-100">
       <div className="absolute left-[160px] top-[-9.11px] h-[469px] w-[289px] overflow-hidden">
         <img
@@ -208,7 +195,7 @@ function Gallery() {
         <p
           className="whitespace-pre text-[12px] leading-[normal] tracking-[0.5px] text-[#e8e1d9]"
           style={{ fontFamily: 'var(--font-mr-label)' }}>
-          100 guests shooting right now
+          {copy.live}
         </p>
       </div>
 
@@ -220,6 +207,7 @@ function Gallery() {
 }
 
 export default function MemorollIdea() {
+  const copy = useLandingCopy().idea;
   return (
     <section
       className="flex flex-col items-center bg-[#1b1b1b] px-6 py-16 md:px-10 lg:px-20 lg:py-28"
@@ -227,15 +215,13 @@ export default function MemorollIdea() {
       <div className="flex w-full max-w-[1280px] flex-col gap-12 lg:gap-[72px]">
         <div className="flex flex-col gap-6 lg:flex-row lg:items-end lg:gap-20">
           <div className="flex flex-col items-start gap-5 lg:w-[800px] lg:shrink-0">
-            <Eyebrow>The Idea!</Eyebrow>
+            <Eyebrow>{copy.eyebrow}</Eyebrow>
             <RevealHeading className="text-[28px] font-semibold leading-[36px] tracking-[-0.72px] text-white md:text-[36px] md:leading-[44px]">
-              Everyone gets a camera. Nobody sees the roll. Then, the Reveal.
+              {copy.heading}
             </RevealHeading>
           </div>
           <p className="text-[16px] font-normal leading-[26px] text-[#b9b2aa] md:text-[18px] md:leading-[29px] lg:w-[400px] lg:shrink-0">
-            No reviewing, deleting, or missing the party to stare at a screen.
-            Capture the raw moments as they happen and leave the magic on the
-            roll.
+            {copy.body}
           </p>
         </div>
 
@@ -245,14 +231,14 @@ export default function MemorollIdea() {
           </div>
 
           <ol className="flex w-full flex-col lg:min-w-0 lg:flex-1">
-            {RULES.map((rule, index) => (
+            {copy.rules.map((rule, index) => (
               <li
-                key={rule.number}
+                key={index}
                 className={`flex gap-6 border-b border-[#3a3633] py-7 lg:h-[177px] ${
                   index === 0 ? 'border-t' : ''
                 }`}>
                 <p className="text-[14px] font-medium leading-[21px] tracking-[-0.28px] text-[#ff3e09]">
-                  {rule.number}
+                  {String(index + 1).padStart(2, '0')}
                 </p>
                 <div className="flex min-w-0 flex-col gap-2">
                   <h3 className="text-[22px] font-semibold leading-[33px] text-white">

@@ -1,34 +1,19 @@
+'use client';
+
 import Eyebrow from './eyebrow';
+import { useLandingCopy } from './language-provider';
 import { RevealHeading } from './reveal-words';
 import RollingNumber from './rolling-number';
 
-const SMALL_REVIEWS = [
-  {
-    quote:
-      'The best part of my 30th (Dirty Thirty Baby!) was the next morning. Opening the roll felt like Christmas.',
-    name: 'Nadia R.',
-    meta: 'Birthday Party · 32 guests',
-    avatar: '/memoroll-landing/testimonial-nadia.jpg',
-  },
-  {
-    quote:
-      'Zero setup. Guests just scanned the table card and started shooting. Our team still talks about the reveal.',
-    name: 'Marcus T.',
-    meta: 'Class of ‘18 Gathering · 58 guests',
-    avatar: '/memoroll-landing/testimonial-marcus.jpg',
-  },
+/** Who wrote each of the smaller reviews, in the order `testimonials.reviews` tells them. */
+const REVIEWERS = [
+  { name: 'Nadia R.', avatar: '/memoroll-landing/testimonial-nadia.jpg' },
+  { name: 'Marcus T.', avatar: '/memoroll-landing/testimonial-marcus.jpg' },
 ];
 
-const STATS = [
-  { value: '1,000+', label: 'rolls developed' },
-  { value: '2.3k', label: 'photos revealed' },
-  { value: '96%', label: 'of hosts would roll again' },
-  { value: '0', label: 'apps to download' },
-];
-
-function Stars({ size }: { size: 14 | 16 }) {
+function Stars({ size, label }: { size: 14 | 16; label: string }) {
   return (
-    <div className="flex gap-[3px]" role="img" aria-label="5 out of 5 stars">
+    <div className="flex gap-[3px]" role="img" aria-label={label}>
       {Array.from({ length: 5 }, (_, i) => (
         <img
           loading="lazy"
@@ -46,27 +31,28 @@ function Stars({ size }: { size: 14 | 16 }) {
 
 /** "Stories from the roll" - what hosts said, and the numbers behind it. */
 export default function MemorollTestimonials() {
+  const copy = useLandingCopy().testimonials;
   return (
     <section
-      aria-label="Stories from the roll"
+      aria-label={copy.eyebrow}
       className="bg-[#fbf4ec] px-4 py-16 md:px-10 md:py-[120px]"
       style={{ fontFamily: 'var(--font-mr-body)' }}>
       <div className="mx-auto flex w-full max-w-[1280px] flex-col gap-10 md:gap-14">
         <div className="flex flex-col items-start justify-between gap-6 md:flex-row md:items-end">
           <div className="flex flex-col items-start gap-5">
-            <Eyebrow>Stories from the roll</Eyebrow>
+            <Eyebrow>{copy.eyebrow}</Eyebrow>
             <RevealHeading className="text-[28px] font-semibold leading-[1.2] tracking-[-0.72px] text-[#1b1b1b] md:text-[36px] md:leading-[44px]">
-              Told by the people who were there.
+              {copy.heading}
             </RevealHeading>
           </div>
           <div className="flex items-center gap-4">
             <p className="text-[32px] font-bold leading-[48px] text-[#1b1b1b]">
-              4.9
+              {copy.rating}
             </p>
             <div className="flex flex-col gap-1.5">
-              <Stars size={16} />
+              <Stars size={16} label={copy.stars} />
               <p className="text-[14px] leading-5 text-[#4a4642]">
-                from all MemoRoll hosts
+                {copy.ratingFrom}
               </p>
             </div>
           </div>
@@ -84,10 +70,7 @@ export default function MemorollTestimonials() {
                 height={44}
               />
               <blockquote className="text-[18px] font-medium leading-[1.5] text-white md:text-[22px] md:leading-[33px]">
-                We got 600 photos back the morning after our wedding, and half
-                of them were moments we never saw. My grandma dancing. Our
-                friends crying during the vows. It felt like reliving the whole
-                night.
+                {copy.featured.quote}
               </blockquote>
               <figcaption className="flex items-center gap-[14px]">
                 <img
@@ -102,7 +85,7 @@ export default function MemorollTestimonials() {
                     Elias & Freya
                   </p>
                   <p className="text-[14px] font-medium leading-[21px] tracking-[-0.28px] text-[#ffe1d6]">
-                    Wedding · 100 guests · 615 photos
+                    {copy.featured.meta}
                   </p>
                 </div>
               </figcaption>
@@ -114,24 +97,24 @@ export default function MemorollTestimonials() {
                   loading="lazy"
                   decoding="async"
                   src="/memoroll-landing/testimonial-elias.jpg"
-                  alt="Elias and Freya with their wedding guests"
+                  alt={copy.featured.photoAlt}
                   className="h-[270px] w-[210px] object-cover"
                 />
                 <p
                   className="text-[22px] text-[#4a4642]"
                   style={{ fontFamily: 'var(--font-mr-hand)' }}>
-                  the whole gang ♡
+                  {copy.featured.caption}
                 </p>
               </div>
             </div>
           </figure>
 
           <div className="flex flex-1 flex-col gap-5">
-            {SMALL_REVIEWS.map((r) => (
+            {copy.reviews.map((r, i) => (
               <figure
-                key={r.name}
+                key={REVIEWERS[i].name}
                 className="flex flex-1 flex-col gap-[22px] rounded-[22px] bg-[#fffdfa] p-8">
-                <Stars size={14} />
+                <Stars size={14} label={copy.stars} />
                 <blockquote className="text-[16px] leading-6 text-[#1b1b1b]">
                   {r.quote}
                 </blockquote>
@@ -139,13 +122,13 @@ export default function MemorollTestimonials() {
                   <img
                     loading="lazy"
                     decoding="async"
-                    src={r.avatar}
+                    src={REVIEWERS[i].avatar}
                     alt=""
                     className="size-10 rounded-full object-cover"
                   />
                   <div className="flex flex-col gap-[3px]">
                     <p className="text-[16px] font-semibold leading-6 text-[#1b1b1b]">
-                      {r.name}
+                      {REVIEWERS[i].name}
                     </p>
                     <p className="text-[14px] font-medium leading-[21px] tracking-[-0.28px] text-[#8a847d]">
                       {r.meta}
@@ -158,8 +141,8 @@ export default function MemorollTestimonials() {
         </div>
 
         <dl className="grid grid-cols-2 gap-x-5 gap-y-8 border-t border-[#e8ded3] pt-8 md:grid-cols-4">
-          {STATS.map((s) => (
-            <div key={s.label} className="flex flex-col-reverse gap-1.5">
+          {copy.stats.map((s, i) => (
+            <div key={i} className="flex flex-col-reverse gap-1.5">
               <dt className="text-[16px] leading-6 text-[#4a4642]">
                 {s.label}
               </dt>

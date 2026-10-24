@@ -11,23 +11,12 @@ import {
 import { useRef, useState } from 'react';
 
 import Eyebrow from './eyebrow';
+import { useLandingCopy } from './language-provider';
 import { PINNED_OFFSET, PINNED_STAGE } from './pinned';
 import { RevealHeading } from './reveal-words';
 
-const OCCASIONS = [
-  {
-    title: 'Birthdays',
-    body: 'Your day, through everyone else’s eyes. Catch the candles, the chaos, and the little moments you were too busy celebrating to see.',
-  },
-  {
-    title: 'Weddings',
-    body: 'A day, a hundred perspectives. From the first look to the dance floor, relive the moments that made your day yours.',
-  },
-  {
-    title: 'Friends & Gatherings',
-    body: 'The nights you wish could last longer. Let everyone capture their own little piece of the chaos, the laughter, and the memories you’ll talk about for years.',
-  },
-];
+/** Birthdays, Weddings, Friends & Gatherings: `occasions.cards` in `copy.tsx`. */
+const OCCASION_COUNT = 3;
 
 /** Scroll distance, in viewport heights, that each occasion is held for. */
 const VH_PER_STEP = 0.7;
@@ -110,6 +99,7 @@ function Print({
  */
 export default function MemorollOccasions() {
   const trackRef = useRef<HTMLDivElement>(null);
+  const copy = useLandingCopy().occasions;
   const reduceMotion = useReducedMotion() ?? false;
   const { scrollYProgress } = useScroll({
     target: trackRef,
@@ -131,21 +121,21 @@ export default function MemorollOccasions() {
 
   return (
     <section
-      aria-label="For any occasions"
+      aria-label={copy.eyebrow}
       className="bg-white py-16 md:py-[120px]"
       style={{ fontFamily: 'var(--font-mr-body)' }}>
       <div
         ref={trackRef}
         className="relative"
-        style={{ height: `${(1 + OCCASIONS.length * VH_PER_STEP) * 100}vh` }}>
+        style={{ height: `${(1 + OCCASION_COUNT * VH_PER_STEP) * 100}vh` }}>
         <div
           className="sticky flex flex-col items-center justify-center px-4 py-4 md:px-10 md:py-8"
           style={PINNED_STAGE}>
           <div className="flex w-full max-w-[1280px] flex-col items-center gap-5 sm:gap-8 lg:gap-12">
             <div className="flex flex-col items-center gap-3">
-              <Eyebrow>For any Occasions</Eyebrow>
+              <Eyebrow>{copy.eyebrow}</Eyebrow>
               <RevealHeading className="text-center text-[28px] font-semibold leading-[1.2] tracking-[-0.72px] text-[#1b1b1b] md:text-[36px] md:leading-[44px]">
-                Made for moments worth remembering
+                {copy.heading}
               </RevealHeading>
             </div>
 
@@ -153,9 +143,9 @@ export default function MemorollOccasions() {
               {/* Below lg the cards share one grid cell, so the pinned view holds a
                   single card at a time and fits a phone screen. */}
               <div className="grid w-full gap-5 lg:flex lg:w-[580px] lg:shrink-0 lg:flex-col">
-                {OCCASIONS.map((o, i) => (
+                {copy.cards.map((o, i) => (
                   <motion.div
-                    key={o.title}
+                    key={i}
                     aria-hidden={i > active}
                     style={i > 0 ? rises[i - 1] : undefined}
                     className={`col-start-1 row-start-1 rounded-[20px] bg-[#fff6f5] p-3 shadow-[0_0_0_1px_#f0f0f0,0_4px_8px_-5px_rgba(0,0,0,0.14)] md:p-5 ${

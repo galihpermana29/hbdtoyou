@@ -1,7 +1,11 @@
+'use client';
+
 import Image from 'next/image';
 import Link from 'next/link';
 
 import HeroCarousel from './hero-carousel';
+import { useLandingCopy } from './language-provider';
+import LanguageToggle from './language-toggle';
 import RollTimer from './roll-timer';
 import StackedWordmark from './stacked-wordmark';
 
@@ -13,12 +17,18 @@ import StackedWordmark from './stacked-wordmark';
  * Down to 1024px the arc is only the backdrop and the words lie over its
  * hollow, as in the design. Below that the arc is too small to hold them, so
  * it takes a band of its own at the top and the words follow it.
+ *
+ * The language switch governs the whole page rather than any one part of it,
+ * so it stands apart from the words. Down to 1024px it sits in the corner
+ * above the arc, where the design leaves sky. Below that the arc fills its
+ * band edge to edge, so the switch heads the words instead of covering a print.
  */
 
 const AVATARS = [1, 2, 3, 4];
 
 /** What floats on the arc, placed on the design's 1440px frame. */
 function Floaters() {
+  const copy = useLandingCopy().hero;
   return (
     <>
       <RollTimer />
@@ -32,7 +42,7 @@ function Floaters() {
         <p
           className="text-[11px] tracking-[1.2px] text-white"
           style={{ fontFamily: 'var(--font-mr-label)' }}>
-          PHOTOS
+          {copy.photosBadge}
         </p>
       </div>
     </>
@@ -40,6 +50,7 @@ function Floaters() {
 }
 
 export default function MemorollHero() {
+  const copy = useLandingCopy().hero;
   return (
     <section
       className="relative overflow-hidden bg-[#FBF4EC]"
@@ -51,22 +62,23 @@ export default function MemorollHero() {
       </div>
 
       <div className="relative flex flex-col items-center gap-7 px-6 pb-16 pt-6 lg:h-[970px] lg:pb-0 lg:pt-[437px]">
+        <LanguageToggle className="relative z-10 lg:absolute lg:right-8 lg:top-6" />
+
         <StackedWordmark scale={0.6335} />
 
         <h1 className="w-[732px] max-w-full text-center text-[36px] font-bold leading-[40px] tracking-[-1.8px] text-[#1b1b1b] md:text-[56px] md:leading-[56px] md:tracking-[-3px]">
-          Some days deserve more than one perspective.
+          {copy.heading}
         </h1>
 
         <p className="w-[560px] max-w-full text-center text-[16px] font-normal leading-[normal] text-[#4a4642]">
-          Give every guest a camera on their phone and collect the moments you
-          couldn&apos;t be there to see.
+          {copy.body}
         </p>
 
         <div className="flex flex-wrap items-center justify-center gap-[14px]">
           <Link
             href="/memoroll/create"
             className="flex h-12 items-center justify-center whitespace-nowrap rounded-lg bg-[#e34013] px-5 text-[16px] md:h-[60px] md:px-6 md:py-4 md:text-[18px] font-semibold leading-7 text-white shadow-[0_1px_1px_rgba(16,24,40,0.05)] transition-colors hover:bg-[#C9340E]">
-            Create your MemoRoll
+            {copy.create}
           </Link>
           <Link
             href="#how-it-works"
@@ -78,7 +90,7 @@ export default function MemorollHero() {
               height={16}
               unoptimized
             />
-            See how it works
+            {copy.howItWorks}
           </Link>
         </div>
 
@@ -94,11 +106,9 @@ export default function MemorollHero() {
             ))}
           </div>
           <div className="flex flex-col gap-[2px] leading-[normal]">
-            <p className="text-[14px] font-bold text-[#1b1b1b]">
-              1,000+ rolls developed
-            </p>
+            <p className="text-[14px] font-bold text-[#1b1b1b]">{copy.proof}</p>
             <p className="text-[13px] font-normal text-[#8a847d]">
-              at weddings, birthdays &amp; reunions
+              {copy.proofWhere}
             </p>
           </div>
         </div>

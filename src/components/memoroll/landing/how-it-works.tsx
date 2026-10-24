@@ -9,74 +9,26 @@ import {
 } from 'lucide-react';
 
 import Eyebrow from './eyebrow';
+import { useLandingCopy } from './language-provider';
 import { RevealHeading } from './reveal-words';
 
 type Role = 'guest' | 'host';
 
-type Step = {
-  title: string;
-  heading: string;
-  body: string;
-  /** The guest steps use the icons from the design; the host steps use lucide. */
-  icon: string | LucideIcon;
-};
+/** The guest steps use the icons from the design; the host steps use lucide. */
+type StepIconSource = string | LucideIcon;
 
-const TABS: { role: Role; label: string }[] = [
-  { role: 'guest', label: "I'm a guest" },
-  { role: 'host', label: "I'm hosting" },
-];
+const ROLES: Role[] = ['guest', 'host'];
 
-const STEPS: Record<Role, Step[]> = {
+/** Each step's icon, in the order the steps are told (`how` in `copy.tsx`). */
+const ICONS: Record<Role, StepIconSource[]> = {
   guest: [
-    {
-      title: 'Scan',
-      heading: 'Join the roll',
-      body: 'Scan the event QR code to open your camera. No app download needed.',
-      icon: '/memoroll-landing/step-icon-scan.svg',
-    },
-    {
-      title: 'Shoot',
-      heading: 'Make them count',
-      body: 'Every guest gets a limited Roll. No retakes. Capture what catches your eye.',
-      icon: '/memoroll-landing/step-icon-shoot.svg',
-    },
-    {
-      title: 'Reveal',
-      heading: 'One roll, every angle',
-      body: 'When the Reveal comes, everyone’s Shots open together in one shared gallery.',
-      icon: '/memoroll-landing/step-icon-reveal.svg',
-    },
-    {
-      title: 'Relive',
-      heading: 'See what you missed',
-      body: 'Discover the moments you didn’t see and the night through everyone else’s eyes.',
-      icon: '/memoroll-landing/step-icon-relive.svg',
-    },
+    '/memoroll-landing/step-icon-scan.svg',
+    '/memoroll-landing/step-icon-shoot.svg',
+    '/memoroll-landing/step-icon-reveal.svg',
+    '/memoroll-landing/step-icon-relive.svg',
   ],
-  host: [
-    {
-      title: 'Activate',
-      heading: 'Set the scene',
-      body: 'Create a roll for your event, customize the experience, and choose when everyone gets to see the photos.',
-      icon: CalendarPlus,
-    },
-    {
-      title: 'Invite',
-      heading: 'Pass the roll around',
-      body: 'Share your event QR code around the venue. Guests scan to join and get a Roll of their own.',
-      icon: QrCode,
-    },
-    {
-      title: 'Enjoy',
-      heading: 'Be there for the moment',
-      body: 'Your guests will capture the little moments happening all around you.',
-      icon: PartyPopper,
-    },
-  ],
+  host: [CalendarPlus, QrCode, PartyPopper],
 };
-
-/** How many frames a tab's strip holds, as the heading says it. */
-const FRAME_COUNT: Record<number, string> = { 3: 'three', 4: 'four' };
 
 /** The third frame is the one the design lights up, on either tab. */
 const LIT_FRAME = 2;
@@ -101,7 +53,7 @@ function Sprockets() {
   );
 }
 
-function StepIcon({ icon, lit }: { icon: Step['icon']; lit: boolean }) {
+function StepIcon({ icon, lit }: { icon: StepIconSource; lit: boolean }) {
   if (typeof icon === 'string') {
     return (
       <img
@@ -132,7 +84,8 @@ function StepIcon({ icon, lit }: { icon: Step['icon']; lit: boolean }) {
  */
 export default function MemorollHowItWorks() {
   const [role, setRole] = useState<Role>('guest');
-  const steps = STEPS[role];
+  const copy = useLandingCopy().how;
+  const steps = copy[role];
 
   return (
     <section
@@ -142,15 +95,15 @@ export default function MemorollHowItWorks() {
       <div className="mx-auto flex w-full max-w-[1280px] flex-col gap-10 lg:gap-14">
         <div className="flex flex-col items-start gap-8 md:flex-row md:items-end md:justify-between">
           <div className="flex max-w-[640px] flex-col items-start gap-5">
-            <Eyebrow>How it works</Eyebrow>
+            <Eyebrow>{copy.eyebrow}</Eyebrow>
             <RevealHeading className="text-[28px] font-semibold leading-[1.2] tracking-[-0.72px] text-[#1b1b1b] md:text-[36px] md:leading-[44px]">
-              {`From first flash to final reveal, in ${FRAME_COUNT[steps.length]} frames.`}
+              {copy.heading(steps.length)}
             </RevealHeading>
           </div>
 
           <div
             role="tablist"
-            aria-label="How it works for"
+            aria-label={copy.tabsLabel}
             className="relative grid shrink-0 grid-cols-2 rounded-full bg-white p-[5px]">
             <span
               aria-hidden
@@ -158,19 +111,19 @@ export default function MemorollHowItWorks() {
                 role === 'host' ? 'translate-x-full' : ''
               }`}
             />
-            {TABS.map((tab) => (
+            {ROLES.map((tab) => (
               <button
-                key={tab.role}
+                key={tab}
                 type="button"
                 role="tab"
-                id={`how-tab-${tab.role}`}
-                aria-selected={role === tab.role}
+                id={`how-tab-${tab}`}
+                aria-selected={role === tab}
                 aria-controls="how-frames"
-                onClick={() => setRole(tab.role)}
+                onClick={() => setRole(tab)}
                 className={`relative whitespace-nowrap rounded-full px-7 py-3 text-[15px] font-semibold transition-colors duration-300 ${
-                  role === tab.role ? 'text-white' : 'text-[#8a847d]'
+                  role === tab ? 'text-white' : 'text-[#8a847d]'
                 }`}>
-                {tab.label}
+                {tab === 'guest' ? copy.guestTab : copy.hostTab}
               </button>
             ))}
           </div>
@@ -190,7 +143,7 @@ export default function MemorollHowItWorks() {
               const lit = i === LIT_FRAME;
               return (
                 <li
-                  key={step.title}
+                  key={i}
                   className={`memoroll-frame-in flex min-h-[283px] flex-col gap-5 rounded-lg px-[26px] pb-8 pt-7 ${
                     lit ? 'bg-[#ff3e09]' : 'bg-[#fffdfa]'
                   }`}
@@ -200,9 +153,9 @@ export default function MemorollHowItWorks() {
                       className={`text-[14px] font-medium leading-[21px] tracking-[-0.28px] ${
                         lit ? 'text-[#ffe1d6]' : 'text-[#8a847d]'
                       }`}>
-                      Step {i + 1}
+                      {copy.step(i + 1)}
                     </span>
-                    <StepIcon icon={step.icon} lit={lit} />
+                    <StepIcon icon={ICONS[role][i]} lit={lit} />
                   </div>
                   <p
                     className={`text-[32px] font-bold leading-[48px] ${

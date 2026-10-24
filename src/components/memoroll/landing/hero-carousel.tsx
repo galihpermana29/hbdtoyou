@@ -12,6 +12,7 @@ import {
 import { useEffect, useRef, type ReactNode } from 'react';
 
 import FlameLine from './flame-line';
+import { useLandingCopy } from './language-provider';
 import PhotoCard, { PRINT_HEIGHT, PRINT_WIDTH, type Photo } from './photo-card';
 
 /**
@@ -98,29 +99,12 @@ const MASK_STOPS = FADE.map(
 ).join(', ');
 
 /**
- * The photographs on the arc, and what was written under each, handed out to
- * the prints in turn. There are thirteen prints and six photographs, so some
- * appear twice; the repeats land six places apart, never beside their twin.
+ * The photographs on the arc, handed out to the prints in turn with what was
+ * written under each (`hero.captions` in `copy.tsx`). There are thirteen
+ * prints and six photographs, so some appear twice; the repeats land six
+ * places apart, never beside their twin.
  */
-const PHOTOS: Photo[] = [
-  { src: '/memoroll-landing/arc-1.jpg', caption: 'Elias & Freya ♡' },
-  { src: '/memoroll-landing/arc-2.jpg', caption: 'first dance!!' },
-  { src: '/memoroll-landing/arc-3.jpg', caption: 'the send-off' },
-  { src: '/memoroll-landing/arc-4.jpg', caption: 'the kiss, finally' },
-  { src: '/memoroll-landing/arc-5.jpg', caption: "grandpa's dessert" },
-  { src: '/memoroll-landing/arc-6.jpg', caption: 'the speeches, 9:12pm' },
-];
-
-/** What the undeveloped prints say about themselves, in turn. */
-const EXPOSURES = [
-  'EXP 21/27',
-  'EXP 19/27',
-  'EXP 16/27 · ALMOST',
-  'EXP 16/27',
-  'EXP 12/27',
-  'EXP 24/27',
-  'EXP 08/27',
-];
+const PHOTOS = [1, 2, 3, 4, 5, 6].map((n) => `/memoroll-landing/arc-${n}.jpg`);
 
 /**
  * How long a print takes to move one place. A print needs roughly two and a
@@ -168,6 +152,11 @@ function Print({
   const x = useTransform(place, (p) => at(p).x - PRINT_WIDTH / 2);
   const y = useTransform(place, (p) => at(p).y - PRINT_HEIGHT / 2);
   const rotate = useTransform(place, (p) => at(p).angle);
+  const copy = useLandingCopy().hero;
+  const photo: Photo = {
+    src: PHOTOS[index % PHOTOS.length],
+    caption: copy.captions[index % copy.captions.length],
+  };
 
   const developing = useTransform(place, (p) => {
     const inside = PRINT_WIDTH / 2 - Math.abs(at(p).x - LINE_X);
@@ -180,8 +169,9 @@ function Print({
       style={{ x, y, rotate }}>
       <PhotoCard
         developing={developing}
-        photo={PHOTOS[index % PHOTOS.length]}
-        exposure={EXPOSURES[index % EXPOSURES.length]}
+        photo={photo}
+        exposure={copy.exposures[index % copy.exposures.length]}
+        developingLabel={copy.developing}
         undeveloped={undeveloped}
       />
     </motion.div>

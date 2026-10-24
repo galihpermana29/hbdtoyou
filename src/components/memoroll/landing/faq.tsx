@@ -3,43 +3,14 @@
 import { useState } from 'react';
 
 import Eyebrow from './eyebrow';
+import { useLandingCopy } from './language-provider';
 import { RevealHeading } from './reveal-words';
-
-/**
- * Only the first answer is in the design; the rest are placeholders written to
- * match the product and need sign-off from the team before launch.
- */
-const FAQS = [
-  {
-    q: 'Do guests need to download an app?',
-    a: 'No. Guests scan the event QR code and the camera opens right in their phone’s browser. It works on any iPhone or Android, with no sign-up required.',
-  },
-  {
-    q: 'How many photos can each guest take?',
-    a: 'Every guest gets their own Roll with a fixed number of Shots, and no retakes. The counter on screen shows how many they have left.',
-  },
-  {
-    q: 'When do the photos get revealed?',
-    a: 'Guests see their own Shots as they take them. Everyone else’s stay Veiled until the Reveal, the moment the host sets, and then every guest develops the whole roll.',
-  },
-  {
-    q: 'Who can see the gallery?',
-    a: 'Only the people you share the gallery link with. The host decides who gets it.',
-  },
-  {
-    q: 'Can I download the full-resolution photos?',
-    a: 'Yes. Once the roll has developed, the host can download every photo from the gallery.',
-  },
-  {
-    q: 'How much does a MemoRoll cost?',
-    a: 'MemoRoll is included with the Wedding Plan at no extra cost. See the plan for details.',
-  },
-];
 
 const EMAIL = 'memoify@memoify.live';
 
 export default function MemorollFaq() {
   const [open, setOpen] = useState<number | null>(0);
+  const copy = useLandingCopy().faq;
 
   return (
     <section
@@ -51,10 +22,10 @@ export default function MemorollFaq() {
         <div className="flex w-full shrink-0 flex-col items-start gap-6 lg:w-[420px]">
           <Eyebrow>FAQ</Eyebrow>
           <RevealHeading className="text-[28px] font-semibold leading-[1.2] tracking-[-0.72px] text-[#1b1b1b] md:text-[36px] md:leading-[44px]">
-            Questions, developed.
+            {copy.heading}
           </RevealHeading>
           <p className="text-[18px] leading-[30px] text-[#4a4642]">
-            Everything you need to know before handing out the cameras.
+            {copy.body}
           </p>
           <div className="flex w-full flex-col items-start gap-[18px] rounded-[20px] bg-[#fbf4ec] p-7">
             <div className="flex items-center gap-3">
@@ -69,11 +40,11 @@ export default function MemorollFaq() {
                 />
               </span>
               <p className="text-[18px] font-bold text-[#1b1b1b]">
-                Still curious?
+                {copy.curious}
               </p>
             </div>
             <p className="text-[15px] leading-[23px] text-[#4a4642]">
-              Our team replies within a day, usually much faster.
+              {copy.replies}
             </p>
             <a
               href={`mailto:${EMAIL}`}
@@ -92,10 +63,10 @@ export default function MemorollFaq() {
         </div>
 
         <div className="min-w-0 flex-1 border-t-[1.5px] border-[#1b1b1b]">
-          {FAQS.map((f, i) => {
+          {copy.items.map((f, i) => {
             const isOpen = open === i;
             return (
-              <div key={f.q} className="border-b border-[#e8ded3]">
+              <div key={i} className="border-b border-[#e8ded3]">
                 <h3>
                   <button
                     type="button"

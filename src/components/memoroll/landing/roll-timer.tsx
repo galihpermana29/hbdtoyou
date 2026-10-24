@@ -3,6 +3,8 @@
 import { useInView, useReducedMotion } from 'framer-motion';
 import { useEffect, useRef, useState } from 'react';
 
+import { useLandingCopy } from './language-provider';
+
 /**
  * The "REVEAL IN" card floating on the hero's arc. It counts down from
  * the design's 02 : 14 : 08 to zero a second at a time, and then starts again,
@@ -28,6 +30,7 @@ export default function RollTimer() {
   const inView = useInView(ref);
   const reduceMotion = useReducedMotion();
   const [remaining, setRemaining] = useState(START_SECONDS);
+  const label = useLandingCopy().hero.timerLabel;
 
   useEffect(() => {
     if (reduceMotion || !inView) return;
@@ -43,7 +46,7 @@ export default function RollTimer() {
       ref={ref}
       className="absolute left-[1170.5px] top-[632.6px] -rotate-[4deg] rounded-[14px] bg-[#1b1b1b] px-[18px] py-[14px]"
       style={{ width: 209, height: 80, fontFamily: 'var(--font-mr-label)' }}>
-      <p className="text-[11px] tracking-[1.2px] text-[#b9b2aa]">REVEAL IN</p>
+      <p className="text-[11px] tracking-[1.2px] text-[#b9b2aa]">{label}</p>
       <p className="mt-[6px] whitespace-pre text-[24px] font-medium text-white">
         {format(remaining)}
       </p>

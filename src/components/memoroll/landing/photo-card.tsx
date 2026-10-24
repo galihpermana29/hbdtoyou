@@ -33,11 +33,14 @@ export default function PhotoCard({
   photo,
   exposure,
   developing,
+  developingLabel,
   undeveloped = false,
 }: {
   photo: Photo;
   /** 0 to 1: how much this print is on the line, and so how much it says "developing…". */
   developing: MotionValue<number>;
+  /** What a print on the line says: "developing…". */
+  developingLabel: string;
   /** What the undeveloped print says about itself: "EXP 16/27". */
   exposure: string;
   undeveloped?: boolean;
@@ -85,7 +88,7 @@ export default function PhotoCard({
             fontFamily: 'var(--font-mr-label)',
             opacity: developing,
           }}>
-          developing…
+          {developingLabel}
         </motion.p>
       </div>
     </div>

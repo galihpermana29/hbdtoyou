@@ -1,5 +1,12 @@
 import type { Metadata } from 'next';
+import { cookies, headers } from 'next/headers';
 
+import { LANDING_COPY } from '@/components/memoroll/landing/copy';
+import {
+  LANGUAGE_COOKIE,
+  resolveLandingLanguage,
+} from '@/components/memoroll/landing/language';
+import { LandingLanguageProvider } from '@/components/memoroll/landing/language-provider';
 import MemorollAnnouncementStrip from '@/components/memoroll/landing/announcement-strip';
 import MemorollFaq from '@/components/memoroll/landing/faq';
 import { landingFonts } from '@/components/memoroll/landing/fonts';
@@ -13,11 +20,20 @@ import MemorollWhy from '@/components/memoroll/landing/why';
 import { memorollFonts } from '@/components/memoroll/ui/fonts';
 import NavigationBar from '@/components/ui/navbar';
 
-export const metadata: Metadata = {
-  title: 'MemoRoll | Memoify',
-  description:
-    'Give every guest a camera on their phone and collect the moments you could not be there to see.',
-};
+/** The language the visitor chose, or failing that the one their browser asks for. */
+function requestLanguage() {
+  return resolveLandingLanguage(
+    cookies().get(LANGUAGE_COOKIE)?.value,
+    headers().get('accept-language')
+  );
+}
+
+export function generateMetadata(): Metadata {
+  return {
+    title: 'MemoRoll | Memoify',
+    description: LANDING_COPY[requestLanguage()].metaDescription,
+  };
+}
 
 /**
  * The MemoRoll landing. The guest viewer lives at `/memoroll/{code}` and the
@@ -25,7 +41,9 @@ export const metadata: Metadata = {
  */
 export default function MemorollLandingPage() {
   return (
-    <div className={`${memorollFonts} ${landingFonts}`}>
+    <LandingLanguageProvider
+      initialLanguage={requestLanguage()}
+      className={`${memorollFonts} ${landingFonts}`}>
       <div className="sticky top-0 z-[100] [--site-strip:40px]">
         <MemorollAnnouncementStrip />
         <NavigationBar />
@@ -40,6 +58,6 @@ export default function MemorollLandingPage() {
         <MemorollFaq />
         <MemorollPlanCallout />
       </main>
-    </div>
+    </LandingLanguageProvider>
   );
 }

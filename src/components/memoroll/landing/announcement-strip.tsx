@@ -4,6 +4,7 @@ import Image from 'next/image';
 import Link from 'next/link';
 import { useEffect, useState } from 'react';
 
+import { useLandingCopy } from './language-provider';
 import LiveDot from './live-dot';
 
 /**
@@ -14,10 +15,11 @@ import LiveDot from './live-dot';
  * The strip carries a long line and a short one and shows one of them by the
  * screen's width. Only the line on screen flips: the other would be running
  * its timers and re-rendering its letters for nobody.
+ *
+ * Switching the page's language flips the board to the new line, the same way
+ * a re-flip does. Where the board is not flipping, under reduced motion or on
+ * the line that is not on screen, the letters simply change.
  */
-
-const LONG_TEXT = 'NEW - MEMOROLL IS NOW INCLUDED FREE WITH THE WEDDING PLAN';
-const SHORT_TEXT = 'NEW - MEMOROLL FREE WITH THE WEDDING PLAN';
 
 const GLYPHS = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789';
 const FLIP_MS = 100;
@@ -43,7 +45,11 @@ function Flap({
   const [tick, setTick] = useState(0);
 
   useEffect(() => {
-    if (cycle === 0 || target === ' ') return;
+    if (cycle === 0 || target === ' ') {
+      setCur(target);
+      setPrev(target);
+      return;
+    }
     const timers: ReturnType<typeof setTimeout>[] = [];
     const steps = 5 + (index % 5);
     let shown = target;
@@ -138,6 +144,7 @@ function FlapLine({ text, cycle }: { text: string; cycle: number }) {
 }
 
 export default function MemorollAnnouncementStrip() {
+  const copy = useLandingCopy().strip;
   const [cycle, setCycle] = useState(0);
   // Which of the two lines is on screen; unknown until the browser says.
   const [wide, setWide] = useState<boolean | null>(null);
@@ -166,10 +173,10 @@ export default function MemorollAnnouncementStrip() {
       className="group flex h-10 items-center justify-center gap-3 overflow-hidden bg-[#1b1b1b] px-4 transition-colors hover:bg-black">
       <LiveDot size={6} className="bg-[#ff3e09]" />
       <span className="hidden md:inline-flex">
-        <FlapLine text={LONG_TEXT} cycle={wide === true ? cycle : 0} />
+        <FlapLine text={copy.long} cycle={wide === true ? cycle : 0} />
       </span>
       <span className="inline-flex md:hidden">
-        <FlapLine text={SHORT_TEXT} cycle={wide === false ? cycle : 0} />
+        <FlapLine text={copy.short} cycle={wide === false ? cycle : 0} />
       </span>
       <Image
         src="/memoroll-landing/banner-arrow.svg"

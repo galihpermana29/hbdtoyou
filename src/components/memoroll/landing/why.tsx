@@ -1,80 +1,30 @@
 'use client';
 
 import { useMotionValueEvent, useScroll } from 'framer-motion';
-import React, { useRef, useState } from 'react';
+import { useRef, useState } from 'react';
 
+import { useLandingCopy } from './language-provider';
 import { PINNED_OFFSET, PINNED_STAGE } from './pinned';
 import { RevealWords } from './reveal-words';
 
+/**
+ * How each statement is set. The words are `why.slides` in `copy.tsx`, in the
+ * same order.
+ */
 type Slide = {
-  text: React.ReactNode;
-  /** The first slide is set larger than the rest. */
+  /** The first slides are set larger than the rest. */
   lead?: boolean;
   photo?: { src: string; side: 'left' | 'right' };
 };
 
-/** The accent the design sets the key phrase of a statement in. */
-function Hi({ children }: { children: React.ReactNode }) {
-  return <span className="text-[#ff3e09]">{children}</span>;
-}
-
 const SLIDES: Slide[] = [
-  {
-    lead: true,
-    text: (
-      <>
-        Why would I want this <Hi>MemoRoll</Hi>?
-      </>
-    ),
-  },
-  {
-    lead: true,
-    text: (
-      <>
-        You <Hi>can&apos;t be everywhere</Hi> at once...
-      </>
-    ),
-  },
-  {
-    text: (
-      <>
-        The <Hi>unscripted joy</Hi> happening around the room
-      </>
-    ),
-    photo: { src: '/memoroll-landing/why-photo-1.jpg', side: 'right' },
-  },
-  {
-    text: (
-      <>
-        <Hi>Your friends</Hi> are taking over the dance floor.
-      </>
-    ),
-    photo: { src: '/memoroll-landing/why-photo-2.jpg', side: 'left' },
-  },
-  {
-    text: (
-      <>
-        Your <Hi>parents are having a moment</Hi> in the corner.
-      </>
-    ),
-    photo: { src: '/memoroll-landing/why-photo-3.jpg', side: 'right' },
-  },
-  {
-    text: (
-      <>
-        You won&apos;t see all of it while it&apos;s happening.{' '}
-        <Hi>But someone will.</Hi>
-      </>
-    ),
-  },
-  {
-    text: (
-      <>
-        <Hi>MemoRoll brings those moments back</Hi> to you, captured by the
-        people who were actually there.
-      </>
-    ),
-  },
+  { lead: true },
+  { lead: true },
+  { photo: { src: '/memoroll-landing/why-photo-1.jpg', side: 'right' } },
+  { photo: { src: '/memoroll-landing/why-photo-2.jpg', side: 'left' } },
+  { photo: { src: '/memoroll-landing/why-photo-3.jpg', side: 'right' } },
+  {},
+  {},
 ];
 
 /** Scroll distance, in viewport heights, that each slide is held for. */
@@ -140,6 +90,7 @@ function PolaroidPhoto({
 export default function MemorollWhy() {
   const trackRef = useRef<HTMLDivElement>(null);
   const [active, setActive] = useState(0);
+  const copy = useLandingCopy().why;
   const { scrollYProgress } = useScroll({
     target: trackRef,
     offset: PINNED_OFFSET,
@@ -151,7 +102,7 @@ export default function MemorollWhy() {
   return (
     <section
       ref={trackRef}
-      aria-label="Why would I want this?"
+      aria-label={copy.label}
       className="relative overflow-x-clip bg-white"
       style={{
         fontFamily: 'var(--font-mr-body)',
@@ -191,7 +142,9 @@ export default function MemorollWhy() {
                           ? 'text-[28px] font-medium md:text-[48px]'
                           : 'w-full text-[28px] font-medium md:text-[48px]'
                     }`}>
-                    <RevealWords show={i === active}>{slide.text}</RevealWords>
+                    <RevealWords show={i === active}>
+                      {copy.slides[i]}
+                    </RevealWords>
                   </p>
                 </div>
               ))}
