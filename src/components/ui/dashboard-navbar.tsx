@@ -24,7 +24,7 @@ const DashboardNavbar = ({ isAdmin }: { isAdmin: boolean }) => {
         <Link
           href={'/dashboard/memoroll'}
           className="text-[#182230] font-[600] text-[16px] hover:bg-[#F9FAFB] rounded-[8px] py-[8px] px-[12px]">
-          MemoRoll
+          Memoroll
         </Link>
         {isAdmin && (
           <>

@@ -14,7 +14,7 @@ const DashboardLayout = async ({ children }: { children: React.ReactNode }) => {
         <DashboardNavbar isAdmin={isAdmin} />
       </div>
 
-      <div className="pt-[180px]">{children}</div>
+      <div className="pt-[220px]">{children}</div>
     </div>
   );
 };

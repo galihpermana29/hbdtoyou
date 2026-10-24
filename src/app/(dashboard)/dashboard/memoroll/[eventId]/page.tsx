@@ -10,7 +10,7 @@ import { getSession } from '@/store/get-set-session';
 import MemorollConsole from './memoroll-console';
 
 export const metadata: Metadata = {
-  title: 'MemoRoll console | Memoify',
+  title: 'Memoroll console | Memoify',
 };
 
 /**
@@ -37,7 +37,7 @@ export default async function MemorollConsolePage({
     return (
       <div className="mx-auto max-w-6xl px-[32px] py-[32px] 2xl:max-w-7xl">
         <h1 className="text-[24px] font-[600] leading-[32px] text-[#182230]">
-          MemoRoll console
+          Memoroll console
         </h1>
         <p className={`mt-[8px] ${note}`}>Sign in to open your roll.</p>
       </div>
@@ -56,7 +56,7 @@ export default async function MemorollConsolePage({
     return (
       <div className="mx-auto max-w-6xl px-[32px] py-[32px] 2xl:max-w-7xl">
         <h1 className="text-[24px] font-[600] leading-[32px] text-[#182230]">
-          MemoRoll console
+          Memoroll console
         </h1>
         <p role="alert" className={`mt-[8px] ${note}`}>
           This roll could not be read: {event.message}.
@@ -70,7 +70,9 @@ export default async function MemorollConsolePage({
       event={event.data}
       dashboard={dashboard.data}
       participants={participants.data ?? []}
-      moreParticipants={(participants.meta?.totalData ?? 0) > PARTICIPANTS_SHOWN}
+      moreParticipants={
+        (participants.meta?.totalData ?? 0) > PARTICIPANTS_SHOWN
+      }
       photos={photos.data ?? []}
       morePhotos={(photos.meta?.totalData ?? 0) > PHOTOS_SHOWN}
     />

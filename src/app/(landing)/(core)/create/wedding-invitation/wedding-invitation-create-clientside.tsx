@@ -528,7 +528,7 @@ export default function WeddingInvitationCreateClientside({
       {contextHolder}
 
       {isOwnChrome ? (
-        <header>
+        <header className="sticky top-0 z-[100]">
           <NavigationBar />
         </header>
       ) : null}

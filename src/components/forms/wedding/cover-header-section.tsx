@@ -142,7 +142,7 @@ export default function CoverHeaderSection({
         <div className={flowFieldParts}>
           {/* The only field of this Section a couple may leave off the
               invitation entirely, so its switch sits on the label's own line,
-              in the shape MemoRoll's is drawn in. See
+              in the shape Memoroll's is drawn in. See
               `docs/adr/0002-figma-is-literal-truth.md`. */}
           <div className="flex items-center justify-between gap-[12px]">
             <label htmlFor={backgroundTrackId} className={flowLabel}>

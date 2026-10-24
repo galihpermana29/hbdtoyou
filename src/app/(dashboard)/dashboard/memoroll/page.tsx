@@ -6,7 +6,7 @@ import { getSession } from '@/store/get-set-session';
 import MemorollListing from './memoroll-listing';
 
 export const metadata: Metadata = {
-  title: 'MemoRoll | Memoify',
+  title: 'Memoroll | Memoify',
 };
 
 /**
@@ -38,7 +38,7 @@ export default async function MemorollDashboardPage() {
     return (
       <div className="mx-auto max-w-6xl px-[32px] py-[32px] 2xl:max-w-7xl">
         <h1 className="text-[24px] font-[600] leading-[32px] text-[#182230]">
-          MemoRoll
+          Memoroll
         </h1>
         <p className={`mt-[8px] ${note}`}>
           Sign in to see the rolls you have made.
@@ -54,7 +54,7 @@ export default async function MemorollDashboardPage() {
     <div className="mx-auto flex max-w-6xl flex-col gap-[24px] px-[32px] py-[32px] 2xl:max-w-7xl">
       <div>
         <h1 className="text-[24px] font-[600] leading-[32px] text-[#182230]">
-          MemoRoll
+          Memoroll
         </h1>
         <p className={`mt-[8px] ${note}`}>
           The rolls you have made. Open one to see who joined and every shot

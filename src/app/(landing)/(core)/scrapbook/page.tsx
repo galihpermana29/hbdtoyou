@@ -72,7 +72,7 @@ const ScrapbookPage = () => {
   ];
 
   return (
-    <div className="w-full overflow-x-hidden">
+    <div className="w-full overflow-x-clip">
       <div className="sticky top-0 left-0 w-full z-40">
         <NavigationBar />
       </div>

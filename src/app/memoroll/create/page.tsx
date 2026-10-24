@@ -27,7 +27,7 @@ import { blankMemorollDraft, draftFromWedding } from './prefill';
  * a broken doorway cannot write a broken link.
  */
 export const metadata: Metadata = {
-  title: 'Create a MemoRoll | Memoify',
+  title: 'Create a Memoroll | Memoify',
   description:
     'Set up a shared disposable camera: the vibe, the name, the cover, when it opens, where it is, how many shots each guest gets, and when it develops.',
   robots: { index: false },

@@ -25,7 +25,7 @@ import MemorollGuest from './memoroll-guest';
  * says more as a wrong address.
  */
 export const metadata: Metadata = {
-  title: 'MemoRoll | Memoify',
+  title: 'Memoroll | Memoify',
   description:
     'A shared disposable camera: a roll of shots each, one collective gallery, nothing seen until the reveal.',
   robots: { index: false },

@@ -243,7 +243,9 @@ export default function WeddingListing({
           <p className="text-[16px] font-[400] leading-[24px] text-[#182230]">
             You have not made a wedding invitation yet.
           </p>
-          <Link href="/create/wedding-invitation" className={`${primary} mt-[12px] w-fit`}>
+          <Link
+            href="/create/wedding-invitation"
+            className={`${primary} mt-[12px] w-fit`}>
             Make one
           </Link>
         </div>
@@ -288,7 +290,9 @@ export default function WeddingListing({
                       {invitation.address}
                     </a>
                   ) : (
-                    <p className={`${note} truncate`} title={invitation.address}>
+                    <p
+                      className={`${note} truncate`}
+                      title={invitation.address}>
                       {invitation.address.replace('https://', '')} - opens when
                       you publish.
                     </p>
@@ -322,13 +326,13 @@ export default function WeddingListing({
                       <Link
                         href={`/dashboard/memoroll/${memoroll.id}`}
                         className={secondary}>
-                        Manage MemoRoll
+                        Manage Memoroll
                       </Link>
                     ) : (
                       <Link
                         href={`/memoroll/create?wedding_id=${invitation.weddingId}`}
                         className={secondary}>
-                        Create MemoRoll
+                        Create Memoroll
                       </Link>
                     )}
 
@@ -356,7 +360,9 @@ export default function WeddingListing({
                 )}
 
                 {answer?.kind === 'published' ? (
-                  <p role="status" className="text-[13px] leading-[18px] text-[#027A48]">
+                  <p
+                    role="status"
+                    className="text-[13px] leading-[18px] text-[#027A48]">
                     Your invitation is published. Anybody with the address can
                     read it.
                   </p>
@@ -374,8 +380,8 @@ export default function WeddingListing({
                 {answer?.kind === 'notReady' ? (
                   <div role="alert" className={alert}>
                     <p>
-                      This invitation is not ready to publish yet. It is still
-                      a draft, and nothing has been sent to your guests.
+                      This invitation is not ready to publish yet. It is still a
+                      draft, and nothing has been sent to your guests.
                     </p>
                     <ul className="mt-[6px] flex list-disc flex-col gap-[4px] pl-[20px]">
                       {answer.outstanding.map((issue, position) => (
