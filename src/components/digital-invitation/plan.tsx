@@ -15,6 +15,7 @@ const INCLUDED = [
 ];
 
 const mono = { fontFamily: 'var(--font-mr-label)' };
+const badge = { fontFamily: 'var(--font-mr-badge)' };
 
 export default function InvitationPlan() {
   return (
@@ -48,7 +49,14 @@ export default function InvitationPlan() {
           className="mx-auto w-full max-w-[460px] shrink-0 lg:mx-0 lg:w-[460px]"
           delay={100}>
           <div className="-rotate-2 rounded bg-[#fffdfa] px-6 py-8 shadow-[0_30px_30px_rgba(27,27,27,0.2)] sm:px-8 sm:py-9">
-            <div className="flex flex-col items-center gap-1.5">
+            <div className="flex justify-end">
+              <span
+                className="rounded-full bg-[#ff3e09] px-2 py-[3px] text-[10px] tracking-[1px] text-[#fffdfa]"
+                style={mono}>
+                SPECIAL LAUNCHING OFFER
+              </span>
+            </div>
+            <div className="mt-5 flex flex-col items-center gap-1.5">
               <img
                 src="/digital-invitation/logo.png"
                 alt="Memoify"
@@ -85,23 +93,30 @@ export default function InvitationPlan() {
             <p
               className="flex items-center justify-between text-[13px] text-[#1b1b1b]"
               style={mono}>
-              Memoroll camera
+              MemoRoll camera
               <span className="text-[#ff3e09]" style={mono}>
                 INCLUDED
               </span>
             </p>
             <div className="my-5 h-px bg-[#1b1b1b]" />
-            <div className="flex items-end justify-between gap-4">
+            <div className="flex items-center justify-between gap-4">
               <p
-                className="uppercase text-[12px] tracking-[1.2px] text-[#1b1b1b]"
+                className="text-[12px] tracking-[0.2px] text-[#1b1b1b]"
                 style={mono}>
-                Extra cost for Memoroll
+                TOTAL WEDDING PLAN COST
               </p>
-              <p
-                className="text-[48px] leading-[48px] text-[#ff3e09]"
-                style={{ fontFamily: 'var(--font-mr-badge)' }}>
-                Rp0
-              </p>
+              <div className="flex items-center gap-2.5">
+                <span
+                  className="text-[20px] text-[#1b1b1b] line-through"
+                  style={badge}>
+                  Rp149.000
+                </span>
+                <span
+                  className="text-[48px] leading-[48px] text-[#ff3e09]"
+                  style={badge}>
+                  Rp0
+                </span>
+              </div>
             </div>
             <p
               className="mt-5 text-[22px] text-[#4a4642] md:text-[24px]"

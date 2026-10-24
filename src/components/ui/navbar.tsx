@@ -3,6 +3,7 @@
 import { Avatar, Dropdown, MenuProps } from 'antd';
 import {
   BadgeDollarSign,
+  BookOpen,
   Camera,
   ChevronDown,
   Gift,
@@ -11,7 +12,6 @@ import {
   LogOut,
   Menu,
   Settings2,
-  Sparkles,
   X,
   Zap,
 } from 'lucide-react';
@@ -65,12 +65,6 @@ const PRIMARY_LINKS: NavItem[] = [
     mobileLabel: 'Digital scrapbook',
   },
   {
-    key: 'journal',
-    href: '/journal',
-    desktopLabel: 'Journal',
-    mobileLabel: 'Personal journal',
-  },
-  {
     key: 'digital-invitation',
     href: '/wedding-invitation',
     desktopLabel: 'Digital invitation',
@@ -105,7 +99,19 @@ const FEATURE_LINKS: NavItem[] = [
     desktopLabel: 'Inspiration',
     mobileLabel: 'Gift inspiration',
   },
+  {
+    key: 'journal',
+    href: '/journal',
+    desktopLabel: 'Journal',
+    mobileLabel: 'Personal journal',
+  },
 ];
+
+const FEATURE_ICONS = {
+  photobox: Camera,
+  inspiration: Lightbulb,
+  journal: BookOpen,
+} as const;
 
 const NavigationBar = () => {
   const [sidebar, setSidebar] = useState(false);
@@ -205,11 +211,10 @@ const NavigationBar = () => {
       <Link
         href={link.href}
         className="flex min-w-[170px] items-center gap-3 py-1">
-        {link.key === 'photobox' ? (
-          <Camera size={17} className="text-[#E34013]" />
-        ) : (
-          <Lightbulb size={17} className="text-[#E34013]" />
-        )}
+        {(() => {
+          const Icon = FEATURE_ICONS[link.key as keyof typeof FEATURE_ICONS];
+          return <Icon size={17} className="text-[#E34013]" />;
+        })()}
         <span>{link.desktopLabel}</span>
       </Link>
     ),
@@ -416,11 +421,11 @@ const NavigationBar = () => {
                       href={link.href}
                       onClick={() => setSidebar(false)}
                       className="flex items-center gap-3 rounded-lg px-3 py-2.5 text-[15px] font-semibold text-[#344054] transition-colors hover:bg-[#F9FAFB]">
-                      {link.key === 'photobox' ? (
-                        <Camera size={17} className="text-[#E34013]" />
-                      ) : (
-                        <Sparkles size={17} className="text-[#E34013]" />
-                      )}
+                      {(() => {
+                        const Icon =
+                          FEATURE_ICONS[link.key as keyof typeof FEATURE_ICONS];
+                        return <Icon size={17} className="text-[#E34013]" />;
+                      })()}
                       {link.mobileLabel}
                     </Link>
                   ))}

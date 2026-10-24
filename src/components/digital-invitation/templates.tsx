@@ -1,6 +1,6 @@
 'use client';
 
-import { useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import type { CSSProperties } from 'react';
 
 import { RevealHeading } from '@/components/memoroll/landing/reveal-words';
@@ -93,6 +93,9 @@ const TEMPLATES: Template[] = [
     height: 500,
   },
 ];
+
+/** How long a card stays open before the next one takes over. */
+const AUTOPLAY_MS = 4500;
 
 const mono = { fontFamily: 'var(--font-mr-label)' };
 
@@ -356,9 +359,39 @@ function Stack({
 
 export default function InvitationTemplates() {
   const [active, setActive] = useState(0);
+  const [paused, setPaused] = useState(false);
+  const [inView, setInView] = useState(false);
+  const sectionRef = useRef<HTMLElement>(null);
+
+  useEffect(() => {
+    const node = sectionRef.current;
+    if (!node) return;
+    const observer = new IntersectionObserver(
+      ([entry]) => setInView(entry.isIntersecting),
+      { threshold: 0.3 }
+    );
+    observer.observe(node);
+    return () => observer.disconnect();
+  }, []);
+
+  // Keyed on `active`, so a click restarts the countdown from the chosen card.
+  useEffect(() => {
+    if (paused || !inView) return;
+    if (window.matchMedia('(prefers-reduced-motion: reduce)').matches) return;
+    const timer = window.setTimeout(
+      () => setActive((current) => (current + 1) % TEMPLATES.length),
+      AUTOPLAY_MS
+    );
+    return () => window.clearTimeout(timer);
+  }, [active, paused, inView]);
 
   return (
     <section
+      ref={sectionRef}
+      onMouseEnter={() => setPaused(true)}
+      onMouseLeave={() => setPaused(false)}
+      onFocus={() => setPaused(true)}
+      onBlur={() => setPaused(false)}
       id="templates"
       aria-label="Our templates"
       className="bg-[#fffdfa] px-4 py-16 sm:px-6 md:px-10 lg:pb-[120px] lg:pt-[140px] xl:px-20">
