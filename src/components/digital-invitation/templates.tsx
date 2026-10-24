@@ -14,6 +14,8 @@ type Template = {
   /** What the caption under a collapsed card says it is. */
   shortTags: string;
   available: boolean;
+  /** Made to order: drawn in code and sold by email, not by an image. */
+  custom?: boolean;
   src: string;
   /** The tint the card takes when it is the open one. */
   accent: string;
@@ -43,17 +45,18 @@ const TEMPLATES: Template[] = [
   },
   {
     id: 'linen',
-    name: 'Linen Arch',
-    tags: 'EMBOSSED · CLASSIC',
-    shortTags: 'EMBOSSED · CLASSIC',
+    name: 'Custom Design',
+    tags: 'BESPOKE · BY REQUEST',
+    shortTags: 'BESPOKE · BY REQUEST',
     available: false,
-    src: '/digital-invitation/template-linen.jpg',
-    accent: '#86776a',
+    custom: true,
+    src: '',
+    accent: '#ff3e09',
     features: [
-      'Letterpress arch cover',
-      'Guest name greeting',
+      'Designed around your theme',
+      'Your photos, colors & fonts',
       'RSVP + schedule',
-      'Memoroll camera',
+      'MemoRoll camera',
     ],
     top: 40,
     height: 500,
@@ -112,23 +115,138 @@ const move = (properties: string): CSSProperties => ({
 const CTA_CLASS =
   'flex h-[47px] items-center justify-between rounded-lg px-5 text-[15px] font-semibold transition-[transform,background-color] duration-150 ease-out active:scale-[0.97]';
 
+const SWATCHES = ['#1B1B1B', '#FF3E09', '#7A7A3A', '#C9A55A', '#E9C9C0'];
+
+type CanvasSize = 'open' | 'closed';
+
+/** The two sizes the card is drawn at; the values move with the card. */
+const CANVAS = {
+  open: {
+    pad: 14,
+    radius: 16,
+    inner: '48px 20px 24px',
+    arch: '110px 110px 10px 10px',
+    script: 44,
+    scriptLine: 46,
+    sub: 12,
+    subLine: 18,
+  },
+  closed: {
+    pad: 10,
+    radius: 10,
+    inner: '40px 14px 20px',
+    arch: '90px 90px 8px 8px',
+    script: 36,
+    scriptLine: 38,
+    sub: 11,
+    subLine: 17,
+  },
+} as const;
+
+/** The Custom Design card: an arched keepsake with the palette it is made of. */
+function CustomCanvas({ size }: { size: CanvasSize }) {
+  const c = CANVAS[size];
+  const t = move('padding,border-radius,font-size,line-height');
+
+  return (
+    <div
+      className="flex size-full flex-col bg-[#fbf4ec]"
+      style={{ padding: c.pad, ...t }}>
+      <div
+        className="flex min-h-0 flex-1 flex-col items-center justify-between overflow-hidden border border-[#1b1b1b]/[0.18]"
+        style={{ padding: c.inner, borderRadius: c.arch, ...t }}>
+        <div className="flex w-full flex-col items-center gap-3.5">
+          <p
+            className="whitespace-nowrap text-[10px] tracking-[1.6px] text-[#8a847d]"
+            style={mono}>
+            YOUR NAMES HERE
+          </p>
+          <p
+            className="w-full text-center text-[#1b1b1b]"
+            style={{
+              fontFamily: 'var(--font-mr-script)',
+              fontSize: c.script,
+              lineHeight: `${c.scriptLine}px`,
+              ...t,
+            }}>
+            Made just
+            <br />
+            for you
+          </p>
+          <span className="h-px w-8 bg-[#1b1b1b]/25" />
+          <p
+            className="w-full text-center text-[#4a4642]"
+            style={{ fontSize: c.sub, lineHeight: `${c.subLine}px`, ...t }}>
+            Your theme, photos, colors and fonts - designed from scratch.
+          </p>
+        </div>
+        <div className="flex flex-col items-center gap-2.5">
+          <div className="flex -space-x-1.5">
+            {SWATCHES.map((color) => (
+              <span
+                key={color}
+                className="size-[22px] rounded-full border-2 border-[#fbf4ec]"
+                style={{ backgroundColor: color }}
+              />
+            ))}
+          </div>
+          <p
+            className="whitespace-nowrap text-[9px] tracking-[1.4px] text-[#8a847d]"
+            style={mono}>
+            PALETTE · TYPE · STORY
+          </p>
+        </div>
+      </div>
+    </div>
+  );
+}
+
+/** What a card shows of the invitation: its image, or the drawn custom card. */
+function Preview({
+  template,
+  size,
+  className,
+}: {
+  template: Template;
+  size: CanvasSize;
+  className?: string;
+}) {
+  if (template.custom) return <CustomCanvas size={size} />;
+
+  return (
+    <img
+      src={template.src}
+      alt={`${template.name} invitation preview`}
+      className={className}
+    />
+  );
+}
+
 function Details({ template }: { template: Template }) {
-  const { available } = template;
+  const { available, custom } = template;
 
   return (
     <div className="flex h-full min-w-0 flex-col justify-between gap-8 py-2">
       <div className="flex flex-col items-start gap-4">
         <span
           className={`inline-flex items-center gap-1.5 rounded-full px-3 py-1.5 text-[10px] tracking-[1.2px] text-[#fbf4ec] ${
-            available ? 'bg-[#ff3e09] text-[#fffdfa]' : 'bg-[#fbf4ec]/[0.08]'
+            custom
+              ? 'bg-[#fbf4ec] !text-[#1b1b1b]'
+              : available
+                ? 'bg-[#ff3e09] text-[#fffdfa]'
+                : 'bg-[#fbf4ec]/[0.08]'
           }`}
           style={mono}>
           <span
             className={`size-1.5 rounded-[3px] ${
-              available ? 'bg-[#fffdfa]' : 'bg-[#ff3e09]'
+              available && !custom ? 'bg-[#fffdfa]' : 'bg-[#ff3e09]'
             }`}
           />
-          {available ? 'AVAILABLE NOW' : 'COMING SOON'}
+          {custom
+            ? 'MADE TO ORDER'
+            : available
+              ? 'AVAILABLE NOW'
+              : 'COMING SOON'}
         </span>
         <h3 className="text-[28px] font-semibold leading-[normal] tracking-[-1px] text-[#fbf4ec]">
           {template.name}
@@ -143,9 +261,13 @@ function Details({ template }: { template: Template }) {
         {template.features.map((feature) => (
           <li
             key={feature}
-            className="flex items-center gap-2.5 border-b border-[#fbf4ec]/[0.12] pb-3 text-[14px] text-[#fbf4ec]/80">
+            className="flex items-center gap-2.5 whitespace-nowrap border-b border-[#fbf4ec]/[0.12] pb-3 text-[14px] text-[#fbf4ec]/80">
             <img
-              src="/digital-invitation/check.svg"
+              src={
+                custom
+                  ? '/digital-invitation/check-cream.svg'
+                  : '/digital-invitation/check.svg'
+              }
               alt=""
               width={14}
               height={14}
@@ -165,6 +287,20 @@ function Details({ template }: { template: Template }) {
             height={18}
           />
         </StartInvitationLink>
+      ) : custom ? (
+        <a
+          href={`mailto:memoify@memoify.live?subject=${encodeURIComponent(
+            'Custom Design request'
+          )}`}
+          className={`${CTA_CLASS} bg-[#faf3eb] text-[#1b1b1b] hover:bg-white`}>
+          Email us to request
+          <img
+            src="/digital-invitation/mail.svg"
+            alt=""
+            width={18}
+            height={18}
+          />
+        </a>
       ) : (
         <a
           href={`mailto:memoify@memoify.live?subject=${encodeURIComponent(
@@ -216,6 +352,9 @@ function Accordion({
                 height: open ? 600 : template.height,
                 backgroundColor: open ? template.accent : '#fffdfa',
                 borderRadius: open ? 24 : 16,
+                outline:
+                  open || !template.custom ? 'none' : '1px solid #e8ded3',
+                outlineOffset: -0.5,
                 ...move('top,height,background-color,border-radius'),
               }}>
               <div
@@ -228,9 +367,9 @@ function Accordion({
                   borderRadius: open ? 16 : 10,
                   ...move('left,top,width,height,border-radius'),
                 }}>
-                <img
-                  src={template.src}
-                  alt={`${template.name} invitation preview`}
+                <Preview
+                  template={template}
+                  size={open ? 'open' : 'closed'}
                   className="size-full object-cover"
                 />
               </div>
@@ -271,10 +410,16 @@ function Accordion({
               </div>
               <p
                 className={`whitespace-nowrap text-[10px] leading-[13px] tracking-[1px] ${
-                  template.available ? 'text-[#ff3e09]' : 'text-[#4a4642]'
+                  template.available || template.custom
+                    ? 'text-[#ff3e09]'
+                    : 'text-[#4a4642]'
                 }`}
                 style={mono}>
-                {template.available ? 'AVAILABLE' : 'COMING SOON'}
+                {template.custom
+                  ? 'EMAIL US ↗'
+                  : template.available
+                    ? 'AVAILABLE'
+                    : 'COMING SOON'}
               </p>
             </div>
 
@@ -322,11 +467,19 @@ function Stack({
                 ? 'shadow-[0_0_0_2px_#e34013]'
                 : 'opacity-70 hover:opacity-100'
             }`}>
-            <img
-              src={item.src}
-              alt=""
-              className="aspect-[196/320] w-full rounded-lg object-cover"
-            />
+            {item.custom ? (
+              <div className="aspect-[196/320] w-full overflow-hidden rounded-lg bg-[#fbf4ec] p-[8%]">
+                <div className="flex size-full flex-col items-center justify-center rounded-t-[999px] rounded-b-[4px] border border-[#1b1b1b]/[0.18] px-1 text-center font-[family-name:var(--font-mr-script)] text-[12px] leading-[1.1] text-[#1b1b1b] sm:text-[18px]">
+                  Made just for you
+                </div>
+              </div>
+            ) : (
+              <img
+                src={item.src}
+                alt=""
+                className="aspect-[196/320] w-full rounded-lg object-cover"
+              />
+            )}
             <span className="mt-2 line-clamp-2 block min-h-[2.4em] px-0.5 text-[11px] font-semibold leading-[1.2] text-[#1b1b1b] sm:text-[12px]">
               {item.name}
             </span>
@@ -343,11 +496,13 @@ function Stack({
         <div
           key={template.id}
           className="flex animate-template-in flex-col gap-6 motion-reduce:animate-none sm:flex-row sm:gap-8">
-          <img
-            src={template.src}
-            alt={`${template.name} invitation preview`}
-            className="mx-auto aspect-[262/544] w-full max-w-[262px] rounded-2xl object-cover sm:mx-0 sm:w-[262px] sm:shrink-0"
-          />
+          <div className="mx-auto aspect-[262/544] w-full max-w-[262px] overflow-hidden rounded-2xl sm:mx-0 sm:w-[262px] sm:shrink-0">
+            <Preview
+              template={template}
+              size="open"
+              className="size-full object-cover"
+            />
+          </div>
           <div className="min-w-0 flex-1 sm:min-h-[544px]">
             <Details template={template} />
           </div>

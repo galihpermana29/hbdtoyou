@@ -1,4 +1,4 @@
-import { Caveat, DM_Mono, Passion_One } from 'next/font/google';
+import { Caveat, DM_Mono, Passion_One, Pinyon_Script } from 'next/font/google';
 
 /**
  * The three faces the landing's hero prints and badges are written in, on top
@@ -30,4 +30,12 @@ export const badge = Passion_One({
   variable: '--font-mr-badge',
 });
 
-export const landingFonts = `${hand.variable} ${mono.variable} ${badge.variable}`;
+/** The formal script on the Custom Design invitation card. */
+export const script = Pinyon_Script({
+  subsets: ['latin'],
+  weight: ['400'],
+  display: 'swap',
+  variable: '--font-mr-script',
+});
+
+export const landingFonts = `${hand.variable} ${mono.variable} ${badge.variable} ${script.variable}`;
