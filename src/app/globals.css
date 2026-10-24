@@ -345,3 +345,167 @@
     scroll-behavior: auto !important;
   }
 }
+
+/* MemoRoll "The Idea!" - the card and the polaroid drift beside the phone. */
+@keyframes memoroll-float-card {
+  0%,
+  100% {
+    transform: translate3d(0, 0, 0) rotate(0deg);
+  }
+  50% {
+    transform: translate3d(3px, -8px, 0) rotate(-1deg);
+  }
+}
+
+@keyframes memoroll-float-polaroid {
+  0%,
+  100% {
+    transform: translate3d(0, 0, 0) rotate(0deg);
+  }
+  50% {
+    transform: translate3d(-3px, 7px, 0) rotate(1.5deg);
+  }
+}
+
+.memoroll-float-card {
+  animation: memoroll-float-card 5s ease-in-out infinite;
+}
+
+.memoroll-float-polaroid {
+  animation: memoroll-float-polaroid 6s ease-in-out -2s infinite;
+}
+
+/* The "100 guests shooting right now" dot: it blinks, with a ring spreading
+   off it, so the chip reads as live rather than as a label. The ring is a
+   layer of its own behind the dot, scaled and faded, so nothing repaints. */
+@keyframes memoroll-live {
+  0%,
+  100% {
+    opacity: 1;
+  }
+  50% {
+    opacity: 0.3;
+  }
+}
+
+@keyframes memoroll-live-ring {
+  0%,
+  100% {
+    opacity: 1;
+    transform: scale(1);
+  }
+  50% {
+    opacity: 0;
+    transform: scale(2.25);
+  }
+}
+
+.memoroll-live-dot {
+  animation: memoroll-live 1.6s ease-in-out infinite;
+}
+
+.memoroll-live-ring {
+  background: rgba(232, 225, 217, 0.55);
+  animation: memoroll-live-ring 1.6s ease-in-out infinite;
+}
+
+/* The sparks drifting off the hero's flame line: up 26px, flaring to their
+   own peak brightness on the way. */
+@keyframes memoroll-spark {
+  0% {
+    opacity: 0;
+    transform: translateY(0);
+  }
+  50% {
+    opacity: var(--spark-peak);
+  }
+  100% {
+    opacity: 0;
+    transform: translateY(-26px);
+  }
+}
+
+.memoroll-spark {
+  opacity: 0;
+  animation: memoroll-spark var(--spark-seconds) ease-out var(--spark-delay)
+    infinite;
+}
+
+/* The announcement strip's split-flap letters: the old half folds down, the
+   new half folds in under it. The arrow nudges toward the link. */
+@keyframes mr-flap-top {
+  from {
+    transform: rotateX(0deg);
+  }
+  to {
+    transform: rotateX(-90deg);
+  }
+}
+
+@keyframes mr-flap-bottom {
+  from {
+    transform: rotateX(90deg);
+  }
+  to {
+    transform: rotateX(0deg);
+  }
+}
+
+@keyframes mr-strip-arrow {
+  0%,
+  100% {
+    transform: translateX(0);
+  }
+  50% {
+    transform: translateX(4px);
+  }
+}
+
+.mr-flap-top {
+  animation: mr-flap-top 50ms ease-in forwards;
+}
+
+.mr-flap-bottom {
+  transform: rotateX(90deg);
+  animation: mr-flap-bottom 50ms ease-out 50ms forwards;
+}
+
+.mr-strip-arrow {
+  animation: mr-strip-arrow 1.6s ease-in-out infinite;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .memoroll-float-card,
+  .memoroll-float-polaroid,
+  .memoroll-live-dot,
+  .memoroll-live-ring,
+  .mr-strip-arrow {
+    animation: none;
+  }
+
+  .memoroll-spark {
+    animation: none;
+  }
+}
+
+/* MemoRoll "How it works" - the frames slide in when the tab changes. */
+@keyframes memoroll-frame-in {
+  from {
+    opacity: 0;
+    transform: translateY(12px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.memoroll-frame-in {
+  animation: memoroll-frame-in 0.45s cubic-bezier(0.22, 1, 0.36, 1) both;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .memoroll-frame-in {
+    animation: none;
+  }
+}
