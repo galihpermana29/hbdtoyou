@@ -7,8 +7,8 @@ import RollingNumber from './rolling-number';
 
 /** Who wrote each of the smaller reviews, in the order `testimonials.reviews` tells them. */
 const REVIEWERS = [
-  { name: 'Nadia R.', avatar: '/memoroll-landing/testimonial-nadia.jpg' },
-  { name: 'Marcus T.', avatar: '/memoroll-landing/testimonial-marcus.jpg' },
+  { name: 'Nadia R.', avatar: '/memoroll-landing/testimonial-nadia.webp' },
+  { name: 'Marcus T.', avatar: '/memoroll-landing/testimonial-marcus.webp' },
 ];
 
 function Stars({ size, label }: { size: 14 | 16; label: string }) {
@@ -76,7 +76,7 @@ export default function MemorollTestimonials() {
                 <img
                   loading="lazy"
                   decoding="async"
-                  src="/memoroll-landing/testimonial-elias.jpg"
+                  src="/memoroll-landing/testimonial-elias.webp"
                   alt=""
                   className="size-12 rounded-full object-cover"
                 />
@@ -96,7 +96,7 @@ export default function MemorollTestimonials() {
                 <img
                   loading="lazy"
                   decoding="async"
-                  src="/memoroll-landing/testimonial-elias.jpg"
+                  src="/memoroll-landing/testimonial-elias.webp"
                   alt={copy.featured.photoAlt}
                   className="h-[270px] w-[210px] object-cover"
                 />

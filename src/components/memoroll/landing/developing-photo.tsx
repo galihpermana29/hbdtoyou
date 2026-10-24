@@ -14,13 +14,13 @@ import { useEffect, useRef, useState } from 'react';
  * roll waits, and picks up where it left off when the print is back in view.
  */
 const PHOTOS = [
-  '/memoroll-landing/idea-photo.jpg',
-  '/memoroll-landing/arc-1.jpg',
-  '/memoroll-landing/arc-2.jpg',
-  '/memoroll-landing/arc-3.jpg',
-  '/memoroll-landing/arc-4.jpg',
-  '/memoroll-landing/arc-5.jpg',
-  '/memoroll-landing/arc-6.jpg',
+  '/memoroll-landing/idea-photo.webp',
+  '/memoroll-landing/arc-1.webp',
+  '/memoroll-landing/arc-2.webp',
+  '/memoroll-landing/arc-3.webp',
+  '/memoroll-landing/arc-4.webp',
+  '/memoroll-landing/arc-5.webp',
+  '/memoroll-landing/arc-6.webp',
 ];
 
 /** How long a photograph stays before the next one starts to develop. */
