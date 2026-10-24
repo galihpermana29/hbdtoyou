@@ -1,6 +1,8 @@
 'use client';
 
 import { useState } from 'react';
+
+import Eyebrow from './eyebrow';
 import { RevealHeading } from './reveal-words';
 
 /**
@@ -14,11 +16,11 @@ const FAQS = [
   },
   {
     q: 'How many photos can each guest take?',
-    a: 'Every guest gets their own roll with a fixed number of exposures, just like a disposable camera. The counter on screen shows how many shots they have left.',
+    a: 'Every guest gets their own Roll with a fixed number of Shots, and no retakes. The counter on screen shows how many they have left.',
   },
   {
     q: 'When do the photos get revealed?',
-    a: 'Nothing is visible while the event is happening. The roll develops after the event, so everyone sees the photos at the same moment.',
+    a: 'Guests see their own Shots as they take them. Everyone else’s stay Veiled until the Reveal, the moment the host sets, and then every guest develops the whole roll.',
   },
   {
     q: 'Who can see the gallery?',
@@ -29,8 +31,8 @@ const FAQS = [
     a: 'Yes. Once the roll has developed, the host can download every photo from the gallery.',
   },
   {
-    q: 'How much does a Memoroll cost?',
-    a: 'Memoroll is included with the Wedding Plan at no extra cost. See the plan for details.',
+    q: 'How much does a MemoRoll cost?',
+    a: 'MemoRoll is included with the Wedding Plan at no extra cost. See the plan for details.',
   },
 ];
 
@@ -47,9 +49,7 @@ export default function MemorollFaq() {
       style={{ fontFamily: 'var(--font-mr-body)' }}>
       <div className="mx-auto flex w-full max-w-[1280px] flex-col gap-10 lg:flex-row lg:gap-24">
         <div className="flex w-full shrink-0 flex-col items-start gap-6 lg:w-[420px]">
-          <span className="inline-flex items-center rounded-full border border-[#e6e6e6] bg-white px-3 py-1.5 text-[14px] font-medium capitalize tracking-[-0.28px] text-[#e34013]">
-            FAQ
-          </span>
+          <Eyebrow>FAQ</Eyebrow>
           <RevealHeading className="text-[28px] font-semibold leading-[1.2] tracking-[-0.72px] text-[#1b1b1b] md:text-[36px] md:leading-[44px]">
             Questions, developed.
           </RevealHeading>
@@ -60,6 +60,8 @@ export default function MemorollFaq() {
             <div className="flex items-center gap-3">
               <span className="flex size-10 items-center justify-center rounded-full bg-[#1b1b1b]">
                 <img
+                  loading="lazy"
+                  decoding="async"
                   src="/memoroll-landing/faq-chat.svg"
                   alt=""
                   width={18}
@@ -78,6 +80,8 @@ export default function MemorollFaq() {
               className="inline-flex max-w-full items-center gap-2 break-all rounded-full bg-[#1b1b1b] px-[18px] py-3 text-[14px] font-semibold text-white">
               {EMAIL}
               <img
+                loading="lazy"
+                decoding="async"
                 src="/memoroll-landing/faq-arrow.svg"
                 alt=""
                 width={16}
@@ -95,6 +99,7 @@ export default function MemorollFaq() {
                 <h3>
                   <button
                     type="button"
+                    id={`faq-question-${i}`}
                     aria-expanded={isOpen}
                     aria-controls={`faq-panel-${i}`}
                     onClick={() => setOpen(isOpen ? null : i)}
@@ -116,6 +121,8 @@ export default function MemorollFaq() {
                         isOpen ? 'bg-[#ff3e09]' : ''
                       }`}>
                       <img
+                        loading="lazy"
+                        decoding="async"
                         src={`/memoroll-landing/faq-${isOpen ? 'minus' : 'plus'}.svg`}
                         alt=""
                         width={18}
@@ -127,6 +134,7 @@ export default function MemorollFaq() {
                 <div
                   id={`faq-panel-${i}`}
                   role="region"
+                  aria-labelledby={`faq-question-${i}`}
                   aria-hidden={!isOpen}
                   className={`grid transition-[grid-template-rows,opacity,visibility] duration-300 ease-out motion-reduce:transition-none ${
                     isOpen

@@ -16,7 +16,7 @@ import NavigationBar from '@/components/ui/navbar';
 export const metadata: Metadata = {
   title: 'MemoRoll | Memoify',
   description:
-    'Give every guest a disposable camera and collect the moments you could not be there to see.',
+    'Give every guest a camera on their phone and collect the moments you could not be there to see.',
 };
 
 /**

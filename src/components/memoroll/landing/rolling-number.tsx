@@ -1,6 +1,7 @@
 'use client';
 
-import { useEffect, useRef, useState } from 'react';
+import { useInView, useReducedMotion } from 'framer-motion';
+import { useRef } from 'react';
 
 /** Delay between one digit starting to roll and the next, in ms. */
 const DIGIT_STAGGER_MS = 120;
@@ -51,31 +52,14 @@ export default function RollingNumber({
   className?: string;
 }) {
   const ref = useRef<HTMLSpanElement>(null);
-  const [rolled, setRolled] = useState(false);
-
-  useEffect(() => {
-    const el = ref.current;
-    if (!el) return;
-    if (window.matchMedia('(prefers-reduced-motion: reduce)').matches) {
-      setRolled(true);
-      return;
-    }
-    const observer = new IntersectionObserver(
-      ([entry]) => setRolled(entry.isIntersecting),
-      { threshold: 0.6 }
-    );
-    observer.observe(el);
-    return () => observer.disconnect();
-  }, []);
+  const inView = useInView(ref, { amount: 0.6 });
+  const rolled = useReducedMotion() || inView;
 
   let digitIndex = 0;
 
   return (
-    <span
-      ref={ref}
-      role="text"
-      aria-label={value}
-      className={`inline-flex h-12 ${className ?? ''}`}>
+    <span ref={ref} className={`inline-flex h-12 ${className ?? ''}`}>
+      <span className="sr-only">{value}</span>
       {value.split('').map((ch, i) =>
         /\d/.test(ch) ? (
           <Digit

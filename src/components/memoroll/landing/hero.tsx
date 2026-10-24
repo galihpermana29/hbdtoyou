@@ -58,15 +58,15 @@ export default function MemorollHero() {
         </h1>
 
         <p className="w-[560px] max-w-full text-center text-[16px] font-normal leading-[normal] text-[#4a4642]">
-          Give every guest a disposable camera on their phone and collect the
-          moments you couldn&apos;t be there to see.
+          Give every guest a camera on their phone and collect the moments you
+          couldn&apos;t be there to see.
         </p>
 
         <div className="flex flex-wrap items-center justify-center gap-[14px]">
           <Link
             href="/memoroll/create"
             className="flex h-12 items-center justify-center whitespace-nowrap rounded-lg bg-[#e34013] px-5 text-[16px] md:h-[60px] md:px-6 md:py-4 md:text-[18px] font-semibold leading-7 text-white shadow-[0_1px_1px_rgba(16,24,40,0.05)] transition-colors hover:bg-[#C9340E]">
-            Create your Memoroll
+            Create your MemoRoll
           </Link>
           <Link
             href="#how-it-works"

@@ -8,6 +8,7 @@ import {
   type LucideIcon,
 } from 'lucide-react';
 
+import Eyebrow from './eyebrow';
 import { RevealHeading } from './reveal-words';
 
 type Role = 'guest' | 'host';
@@ -30,19 +31,19 @@ const STEPS: Record<Role, Step[]> = {
     {
       title: 'Scan',
       heading: 'Join the roll',
-      body: 'Scan the event QR code to open your disposable camera. No app download needed.',
+      body: 'Scan the event QR code to open your camera. No app download needed.',
       icon: '/memoroll-landing/step-icon-scan.svg',
     },
     {
       title: 'Shoot',
       heading: 'Make them count',
-      body: 'Every guest gets a limited roll. No previews, no retakes. Capture what catches your eye.',
+      body: 'Every guest gets a limited Roll. No retakes. Capture what catches your eye.',
       icon: '/memoroll-landing/step-icon-shoot.svg',
     },
     {
       title: 'Reveal',
       heading: 'One roll, every angle',
-      body: 'Once the event wraps and the roll develops, everyone’s photos land in one shared gallery.',
+      body: 'When the Reveal comes, everyone’s Shots open together in one shared gallery.',
       icon: '/memoroll-landing/step-icon-reveal.svg',
     },
     {
@@ -62,7 +63,7 @@ const STEPS: Record<Role, Step[]> = {
     {
       title: 'Invite',
       heading: 'Pass the roll around',
-      body: 'Share your event QR code around the venue. Guests scan to join the roll and get their own disposable camera.',
+      body: 'Share your event QR code around the venue. Guests scan to join and get a Roll of their own.',
       icon: QrCode,
     },
     {
@@ -73,6 +74,9 @@ const STEPS: Record<Role, Step[]> = {
     },
   ],
 };
+
+/** How many frames a tab's strip holds, as the heading says it. */
+const FRAME_COUNT: Record<number, string> = { 3: 'three', 4: 'four' };
 
 /** The third frame is the one the design lights up, on either tab. */
 const LIT_FRAME = 2;
@@ -100,7 +104,15 @@ function Sprockets() {
 function StepIcon({ icon, lit }: { icon: Step['icon']; lit: boolean }) {
   if (typeof icon === 'string') {
     return (
-      <img src={icon} alt="" width={22} height={22} className="size-[22px]" />
+      <img
+        loading="lazy"
+        decoding="async"
+        src={icon}
+        alt=""
+        width={22}
+        height={22}
+        className="size-[22px]"
+      />
     );
   }
   const Icon = icon;
@@ -130,11 +142,9 @@ export default function MemorollHowItWorks() {
       <div className="mx-auto flex w-full max-w-[1280px] flex-col gap-10 lg:gap-14">
         <div className="flex flex-col items-start gap-8 md:flex-row md:items-end md:justify-between">
           <div className="flex max-w-[640px] flex-col items-start gap-5">
-            <span className="inline-flex items-center rounded-full border border-[#e6e6e6] bg-white px-3 py-1.5 text-[14px] font-medium capitalize tracking-[-0.28px] text-[#e34013]">
-              How it works
-            </span>
+            <Eyebrow>How it works</Eyebrow>
             <RevealHeading className="text-[28px] font-semibold leading-[1.2] tracking-[-0.72px] text-[#1b1b1b] md:text-[36px] md:leading-[44px]">
-              From first flash to final reveal, in four frames.
+              {`From first flash to final reveal, in ${FRAME_COUNT[steps.length]} frames.`}
             </RevealHeading>
           </div>
 

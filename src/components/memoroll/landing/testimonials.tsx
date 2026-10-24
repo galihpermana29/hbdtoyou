@@ -1,3 +1,4 @@
+import Eyebrow from './eyebrow';
 import { RevealHeading } from './reveal-words';
 import RollingNumber from './rolling-number';
 
@@ -19,7 +20,7 @@ const SMALL_REVIEWS = [
 ];
 
 const STATS = [
-  { value: '1k+', label: 'rolls developed' },
+  { value: '1,000+', label: 'rolls developed' },
   { value: '2.3k', label: 'photos revealed' },
   { value: '96%', label: 'of hosts would roll again' },
   { value: '0', label: 'apps to download' },
@@ -30,6 +31,8 @@ function Stars({ size }: { size: 14 | 16 }) {
     <div className="flex gap-[3px]" role="img" aria-label="5 out of 5 stars">
       {Array.from({ length: 5 }, (_, i) => (
         <img
+          loading="lazy"
+          decoding="async"
           key={i}
           src={`/memoroll-landing/star-${size}.svg`}
           alt=""
@@ -51,9 +54,7 @@ export default function MemorollTestimonials() {
       <div className="mx-auto flex w-full max-w-[1280px] flex-col gap-10 md:gap-14">
         <div className="flex flex-col items-start justify-between gap-6 md:flex-row md:items-end">
           <div className="flex flex-col items-start gap-5">
-            <span className="inline-flex items-center rounded-full border border-[#e6e6e6] bg-white px-3 py-1.5 text-[14px] font-medium capitalize tracking-[-0.28px] text-[#e34013]">
-              Stroies from the roll
-            </span>
+            <Eyebrow>Stories from the roll</Eyebrow>
             <RevealHeading className="text-[28px] font-semibold leading-[1.2] tracking-[-0.72px] text-[#1b1b1b] md:text-[36px] md:leading-[44px]">
               Told by the people who were there.
             </RevealHeading>
@@ -65,7 +66,7 @@ export default function MemorollTestimonials() {
             <div className="flex flex-col gap-1.5">
               <Stars size={16} />
               <p className="text-[14px] leading-5 text-[#4a4642]">
-                from all Memoroll hosts
+                from all MemoRoll hosts
               </p>
             </div>
           </div>
@@ -75,6 +76,8 @@ export default function MemorollTestimonials() {
           <figure className="flex flex-col gap-8 rounded-[28px] bg-[#ff3e09] p-8 md:flex-row md:items-center md:gap-9 md:pb-11 md:pl-[52px] md:pr-12 md:pt-12 lg:min-h-[480px] lg:w-[800px] lg:shrink-0">
             <div className="flex flex-1 flex-col items-start justify-between gap-8 lg:h-[388px]">
               <img
+                loading="lazy"
+                decoding="async"
                 src="/memoroll-landing/quote-mark.svg"
                 alt=""
                 width={44}
@@ -88,6 +91,8 @@ export default function MemorollTestimonials() {
               </blockquote>
               <figcaption className="flex items-center gap-[14px]">
                 <img
+                  loading="lazy"
+                  decoding="async"
                   src="/memoroll-landing/testimonial-elias.jpg"
                   alt=""
                   className="size-12 rounded-full object-cover"
@@ -106,6 +111,8 @@ export default function MemorollTestimonials() {
             <div className="flex shrink-0 justify-center md:w-[257px]">
               <div className="flex w-[234px] rotate-4 flex-col gap-3 bg-white px-3 pb-4 pt-3 drop-shadow-[0_16px_15px_rgba(122,31,0,0.25)]">
                 <img
+                  loading="lazy"
+                  decoding="async"
                   src="/memoroll-landing/testimonial-elias.jpg"
                   alt="Elias and Freya with their wedding guests"
                   className="h-[270px] w-[210px] object-cover"
@@ -130,6 +137,8 @@ export default function MemorollTestimonials() {
                 </blockquote>
                 <figcaption className="flex items-center gap-3">
                   <img
+                    loading="lazy"
+                    decoding="async"
                     src={r.avatar}
                     alt=""
                     className="size-10 rounded-full object-cover"

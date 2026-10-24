@@ -34,7 +34,9 @@ interface SessionContextType {
       visible: boolean;
       data: string;
     };
-    setModalState: React.Dispatch<React.SetStateAction<any>>;
+    setModalState: React.Dispatch<
+      React.SetStateAction<{ visible: boolean; data: string }>
+    >;
   };
   uploadStateLoading: {
     setUploadStateLoading: React.Dispatch<React.SetStateAction<boolean>>;
@@ -147,12 +149,17 @@ const promotionalContent: AdContent[] = [
  * rather than under `/create`, so they are named here too: somebody assembling
  * a scrapbook or writing a journal is building, and an advertisement over the
  * work interrupts it the same way it would in the Create Flow.
+ *
+ * `/memoroll` covers MemoRoll's landing and its screens beneath it: the
+ * landing introduces one product, and a modal selling another over it
+ * would talk over its own pitch.
  */
 const PRODUCT_ROUTES_WITHOUT_ADS = [
   '/create',
   '/payment',
   '/scrapbook/create',
   '/journal/create',
+  '/memoroll',
 ];
 
 function isProductRouteWithoutAds(pathname: string): boolean {
@@ -162,13 +169,18 @@ function isProductRouteWithoutAds(pathname: string): boolean {
 }
 
 /**
- * The MemoRoll demo and guest viewer draw the designer's screens edge to edge, so the site
- * chrome stays off it the same way it stays off a gift: no footer beneath the
- * walkthrough and no advertisement over it. It is not a gift, though, so it
- * does not belong in `drawsAGift` - it answers the chrome question here on
- * its own.
+ * MemoRoll's own screens - the demo, the creator and the guest viewer, all
+ * under `/memoroll/` - draw the designer's screens edge to edge, so the footer
+ * stays off them the same way it stays off a gift. They are not gifts, though,
+ * so they do not belong in `drawsAGift` - they answer the footer question here
+ * on their own.
+ *
+ * `/memoroll` itself is the product's landing page, an ordinary marketing page
+ * that ends in the site footer like any other, so it is not one of them. It
+ * still takes no advertisement: `PRODUCT_ROUTES_WITHOUT_ADS` names `/memoroll`,
+ * which covers the landing and every screen beneath it.
  */
-function isMemorollDemo(pathname: string): boolean {
+function isMemorollScreen(pathname: string): boolean {
   return pathname.startsWith('/memoroll/');
 }
 
@@ -217,9 +229,8 @@ const SessionProvider = ({
 
   const isPremium = userProfile?.type === 'premium';
   const isGift = drawsAGift(segments, contentId);
-  const isChromeFreeDemo = isMemorollDemo(pathname);
-  const isHideAds =
-    isGift || isChromeFreeDemo || isProductRouteWithoutAds(pathname);
+  const isFooterFree = isGift || isMemorollScreen(pathname);
+  const isHideAds = isFooterFree || isProductRouteWithoutAds(pathname);
 
   const PREMIUM_ADS_KEY = 'memoify_premium_ads_count';
   const PREMIUM_ADS_LIMIT = 3;
@@ -406,7 +417,7 @@ const SessionProvider = ({
           it stays off a gift. The Create Flow that builds one is ordinary
           product UI and keeps it. Arcade Claw and Board of Us sit in (gifts),
           so drawsAGift already covers them. */}
-      {!isGift && !isChromeFreeDemo && <Footer />}
+      {!isFooterFree && <Footer />}
     </SessionContext.Provider>
   );
 };

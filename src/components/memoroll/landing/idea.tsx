@@ -1,7 +1,9 @@
 import { FlipNumber } from '../ui/flip-counter';
 import DevelopingPhoto from './developing-photo';
-import StackedWordmark from './stacked-wordmark';
+import Eyebrow from './eyebrow';
+import LiveDot from './live-dot';
 import { RevealHeading } from './reveal-words';
+import StackedWordmark from './stacked-wordmark';
 
 /**
  * "The Idea!": the one-line pitch, the gallery the guests end up in, and the
@@ -11,13 +13,17 @@ import { RevealHeading } from './reveal-words';
  * where the design puts them, in the panel's own 608x460 pixels, which is why
  * they are placed by number: the card and the polaroid hang off the panel's
  * edges on purpose, and they drift (see `memoroll-float-*` in globals.css).
+ *
+ * The drift moves an outer box and the stacked drop shadows sit on the box
+ * inside it, so the shadows are drawn once and carried along. On the moving
+ * box itself they would be redrawn on every frame of the drift.
  */
 
 const RULES = [
   {
     number: '01',
-    title: 'No previews',
-    body: 'Shots stay hidden until the roll develops. The surprise is the point.',
+    title: 'No peeking',
+    body: "Everyone else's Shots stay Veiled until the Reveal. The surprise is the point.",
   },
   {
     number: '02',
@@ -27,7 +33,7 @@ const RULES = [
   {
     number: '03',
     title: 'One shared reveal',
-    body: "Every guest's roll lands in one gallery, the morning after.",
+    body: "Every guest's Roll lands in one gallery, at the Reveal you set.",
   },
 ];
 
@@ -62,6 +68,8 @@ function BackPill({ hidden = false }: { hidden?: boolean }) {
       }`}
       style={{ boxShadow: PILL_SHADOW }}>
       <img
+        loading="lazy"
+        decoding="async"
         src="/memoroll-landing/idea-arrow-left.svg"
         alt=""
         className="size-[21.544px] max-w-none"
@@ -95,10 +103,10 @@ function EndsIn() {
 
 function GalleryCard() {
   return (
-    <div
-      className="memoroll-float-card absolute left-[205.84px] top-[-25.1px] w-[337.523px]"
-      style={{ filter: CARD_SHADOW }}>
-      <div className="flex flex-col gap-[10.772px] rounded-[17.953px] bg-[#f7f5f3] py-[10.772px]">
+    <div className="memoroll-float-card absolute left-[205.84px] top-[-25.1px] w-[337.523px]">
+      <div
+        className="flex flex-col gap-[10.772px] rounded-[17.953px] bg-[#f7f5f3] py-[10.772px]"
+        style={{ filter: CARD_SHADOW }}>
         <div className="flex items-center justify-between px-[14.363px]">
           <BackPill />
           <p className="w-[223.519px] text-center text-[17.953px] font-bold leading-[1.5] tracking-[-0.1975px] text-[#232323]">
@@ -111,6 +119,8 @@ function GalleryCard() {
           <div className="absolute left-[221.72px] top-[-52.51px] flex h-[162.414px] w-[153.67px] items-center justify-center">
             <div className="-scale-y-100 rotate-[53.34deg]">
               <img
+                loading="lazy"
+                decoding="async"
                 src="/memoroll-landing/idea-trade.svg"
                 alt=""
                 className="h-[91.632px] w-[134.262px] max-w-none"
@@ -138,6 +148,8 @@ function GalleryCard() {
           </div>
 
           <img
+            loading="lazy"
+            decoding="async"
             src="/memoroll-landing/idea-union.svg"
             alt=""
             className="h-[1.796px] w-full"
@@ -157,7 +169,9 @@ function Polaroid() {
         style={{ filter: POLAROID_SHADOW }}>
         <div className="pointer-events-none absolute inset-0 overflow-hidden">
           <img
-            src="/memoroll-landing/idea-paper.png"
+            loading="lazy"
+            decoding="async"
+            src="/memoroll-landing/idea-paper.webp"
             alt=""
             className="absolute left-0 top-[-25.99%] h-[152.47%] w-[99.95%] max-w-none"
           />
@@ -178,7 +192,9 @@ function Gallery() {
       className="relative h-[460px] w-[608px] origin-top-left scale-[0.55] rounded-[28px] bg-white md:scale-[0.85] lg:scale-100">
       <div className="absolute left-[160px] top-[-9.11px] h-[469px] w-[289px] overflow-hidden">
         <img
-          src="/memoroll-landing/idea-phone.png"
+          loading="lazy"
+          decoding="async"
+          src="/memoroll-landing/idea-phone.webp"
           alt=""
           className="absolute left-[0.15%] top-[0.02%] h-[125.89%] w-[99.92%] max-w-none"
         />
@@ -188,7 +204,7 @@ function Gallery() {
       <Polaroid />
 
       <div className="absolute left-[354px] top-[365.5px] flex h-[35.5px] w-[267.3px] items-center gap-2 rounded-full bg-[#ff3e09] px-[14px] py-[10px]">
-        <span className="memoroll-live-dot size-2 shrink-0 rounded-[4px] bg-[#e8e1d9]" />
+        <LiveDot size={8} className="bg-[#e8e1d9]" />
         <p
           className="whitespace-pre text-[12px] leading-[normal] tracking-[0.5px] text-[#e8e1d9]"
           style={{ fontFamily: 'var(--font-mr-label)' }}>
@@ -211,11 +227,9 @@ export default function MemorollIdea() {
       <div className="flex w-full max-w-[1280px] flex-col gap-12 lg:gap-[72px]">
         <div className="flex flex-col gap-6 lg:flex-row lg:items-end lg:gap-20">
           <div className="flex flex-col items-start gap-5 lg:w-[800px] lg:shrink-0">
-            <span className="inline-flex items-center rounded-full border border-[#e6e6e6] bg-white px-3 py-1.5 text-[14px] font-medium capitalize leading-[normal] tracking-[-0.28px] text-[#e34013]">
-              The Idea!
-            </span>
+            <Eyebrow>The Idea!</Eyebrow>
             <RevealHeading className="text-[28px] font-semibold leading-[36px] tracking-[-0.72px] text-white md:text-[36px] md:leading-[44px]">
-              Everyone gets a camera. Nobody gets a preview. Then, the reveal.
+              Everyone gets a camera. Nobody sees the roll. Then, the Reveal.
             </RevealHeading>
           </div>
           <p className="text-[16px] font-normal leading-[26px] text-[#b9b2aa] md:text-[18px] md:leading-[29px] lg:w-[400px] lg:shrink-0">

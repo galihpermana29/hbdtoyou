@@ -1,28 +1,18 @@
-import { DM_Mono, Passion_One, Plus_Jakarta_Sans } from 'next/font/google';
+import { Plus_Jakarta_Sans } from 'next/font/google';
 import Image from 'next/image';
 import Link from 'next/link';
 
+import { badge as wordmark, mono as label } from './brand-fonts';
 import ElasticWordmark from './elastic-wordmark';
 
 /**
- * The site footer. Its three faces are loaded here and applied on the footer's
- * own element, so the rest of the product keeps the typeface it already has.
+ * The site footer. Its faces are applied on the footer's own element, so the
+ * rest of the product keeps the typeface it already has. The label and
+ * wordmark faces come from `brand-fonts.ts`, shared with the MemoRoll landing.
  */
 const body = Plus_Jakarta_Sans({
   subsets: ['latin'],
   weight: ['400', '600'],
-  display: 'swap',
-});
-
-const label = DM_Mono({
-  subsets: ['latin'],
-  weight: ['400'],
-  display: 'swap',
-});
-
-const wordmark = Passion_One({
-  subsets: ['latin'],
-  weight: ['400'],
   display: 'swap',
 });
 
@@ -71,7 +61,7 @@ export function Footer() {
         <div className="flex flex-col gap-12 lg:flex-row lg:justify-between">
           <div className="flex flex-col items-start justify-between gap-8 lg:w-[420px]">
             <p className="text-[24px] font-semibold leading-[1.25] tracking-[-0.8px] md:text-[28px] md:leading-[35px]">
-              Add personal touches and let your memories feels YOU!
+              Add personal touches and let your memories feel like YOU!
             </p>
             <Link
               href="/payment?type=premium"

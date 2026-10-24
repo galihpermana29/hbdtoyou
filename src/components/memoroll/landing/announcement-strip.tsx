@@ -4,10 +4,16 @@ import Image from 'next/image';
 import Link from 'next/link';
 import { useEffect, useState } from 'react';
 
+import LiveDot from './live-dot';
+
 /**
- * The dark strip above the navigation: Memoroll now ships with the wedding
+ * The dark strip above the navigation: MemoRoll now ships with the wedding
  * plan. The line is a split-flap board - every letter flips through a few
  * random glyphs before it lands - and it re-flips every few seconds.
+ *
+ * The strip carries a long line and a short one and shows one of them by the
+ * screen's width. Only the line on screen flips: the other would be running
+ * its timers and re-rendering its letters for nobody.
  */
 
 const LONG_TEXT = 'NEW - MEMOROLL IS NOW INCLUDED FREE WITH THE WEDDING PLAN';
@@ -73,7 +79,12 @@ function Flap({
       <Half pos="bottom" char={animating ? prev : cur} />
       {animating && (
         <>
-          <Half key={`t${tick}`} pos="top" char={prev} className="mr-flap-top" />
+          <Half
+            key={`t${tick}`}
+            pos="top"
+            char={prev}
+            className="mr-flap-top"
+          />
           <Half
             key={`b${tick}`}
             pos="bottom"
@@ -116,10 +127,9 @@ function Half({
 function FlapLine({ text, cycle }: { text: string; cycle: number }) {
   return (
     <span
-      role="text"
-      aria-label={text}
       className="inline-flex gap-[0.5px] text-[10px] leading-[20px] md:gap-[1.2px] md:text-[11px] text-[#fbf4ec]"
       style={{ fontFamily: 'var(--font-mr-label)' }}>
+      <span className="sr-only">{text}</span>
       {text.split('').map((ch, i) => (
         <Flap key={i} target={ch} index={i} cycle={cycle} />
       ))}
@@ -129,6 +139,16 @@ function FlapLine({ text, cycle }: { text: string; cycle: number }) {
 
 export default function MemorollAnnouncementStrip() {
   const [cycle, setCycle] = useState(0);
+  // Which of the two lines is on screen; unknown until the browser says.
+  const [wide, setWide] = useState<boolean | null>(null);
+
+  useEffect(() => {
+    const query = window.matchMedia('(min-width: 768px)');
+    const update = () => setWide(query.matches);
+    update();
+    query.addEventListener('change', update);
+    return () => query.removeEventListener('change', update);
+  }, []);
 
   useEffect(() => {
     if (window.matchMedia('(prefers-reduced-motion: reduce)').matches) return;
@@ -144,12 +164,12 @@ export default function MemorollAnnouncementStrip() {
     <Link
       href="/wedding-invitation"
       className="group flex h-10 items-center justify-center gap-3 overflow-hidden bg-[#1b1b1b] px-4 transition-colors hover:bg-black">
-      <span className="memoroll-live-dot size-[6px] shrink-0 rounded-[3px] bg-[#ff3e09]" />
+      <LiveDot size={6} className="bg-[#ff3e09]" />
       <span className="hidden md:inline-flex">
-        <FlapLine text={LONG_TEXT} cycle={cycle} />
+        <FlapLine text={LONG_TEXT} cycle={wide === true ? cycle : 0} />
       </span>
       <span className="inline-flex md:hidden">
-        <FlapLine text={SHORT_TEXT} cycle={cycle} />
+        <FlapLine text={SHORT_TEXT} cycle={wide === false ? cycle : 0} />
       </span>
       <Image
         src="/memoroll-landing/banner-arrow.svg"

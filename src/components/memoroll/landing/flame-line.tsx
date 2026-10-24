@@ -18,6 +18,11 @@ import { motion, type MotionValue } from 'framer-motion';
  * is the strip's tilt in degrees. Both come from the carousel's own clock, so
  * the line lights up exactly when a print is there rather than on a timer of
  * its own that could drift out of step with it.
+ *
+ * The sparks are a CSS animation (`memoroll-spark` in globals.css), moving
+ * only transform and opacity, so they run off the main thread the carousel
+ * is already busy on. `running` stops them with the carousel when it is out
+ * of view.
  */
 const FLAME = '255, 62, 9';
 
@@ -56,10 +61,12 @@ export default function FlameLine({
   height,
   crossing,
   sway,
+  running,
 }: {
   height: number;
   crossing: MotionValue<number>;
   sway: MotionValue<number>;
+  running: boolean;
 }) {
   return (
     <div className="absolute top-0" style={{ height }}>
@@ -77,22 +84,20 @@ export default function FlameLine({
         }}
       />
       {SPARKS.map((spark, index) => (
-        <motion.span
+        <span
           key={index}
-          className="absolute size-[3px] rounded-[1.5px] bg-[#ffd9cc]"
-          style={{
-            left: spark.dx,
-            top: spark.y,
-            boxShadow: `0 0 6px 0 rgba(${FLAME}, 0.7)`,
-          }}
-          initial={{ opacity: 0, y: 0 }}
-          animate={{ opacity: [0, spark.peak, 0], y: [0, -26] }}
-          transition={{
-            duration: spark.seconds,
-            delay: index * 0.37,
-            repeat: Infinity,
-            ease: 'easeOut',
-          }}
+          className="memoroll-spark absolute size-[3px] rounded-[1.5px] bg-[#ffd9cc]"
+          style={
+            {
+              left: spark.dx,
+              top: spark.y,
+              boxShadow: `0 0 6px 0 rgba(${FLAME}, 0.7)`,
+              animationPlayState: running ? 'running' : 'paused',
+              '--spark-peak': spark.peak,
+              '--spark-seconds': `${spark.seconds}s`,
+              '--spark-delay': `${index * 0.37}s`,
+            } as React.CSSProperties
+          }
         />
       ))}
     </div>

@@ -3,11 +3,13 @@
 import {
   animate,
   motion,
+  useInView,
   useMotionValue,
+  useReducedMotion,
   useTransform,
   type MotionValue,
 } from 'framer-motion';
-import { useEffect, type ReactNode } from 'react';
+import { useEffect, useRef, type ReactNode } from 'react';
 
 import FlameLine from './flame-line';
 import PhotoCard, { PRINT_HEIGHT, PRINT_WIDTH, type Photo } from './photo-card';
@@ -37,6 +39,10 @@ import PhotoCard, { PRINT_HEIGHT, PRINT_WIDTH, type Photo } from './photo-card';
  * The frame is laid out at the design's 1440px width and scaled down below it
  * rather than re-flowed, because an arc has no meaningful reflow: on a phone
  * it is the same picture, smaller.
+ *
+ * Every frame of the travel is worked out on the main thread, for 26 prints,
+ * so it only runs while the arc is on screen: scrolled past, it waits where
+ * it stopped. Under reduced motion it never starts, and the arc is a still.
  */
 
 const FRAME = { width: 1440, height: 970 };
@@ -77,9 +83,15 @@ const FADE = [
 /**
  * A mask only paints inside its own box, and the prints reach well outside the
  * frame, so the masked layer is drawn on a box bigger than the frame by this
- * much on each side.
+ * much on each side. A print still above the frame's foot reaches under 400px
+ * past its sides, which a screen wider than the frame shows.
+ *
+ * The box stops just right of the line, where the fade has already cleared:
+ * nothing of the undeveloped copy shows past there, and every pixel of the
+ * box is a pixel the browser has to keep as a layer.
  */
-const MASK_ROOM = 800;
+const MASK_ROOM = 480;
+const MASK_RIGHT = LINE_X + FADE[FADE.length - 1][0];
 const MASK_STOPS = FADE.map(
   ([offset, alpha]) =>
     `rgba(0, 0, 0, ${alpha}) ${MASK_ROOM + LINE_X + offset}px`
@@ -177,6 +189,9 @@ function Print({
 }
 
 export default function HeroCarousel({ children }: { children?: ReactNode }) {
+  const ref = useRef<HTMLDivElement>(null);
+  const inView = useInView(ref);
+  const reduceMotion = useReducedMotion();
   const phase = useMotionValue(0);
   const prints = Array.from({ length: COUNT }, (_, index) => index);
 
@@ -200,16 +215,21 @@ export default function HeroCarousel({ children }: { children?: ReactNode }) {
   );
 
   useEffect(() => {
-    const loop = animate(phase, COUNT, {
+    if (reduceMotion || !inView) return;
+
+    // Carries on from wherever the arc stopped, one full turn per loop.
+    const start = phase.get() % COUNT;
+    const loop = animate(phase, [start, start + COUNT], {
       duration: COUNT * PLACE_SECONDS,
       ease: 'linear',
       repeat: Infinity,
     });
     return () => loop.stop();
-  }, [phase]);
+  }, [phase, inView, reduceMotion]);
 
   return (
     <div
+      ref={ref}
       aria-hidden="true"
       className="absolute left-1/2 top-0 origin-top -translate-x-1/2 scale-[0.45] sm:scale-[0.7] lg:scale-100"
       style={{ width: FRAME.width, height: FRAME.height }}>
@@ -223,7 +243,7 @@ export default function HeroCarousel({ children }: { children?: ReactNode }) {
         style={{
           left: -MASK_ROOM,
           top: -MASK_ROOM,
-          width: FRAME.width + 2 * MASK_ROOM,
+          width: MASK_ROOM + MASK_RIGHT,
           height: FRAME.height + 2 * MASK_ROOM,
           maskImage: `linear-gradient(90deg, ${MASK_STOPS})`,
           WebkitMaskImage: `linear-gradient(90deg, ${MASK_STOPS})`,
@@ -235,7 +255,12 @@ export default function HeroCarousel({ children }: { children?: ReactNode }) {
         </div>
       </div>
       <div className="absolute" style={{ left: LINE_X, top: LINE_TOP }}>
-        <FlameLine height={LINE_HEIGHT} crossing={crossing} sway={sway} />
+        <FlameLine
+          height={LINE_HEIGHT}
+          crossing={crossing}
+          sway={sway}
+          running={inView}
+        />
       </div>
       {children}
     </div>

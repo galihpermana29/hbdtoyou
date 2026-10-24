@@ -1,6 +1,7 @@
 'use client';
 
-import React, { useEffect, useRef, useState } from 'react';
+import { useInView } from 'framer-motion';
+import React, { useRef } from 'react';
 
 /** Delay between one word starting to rise and the next, in ms. */
 const WORD_STAGGER_MS = 45;
@@ -70,18 +71,7 @@ export function RevealHeading({
   className?: string;
 }) {
   const ref = useRef<HTMLHeadingElement>(null);
-  const [show, setShow] = useState(false);
-
-  useEffect(() => {
-    const el = ref.current;
-    if (!el) return;
-    const observer = new IntersectionObserver(
-      ([entry]) => setShow(entry.isIntersecting),
-      { rootMargin: '0px 0px -15% 0px' }
-    );
-    observer.observe(el);
-    return () => observer.disconnect();
-  }, []);
+  const show = useInView(ref, { margin: '0px 0px -15% 0px' });
 
   return (
     <h2 ref={ref} className={className}>

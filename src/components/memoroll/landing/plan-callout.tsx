@@ -1,6 +1,8 @@
 'use client';
 
-import { useEffect, useRef, useState } from 'react';
+import { useInView, useReducedMotion } from 'framer-motion';
+import Link from 'next/link';
+import { useRef } from 'react';
 
 import { RevealHeading } from './reveal-words';
 
@@ -23,22 +25,8 @@ const pop = (show: boolean, order: number): React.CSSProperties => ({
 /** "Included in the Wedding Plan" - the closing call-out above the footer. */
 export default function MemorollPlanCallout() {
   const clusterRef = useRef<HTMLDivElement>(null);
-  const [show, setShow] = useState(false);
-
-  useEffect(() => {
-    const el = clusterRef.current;
-    if (!el) return;
-    if (window.matchMedia('(prefers-reduced-motion: reduce)').matches) {
-      setShow(true);
-      return;
-    }
-    const observer = new IntersectionObserver(
-      ([entry]) => setShow(entry.isIntersecting),
-      { threshold: 0.3 }
-    );
-    observer.observe(el);
-    return () => observer.disconnect();
-  }, []);
+  const inView = useInView(clusterRef, { amount: 0.3 });
+  const show = useReducedMotion() || inView;
 
   return (
     <section
@@ -47,6 +35,8 @@ export default function MemorollPlanCallout() {
       style={{ fontFamily: 'var(--font-mr-body)' }}>
       <div className="relative mx-auto flex w-full max-w-[1280px] flex-col gap-10 overflow-hidden rounded-2xl p-6 md:p-10 lg:block lg:h-[460px] lg:p-0">
         <img
+          loading="lazy"
+          decoding="async"
           src="/memoroll-landing/callout-bg.jpg"
           alt=""
           className="pointer-events-none absolute inset-0 size-full object-cover"
@@ -57,19 +47,19 @@ export default function MemorollPlanCallout() {
             Included in the Wedding Plan
           </span>
           <RevealHeading className="text-[28px] font-semibold leading-[1.2] tracking-[-0.72px] text-white md:text-[36px] md:leading-[44px]">
-            Memoroll is on the house with your Wedding Plan.
+            MemoRoll is on the house with your Wedding Plan.
           </RevealHeading>
           <p className="max-w-[520px] text-[18px] leading-[30px] text-[#ffe9e0]">
             No add-on, no extra checkout. Every guest gets a camera and the
-            whole roll develops the morning after - all included when you book
-            the Wedding Plan.
+            whole roll opens together at the Reveal you choose - all included
+            when you book the Wedding Plan.
           </p>
           <div className="flex flex-wrap items-center gap-4 pt-2">
-            <a
+            <Link
               href="/create/wedding-invitation"
               className="flex h-12 items-center justify-center rounded-lg bg-white px-5 text-[16px] md:h-[60px] md:px-6 md:text-[18px] font-semibold text-[#e34013] shadow-[0_1px_1px_rgba(16,24,40,0.05)]">
               Get the Wedding Plan
-            </a>
+            </Link>
             <a
               href="#plan-details"
               className="text-[16px] font-semibold text-white">
@@ -89,6 +79,8 @@ export default function MemorollPlanCallout() {
               className="absolute left-[275.09px] top-0 flex h-[339.7px] w-[278.3px] items-center justify-center">
               <div className="rotate-[11.18deg] bg-white px-3 pb-10 pt-3 drop-shadow-[0_16px_16px_rgba(122,31,0,0.25)]">
                 <img
+                  loading="lazy"
+                  decoding="async"
                   src="/memoroll-landing/testimonial-elias.jpg"
                   alt=""
                   className="h-[250px] w-[200px] object-cover"
@@ -106,6 +98,8 @@ export default function MemorollPlanCallout() {
                     Memoify · Wedding Plan
                   </p>
                   <img
+                    loading="lazy"
+                    decoding="async"
                     src="/memoroll-landing/callout-heart.svg"
                     alt=""
                     width={16}
@@ -119,6 +113,8 @@ export default function MemorollPlanCallout() {
                 <div className="flex h-[43px] items-center gap-3">
                   <span className="flex size-6 shrink-0 items-center justify-center rounded-full bg-[#1b1b1b]">
                     <img
+                      loading="lazy"
+                      decoding="async"
                       src="/memoroll-landing/callout-check.svg"
                       alt=""
                       width={13}
@@ -137,6 +133,8 @@ export default function MemorollPlanCallout() {
                 <div className="flex items-center gap-3 rounded-xl bg-[#ffede5] p-[14px]">
                   <span className="flex size-6 shrink-0 items-center justify-center rounded-full bg-[#ff3e09]">
                     <img
+                      loading="lazy"
+                      decoding="async"
                       src="/memoroll-landing/callout-camera.svg"
                       alt=""
                       width={13}
@@ -145,7 +143,7 @@ export default function MemorollPlanCallout() {
                   </span>
                   <div className="flex flex-1 flex-col gap-0.5">
                     <p className="text-[16px] font-semibold leading-6 text-[#1b1b1b]">
-                      Memoroll
+                      MemoRoll
                     </p>
                     <p className="text-[14px] leading-5 text-[#4a4642]">
                       A camera for every guest
@@ -159,7 +157,7 @@ export default function MemorollPlanCallout() {
                 <div className="border-t border-[#e8ded3]" />
                 <div className="flex items-center justify-between">
                   <p className="text-[14px] font-medium leading-[21px] text-[#4a4642]">
-                    Extra cost for Memoroll
+                    Extra cost for MemoRoll
                   </p>
                   <p className="text-[24px] font-semibold leading-9 text-[#ff3e09]">
                     Rp0

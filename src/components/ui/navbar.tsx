@@ -71,8 +71,8 @@ const PRIMARY_LINKS: NavItem[] = [
   {
     key: 'memoroll',
     href: '/memoroll',
-    desktopLabel: 'Memoroll',
-    mobileLabel: 'Memoroll',
+    desktopLabel: 'MemoRoll',
+    mobileLabel: 'MemoRoll',
     badge: 'NEW!',
   },
 ];

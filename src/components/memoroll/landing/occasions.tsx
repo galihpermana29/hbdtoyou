@@ -1,6 +1,17 @@
 'use client';
 
-import { useEffect, useRef, useState } from 'react';
+import {
+  motion,
+  useMotionValueEvent,
+  useReducedMotion,
+  useScroll,
+  useTransform,
+  type MotionValue,
+} from 'framer-motion';
+import { useRef, useState } from 'react';
+
+import Eyebrow from './eyebrow';
+import { PINNED_OFFSET, PINNED_STAGE } from './pinned';
 import { RevealHeading } from './reveal-words';
 
 const OCCASIONS = [
@@ -28,20 +39,37 @@ const PRINT_SHADOW =
  * The scroll window, as a fraction of the pinned scroll, in which each later
  * occasion rises into place. The first is there from the start.
  */
-const WINDOWS = [
+const WINDOWS: [number, number][] = [
   [0.05, 0.5],
   [0.5, 0.95],
 ];
 
 /**
  * A card and its print rise from below the screen, tilted, and settle flat as
- * `--t{n}` (0 -> 1, set from the scroll position) reaches 1.
+ * the scroll crosses the occasion's window.
+ *
+ * The transform is written straight onto each moving element. Written as a
+ * CSS variable on the section instead, every scroll frame would restyle the
+ * whole collage beneath it, which is what made this section drop frames.
  */
-const rise = (n: 1 | 2): React.CSSProperties => ({
-  transform: `translateY(calc((1 - var(--t${n})) * 80vh)) rotate(calc((1 - var(--t${n})) * -8deg))`,
-  opacity: `min(1, calc(var(--t${n}) * 4))`,
-  willChange: 'transform, opacity',
-});
+function useRise(
+  progress: MotionValue<number>,
+  [from, to]: [number, number],
+  reduceMotion: boolean
+) {
+  // How far through its window the occasion is, eased out: 0 -> 1.
+  const t = useTransform(progress, (p) => {
+    if (reduceMotion) return 1;
+    const linear = Math.min(1, Math.max(0, (p - from) / (to - from)));
+    return 1 - (1 - linear) ** 3;
+  });
+  const transform = useTransform(
+    t,
+    (v) => `translateY(${(1 - v) * 80}vh) rotate(${(1 - v) * -8}deg)`
+  );
+  const opacity = useTransform(t, (v) => Math.min(1, v * 4));
+  return { transform, opacity, willChange: 'transform, opacity' };
+}
 
 function Print({
   photo,
@@ -57,11 +85,15 @@ function Print({
   return (
     <div className={`relative ${PRINT_SHADOW} ${className ?? ''}`}>
       <img
-        src="/memoroll-landing/why-paper.png"
+        loading="lazy"
+        decoding="async"
+        src="/memoroll-landing/why-paper.webp"
         alt=""
         className={`absolute object-cover ${paperClassName}`}
       />
       <img
+        loading="lazy"
+        decoding="async"
         src={photo}
         alt=""
         className={`absolute object-cover ${photoClassName}`}
@@ -78,40 +110,24 @@ function Print({
  */
 export default function MemorollOccasions() {
   const trackRef = useRef<HTMLDivElement>(null);
-  const [active, setActive] = useState(0);
+  const reduceMotion = useReducedMotion() ?? false;
+  const { scrollYProgress } = useScroll({
+    target: trackRef,
+    offset: PINNED_OFFSET,
+  });
+  const rises = [
+    useRise(scrollYProgress, WINDOWS[0], reduceMotion),
+    useRise(scrollYProgress, WINDOWS[1], reduceMotion),
+  ];
 
-  useEffect(() => {
-    const track = trackRef.current;
-    if (!track) return;
-
-    const reduceMotion = window.matchMedia(
-      '(prefers-reduced-motion: reduce)'
-    ).matches;
-
-    const update = () => {
-      const { top, height } = track.getBoundingClientRect();
-      const scrollable = height - window.innerHeight;
-      const progress =
-        scrollable > 0 ? Math.min(1, Math.max(0, -top / scrollable)) : 0;
-      let shown = 0;
-      WINDOWS.forEach(([from, to], i) => {
-        const t = reduceMotion
-          ? 1
-          : Math.min(1, Math.max(0, (progress - from) / (to - from)));
-        track.style.setProperty(`--t${i + 1}`, String(1 - (1 - t) ** 3));
-        if (t > 0) shown = i + 1;
-      });
-      setActive(shown);
-    };
-
-    update();
-    window.addEventListener('scroll', update, { passive: true });
-    window.addEventListener('resize', update);
-    return () => {
-      window.removeEventListener('scroll', update);
-      window.removeEventListener('resize', update);
-    };
-  }, []);
+  // The occasions that have started to rise, for the cards' pointer events and
+  // what a screen reader is told. It only changes as a window is crossed, so
+  // scrolling within one renders nothing.
+  const [risen, setRisen] = useState(0);
+  useMotionValueEvent(scrollYProgress, 'change', (p) =>
+    setRisen(WINDOWS.filter(([from]) => p > from).length)
+  );
+  const active = reduceMotion ? WINDOWS.length : risen;
 
   return (
     <section
@@ -120,14 +136,14 @@ export default function MemorollOccasions() {
       style={{ fontFamily: 'var(--font-mr-body)' }}>
       <div
         ref={trackRef}
-        className="relative [--t1:0] [--t2:0]"
+        className="relative"
         style={{ height: `${(1 + OCCASIONS.length * VH_PER_STEP) * 100}vh` }}>
-        <div className="sticky top-0 flex h-screen flex-col items-center justify-center px-4 py-4 md:px-10 md:py-8">
+        <div
+          className="sticky flex flex-col items-center justify-center px-4 py-4 md:px-10 md:py-8"
+          style={PINNED_STAGE}>
           <div className="flex w-full max-w-[1280px] flex-col items-center gap-5 sm:gap-8 lg:gap-12">
             <div className="flex flex-col items-center gap-3">
-              <span className="inline-flex items-center rounded-full border border-[#e6e6e6] px-3 py-1.5 text-[14px] font-medium capitalize tracking-[-0.28px] text-[#e34013]">
-                For any Occasions
-              </span>
+              <Eyebrow>For any Occasions</Eyebrow>
               <RevealHeading className="text-center text-[28px] font-semibold leading-[1.2] tracking-[-0.72px] text-[#1b1b1b] md:text-[36px] md:leading-[44px]">
                 Made for moments worth remembering
               </RevealHeading>
@@ -138,10 +154,10 @@ export default function MemorollOccasions() {
                   single card at a time and fits a phone screen. */}
               <div className="grid w-full gap-5 lg:flex lg:w-[580px] lg:shrink-0 lg:flex-col">
                 {OCCASIONS.map((o, i) => (
-                  <div
+                  <motion.div
                     key={o.title}
                     aria-hidden={i > active}
-                    style={i > 0 ? rise(i as 1 | 2) : undefined}
+                    style={i > 0 ? rises[i - 1] : undefined}
                     className={`col-start-1 row-start-1 rounded-[20px] bg-[#fff6f5] p-3 shadow-[0_0_0_1px_#f0f0f0,0_4px_8px_-5px_rgba(0,0,0,0.14)] md:p-5 ${
                       i > 0 && i > active ? 'pointer-events-none' : ''
                     }`}>
@@ -149,7 +165,7 @@ export default function MemorollOccasions() {
                       <p className="text-[24px] text-[#ff3e09]">{o.title}</p>
                       <p className="text-[16px] text-black/60">{o.body}</p>
                     </div>
-                  </div>
+                  </motion.div>
                 ))}
               </div>
 
@@ -169,7 +185,9 @@ export default function MemorollOccasions() {
                     </div>
                     <div className="absolute left-0 top-0 flex h-[162px] w-[149px] items-center justify-center">
                       <img
-                        src="/memoroll-landing/occasions-cat.png"
+                        loading="lazy"
+                        decoding="async"
+                        src="/memoroll-landing/occasions-cat.webp"
                         alt=""
                         className="h-[139.3px] w-[122.4px] -rotate-[12.25deg] object-cover"
                       />
@@ -177,8 +195,8 @@ export default function MemorollOccasions() {
                   </div>
 
                   {/* Weddings */}
-                  <div
-                    style={rise(1)}
+                  <motion.div
+                    style={rises[0]}
                     className="absolute left-0 top-[212.5px] h-[311.7px] w-[527px]">
                     <Print
                       photo="/memoroll-landing/occasions-wedding.jpg"
@@ -188,38 +206,46 @@ export default function MemorollOccasions() {
                     />
                     <div className="absolute left-[416.4px] top-[-31.6px] flex h-[117px] w-[172.6px] items-center justify-center">
                       <img
-                        src="/memoroll-landing/occasions-swans.png"
+                        loading="lazy"
+                        decoding="async"
+                        src="/memoroll-landing/occasions-swans.webp"
                         alt=""
                         className="h-[63.2px] w-[160.7px] -rotate-[21.37deg] object-cover"
                       />
                     </div>
-                  </div>
+                  </motion.div>
 
                   {/* Friends & Gatherings */}
-                  <div
-                    style={rise(2)}
+                  <motion.div
+                    style={rises[1]}
                     className="absolute left-[69.7px] top-[352px] flex h-[332px] w-[541.7px] items-center justify-center">
                     <div
                       className={`relative h-[324.9px] w-[537.5px] rotate-[0.75deg] ${PRINT_SHADOW}`}>
                       <img
-                        src="/memoroll-landing/why-paper.png"
+                        loading="lazy"
+                        decoding="async"
+                        src="/memoroll-landing/why-paper.webp"
                         alt=""
                         className="absolute left-[74.7px] top-[6.2px] h-[311.7px] w-[458.3px] object-cover"
                       />
                       <img
+                        loading="lazy"
+                        decoding="async"
                         src="/memoroll-landing/occasions-gathering.jpg"
                         alt=""
                         className="absolute left-[83.6px] top-[15.1px] h-[294px] w-[440.7px] object-cover"
                       />
                       <div className="absolute left-[3px] top-[176.7px] flex h-[134.7px] w-[154.4px] items-center justify-center">
                         <img
-                          src="/memoroll-landing/occasions-disco.png"
+                          loading="lazy"
+                          decoding="async"
+                          src="/memoroll-landing/occasions-disco.webp"
                           alt=""
                           className="h-[132.7px] w-[152.7px] -rotate-[0.75deg] object-cover"
                         />
                       </div>
                     </div>
-                  </div>
+                  </motion.div>
                 </div>
               </div>
             </div>

@@ -1,7 +1,9 @@
 'use client';
 
-import React, { useEffect, useRef, useState } from 'react';
+import { useMotionValueEvent, useScroll } from 'framer-motion';
+import React, { useRef, useState } from 'react';
 
+import { PINNED_OFFSET, PINNED_STAGE } from './pinned';
 import { RevealWords } from './reveal-words';
 
 type Slide = {
@@ -21,7 +23,7 @@ const SLIDES: Slide[] = [
     lead: true,
     text: (
       <>
-        Why would I want this <Hi>Memoroll</Hi>?
+        Why would I want this <Hi>MemoRoll</Hi>?
       </>
     ),
   },
@@ -68,7 +70,7 @@ const SLIDES: Slide[] = [
   {
     text: (
       <>
-        <Hi>Memoroll brings those moments back</Hi> to you, captured by the
+        <Hi>MemoRoll brings those moments back</Hi> to you, captured by the
         people who were actually there.
       </>
     ),
@@ -103,16 +105,22 @@ function PolaroidPhoto({
       className="flex w-full max-w-[531px] shrink-0 items-center justify-center motion-reduce:!transform-none motion-reduce:!transition-none lg:w-[531px]">
       <div className="relative aspect-[519/353] w-[97.7%] rotate-[2.09deg] shadow-[0_0.6px_0.6px_rgba(255,255,255,0.22),0_2.3px_2.3px_rgba(255,255,255,0.19),0_10px_10px_rgba(255,255,255,0.08)]">
         <img
-          src="/memoroll-landing/why-paper.png"
+          loading="lazy"
+          decoding="async"
+          src="/memoroll-landing/why-paper.webp"
           alt=""
           className="absolute inset-0 size-full object-cover"
         />
         <img
+          loading="lazy"
+          decoding="async"
           src={src}
           alt=""
           className="absolute left-[1.93%] top-[2.83%] h-[94.3%] w-[96.14%] object-cover"
         />
         <img
+          loading="lazy"
+          decoding="async"
           src="/memoroll-landing/why-clip.png"
           alt=""
           width={76}
@@ -125,36 +133,20 @@ function PolaroidPhoto({
 }
 
 /**
- * "Why would I want this?" - six statements that take the section's one slot in
+ * "Why would I want this?" - seven statements that take the section's one slot in
  * turn. The section is pinned while the page scrolls through it: scrolling down
  * moves to the next statement, scrolling up moves back to the previous one.
  */
 export default function MemorollWhy() {
   const trackRef = useRef<HTMLDivElement>(null);
   const [active, setActive] = useState(0);
-
-  useEffect(() => {
-    const track = trackRef.current;
-    if (!track) return;
-
-    const update = () => {
-      const { top, height } = track.getBoundingClientRect();
-      const scrollable = height - window.innerHeight;
-      const progress =
-        scrollable > 0 ? Math.min(1, Math.max(0, -top / scrollable)) : 0;
-      setActive(
-        Math.min(SLIDES.length - 1, Math.floor(progress * SLIDES.length))
-      );
-    };
-
-    update();
-    window.addEventListener('scroll', update, { passive: true });
-    window.addEventListener('resize', update);
-    return () => {
-      window.removeEventListener('scroll', update);
-      window.removeEventListener('resize', update);
-    };
-  }, []);
+  const { scrollYProgress } = useScroll({
+    target: trackRef,
+    offset: PINNED_OFFSET,
+  });
+  useMotionValueEvent(scrollYProgress, 'change', (progress) =>
+    setActive(Math.min(SLIDES.length - 1, Math.floor(progress * SLIDES.length)))
+  );
 
   return (
     <section
@@ -165,7 +157,9 @@ export default function MemorollWhy() {
         fontFamily: 'var(--font-mr-body)',
         height: `${(1 + SLIDES.length * VH_PER_SLIDE) * 100}vh`,
       }}>
-      <div className="sticky top-0 flex h-screen flex-col items-center justify-center px-4 py-12 md:px-10">
+      <div
+        className="sticky flex flex-col items-center justify-center px-4 py-12 md:px-10"
+        style={PINNED_STAGE}>
         <div className="flex w-full max-w-[1280px] flex-col items-center">
           <div className="flex min-h-[420px] w-full items-center gap-6 lg:min-h-[498px] lg:gap-12">
             <div className="relative flex-1 self-stretch">
@@ -173,6 +167,10 @@ export default function MemorollWhy() {
                 <div
                   key={i}
                   aria-hidden={i !== active}
+                  // React 18 has no `inert` prop, so it is set on the element.
+                  ref={(el) => {
+                    if (el) el.inert = i !== active;
+                  }}
                   className={`absolute inset-0 flex flex-col items-center justify-center gap-8 transition-opacity duration-500 ease-out motion-reduce:transition-none lg:gap-12 ${
                     slide.photo?.side === 'left'
                       ? 'lg:flex-row'
