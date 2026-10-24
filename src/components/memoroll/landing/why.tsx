@@ -20,9 +20,9 @@ type Slide = {
 const SLIDES: Slide[] = [
   { lead: true },
   { lead: true },
-  { photo: { src: '/memoroll-landing/why-photo-1.jpg', side: 'right' } },
-  { photo: { src: '/memoroll-landing/why-photo-2.jpg', side: 'left' } },
-  { photo: { src: '/memoroll-landing/why-photo-3.jpg', side: 'right' } },
+  { photo: { src: '/memoroll-landing/why-photo-1.webp', side: 'right' } },
+  { photo: { src: '/memoroll-landing/why-photo-2.webp', side: 'left' } },
+  { photo: { src: '/memoroll-landing/why-photo-3.webp', side: 'right' } },
   {},
   {},
 ];

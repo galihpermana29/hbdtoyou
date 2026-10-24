@@ -99,7 +99,7 @@ export default function MemorollHero() {
             {AVATARS.map((n) => (
               <img
                 key={n}
-                src={`/memoroll-landing/avatar-${n}.jpg`}
+                src={`/memoroll-landing/avatar-${n}.webp`}
                 alt=""
                 className="-mr-3 size-9 shrink-0 rounded-full object-cover last:mr-0"
               />

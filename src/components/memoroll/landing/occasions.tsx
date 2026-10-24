@@ -167,7 +167,7 @@ export default function MemorollOccasions() {
                   <div className="absolute left-[34.9px] top-0 h-[368px] w-[558px]">
                     <div className="absolute left-[88.7px] top-[40.2px] flex h-[328px] w-[469px] items-center justify-center">
                       <Print
-                        photo="/memoroll-landing/occasions-birthday.jpg"
+                        photo="/memoroll-landing/occasions-birthday.webp"
                         className="h-[311.7px] w-[458.3px] rotate-[2.09deg]"
                         paperClassName="inset-0 size-full"
                         photoClassName="left-[8.8px] top-[8.8px] h-[294px] w-[440.7px]"
@@ -189,7 +189,7 @@ export default function MemorollOccasions() {
                     style={rises[0]}
                     className="absolute left-0 top-[212.5px] h-[311.7px] w-[527px]">
                     <Print
-                      photo="/memoroll-landing/occasions-wedding.jpg"
+                      photo="/memoroll-landing/occasions-wedding.webp"
                       className="absolute left-[68.8px] top-0 h-[311.7px] w-[458.3px]"
                       paperClassName="inset-0 size-full"
                       photoClassName="left-[8.8px] top-[8.8px] h-[294px] w-[440.7px]"
@@ -221,7 +221,7 @@ export default function MemorollOccasions() {
                       <img
                         loading="lazy"
                         decoding="async"
-                        src="/memoroll-landing/occasions-gathering.jpg"
+                        src="/memoroll-landing/occasions-gathering.webp"
                         alt=""
                         className="absolute left-[83.6px] top-[15.1px] h-[294px] w-[440.7px] object-cover"
                       />

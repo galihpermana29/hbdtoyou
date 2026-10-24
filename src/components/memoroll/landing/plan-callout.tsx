@@ -39,7 +39,7 @@ export default function MemorollPlanCallout() {
         <img
           loading="lazy"
           decoding="async"
-          src="/memoroll-landing/callout-bg.jpg"
+          src="/memoroll-landing/callout-bg.webp"
           alt=""
           className="pointer-events-none absolute inset-0 size-full object-cover"
         />
@@ -81,7 +81,7 @@ export default function MemorollPlanCallout() {
                 <img
                   loading="lazy"
                   decoding="async"
-                  src="/memoroll-landing/testimonial-elias.jpg"
+                  src="/memoroll-landing/testimonial-elias.webp"
                   alt=""
                   className="h-[250px] w-[200px] object-cover"
                 />

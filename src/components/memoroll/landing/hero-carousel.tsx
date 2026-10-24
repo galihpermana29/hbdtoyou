@@ -104,7 +104,7 @@ const MASK_STOPS = FADE.map(
  * prints and six photographs, so some appear twice; the repeats land six
  * places apart, never beside their twin.
  */
-const PHOTOS = [1, 2, 3, 4, 5, 6].map((n) => `/memoroll-landing/arc-${n}.jpg`);
+const PHOTOS = [1, 2, 3, 4, 5, 6].map((n) => `/memoroll-landing/arc-${n}.webp`);
 
 /**
  * How long a print takes to move one place. A print needs roughly two and a
