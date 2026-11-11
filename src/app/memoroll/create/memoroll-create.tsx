@@ -623,6 +623,11 @@ export default function MemorollCreate({
                 venue={draft.venue}
                 address={draft.address}
                 onlyAtTheVenue={draft.onlyAtTheVenue}
+                // Nothing enforces the venue lock yet (memoroll-record.ts),
+                // so the product does not offer it - owner, 2026-11-12. The
+                // draft keeps `onlyAtTheVenue: false` and the payload says so.
+                venueLock={false}
+                fromInvitation={weddingId !== null}
                 onChange={patch}
                 onBack={back}
                 onContinue={next}
@@ -711,6 +716,7 @@ export default function MemorollCreate({
               url={guestUrl}
               onClose={() => setQrOpen(false)}
               onShareLink={shareLink}
+              downloadName={`memoroll-qr-${published.code}.png`}
               onOpenDashboard={() =>
                 router.push(`/dashboard/memoroll/${published.id}`)
               }

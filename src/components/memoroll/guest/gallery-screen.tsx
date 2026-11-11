@@ -277,7 +277,7 @@ export default function GalleryScreen({
               <span
                 className="text-[12px] font-medium leading-[150%] tracking-[-0.011em]"
                 style={{ color: colour.ink }}>
-                {photoCount} Photos
+                {photoCount} {photoCount === 1 ? 'Photo' : 'Photos'}
               </span>
               <span
                 className="text-[14px] font-medium leading-[150%] tracking-[-0.011em]"
@@ -287,7 +287,8 @@ export default function GalleryScreen({
               <span
                 className="text-[12px] font-medium leading-[150%] tracking-[-0.011em]"
                 style={{ color: colour.ink }}>
-                {participantCount} Participants
+                {participantCount}{' '}
+                {participantCount === 1 ? 'Participant' : 'Participants'}
               </span>
             </div>
           </div>

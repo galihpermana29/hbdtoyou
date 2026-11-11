@@ -1,7 +1,8 @@
 'use client';
 
 import { motion, useReducedMotion } from 'framer-motion';
-import { QRCodeSVG } from 'qrcode.react';
+import { QRCodeCanvas, QRCodeSVG } from 'qrcode.react';
+import { useRef } from 'react';
 import Cta from '../ui/cta';
 import { ChevronLeftIcon } from '../ui/icons';
 import { colour, type } from '../ui/tokens';
@@ -23,6 +24,7 @@ export default function QrSheet({
   onClose,
   onShareLink,
   onOpenDashboard,
+  downloadName,
 }: {
   eventName: string;
   /** Where the code points: the roll's own address. */
@@ -35,8 +37,25 @@ export default function QrSheet({
    * sheet stays exactly the drawn one.
    */
   onOpenDashboard?: () => void;
+  /**
+   * The file name the QR saves under, which turns on the Download QR button:
+   * a creator prints this for the tables, so it is a 1024px PNG rather than
+   * a screenshot of a 132px code. Owner's ask (2026-11-12); the demo passes
+   * nothing and the sheet stays exactly the drawn one.
+   */
+  downloadName?: string;
 }) {
   const reduce = useReducedMotion();
+  const printable = useRef<HTMLCanvasElement>(null);
+
+  const downloadQr = () => {
+    const canvas = printable.current;
+    if (!canvas || !downloadName) return;
+    const anchor = document.createElement('a');
+    anchor.href = canvas.toDataURL('image/png');
+    anchor.download = downloadName;
+    anchor.click();
+  };
 
   return (
     <div className="absolute inset-0 z-30 flex flex-col justify-end">
@@ -120,6 +139,29 @@ export default function QrSheet({
           <Cta tone="outline" onClick={onShareLink} className="h-[44px] w-full">
             Share Link
           </Cta>
+
+          {downloadName ? (
+            <>
+              <Cta
+                tone="outline"
+                onClick={downloadQr}
+                className="-mt-[20px] h-[44px] w-full">
+                Download QR
+              </Cta>
+              {/* The print-size code, kept offscreen: only its pixels are
+                  wanted, and only when the button asks for them. */}
+              <div aria-hidden className="fixed -left-[2000px] top-0">
+                <QRCodeCanvas
+                  ref={printable}
+                  value={url}
+                  size={1024}
+                  marginSize={4}
+                  fgColor="#212121"
+                  bgColor="#ffffff"
+                />
+              </div>
+            </>
+          ) : null}
 
           {onOpenDashboard ? (
             <Cta onClick={onOpenDashboard} className="h-[44px] w-full">

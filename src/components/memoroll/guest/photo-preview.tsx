@@ -107,7 +107,17 @@ export default function PhotoPreview({
     if (downloading) return;
     setDownloading(true);
     try {
-      const response = await fetch(photo.src);
+      // A print still uploading is a local blob and is read as it is; a
+      // stored one goes through our own origin, because its host sends no
+      // CORS header and a direct fetch is refused (see /api/memoroll/photo).
+      const local = /^(blob|data):/.test(photo.src);
+      const response = await fetch(
+        local
+          ? photo.src
+          : `/api/memoroll/photo?url=${encodeURIComponent(
+              photo.src
+            )}&name=${encodeURIComponent(`memoroll-${photo.id}.jpg`)}`
+      );
       if (!response.ok) throw new Error(String(response.status));
       const blob = await response.blob();
       const url = URL.createObjectURL(blob);
