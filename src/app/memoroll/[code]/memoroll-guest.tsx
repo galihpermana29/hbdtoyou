@@ -666,6 +666,7 @@ export default function MemorollGuest({
                 onLogout={logout}
                 showSwipeCue={!swipeCueSeen}
                 onSwipeCueSeen={() => setSwipeCueSeen(true)}
+                storyExport
               />
             )}
             {screen === 'darkroom' && (

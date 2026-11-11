@@ -134,6 +134,7 @@ export default function GalleryScreen({
   onLogout,
   showSwipeCue,
   onSwipeCueSeen,
+  storyExport = false,
 }: {
   eventName: string;
   photoCount: number;
@@ -166,6 +167,8 @@ export default function GalleryScreen({
   /** The preview's hand cue, early on and never again. */
   showSwipeCue: boolean;
   onSwipeCueSeen: () => void;
+  /** Offer Share to Story in the preview - the product's, not the demo's. */
+  storyExport?: boolean;
 }) {
   const reduce = useReducedMotion();
   const [opened, setOpened] = useState<number | null>(null);
@@ -412,6 +415,7 @@ export default function GalleryScreen({
             showSwipeCue={showSwipeCue}
             onSwipeCueSeen={onSwipeCueSeen}
             onClose={() => setOpened(null)}
+            storyEventName={storyExport ? eventName : undefined}
           />
         )}
       </AnimatePresence>
