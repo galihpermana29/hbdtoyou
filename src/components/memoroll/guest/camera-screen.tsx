@@ -4,6 +4,7 @@ import {
   detectLightingCapabilities,
   defaultImageCaptureFactory,
   setTorch,
+  withTorchPulse,
   type PhotoCapturer,
 } from '@/lib/memoroll-camera';
 import { bakeMemoRollFilm } from '@/lib/memoroll-film';
@@ -42,10 +43,14 @@ const JPEG_QUALITY = 0.78;
  * no negative kept (ADR 0006). The viewfinder wears an ordinary CSS
  * approximation of the look; the baked pixels are the truth.
  *
- * Lighting is hardware-honest: Flash (synchronized fill light via
- * ImageCapture.takePhoto) and Torch (continuous LED via applyConstraints)
- * appear only when the granted track really supports them, and a runtime
- * failure downgrades the control with a visible note instead of faking.
+ * Lighting is hardware-honest: Flash appears only when the granted track can
+ * light the shot, and a runtime failure downgrades it with a visible note
+ * instead of faking. Flash fires the synchronized fill light via
+ * ImageCapture.takePhoto where the browser exposes one; most phones expose
+ * only the torch, so there Flash pulses the torch around the shot - on at the
+ * shutter, off straight after (owner, 2026-11-12: a torch left burning is not
+ * a flash). The product no longer offers a standalone Torch; only the demo's
+ * dial still draws one.
  * `simulatedLighting` is the demo's stand-in for hardware nobody's laptop
  * has, the same stand-in its dock already is for clocks and venues; a
  * simulated light draws the control without ever touching a track.
@@ -174,8 +179,15 @@ export default function CameraScreen({
     };
   }, []);
 
-  const offersFlash = flashSupported || Boolean(simulatedLighting?.flash);
-  const offersTorch = torchSupportedState || Boolean(simulatedLighting?.torch);
+  /** Flash is offered for either light: the real flash, or the torch fired
+   *  as one (`withTorchPulse`). */
+  const offersFlash =
+    flashSupported || torchSupportedState || Boolean(simulatedLighting?.flash);
+  /** A standalone, always-on Torch is the demo dial's alone now. */
+  const offersTorch = Boolean(simulatedLighting?.torch);
+  /** A pulse holds the shutter for its settle time; a second press inside
+   *  it must not take a second shot. */
+  const shooting = useRef(false);
 
   const toggleTorch = async () => {
     const track = streamRef.current?.getVideoTracks()[0];
@@ -288,25 +300,53 @@ export default function CameraScreen({
       }
       return;
     }
-    // White-screen animation: shutter feedback only, never a light source.
-    setFlashKey((k) => k + 1);
-    let stage: HTMLCanvasElement;
-    if (flashOn && flashSupported && capturerRef.current) {
+    if (shooting.current) return;
+    shooting.current = true;
+    try {
+      // White-screen animation: shutter feedback only, never a light source.
+      setFlashKey((k) => k + 1);
+      const stage = await lightAndTake();
+      const blob = await bakeShot(stage, film, stampDate, stampFonts);
+      onShot(blob, film);
+    } finally {
+      shooting.current = false;
+    }
+  };
+
+  /**
+   * The frame, lit the best way this camera can when Flash is on: the real
+   * flash first, then the torch pulsed as one. Each failure downgrades that
+   * light with a note and falls through - the shot is never lost.
+   */
+  const lightAndTake = async (): Promise<HTMLCanvasElement> => {
+    if (!flashOn) return takeFrame();
+    if (flashSupported && capturerRef.current) {
       try {
-        stage = await takeFlashFrame();
+        return await takeFlashFrame();
       } catch {
         setFlashSupported(false);
+        if (!torchSupportedState) {
+          setFlashOn(false);
+          setLightingNote(
+            'Flash failed on this camera, so this shot used the live view instead.'
+          );
+          return takeFrame();
+        }
+      }
+    }
+    const track = streamRef.current?.getVideoTracks()[0];
+    if (torchSupportedState && track) {
+      try {
+        return await withTorchPulse(track, takeFrame);
+      } catch {
+        setTorchSupportedState(false);
         setFlashOn(false);
         setLightingNote(
-          'Flash failed on this camera, so this shot used the live view instead.'
+          'Flash stopped responding on this camera, so this shot used the live view instead.'
         );
-        stage = await takeFrame();
       }
-    } else {
-      stage = await takeFrame();
     }
-    const blob = await bakeShot(stage, film, stampDate, stampFonts);
-    onShot(blob, film);
+    return takeFrame();
   };
 
   const empty = remaining <= 0;

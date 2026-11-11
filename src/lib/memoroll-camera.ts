@@ -106,3 +106,34 @@ export async function setTorch(
     advanced: [{ torch: on } as MediaTrackConstraintSet],
   });
 }
+
+/** How long the LED burns before the frame is taken: long enough for the
+ *  sensor's auto-exposure to settle on the lit scene, short enough to read as
+ *  a flash rather than a torch. */
+export const TORCH_PULSE_SETTLE_MS = 350;
+
+/**
+ * Flash, on a phone that only has a torch (owner, 2026-11-12: "flash acts
+ * like a torch"). Real Flash - ImageCapture's fillLightMode 'flash' - is
+ * rarely exposed to the web, so on most phones the only light is the torch,
+ * and a torch left burning is not a flash. This fires it the way a flash
+ * fires: on at the shutter, the frame taken once exposure has caught up, off
+ * again straight after - whether or not the grab succeeds.
+ *
+ * `grab` takes the frame; `wait` is injectable for the proof harness.
+ */
+export async function withTorchPulse<T>(
+  track: MediaStreamTrack,
+  grab: () => Promise<T>,
+  settleMs: number = TORCH_PULSE_SETTLE_MS,
+  wait: (ms: number) => Promise<void> = (ms) =>
+    new Promise((resolve) => setTimeout(resolve, ms))
+): Promise<T> {
+  await setTorch(track, true);
+  try {
+    await wait(settleMs);
+    return await grab();
+  } finally {
+    await setTorch(track, false).catch(() => undefined);
+  }
+}
