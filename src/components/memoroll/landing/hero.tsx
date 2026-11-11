@@ -1,7 +1,10 @@
 'use client';
 
+import { signIn } from 'next-auth/react';
 import Image from 'next/image';
 import Link from 'next/link';
+
+import { useMemoifySession } from '@/app/session-provider';
 
 import HeroCarousel from './hero-carousel';
 import { useLandingCopy } from './language-provider';
@@ -25,6 +28,9 @@ import StackedWordmark from './stacked-wordmark';
  */
 
 const AVATARS = [1, 2, 3, 4];
+
+/** The standalone creator: no wedding needed (ADR 0007). */
+const CREATE_ROUTE = '/memoroll/create';
 
 /** What floats on the arc, placed on the design's 1440px frame. */
 function Floaters() {
@@ -51,6 +57,7 @@ function Floaters() {
 
 export default function MemorollHero() {
   const copy = useLandingCopy().hero;
+  const session = useMemoifySession();
   return (
     <section
       className="relative overflow-hidden bg-[#FBF4EC]"
@@ -76,7 +83,18 @@ export default function MemorollHero() {
 
         <div className="flex flex-wrap items-center justify-center gap-[14px]">
           <Link
-            href="/memoroll/create"
+            href={CREATE_ROUTE}
+            // Creating needs an account: the credit it spends and the cover
+            // photographs it uploads both need a bearer token. A visitor
+            // without one is signed in first and carried straight into the
+            // creator, the way the wedding landing's Start button does -
+            // otherwise /memoroll/create bounces them out of the flow.
+            onClick={(event) => {
+              if (!session?.accessToken) {
+                event.preventDefault();
+                signIn('google', { callbackUrl: CREATE_ROUTE });
+              }
+            }}
             className="flex h-12 items-center justify-center whitespace-nowrap rounded-lg bg-[#e34013] px-5 text-[16px] md:h-[60px] md:px-6 md:py-4 md:text-[18px] font-semibold leading-7 text-white shadow-[0_1px_1px_rgba(16,24,40,0.05)] transition-colors hover:bg-[#C9340E]">
             {copy.create}
           </Link>
