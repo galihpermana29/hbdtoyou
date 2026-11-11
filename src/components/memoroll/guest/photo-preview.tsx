@@ -6,6 +6,7 @@ import BackPill from '../ui/back-pill';
 import Cta from '../ui/cta';
 import RollPrint from './print';
 import type { GalleryPhoto } from './roll';
+import StorySheet from './story-sheet';
 
 /**
  * One photo at a time over the gallery (guest-19/20): a deck of prints, the
@@ -45,6 +46,7 @@ export default function PhotoPreview({
   showSwipeCue,
   onSwipeCueSeen,
   onClose,
+  storyEventName,
 }: {
   photos: GalleryPhoto[];
   index: number;
@@ -52,8 +54,15 @@ export default function PhotoPreview({
   showSwipeCue: boolean;
   onSwipeCueSeen: () => void;
   onClose: () => void;
+  /**
+   * The event's name, which turns on Share to Story (owner, 2026-11-12).
+   * The product passes it; the demo passes nothing and the preview stays
+   * the drawn one.
+   */
+  storyEventName?: string;
 }) {
   const reduce = useReducedMotion();
+  const [storyOpen, setStoryOpen] = useState(false);
   const [revealed, setRevealed] = useState(false);
   const [direction, setDirection] = useState(1);
   const [downloading, setDownloading] = useState(false);
@@ -289,7 +298,27 @@ export default function PhotoPreview({
             {downloading ? 'Saving…' : 'Download'}
           </Cta>
         </div>
+        {storyEventName !== undefined ? (
+          <div className="mt-[12px] flex justify-center">
+            <Cta
+              tone="outline"
+              onClick={() => {
+                onSwipeCueSeen();
+                setStoryOpen(true);
+              }}
+              className="w-[276px]">
+              Share to IG Story
+            </Cta>
+          </div>
+        ) : null}
       </div>
+      {storyOpen && storyEventName !== undefined ? (
+        <StorySheet
+          photo={photo}
+          eventName={storyEventName}
+          onClose={() => setStoryOpen(false)}
+        />
+      ) : null}
     </motion.div>
   );
 }
