@@ -1,6 +1,7 @@
 'use client';
 
 import { motion, useReducedMotion } from 'framer-motion';
+import { PRESS } from './motion';
 import { colour, type } from './tokens';
 
 /**
@@ -68,7 +69,7 @@ export default function Cta({
       disabled={disabled}
       aria-label={label}
       whileTap={reduce || disabled ? undefined : { scale: 0.97 }}
-      transition={{ duration: 0.12, ease: [0.32, 0.72, 0, 1] }}
+      transition={PRESS}
       className={`inline-flex items-center justify-center rounded-full px-[10px] py-[10px] disabled:opacity-60 ${type.button} ${className}`}
       style={{
         ...TONES[tone],

@@ -1,6 +1,7 @@
 'use client';
 
 import { motion, useReducedMotion } from 'framer-motion';
+import { PRESS } from './motion';
 import { ChevronLeftIcon } from './icons';
 import { colour, pillShadow } from './tokens';
 
@@ -28,7 +29,7 @@ export default function BackPill({
       onClick={onClick}
       aria-label={label}
       whileTap={reduce ? undefined : { scale: 0.94 }}
-      transition={{ duration: 0.12, ease: [0.32, 0.72, 0, 1] }}
+      transition={PRESS}
       className="inline-flex items-center justify-center rounded-full px-[12px] py-[10px]"
       style={{ background: colour.flame, boxShadow: pillShadow }}>
       <ChevronLeftIcon className="h-[24px] w-[24px] text-[#fafafa]" />

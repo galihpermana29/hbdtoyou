@@ -9,6 +9,7 @@ import HeaderRule from '../ui/header-rule';
 import MemoifyFooter from '../ui/memoify-footer';
 import { colour, pillShadow } from '../ui/tokens';
 import Cta from '../ui/cta';
+import { EASE_OUT } from '../ui/motion';
 import PhotoPreview from './photo-preview';
 import RollPrint from './print';
 import type { GalleryGroup, GalleryPhoto } from './roll';
@@ -318,9 +319,10 @@ export default function GalleryScreen({
             initial={{ opacity: 0 }}
             animate={{
               opacity: 1,
-              transition: { duration: reduce ? 0.12 : 0.3 },
+              // Switched tens of times a visit: short, ease-out.
+              transition: { duration: reduce ? 0.12 : 0.18, ease: EASE_OUT },
             }}
-            exit={{ opacity: 0, transition: { duration: 0.12 } }}
+            exit={{ opacity: 0, transition: { duration: 0.1, ease: EASE_OUT } }}
             className="mt-[24px] flex flex-col gap-[12px]">
             {groups.map((group) => (
               <section key={group.label} className="flex flex-col gap-[8px]">

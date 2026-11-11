@@ -24,7 +24,7 @@ export default function MemorollDemoPage() {
     // the legacy pair that outlived the screens drawn in it - the camera
     // bakes its date stamp and watermark in them (hbd-3i5 owns retiring
     // that), and the mock sign-in and the demo dock still speak them.
-    <main className={`${designFonts} ${legacyFonts}`}>
+    <main className={`${designFonts} ${legacyFonts} memoroll-native`}>
       <MemorollDemo />
     </main>
   );

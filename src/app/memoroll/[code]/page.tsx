@@ -46,7 +46,7 @@ export default async function MemorollGuestPage({
     // Two font sets, the way the demo carries them: the four families of the
     // design, and the legacy pair the camera still bakes its date stamp and
     // watermark in (hbd-3i5 owns retiring that).
-    <main className={`${designFonts} ${legacyFonts}`}>
+    <main className={`${designFonts} ${legacyFonts} memoroll-native`}>
       <MemorollGuest code={code} event={preview.data.event} />
     </main>
   );

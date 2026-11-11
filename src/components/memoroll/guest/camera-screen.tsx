@@ -8,6 +8,7 @@ import {
   type PhotoCapturer,
 } from '@/lib/memoroll-camera';
 import { bakeMemoRollFilm } from '@/lib/memoroll-film';
+import { EASE_OUT, tick } from '../ui/motion';
 import {
   AnimatePresence,
   motion,
@@ -302,6 +303,9 @@ export default function CameraScreen({
     }
     if (shooting.current) return;
     shooting.current = true;
+    // A click under the finger where the phone can (Android): a native
+    // shutter is felt as much as seen.
+    tick();
     try {
       // White-screen animation: shutter feedback only, never a light source.
       setFlashKey((k) => k + 1);
@@ -555,7 +559,7 @@ export default function CameraScreen({
                   transition={
                     reduce
                       ? { duration: 0.12 }
-                      : { duration: 0.35, ease: 'easeOut' }
+                      : { duration: 0.35, ease: EASE_OUT }
                   }
                   className="pointer-events-none absolute inset-0 block bg-white"
                 />

@@ -21,8 +21,8 @@ import LocationScreen, {
   type LocationState,
 } from '@/components/memoroll/guest/location-screen';
 import UsernameScreen from '@/components/memoroll/guest/username-screen';
-import { AnimatePresence, motion, useReducedMotion } from 'framer-motion';
-import { useEffect, useState } from 'react';
+import { AnimatePresence, useReducedMotion } from 'framer-motion';
+import { useEffect, useRef, useState } from 'react';
 import DemoControl, {
   DemoLighting,
   DemoPhase,
@@ -43,7 +43,12 @@ import {
   type MockRollPhoto,
 } from './mock';
 import { SHOT_LIMIT, useShots, type Shot } from './use-shots';
-import { REDUCED_FADE, screenVariants } from './variants';
+import {
+  directionBetween,
+  pushVariants,
+  reducedScreenVariants,
+} from '@/components/memoroll/ui/motion';
+import PushScreen from '@/components/memoroll/ui/push-screen';
 
 /** The guest's last film pick survives a reload along with the roll. */
 const FILM_STORAGE_KEY = 'memoroll-demo:film';
@@ -56,6 +61,17 @@ type Screen =
   | 'camera'
   | 'gallery'
   | 'darkroom';
+
+/** How deep each screen sits in the guest's way through. */
+const SCREEN_RANK: Record<Screen, number> = {
+  cover: 0,
+  countdown: 1,
+  username: 1,
+  location: 2,
+  camera: 3,
+  gallery: 4,
+  darkroom: 5,
+};
 
 /** A photo with the heading its group sits under, before grouping. */
 type RollEntry = { photo: GalleryPhoto; groupLabel: string };
@@ -250,6 +266,18 @@ export default function MemorollDemo() {
 
   const dark = screen === 'camera' || screen === 'darkroom';
 
+  // The product's navigation stack (memoroll-guest.tsx): push deeper, pop
+  // back out, crossfade in and out of the Dark Room.
+  const lastScreen = useRef(screen);
+  const direction = useRef(0);
+  if (screen !== lastScreen.current) {
+    direction.current =
+      screen === 'darkroom' || lastScreen.current === 'darkroom'
+        ? 0
+        : directionBetween(SCREEN_RANK[lastScreen.current], SCREEN_RANK[screen]);
+    lastScreen.current = screen;
+  }
+
   return (
     <div
       className={`min-h-[100dvh] transition-colors duration-300 ${
@@ -259,16 +287,19 @@ export default function MemorollDemo() {
         className={`relative mx-auto flex min-h-[100dvh] max-w-[430px] flex-col overflow-x-clip shadow-2xl ${
           dark ? 'bg-[#212121]' : 'bg-[#f7f5f3]'
         }`}>
-        <AnimatePresence mode="wait" initial={false}>
-          <motion.div
+        <AnimatePresence
+          mode="popLayout"
+          initial={false}
+          custom={direction.current}>
+          <PushScreen
             key={screen}
-            variants={reduce ? undefined : screenVariants}
-            initial={reduce ? { opacity: 0 } : 'enter'}
-            animate={
-              reduce ? { opacity: 1, transition: REDUCED_FADE } : 'center'
-            }
-            exit={reduce ? { opacity: 0, transition: REDUCED_FADE } : 'exit'}
-            className="flex min-h-[100dvh] flex-col">
+            custom={direction.current}
+            variants={reduce ? reducedScreenVariants : pushVariants}
+            initial="enter"
+            animate="center"
+            exit="exit"
+            className="flex min-h-[100dvh] flex-col"
+            style={{ background: dark ? '#212121' : '#f7f5f3' }}>
             {screen === 'cover' && (
               <Cover
                 eventName={MOCK_WEDDING.title}
@@ -349,7 +380,7 @@ export default function MemorollDemo() {
                 }}
               />
             )}
-          </motion.div>
+          </PushScreen>
         </AnimatePresence>
       </div>
 
