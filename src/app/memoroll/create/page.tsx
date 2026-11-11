@@ -16,8 +16,9 @@ import { blankMemorollDraft, draftFromWedding } from './prefill';
  * the demo is, and gated the way the wedding's Create Flow is: creating needs
  * an account for the credit it spends and the photographs it uploads, and a
  * visitor who filled eight steps only to be bounced at publish would have
- * been treated worse than one asked at the door. They are sent to the landing
- * page, whose own control signs them in.
+ * been treated worse than one asked at the door. They are sent to the MemoRoll
+ * landing (not the site home, where they would lose the thread), whose Create
+ * button signs them in and brings them straight back here.
  *
  * `?wedding_id` is the dashboard card's doorway: the wedding it names is read
  * with the caller's own authority and prefills the flow - the couple, the
@@ -40,7 +41,7 @@ export default async function MemorollCreatePage({
 }) {
   const session = await getSession();
   if (!session?.accessToken) {
-    redirect('/');
+    redirect('/memoroll');
   }
 
   const weddingParam = searchParams.wedding_id;

@@ -52,14 +52,26 @@ export default async function MemorollDashboardPage() {
 
   return (
     <div className="mx-auto flex max-w-6xl flex-col gap-[24px] px-[32px] py-[32px] 2xl:max-w-7xl">
-      <div>
-        <h1 className="text-[24px] font-[600] leading-[32px] text-[#182230]">
-          MemoRoll
-        </h1>
-        <p className={`mt-[8px] ${note}`}>
-          The rolls you have made. Open one to see who joined and every shot
-          they took - the reveal never hides anything from you.
-        </p>
+      <div className="flex flex-col gap-[16px] sm:flex-row sm:items-start sm:justify-between">
+        <div>
+          <h1 className="text-[24px] font-[600] leading-[32px] text-[#182230]">
+            MemoRoll
+          </h1>
+          <p className={`mt-[8px] ${note}`}>
+            The rolls you have made. Open one to see who joined and every shot
+            they took - the reveal never hides anything from you.
+          </p>
+        </div>
+        {/* Standalone creation (ADR 0007), always on hand - not only when
+            the listing is empty. A roll for a wedding starts from its card on
+            the Wedding tab instead, which prefills it. */}
+        {rows.length > 0 ? (
+          <Link
+            href="/memoroll/create"
+            className="w-fit shrink-0 rounded-[8px] border border-[#E34013] bg-[#E34013] px-[14px] py-[8px] text-[14px] font-[600] leading-[20px] text-white hover:opacity-90">
+            Create MemoRoll
+          </Link>
+        ) : null}
       </div>
 
       {!events.success ? (
