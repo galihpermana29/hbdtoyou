@@ -41,7 +41,9 @@ import PhotoCard, { PRINT_HEIGHT, PRINT_WIDTH, type Photo } from './photo-card';
  * rather than re-flowed, because an arc has no meaningful reflow: on a phone
  * it is the same picture, smaller.
  *
- * Every frame of the travel is worked out on the main thread, for 26 prints,
+ * Every frame of the travel is worked out on the main thread, for 39 prints
+ * (the developed copy, and the undeveloped one drawn in two boxes - see
+ * DEVELOPED below),
  * so it only runs while the arc is on screen: scrolled past, it waits where
  * it stopped. Under reduced motion it never starts, and the arc is a still.
  */
@@ -83,20 +85,86 @@ const FADE = [
 
 /**
  * A mask only paints inside its own box, and the prints reach well outside the
- * frame, so the masked layer is drawn on a box bigger than the frame by this
- * much on each side. A print still above the frame's foot reaches under 400px
+ * frame, so the masked layer is drawn on a box wider than the frame by this
+ * much to the left. A print still above the frame's foot reaches under 400px
  * past its sides, which a screen wider than the frame shows.
  *
  * The box stops just right of the line, where the fade has already cleared:
  * nothing of the undeveloped copy shows past there, and every pixel of the
  * box is a pixel the browser has to keep as a layer.
+ *
+ * Vertically it is the frame and no more (2026-11-12, scroll profiling). The
+ * hero clips the arc to the frame's height, and no print rises above the
+ * frame's top, so room above and below was never seen - but it was still
+ * composited, masked, every frame: the box was 1930px tall for 970px of
+ * picture, and that masked layer was the single largest cost of scrolling
+ * past the hero.
  */
 const MASK_ROOM = 480;
-const MASK_RIGHT = LINE_X + FADE[FADE.length - 1][0];
-const MASK_STOPS = FADE.map(
-  ([offset, alpha]) =>
-    `rgba(0, 0, 0, ${alpha}) ${MASK_ROOM + LINE_X + offset}px`
+
+/**
+ * Where the fade begins and ends. Left of FADE_LEFT the undeveloped copy is
+ * fully there (the gradient's first stop is opaque), right of FADE_RIGHT it
+ * is gone. Only the 24px between needs a mask at all.
+ */
+const FADE_LEFT = LINE_X + FADE[0][0];
+const FADE_RIGHT = LINE_X + FADE[FADE.length - 1][0];
+
+/** The gradient, in the coordinates of the 24px strip that carries it. */
+const STRIP_STOPS = FADE.map(
+  ([offset, alpha]) => `rgba(0, 0, 0, ${alpha}) ${offset - FADE[0][0]}px`
 ).join(', ');
+
+/** A stretch of the frame, in frame coordinates. */
+type Region = { left: number; right: number; top: number; bottom: number };
+
+/**
+ * Where each copy of the arc can be seen (2026-11-12, scroll profiling).
+ *
+ * The undeveloped copy used to be one box 1222px wide with the gradient mask
+ * over all of it, recomposited every frame with all thirteen prints inside -
+ * the single largest cost of scrolling past the hero. It is now two boxes
+ * that draw exactly the same picture: everything left of the fade clipped by
+ * a plain rectangle, which costs next to nothing, and only the 24px fade
+ * itself masked. And a print is only drawn in a box it can be seen in: at
+ * any moment about half the undeveloped prints are past the line, and the
+ * two lowest prints of either copy are under the frame's foot, where the
+ * hero clips them anyway.
+ */
+const DEVELOPED: Region = {
+  left: -Infinity,
+  right: Infinity,
+  top: 0,
+  bottom: FRAME.height,
+};
+const UNDEVELOPED_SOLID: Region = {
+  left: -MASK_ROOM,
+  right: FADE_LEFT,
+  top: 0,
+  bottom: FRAME.height,
+};
+const UNDEVELOPED_FADE: Region = {
+  left: FADE_LEFT,
+  right: FADE_RIGHT,
+  top: 0,
+  bottom: FRAME.height,
+};
+
+/** Whether a print at this place overlaps the region at all. */
+function seen(place: number, region: Region) {
+  const { x, y, angle } = at(place);
+  const radians = (angle * Math.PI) / 180;
+  const cos = Math.abs(Math.cos(radians));
+  const sin = Math.abs(Math.sin(radians));
+  const halfWidth = (PRINT_WIDTH / 2) * cos + (PRINT_HEIGHT / 2) * sin;
+  const halfHeight = (PRINT_WIDTH / 2) * sin + (PRINT_HEIGHT / 2) * cos;
+  return (
+    x + halfWidth > region.left &&
+    x - halfWidth < region.right &&
+    y + halfHeight > region.top &&
+    y - halfHeight < region.bottom
+  );
+}
 
 /**
  * The photographs on the arc, handed out to the prints in turn with what was
@@ -140,10 +208,13 @@ function Print({
   index,
   phase,
   undeveloped,
+  region,
 }: {
   index: number;
   phase: MotionValue<number>;
   undeveloped: boolean;
+  /** Where this copy can be seen; outside it the print is not drawn. */
+  region: Region;
 }) {
   const place = useTransform(
     phase,
@@ -152,6 +223,11 @@ function Print({
   const x = useTransform(place, (p) => at(p).x - PRINT_WIDTH / 2);
   const y = useTransform(place, (p) => at(p).y - PRINT_HEIGHT / 2);
   const rotate = useTransform(place, (p) => at(p).angle);
+  // Hidden, not unmounted: it keeps its layer and comes back the frame it is
+  // needed, without a mount mid-animation.
+  const visibility = useTransform(place, (p) =>
+    seen(p, region) ? 'visible' : 'hidden'
+  );
   const copy = useLandingCopy().hero;
   const photo: Photo = {
     src: PHOTOS[index % PHOTOS.length],
@@ -166,7 +242,7 @@ function Print({
   return (
     <motion.div
       className="absolute left-0 top-0 will-change-transform"
-      style={{ x, y, rotate }}>
+      style={{ x, y, rotate, visibility }}>
       <PhotoCard
         developing={developing}
         photo={photo}
@@ -225,22 +301,57 @@ export default function HeroCarousel({ children }: { children?: ReactNode }) {
       style={{ width: FRAME.width, height: FRAME.height }}>
       <div className="absolute inset-0">
         {prints.map((index) => (
-          <Print key={index} index={index} phase={phase} undeveloped={false} />
+          <Print
+            key={index}
+            index={index}
+            phase={phase}
+            undeveloped={false}
+            region={DEVELOPED}
+          />
         ))}
       </div>
+      {/* The undeveloped copy, left of the fade: wholly there, so a plain
+          clip does what the mask did. */}
+      <div
+        className="absolute overflow-hidden"
+        style={{
+          left: -MASK_ROOM,
+          top: 0,
+          width: MASK_ROOM + FADE_LEFT,
+          height: FRAME.height,
+        }}>
+        <div className="absolute" style={{ left: MASK_ROOM, top: 0 }}>
+          {prints.map((index) => (
+            <Print
+              key={index}
+              index={index}
+              phase={phase}
+              undeveloped
+              region={UNDEVELOPED_SOLID}
+            />
+          ))}
+        </div>
+      </div>
+      {/* The fade itself: the same copy, masked, but only 24px of it. */}
       <div
         className="absolute"
         style={{
-          left: -MASK_ROOM,
-          top: -MASK_ROOM,
-          width: MASK_ROOM + MASK_RIGHT,
-          height: FRAME.height + 2 * MASK_ROOM,
-          maskImage: `linear-gradient(90deg, ${MASK_STOPS})`,
-          WebkitMaskImage: `linear-gradient(90deg, ${MASK_STOPS})`,
+          left: FADE_LEFT,
+          top: 0,
+          width: FADE_RIGHT - FADE_LEFT,
+          height: FRAME.height,
+          maskImage: `linear-gradient(90deg, ${STRIP_STOPS})`,
+          WebkitMaskImage: `linear-gradient(90deg, ${STRIP_STOPS})`,
         }}>
-        <div className="absolute" style={{ left: MASK_ROOM, top: MASK_ROOM }}>
+        <div className="absolute" style={{ left: -FADE_LEFT, top: 0 }}>
           {prints.map((index) => (
-            <Print key={index} index={index} phase={phase} undeveloped />
+            <Print
+              key={index}
+              index={index}
+              phase={phase}
+              undeveloped
+              region={UNDEVELOPED_FADE}
+            />
           ))}
         </div>
       </div>
