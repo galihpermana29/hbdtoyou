@@ -200,7 +200,9 @@ export default function GalleryScreen({
     <div
       className="relative flex min-h-full flex-1 flex-col overflow-x-clip"
       style={{ background: colour.paper, fontFamily: 'var(--font-mr-body)' }}>
-      <header className="pt-[50px]">
+      {/* The frame's 50px top is the iOS status bar, drawn outside the page
+          in a browser (owner, 2026-11-12): start at the safe area instead. */}
+      <header className="pt-[max(16px,env(safe-area-inset-top))]">
         <div className="flex items-center justify-between px-[16px]">
           <BackPill onClick={onBack} label="Back" />
           <h1
