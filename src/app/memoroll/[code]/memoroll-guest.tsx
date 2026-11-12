@@ -53,6 +53,19 @@ type Screen =
   | 'gallery'
   | 'darkroom';
 
+/** The Reveal for a guest's own clock: "Fri 13 Nov, 21:00". */
+function revealLabelFor(at: Date): string {
+  return isNaN(at.getTime())
+    ? ''
+    : at.toLocaleString('en-GB', {
+        weekday: 'short',
+        day: 'numeric',
+        month: 'short',
+        hour: '2-digit',
+        minute: '2-digit',
+      });
+}
+
 /** A photo with the heading its group sits under, before grouping. */
 type RollEntry = { photo: GalleryPhoto; groupLabel: string };
 
@@ -628,6 +641,7 @@ export default function MemorollGuest({
               <CameraScreen
                 remaining={remaining}
                 rollSize={event.shot_limit}
+                revealLabel={revealLabelFor(new Date(revealMs))}
                 galleryCount={photoCount ?? allEntries.length}
                 film={film}
                 onPickFilm={pickFilm}
