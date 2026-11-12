@@ -20,8 +20,14 @@ import { motion, useTransform, type MotionValue } from 'framer-motion';
 export const PRINT_WIDTH = 240;
 export const PRINT_HEIGHT = 328;
 
-/** Under every print, the one shadow the design gives them. */
-const SHADOW = '0 18px 40px rgba(90, 42, 18, 0.133)';
+/**
+ * Under every print, the one shadow the design gives them - tightened from
+ * the design's 0 18px 40px (owner, 2026-11-12). Each print is its own moving
+ * layer, and a 40px blur grew every one of the thirteen past the print by
+ * the blur on every side, all composited each frame. Slightly denser, so it
+ * still reads as the same lift.
+ */
+const SHADOW = '0 12px 24px rgba(90, 42, 18, 0.15)';
 
 function useFade(developing: MotionValue<number>) {
   return useTransform(developing, (value) => 1 - value);
