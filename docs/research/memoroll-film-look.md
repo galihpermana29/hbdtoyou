@@ -318,3 +318,24 @@ Unsupported controls are hidden; a runtime failure downgrades the control with a
 
 Measured on the harness (headless Chromium, 960x1280, 6 iterations): color pass 5.4-7.3 ms per look, finalize under 1 ms, JPEG encode 7-11 ms, parked party 12 ms color + 1.5 ms bloom - roughly 15-20 ms per developed keeper against the 300 ms budget, so no WebGL2 escalation is recommended on this evidence; real-phone timings remain to be recorded.
 Determinism and the absence of grain are asserted: repeat renders are bit-identical and a flat-gray keeper develops with a high-frequency residual under 0.15/255 on every look.
+
+## 11. Iteration 3: the film-compact looks, with grain (owner, 2026-11-13)
+
+The owner judged the six-film roster not close enough to a real compact camera and supplied nine reference prints: 35mm point-and-shoot and disposable frames.
+Measured across them: blue sits 2-16 points under green through shadows and mids, whites stop at 0.95-0.97, blacks are lifted but tinted, saturation is modest, and the texture is soft grain rather than sharpness.
+A first attempt at a CCD "digicam" look (hard clipping, oversharpening, chroma noise) was rejected outright; the references are film, not early digital.
+
+Four looks were then tuned by eye on the owner's own photographs, each approved as a full 960x1280 render: **Gold** (warm, yellow-green shadows, cream whites), **Green** (cyan-green shadows, deep greens, bluer skies), **Clean** (bright, green mids, neutral white) and **Teal** (brown-black shadows, teal mids, blooming whites).
+They share one pipeline in `src/lib/memoroll-film.ts`: soften, bend blues and greens, tone curve with split toning, saturation, halation, grain, vignette (corner gain 0.74).
+All recipes are original; no third-party LUT or preset is copied.
+
+Grain returns, reversing section 10, by the owner's explicit decision after seeing it at three strengths: the first was too faint, the second "ruined the photo", and the shipped one is about 60% of the second, with the coarse clumps halved and the amplitude thinned in bright areas.
+It is seeded from the frame's own pixels, so determinism holds: the same frame and look render bit-identically.
+
+The roster in the camera is RAW plus these four; the five recipes of section 10 are removed from the strip only and remain in the renderer.
+
+Checked on the port (Node, 960x1280, three photographs, four looks): against the approved prototype with grain off, mean difference 0.47-0.58/255 with under 0.005% of samples off by more than 4; repeat renders with grain bit-identical.
+The grain is made once per frame size and kept (`warmMemoRollGrain`, called while the camera idles); the frame's seed chooses where each of its five layers starts in the sheet.
+Cost, in this sandbox: about 330 ms per look in Node and 360-390 ms for a whole bake in headless Chromium, against about 150 ms for a retired recipe in the same harness; with the CPU throttled 4x, 1.4-1.6 s.
+That is the soft-lens blur, the per-pixel colour pass and the halation on the main thread, and is NOT yet measured on a phone; the camera waits for the shutter flash to paint before baking so the pause lands after the feedback.
+Not carried over from the prototype: film burn (judged a rare accident on a sealed disposable, left out), the Soft, Expired and B&W looks (not approved), and a 3:2 frame (tried and declined).

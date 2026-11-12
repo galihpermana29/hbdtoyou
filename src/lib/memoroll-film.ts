@@ -14,16 +14,28 @@
  * mutates ImageData so callers can assert on it pre-encode. Date stamp and
  * watermark remain the camera's job (ADR 0006's bake-at-capture contract
  * is unchanged; only the artifact's resolution grew to 960x1280).
+ *
+ * 2026-11-13 (owner): the roster a guest picks from is now four film-compact
+ * looks - Gold, Green, Clean, Teal - rendered by the look pipeline further
+ * down, which DOES have grain, by the owner's decision, seeded from the
+ * frame so a render is still deterministic. The six recipes above the looks
+ * are retired from the camera's strip, not deleted: their code stays and
+ * still runs (docs/research/memoroll-film-look.proof.mjs exercises it).
  */
 
-export type MemoRollFilmId =
-  | 'none'
+/** The film-compact looks of 2026-11-13: what the camera offers today. */
+export type MemoRollLookId = 'gold' | 'green' | 'clean' | 'teal';
+
+/** The recipes of hbd-sk4: retired from the strip, kept in the code. */
+export type MemoRollLegacyFilmId =
   | 'wedding-natural'
   | 'soft-pastel'
   | 'clean-cool'
   | 'bold-color'
   | 'black-white'
   | 'party';
+
+export type MemoRollFilmId = 'none' | MemoRollLookId | MemoRollLegacyFilmId;
 
 interface PresetParams {
   master: [number, number][];
@@ -58,7 +70,7 @@ const NO_OFFSET = () => 0;
  * approves it. All color values are original MemoRoll recipes derived from
  * the reference study - no third-party LUTs or recipes are copied.
  */
-const PRESETS: Record<Exclude<MemoRollFilmId, 'none'>, PresetParams> = {
+const PRESETS: Record<MemoRollLegacyFilmId, PresetParams> = {
   // The approved Wedding Daylight color and tone of hbd-15j, unchanged
   // except that grain no longer exists anywhere in the renderer.
   'wedding-natural': {
@@ -233,7 +245,7 @@ interface Luts {
 const lutCache: Partial<Record<string, Luts>> = {};
 
 /** R = m + redOffset, G = m, B = m + blueOffset, each clamped to 0..255. */
-function lutsFor(preset: Exclude<MemoRollFilmId, 'none'>): Luts {
+function lutsFor(preset: MemoRollLegacyFilmId): Luts {
   const cached = lutCache[preset];
   if (cached) return cached;
   const params = PRESETS[preset];
@@ -287,6 +299,499 @@ function vignetteMap(
   return map;
 }
 
+/* ----------------------- the film-compact looks ----------------------- */
+
+/**
+ * The look pipeline (owner, 2026-11-13).
+ *
+ * The owner's references are 35mm point-and-shoot and disposable prints, and
+ * what was measured from them is what this draws: blue sitting under green
+ * through the shadows and mids, whites that stop short of paper white,
+ * tinted blacks, modest saturation, a soft lens, and grain. Every look is an
+ * original MemoRoll recipe tuned by eye against those references on the
+ * owner's own photographs - no third-party LUT or preset is copied.
+ *
+ * One pass over float channels, in this order: soften (a plastic lens is
+ * never sharp), bend blues and greens, tone curve with split toning,
+ * saturation, halation (bright areas glow into their surroundings), grain,
+ * vignette. Still no ctx.filter and no canvas at all - it is arithmetic on
+ * ImageData, so it runs anywhere the legacy pass runs.
+ *
+ * Grain is back, deliberately. hbd-sk4 removed it for determinism; here the
+ * generator is seeded from the frame's own pixels, so the same frame and
+ * look still always produce the same render.
+ */
+type Rgb = [number, number, number];
+
+interface LookParams {
+  master: [number, number][];
+  /** Channel offsets in the shadows, the mids, and the highlights. */
+  tone: [Rgb, Rgb, Rgb];
+  /** What blues do: an RGB offset, then a pull toward luminance. */
+  blue: [number, number, number, number];
+  /** What greens do: an RGB offset, then a lift or a deepening. */
+  green: [number, number, number, number];
+  saturation: number;
+  /** Grain strength relative to Gold. */
+  grain: number;
+  /** The colour bright areas bleed. */
+  halo: Rgb;
+}
+
+const COMPACT_LOOKS: Record<MemoRollLookId, LookParams> = {
+  // Warm consumer stock: yellow-green shadows, cream whites.
+  gold: {
+    master: [
+      [0, 0.032],
+      [0.08, 0.048],
+      [0.22, 0.145],
+      [0.45, 0.44],
+      [0.7, 0.79],
+      [0.88, 0.93],
+      [1, 0.972],
+    ],
+    tone: [
+      [0.004, 0.016, -0.045],
+      [0.022, 0.004, -0.05],
+      [0.008, 0, -0.028],
+    ],
+    blue: [0, 0.035, -0.05, 0.18],
+    green: [0.03, -0.005, -0.035, -0.03],
+    saturation: 1.06,
+    grain: 1,
+    halo: [0.13, 0.045, 0],
+  },
+  // Cooler, green-leaning stock: cyan-green shadows, deep greens, bluer
+  // skies, clean whites with a hint of pink.
+  green: {
+    master: [
+      [0, 0.03],
+      [0.08, 0.05],
+      [0.22, 0.15],
+      [0.45, 0.445],
+      [0.7, 0.78],
+      [0.88, 0.925],
+      [1, 0.975],
+    ],
+    tone: [
+      [-0.014, 0.014, 0.012],
+      [-0.004, 0.008, -0.012],
+      [0.012, -0.002, 0.004],
+    ],
+    blue: [-0.01, 0.02, 0, 0.05],
+    green: [-0.025, 0.012, 0.012, -0.035],
+    saturation: 1,
+    grain: 1,
+    halo: [0.11, 0.05, 0.03],
+  },
+  // Bright and clean: green through shadows and mids, neutral paper white.
+  clean: {
+    master: [
+      [0, 0.025],
+      [0.1, 0.07],
+      [0.3, 0.3],
+      [0.5, 0.54],
+      [0.75, 0.82],
+      [0.9, 0.945],
+      [1, 0.985],
+    ],
+    tone: [
+      [-0.024, 0.012, -0.004],
+      [-0.012, 0.008, -0.02],
+      [0.004, 0, 0.002],
+    ],
+    blue: [-0.01, 0.015, 0, 0.1],
+    green: [-0.03, 0.015, 0, -0.04],
+    saturation: 1.02,
+    grain: 0.9,
+    halo: [0.08, 0.05, 0.04],
+  },
+  // Cinematic: brown-black shadows, teal mids, whites that bloom.
+  teal: {
+    master: [
+      [0, 0.03],
+      [0.1, 0.05],
+      [0.3, 0.22],
+      [0.5, 0.5],
+      [0.72, 0.8],
+      [0.9, 0.93],
+      [1, 0.962],
+    ],
+    tone: [
+      [0.02, 0, -0.03],
+      [-0.04, 0.006, 0.004],
+      [-0.015, 0.004, -0.006],
+    ],
+    blue: [-0.02, 0.02, 0, 0.1],
+    green: [-0.03, 0, 0.02, -0.03],
+    saturation: 0.95,
+    grain: 1.05,
+    halo: [0.26, 0.22, 0.17],
+  },
+};
+
+const LOOK_IDS = new Set<string>(Object.keys(COMPACT_LOOKS));
+
+export function isLook(preset: MemoRollFilmId): preset is MemoRollLookId {
+  return LOOK_IDS.has(preset);
+}
+
+/** The corner gain every look shares: a compact's lens falls off hard. */
+const LOOK_VIGNETTE = 0.74;
+
+const lookLutCache: Partial<Record<MemoRollLookId, Float32Array[]>> = {};
+
+/** Tone curve plus split toning, as three 256-entry float tables. */
+function lookLuts(look: MemoRollLookId): Float32Array[] {
+  const cached = lookLutCache[look];
+  if (cached) return cached;
+  const { master, tone } = COMPACT_LOOKS[look];
+  const curve = monotoneCubic(master);
+  const luts = [0, 1, 2].map(() => new Float32Array(256));
+  for (let i = 0; i < 256; i++) {
+    const x = i / 255;
+    const m = curve(x);
+    const shadow = Math.pow(clamp01(1 - x / 0.35), 1.2);
+    const high = clamp01((x - 0.7) / 0.3);
+    const mid = 1 - shadow - high * 0.8;
+    for (let c = 0; c < 3; c++) {
+      luts[c][i] = clamp01(
+        m + tone[0][c] * shadow + tone[1][c] * mid + tone[2][c] * high
+      );
+    }
+  }
+  lookLutCache[look] = luts;
+  return luts;
+}
+
+/** Separable Gaussian blur over one float plane, edges clamped. */
+function blurPlane(
+  src: Float32Array,
+  width: number,
+  height: number,
+  sigma: number
+): Float32Array {
+  // 2.5 sigma holds 98.8% of the bell; a wider kernel costs more than it shows.
+  const radius = Math.max(1, Math.ceil(sigma * 2.5));
+  const kernel = new Float32Array(radius * 2 + 1);
+  let sum = 0;
+  for (let i = -radius; i <= radius; i++) {
+    const v = Math.exp(-(i * i) / (2 * sigma * sigma));
+    kernel[i + radius] = v;
+    sum += v;
+  }
+  for (let i = 0; i < kernel.length; i++) kernel[i] /= sum;
+
+  // Interior pixels take the branch-free path; only the `radius` columns and
+  // rows at each edge pay for clamping. This pass is most of a look's cost.
+  const taps = kernel.length;
+  const tmp = new Float32Array(src.length);
+  const xEnd = width - radius;
+  for (let y = 0; y < height; y++) {
+    const row = y * width;
+    for (let x = 0; x < width; x++) {
+      let acc = 0;
+      if (x >= radius && x < xEnd) {
+        const base = row + x - radius;
+        for (let k = 0; k < taps; k++) acc += src[base + k] * kernel[k];
+      } else {
+        for (let k = -radius; k <= radius; k++) {
+          const xx = x + k < 0 ? 0 : x + k >= width ? width - 1 : x + k;
+          acc += src[row + xx] * kernel[k + radius];
+        }
+      }
+      tmp[row + x] = acc;
+    }
+  }
+  const out = new Float32Array(src.length);
+  const yEnd = height - radius;
+  for (let y = 0; y < height; y++) {
+    const row = y * width;
+    if (y >= radius && y < yEnd) {
+      // Row-wise accumulation keeps the reads sequential.
+      for (let k = 0; k < taps; k++) {
+        const weight = kernel[k];
+        const from = (y - radius + k) * width;
+        for (let x = 0; x < width; x++) out[row + x] += tmp[from + x] * weight;
+      }
+    } else {
+      for (let x = 0; x < width; x++) {
+        let acc = 0;
+        for (let k = -radius; k <= radius; k++) {
+          const yy = y + k < 0 ? 0 : y + k >= height ? height - 1 : y + k;
+          acc += tmp[yy * width + x] * kernel[k + radius];
+        }
+        out[row + x] = acc;
+      }
+    }
+  }
+  return out;
+}
+
+/** Bilinear resize of one float plane. */
+function resizePlane(
+  src: Float32Array,
+  sw: number,
+  sh: number,
+  dw: number,
+  dh: number
+): Float32Array {
+  const out = new Float32Array(dw * dh);
+  const fx = sw / dw;
+  const fy = sh / dh;
+  for (let y = 0; y < dh; y++) {
+    const sy = Math.min(sh - 1, Math.max(0, (y + 0.5) * fy - 0.5));
+    const y0 = Math.floor(sy);
+    const y1 = Math.min(sh - 1, y0 + 1);
+    const ty = sy - y0;
+    for (let x = 0; x < dw; x++) {
+      const sx = Math.min(sw - 1, Math.max(0, (x + 0.5) * fx - 0.5));
+      const x0 = Math.floor(sx);
+      const x1 = Math.min(sw - 1, x0 + 1);
+      const tx = sx - x0;
+      const top = src[y0 * sw + x0] * (1 - tx) + src[y0 * sw + x1] * tx;
+      const bottom = src[y1 * sw + x0] * (1 - tx) + src[y1 * sw + x1] * tx;
+      out[y * dw + x] = top * (1 - ty) + bottom * ty;
+    }
+  }
+  return out;
+}
+
+/** mulberry32: small, fast, and the same sequence in every browser. */
+function seededRandom(seed: number): () => number {
+  let a = seed >>> 0;
+  return () => {
+    a = (a + 0x6d2b79f5) >>> 0;
+    let t = a;
+    t = Math.imul(t ^ (t >>> 15), t | 1);
+    t ^= t + Math.imul(t ^ (t >>> 7), t | 61);
+    return ((t ^ (t >>> 14)) >>> 0) / 4294967296;
+  };
+}
+
+/** The frame's own fingerprint: the same pixels always seed the same grain. */
+function frameSeed(data: Uint8ClampedArray): number {
+  let h = 0x811c9dc5;
+  const step = Math.max(4, Math.floor(data.length / 4096) & ~3);
+  for (let i = 0; i < data.length; i += step) {
+    h ^= data[i] + (data[i + 1] << 8) + (data[i + 2] << 16);
+    h = Math.imul(h, 0x01000193);
+  }
+  return h >>> 0;
+}
+
+/**
+ * One plane of soft-edged noise with unit deviation: Gaussian white noise,
+ * blurred, renormalised. `scale` below 1 generates it smaller and stretches
+ * it, which is both cheaper and how coarse grain is made.
+ */
+function grainPlane(
+  random: () => number,
+  width: number,
+  height: number,
+  sigma: number,
+  scale: number
+): Float32Array {
+  const w = Math.max(1, Math.round(width * scale));
+  const h = Math.max(1, Math.round(height * scale));
+  const white = new Float32Array(w * h);
+  for (let i = 0; i < white.length; i += 2) {
+    // Box-Muller, both halves used
+    const u = Math.max(random(), 1e-7);
+    const v = random();
+    const mag = Math.sqrt(-2 * Math.log(u));
+    white[i] = mag * Math.cos(2 * Math.PI * v);
+    if (i + 1 < white.length) white[i + 1] = mag * Math.sin(2 * Math.PI * v);
+  }
+  let plane = blurPlane(white, w, h, sigma * scale);
+  if (scale !== 1) plane = resizePlane(plane, w, h, width, height);
+  let sq = 0;
+  for (let i = 0; i < plane.length; i++) sq += plane[i] * plane[i];
+  const deviation = Math.sqrt(sq / plane.length) || 1;
+  for (let i = 0; i < plane.length; i++) plane[i] /= deviation;
+  return plane;
+}
+
+/**
+ * The grain itself is made once per frame size and kept: making it is a
+ * third of a look's cost, and a guest shoots a roll, not a frame. What the
+ * frame's seed decides is where in the sheet each layer starts, so every
+ * Shot still gets its own grain and the same frame always gets the same.
+ */
+interface GrainSheet {
+  width: number;
+  height: number;
+  /** Fine grain, full size. */
+  fine: Float32Array;
+  /** Dye clumps and the colour in the grain: made at half size. */
+  coarse: Float32Array;
+}
+
+let grainSheet: GrainSheet | null = null;
+
+function grainFor(width: number, height: number): GrainSheet {
+  if (grainSheet && grainSheet.width === width && grainSheet.height === height)
+    return grainSheet;
+  const random = seededRandom(0x9e3779b9);
+  grainSheet = {
+    width,
+    height,
+    fine: grainPlane(random, width, height, 0.6, 1),
+    coarse: grainPlane(random, width, height, 1.3, 0.5),
+  };
+  return grainSheet;
+}
+
+/**
+ * Make the grain ahead of the first Shot. The camera calls this while it is
+ * idle, so the first press of the shutter does not pay for it.
+ */
+export function warmMemoRollGrain(width: number, height: number): void {
+  grainFor(width, height);
+}
+
+/** How far a hue (0..1) sits inside a band, scaled by how saturated it is. */
+function hueBand(hue: number, sat: number, centre: number, width: number) {
+  const d = Math.abs(((((hue - centre + 0.5) % 1) + 1) % 1) - 0.5);
+  const inBand = 1 - d / width;
+  return inBand <= 0 ? 0 : inBand * Math.min(1, sat * 3);
+}
+
+/**
+ * A look, start to finish, on the pixels. Mutates `image` in place and
+ * returns the elapsed milliseconds. `options.grain: false` leaves the grain
+ * off - that is for the port check in docs/research, never for the camera.
+ */
+function applyLookPixels(
+  image: ImageData,
+  look: MemoRollLookId,
+  options: { grain?: boolean } = {}
+): number {
+  const start = performance.now();
+  const { width, height, data } = image;
+  const count = width * height;
+  const params = COMPACT_LOOKS[look];
+  const seed = frameSeed(data);
+
+  // 1. A compact's lens: a touch soft, never sharpened.
+  const planes = [0, 1, 2].map((c) => {
+    const plane = new Float32Array(count);
+    for (let p = 0, i = c; p < count; p++, i += 4) plane[p] = data[i] / 255;
+    return blurPlane(plane, width, height, 1.05);
+  });
+  const [red, green, blue] = planes;
+
+  // 2-4. Blues and greens bent, tone curve with split toning, saturation.
+  const luts = lookLuts(look);
+  const [bR, bG, bB, bPull] = params.blue;
+  const [gR, gG, gB, gLift] = params.green;
+  const luminance = new Float32Array(count);
+  for (let p = 0; p < count; p++) {
+    let r = red[p];
+    let g = green[p];
+    let b = blue[p];
+    const mx = Math.max(r, g, b);
+    const mn = Math.min(r, g, b);
+    const chroma = mx - mn + 1e-6;
+    let hue: number;
+    if (mx === r) hue = ((((g - b) / chroma) % 6) + 6) % 6;
+    else if (mx === g) hue = (b - r) / chroma + 2;
+    else hue = (r - g) / chroma + 4;
+    hue /= 6;
+    const sat = chroma / (mx + 1e-6);
+    const inBlue = hueBand(hue, sat, 0.6, 0.13);
+    const inGreen = hueBand(hue, sat, 0.33, 0.14);
+    if (inBlue > 0) {
+      const lum = 0.2126 * r + 0.7152 * g + 0.0722 * b;
+      r += inBlue * (bR + bPull * (lum - r));
+      g += inBlue * (bG + bPull * (lum - g));
+      b += inBlue * (bB + bPull * (lum - b));
+    }
+    if (inGreen > 0) {
+      r += inGreen * (gR + gLift);
+      g += inGreen * (gG + gLift);
+      b += inGreen * (gB + gLift);
+    }
+    r = luts[0][Math.round(clamp01(r) * 255)];
+    g = luts[1][Math.round(clamp01(g) * 255)];
+    b = luts[2][Math.round(clamp01(b) * 255)];
+    const lum = 0.2126 * r + 0.7152 * g + 0.0722 * b;
+    r = lum + (r - lum) * params.saturation;
+    g = lum + (g - lum) * params.saturation;
+    b = lum + (b - lum) * params.saturation;
+    red[p] = r;
+    green[p] = g;
+    blue[p] = b;
+    luminance[p] = 0.2126 * r + 0.7152 * g + 0.0722 * b;
+  }
+
+  // 5. Halation: what is bright glows into what is next to it. The mask is
+  // blurred at quarter size - the glow is far wider than a pixel.
+  const qw = Math.max(1, Math.round(width / 4));
+  const qh = Math.max(1, Math.round(height / 4));
+  const mask = resizePlane(luminance, width, height, qw, qh);
+  for (let i = 0; i < mask.length; i++) {
+    mask[i] = clamp01((mask[i] - 0.8) / 0.16);
+  }
+  const glow = resizePlane(
+    blurPlane(mask, qw, qh, 11 / 4),
+    qw,
+    qh,
+    width,
+    height
+  );
+
+  // 6. Grain: fine grain plus larger dye clumps, with a little colour in it;
+  // strongest in the mids, thinner where the print is bright. Five layers
+  // read from the kept sheet, each starting where this frame's seed puts it.
+  const sheet = options.grain !== false ? grainFor(width, height) : null;
+  const random = seededRandom(seed);
+  let iFine = Math.floor(random() * count);
+  let iClump = Math.floor(random() * count);
+  let iRed = Math.floor(random() * count);
+  let iGreen = Math.floor(random() * count);
+  let iBlue = Math.floor(random() * count);
+
+  // 7. Vignette, and back to bytes.
+  const vig = vignetteMap(width, height, LOOK_VIGNETTE);
+  for (let p = 0, i = 0; p < count; p++, i += 4) {
+    const halo = glow[p];
+    let r = red[p] + halo * params.halo[0] * (1 - red[p]);
+    let g = green[p] + halo * params.halo[1] * (1 - green[p]);
+    let b = blue[p] + halo * params.halo[2] * (1 - blue[p]);
+    if (sheet) {
+      const { fine, coarse } = sheet;
+      const lum = 0.2126 * r + 0.7152 * g + 0.0722 * b;
+      const amplitude =
+        (0.013 + 0.014 * clamp01(1 - Math.abs(lum - 0.38) / 0.5)) *
+        (1 - 0.35 * clamp01((lum - 0.6) / 0.4)) *
+        params.grain;
+      const shared = 0.9 * fine[iFine] + 0.28 * coarse[iClump];
+      r += amplitude * (shared + 0.2 * coarse[iRed]);
+      g += amplitude * (shared + 0.2 * coarse[iGreen]);
+      b += amplitude * (shared + 0.2 * coarse[iBlue]);
+      if (++iFine === count) iFine = 0;
+      if (++iClump === count) iClump = 0;
+      if (++iRed === count) iRed = 0;
+      if (++iGreen === count) iGreen = 0;
+      if (++iBlue === count) iBlue = 0;
+    }
+    const gain = vig[p] * 255;
+    data[i] = Math.max(0, Math.min(255, clamp01(r) * gain + 0.5));
+    data[i + 1] = Math.max(0, Math.min(255, clamp01(g) * gain + 0.5));
+    data[i + 2] = Math.max(0, Math.min(255, clamp01(b) * gain + 0.5));
+  }
+  return performance.now() - start;
+}
+
+/** The look pass without grain, for docs/research's port check only. */
+export function applyMemoRollLookWithoutGrain(
+  image: ImageData,
+  look: MemoRollLookId
+): number {
+  return applyLookPixels(image, look, { grain: false });
+}
+
 /* ----------------------- the pixel pass ----------------------- */
 
 export interface BakeTimings {
@@ -301,13 +806,15 @@ export interface BakeTimings {
 /**
  * The color stage plus vignette, in one deterministic pass over the pixels.
  * Mutates `image` in place so callers can assert on it before any encode.
- * 'none' is a strict identity. Returns the elapsed milliseconds.
+ * 'none' is a strict identity. Returns the elapsed milliseconds. A look
+ * (Gold, Green, Clean, Teal) takes the look pipeline above instead.
  */
 export function applyMemoRollFilmPixels(
   image: ImageData,
   preset: MemoRollFilmId
 ): number {
   if (preset === 'none') return 0;
+  if (isLook(preset)) return applyLookPixels(image, preset);
   const start = performance.now();
   const params = PRESETS[preset];
   const { r: lutR, g: lutG, b: lutB } = lutsFor(preset);
@@ -366,7 +873,7 @@ export function applyHighlightBloom(
   source: CanvasImageSource,
   preset: MemoRollFilmId
 ): number {
-  if (preset === 'none') return 0;
+  if (preset === 'none' || isLook(preset)) return 0;
   const params = PRESETS[preset];
   if (!params.bloom) return 0;
   const start = performance.now();

@@ -190,9 +190,10 @@ It is also when shooting ends: a Roll can be spent right up to the Reveal, and t
 
 **Film**:
 The analog look a Shot Bakes through, chosen by the guest on the camera, per Shot, before it is taken.
-Six exist: Wedding Natural (the approved consumer-negative look), Soft Pastel, Clean Cool, Bold Color, Black & White, and RAW, which is plain digital.
-No Film carries synthetic grain; a look is tone and color only, and the low-light Party look stays unofferable until a representative input approves it.
-The camera opens on Wedding Natural and stays on whatever the guest last chose.
+Five exist: Gold, Green, Clean and Teal - the film-compact looks the owner approved on 2026-11-13 against 35mm point-and-shoot references - and RAW, which is plain digital.
+A look is a soft lens, tone and color, halation, and grain; the grain is seeded from the frame, so the same frame always Bakes the same way.
+The recipes they replaced (Wedding Natural, Soft Pastel, Clean Cool, Bold Color, Black & White, and the never-offered Party) are retired from the camera but kept in the renderer.
+The camera opens on Gold and stays on whatever the guest last chose.
 The couple has no say: the choice moved from creator to guest and did not leave a switch behind.
 Shots Baked under retired rosters remain what they are: the pixels were settled when they were taken.
 _Avoid_: filter, effect, film filter

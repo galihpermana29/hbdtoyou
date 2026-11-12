@@ -562,8 +562,8 @@ async function memorollEnterCamera(page) {
  * Two of those are driven rather than defaulted, deliberately. Flash is
  * capability-detected and this browser has no flash to detect, so the dock's
  * lighting dial stands in for the hardware - the same stated stand-in it is
- * for clocks and rolls. And the camera opens on Wedding Natural (the film a
- * wedding wants), while the design draws its selected pill on RAW; pressing
+ * for clocks and rolls. And the camera opens on Gold (the roster's first
+ * look), while the design draws its selected pill on RAW; pressing
  * RAW checks the designed state and the act of choosing it in one move.
  */
 async function memorollCameraDesigned(page) {
