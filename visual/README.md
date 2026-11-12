@@ -266,6 +266,6 @@ takes a photograph.
 
 `node visual/shot-e2e.mjs` does: it drives the demo the way a guest does, presses the
 shutter, and asserts that what comes back is a 960x1280 JPEG baked through the film and
-stored in IndexedDB, with the strip opening on Wedding Natural. Run it after anything
+stored in IndexedDB, with the strip opening on Gold. Run it after anything
 that touches the camera, the film pipeline or the shot store - re-skinning the camera
 could have broken all three without moving a pixel.

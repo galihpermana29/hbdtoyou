@@ -166,11 +166,13 @@ export const expectations = [
     style: { gap: '16px', padding: '16px' },
   },
   filmPill('RAW', true),
-  filmPill('Wedding Natural', false),
-  filmPill('Soft Pastel', false),
-  filmPill('Clean Cool', false),
-  filmPill('Bold Color', false),
-  filmPill('Black & White', false),
+  // The roster of 2026-11-13 (owner): four film-compact looks in place of
+  // the five recipes of hbd-sk4. The pills' design is unchanged; only which
+  // films the strip names changed (src/components/memoroll/guest/films.ts).
+  filmPill('Gold', false),
+  filmPill('Green', false),
+  filmPill('Clean', false),
+  filmPill('Teal', false),
   {
     name: 'the mauve ring around the shutter',
     select: 'section[aria-label="Camera"] > div:last-of-type span[aria-hidden]',

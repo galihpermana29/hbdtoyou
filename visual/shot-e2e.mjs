@@ -3,7 +3,7 @@
  *
  * `npm run visual` asserts that the camera looks like the design. This asserts
  * that it still works: a shot bakes at 960x1280 through the film pipeline and
- * lands in IndexedDB, and the strip opens on Wedding Natural. Re-skinning the
+ * lands in IndexedDB, and the strip opens on Gold. Re-skinning the
  * camera (hbd-qti.2) could have broken any of that without moving a pixel.
  *
  * Drives the demo the way a guest does - gate, Check Again, Got it, SHOOT -
@@ -27,7 +27,7 @@ try {
   await page.getByRole('button', { name: 'Check Again' }).click();
   await page.getByRole('button', { name: 'Got it' }).click();
 
-  // Ten shots on a fresh roll, and the strip opens on Wedding Natural.
+  // Ten shots on a fresh roll, and the strip opens on Gold.
   const before = await page
     .locator('section[aria-label="Camera"] >> text=/^10$/')
     .first()
@@ -78,7 +78,7 @@ try {
   );
   const pass =
     before === '10' &&
-    opensOn === 'Wedding Natural' &&
+    opensOn === 'Gold' &&
     shot.rows === 1 &&
     shot.type === 'image/jpeg' &&
     shot.width === 960 &&

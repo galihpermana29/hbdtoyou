@@ -7,7 +7,7 @@ import {
   withTorchPulse,
   type PhotoCapturer,
 } from '@/lib/memoroll-camera';
-import { bakeMemoRollFilm } from '@/lib/memoroll-film';
+import { bakeMemoRollFilm, warmMemoRollGrain } from '@/lib/memoroll-film';
 import { EASE_OUT, tick } from '../ui/motion';
 import {
   AnimatePresence,
@@ -130,6 +130,16 @@ export default function CameraScreen({
     document.fonts?.load(`52px ${stampFonts.hand}`).catch(() => undefined);
     document.fonts?.load(`500 30px ${stampFonts.ui}`).catch(() => undefined);
   }, [stampFonts.hand, stampFonts.ui]);
+
+  useEffect(() => {
+    // The looks' grain is made once and kept; make it while the guest is
+    // still framing, not on the first press of the shutter.
+    const id = window.setTimeout(
+      () => warmMemoRollGrain(FRAME_W, FRAME_H),
+      600
+    );
+    return () => window.clearTimeout(id);
+  }, []);
 
   useEffect(() => {
     let cancelled = false;
@@ -318,6 +328,11 @@ export default function CameraScreen({
       // White-screen animation: shutter feedback only, never a light source.
       setFlashKey((k) => k + 1);
       const stage = await lightAndTake();
+      // A look is a few hundred milliseconds of arithmetic on the main
+      // thread (2026-11-13: soft lens, halation, grain). Let the shutter's
+      // white flash reach the screen first - once painted it fades on the
+      // compositor, whatever the main thread is doing.
+      await painted();
       const blob = await bakeShot(stage, film, stampDate, stampFonts);
       onShot(blob, film);
     } finally {
@@ -506,8 +521,7 @@ export default function CameraScreen({
                   <p
                     className="text-[13px] leading-[150%]"
                     style={{ color: 'rgba(224, 218, 191, 0.85)' }}>
-                    You&apos;ve shot all {rollSize}. They develop at the
-                    reveal
+                    You&apos;ve shot all {rollSize}. They develop at the reveal
                     {revealLabel ? (
                       <>
                         {' '}
@@ -774,6 +788,13 @@ export default function CameraScreen({
       </AnimatePresence>
     </section>
   );
+}
+
+/** Resolves once the browser has painted what was just rendered. */
+function painted(): Promise<void> {
+  return new Promise((resolve) => {
+    requestAnimationFrame(() => requestAnimationFrame(() => resolve()));
+  });
 }
 
 /**
