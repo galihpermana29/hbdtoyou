@@ -55,6 +55,7 @@
     "cropperjs": "^1.6.2",
     "dayjs": "^1.11.13",
     "embla-carousel-react": "^8.5.1",
+    "fflate": "^0.8.3",
     "framer-motion": "^12.12.1",
     "gif.js": "^0.2.0",
     "html2canvas": "^1.4.1",

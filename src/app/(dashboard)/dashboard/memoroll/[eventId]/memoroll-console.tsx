@@ -24,6 +24,7 @@ import {
   memorollRecordFrom,
   serializeMemorollRecord,
 } from '@/lib/memoroll-record';
+import { buildRollZip } from '@/lib/memoroll-zip';
 
 const card =
   'rounded-[12px] border border-[#EAECF0] bg-white p-[20px] flex flex-col gap-[12px]';
@@ -124,6 +125,58 @@ export default function MemorollConsole({
   const [said_, setSaid] = useState<
     { kind: 'saved' } | { kind: 'failed'; problem: string } | null
   >(null);
+
+  /** Download all: what it is doing now, or null when idle. */
+  const [zipStatus, setZipStatus] = useState<string | null>(null);
+  const [zipNote, setZipNote] = useState<{ ok: boolean; text: string } | null>(
+    null
+  );
+
+  /**
+   * Every photo of the roll as one ZIP - all of them, not just the hundred
+   * shown here (owner, 2026-11-12). Built in this browser; see
+   * src/lib/memoroll-zip.ts for why.
+   */
+  const downloadAll = async () => {
+    setZipNote(null);
+    setZipStatus('Preparing…');
+    try {
+      const { blob, count, missed } = await buildRollZip(
+        event.id,
+        (progress) =>
+          setZipStatus(
+            progress.stage === 'listing'
+              ? 'Preparing…'
+              : progress.stage === 'fetching'
+                ? `Fetching ${progress.done} of ${progress.total}…`
+                : 'Zipping…'
+          )
+      );
+      const url = URL.createObjectURL(blob);
+      const anchor = document.createElement('a');
+      anchor.href = url;
+      anchor.download = `memoroll-${event.code}.zip`;
+      anchor.click();
+      setTimeout(() => URL.revokeObjectURL(url), 10_000);
+      setZipNote(
+        missed > 0
+          ? {
+              ok: false,
+              text: `Saved ${count} photos. ${missed} could not be fetched - try again to get them.`,
+            }
+          : { ok: true, text: `Saved all ${count} photos.` }
+      );
+    } catch (error) {
+      setZipNote({
+        ok: false,
+        text: `The photos could not be downloaded: ${
+          error instanceof Error ? error.message : String(error)
+        }.`,
+      });
+    } finally {
+      setZipStatus(null);
+    }
+  };
 
   /** Which photo's Delete has been pressed once, waiting for the second. */
   const [armed, setArmed] = useState<string | null>(null);
@@ -404,13 +457,30 @@ export default function MemorollConsole({
 
       {/* Every shot, reveal or no reveal. */}
       <div className={card}>
-        <h2 className="text-[18px] font-[600] leading-[28px] text-[#182230]">
-          Photos
-        </h2>
+        <div className="flex flex-wrap items-start justify-between gap-[12px]">
+          <h2 className="text-[18px] font-[600] leading-[28px] text-[#182230]">
+            Photos
+          </h2>
+          {photos.length > 0 ? (
+            <button
+              type="button"
+              onClick={downloadAll}
+              disabled={zipStatus !== null}
+              aria-busy={zipStatus !== null}
+              className={primaryAction}>
+              {zipStatus ?? 'Download all (ZIP)'}
+            </button>
+          ) : null}
+        </div>
         <p className={note}>
           Everything guests have shot, including what the reveal still hides
           from them. Deleting removes a photo for everyone, for good.
         </p>
+        {zipNote ? (
+          <p role="status" className={zipNote.ok ? good : alert}>
+            {zipNote.text}
+          </p>
+        ) : null}
         {deleteProblem ? (
           <p role="alert" className={alert}>
             {deleteProblem}
