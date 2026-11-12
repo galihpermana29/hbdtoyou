@@ -70,7 +70,7 @@ export default async function MemorollCreatePage({
   }
 
   return (
-    <main className={memorollFonts}>
+    <main className={`${memorollFonts} memoroll-native`}>
       <MemorollCreate
         initialDraft={initialDraft}
         weddingId={linkedWeddingId}

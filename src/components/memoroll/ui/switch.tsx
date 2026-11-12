@@ -1,6 +1,7 @@
 'use client';
 
 import { motion, useReducedMotion } from 'framer-motion';
+import { EASE_IN_OUT } from './motion';
 import { colour } from './tokens';
 
 /**
@@ -36,11 +37,15 @@ export default function Switch({
       className="relative h-[30px] w-[52px] shrink-0 rounded-full"
       style={{ background: on ? colour.flame : colour.hairline }}>
       <motion.span
-        className="absolute top-[3px] h-[24px] w-[24px] rounded-full bg-white"
+        className="absolute left-[3px] top-[3px] h-[24px] w-[24px] rounded-full bg-white"
         initial={false}
-        animate={{ left: on ? 25 : 3 }}
+        // transform, not `left`: a moving `left` lays the page out again on
+        // every frame (animation-performance). 22px is the old 3 -> 25.
+        animate={{
+          transform: on ? 'translateX(22px)' : 'translateX(0px)',
+        }}
         transition={
-          reduce ? { duration: 0 } : { duration: 0.2, ease: [0.32, 0.72, 0, 1] }
+          reduce ? { duration: 0 } : { duration: 0.2, ease: EASE_IN_OUT }
         }
         style={{
           boxShadow:

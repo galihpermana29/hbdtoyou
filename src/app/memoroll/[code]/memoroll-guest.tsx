@@ -1,6 +1,6 @@
 'use client';
 
-import { AnimatePresence, motion, useReducedMotion } from 'framer-motion';
+import { AnimatePresence, useReducedMotion } from 'framer-motion';
 import { signIn } from 'next-auth/react';
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 
@@ -40,9 +40,12 @@ import { removeSession } from '@/store/get-set-session';
 // (ADR 0007; the legacy faces are hbd-3i5's to retire).
 import { homemadeApple, poppins } from '@/app/memoroll/demo/fonts';
 import {
-  REDUCED_FADE,
-  screenVariants,
-} from '@/app/memoroll/demo/variants';
+  directionBetween,
+  pushVariants,
+  reducedScreenVariants,
+} from '@/components/memoroll/ui/motion';
+import PushScreen from '@/components/memoroll/ui/push-screen';
+import Toast from '@/components/memoroll/ui/toast';
 import { useRoll } from './use-roll';
 
 type Screen =
@@ -52,6 +55,29 @@ type Screen =
   | 'camera'
   | 'gallery'
   | 'darkroom';
+
+/** How deep each screen sits in the guest's way through. */
+const SCREEN_RANK: Record<Screen, number> = {
+  cover: 0,
+  countdown: 1,
+  username: 1,
+  camera: 2,
+  gallery: 3,
+  darkroom: 4,
+};
+
+/** The Reveal for a guest's own clock: "Fri 13 Nov, 21:00". */
+function revealLabelFor(at: Date): string {
+  return isNaN(at.getTime())
+    ? ''
+    : at.toLocaleString('en-GB', {
+        weekday: 'short',
+        day: 'numeric',
+        month: 'short',
+        hour: '2-digit',
+        minute: '2-digit',
+      });
+}
 
 /** A photo with the heading its group sits under, before grouping. */
 type RollEntry = { photo: GalleryPhoto; groupLabel: string };
@@ -585,6 +611,21 @@ export default function MemorollGuest({
 
   const dark = screen === 'camera' || screen === 'darkroom';
 
+  /**
+   * The guest's way through as a navigation stack, so each move is a push
+   * (deeper) or a pop (back out). The Dark Room is a ceremony rather than a
+   * place: going into it and coming out to the developed wall crossfade.
+   */
+  const lastScreen = useRef(screen);
+  const direction = useRef(0);
+  if (screen !== lastScreen.current) {
+    direction.current =
+      screen === 'darkroom' || lastScreen.current === 'darkroom'
+        ? 0
+        : directionBetween(SCREEN_RANK[lastScreen.current], SCREEN_RANK[screen]);
+    lastScreen.current = screen;
+  }
+
   return (
     <div
       className={`min-h-[100dvh] transition-colors duration-300 ${
@@ -594,16 +635,21 @@ export default function MemorollGuest({
         className={`relative mx-auto flex min-h-[100dvh] max-w-[430px] flex-col overflow-x-clip shadow-2xl ${
           dark ? 'bg-[#212121]' : 'bg-[#f7f5f3]'
         }`}>
-        <AnimatePresence mode="wait" initial={false}>
-          <motion.div
+        <AnimatePresence
+          mode="popLayout"
+          initial={false}
+          custom={direction.current}>
+          <PushScreen
             key={screen}
-            variants={reduce ? undefined : screenVariants}
-            initial={reduce ? { opacity: 0 } : 'enter'}
-            animate={
-              reduce ? { opacity: 1, transition: REDUCED_FADE } : 'center'
-            }
-            exit={reduce ? { opacity: 0, transition: REDUCED_FADE } : 'exit'}
-            className="flex min-h-[100dvh] flex-col">
+            custom={direction.current}
+            variants={reduce ? reducedScreenVariants : pushVariants}
+            initial="enter"
+            animate="center"
+            exit="exit"
+            className="flex min-h-[100dvh] flex-col"
+            // Its own ground, so the screen beneath a push never shows
+            // through - the same colour the frame around it wears.
+            style={{ background: dark ? '#212121' : '#f7f5f3' }}>
             {screen === 'cover' && (
               <Cover
                 eventName={event.host_name}
@@ -628,6 +674,7 @@ export default function MemorollGuest({
               <CameraScreen
                 remaining={remaining}
                 rollSize={event.shot_limit}
+                revealLabel={revealLabelFor(new Date(revealMs))}
                 galleryCount={photoCount ?? allEntries.length}
                 film={film}
                 onPickFilm={pickFilm}
@@ -681,25 +728,16 @@ export default function MemorollGuest({
                 }}
               />
             )}
-          </motion.div>
+          </PushScreen>
         </AnimatePresence>
 
-        {problem ? (
-          <div
-            role="alert"
-            className="pointer-events-none absolute inset-x-[16px] bottom-[96px] z-30">
-            <p
-              className="pointer-events-auto rounded-[12px] px-[16px] py-[12px] text-[13px] font-semibold leading-[150%] shadow-lg"
-              style={{
-                background: colour.ink,
-                color: colour.paper,
-                fontFamily: 'var(--font-mr-body)',
-              }}
-              onClick={() => setProblem(null)}>
-              {problem}
-            </p>
-          </div>
-        ) : null}
+        <Toast
+          role="alert"
+          message={problem}
+          background={colour.ink}
+          color={colour.paper}
+          onDismiss={() => setProblem(null)}
+        />
       </div>
     </div>
   );

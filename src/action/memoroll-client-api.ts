@@ -210,3 +210,18 @@ export async function deleteMemorollPhotoClient(
     { method: 'DELETE' }
   );
 }
+
+/**
+ * One page of every photo in an event the caller owns - veiled or not - from
+ * the browser, for the console's Download all, which pages through the whole
+ * roll rather than the hundred the console shows.
+ */
+export async function listMemorollPhotosClient(
+  eventId: string,
+  page: number,
+  limit: number
+): Promise<MemorollResult<IMemorollGalleryPhoto[]>> {
+  return callMemoroll<IMemorollGalleryPhoto[]>(
+    `/${encodeURIComponent(eventId)}/photos?page=${page}&limit=${limit}`
+  );
+}

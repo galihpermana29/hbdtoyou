@@ -36,19 +36,36 @@ export interface MockRollPhoto {
   stamp: string;
 }
 
+/**
+ * The sample photographs every MemoRoll surface shows before anybody has shot
+ * anything: the creator's welcome, the demo cover, the demo rolls.
+ *
+ * Checked into `public/memoroll-samples/`, not hosted: these used to be
+ * Cloudinary URLs on cloud `dxuumohme`, which Cloudinary disabled (every one
+ * answered 401 "cloud_name dxuumohme is disabled", found 2026-11-12), and
+ * the creator's welcome showed empty frames. Same remedy as
+ * src/lib/template-thumbnail.ts: no image host can take these away again.
+ *
+ * Source: the design's own "Pile-up stills: Wedding" (Figma Randos, node
+ * 734:6366), resized to 720px wide. Eight stills fill ten photo slots, so
+ * two of them appear twice on the demo rolls - more stills from the design
+ * can replace the repeats in slots 8 and 10.
+ */
+const SAMPLE = (name: string) => `/memoroll-samples/wedding-${name}.webp`;
+
 export const SAMPLE_SOURCES = [
-  'https://res.cloudinary.com/dxuumohme/image/upload/v1735834469/tccbqffnucbsyeeioutb.jpg',
-  'https://res.cloudinary.com/dxuumohme/image/upload/v1736878627/bubjbkztn7xfrxmusjtp.jpg',
-  'https://res.cloudinary.com/dxuumohme/image/upload/v1736880564/zm9qkwdjbbnugbohko9x.jpg',
-  'https://res.cloudinary.com/dxuumohme/image/upload/v1736880576/kdf19qhcabj6gnaoxx7s.jpg',
-  'https://res.cloudinary.com/dxuumohme/image/upload/v1736880581/ajhrmyr1qz4n1u1fscha.jpg',
-  'https://res.cloudinary.com/dxuumohme/image/upload/v1736880586/mwnbkxb11oo2ew2squ1z.jpg',
-  'https://res.cloudinary.com/dxuumohme/image/upload/v1736880592/sc6uynh62vjcvquu1dur.jpg',
-  'https://res.cloudinary.com/dxuumohme/image/upload/v1736880662/pm1dz6f6cq1ttk8b1vjh.jpg',
-  'https://res.cloudinary.com/dxuumohme/image/upload/v1736880667/jzdtgs5klr20uyyngxae.jpg',
+  SAMPLE('embrace'),
+  SAMPLE('group-selfie'),
+  SAMPLE('laughing'),
+  SAMPLE('cake-cutting'),
+  SAMPLE('dancing'),
+  SAMPLE('first-bite'),
+  SAMPLE('kids-under-table'),
+  SAMPLE('kicked-off-shoes'),
+  SAMPLE('group-selfie'),
+  // Index 9: the grey placeholder graphic - not a photograph, used nowhere.
   'https://res.cloudinary.com/ddlus5qur/image/upload/v1746085724/phu2rbi6fqnp71hytjex.jpg',
-  'https://res.cloudinary.com/dxuumohme/image/upload/w_800/v1735231561/gemsi8y1c20pwhdespcf.jpg',
-  'https://res.cloudinary.com/dxuumohme/image/upload/v1737048992/vz6tqrzgcht45fstloxc.png',
+  SAMPLE('embrace'),
 ];
 
 const CAM_OWNERS = ['Zidane', 'Widya', 'Nadia'];
@@ -69,9 +86,10 @@ const rollGroupLabel = (index: number) =>
   GALLERY_GROUP_LABELS[index < 6 ? 0 : 1];
 
 /**
- * The ten sample sources that are photographs. The other two are not: index 9
- * is a grey placeholder graphic and index 11 is the Memoify mark, and a roll
- * with either on it reads as a broken image rather than as somebody's shot.
+ * The ten sample sources that are photographs. Index 9 is not - it is a grey
+ * placeholder graphic, and a roll with it on it reads as a broken image
+ * rather than as somebody's shot. (Index 11, the Memoify mark, lived on the
+ * disabled cloud and was used nowhere, so it is gone.)
  */
 const ROLL_SOURCES = [...SAMPLE_SOURCES.slice(0, 9), SAMPLE_SOURCES[10]];
 

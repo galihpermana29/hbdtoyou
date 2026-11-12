@@ -1,6 +1,6 @@
 'use client';
 
-import { AnimatePresence, motion, useReducedMotion } from 'framer-motion';
+import { AnimatePresence, useReducedMotion } from 'framer-motion';
 import { useRouter } from 'next/navigation';
 import { useEffect, useRef, useState } from 'react';
 
@@ -30,6 +30,7 @@ import VibeStep from '@/components/memoroll/creator/vibe-step';
 import WelcomeScreen from '@/components/memoroll/creator/welcome-screen';
 import { ChevronLeftIcon } from '@/components/memoroll/ui/icons';
 import { colour } from '@/components/memoroll/ui/tokens';
+import Toast from '@/components/memoroll/ui/toast';
 import {
   COVER_STYLES,
   LAST_STEP,
@@ -38,7 +39,12 @@ import {
 import { newUploadImageWithAPI } from '@/lib/upload';
 // The motion constants are the demo's, on purpose: one source, so the product
 // and the walkthrough cannot drift apart in how a step arrives (ADR 0007).
-import { REDUCED_FADE, screenVariants } from '@/app/memoroll/demo/variants';
+import {
+  directionBetween,
+  pushVariants,
+  reducedScreenVariants,
+} from '@/components/memoroll/ui/motion';
+import PushScreen from '@/components/memoroll/ui/push-screen';
 import { buildMemorollPayload } from './payload';
 
 /**
@@ -166,6 +172,20 @@ export default function MemorollCreate({
     setView({ kind: 'step', step: Math.min(Math.max(step, 1), LAST_STEP) });
 
   const step = view.kind === 'step' ? view.step : 0;
+
+  /**
+   * Where this view sits in the flow, so moving between two of them is a
+   * push (forward) or a pop (back) - the native stack's direction. Read in
+   * render: the direction belongs to the change that produced this render.
+   */
+  const rank =
+    view.kind === 'welcome' ? 0 : view.kind === 'preview' ? LAST_STEP + 1 : step;
+  const lastRank = useRef(rank);
+  const direction = useRef(0);
+  if (rank !== lastRank.current) {
+    direction.current = directionBetween(lastRank.current, rank);
+    lastRank.current = rank;
+  }
   const back = () => {
     setProblem(null);
     goToStep(step - 1);
@@ -543,16 +563,23 @@ export default function MemorollCreate({
         style={{
           background: view.kind === 'welcome' ? colour.ink : colour.paper,
         }}>
-        <AnimatePresence mode="wait" initial={false}>
-          <motion.div
+        <AnimatePresence
+          mode="popLayout"
+          initial={false}
+          custom={direction.current}>
+          <PushScreen
             key={view.kind === 'step' ? `step-${view.step}` : view.kind}
-            variants={reduce ? undefined : screenVariants}
-            initial={reduce ? { opacity: 0 } : 'enter'}
-            animate={
-              reduce ? { opacity: 1, transition: REDUCED_FADE } : 'center'
-            }
-            exit={reduce ? { opacity: 0, transition: REDUCED_FADE } : 'exit'}
-            className="flex min-h-[100dvh] flex-col">
+            custom={direction.current}
+            variants={reduce ? reducedScreenVariants : pushVariants}
+            initial="enter"
+            animate="center"
+            exit="exit"
+            className="flex min-h-[100dvh] flex-col"
+            // Each screen paints its own ground: during a push both are on
+            // screen at once, and the one beneath must not show through.
+            style={{
+              background: view.kind === 'welcome' ? colour.ink : colour.paper,
+            }}>
             {view.kind === 'welcome' && (
               <WelcomeScreen
                 photos={WELCOME_PHOTOS}
@@ -667,47 +694,33 @@ export default function MemorollCreate({
                 }
               />
             )}
-          </motion.div>
+          </PushScreen>
         </AnimatePresence>
 
         {/* Success, said briefly: two seconds of toast, then the flipped
             footer carries the statement. It lingered once and sat over the
             pills it was announcing (owner, 2026-08-30). */}
-        {justPublished && !problem ? (
-          <div
-            role="status"
-            className="pointer-events-none absolute inset-x-[16px] bottom-[96px] z-30">
-            <p
-              className="rounded-[12px] px-[16px] py-[12px] text-[13px] font-semibold leading-[150%] shadow-lg"
-              style={{
-                background: colour.flame,
-                color: '#ffffff',
-                fontFamily: 'var(--font-mr-body)',
-              }}>
-              Your roll is published. The QR is ready whenever you need it.
-            </p>
-          </div>
-        ) : null}
+        <Toast
+          role="status"
+          message={
+            justPublished && !problem
+              ? 'Your roll is published. The QR is ready whenever you need it.'
+              : null
+          }
+          background={colour.flame}
+          color="#ffffff"
+        />
 
         {/* What stopped the last press, in a sentence, where the thumb that
             pressed is. Product-owned: the designed steps carry no problem
             slot, and inventing one inside them would be redrawing screens. */}
-        {problem ? (
-          <div
-            role="alert"
-            className="pointer-events-none absolute inset-x-[16px] bottom-[96px] z-30">
-            <p
-              className="pointer-events-auto rounded-[12px] px-[16px] py-[12px] text-[13px] font-semibold leading-[150%] shadow-lg"
-              style={{
-                background: colour.ink,
-                color: colour.paper,
-                fontFamily: 'var(--font-mr-body)',
-              }}
-              onClick={() => setProblem(null)}>
-              {problem}
-            </p>
-          </div>
-        ) : null}
+        <Toast
+          role="alert"
+          message={problem}
+          background={colour.ink}
+          color={colour.paper}
+          onDismiss={() => setProblem(null)}
+        />
 
         <AnimatePresence>
           {qrOpen && published?.code && (

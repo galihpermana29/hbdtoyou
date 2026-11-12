@@ -9,6 +9,7 @@ import HeaderRule from '../ui/header-rule';
 import MemoifyFooter from '../ui/memoify-footer';
 import { colour, pillShadow } from '../ui/tokens';
 import Cta from '../ui/cta';
+import { EASE_OUT } from '../ui/motion';
 import PhotoPreview from './photo-preview';
 import StorySheet from './story-sheet';
 import RollPrint from './print';
@@ -329,9 +330,10 @@ export default function GalleryScreen({
             initial={{ opacity: 0 }}
             animate={{
               opacity: 1,
-              transition: { duration: reduce ? 0.12 : 0.3 },
+              // Switched tens of times a visit: short, ease-out.
+              transition: { duration: reduce ? 0.12 : 0.18, ease: EASE_OUT },
             }}
-            exit={{ opacity: 0, transition: { duration: 0.12 } }}
+            exit={{ opacity: 0, transition: { duration: 0.1, ease: EASE_OUT } }}
             className="mt-[24px] flex flex-col gap-[12px]">
             {groups.map((group) => (
               <section key={group.label} className="flex flex-col gap-[8px]">
@@ -449,18 +451,23 @@ export default function GalleryScreen({
         )}
       </AnimatePresence>
 
-      {rollStoryOpen && showRollStory ? (
-        // Pinned to the viewport: the gallery scrolls, and a sheet anchored
-        // to its foot would open somewhere below the fold.
-        <div className="fixed inset-0 z-50 mx-auto max-w-[430px]">
-          <StorySheet
-            roll
-            photos={ownVisible}
-            eventName={eventName}
-            onClose={() => setRollStoryOpen(false)}
-          />
-        </div>
-      ) : null}
+      {/* Present, so the sheet slides away the way it came in. */}
+      <AnimatePresence>
+        {rollStoryOpen && showRollStory ? (
+          // Pinned to the viewport: the gallery scrolls, and a sheet anchored
+          // to its foot would open somewhere below the fold.
+          <div
+            key="roll-story"
+            className="fixed inset-0 z-50 mx-auto max-w-[430px]">
+            <StorySheet
+              roll
+              photos={ownVisible}
+              eventName={eventName}
+              onClose={() => setRollStoryOpen(false)}
+            />
+          </div>
+        ) : null}
+      </AnimatePresence>
     </div>
   );
 }

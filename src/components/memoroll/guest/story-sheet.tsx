@@ -10,6 +10,8 @@ import {
   type StoryTheme,
 } from '@/lib/memoroll-story';
 import Cta from '../ui/cta';
+import { REDUCED, SHEET_IN, SHEET_OUT } from '../ui/motion';
+import { useSheetDrag } from '../ui/sheet-drag';
 import { body, mono, script } from '../ui/fonts';
 import { colour } from '../ui/tokens';
 import type { GalleryPhoto } from './roll';
@@ -46,6 +48,7 @@ export default function StorySheet({
 }) {
   const reduce = useReducedMotion();
   const most = Math.min(4, photos.length);
+  const { backdropOpacity, dragProps } = useSheetDrag(onClose);
   const [theme, setTheme] = useState<StoryTheme>('paper');
   const [count, setCount] = useState(Math.min(3, most));
   /** Which of the guest's prints go in, in order; Shuffle redraws it. */
@@ -121,7 +124,7 @@ export default function StorySheet({
               // Only a guest's own print is signed: who took anyone else's is
               // the preview's "Who took this?" secret, and a Story must not
               // tell it.
-              shooter: chosen[0]?.own ? chosen[0].shooter ?? '' : '',
+              shooter: chosen[0]?.own ? (chosen[0].shooter ?? '') : '',
               theme,
               fonts,
             })
@@ -167,7 +170,7 @@ export default function StorySheet({
       return next;
     });
 
-  const name = `memoroll-story-${roll ? 'roll' : chosen[0]?.id ?? 'print'}.png`;
+  const name = `memoroll-story-${roll ? 'roll' : (chosen[0]?.id ?? 'print')}.png`;
 
   const save = (blob: Blob) => {
     const url = URL.createObjectURL(blob);
@@ -201,113 +204,132 @@ export default function StorySheet({
 
   return (
     <div className="absolute inset-0 z-40 flex flex-col justify-end">
-      <motion.button
-        type="button"
-        aria-label="Close"
-        onClick={onClose}
-        className="absolute inset-0 cursor-default"
-        style={{ background: 'rgba(0, 0, 0, 0.6)' }}
-        initial={{ opacity: 0 }}
-        animate={{ opacity: 1 }}
-      />
+      {/* Outer: the scrim arriving and leaving with the sheet. Inner: the
+          scrim itself, dimming as a finger drags the sheet down. */}
       <motion.div
-        role="dialog"
-        aria-label={roll ? 'Share my roll to Story' : 'Share to Story'}
-        className="relative flex flex-col items-center gap-[14px] px-[16px] pb-[32px] pt-[20px]"
-        style={{
-          background: colour.paper,
-          borderTopLeftRadius: 20,
-          borderTopRightRadius: 20,
-          fontFamily: 'var(--font-mr-body)',
-        }}
-        initial={reduce ? { opacity: 0 } : { y: '100%' }}
-        animate={reduce ? { opacity: 1 } : { y: 0 }}
-        transition={{ duration: reduce ? 0.12 : 0.3, ease: [0.32, 0.72, 0, 1] }}>
-        <h2
-          className="text-[18px] font-bold leading-[150%]"
-          style={{ color: colour.ink }}>
-          {roll ? 'Share your roll' : 'Share to your Story'}
-        </h2>
+        className="absolute inset-0"
+        initial={{ opacity: 0 }}
+        animate={{ opacity: 1, transition: reduce ? REDUCED : SHEET_IN }}
+        exit={{ opacity: 0, transition: reduce ? REDUCED : SHEET_OUT }}>
+        <motion.button
+          type="button"
+          aria-label="Close"
+          onClick={onClose}
+          className="absolute inset-0 cursor-default"
+          style={{ background: 'rgba(0, 0, 0, 0.6)', opacity: backdropOpacity }}
+        />
+      </motion.div>
+      <motion.div
+        className="relative"
+        initial={reduce ? { opacity: 0 } : { transform: 'translateY(100%)' }}
+        animate={
+          reduce
+            ? { opacity: 1, transition: REDUCED }
+            : { transform: 'translateY(0%)', transition: SHEET_IN }
+        }
+        exit={
+          reduce
+            ? { opacity: 0, transition: REDUCED }
+            : { transform: 'translateY(100%)', transition: SHEET_OUT }
+        }>
+        <motion.div
+          role="dialog"
+          aria-label={roll ? 'Share my roll to Story' : 'Share to Story'}
+          className="relative flex flex-col items-center gap-[14px] px-[16px] pb-[32px] pt-[20px]"
+          {...dragProps}
+          style={{
+            ...dragProps.style,
+            background: colour.paper,
+            borderTopLeftRadius: 20,
+            borderTopRightRadius: 20,
+            fontFamily: 'var(--font-mr-body)',
+          }}>
+          <h2
+            className="text-[18px] font-bold leading-[150%]"
+            style={{ color: colour.ink }}>
+            {roll ? 'Share your roll' : 'Share to your Story'}
+          </h2>
 
-        <div
-          className="relative flex aspect-[9/16] h-[48dvh] max-h-[440px] items-center justify-center overflow-hidden rounded-[12px]"
-          style={{ background: colour.track }}>
-          {previewUrl ? (
-            <img
-              src={previewUrl}
-              alt={roll ? 'Your roll as a Story' : 'Your Story'}
-              className="h-full w-full object-cover transition-opacity duration-150"
-              style={{ opacity: story ? 1 : 0.6 }}
-            />
-          ) : (
-            <span className="text-[13px]" style={{ color: colour.muted }}>
-              {problem ?? 'Drawing your Story…'}
-            </span>
-          )}
-        </div>
-
-        {roll ? (
-          <div className="flex items-center gap-[8px]">
-            <div
-              role="radiogroup"
-              aria-label="How many photos"
-              className="flex gap-[6px]">
-              {[2, 3, 4]
-                .filter((option) => option <= most)
-                .map((option) => (
-                  <button
-                    key={option}
-                    type="button"
-                    role="radio"
-                    aria-checked={count === option}
-                    aria-label={`${option} photos`}
-                    onClick={() => setCount(option)}
-                    className="h-[32px] w-[40px] rounded-full text-[13px] font-bold"
-                    style={chip(count === option)}>
-                    {option}
-                  </button>
-                ))}
-            </div>
-            {photos.length > count ? (
-              <button
-                type="button"
-                onClick={shuffle}
-                className="h-[32px] rounded-full px-[14px] text-[13px] font-bold"
-                style={chip(false)}>
-                Shuffle
-              </button>
-            ) : null}
+          <div
+            className="relative flex aspect-[9/16] h-[48dvh] max-h-[440px] items-center justify-center overflow-hidden rounded-[12px]"
+            style={{ background: colour.track }}>
+            {previewUrl ? (
+              <img
+                src={previewUrl}
+                alt={roll ? 'Your roll as a Story' : 'Your Story'}
+                className="h-full w-full object-cover transition-opacity duration-150"
+                style={{ opacity: story ? 1 : 0.6 }}
+              />
+            ) : (
+              <span className="text-[13px]" style={{ color: colour.muted }}>
+                {problem ?? 'Drawing your Story…'}
+              </span>
+            )}
           </div>
-        ) : null}
 
-        <div
-          role="radiogroup"
-          aria-label="Story style"
-          className="flex gap-[8px]">
-          {STORY_THEMES.map((option) => (
-            <button
-              key={option.id}
-              type="button"
-              role="radio"
-              aria-checked={theme === option.id}
-              onClick={() => setTheme(option.id)}
-              className="rounded-full px-[14px] py-[6px] text-[13px] font-bold"
-              style={chip(theme === option.id)}>
-              {option.label}
-            </button>
-          ))}
-        </div>
+          {roll ? (
+            <div className="flex items-center gap-[8px]">
+              <div
+                role="radiogroup"
+                aria-label="How many photos"
+                className="flex gap-[6px]">
+                {[2, 3, 4]
+                  .filter((option) => option <= most)
+                  .map((option) => (
+                    <button
+                      key={option}
+                      type="button"
+                      role="radio"
+                      aria-checked={count === option}
+                      aria-label={`${option} photos`}
+                      onClick={() => setCount(option)}
+                      className="h-[32px] w-[40px] rounded-full text-[13px] font-bold"
+                      style={chip(count === option)}>
+                      {option}
+                    </button>
+                  ))}
+              </div>
+              {photos.length > count ? (
+                <button
+                  type="button"
+                  onClick={shuffle}
+                  className="h-[32px] rounded-full px-[14px] text-[13px] font-bold"
+                  style={chip(false)}>
+                  Shuffle
+                </button>
+              ) : null}
+            </div>
+          ) : null}
 
-        <Cta onClick={share} disabled={!story} className="h-[44px] w-full">
-          Share to Story
-        </Cta>
-        <Cta
-          tone="outline"
-          onClick={() => story && save(story)}
-          disabled={!story}
-          className="-mt-[4px] h-[44px] w-full">
-          Save image
-        </Cta>
+          <div
+            role="radiogroup"
+            aria-label="Story style"
+            className="flex gap-[8px]">
+            {STORY_THEMES.map((option) => (
+              <button
+                key={option.id}
+                type="button"
+                role="radio"
+                aria-checked={theme === option.id}
+                onClick={() => setTheme(option.id)}
+                className="rounded-full px-[14px] py-[6px] text-[13px] font-bold"
+                style={chip(theme === option.id)}>
+                {option.label}
+              </button>
+            ))}
+          </div>
+
+          <Cta onClick={share} disabled={!story} className="h-[44px] w-full">
+            Share to Story
+          </Cta>
+          <Cta
+            tone="outline"
+            onClick={() => story && save(story)}
+            disabled={!story}
+            className="-mt-[4px] h-[44px] w-full">
+            Save image
+          </Cta>
+        </motion.div>
       </motion.div>
     </div>
   );

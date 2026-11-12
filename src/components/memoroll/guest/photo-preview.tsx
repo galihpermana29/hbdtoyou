@@ -1,6 +1,13 @@
 'use client';
 
-import { AnimatePresence, motion, useReducedMotion } from 'framer-motion';
+import {
+  AnimatePresence,
+  motion,
+  useMotionValue,
+  useReducedMotion,
+  useTransform,
+  type Variants,
+} from 'framer-motion';
 import { useEffect, useState } from 'react';
 import BackPill from '../ui/back-pill';
 import Cta from '../ui/cta';
@@ -189,47 +196,14 @@ export default function PhotoPreview({
           ))}
 
           <AnimatePresence mode="popLayout" initial={false} custom={direction}>
-            <motion.div
+            <DeckCard
               key={photo.id}
-              className="absolute w-[296px] cursor-grab active:cursor-grabbing"
-              style={{ left: DECK[2].left, top: DECK[2].top }}
-              initial={
-                reduce
-                  ? { opacity: 0 }
-                  : { opacity: 0, x: direction * 120, rotate: direction * 8 }
-              }
-              animate={{ opacity: 1, x: 0, rotate: DECK[2].rotate }}
-              exit={
-                reduce
-                  ? { opacity: 0 }
-                  : {
-                      opacity: 0,
-                      x: direction * -260,
-                      rotate: direction * -10,
-                    }
-              }
-              transition={
-                reduce
-                  ? { duration: 0.12, ease: EASE }
-                  : { type: 'spring', stiffness: 260, damping: 24 }
-              }
-              drag={reduce ? false : 'x'}
-              dragConstraints={{ left: 0, right: 0 }}
-              dragElastic={0.6}
+              photo={photo}
+              direction={direction}
+              reduce={!!reduce}
               onDragStart={onSwipeCueSeen}
-              onDragEnd={(_, info) => {
-                if (info.offset.x < -80 || info.velocity.x < -500) advance(1);
-                else if (info.offset.x > 80 || info.velocity.x > 500)
-                  advance(-1);
-              }}
-              onTap={() => advance(1)}>
-              <RollPrint
-                src={photo.src}
-                size="card"
-                stamp={photo.stamp}
-                shooter={null}
-              />
-            </motion.div>
+              onAdvance={advance}
+            />
           </AnimatePresence>
 
           {/* Once the wiggle has run its three passes the cue counts itself
@@ -312,13 +286,16 @@ export default function PhotoPreview({
           </div>
         ) : null}
       </div>
-      {storyOpen && storyEventName !== undefined ? (
-        <StorySheet
-          photos={[photo]}
-          eventName={storyEventName}
-          onClose={() => setStoryOpen(false)}
-        />
-      ) : null}
+      <AnimatePresence>
+        {storyOpen && storyEventName !== undefined ? (
+          <StorySheet
+            key="story"
+            photos={[photo]}
+            eventName={storyEventName}
+            onClose={() => setStoryOpen(false)}
+          />
+        ) : null}
+      </AnimatePresence>
     </motion.div>
   );
 }
@@ -344,5 +321,93 @@ function SwipeHand() {
         fill="#ffffff"
       />
     </svg>
+  );
+}
+
+const DECK_SPRING = { type: 'spring', duration: 0.45, bounce: 0.15 } as const;
+const DECK_MOTION: Variants = {
+  enter: (direction: number) => ({ opacity: 0, x: direction * 120 }),
+  center: { opacity: 1, x: 0, transition: DECK_SPRING },
+  exit: (direction: number) => ({
+    opacity: 0,
+    x: direction * -260,
+    transition: DECK_SPRING,
+  }),
+};
+const REDUCED_DECK: Variants = {
+  enter: { opacity: 0 },
+  center: { opacity: 1, transition: { duration: 0.12, ease: EASE } },
+  exit: { opacity: 0, transition: { duration: 0.12, ease: EASE } },
+};
+
+/**
+ * The top print of the deck, as a finger handles it (Emil Kowalski, gestures
+ * skill). While the finger is down the card IS the finger - 1:1 along x, no
+ * elastic, no spring - and it tilts with the drag the way a print held at
+ * the bottom would. On release it either flies on to the next print (past
+ * 80px, or flicked faster than 500px/s) carrying the drag's direction, or a
+ * spring sets it back. Each card owns its motion value, so the one leaving
+ * and the one arriving never share a position.
+ */
+function DeckCard({
+  photo,
+  direction,
+  reduce,
+  onDragStart,
+  onAdvance,
+}: {
+  photo: GalleryPhoto;
+  direction: number;
+  reduce: boolean;
+  onDragStart: () => void;
+  onAdvance: (step: number) => void;
+}) {
+  const x = useMotionValue(0);
+  // A held print turns as it is pulled: about 8deg at a 260px pull.
+  const tilt = useTransform(x, [-260, 0, 260], [-8, 0, 8]);
+
+  return (
+    <motion.div
+      className="absolute w-[296px] cursor-grab active:cursor-grabbing"
+      style={{
+        left: DECK[2].left,
+        top: DECK[2].top,
+        x,
+        rotate: DECK[2].rotate,
+        // The deck owns horizontal; the browser keeps vertical.
+        touchAction: 'pan-y',
+      }}
+      // The print inside is an <img>: without this a mouse drag starts the
+      // browser's own image drag, which cancels the gesture before the card
+      // moves (globals.css, [data-deck-card] img).
+      data-deck-card=""
+      custom={direction}
+      // Variants rather than objects: the leaving card is handed the newest
+      // direction through AnimatePresence's `custom`, so it always flies out
+      // the way the swipe went - an object would keep the direction from
+      // the render before it started leaving.
+      variants={reduce ? REDUCED_DECK : DECK_MOTION}
+      initial="enter"
+      animate="center"
+      exit="exit"
+      drag={reduce ? false : 'x'}
+      dragConstraints={{ left: 0, right: 0 }}
+      dragElastic={1}
+      dragTransition={{ bounceStiffness: 500, bounceDamping: 40 }}
+      onDragStart={onDragStart}
+      onDragEnd={(_, info) => {
+        if (info.offset.x < -80 || info.velocity.x < -500) onAdvance(1);
+        else if (info.offset.x > 80 || info.velocity.x > 500) onAdvance(-1);
+      }}
+      onTap={() => onAdvance(1)}>
+      <motion.div style={{ rotate: reduce ? 0 : tilt }}>
+        <RollPrint
+          src={photo.src}
+          size="card"
+          stamp={photo.stamp}
+          shooter={null}
+        />
+      </motion.div>
+    </motion.div>
   );
 }

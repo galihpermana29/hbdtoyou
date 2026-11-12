@@ -5,6 +5,8 @@ import { QRCodeCanvas, QRCodeSVG } from 'qrcode.react';
 import { useRef } from 'react';
 import Cta from '../ui/cta';
 import { ChevronLeftIcon } from '../ui/icons';
+import { REDUCED, SHEET_IN, SHEET_OUT } from '../ui/motion';
+import { useSheetDrag } from '../ui/sheet-drag';
 import { colour, type } from '../ui/tokens';
 
 /**
@@ -46,6 +48,7 @@ export default function QrSheet({
   downloadName?: string;
 }) {
   const reduce = useReducedMotion();
+  const { backdropOpacity, dragProps } = useSheetDrag(onClose);
   const printable = useRef<HTMLCanvasElement>(null);
 
   const downloadQr = () => {
@@ -59,116 +62,149 @@ export default function QrSheet({
 
   return (
     <div className="absolute inset-0 z-30 flex flex-col justify-end">
-      <motion.button
-        type="button"
-        aria-label="Close"
-        onClick={onClose}
-        className="absolute inset-0 cursor-default"
-        style={{ background: 'rgba(0, 0, 0, 0.5)' }}
-        initial={{ opacity: 0 }}
-        animate={{ opacity: 1 }}
-        transition={reduce ? { duration: 0.12 } : { duration: 0.22 }}
-      />
-
+      {/* Outer: the scrim arriving and leaving with the sheet. Inner: the
+          scrim itself, dimming as a finger drags the sheet down. */}
       <motion.div
-        role="dialog"
-        aria-label="Share QR Code"
-        className="relative flex flex-col items-center px-[16px] pb-[58px] pt-[20px]"
-        style={{
-          background: colour.paper,
-          borderTopLeftRadius: 20,
-          borderTopRightRadius: 20,
-        }}
-        initial={reduce ? { opacity: 0 } : { y: '100%' }}
-        animate={reduce ? { opacity: 1 } : { y: 0 }}
-        transition={
+        className="absolute inset-0"
+        initial={{ opacity: 0 }}
+        animate={{ opacity: 1, transition: reduce ? REDUCED : SHEET_IN }}
+        exit={{ opacity: 0, transition: reduce ? REDUCED : SHEET_OUT }}>
+        <motion.button
+          type="button"
+          aria-label="Close"
+          onClick={onClose}
+          className="absolute inset-0 cursor-default"
+          style={{ background: 'rgba(0, 0, 0, 0.5)', opacity: backdropOpacity }}
+        />
+      </motion.div>
+
+      {/* Outer: the sheet arriving and leaving (Vaul's iOS sheet timing, and
+          out the way it came in). Inner: the finger. */}
+      <motion.div
+        className="relative"
+        initial={reduce ? { opacity: 0 } : { transform: 'translateY(100%)' }}
+        animate={
           reduce
-            ? { duration: 0.12 }
-            : { duration: 0.34, ease: [0.32, 0.72, 0, 1] }
+            ? { opacity: 1, transition: REDUCED }
+            : { transform: 'translateY(0%)', transition: SHEET_IN }
+        }
+        exit={
+          reduce
+            ? { opacity: 0, transition: REDUCED }
+            : { transform: 'translateY(100%)', transition: SHEET_OUT }
         }>
-        {/* The design puts a second pill at the far right of this row at no
+        <motion.div
+          role="dialog"
+          aria-label="Share QR Code"
+          className="relative flex flex-col items-center px-[16px] pb-[58px] pt-[20px]"
+          {...dragProps}
+          style={{
+            ...dragProps.style,
+            background: colour.paper,
+            borderTopLeftRadius: 20,
+            borderTopRightRadius: 20,
+          }}>
+          {/* The design puts a second pill at the far right of this row at no
             opacity, which is a spacer holding the row symmetrical rather than a
             control. A flex row needs no such thing. */}
-        <div className="flex w-full">
-          <button
-            type="button"
-            aria-label="Back"
-            onClick={onClose}
-            className="flex h-[44px] w-[48px] items-center justify-center rounded-full"
-            style={{
-              background: colour.flame,
-              color: '#fafafa',
-              boxShadow:
-                'inset 4px 4px 40.9px 12px rgba(0,0,0,0.1), inset 0 -3.6px 5.2px 1px rgba(0,0,0,0.17)',
-            }}>
-            <ChevronLeftIcon className="h-[24px] w-[24px]" />
-          </button>
-        </div>
-
-        <div className="mt-[20px] flex w-full flex-col items-center gap-[32px]">
-          <div className="flex w-full flex-col items-center gap-[4px] text-center">
-            <h2
-              className={type.heading}
-              style={{ color: colour.ink, fontFamily: 'var(--font-mr-body)' }}>
-              Share QR Code
-            </h2>
-            <p
-              className={type.body}
-              style={{ color: colour.ink, fontFamily: 'var(--font-mr-body)' }}>
-              Anyone can join this Memoroll by scanning the QR Code. No app
-              download required!
-            </p>
-          </div>
-
-          <div className="flex flex-col items-center gap-[12px]">
-            <div
-              className="p-[12px]"
+          <div className="flex w-full">
+            <button
+              type="button"
+              aria-label="Back"
+              onClick={onClose}
+              className="flex h-[44px] w-[48px] items-center justify-center rounded-full"
               style={{
-                border: '1px solid rgba(33, 33, 33, 0.2)',
-                borderRadius: 10,
+                background: colour.flame,
+                color: '#fafafa',
+                boxShadow:
+                  'inset 4px 4px 40.9px 12px rgba(0,0,0,0.1), inset 0 -3.6px 5.2px 1px rgba(0,0,0,0.17)',
               }}>
-              <QRCodeSVG value={url} size={132} fgColor={colour.ink} bgColor={colour.paper} />
-            </div>
-            <p
-              className="text-[14px] font-bold leading-[150%] tracking-[-0.011em]"
-              style={{ color: colour.ink, fontFamily: 'var(--font-mr-body)' }}>
-              {eventName}
-            </p>
+              <ChevronLeftIcon className="h-[24px] w-[24px]" />
+            </button>
           </div>
 
-          <Cta tone="outline" onClick={onShareLink} className="h-[44px] w-full">
-            Share Link
-          </Cta>
+          <div className="mt-[20px] flex w-full flex-col items-center gap-[32px]">
+            <div className="flex w-full flex-col items-center gap-[4px] text-center">
+              <h2
+                className={type.heading}
+                style={{
+                  color: colour.ink,
+                  fontFamily: 'var(--font-mr-body)',
+                }}>
+                Share QR Code
+              </h2>
+              <p
+                className={type.body}
+                style={{
+                  color: colour.ink,
+                  fontFamily: 'var(--font-mr-body)',
+                }}>
+                Anyone can join this Memoroll by scanning the QR Code. No app
+                download required!
+              </p>
+            </div>
 
-          {downloadName ? (
-            <>
-              <Cta
-                tone="outline"
-                onClick={downloadQr}
-                className="-mt-[20px] h-[44px] w-full">
-                Download QR
-              </Cta>
-              {/* The print-size code, kept offscreen: only its pixels are
-                  wanted, and only when the button asks for them. */}
-              <div aria-hidden className="fixed -left-[2000px] top-0">
-                <QRCodeCanvas
-                  ref={printable}
+            <div className="flex flex-col items-center gap-[12px]">
+              <div
+                className="p-[12px]"
+                style={{
+                  border: '1px solid rgba(33, 33, 33, 0.2)',
+                  borderRadius: 10,
+                }}>
+                <QRCodeSVG
                   value={url}
-                  size={1024}
-                  marginSize={4}
-                  fgColor="#212121"
-                  bgColor="#ffffff"
+                  size={132}
+                  fgColor={colour.ink}
+                  bgColor={colour.paper}
                 />
               </div>
-            </>
-          ) : null}
+              <p
+                className="text-[14px] font-bold leading-[150%] tracking-[-0.011em]"
+                style={{
+                  color: colour.ink,
+                  fontFamily: 'var(--font-mr-body)',
+                }}>
+                {eventName}
+              </p>
+            </div>
 
-          {onOpenDashboard ? (
-            <Cta onClick={onOpenDashboard} className="h-[44px] w-full">
-              Open dashboard
+            <Cta
+              tone="outline"
+              onClick={onShareLink}
+              className="h-[44px] w-full">
+              Share Link
             </Cta>
-          ) : null}
-        </div>
+
+            {downloadName ? (
+              <>
+                <Cta
+                  tone="outline"
+                  onClick={downloadQr}
+                  className="-mt-[20px] h-[44px] w-full">
+                  Download QR
+                </Cta>
+                {/* The print-size code, kept offscreen: only its pixels are
+                  wanted, and only when the button asks for them. */}
+                <div aria-hidden className="fixed -left-[2000px] top-0">
+                  <QRCodeCanvas
+                    ref={printable}
+                    value={url}
+                    size={1024}
+                    marginSize={4}
+                    fgColor="#212121"
+                    bgColor="#ffffff"
+                  />
+                </div>
+              </>
+            ) : null}
+
+            {onOpenDashboard ? (
+              <Cta onClick={onOpenDashboard} className="h-[44px] w-full">
+                Open dashboard
+              </Cta>
+            ) : null}
+          </div>
+        </motion.div>
       </motion.div>
     </div>
   );
