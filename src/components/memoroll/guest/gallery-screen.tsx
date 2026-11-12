@@ -202,7 +202,12 @@ export default function GalleryScreen({
       style={{ background: colour.paper, fontFamily: 'var(--font-mr-body)' }}>
       {/* The frame's 50px top is the iOS status bar, drawn outside the page
           in a browser (owner, 2026-11-12): start at the safe area instead. */}
-      <header className="pt-[max(16px,env(safe-area-inset-top))]">
+      {/* Sticky, like a navbar (owner, 2026-11-12): the event stays named
+          while the roll scrolls under it, on the page's own paper so prints
+          pass behind rather than through. */}
+      <header
+        className="sticky top-0 z-30 pt-[max(16px,env(safe-area-inset-top))]"
+        style={{ background: colour.paper }}>
         <div className="flex items-center justify-between px-[16px]">
           <BackPill onClick={onBack} label="Back" />
           <h1
@@ -250,10 +255,12 @@ export default function GalleryScreen({
               node's bounds in the capture are its unrotated box, which put the
               camera a row too low and a size too small. In the frame its top
               edge rides level with the Gallery title's baseline and it spans
-              all three header rows. */}
+              all three header rows. Anchored to the header's foot (owner,
+              2026-11-12): the crop is meant to be cut by the rule, not to
+              float a row above it. */}
           <div
             aria-hidden
-            className="pointer-events-none absolute right-[-4px] top-[-20px] h-[100px] w-[142px] select-none overflow-hidden">
+            className="pointer-events-none absolute bottom-0 right-[-4px] h-[100px] w-[142px] select-none overflow-hidden">
             <img src={galleryCamera.src} alt="" className="w-full" />
           </div>
 
