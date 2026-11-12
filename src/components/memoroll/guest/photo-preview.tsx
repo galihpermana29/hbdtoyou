@@ -171,13 +171,18 @@ export default function PhotoPreview({
         fontFamily: 'var(--font-mr-body)',
       }}>
       {/* The sheet dims everything; what sits on it keeps to the phone column
-          the demo renders the product in. */}
-      <div className="mx-auto flex h-full w-full max-w-[430px] flex-col">
-        <div className="flex items-center px-[16px] pt-[50px]">
+          the demo renders the product in.
+          On a phone (owner, 2026-11-12): the frame's 50px top is the iOS
+          status bar, which a browser already draws outside the page, so the
+          column starts at the safe area instead; the last button keeps clear
+          of Safari's toolbar; a short screen tightens the gap above the
+          print; and a very short one scrolls rather than clipping a button. */}
+      <div className="mx-auto flex h-full w-full max-w-[430px] flex-col overflow-y-auto pb-[max(28px,calc(env(safe-area-inset-bottom)+16px))]">
+        <div className="flex items-center px-[16px] pt-[max(16px,env(safe-area-inset-top))]">
           <BackPill onClick={onClose} label="Back to the gallery" />
         </div>
 
-        <div className="relative mx-auto mt-[60px] h-[374px] w-[334px]">
+        <div className="relative mx-auto mt-[60px] h-[374px] w-[334px] shrink-0 [@media(max-height:800px)]:mt-[28px]">
           {behind.map(({ neighbour, pose }, layer) => (
             <RollPrint
               key={`behind-${layer}`}

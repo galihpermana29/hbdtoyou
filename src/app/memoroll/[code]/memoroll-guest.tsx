@@ -49,12 +49,7 @@ import Toast from '@/components/memoroll/ui/toast';
 import { useRoll } from './use-roll';
 
 type Screen =
-  | 'cover'
-  | 'countdown'
-  | 'username'
-  | 'camera'
-  | 'gallery'
-  | 'darkroom';
+  'cover' | 'countdown' | 'username' | 'camera' | 'gallery' | 'darkroom';
 
 /** How deep each screen sits in the guest's way through. */
 const SCREEN_RANK: Record<Screen, number> = {
@@ -102,9 +97,10 @@ function groupLabelFor(at: Date): string {
   const hour12 = ((at.getHours() + 11) % 12) + 1;
   const half = at.getHours() < 12 ? 'am' : 'pm';
   const minutes = String(at.getMinutes()).padStart(2, '0');
-  return `${MONTHS[at.getMonth()]} ${at.getDate()} at ${String(
-    hour12
-  ).padStart(2, '0')}:${minutes}${half}`;
+  return `${MONTHS[at.getMonth()]} ${at.getDate()} at ${String(hour12).padStart(
+    2,
+    '0'
+  )}:${minutes}${half}`;
 }
 
 /** The Date Stamp the camera burns, in the redesign's own spelling:
@@ -444,7 +440,15 @@ export default function MemorollGuest({
     if (screen !== 'cover' || phase === 'upcoming') return;
     resumed.current = true;
     void enterFromCover();
-  }, [deviceKnown, handleConfirmed, session?.accessToken, joining, joined, screen, phase]);
+  }, [
+    deviceKnown,
+    handleConfirmed,
+    session?.accessToken,
+    joining,
+    joined,
+    screen,
+    phase,
+  ]);
 
   /**
    * Hand the phone to the next guest (owner asked, 2026-08-30): destroy the
@@ -466,6 +470,12 @@ export default function MemorollGuest({
     }
     window.location.reload();
   };
+
+  /** Who this browser is signed in as, shown where a guest walks in. */
+  const account =
+    session?.accessToken && profile?.email
+      ? { email: profile.email, onSwitch: logout }
+      : undefined;
 
   const confirmHandle = (next: string) => {
     setHandle(next);
@@ -622,7 +632,10 @@ export default function MemorollGuest({
     direction.current =
       screen === 'darkroom' || lastScreen.current === 'darkroom'
         ? 0
-        : directionBetween(SCREEN_RANK[lastScreen.current], SCREEN_RANK[screen]);
+        : directionBetween(
+            SCREEN_RANK[lastScreen.current],
+            SCREEN_RANK[screen]
+          );
     lastScreen.current = screen;
   }
 
@@ -662,13 +675,18 @@ export default function MemorollGuest({
                 }
                 ctaLabel={joining ? 'Opening…' : 'Get me in'}
                 onEnter={enterFromCover}
+                account={account}
               />
             )}
             {screen === 'countdown' && (
               <CountdownScreen remaining={remainingUntil(startsMs, now)} />
             )}
             {screen === 'username' && (
-              <UsernameScreen handle={handle} onConfirm={confirmHandle} />
+              <UsernameScreen
+                handle={handle}
+                onConfirm={confirmHandle}
+                account={account}
+              />
             )}
             {screen === 'camera' && (
               <CameraScreen

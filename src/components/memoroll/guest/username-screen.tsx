@@ -4,6 +4,7 @@ import editIcon from '@/assets/memoroll/edit-handle.svg';
 import { useEffect, useRef, useState } from 'react';
 import Cta from '../ui/cta';
 import MemoifyFooter from '../ui/memoify-footer';
+import SignedInAs from '../ui/signed-in-as';
 import { colour, type } from '../ui/tokens';
 
 /**
@@ -27,10 +28,13 @@ import { colour, type } from '../ui/tokens';
 export default function UsernameScreen({
   handle,
   onConfirm,
+  account,
 }: {
   /** Where the signed-in identity puts them. Theirs to correct. */
   handle: string;
   onConfirm: (handle: string) => void;
+  /** The account they are signed in as: the handle comes from it. */
+  account?: { email: string; onSwitch: () => void };
 }) {
   const [value, setValue] = useState(handle);
   const inputRef = useRef<HTMLInputElement>(null);
@@ -107,6 +111,13 @@ export default function UsernameScreen({
         <Cta type="submit" disabled={!trimmed} className="w-full">
           Yup, let’s shoot!
         </Cta>
+        {account ? (
+          <SignedInAs
+            email={account.email}
+            onSwitch={account.onSwitch}
+            className="-mt-[16px]"
+          />
+        ) : null}
       </div>
 
       <MemoifyFooter />

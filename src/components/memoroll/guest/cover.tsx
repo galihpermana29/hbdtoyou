@@ -3,6 +3,7 @@
 import cameraDoodle from '@/assets/memoroll/cover-camera-doodle.png';
 import hearts from '@/assets/memoroll/cover-hearts.png';
 import tape from '@/assets/memoroll/cover-tape.png';
+import SignedInAs from '../ui/signed-in-as';
 import Cta from '../ui/cta';
 import MemoifyFooter from '../ui/memoify-footer';
 import Wordmark from '../ui/wordmark';
@@ -242,6 +243,7 @@ export default function Cover({
   draft = false,
   ctaLabel = 'Let’s Shoot!',
   onEnter,
+  account,
 }: {
   /** The creator's own words, set in script. Any length, any script. */
   eventName: string;
@@ -259,6 +261,8 @@ export default function Cover({
   /** "Let's Shoot!" everywhere except the first template, which says "Get me in". */
   ctaLabel?: string;
   onEnter: () => void;
+  /** The account this browser is already signed in as, if any. */
+  account?: { email: string; onSwitch: () => void };
 }) {
   return (
     <div
@@ -316,6 +320,13 @@ export default function Cover({
         <Cta onClick={onEnter} className="mt-[11px] w-[210px]">
           {ctaLabel}
         </Cta>
+        {account ? (
+          <SignedInAs
+            email={account.email}
+            onSwitch={account.onSwitch}
+            className="mt-[10px] w-[260px]"
+          />
+        ) : null}
       </div>
 
       <MemoifyFooter className="relative z-10" />
