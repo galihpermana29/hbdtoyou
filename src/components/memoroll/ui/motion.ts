@@ -61,6 +61,11 @@ export const pushVariants: Variants = {
     opacity: 1,
     transform: 'translateX(0%)',
     transition: direction === 0 ? FADE : PUSH,
+    // Landed, the screen drops its transform altogether. Even an identity
+    // transform makes a screen the containing block of everything `fixed`
+    // inside it, so a sheet pinned to the viewport (Share my roll) would be
+    // pinned to the whole scrolling screen instead.
+    transitionEnd: { transform: 'none' },
   }),
   exit: (direction: number) =>
     direction === 0
