@@ -123,30 +123,48 @@ function fitFont(
   return size;
 }
 
-/** The print on the table: white border, deeper at the foot, tilted. */
-function drawPrint(ctx: CanvasRenderingContext2D, input: StoryInput) {
-  const photoW = 720;
-  const photoH = 960; // the print's own 3:4
-  const border = 28;
-  const foot = 120;
+/** Where one print lies on the Story: centre, photo width, tilt. */
+interface Placement {
+  cx: number;
+  cy: number;
+  /** The photo window's width; its height is the print's own 3:4. */
+  photoW: number;
+  /** Degrees, clockwise. */
+  rotate: number;
+}
+
+type Photo = StoryInput['photo'];
+
+/**
+ * A print on the table: white border, deeper at the foot, tilted, with a
+ * soft shadow - the gallery's prints, at Story size. Returns the lowest
+ * point it reaches, for laying the type out below.
+ */
+function drawPrint(
+  ctx: CanvasRenderingContext2D,
+  photo: Photo,
+  at: Placement,
+  caption?: { text: string; family: string }
+): number {
+  const photoW = at.photoW;
+  const photoH = (photoW * 4) / 3;
+  const border = Math.round(photoW * 0.039);
+  const foot = Math.round(photoW * 0.167);
   const frameW = photoW + border * 2;
   const frameH = photoH + border + foot;
-  const centreX = STORY_WIDTH / 2;
-  const centreY = 330 + frameH / 2;
 
   ctx.save();
-  ctx.translate(centreX, centreY);
-  ctx.rotate((-2.5 * Math.PI) / 180);
+  ctx.translate(at.cx, at.cy);
+  ctx.rotate((at.rotate * Math.PI) / 180);
 
   ctx.shadowColor = 'rgba(0, 0, 0, 0.28)';
-  ctx.shadowBlur = 60;
-  ctx.shadowOffsetY = 24;
+  ctx.shadowBlur = Math.round(photoW * 0.083);
+  ctx.shadowOffsetY = Math.round(photoW * 0.033);
   ctx.fillStyle = '#ffffff';
   ctx.fillRect(-frameW / 2, -frameH / 2, frameW, frameH);
   ctx.shadowColor = 'transparent';
 
   // Cover-crop the photo into the window, the way the gallery shows it.
-  const { photo } = input;
   const scale = Math.max(photoW / photo.width, photoH / photo.height);
   const sw = photoW / scale;
   const sh = photoH / scale;
@@ -162,28 +180,60 @@ function drawPrint(ctx: CanvasRenderingContext2D, input: StoryInput) {
     photoH
   );
 
-  if (input.shooter) {
+  if (caption?.text) {
     ctx.fillStyle = '#232323';
     ctx.textAlign = 'center';
     ctx.textBaseline = 'middle';
-    const line = `shot by ${input.shooter}`;
-    fitFont(ctx, line, input.fonts.script, 56, 32, photoW - 40);
-    ctx.fillText(line, 0, frameH / 2 - foot / 2);
+    fitFont(
+      ctx,
+      caption.text,
+      caption.family,
+      Math.round(foot * 0.47),
+      Math.round(foot * 0.27),
+      photoW - 40
+    );
+    ctx.fillText(caption.text, 0, frameH / 2 - foot / 2);
   }
   ctx.restore();
 
-  return { bottom: centreY + frameH / 2 + 40 };
+  // The rotated frame's lowest corner, near enough: half its diagonal span.
+  const r = Math.abs((at.rotate * Math.PI) / 180);
+  return (
+    at.cy + (frameH / 2) * Math.cos(r) + (frameW / 2) * Math.sin(r)
+  );
 }
 
-/** Draw the Story and hand it back as a PNG. */
-export async function renderStory(input: StoryInput): Promise<Blob> {
-  const palette = PALETTES[input.theme];
-  const canvas = document.createElement('canvas');
-  canvas.width = STORY_WIDTH;
-  canvas.height = STORY_HEIGHT;
-  const ctx = canvas.getContext('2d');
-  if (!ctx) throw new Error('canvas unavailable');
+/** One print, large: the single-photo Story. */
+const SINGLE: Placement = { cx: 540, cy: 330 + (720 * 4) / 3 / 2 + 74, photoW: 720, rotate: -2.5 };
 
+/**
+ * A guest's own Roll as a Story: two to four of their prints, laid the way
+ * prints land on a table (owner, 2026-11-12: "variasi 2-4 foto, foto user
+ * sendiri"). Drawn in order; the last lies on top.
+ */
+export const ROLL_LAYOUTS: Record<2 | 3 | 4, Placement[]> = {
+  // Two, overlapping on the diagonal, the second dropped over the first.
+  2: [
+    { cx: 400, cy: 790, photoW: 480, rotate: -6 },
+    { cx: 690, cy: 1130, photoW: 480, rotate: 5 },
+  ],
+  // Three, fanned like a hand of cards, the middle one held up front.
+  3: [
+    { cx: 320, cy: 960, photoW: 420, rotate: -9 },
+    { cx: 760, cy: 960, photoW: 420, rotate: 9 },
+    { cx: 540, cy: 910, photoW: 420, rotate: -1 },
+  ],
+  // Four, a scrapbook page: two by two, each a little off true.
+  4: [
+    { cx: 300, cy: 690, photoW: 360, rotate: -4 },
+    { cx: 780, cy: 670, photoW: 360, rotate: 3 },
+    { cx: 290, cy: 1230, photoW: 360, rotate: 2 },
+    { cx: 790, cy: 1250, photoW: 360, rotate: -3 },
+  ],
+};
+
+/** The ground: flat colour, a soft pool of light behind the prints. */
+function drawGround(ctx: CanvasRenderingContext2D, palette: Palette) {
   ctx.fillStyle = palette.ground;
   ctx.fillRect(0, 0, STORY_WIDTH, STORY_HEIGHT);
   if (palette.glow) {
@@ -200,31 +250,105 @@ export async function renderStory(input: StoryInput): Promise<Blob> {
     ctx.fillStyle = glow;
     ctx.fillRect(0, 0, STORY_WIDTH, STORY_HEIGHT);
   }
-
   // Instagram lays its own chrome over the top ~250px; the mark sits below it.
   drawWordmark(ctx, STORY_WIDTH / 2, 190, 420, palette);
+}
 
-  const { bottom } = drawPrint(ctx, input);
-
+/** The event's name in the script, a mono line under it. */
+function drawType(
+  ctx: CanvasRenderingContext2D,
+  palette: Palette,
+  fonts: StoryFonts,
+  eventName: string,
+  line: string,
+  top: number
+) {
   ctx.textAlign = 'center';
   ctx.textBaseline = 'top';
   ctx.fillStyle = palette.ink;
-  const name = input.eventName.trim() || 'MemoRoll';
-  const nameSize = fitFont(ctx, name, input.fonts.script, 120, 56, 900);
-  ctx.fillText(name, STORY_WIDTH / 2, bottom + 20);
+  const name = eventName.trim() || 'MemoRoll';
+  const nameSize = fitFont(ctx, name, fonts.script, 120, 56, 900);
+  ctx.fillText(name, STORY_WIDTH / 2, top + 20);
 
   ctx.fillStyle = palette.muted;
-  ctx.font = `30px ${input.fonts.mono}`;
-  ctx.fillText(
-    'SHOT ON MEMOROLL · MEMOIFY.LIVE',
-    STORY_WIDTH / 2,
-    bottom + 40 + nameSize * 1.3
-  );
+  ctx.font = `30px ${fonts.mono}`;
+  fitFont(ctx, line, fonts.mono, 30, 22, 940);
+  ctx.fillText(line, STORY_WIDTH / 2, top + 40 + nameSize * 1.3);
+}
 
+function toPng(canvas: HTMLCanvasElement): Promise<Blob> {
   return new Promise((resolve, reject) =>
     canvas.toBlob(
       (blob) => (blob ? resolve(blob) : reject(new Error('no blob'))),
       'image/png'
     )
   );
+}
+
+function storyCanvas(): [HTMLCanvasElement, CanvasRenderingContext2D] {
+  const canvas = document.createElement('canvas');
+  canvas.width = STORY_WIDTH;
+  canvas.height = STORY_HEIGHT;
+  const ctx = canvas.getContext('2d');
+  if (!ctx) throw new Error('canvas unavailable');
+  return [canvas, ctx];
+}
+
+/** Draw the single-print Story and hand it back as a PNG. */
+export async function renderStory(input: StoryInput): Promise<Blob> {
+  const palette = PALETTES[input.theme];
+  const [canvas, ctx] = storyCanvas();
+  drawGround(ctx, palette);
+  const bottom = drawPrint(
+    ctx,
+    input.photo,
+    SINGLE,
+    input.shooter
+      ? { text: `shot by ${input.shooter}`, family: input.fonts.script }
+      : undefined
+  );
+  drawType(
+    ctx,
+    palette,
+    input.fonts,
+    input.eventName,
+    'SHOT ON MEMOROLL · MEMOIFY.LIVE',
+    bottom + 20
+  );
+  return toPng(canvas);
+}
+
+export interface RollStoryInput {
+  /** Two to four of the guest's own prints, in the order to lay them. */
+  photos: Photo[];
+  eventName: string;
+  /** The guest's own name, for "GALIH'S ROLL"; '' for "MY ROLL". */
+  shooter: string;
+  theme: StoryTheme;
+  fonts: StoryFonts;
+}
+
+/** Draw the guest's Roll as one Story and hand it back as a PNG. */
+export async function renderRollStory(input: RollStoryInput): Promise<Blob> {
+  const count = Math.max(2, Math.min(4, input.photos.length)) as 2 | 3 | 4;
+  const layout = ROLL_LAYOUTS[count];
+  const palette = PALETTES[input.theme];
+  const [canvas, ctx] = storyCanvas();
+  drawGround(ctx, palette);
+  let bottom = 0;
+  layout.forEach((at, index) => {
+    bottom = Math.max(bottom, drawPrint(ctx, input.photos[index], at));
+  });
+  const owner = input.shooter.trim()
+    ? `${input.shooter.trim().toUpperCase()}'S ROLL`
+    : 'MY ROLL';
+  drawType(
+    ctx,
+    palette,
+    input.fonts,
+    input.eventName,
+    `${owner} · MEMOIFY.LIVE`,
+    bottom + 10
+  );
+  return toPng(canvas);
 }

@@ -314,7 +314,7 @@ export default function PhotoPreview({
       </div>
       {storyOpen && storyEventName !== undefined ? (
         <StorySheet
-          photo={photo}
+          photos={[photo]}
           eventName={storyEventName}
           onClose={() => setStoryOpen(false)}
         />

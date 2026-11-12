@@ -10,6 +10,7 @@ import MemoifyFooter from '../ui/memoify-footer';
 import { colour, pillShadow } from '../ui/tokens';
 import Cta from '../ui/cta';
 import PhotoPreview from './photo-preview';
+import StorySheet from './story-sheet';
 import RollPrint from './print';
 import type { GalleryGroup, GalleryPhoto } from './roll';
 
@@ -183,6 +184,16 @@ export default function GalleryScreen({
 
   /** What the preview can flip through: only what this guest may see. */
   const visible = groups.flatMap((group) => group.photos).filter(sharp);
+
+  /** The guest's own prints they can see - what a Roll Story is made of. */
+  const ownVisible = visible.filter((photo) => photo.own);
+  const [rollStoryOpen, setRollStoryOpen] = useState(false);
+  const showDevelop =
+    canDevelop && (tab === 'myroll' ? !ownDeveloped : !othersDeveloped);
+  /** Share my roll: My Roll, two prints or more, and nothing louder above
+   *  the fold - Develop My Roll keeps the slot while it is the next step. */
+  const showRollStory =
+    storyExport && tab === 'myroll' && ownVisible.length >= 2 && !showDevelop;
 
   return (
     <div
@@ -385,8 +396,26 @@ export default function GalleryScreen({
             moment there is nothing left to shoot. It rides above the fold so a
             guest scrolling their veiled Roll is never without it. */}
         <AnimatePresence>
-          {canDevelop &&
-            (tab === 'myroll' ? !ownDeveloped : !othersDeveloped) && (
+          {showRollStory && (
+            <motion.div
+              key="roll-story"
+              initial={reduce ? { opacity: 0 } : { opacity: 0, y: 12 }}
+              animate={{ opacity: 1, y: 0 }}
+              exit={{ opacity: 0 }}
+              transition={{
+                duration: reduce ? 0.12 : 0.35,
+                ease: [0.22, 1, 0.36, 1],
+              }}
+              className="sticky bottom-[24px] z-20 mt-[24px] flex justify-center">
+              <Cta onClick={() => setRollStoryOpen(true)} className="w-[276px]">
+                Share my roll to Story
+              </Cta>
+            </motion.div>
+          )}
+        </AnimatePresence>
+
+        <AnimatePresence>
+          {showDevelop && (
             <motion.div
               initial={reduce ? { opacity: 0 } : { opacity: 0, y: 12 }}
               animate={{ opacity: 1, y: 0 }}
@@ -419,6 +448,19 @@ export default function GalleryScreen({
           />
         )}
       </AnimatePresence>
+
+      {rollStoryOpen && showRollStory ? (
+        // Pinned to the viewport: the gallery scrolls, and a sheet anchored
+        // to its foot would open somewhere below the fold.
+        <div className="fixed inset-0 z-50 mx-auto max-w-[430px]">
+          <StorySheet
+            roll
+            photos={ownVisible}
+            eventName={eventName}
+            onClose={() => setRollStoryOpen(false)}
+          />
+        </div>
+      ) : null}
     </div>
   );
 }
