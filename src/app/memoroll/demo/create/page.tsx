@@ -19,7 +19,7 @@ export const metadata: Metadata = {
 
 export default function MemorollCreatorDemoPage() {
   return (
-    <main className={memorollFonts}>
+    <main className={`${memorollFonts} memoroll-native`}>
       <CreatorDemo />
     </main>
   );

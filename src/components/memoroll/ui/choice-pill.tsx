@@ -1,6 +1,7 @@
 'use client';
 
 import { motion, useReducedMotion } from 'framer-motion';
+import { PRESS } from './motion';
 import { colour, type } from './tokens';
 
 /**
@@ -47,7 +48,7 @@ export default function ChoicePill({
       onClick={onClick}
       aria-pressed={chosen}
       whileTap={reduce ? undefined : { scale: 0.98 }}
-      transition={{ duration: 0.12, ease: [0.32, 0.72, 0, 1] }}
+      transition={PRESS}
       className={`flex items-center gap-[10px] rounded-full px-[16px] py-[7px] ${type.button} ${className}`}
       style={{
         backgroundColor: chosen ? 'rgba(0, 0, 0, 0)' : colour.unchosen,

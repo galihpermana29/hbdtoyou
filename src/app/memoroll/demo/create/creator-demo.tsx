@@ -18,11 +18,16 @@ import {
   LAST_STEP,
   type MemorollDraft,
 } from '@/components/memoroll/creator/draft';
-import { AnimatePresence, motion, useReducedMotion } from 'framer-motion';
-import { useEffect, useState } from 'react';
+import { AnimatePresence, useReducedMotion } from 'framer-motion';
+import { useEffect, useRef, useState } from 'react';
 import DemoDock from '../demo-dock';
 import { SAMPLE_SOURCES } from '../mock';
-import { REDUCED_FADE, screenVariants } from '../variants';
+import {
+  directionBetween,
+  pushVariants,
+  reducedScreenVariants,
+} from '@/components/memoroll/ui/motion';
+import PushScreen from '@/components/memoroll/ui/push-screen';
 
 /** Where the QR sends a guest, once the browser has told us where we are. */
 const GUEST_PATH = '/memoroll/demo';
@@ -136,6 +141,20 @@ export default function CreatorDemo() {
     });
   };
 
+  // Push forward, pop back: the same navigation stack the product moves in.
+  const rank =
+    view.kind === 'welcome'
+      ? 0
+      : view.kind === 'preview'
+        ? LAST_STEP + 1
+        : view.step;
+  const lastRank = useRef(rank);
+  const direction = useRef(0);
+  if (rank !== lastRank.current) {
+    direction.current = directionBetween(lastRank.current, rank);
+    lastRank.current = rank;
+  }
+
   return (
     <div className="min-h-[100dvh] bg-[#e8e4dd] transition-colors duration-300">
       <div
@@ -143,16 +162,19 @@ export default function CreatorDemo() {
         style={{
           background: view.kind === 'welcome' ? colour.ink : colour.paper,
         }}>
-        <AnimatePresence mode="wait" initial={false}>
-          <motion.div
+        <AnimatePresence
+          mode="popLayout"
+          initial={false}
+          custom={direction.current}>
+          <PushScreen
             key={view.kind === 'step' ? `step-${view.step}` : view.kind}
-            variants={reduce ? undefined : screenVariants}
-            initial={reduce ? { opacity: 0 } : 'enter'}
-            animate={
-              reduce ? { opacity: 1, transition: REDUCED_FADE } : 'center'
-            }
-            exit={reduce ? { opacity: 0, transition: REDUCED_FADE } : 'exit'}
-            className="flex min-h-[100dvh] flex-col">
+            custom={direction.current}
+            variants={reduce ? reducedScreenVariants : pushVariants}
+            initial="enter"
+            animate="center"
+            exit="exit"
+            className="flex min-h-[100dvh] flex-col"
+            style={{ background: view.kind === 'welcome' ? colour.ink : colour.paper }}>
             {view.kind === 'welcome' && (
               <WelcomeScreen
                 photos={WELCOME_PHOTOS}
@@ -257,7 +279,7 @@ export default function CreatorDemo() {
                 onPublish={() => setQrOpen(true)}
               />
             )}
-          </motion.div>
+          </PushScreen>
         </AnimatePresence>
 
         <AnimatePresence>

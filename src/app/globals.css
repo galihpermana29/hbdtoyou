@@ -509,3 +509,36 @@
     animation: none;
   }
 }
+
+/*
+ * MemoRoll's surfaces should feel installed, not embedded (owner, 2026-11-12;
+ * emilkowalski/skills mobile-native). Scoped to the MemoRoll routes so the
+ * rest of the site keeps its behaviour.
+ *
+ * - No gray/blue flash on tap: every control here has its own press feedback.
+ * - Controls fire on tap without the double-tap-zoom wait, and a long press
+ *   does not select their label or open the link callout. Content stays
+ *   selectable - only controls opt out.
+ * - No pull-to-refresh or page rubber-band behind the camera and the flows:
+ *   pulling down mid-shoot must not reload the roll.
+ */
+.memoroll-native {
+  -webkit-tap-highlight-color: transparent;
+}
+.memoroll-native :is(button, a, [role='button'], [role='radio'], [role='switch']) {
+  touch-action: manipulation;
+  user-select: none;
+  -webkit-user-select: none;
+  -webkit-touch-callout: none;
+}
+html:has(.memoroll-native),
+html:has(.memoroll-native) body {
+  overscroll-behavior: none;
+}
+/* A print (or a sheet) being dragged is not an image being dragged: the browser's own
+   image drag would cancel the swipe before the card moved. Long-press save
+   stays (no touch-callout rule here). */
+.memoroll-native [data-deck-card] img,
+.memoroll-native [data-sheet] img {
+  -webkit-user-drag: none;
+}
