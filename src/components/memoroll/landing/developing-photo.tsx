@@ -56,7 +56,11 @@ export default function DevelopingPhoto() {
   const previous = (current + PHOTOS.length - 1) % PHOTOS.length;
 
   return (
-    <div ref={ref} className="relative size-full overflow-hidden">
+    // Its own layer: the develop repaints this photograph alone, not the
+    // print and the shadow around it.
+    <div
+      ref={ref}
+      className="relative size-full overflow-hidden will-change-transform">
       <img
         loading="lazy"
         decoding="async"

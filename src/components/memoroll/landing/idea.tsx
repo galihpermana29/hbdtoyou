@@ -150,9 +150,18 @@ function GalleryCard() {
 function Polaroid() {
   return (
     <div className="memoroll-float-polaroid absolute left-[79.6px] top-[248.9px]">
-      <div
-        className="relative flex h-[206.35px] w-[157.927px] rotate-[3.79deg] flex-col p-[4.127px]"
-        style={{ filter: POLAROID_SHADOW }}>
+      <div className="relative flex h-[206.35px] w-[157.927px] rotate-[3.79deg] flex-col p-[4.127px]">
+        {/* The shadow is cast by a plain sheet the size of the print, under
+            it, rather than by the print itself (2026-11-12, scroll
+            profiling). On the print, every frame of the photograph
+            developing - a 12px blur, 1.8s every 4.5s - re-ran all five drop
+            shadows over the whole print. The paper is opaque, so the sheet
+            casts exactly the shadow the print did. */}
+        <div
+          aria-hidden
+          className="pointer-events-none absolute inset-0 bg-white"
+          style={{ filter: POLAROID_SHADOW }}
+        />
         <div className="pointer-events-none absolute inset-0 overflow-hidden">
           <img
             loading="lazy"
