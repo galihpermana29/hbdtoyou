@@ -67,6 +67,7 @@ const JPEG_QUALITY = 0.78;
  */
 export default function CameraScreen({
   remaining,
+  revealLabel,
   rollSize,
   galleryCount,
   film,
@@ -81,6 +82,13 @@ export default function CameraScreen({
   simulatedLighting,
 }: {
   remaining: number;
+  /**
+   * When the Reveal is, worded for a guest ("Fri 13 Nov, 21:00"). Turns on
+   * the out-of-shots card over the viewfinder (owner, 2026-11-12): an empty
+   * roll used to show only a greyed shutter, with nothing to say why or what
+   * comes next. The demo passes nothing and draws the designed camera.
+   */
+  revealLabel?: string;
   /** The whole Roll this event hands out; the How popup says this number. */
   rollSize: number;
   /** The number on the gallery button: how many prints the roll holds. */
@@ -468,6 +476,52 @@ export default function CameraScreen({
                 }}
               />
             )}
+            <AnimatePresence>
+              {empty && revealLabel !== undefined ? (
+                <motion.div
+                  key="roll-done"
+                  role="status"
+                  className="absolute inset-0 flex flex-col items-center justify-center gap-[10px] px-[20px] text-center"
+                  style={{
+                    background: 'rgba(20, 20, 20, 0.78)',
+                    backdropFilter: 'blur(2px)',
+                    WebkitBackdropFilter: 'blur(2px)',
+                  }}
+                  initial={{ opacity: 0 }}
+                  animate={{ opacity: 1 }}
+                  exit={{ opacity: 0 }}
+                  transition={{
+                    duration: reduce ? 0.12 : 0.3,
+                    ease: [0.23, 1, 0.32, 1],
+                  }}>
+                  <p
+                    className="text-[20px] font-bold leading-[130%]"
+                    style={{ color: colour.cream }}>
+                    That&apos;s your roll!
+                  </p>
+                  <p
+                    className="text-[13px] leading-[150%]"
+                    style={{ color: 'rgba(224, 218, 191, 0.85)' }}>
+                    You&apos;ve shot all {rollSize}. They develop at the
+                    reveal
+                    {revealLabel ? (
+                      <>
+                        {' '}
+                        on <strong>{revealLabel}</strong>
+                      </>
+                    ) : null}
+                    .
+                  </p>
+                  <button
+                    type="button"
+                    onClick={onOpenGallery}
+                    className="mt-[6px] rounded-full px-[16px] py-[8px] text-[13px] font-bold"
+                    style={{ background: colour.flame, color: '#ffffff' }}>
+                    See my shots
+                  </button>
+                </motion.div>
+              ) : null}
+            </AnimatePresence>
             {/* The rule-of-thirds grid, drawn over whatever the lens sees. */}
             <span aria-hidden className="pointer-events-none absolute inset-0">
               <span
