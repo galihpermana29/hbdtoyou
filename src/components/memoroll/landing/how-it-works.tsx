@@ -4,8 +4,6 @@ import Link from 'next/link';
 import { useEffect, useState } from 'react';
 import {
   CalendarPlus,
-  Check,
-  Link2,
   PartyPopper,
   QrCode,
   type LucideIcon,
@@ -102,7 +100,6 @@ function StepIcon({ icon, lit }: { icon: StepIconSource; lit: boolean }) {
  */
 export default function MemorollHowItWorks() {
   const [role, setRole] = useState<Role>('guest');
-  const [copied, setCopied] = useState(false);
   const copy = useLandingCopy().how;
   const steps = copy[role];
 
@@ -123,29 +120,6 @@ export default function MemorollHowItWorks() {
     window.addEventListener('hashchange', open);
     return () => window.removeEventListener('hashchange', open);
   }, []);
-
-  /** The link to this section, on the tab being read. */
-  const share = async () => {
-    const url = `${window.location.origin}${window.location.pathname}#${hashFor(
-      role
-    )}`;
-    if (navigator.share) {
-      try {
-        await navigator.share({ title: copy.shareTitle, url });
-        return;
-      } catch (error) {
-        // Dismissing the sheet is an answer; anything else falls to copying.
-        if ((error as Error)?.name === 'AbortError') return;
-      }
-    }
-    try {
-      await navigator.clipboard.writeText(url);
-      setCopied(true);
-      window.setTimeout(() => setCopied(false), 2000);
-    } catch {
-      // No clipboard either: the address bar already holds the page.
-    }
-  };
 
   return (
     <section
@@ -246,42 +220,24 @@ export default function MemorollHowItWorks() {
         </div>
 
         {/* Try it (owner, 2026-11-13): the demo of the side being read comes
-            first, the other side right beside it, and the section's own link
-            last. */}
-        <div className="flex flex-col gap-4 md:flex-row md:items-center md:justify-between">
-          <div className="flex flex-col gap-3 sm:flex-row sm:flex-wrap">
-            {(role === 'host'
-              ? (['host', 'guest'] as Role[])
-              : (['guest', 'host'] as Role[])
-            ).map((side, i) => (
-              <Link
-                key={side}
-                href={DEMO_HREF[side]}
-                className={`inline-flex items-center justify-center rounded-full px-7 py-4 text-[16px] font-semibold transition-[transform,background-color] duration-150 active:scale-[0.97] ${
-                  i === 0
-                    ? 'bg-[#ff3e09] text-white hover:bg-[#e63600]'
-                    : 'border border-[#1b1b1b]/15 bg-white text-[#1b1b1b] hover:bg-[#fffdfa]'
-                }`}>
-                {side === 'host' ? copy.demoAsCreator : copy.demoAsGuest}
-              </Link>
-            ))}
-          </div>
-          <div className="flex flex-col items-start gap-2 md:items-end">
-            <button
-              type="button"
-              onClick={share}
-              className="inline-flex items-center gap-2 rounded-full px-4 py-2 text-[15px] font-semibold text-[#1b1b1b] transition-colors hover:bg-white">
-              {copied ? (
-                <Check aria-hidden size={18} strokeWidth={2} />
-              ) : (
-                <Link2 aria-hidden size={18} strokeWidth={2} />
-              )}
-              <span aria-live="polite">
-                {copied ? copy.copied : copy.share}
-              </span>
-            </button>
-            <p className="text-[14px] text-[#8a847d]">{copy.demoNote}</p>
-          </div>
+            first, the other side right beside it. The section is shared by
+            its link, #how-it-works or #how-it-works-host. */}
+        <div className="flex flex-col gap-3 sm:flex-row sm:flex-wrap">
+          {(role === 'host'
+            ? (['host', 'guest'] as Role[])
+            : (['guest', 'host'] as Role[])
+          ).map((side, i) => (
+            <Link
+              key={side}
+              href={DEMO_HREF[side]}
+              className={`inline-flex items-center justify-center rounded-full px-7 py-4 text-[16px] font-semibold transition-[transform,background-color] duration-150 active:scale-[0.97] ${
+                i === 0
+                  ? 'bg-[#ff3e09] text-white hover:bg-[#e63600]'
+                  : 'border border-[#1b1b1b]/15 bg-white text-[#1b1b1b] hover:bg-[#fffdfa]'
+              }`}>
+              {side === 'host' ? copy.demoAsCreator : copy.demoAsGuest}
+            </Link>
+          ))}
         </div>
       </div>
     </section>
