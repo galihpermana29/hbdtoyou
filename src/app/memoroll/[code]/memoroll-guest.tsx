@@ -313,17 +313,36 @@ export default function MemorollGuest({
    * the guest again. Never in the way: the guest walks on whatever the answer,
    * and a failed send is tried again on their next "Get me in".
    */
+  const welcomedHere = useRef(false);
+  /**
+   * The welcome email, once per guest per event (owner, 2026-11-14: "only 1
+   * ... save it on localstorage"). The mark goes down BEFORE the request, so
+   * a second tap - or a tap while the first is still in flight - never sends
+   * another. It is lifted again only when the request certainly never left
+   * (no session to sign it with); a timeout or an error from the backend may
+   * still have sent the email, so it stays down.
+   */
   const sendWelcomeOnce = () => {
+    if (!userId) return;
+    const key = storageKey('welcomed');
     try {
-      if (window.localStorage.getItem(storageKey('welcomed')) === '1') return;
+      if (window.localStorage.getItem(key)) return;
+      window.localStorage.setItem(key, String(Date.now()));
     } catch {
-      // No store to ask: send, and let the backend be the judge.
+      // No store to keep the mark in: this tab's memory keeps it instead.
+      if (welcomedHere.current) return;
     }
+    welcomedHere.current = true;
     void sendMemorollWelcomeClient(code).then((answer) => {
-      if (answer.success) remember('welcomed', '1');
+      if (answer.success || answer.message !== 'You are not signed in') return;
+      welcomedHere.current = false;
+      try {
+        window.localStorage.removeItem(key);
+      } catch {
+        // Nothing was kept.
+      }
     });
   };
-
   const remember = useCallback(
     (what: string, value: string) => {
       try {
