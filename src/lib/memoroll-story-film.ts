@@ -159,19 +159,22 @@ function drawPhoto(
   }
   const f = clampFraming(photo, slot, framing);
   const scale = coverScale(photo, slot) * f.zoom;
-  const sw = slot.w / scale;
-  const sh = slot.h / scale;
-  ctx.drawImage(
-    photo,
-    f.cx * photo.width - sw / 2,
-    f.cy * photo.height - sh / 2,
-    sw,
-    sh,
-    slot.x,
-    slot.y,
-    slot.w,
-    slot.h
+  // The source rectangle, kept inside the photo. Floating point can put it
+  // a hair outside (-5.7e-14 for a 960x1280 print in Layout 2's window), and
+  // Safari draws NOTHING for a source rectangle that leaves the image, where
+  // Chrome clips it - Layouts 2 and 3 went blank on iPhones (owner,
+  // 2026-11-14).
+  const sw = Math.min(photo.width, slot.w / scale);
+  const sh = Math.min(photo.height, slot.h / scale);
+  const sx = Math.max(
+    0,
+    Math.min(photo.width - sw, f.cx * photo.width - sw / 2)
   );
+  const sy = Math.max(
+    0,
+    Math.min(photo.height - sh, f.cy * photo.height - sh / 2)
+  );
+  ctx.drawImage(photo, sx, sy, sw, sh, slot.x, slot.y, slot.w, slot.h);
   ctx.restore();
 }
 
@@ -386,12 +389,7 @@ export function drawFilmStory(
   ctx.fillStyle = GROUND;
   ctx.fillRect(0, 0, FILM_STORY_WIDTH, FILM_STORY_HEIGHT);
   FILM_SLOTS[count].forEach((slot, index) =>
-    drawPhoto(
-      ctx,
-      input.photos[index],
-      slot,
-      input.framings[index] ?? CENTRED
-    )
+    drawPhoto(ctx, input.photos[index], slot, input.framings[index] ?? CENTRED)
   );
   const name = input.eventName.trim() || 'MemoRoll';
   const date = filmDate(input.date);
