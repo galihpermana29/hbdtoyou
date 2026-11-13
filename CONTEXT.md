@@ -171,7 +171,8 @@ _Avoid_: reveal, which is the moment the clock permits developing, not the act
 **Undeveloped**:
 A Roll whose Shots have been taken and cannot yet be seen, shown blurred.
 In the product this is now everyone else's condition, never one's own: a guest's own Shots are sharp from capture (2026-08-30), and the collective stays Undeveloped to each guest until they Develop it.
-The demo walkthrough still performs the original own-roll ceremony.
+The demo's own roll now behaves the same (2026-11-13); only its designed roll states, behind ?developer=true, still perform the original own-roll ceremony.
+Develop My Roll is offered on both tabs, only once the Reveal has come, and only until the guest has pressed it once.
 
 **Veiled**:
 How a Shot nobody may see yet is drawn: near-black under an 80% veil, softly blurred, with nothing printed on it.

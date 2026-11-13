@@ -127,7 +127,7 @@ export default function GalleryScreen({
   all,
   own,
   ownDeveloped,
-  othersDeveloped = true,
+  othersDeveloped: othersDevelopedProp,
   canDevelop,
   tab,
   onTabChange,
@@ -154,7 +154,13 @@ export default function GalleryScreen({
    * Absent - the demo - the clock alone decides, as the frames drew it.
    */
   othersDeveloped?: boolean;
-  /** Shots at zero, or the event over with shots unspent - either opens the door. */
+  /**
+   * Whether Develop My Roll is offered. Where `othersDeveloped` is given (the
+   * product, and the demo's own roll), this is "the Reveal has come and this
+   * guest has not developed yet", and the button is on both tabs: it opens
+   * everyone's prints, not one tab's (owner, 2026-11-13). Where it is absent
+   * (the demo's designed roll states), it is the old per-tab door.
+   */
   canDevelop: boolean;
   tab: GalleryTab;
   onTabChange: (tab: GalleryTab) => void;
@@ -176,6 +182,9 @@ export default function GalleryScreen({
   const [opened, setOpened] = useState<number | null>(null);
 
   const revealed = reveal.state === 'past';
+  /** Does the guest's own press hold everyone else's prints shut? */
+  const gatedByPress = othersDevelopedProp !== undefined;
+  const othersDeveloped = othersDevelopedProp ?? true;
   const groups = tab === 'all' ? all : own;
 
   /** The Reveal gates everyone else's Shots, never a guest's own - and the
@@ -189,8 +198,9 @@ export default function GalleryScreen({
   /** The guest's own prints they can see - what a Roll Story is made of. */
   const ownVisible = visible.filter((photo) => photo.own);
   const [rollStoryOpen, setRollStoryOpen] = useState(false);
-  const showDevelop =
-    canDevelop && (tab === 'myroll' ? !ownDeveloped : !othersDeveloped);
+  const showDevelop = gatedByPress
+    ? canDevelop
+    : canDevelop && (tab === 'myroll' ? !ownDeveloped : !othersDeveloped);
   /** Share my roll: My Roll, two prints or more, and nothing louder above
    *  the fold - Develop My Roll keeps the slot while it is the next step. */
   const showRollStory =
