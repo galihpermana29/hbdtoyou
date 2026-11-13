@@ -26,7 +26,8 @@ import {
 /** Everything structural: headings, body, labels, buttons, counters. */
 export const body = Plus_Jakarta_Sans({
   subsets: ['latin'],
-  weight: ['400', '500', '600', '700', '800'],
+  // 200 and 300: the Story's film strip sets its date and names that light.
+  weight: ['200', '300', '400', '500', '600', '700', '800'],
   style: ['normal', 'italic'],
   display: 'swap',
   variable: '--font-mr-body',

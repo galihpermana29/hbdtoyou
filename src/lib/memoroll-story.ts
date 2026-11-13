@@ -10,6 +10,10 @@
  * slight tilt, soft shadow - the way the gallery lays them on the table.
  * Three themes so the direction can be chosen before anything is polished.
  *
+ * SUPERSEDED (2026-11-14): the designed film strip in memoroll-story-film.ts
+ * is what the Story sheet draws now. These themes and layouts are kept, not
+ * offered (owner: "desain lain gausah hapus tapi hide aja").
+ *
  * Everything is drawn on a canvas, nothing is fetched here: the caller hands
  * in pixels it is allowed to read (same-origin, see /api/memoroll/photo).
  */

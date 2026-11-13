@@ -54,6 +54,7 @@ export default function PhotoPreview({
   onSwipeCueSeen,
   onClose,
   storyEventName,
+  storyEventDate,
 }: {
   photos: GalleryPhoto[];
   index: number;
@@ -67,6 +68,8 @@ export default function PhotoPreview({
    * the drawn one.
    */
   storyEventName?: string;
+  /** The event's day, for the Story's film strip; today if absent. */
+  storyEventDate?: Date;
 }) {
   const reduce = useReducedMotion();
   const [storyOpen, setStoryOpen] = useState(false);
@@ -297,6 +300,7 @@ export default function PhotoPreview({
             key="story"
             photos={[photo]}
             eventName={storyEventName}
+            eventDate={storyEventDate ?? new Date()}
             onClose={() => setStoryOpen(false)}
           />
         ) : null}
