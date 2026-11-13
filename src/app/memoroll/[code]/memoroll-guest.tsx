@@ -12,7 +12,10 @@ import type {
 // Browser-to-backend since 2026-08-30: the join, the refresh and the poll
 // are all calls a guest is actively living inside - see
 // memoroll-client-api.ts for why they skip the server-action middleman.
-import { readMemorollGalleryClient } from '@/action/memoroll-client-api';
+import {
+  readMemorollGalleryClient,
+  sendMemorollWelcomeClient,
+} from '@/action/memoroll-client-api';
 import CameraScreen from '@/components/memoroll/guest/camera-screen';
 import CountdownScreen from '@/components/memoroll/guest/countdown-screen';
 import Cover from '@/components/memoroll/guest/cover';
@@ -303,6 +306,24 @@ export default function MemorollGuest({
     if (!handleConfirmed && profile?.fullname) setHandle(profile.fullname);
   }, [handleConfirmed, profile?.fullname]);
 
+  /**
+   * The welcome email (2026-11-13): asked for once a "Get me in" has joined -
+   * straight away, or on the way back from Google - and once per guest per
+   * roll on this device, so walking back in through the Cover does not mail
+   * the guest again. Never in the way: the guest walks on whatever the answer,
+   * and a failed send is tried again on their next "Get me in".
+   */
+  const sendWelcomeOnce = () => {
+    try {
+      if (window.localStorage.getItem(storageKey('welcomed')) === '1') return;
+    } catch {
+      // No store to ask: send, and let the backend be the judge.
+    }
+    void sendMemorollWelcomeClient(code).then((answer) => {
+      if (answer.success) remember('welcomed', '1');
+    });
+  };
+
   const remember = useCallback(
     (what: string, value: string) => {
       try {
@@ -396,6 +417,7 @@ export default function MemorollGuest({
       setProblem('The roll could not be opened. Try again in a moment.');
       return;
     }
+    sendWelcomeOnce();
     if (revealed) {
       setGalleryTab('all');
       setScreen('gallery');

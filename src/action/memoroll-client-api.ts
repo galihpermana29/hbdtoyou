@@ -175,6 +175,21 @@ export async function readMemorollGalleryClient(
   );
 }
 
+/**
+ * Ask the backend to send this guest the MemoRoll welcome email (2026-11-13).
+ * POST /memoroll/{code}/welcome, no body, as the signed-in guest. The guest
+ * page calls it once a "Get me in" has joined, and only once per guest per
+ * roll on this device; the email is a courtesy, so a failure is not shown.
+ */
+export async function sendMemorollWelcomeClient(
+  code: string
+): Promise<MemorollResult<unknown>> {
+  return callMemoroll<unknown>(`/${encodeURIComponent(code)}/welcome`, {
+    method: 'POST',
+    timeoutMs: 15_000,
+  });
+}
+
 export async function submitMemorollPhotoClient(
   code: string,
   photoUrl: string,
