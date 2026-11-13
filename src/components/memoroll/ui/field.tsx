@@ -1,6 +1,24 @@
 'use client';
 
+import { useRef } from 'react';
+
 import { colour, type } from './tokens';
+
+/**
+ * Open the platform's date or time picker. On desktop Chrome a date input
+ * only opens from its own small indicator; a tap anywhere on the field should
+ * do it (owner, 2026-11-13). Older browsers without showPicker() keep their
+ * native behaviour, which on phones already opens on tap.
+ */
+function openPicker(input: HTMLInputElement | null) {
+  if (!input) return;
+  try {
+    input.showPicker?.();
+  } catch {
+    // Not allowed here (no user gesture, or a browser that refuses): the
+    // input keeps focus, and the platform's own behaviour takes over.
+  }
+}
 
 /**
  * One thing the creator is asked for: a label, the field they answer in, and
@@ -41,7 +59,8 @@ export default function Field({
   icon?: React.ReactNode;
   /**
    * `shaded` is the warmer ground the design gives Venue and Address, the two
-   * fields it drew as answers coming from somewhere else.
+   * fields it drew as answers coming from somewhere else. No field uses it
+   * now (owner, 2026-11-13): it read as a disabled input.
    */
   tone?: 'paper' | 'shaded';
   inputMode?: 'text' | 'numeric';
@@ -55,6 +74,9 @@ export default function Field({
    */
   kind?: 'text' | 'date' | 'time';
 }) {
+  const inputRef = useRef<HTMLInputElement>(null);
+  const picks = kind === 'date' || kind === 'time';
+
   return (
     <div className="flex w-full flex-col gap-[12px]">
       <div className="flex flex-col gap-[2px]">
@@ -75,7 +97,15 @@ export default function Field({
 
       <div className="flex flex-col gap-[4px]">
         <div
-          className="flex items-center gap-[10px] rounded-full px-[16px] py-[8px]"
+          className={`flex items-center gap-[10px] rounded-full px-[16px] py-[8px] ${
+            picks ? 'memoroll-picker cursor-pointer' : ''
+          }`}
+          // The pill, flame icon included, is the target: a tap anywhere on
+          // it focuses the field and, for a date or a time, opens the picker.
+          onClick={() => {
+            inputRef.current?.focus();
+            if (picks) openPicker(inputRef.current);
+          }}
           style={{
             background: tone === 'shaded' ? colour.unchosen : colour.field,
             border: '1px solid rgba(0, 0, 0, 0.2)',
@@ -88,6 +118,7 @@ export default function Field({
             </span>
           ) : null}
           <input
+            ref={inputRef}
             id={id}
             type={kind}
             value={value}
@@ -95,7 +126,9 @@ export default function Field({
             inputMode={inputMode}
             autoComplete="off"
             spellCheck={false}
-            className={`min-w-0 flex-1 bg-transparent outline-none ${type.body}`}
+            className={`min-w-0 flex-1 bg-transparent outline-none ${type.body} ${
+              picks ? 'cursor-pointer' : ''
+            }`}
             style={{ color: colour.ink, fontFamily: 'var(--font-mr-body)' }}
           />
         </div>

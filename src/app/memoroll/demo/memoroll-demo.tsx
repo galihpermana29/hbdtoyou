@@ -348,14 +348,15 @@ export default function MemorollDemo() {
   const eventOver = phase === 'developing' || phase === 'revealed';
   /**
    * The roll a guest actually shoots behaves as the product does (owner,
-   * 2026-11-13): their own prints are sharp the moment they are taken;
-   * everyone else's stay veiled until the Reveal has come AND the guest has
-   * pressed Develop My Roll - once, from either tab - and watched the Dark
-   * Room. The roll dial's designed states (?developer=true) keep the old
+   * 2026-11-13): every print, the guest's own included, stays veiled until
+   * the Reveal has come AND the guest has pressed Develop My Roll - once,
+   * from either tab - and watched the Dark Room. The roll dial's designed states (?developer=true) keep the old
    * own-roll ceremony, because they stand in for the design's frames.
    */
   const live = roll === 'live';
-  const ownDeveloped = live || roll === 'developed' || developedByHand;
+  const ownDeveloped = live
+    ? unveiled
+    : roll === 'developed' || developedByHand;
   const canDevelop = live
     ? phase === 'revealed' && !unveiled
     : ownEntries.length > 0 && (ownRemaining === 0 || eventOver);

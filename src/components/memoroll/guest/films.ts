@@ -52,9 +52,13 @@ export function normalizeStoredFilm(raw: string | null): SelectableFilmId {
   return DEFAULT_FILM;
 }
 
-/** Films that burn the date stamp; RAW stays plain (watermark only). */
+/**
+ * Every film burns the date stamp, RAW included (owner, 2026-11-13): the
+ * stamp is the camera's, not the film's. RAW used to stay plain, with the
+ * watermark only.
+ */
 export function filmStamps(film: SelectableFilmId): boolean {
-  return film !== 'none';
+  return Boolean(film);
 }
 
 /**

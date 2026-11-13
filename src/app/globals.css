@@ -542,3 +542,10 @@ html:has(.memoroll-native) body {
 .memoroll-native [data-sheet] img {
   -webkit-user-drag: none;
 }
+
+/* MemoRoll creator: a date or time field opens from anywhere on its pill
+   (field.tsx), so the browser's own small calendar or clock indicator is one
+   icon too many next to the flame. */
+.memoroll-picker input::-webkit-calendar-picker-indicator {
+  display: none;
+}
