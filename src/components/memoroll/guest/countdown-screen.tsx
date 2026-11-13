@@ -34,6 +34,9 @@ export default function CountdownScreen({
           over its bottom edge and running off the right of the screen. Both are
           the photograph rather than working controls, which is why they are
           exported artwork and not the real components hbd-qti.2 builds.
+          The design's three "Portra 400" pills are repainted in the artwork
+          with the roster's own names, Gold, Green and Clean (2026-11-13), so
+          the picture does not name a film the camera does not have.
           Absolutely placed so the words below keep their position whatever the
           artwork does, and the design's own offsets are kept: 353x270 of the
           375 column for the camera, the counter at 69 across and 279 down. */}

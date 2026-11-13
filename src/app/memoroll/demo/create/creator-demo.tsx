@@ -21,6 +21,8 @@ import {
 import { AnimatePresence, useReducedMotion } from 'framer-motion';
 import { useEffect, useRef, useState } from 'react';
 import DemoDock from '../demo-dock';
+import { clearDemoEvent, momentOf, saveDemoEvent } from '../demo-event';
+import { MOCK_WEDDING } from '../mock';
 import { SAMPLE_SOURCES } from '../mock';
 import {
   directionBetween,
@@ -32,19 +34,38 @@ import PushScreen from '@/components/memoroll/ui/push-screen';
 /** Where the QR sends a guest, once the browser has told us where we are. */
 const GUEST_PATH = '/memoroll/demo';
 
+/** A date as the native date input holds it: 2026-11-20. */
+function dateField(at: Date): string {
+  const pad = (n: number) => String(n).padStart(2, '0');
+  return `${at.getFullYear()}-${pad(at.getMonth() + 1)}-${pad(at.getDate())}`;
+}
+
 /**
  * What the demo opens on: the design's own answers, so every step matches the
  * frame it was built from without anybody typing.
  *
- * The event's name is the one the design writes on the field and under the QR.
- * The design writes a different one on the Cover - "Elias & Freya's wedding" -
- * and that is the guest Cover's own example content rather than a second
- * answer: once the Cover is actually fed the creator's draft, as it is here,
- * there is only one name and this is it.
+ * Two answers are not the design's (owner, 2026-11-13). The name is the guest
+ * demo's, "Elias & Freya's wedding", so a creator who changes nothing scans
+ * their QR and meets the wedding they just set up rather than a second one
+ * spelled the other way round. And the dates are a week from today and the
+ * day after, because the design's 3 May 2026 had already passed, and a demo
+ * that opens on a roll that has already been revealed explains nothing.
  */
+function designedDraft(): MemorollDraft {
+  const opens = new Date();
+  opens.setDate(opens.getDate() + 7);
+  const reveal = new Date(opens);
+  reveal.setDate(reveal.getDate() + 1);
+  return {
+    ...DESIGNED_DRAFT,
+    opensOn: dateField(opens),
+    revealOn: dateField(reveal),
+  };
+}
+
 const DESIGNED_DRAFT: MemorollDraft = {
   vibe: 'wedding',
-  eventName: 'Freya & Elias’ Wedding',
+  eventName: MOCK_WEDDING.title,
   coverStyle: 'collage',
   photos: [
     SAMPLE_SOURCES[0],
@@ -55,22 +76,20 @@ const DESIGNED_DRAFT: MemorollDraft = {
   // and 07:15 PM in free-text fields, and these are that same moment as the
   // native date and time inputs hold it.
   opensOn: '2026-05-03',
-  opensAt: '19:15',
+  opensAt: '19:00',
   venue: 'Park Hyatt Jakarta',
   address: 'Jl. M.H. Thamrin',
   onlyAtTheVenue: true,
   shotsPerGuest: 10,
-  revealOn: '2026-05-03',
-  revealAt: '19:15',
+  revealOn: '2026-05-04',
+  revealAt: '12:00',
 };
 
 /** The stack behind the welcome's sentence. */
 const WELCOME_PHOTOS = SAMPLE_SOURCES.slice(2, 6);
 
 type View =
-  | { kind: 'welcome' }
-  | { kind: 'step'; step: number }
-  | { kind: 'preview' };
+  { kind: 'welcome' } | { kind: 'step'; step: number } | { kind: 'preview' };
 
 /**
  * The creator walkthrough: the welcome, the eight steps in the order the
@@ -84,7 +103,9 @@ type View =
 export default function CreatorDemo() {
   const reduce = useReducedMotion();
   const [view, setView] = useState<View>({ kind: 'welcome' });
-  const [draft, setDraft] = useState<MemorollDraft>(DESIGNED_DRAFT);
+  // Built on first render so its dates are this week's; the welcome is what
+  // the server renders, and no date is on it to mismatch.
+  const [draft, setDraft] = useState<MemorollDraft>(designedDraft);
   const [qrOpen, setQrOpen] = useState(false);
   const [origin, setOrigin] = useState('');
 
@@ -120,6 +141,20 @@ export default function CreatorDemo() {
     });
 
   const guestUrl = `${origin}${GUEST_PATH}`;
+
+  /**
+   * Hand the roll to the guest demo (owner, 2026-11-13): from the moment it
+   * is created, the QR leads to this name, this cover, this many shots.
+   */
+  const keepForGuests = () =>
+    void saveDemoEvent({
+      eventName: draft.eventName.trim() || MOCK_WEDDING.title,
+      coverStyle: draft.coverStyle,
+      photos: draft.photos,
+      shotsPerGuest: draft.shotsPerGuest,
+      opensAt: momentOf(draft.opensOn, draft.opensAt),
+      revealAt: momentOf(draft.revealOn, draft.revealAt),
+    });
 
   /**
    * Hand the link over the way the phone offers to.
@@ -174,7 +209,9 @@ export default function CreatorDemo() {
             animate="center"
             exit="exit"
             className="flex min-h-[100dvh] flex-col"
-            style={{ background: view.kind === 'welcome' ? colour.ink : colour.paper }}>
+            style={{
+              background: view.kind === 'welcome' ? colour.ink : colour.paper,
+            }}>
             {view.kind === 'welcome' && (
               <WelcomeScreen
                 photos={WELCOME_PHOTOS}
@@ -246,6 +283,11 @@ export default function CreatorDemo() {
                 venue={draft.venue}
                 address={draft.address}
                 onlyAtTheVenue={draft.onlyAtTheVenue}
+                // The product dropped the venue switch (it promised a geofence
+                // the guest flow does not enforce), and the demo shows what
+                // the product does. Nor is this roll made from an invitation.
+                venueLock={false}
+                fromInvitation={false}
                 onChange={patch}
                 onBack={back}
                 onContinue={next}
@@ -265,7 +307,10 @@ export default function CreatorDemo() {
                 revealAt={draft.revealAt}
                 onChange={patch}
                 onBack={back}
-                onCreate={next}
+                onCreate={() => {
+                  keepForGuests();
+                  next();
+                }}
               />
             )}
             {step === 8 && (
@@ -275,8 +320,14 @@ export default function CreatorDemo() {
                 photos={draft.photos}
                 onEdit={() => goToStep(1)}
                 onPreview={() => setView({ kind: 'preview' })}
-                onShowQr={() => setQrOpen(true)}
-                onPublish={() => setQrOpen(true)}
+                onShowQr={() => {
+                  keepForGuests();
+                  setQrOpen(true);
+                }}
+                onPublish={() => {
+                  keepForGuests();
+                  setQrOpen(true);
+                }}
               />
             )}
           </PushScreen>
@@ -312,7 +363,8 @@ export default function CreatorDemo() {
             type="button"
             onClick={() => {
               setQrOpen(false);
-              setDraft(DESIGNED_DRAFT);
+              setDraft(designedDraft());
+              clearDemoEvent();
             }}
             className="block w-full rounded-full px-3 py-1.5 text-left text-[12px] text-[#212121] hover:bg-[#f2efe9]">
             Reset the answers

@@ -24,8 +24,9 @@ export const expectations = creatorStep(
     step: 7,
     name: 'Reveal timing',
     heading: 'When should the roll develop',
-    blurb:
-      'Give your Memoroll a name and customize what guests see when they join',
+    // The design repeats step two's blurb here; the owner had it rewritten
+    // to say what this step does (2026-11-13).
+    blurb: 'Pick the moment everyone’s shots are revealed together',
     primary: 'Create Now',
   },
   [

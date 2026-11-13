@@ -2,7 +2,11 @@
 
 import { useCallback, useEffect, useRef, useState } from 'react';
 
+/** The designed roll: ten shots, unless the creator demo chose otherwise. */
 export const SHOT_LIMIT = 10;
+
+/** The most any roll can hold (the creator's plus greys at fifteen). */
+const MAX_SHOTS = 15;
 
 const DB_NAME = 'memoroll-demo';
 const DB_VERSION = 1;
@@ -115,12 +119,12 @@ async function migrateLegacyShots(db: IDBDatabase): Promise<void> {
 }
 
 /**
- * The guest's ten shots: baked JPEG blobs in IndexedDB so the roll survives
+ * The guest's shots (ten, or what the creator demo gave everyone): baked JPEG blobs in IndexedDB so the roll survives
  * a reload without touching localStorage quotas, surfaced as object URLs
  * that this hook creates on hydration and revokes on cleanup. Local state
  * only: nothing here talks to a backend.
  */
-export function useShots() {
+export function useShots(limit: number = SHOT_LIMIT) {
   const [shots, setShots] = useState<Shot[]>([]);
   const dbRef = useRef<IDBDatabase | null>(null);
   const urlsRef = useRef<Set<string>>(new Set());
@@ -129,6 +133,8 @@ export function useShots() {
   // OUTSIDE the state updater (updaters run twice under StrictMode, and a
   // side effect inside one wrote duplicate records).
   const countRef = useRef(0);
+  const limitRef = useRef(limit);
+  limitRef.current = limit;
 
   useEffect(() => {
     countRef.current = shots.length;
@@ -157,7 +163,7 @@ export function useShots() {
         if (cancelled) return;
         stored.sort((a, b) => a.takenAt - b.takenAt);
         setShots(
-          stored.slice(0, SHOT_LIMIT).map((s) => ({
+          stored.slice(0, MAX_SHOTS).map((s) => ({
             id: s.id,
             url: trackUrl(s.blob),
             takenAt: s.takenAt,
@@ -181,7 +187,7 @@ export function useShots() {
 
   const addShot = useCallback(
     (blob: Blob, film: string) => {
-      if (countRef.current >= SHOT_LIMIT) return;
+      if (countRef.current >= limitRef.current) return;
       countRef.current += 1;
       const takenAt = Date.now();
       const id =
@@ -196,7 +202,7 @@ export function useShots() {
       }
       const url = trackUrl(blob);
       setShots((prev) =>
-        prev.length >= SHOT_LIMIT ? prev : [...prev, { id, url, takenAt, film }]
+        prev.length >= MAX_SHOTS ? prev : [...prev, { id, url, takenAt, film }]
       );
     },
     [trackUrl]
@@ -222,6 +228,6 @@ export function useShots() {
     shots,
     addShot,
     clearShots,
-    remaining: Math.max(0, SHOT_LIMIT - shots.length),
+    remaining: Math.max(0, limit - shots.length),
   };
 }

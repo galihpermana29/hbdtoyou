@@ -1,8 +1,8 @@
 /**
  * Mock data for the MemoRoll guest demo. Local state only: no backend is
  * called anywhere on this surface. The imagery is Cloudinary-hosted photos
- * already referenced by this repo's sample content (graduation/scrapbook
- * samples), so the demo invents no external asset dependency.
+ * checked into public/memoroll-samples (see SAMPLE_SOURCES below): the demo
+ * touches no image host, Cloudinary included.
  */
 
 export interface MockWedding {
@@ -63,8 +63,10 @@ export const SAMPLE_SOURCES = [
   SAMPLE('kids-under-table'),
   SAMPLE('kicked-off-shoes'),
   SAMPLE('group-selfie'),
-  // Index 9: the grey placeholder graphic - not a photograph, used nowhere.
-  'https://res.cloudinary.com/ddlus5qur/image/upload/v1746085724/phu2rbi6fqnp71hytjex.jpg',
+  // Index 9 was a grey placeholder graphic on Cloudinary, used nowhere. The
+  // demo touches no image host (owner, 2026-11-13), so a local still holds
+  // its place and every index after it keeps its meaning.
+  SAMPLE('laughing'),
   SAMPLE('embrace'),
 ];
 
@@ -86,9 +88,8 @@ const rollGroupLabel = (index: number) =>
   GALLERY_GROUP_LABELS[index < 6 ? 0 : 1];
 
 /**
- * The ten sample sources that are photographs. Index 9 is not - it is a grey
- * placeholder graphic, and a roll with it on it reads as a broken image
- * rather than as somebody's shot. (Index 11, the Memoify mark, lived on the
+ * The ten sample sources the rolls are dealt from. Index 9 used to be a grey
+ * placeholder graphic and stays skipped, so the rolls keep their order. (Index 11, the Memoify mark, lived on the
  * disabled cloud and was used nowhere, so it is gone.)
  */
 const ROLL_SOURCES = [...SAMPLE_SOURCES.slice(0, 9), SAMPLE_SOURCES[10]];
@@ -128,6 +129,14 @@ export const GALLERY_REMAINING = {
   hours: 16,
   minutes: 32,
   seconds: 9,
+};
+
+/** How long the countdown screen says the doors stay shut (guest-02). */
+export const WAIT_BEFORE_OPEN = {
+  days: 6,
+  hours: 7,
+  minutes: 6,
+  seconds: 7,
 };
 
 /** When the demo's Reveal came, as guest-14 prints it. */

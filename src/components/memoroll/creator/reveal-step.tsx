@@ -37,7 +37,7 @@ export default function RevealStep({
     <StepShell
       step={7}
       heading="When should the roll develop"
-      blurb="Give your Memoroll a name and customize what guests see when they join"
+      blurb="Pick the moment everyone’s shots are revealed together"
       onBack={onBack}
       primary={{ label: 'Create Now', onClick: onCreate }}>
       <div className="flex w-full flex-col gap-[20px]">

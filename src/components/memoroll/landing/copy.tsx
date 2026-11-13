@@ -118,6 +118,12 @@ const EN = {
     heading: (frames: number) =>
       `From first flash to final reveal, in ${frames === 3 ? 'three' : 'four'} frames.`,
     tabsLabel: 'How it works for',
+    demoAsGuest: 'Start Demo as Guest',
+    demoAsCreator: 'Start Demo as Creator',
+    demoNote: 'No sign-in, nothing uploaded. Try it on your phone.',
+    share: 'Share this',
+    shareTitle: 'How MemoRoll works',
+    copied: 'Link copied',
     guestTab: "I'm a guest",
     hostTab: "I'm hosting",
     step: (n: number) => `Step ${n}`,
@@ -130,7 +136,7 @@ const EN = {
       {
         title: 'Shoot',
         heading: 'Make them count',
-        body: 'You get a set number of Shots and six film looks to shoot them in. Each Shot is final, so pick your moments.',
+        body: 'You get a set number of Shots and four film looks to shoot them in. Each Shot is final, so pick your moments.',
       },
       {
         title: 'Reveal',
@@ -375,6 +381,13 @@ const ID: LandingCopy = {
     heading: (frames: number) =>
       `Dari jepretan pertama sampai Reveal, cukup ${frames === 3 ? 'tiga' : 'empat'} frame.`,
     tabsLabel: 'Cara kerjanya buat',
+    demoAsGuest: 'Coba Demo sebagai Tamu',
+    demoAsCreator: 'Coba Demo sebagai Creator',
+    demoNote:
+      'Nggak perlu login, nggak ada yang di-upload. Paling enak dicoba di HP.',
+    share: 'Bagikan',
+    shareTitle: 'Cara kerja MemoRoll',
+    copied: 'Link disalin',
     guestTab: 'Aku tamu',
     hostTab: 'Aku host',
     step: (n: number) => `Langkah ${n}`,
@@ -387,7 +400,7 @@ const ID: LandingCopy = {
       {
         title: 'Jepret',
         heading: 'Bikin tiap jepretan berarti',
-        body: 'Jatah Shot kamu terbatas, dan ada enam pilihan look film. Tiap Shot nggak bisa diulang, jadi pilih momennya baik-baik.',
+        body: 'Jatah Shot kamu terbatas, dan ada empat pilihan look film. Tiap Shot nggak bisa diulang, jadi pilih momennya baik-baik.',
       },
       {
         title: 'Reveal',

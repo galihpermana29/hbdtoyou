@@ -1,7 +1,6 @@
 'use client';
 
 import DemoDock from './demo-dock';
-import { SHOT_LIMIT } from './use-shots';
 
 /**
  * Where the demo stands on the event's timeline. This is the local-state
@@ -59,11 +58,18 @@ export const LIGHTING_SIMULATED: Record<
 };
 
 /**
- * The guest demo's affordance: the two dials of the two gates, the jumps that
- * put a screen straight on the glass, and the two reset actions, living in the
- * shared DemoDock shell.
+ * The guest demo's affordance, in the shared DemoDock shell.
+ *
+ * What a visitor sees is the core of the story (owner, 2026-11-13): where the
+ * event stands on its clock, a fresh roll, and starting over - plus the way
+ * to the creator's side. The dials that exist to reach a designed state
+ * quickly (the roll dial, simulated lighting hardware, jumps into the gallery
+ * and a held Dark Room) are developer tools, shown only at ?developer=true;
+ * the visual harness opens the demo that way.
  */
 export default function DemoControl({
+  developer,
+  rollSize,
   phase,
   onPhaseChange,
   roll,
@@ -75,6 +81,10 @@ export default function DemoControl({
   onReloadFilm,
   onRestart,
 }: {
+  /** Show the developer dials (?developer=true). */
+  developer: boolean;
+  /** How many shots this roll has: ten, or what the creator demo chose. */
+  rollSize: number;
   phase: DemoPhase;
   onPhaseChange: (phase: DemoPhase) => void;
   roll: DemoRoll;
@@ -111,54 +121,12 @@ export default function DemoControl({
         ))}
       </div>
 
-      <p className="mt-3 text-[10px] font-semibold uppercase tracking-[0.14em] text-[#212121]/50">
-        Demo · your roll
-      </p>
-      <div className="mt-2 flex flex-col gap-1">
-        {(Object.keys(ROLL_LABELS) as DemoRoll[]).map((key) => (
-          <button
-            key={key}
-            type="button"
-            onClick={() => onRollChange(key)}
-            className={option(key === roll)}>
-            {ROLL_LABELS[key]}
-          </button>
-        ))}
-      </div>
-
-      <p className="mt-3 text-[10px] font-semibold uppercase tracking-[0.14em] text-[#212121]/50">
-        Demo · camera lighting
-      </p>
-      <div className="mt-2 flex flex-col gap-1">
-        {(Object.keys(LIGHTING_LABELS) as DemoLighting[]).map((key) => (
-          <button
-            key={key}
-            type="button"
-            onClick={() => onLightingChange(key)}
-            className={option(key === lighting)}>
-            {LIGHTING_LABELS[key]}
-          </button>
-        ))}
-      </div>
-
       <div className="mt-3 border-t border-[#212121]/10 pt-2">
-        <button
-          type="button"
-          onClick={onOpenGallery}
-          className="block w-full rounded-full px-3 py-1.5 text-left text-[12px] text-[#212121] hover:bg-[#f2efe9]">
-          Open the gallery
-        </button>
-        <button
-          type="button"
-          onClick={onPinDarkRoom}
-          className="block w-full rounded-full px-3 py-1.5 text-left text-[12px] text-[#212121] hover:bg-[#f2efe9]">
-          Pin the Dark Room open
-        </button>
         <button
           type="button"
           onClick={onReloadFilm}
           className="block w-full rounded-full px-3 py-1.5 text-left text-[12px] text-[#ff3e09] hover:bg-[#fff1ed]">
-          Reload film (clear your {SHOT_LIMIT} shots)
+          Reload film (clear your {rollSize} shots)
         </button>
         <button
           type="button"
@@ -166,7 +134,60 @@ export default function DemoControl({
           className="block w-full rounded-full px-3 py-1.5 text-left text-[12px] text-[#212121] hover:bg-[#f2efe9]">
           Restart walkthrough
         </button>
+        <a
+          href="/memoroll/demo/create"
+          className="block w-full rounded-full px-3 py-1.5 text-left text-[12px] text-[#212121] hover:bg-[#f2efe9]">
+          Try the creator side
+        </a>
       </div>
+
+      {developer ? (
+        <>
+          <p className="mt-3 text-[10px] font-semibold uppercase tracking-[0.14em] text-[#212121]/50">
+            Demo · your roll
+          </p>
+          <div className="mt-2 flex flex-col gap-1">
+            {(Object.keys(ROLL_LABELS) as DemoRoll[]).map((key) => (
+              <button
+                key={key}
+                type="button"
+                onClick={() => onRollChange(key)}
+                className={option(key === roll)}>
+                {ROLL_LABELS[key]}
+              </button>
+            ))}
+          </div>
+
+          <p className="mt-3 text-[10px] font-semibold uppercase tracking-[0.14em] text-[#212121]/50">
+            Demo · camera lighting
+          </p>
+          <div className="mt-2 flex flex-col gap-1">
+            {(Object.keys(LIGHTING_LABELS) as DemoLighting[]).map((key) => (
+              <button
+                key={key}
+                type="button"
+                onClick={() => onLightingChange(key)}
+                className={option(key === lighting)}>
+                {LIGHTING_LABELS[key]}
+              </button>
+            ))}
+          </div>
+          <div className="mt-3 border-t border-[#212121]/10 pt-2">
+            <button
+              type="button"
+              onClick={onOpenGallery}
+              className="block w-full rounded-full px-3 py-1.5 text-left text-[12px] text-[#212121] hover:bg-[#f2efe9]">
+              Open the gallery
+            </button>
+            <button
+              type="button"
+              onClick={onPinDarkRoom}
+              className="block w-full rounded-full px-3 py-1.5 text-left text-[12px] text-[#212121] hover:bg-[#f2efe9]">
+              Pin the Dark Room open
+            </button>
+          </div>
+        </>
+      ) : null}
     </DemoDock>
   );
 }

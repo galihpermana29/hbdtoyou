@@ -504,7 +504,12 @@ async function openTheRsvp(page) {
  * account, a venue or a clock. It renders the same components the real product
  * will (ADR 0007), so what is checked here is what ships there.
  */
-const MEMOROLL_ROUTE = '/memoroll/demo';
+/**
+ * The guest demo opens with its developer dials (?developer=true): the roll
+ * dial and the simulated lighting are how several designed states are reached,
+ * and a visitor's dock no longer shows them (owner, 2026-11-13).
+ */
+const MEMOROLL_ROUTE = '/memoroll/demo?developer=true';
 const MEMOROLL_CREATOR_ROUTE = '/memoroll/demo/create';
 
 /**
