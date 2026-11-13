@@ -12,8 +12,9 @@
  *   demo, like a standalone roll, comes from no invitation. The product still
  *   shows them when a roll is made from a wedding (`fromInvitation`).
  *
- * Both fields are still shaded, the design's mark of an answer that came from
- * somewhere else; the padlock drawn over it is not, as ADR 0002 records.
+ * - Neither field is shaded (owner, 2026-11-13). The design's warmer ground
+ *   marked an answer that came from somewhere else, and on a field the guest
+ *   has to fill in it read as a disabled input.
  */
 
 import {
@@ -32,10 +33,10 @@ export const expectations = creatorStep(
   },
   [
     fieldLabel('Venue'),
-    fieldPill(0, { shaded: true }),
+    fieldPill(0),
     fieldValue('Venue'),
     fieldLabel('Address'),
-    fieldPill(1, { shaded: true }),
+    fieldPill(1),
     fieldValue('Address'),
   ]
 );

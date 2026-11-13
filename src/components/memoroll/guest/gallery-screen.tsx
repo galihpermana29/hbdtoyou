@@ -203,8 +203,14 @@ export default function GalleryScreen({
     : canDevelop && (tab === 'myroll' ? !ownDeveloped : !othersDeveloped);
   /** Share my roll: My Roll, two prints or more, and nothing louder above
    *  the fold - Develop My Roll keeps the slot while it is the next step. */
+  // Only prints that have developed can go into a Story: `ownVisible` holds
+  // the sharp ones alone, so a veiled roll offers nothing until Develop.
   const showRollStory =
-    storyExport && tab === 'myroll' && ownVisible.length >= 2 && !showDevelop;
+    storyExport &&
+    tab === 'myroll' &&
+    ownDeveloped &&
+    ownVisible.length >= 2 &&
+    !showDevelop;
 
   return (
     <div

@@ -74,7 +74,6 @@ export default function VenueStep({
           id="memoroll-venue"
           label="Venue"
           note={fromInvitation ? INVITATION_HINT : undefined}
-          tone="shaded"
           value={venue}
           onChange={(value) => onChange({ venue: value })}
         />
@@ -82,7 +81,6 @@ export default function VenueStep({
           id="memoroll-address"
           label="Address"
           note={fromInvitation ? INVITATION_HINT : undefined}
-          tone="shaded"
           value={address}
           onChange={(value) => onChange({ address: value })}
         />

@@ -169,9 +169,10 @@ function groupRoll(entries: RollEntry[]): GalleryGroup[] {
  * - The phase is the clock's. The server said where the event stood when the
  *   page opened; after that the schedule it handed over is enough, and the
  *   door opens or the Reveal arrives without a reload.
- * - A guest's own prints are sharp from capture (the develop ceremony was
- *   retired from the product on 2026-08-30); the Reveal guards only other
- *   people's Shots.
+ * - Every print stays veiled until the Reveal has come AND this guest has
+ *   pressed Develop My Roll, their own included (owner, 2026-11-13: like a
+ *   disposable, nobody sees their own shots before the lab does). From
+ *   2026-08-30 until then a guest's own prints were sharp from capture.
  * - The handle signs local prints only, until the backend has somewhere to
  *   put it (the display_name ask, 2026-08-29): everything the server echoes
  *   back is signed with the account's own name.
@@ -581,12 +582,9 @@ export default function MemorollGuest({
     ? { state: 'past', endedOn: endedOnLabel(new Date(revealMs)) }
     : { state: 'counting', remaining: remainingUntil(revealMs, now) };
 
-  // A guest's own prints are sharp from the moment they are taken - the
-  // owner retired the develop ceremony from the product on 2026-08-30: the
-  // secret that matters is other people's Shots, and those the Reveal still
-  // guards. The Dark Room and its Develop button survive in the demo
-  // walkthrough; here `ownDeveloped` is simply always true and nothing can
-  // ask to develop.
+  // One veil over the whole roll (owner, 2026-11-13): a guest's own prints
+  // open with everyone else's - after the Reveal, once they have pressed
+  // Develop My Roll and watched the Dark Room - and not before.
 
   // The gallery answers change while a guest is elsewhere - other people are
   // shooting too - so walking into the gallery asks the event again.
@@ -719,7 +717,7 @@ export default function MemorollGuest({
                 reveal={reveal}
                 all={groupRoll(allEntries)}
                 own={groupRoll(ownEntries)}
-                ownDeveloped={true}
+                ownDeveloped={unveiled}
                 othersDeveloped={unveiled}
                 canDevelop={revealed && !unveiled}
                 tab={galleryTab}

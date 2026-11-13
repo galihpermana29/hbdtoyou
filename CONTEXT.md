@@ -165,12 +165,12 @@ _Avoid_: develop, which now names the thing a guest does
 
 **Develop**:
 Each guest's own act of opening the collective gallery, through the Dark Room, once the Reveal's clock has struck.
-Repurposed on 2026-08-30: it used to unveil a guest's own Roll (now sharp from capture); today the clock alone unveils nothing, and Develop My Roll is how every guest lifts the veil off everyone's prints for themselves.
+Since 2026-11-13 it unveils everything at once, the guest's own Roll included: the clock alone unveils nothing, and Develop My Roll is how every guest lifts the veil off every print for themselves. (From 2026-08-30 to 2026-11-13 a guest's own prints were sharp from capture.)
 _Avoid_: reveal, which is the moment the clock permits developing, not the act
 
 **Undeveloped**:
 A Roll whose Shots have been taken and cannot yet be seen, shown blurred.
-In the product this is now everyone else's condition, never one's own: a guest's own Shots are sharp from capture (2026-08-30), and the collective stays Undeveloped to each guest until they Develop it.
+In the product every Shot is Undeveloped to a guest, their own included, until they Develop after the Reveal (owner, 2026-11-13; from 2026-08-30 a guest's own Shots had been sharp from capture).
 The demo's own roll now behaves the same (2026-11-13); only its designed roll states, behind ?developer=true, still perform the original own-roll ceremony.
 Develop My Roll is offered on both tabs, only once the Reveal has come, and only until the guest has pressed it once.
 
@@ -191,7 +191,7 @@ It is also when shooting ends: a Roll can be spent right up to the Reveal, and t
 
 **Film**:
 The analog look a Shot Bakes through, chosen by the guest on the camera, per Shot, before it is taken.
-Five exist: Gold, Green, Clean and Teal - the film-compact looks the owner approved on 2026-11-13 against 35mm point-and-shoot references - and RAW, which is plain digital.
+Five exist: Gold, Green, Clean and Teal - the film-compact looks the owner approved on 2026-11-13 against 35mm point-and-shoot references - and RAW, which is plain digital (it still carries the date stamp, like every film).
 A look is a soft lens, tone and color, halation, and grain; the grain is seeded from the frame, so the same frame always Bakes the same way.
 The recipes they replaced (Wedding Natural, Soft Pastel, Clean Cool, Bold Color, Black & White, and the never-offered Party) are retired from the camera but kept in the renderer.
 The camera opens on Gold and stays on whatever the guest last chose.
