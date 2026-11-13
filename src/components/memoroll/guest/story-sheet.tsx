@@ -1,18 +1,29 @@
 'use client';
 
 import { motion, useReducedMotion } from 'framer-motion';
-import { useCallback, useEffect, useRef, useState } from 'react';
+import {
+  useCallback,
+  useEffect,
+  useRef,
+  useState,
+  type PointerEvent as ReactPointerEvent,
+} from 'react';
 
 import {
-  renderRollStory,
-  renderStory,
-  STORY_THEMES,
-  type StoryTheme,
-} from '@/lib/memoroll-story';
+  CENTRED,
+  drawFilmStory,
+  FILM_SLOTS,
+  FILM_STORY_HEIGHT,
+  FILM_STORY_WIDTH,
+  filmCountFor,
+  moveFraming,
+  slotAt,
+  type Framing,
+} from '@/lib/memoroll-story-film';
 import Cta from '../ui/cta';
 import { REDUCED, SHEET_IN, SHEET_OUT } from '../ui/motion';
 import { useSheetDrag } from '../ui/sheet-drag';
-import { body, mono, script } from '../ui/fonts';
+import { body } from '../ui/fonts';
 import { colour } from '../ui/tokens';
 import type { GalleryPhoto } from './roll';
 
@@ -21,14 +32,20 @@ import type { GalleryPhoto } from './roll';
  * previewed, and handed to the phone's share sheet - where Instagram offers
  * "Story" - or saved, where a browser has no sheet for files.
  *
- * Two kinds, one sheet:
+ * Two ways in, one sheet:
  * - a single print, from the photo preview;
- * - the guest's Roll (`roll`), from My Roll: two to four of their own prints
- *   laid out together, the count theirs to pick and Shuffle to swap which
- *   prints go in.
+ * - the guest's Roll (`roll`), from My Roll: one to four of their own prints
+ *   (owner, 2026-11-14: "boleh juga dia pilih 1"), the count theirs to pick
+ *   and Shuffle to swap which prints go in.
  *
- * DRAFT: the themes and layouts are drawn from the MemoRoll palette (see
- * src/lib/memoroll-story.ts), awaiting a designed template.
+ * The Story is the designed film strip (src/lib/memoroll-story-film.ts). The
+ * paper/darkroom/flame drafts it replaced are still in memoroll-story.ts but
+ * no longer offered (owner: hide them, do not delete them).
+ *
+ * Each print can be slid and pinched inside its window (owner, 2026-11-14),
+ * never so far that the window shows past its edge; a double tap puts it
+ * back in the middle. No swapping prints between windows - kept simple on
+ * purpose (owner).
  *
  * Only prints the guest can already see reach this sheet - the preview hands
  * visible prints alone, My Roll hands the guest's own - so a veiled Shot
@@ -37,37 +54,48 @@ import type { GalleryPhoto } from './roll';
 export default function StorySheet({
   photos,
   eventName,
+  eventDate,
   roll = false,
   onClose,
 }: {
   /** The print to share, or - with `roll` - the guest's own to pick from. */
   photos: GalleryPhoto[];
   eventName: string;
+  /** The event's day, printed on the strip. */
+  eventDate: Date;
   roll?: boolean;
   onClose: () => void;
 }) {
   const reduce = useReducedMotion();
   const most = Math.min(4, photos.length);
   const { backdropOpacity, dragProps } = useSheetDrag(onClose);
-  const [theme, setTheme] = useState<StoryTheme>('paper');
-  const [count, setCount] = useState(Math.min(3, most));
+  const [count, setCount] = useState(roll ? Math.min(3, most) : 1);
   /** Which of the guest's prints go in, in order; Shuffle redraws it. */
   const [order, setOrder] = useState<number[]>(() =>
     photos.map((_, index) => index)
   );
+  /** Each window's framing, by layout, window and print: changing the count
+   *  or the prints starts those windows centred again. */
+  const [framings, setFramings] = useState<Record<string, Framing>>({});
+  const [images, setImages] = useState<ImageBitmap[] | null>(null);
   const [story, setStory] = useState<Blob | null>(null);
-  const [previewUrl, setPreviewUrl] = useState<string | null>(null);
   const [problem, setProblem] = useState<string | null>(null);
+  const canvasRef = useRef<HTMLCanvasElement>(null);
   /** Pixels already fetched, by print - a reshuffle never fetches twice. */
   const bitmaps = useRef(new Map<string, ImageBitmap>());
   const fontsReady = useRef<Promise<unknown> | null>(null);
-  /** Draws can overlap when choices change quickly; only the last counts. */
+  /** Loads can overlap when choices change quickly; only the last counts. */
   const generation = useRef(0);
 
   const chosen = roll
     ? order.slice(0, count).map((index) => photos[index])
     : photos.slice(0, 1);
   const chosenKey = chosen.map((photo) => photo.id).join(',');
+  const layout = filmCountFor(chosen.length);
+  const keyOf = (slot: number) => `${layout}:${slot}:${chosen[slot]?.id}`;
+  const framingsNow = chosen.map(
+    (_, slot) => framings[keyOf(slot)] ?? CENTRED
+  );
 
   /** A print's pixels, same-origin: a stored print's host sends no CORS
    *  header, and a canvas it tainted could not be read back. */
@@ -96,65 +124,200 @@ export default function StorySheet({
 
   useEffect(() => {
     const run = ++generation.current;
-    // The canvas never falls back the way CSS does: warm the faces first. A
-    // face that will not warm is not fatal - the Story draws in the fallback.
-    fontsReady.current ??= Promise.all([
-      document.fonts?.load(`56px ${script.style.fontFamily}`),
-      document.fonts?.load(`30px ${mono.style.fontFamily}`),
-    ]).catch(() => undefined);
-    const fonts = {
-      body: body.style.fontFamily,
-      script: script.style.fontFamily,
-      mono: mono.style.fontFamily,
-    };
+    // The canvas never falls back the way CSS does: warm the three weights
+    // the strip is set in first. A face that will not warm is not fatal -
+    // the Story draws in the fallback.
+    fontsReady.current ??= Promise.all(
+      [200, 300, 400].map((weight) =>
+        document.fonts?.load(`${weight} 40px ${body.style.fontFamily}`)
+      )
+    ).catch(() => undefined);
+    setImages(null);
     setStory(null);
     Promise.all([Promise.all(chosen.map(pixelsOf)), fontsReady.current])
-      .then(([images]) =>
-        roll
-          ? renderRollStory({
-              photos: images,
-              eventName,
-              shooter: chosen[0]?.shooter ?? '',
-              theme,
-              fonts,
-            })
-          : renderStory({
-              photo: images[0],
-              eventName,
-              // Only a guest's own print is signed: who took anyone else's is
-              // the preview's "Who took this?" secret, and a Story must not
-              // tell it.
-              shooter: chosen[0]?.own ? (chosen[0].shooter ?? '') : '',
-              theme,
-              fonts,
-            })
-      )
-      .then((blob) => {
+      .then(([loaded]) => {
         if (run !== generation.current) return;
         setProblem(null);
-        setStory(blob);
-        setPreviewUrl((previous) => {
-          if (previous) URL.revokeObjectURL(previous);
-          return URL.createObjectURL(blob);
-        });
+        setImages(loaded);
       })
       .catch(() => {
         if (run === generation.current)
           setProblem('The Story could not be drawn.');
       });
     // `chosenKey` stands for `chosen`, which is rebuilt every render.
-  }, [chosenKey, theme, roll, eventName, pixelsOf]);
+  }, [chosenKey, pixelsOf]);
 
-  // On close, the last preview's URL goes too; each earlier one was revoked
-  // as the next landed.
-  const lastPreview = useRef<string | null>(null);
-  lastPreview.current = previewUrl;
-  useEffect(
-    () => () => {
-      if (lastPreview.current) URL.revokeObjectURL(lastPreview.current);
+  // The preview is the Story itself, drawn again on every move of a finger;
+  // the PNG to share follows once the prints stop moving.
+  const day = eventDate.toDateString();
+  const framingKey = framingsNow
+    .map((f) => `${f.zoom.toFixed(4)},${f.cx.toFixed(4)},${f.cy.toFixed(4)}`)
+    .join(';');
+  useEffect(() => {
+    const canvas = canvasRef.current;
+    const ctx = canvas?.getContext('2d');
+    if (!canvas || !ctx || !images) return;
+    const frame = requestAnimationFrame(() =>
+      drawFilmStory(ctx, {
+        photos: images,
+        framings: framingsNow,
+        eventName,
+        date: eventDate,
+        fonts: { body: body.style.fontFamily },
+      })
+    );
+    setStory(null);
+    const settle = setTimeout(() => {
+      canvas.toBlob((blob) => blob && setStory(blob), 'image/png');
+    }, 250);
+    return () => {
+      cancelAnimationFrame(frame);
+      clearTimeout(settle);
+    };
+    // `framingKey` stands for `framingsNow`, and `day` for `eventDate`: both
+    // are new objects on every render of the caller's ticking clock.
+  }, [images, framingKey, eventName, day]);
+
+  /* ---- Sliding and pinching a print inside its window ---- */
+
+  const pointers = useRef(new Map<number, { x: number; y: number }>());
+  /** The window being moved, for as long as a finger is down. */
+  const active = useRef<number>(-1);
+  const pressedAt = useRef<{ x: number; y: number } | null>(null);
+  const lastTap = useRef<{ slot: number; at: number } | null>(null);
+
+  /** A point on the screen, in Story pixels. */
+  const toStory = (clientX: number, clientY: number) => {
+    const rect = canvasRef.current!.getBoundingClientRect();
+    return {
+      x: ((clientX - rect.left) / rect.width) * FILM_STORY_WIDTH,
+      y: ((clientY - rect.top) / rect.height) * FILM_STORY_HEIGHT,
+    };
+  };
+
+  const update = useCallback(
+    (slot: number, change: (current: Framing) => Framing) => {
+      const key = `${layout}:${slot}:${chosen[slot]?.id}`;
+      setFramings((all) => ({
+        ...all,
+        [key]: change(all[key] ?? CENTRED),
+      }));
     },
-    []
+    // `chosenKey` stands for `chosen`.
+    [layout, chosenKey]
   );
+
+  const onPointerDown = (event: PointerEvent) => {
+    if (!images) return;
+    const at = toStory(event.clientX, event.clientY);
+    if (pointers.current.size === 0) {
+      active.current = slotAt(layout, at.x, at.y);
+      pressedAt.current = at;
+    }
+    if (active.current < 0) return;
+    try {
+      canvasRef.current?.setPointerCapture(event.pointerId);
+    } catch {
+      // A pointer the browser no longer knows; its moves still arrive here.
+    }
+    pointers.current.set(event.pointerId, at);
+  };
+
+  const onPointerMove = (event: ReactPointerEvent<HTMLCanvasElement>) => {
+    const previous = pointers.current.get(event.pointerId);
+    const slot = active.current;
+    if (!previous || slot < 0 || !images?.[slot]) return;
+    const at = toStory(event.clientX, event.clientY);
+    const others = Array.from(pointers.current.entries()).filter(
+      ([id]) => id !== event.pointerId
+    );
+    const box = FILM_SLOTS[layout][slot];
+    const photo = images[slot];
+    if (others.length === 0) {
+      update(slot, (f) =>
+        moveFraming(photo, box, f, at.x - previous.x, at.y - previous.y)
+      );
+    } else {
+      // Two fingers: the photo scales with their spread about the point
+      // between them, and follows that point as it moves.
+      const other = others[0][1];
+      const before = Math.hypot(previous.x - other.x, previous.y - other.y);
+      const after = Math.hypot(at.x - other.x, at.y - other.y);
+      const midBefore = {
+        x: (previous.x + other.x) / 2,
+        y: (previous.y + other.y) / 2,
+      };
+      const midAfter = { x: (at.x + other.x) / 2, y: (at.y + other.y) / 2 };
+      update(slot, (f) =>
+        moveFraming(
+          photo,
+          box,
+          f,
+          midAfter.x - midBefore.x,
+          midAfter.y - midBefore.y,
+          before > 0 ? after / before : 1,
+          midBefore.x,
+          midBefore.y
+        )
+      );
+    }
+    pointers.current.set(event.pointerId, at);
+  };
+
+  const onPointerUp = (event: ReactPointerEvent<HTMLCanvasElement>) => {
+    if (!pointers.current.delete(event.pointerId)) return;
+    if (pointers.current.size > 0) return;
+    const slot = active.current;
+    active.current = -1;
+    // A tap that barely moved; two on the same print, quickly, re-centre it.
+    const at = toStory(event.clientX, event.clientY);
+    const start = pressedAt.current;
+    if (!start || Math.hypot(at.x - start.x, at.y - start.y) > 24) return;
+    const now = performance.now();
+    if (lastTap.current?.slot === slot && now - lastTap.current.at < 320) {
+      lastTap.current = null;
+      update(slot, () => CENTRED);
+    } else {
+      lastTap.current = { slot, at: now };
+    }
+  };
+
+  // The sheet itself drags down to close, and its drag listens natively on
+  // the sheet; a finger on a print is moving the print, not the sheet, so
+  // the press is caught here before it can bubble there.
+  const pressRef = useRef(onPointerDown);
+  pressRef.current = onPointerDown;
+  useEffect(() => {
+    const canvas = canvasRef.current;
+    if (!canvas) return;
+    const onPress = (event: PointerEvent) => {
+      event.stopPropagation();
+      pressRef.current(event);
+    };
+    canvas.addEventListener('pointerdown', onPress);
+    return () => canvas.removeEventListener('pointerdown', onPress);
+  }, []);
+
+  // A mouse wheel zooms on a desktop. Not a React handler: React's wheel
+  // listener is passive, and the page must not scroll under the zoom.
+  useEffect(() => {
+    const canvas = canvasRef.current;
+    if (!canvas || !images) return;
+    const onWheel = (event: WheelEvent) => {
+      const rect = canvas.getBoundingClientRect();
+      const x = ((event.clientX - rect.left) / rect.width) * FILM_STORY_WIDTH;
+      const y = ((event.clientY - rect.top) / rect.height) * FILM_STORY_HEIGHT;
+      const slot = slotAt(layout, x, y);
+      if (slot < 0 || !images[slot]) return;
+      event.preventDefault();
+      const factor = Math.exp(-event.deltaY * 0.0015);
+      update(slot, (f) =>
+        moveFraming(images[slot], FILM_SLOTS[layout][slot], f, 0, 0, factor, x, y)
+      );
+    };
+    canvas.addEventListener('wheel', onWheel, { passive: false });
+    return () => canvas.removeEventListener('wheel', onWheel);
+  }, [images, layout, update]);
 
   /** A fresh pick of the guest's prints, never the same lead print twice in
    *  a row when there is another to lead with. */
@@ -253,19 +416,29 @@ export default function StorySheet({
           <div
             className="relative flex aspect-[9/16] h-[48dvh] max-h-[440px] items-center justify-center overflow-hidden rounded-[12px]"
             style={{ background: colour.track }}>
-            {previewUrl ? (
-              <img
-                src={previewUrl}
-                alt={roll ? 'Your roll as a Story' : 'Your Story'}
-                className="h-full w-full object-cover transition-opacity duration-150"
-                style={{ opacity: story ? 1 : 0.6 }}
-              />
-            ) : (
+            <canvas
+              ref={canvasRef}
+              width={FILM_STORY_WIDTH}
+              height={FILM_STORY_HEIGHT}
+              role="img"
+              aria-label={roll ? 'Your roll as a Story' : 'Your Story'}
+              onPointerMove={onPointerMove}
+              onPointerUp={onPointerUp}
+              onPointerCancel={onPointerUp}
+              className="absolute inset-0 h-full w-full cursor-grab touch-none active:cursor-grabbing"
+              style={{ opacity: images ? 1 : 0 }}
+            />
+            {images ? null : (
               <span className="text-[13px]" style={{ color: colour.muted }}>
                 {problem ?? 'Drawing your Story…'}
               </span>
             )}
           </div>
+          <p
+            className="-mt-[6px] text-[12px] leading-[150%]"
+            style={{ color: colour.muted }}>
+            Drag or pinch a photo to fit it. Double-tap to reset.
+          </p>
 
           {roll ? (
             <div className="flex items-center gap-[8px]">
@@ -273,7 +446,7 @@ export default function StorySheet({
                 role="radiogroup"
                 aria-label="How many photos"
                 className="flex gap-[6px]">
-                {[2, 3, 4]
+                {[1, 2, 3, 4]
                   .filter((option) => option <= most)
                   .map((option) => (
                     <button
@@ -281,7 +454,7 @@ export default function StorySheet({
                       type="button"
                       role="radio"
                       aria-checked={count === option}
-                      aria-label={`${option} photos`}
+                      aria-label={option === 1 ? '1 photo' : `${option} photos`}
                       onClick={() => setCount(option)}
                       className="h-[32px] w-[40px] rounded-full text-[13px] font-bold"
                       style={chip(count === option)}>
@@ -300,24 +473,6 @@ export default function StorySheet({
               ) : null}
             </div>
           ) : null}
-
-          <div
-            role="radiogroup"
-            aria-label="Story style"
-            className="flex gap-[8px]">
-            {STORY_THEMES.map((option) => (
-              <button
-                key={option.id}
-                type="button"
-                role="radio"
-                aria-checked={theme === option.id}
-                onClick={() => setTheme(option.id)}
-                className="rounded-full px-[14px] py-[6px] text-[13px] font-bold"
-                style={chip(theme === option.id)}>
-                {option.label}
-              </button>
-            ))}
-          </div>
 
           <Cta onClick={share} disabled={!story} className="h-[44px] w-full">
             Share to Story

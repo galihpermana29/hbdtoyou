@@ -734,6 +734,7 @@ export default function MemorollGuest({
             {screen === 'gallery' && (
               <GalleryScreen
                 eventName={event.host_name}
+                eventDate={new Date(startsMs)}
                 photoCount={photoCount ?? allEntries.length}
                 participantCount={participantCount}
                 reveal={reveal}

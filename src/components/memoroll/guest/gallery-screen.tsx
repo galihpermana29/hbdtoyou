@@ -137,8 +137,11 @@ export default function GalleryScreen({
   showSwipeCue,
   onSwipeCueSeen,
   storyExport = false,
+  eventDate,
 }: {
   eventName: string;
+  /** The event's day, printed on a Story's film strip; today if absent. */
+  eventDate?: Date;
   photoCount: number;
   participantCount: number;
   reveal: RevealClock;
@@ -198,10 +201,12 @@ export default function GalleryScreen({
   /** The guest's own prints they can see - what a Roll Story is made of. */
   const ownVisible = visible.filter((photo) => photo.own);
   const [rollStoryOpen, setRollStoryOpen] = useState(false);
+  const [today] = useState(() => new Date());
+  const storyDate = eventDate ?? today;
   const showDevelop = gatedByPress
     ? canDevelop
     : canDevelop && (tab === 'myroll' ? !ownDeveloped : !othersDeveloped);
-  /** Share my roll: My Roll, two prints or more, and nothing louder above
+  /** Share my roll: My Roll, one print or more (owner, 2026-11-14), and nothing louder above
    *  the fold - Develop My Roll keeps the slot while it is the next step. */
   // Only prints that have developed can go into a Story: `ownVisible` holds
   // the sharp ones alone, so a veiled roll offers nothing until Develop.
@@ -209,7 +214,7 @@ export default function GalleryScreen({
     storyExport &&
     tab === 'myroll' &&
     ownDeveloped &&
-    ownVisible.length >= 2 &&
+    ownVisible.length >= 1 &&
     !showDevelop;
 
   return (
@@ -472,6 +477,7 @@ export default function GalleryScreen({
             onSwipeCueSeen={onSwipeCueSeen}
             onClose={() => setOpened(null)}
             storyEventName={storyExport ? eventName : undefined}
+            storyEventDate={storyDate}
           />
         )}
       </AnimatePresence>
@@ -488,6 +494,7 @@ export default function GalleryScreen({
               roll
               photos={ownVisible}
               eventName={eventName}
+              eventDate={storyDate}
               onClose={() => setRollStoryOpen(false)}
             />
           </div>

@@ -490,6 +490,7 @@ export default function MemorollDemo() {
             {screen === 'gallery' && (
               <GalleryScreen
                 eventName={eventName}
+                eventDate={eventDay ?? undefined}
                 // Share to IG Story from a print, and Share my roll to Story
                 // from My Roll, as the product offers them (owner, 2026-11-13).
                 storyExport
