@@ -99,14 +99,14 @@ export const MOST_SHOTS = 15;
  * evidence: every creator frame draws its own numbered mark, and the highest lit
  * one says which step it is. This list is that reading, written down once.
  *
- * "TIme" is the design's own spelling of step four and it ships as written, the
- * way every other copy error in the file does (ADR 0002).
+ * The design spells step four "TIme". It shipped that way under ADR 0002 until
+ * the owner asked for the copy errors to be fixed (2026-11-13).
  */
 export const CREATOR_STEPS = [
   'Choose your vibe',
   'Name your roll',
   'Make it yours',
-  'TIme',
+  'Time',
   'Venue & Location',
   'Shots per guest',
   'Reveal timing',

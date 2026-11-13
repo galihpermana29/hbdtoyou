@@ -64,7 +64,7 @@ export default function VenueStep({
       heading="Where’s the party?"
       blurb={
         venueLock
-          ? 'Being there is the ticket, nobody shoots the rolloutside the function'
+          ? 'Being there is the ticket, nobody shoots the roll outside the function'
           : 'Tell your guests where the party is'
       }
       onBack={onBack}

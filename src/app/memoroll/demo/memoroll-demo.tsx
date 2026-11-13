@@ -29,6 +29,7 @@ import DemoControl, {
   DemoRoll,
   LIGHTING_SIMULATED,
 } from './demo-control';
+import { loadDemoEvent, type DemoEvent } from './demo-event';
 import { homemadeApple, poppins } from './fonts';
 import {
   GALLERY_REMAINING,
@@ -40,6 +41,7 @@ import {
   SAMPLE_SOURCES,
   STAMP_DATE,
   VIEWFINDER_FALLBACK,
+  WAIT_BEFORE_OPEN,
   type MockRollPhoto,
 } from './mock';
 import { SHOT_LIMIT, useShots, type Shot } from './use-shots';
@@ -76,12 +78,86 @@ const SCREEN_RANK: Record<Screen, number> = {
 /** A photo with the heading its group sits under, before grouping. */
 type RollEntry = { photo: GalleryPhoto; groupLabel: string };
 
-/** One live camera Shot as a gallery entry, grouped under its capture time. */
-function liveShotEntry(shot: Shot, handle: string): RollEntry {
+const MONTHS = 'Jan Feb Mar Apr May Jun Jul Aug Sep Oct Nov Dec'.split(' ');
+
+/** "4th" for 4, the way the reveal's ended-on line spells its day. */
+function ordinal(day: number): string {
+  const tens = day % 100;
+  if (tens >= 11 && tens <= 13) return `${day}th`;
+  return `${day}${['th', 'st', 'nd', 'rd'][day % 10] ?? 'th'}`;
+}
+
+/** "May 4th 2026, 12:00PM", as the gallery writes a Reveal that has come. */
+function endedOnLabel(at: Date): string {
+  const hour12 = ((at.getHours() + 11) % 12) + 1;
+  const half = at.getHours() < 12 ? 'AM' : 'PM';
+  const minutes = String(at.getMinutes()).padStart(2, '0');
+  return `${MONTHS[at.getMonth()]} ${ordinal(at.getDate())} ${at.getFullYear()}, ${String(
+    hour12
+  ).padStart(2, '0')}:${minutes}${half}`;
+}
+
+/** "Fri 13 Nov, 21:00": the Reveal as the out-of-shots card names it. */
+function revealLabelFor(at: Date): string {
+  return isNaN(at.getTime())
+    ? ''
+    : at.toLocaleString('en-GB', {
+        weekday: 'short',
+        day: 'numeric',
+        month: 'short',
+        hour: '2-digit',
+        minute: '2-digit',
+      });
+}
+
+/** The camera's Date Stamp for a day: `5 3 ‘26`. */
+function stampDateFor(at: Date): string {
+  return `${at.getMonth() + 1} ${at.getDate()} ‘${String(
+    at.getFullYear() % 100
+  ).padStart(2, '0')}`;
+}
+
+/** What is left on a clock counting to `target`, floored at zero. */
+function remainingUntil(target: number, now: number) {
+  const left = Math.max(0, Math.floor((target - now) / 1000));
+  return {
+    days: Math.floor(left / 86_400),
+    hours: Math.floor((left % 86_400) / 3_600),
+    minutes: Math.floor((left % 3_600) / 60),
+    seconds: left % 60,
+  };
+}
+
+/** A designed remaining time as milliseconds, for a clock that really ticks. */
+function durationOf(remaining: {
+  days: number;
+  hours: number;
+  minutes: number;
+  seconds: number;
+}): number {
+  return (
+    ((remaining.days * 24 + remaining.hours) * 60 + remaining.minutes) *
+      60_000 +
+    remaining.seconds * 1000
+  );
+}
+
+/**
+ * One live camera Shot as a gallery entry, grouped under its capture time on
+ * the event's day: the demo's guest is at the event, whatever today is.
+ */
+function liveShotEntry(
+  shot: Shot,
+  handle: string,
+  eventDay: Date | null
+): RollEntry {
   const at = new Date(shot.takenAt);
   const hour12 = ((at.getHours() + 11) % 12) + 1;
   const half = at.getHours() < 12 ? 'am' : 'pm';
   const minutes = String(at.getMinutes()).padStart(2, '0');
+  const day = eventDay
+    ? `${MONTHS[eventDay.getMonth()]} ${eventDay.getDate()}`
+    : 'May 3';
   return {
     photo: {
       id: shot.id,
@@ -91,7 +167,7 @@ function liveShotEntry(shot: Shot, handle: string): RollEntry {
       shooter: handle,
       own: true,
     },
-    groupLabel: `May 3 at ${String(hour12).padStart(2, '0')}:${minutes}${half}`,
+    groupLabel: `${day} at ${String(hour12).padStart(2, '0')}:${minutes}${half}`,
   };
 }
 
@@ -158,7 +234,49 @@ export default function MemorollDemo() {
   const [handle, setHandle] = useState('dhilafadhila');
   const [film, setFilm] = useState<SelectableFilmId>(DEFAULT_FILM);
   const [lighting, setLighting] = useState<DemoLighting>('detected');
-  const { shots, addShot, clearShots, remaining } = useShots();
+  /** The roll the creator demo made in this browser, if any (owner, 2026-11-13). */
+  const [event, setEvent] = useState<DemoEvent | null>(null);
+  /** The detail dials stay out of a visitor's way unless asked for. */
+  const [developer, setDeveloper] = useState(false);
+  const rollSize = event?.shotsPerGuest ?? SHOT_LIMIT;
+  const { shots, addShot, clearShots, remaining } = useShots(rollSize);
+
+  // The clocks tick (owner, 2026-11-13). The phase dial says where the guest
+  // stands, so the clocks count from there rather than from today: before the
+  // event, to the creator's opening (or the design's six days); during and
+  // after it, to the Reveal as if the event had just opened - the creator's
+  // gap between opening and Reveal, or the design's 16:32:09.
+  const [now, setNow] = useState(() => Date.now());
+  const [openedAt] = useState(() => Date.now());
+  useEffect(() => {
+    const timer = setInterval(() => setNow(Date.now()), 1000);
+    return () => clearInterval(timer);
+  }, []);
+
+  useEffect(() => {
+    setEvent(loadDemoEvent());
+    try {
+      setDeveloper(
+        new URLSearchParams(window.location.search).get('developer') === 'true'
+      );
+    } catch {
+      // No query to read: the visitor's dock it is.
+    }
+  }, []);
+
+  const opensTarget =
+    event && event.opensAt > openedAt
+      ? event.opensAt
+      : openedAt + durationOf(WAIT_BEFORE_OPEN);
+  const revealGap =
+    event && event.revealAt > event.opensAt
+      ? event.revealAt - event.opensAt
+      : durationOf(GALLERY_REMAINING);
+  const revealTarget = openedAt + revealGap;
+  /** The Reveal as the out-of-shots card names it: the creator's own date. */
+  const revealDate = new Date(event ? event.revealAt : revealTarget);
+  const eventDay = event ? new Date(event.opensAt) : null;
+  const eventName = event?.eventName ?? MOCK_WEDDING.title;
 
   useEffect(() => {
     try {
@@ -215,7 +333,9 @@ export default function MemorollDemo() {
   /** A guest's own Roll, from whichever dial the dock is on. */
   const ownEntries: RollEntry[] =
     roll === 'live'
-      ? shots.map((shot) => liveShotEntry(shot, handle))
+      ? shots
+          .slice(0, rollSize)
+          .map((shot) => liveShotEntry(shot, handle, eventDay))
       : MOCK_OWN_SHOTS.slice(0, roll === 'nine' ? 9 : 10).map((mock) =>
           mockShotEntry(mock, handle)
         );
@@ -245,8 +365,13 @@ export default function MemorollDemo() {
 
   const reveal: RevealClock =
     phase === 'revealed'
-      ? { state: 'past', endedOn: REVEAL_ENDED_ON }
-      : { state: 'counting', remaining: GALLERY_REMAINING };
+      ? {
+          state: 'past',
+          endedOn: event
+            ? endedOnLabel(new Date(event.revealAt))
+            : REVEAL_ENDED_ON,
+        }
+      : { state: 'counting', remaining: remainingUntil(revealTarget, now) };
 
   const changeRoll = (next: DemoRoll) => {
     setRoll(next);
@@ -274,7 +399,10 @@ export default function MemorollDemo() {
     direction.current =
       screen === 'darkroom' || lastScreen.current === 'darkroom'
         ? 0
-        : directionBetween(SCREEN_RANK[lastScreen.current], SCREEN_RANK[screen]);
+        : directionBetween(
+            SCREEN_RANK[lastScreen.current],
+            SCREEN_RANK[screen]
+          );
     lastScreen.current = screen;
   }
 
@@ -302,17 +430,15 @@ export default function MemorollDemo() {
             style={{ background: dark ? '#212121' : '#f7f5f3' }}>
             {screen === 'cover' && (
               <Cover
-                eventName={MOCK_WEDDING.title}
-                photos={SAMPLE_SOURCES.slice(0, 6)}
-                style="collage"
+                eventName={eventName}
+                photos={event?.photos ?? SAMPLE_SOURCES.slice(0, 6)}
+                style={event?.coverStyle ?? 'collage'}
                 ctaLabel="Get me in"
                 onEnter={enterFromCover}
               />
             )}
             {screen === 'countdown' && (
-              <CountdownScreen
-                remaining={{ days: 6, hours: 7, minutes: 6, seconds: 7 }}
-              />
+              <CountdownScreen remaining={remainingUntil(opensTarget, now)} />
             )}
             {screen === 'username' && (
               <UsernameScreen
@@ -329,7 +455,10 @@ export default function MemorollDemo() {
             {screen === 'camera' && (
               <CameraScreen
                 remaining={remaining}
-                rollSize={SHOT_LIMIT}
+                rollSize={rollSize}
+                // The product's out-of-shots card, naming when the roll
+                // develops - the demo shows what the product shows.
+                revealLabel={revealLabelFor(revealDate)}
                 galleryCount={allEntries.length}
                 film={film}
                 onPickFilm={pickFilm}
@@ -338,7 +467,7 @@ export default function MemorollDemo() {
                 showHow={!howSeen}
                 onHowSeen={() => setHowSeen(true)}
                 fallbackSrc={VIEWFINDER_FALLBACK}
-                stampDate={STAMP_DATE}
+                stampDate={eventDay ? stampDateFor(eventDay) : STAMP_DATE}
                 stampFonts={{
                   hand: homemadeApple.style.fontFamily,
                   ui: poppins.style.fontFamily,
@@ -348,7 +477,10 @@ export default function MemorollDemo() {
             )}
             {screen === 'gallery' && (
               <GalleryScreen
-                eventName={MOCK_WEDDING.title}
+                eventName={eventName}
+                // Share to IG Story from a print, and Share my roll to Story
+                // from My Roll, as the product offers them (owner, 2026-11-13).
+                storyExport
                 photoCount={GALLERY_TALLY.photos}
                 participantCount={GALLERY_TALLY.participants}
                 reveal={reveal}
@@ -385,6 +517,8 @@ export default function MemorollDemo() {
       </div>
 
       <DemoControl
+        developer={developer}
+        rollSize={rollSize}
         phase={phase}
         onPhaseChange={changePhase}
         roll={roll}
