@@ -226,6 +226,8 @@ export default function MemorollDemo() {
   const [phase, setPhase] = useState<DemoPhase>('during');
   const [roll, setRoll] = useState<DemoRoll>('live');
   const [developedByHand, setDevelopedByHand] = useState(false);
+  /** This guest has pressed Develop My Roll after the Reveal: once is enough. */
+  const [unveiled, setUnveiled] = useState(false);
   const [galleryTab, setGalleryTab] = useState<GalleryTab>('all');
   const [darkRoomHeld, setDarkRoomHeld] = useState(false);
   const [swipeCueSeen, setSwipeCueSeen] = useState(false);
@@ -324,6 +326,8 @@ export default function MemorollDemo() {
 
   const changePhase = (next: DemoPhase) => {
     setPhase(next);
+    // Winding the clock back before the Reveal re-veils the gallery.
+    if (next !== 'revealed') setUnveiled(false);
     // The door opens the moment the demo clock says the event started.
     if (screen === 'countdown' && next !== 'before') setScreen('username');
     // And walking back in time from the roll returns to the closed one.
@@ -341,13 +345,20 @@ export default function MemorollDemo() {
         );
 
   const ownRemaining = roll === 'live' ? remaining : roll === 'nine' ? 1 : 0;
-  const ownDeveloped = roll === 'developed' || developedByHand;
   const eventOver = phase === 'developing' || phase === 'revealed';
   /**
-   * The Develop CTA appears at zero shots - or at the event's end for a guest
-   * who never spent all ten, so nobody is stranded undeveloped forever.
+   * The roll a guest actually shoots behaves as the product does (owner,
+   * 2026-11-13): their own prints are sharp the moment they are taken;
+   * everyone else's stay veiled until the Reveal has come AND the guest has
+   * pressed Develop My Roll - once, from either tab - and watched the Dark
+   * Room. The roll dial's designed states (?developer=true) keep the old
+   * own-roll ceremony, because they stand in for the design's frames.
    */
-  const canDevelop = ownEntries.length > 0 && (ownRemaining === 0 || eventOver);
+  const live = roll === 'live';
+  const ownDeveloped = live || roll === 'developed' || developedByHand;
+  const canDevelop = live
+    ? phase === 'revealed' && !unveiled
+    : ownEntries.length > 0 && (ownRemaining === 0 || eventOver);
 
   const allEntries: RollEntry[] = [
     ...MOCK_ALL_ROLL.map((mock) => ({
@@ -487,6 +498,7 @@ export default function MemorollDemo() {
                 all={groupRoll(allEntries)}
                 own={groupRoll(ownEntries)}
                 ownDeveloped={ownDeveloped}
+                othersDeveloped={live ? unveiled : undefined}
                 canDevelop={canDevelop}
                 tab={galleryTab}
                 onTabChange={setGalleryTab}
@@ -503,11 +515,20 @@ export default function MemorollDemo() {
             )}
             {screen === 'darkroom' && (
               <DarkRoomScreen
-                photos={ownEntries.map((entry) => entry.photo)}
+                // The live roll develops everyone's prints; the designed
+                // states develop the guest's own, as the frames drew it.
+                photos={(live && !darkRoomHeld ? allEntries : ownEntries).map(
+                  (entry) => entry.photo
+                )}
                 hold={darkRoomHeld}
                 onDeveloped={() => {
-                  setDevelopedByHand(true);
-                  setGalleryTab('myroll');
+                  if (live) {
+                    setUnveiled(true);
+                    setGalleryTab('all');
+                  } else {
+                    setDevelopedByHand(true);
+                    setGalleryTab('myroll');
+                  }
                   setScreen('gallery');
                 }}
               />
@@ -532,6 +553,7 @@ export default function MemorollDemo() {
           setDevelopedByHand(false);
         }}
         onRestart={() => {
+          setUnveiled(false);
           setLocation('asking');
           setGalleryTab('all');
           setSwipeCueSeen(false);

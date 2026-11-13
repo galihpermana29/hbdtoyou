@@ -653,9 +653,19 @@ async function memorollDock(page, presses) {
 const memorollGalleryDuring = (page) =>
   memorollDock(page, ['Open the gallery']);
 
-/** ALL after the Reveal. */
-const memorollGalleryAfter = (page) =>
-  memorollDock(page, ['After · revealed', 'Open the gallery']);
+/**
+ * ALL after the Reveal, the way a guest reaches it (owner, 2026-11-13): the
+ * Reveal has come, the gallery offers Develop My Roll, and the prints open
+ * once the Dark Room has run.
+ */
+async function memorollGalleryAfter(page) {
+  await memorollDock(page, ['After · revealed', 'Open the gallery']);
+  await page.getByRole('button', { name: 'Develop My Roll' }).click();
+  await page
+    .getByRole('button', { name: 'Open this shot' })
+    .first()
+    .waitFor({ timeout: 30_000 });
+}
 
 /** My Roll with the dock's roll dial at one of its designed states. */
 async function memorollMyRoll(page, rollState) {
