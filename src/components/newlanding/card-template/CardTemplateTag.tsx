@@ -147,7 +147,7 @@ const CardTemplateTag = ({
     <div>
       <div
         className={clsx(
-          'p-[24px] transition cursor-pointer group min-h-[400px] flex flex-col justify-between bg-[#F9FAFB] rounded-[8px] border-[1px] border-[#EAECF0]',
+          'p-[24px] transition cursor-pointer group min-h-[400px] flex flex-col justify-between bg-white rounded-[20px] border-[1px] border-[#dadada]',
           type === 'preview'
             ? 'w-[350px] md:w-[400px]'
             : type === 'scrapbook'
@@ -209,7 +209,7 @@ const CardTemplateTag = ({
           <img
             src={thumbnailSrc ?? templateThumbnail(data)}
             alt={data.name}
-            className="w-full aspect-video object-cover rounded-md"
+            className="w-full aspect-video object-cover rounded-[12px]"
           />
         </div>
         {type !== 'scrapbook' && (

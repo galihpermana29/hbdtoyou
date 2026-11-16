@@ -16,8 +16,15 @@ import { colour } from '@/components/memoroll/ui/tokens';
  * this provider, and `.mr-form` in globals.css covers what a token cannot -
  * the pill fields, the CTA's raised highlight, the label type, the toasts.
  *
- * Scoped, not global: the dashboard and the rest of the site keep their own
- * look until they are given this one on purpose.
+ * Scoped, not global: it wraps the gift, scrapbook and journal creators and
+ * the dashboard; the rest of the site keeps its own look until it is given
+ * this one on purpose.
+ *
+ * The rule for anything drawn by hand inside it (owner, 2026-11-17):
+ * - one hairline, `#dadada`; outlined controls `rgba(33,33,33,0.2)`;
+ * - cards and panels 20px, white on the paper;
+ * - fields, tiles, thumbnails and rows inside a card 12px;
+ * - buttons and status chips fully round.
  */
 export const memorollFormTheme: ThemeConfig = {
   token: {
@@ -86,6 +93,27 @@ export const memorollFormTheme: ThemeConfig = {
       titleFontSize: 18,
     },
     Tooltip: { colorBgSpotlight: colour.ink },
+    // Tables sit in a 20px card with one hairline; the header is the field
+    // fill, not a grey of its own.
+    Table: {
+      headerBg: colour.field,
+      headerColor: colour.ink,
+      headerSplitColor: 'transparent',
+      borderColor: colour.hairline,
+      rowHoverBg: '#fbfaf9',
+      borderRadiusLG: 20,
+    },
+    // Status chips (Published, Locked, premium...) are pills, like every
+    // selection mark in MemoRoll.
+    Tag: { borderRadiusSM: 999, defaultBg: colour.unchosen },
+    Card: { borderRadiusLG: 20, colorBorderSecondary: colour.hairline },
+    Pagination: { itemActiveBg: colour.paper, borderRadius: 999 },
+    Segmented: {
+      borderRadius: 999,
+      borderRadiusSM: 999,
+      itemSelectedBg: colour.flame,
+      itemSelectedColor: '#ffffff',
+    },
     Upload: { colorFillAlter: colour.field },
   },
 };

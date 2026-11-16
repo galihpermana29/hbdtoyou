@@ -243,27 +243,35 @@ const DraggerUpload = ({
           {fileList.length === limit ? null : uploadButton}
         </Upload>
       </LoadingHandler>
-      <div className="text-caption-2 text-ny-gray-300 text-center mt-[10px] max-w-max">
+      {/* One line under the slot: how many, what, how big - and, on the
+          free plan, where more comes from. */}
+      <div className="mt-[8px] flex flex-wrap items-center gap-x-[6px] text-left text-[12px] leading-[150%] text-[#808080]">
         {limit > 1 ? (
-          <>
-            <span className="font-semibold text-gray-700">
-              {fileList.length} / {limit}
+          <span>
+            <span className="font-semibold text-[#232323]">
+              {fileList.length}/{limit}
             </span>{' '}
-            photos ·{' '}
-          </>
+            photos ·
+          </span>
         ) : null}
-        {acceptTypes.replace(/\./g, '').toUpperCase()}, up to{' '}
-        {PLAN_LIMITS[type].fileMB}MB
+        <span>
+          {Array.from(
+            new Set(
+              acceptTypes
+                .replace(/\./g, '')
+                .toUpperCase()
+                .split(',')
+                .map((ext) => ext.trim().replace('JPEG', 'JPG'))
+            )
+          ).join(', ')}{' '}
+          · {PLAN_LIMITS[type].fileMB}MB max
+        </span>
         {type === AccountType.free ? (
-          <>
-            {' '}
-            ·{' '}
-            <Link
-              href="/payment?type=premium"
-              className="font-semibold !text-[#E34013] underline">
-              more with Premium
-            </Link>
-          </>
+          <Link
+            href="/payment?type=premium"
+            className="font-semibold !text-[#ff3e09] underline">
+            More with Premium
+          </Link>
         ) : null}
       </div>
     </div>

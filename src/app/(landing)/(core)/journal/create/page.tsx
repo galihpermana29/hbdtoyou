@@ -135,7 +135,7 @@ const NewEntryPage: React.FC = () => {
                   rules={[{ required: true, message: 'Please enter a title' }]}
                   className="mb-6">
                   <Input
-                    className="rounded-sm"
+                    className="rounded-[12px]"
                     placeholder="Enter journal title"
                   />
                 </Form.Item>
@@ -148,7 +148,7 @@ const NewEntryPage: React.FC = () => {
                   ]}
                   className="mb-6">
                   <Input
-                    className="rounded-sm"
+                    className="rounded-[12px]"
                     placeholder="Enter author name"
                   />
                 </Form.Item>
@@ -164,7 +164,7 @@ const NewEntryPage: React.FC = () => {
                   ]}
                   className="mb-6">
                   <Input
-                    className="rounded-sm"
+                    className="rounded-[12px]"
                     placeholder="Enter destination name"
                   />
                 </Form.Item>
@@ -273,7 +273,7 @@ const NewEntryPage: React.FC = () => {
                   className="mb-6">
                   <Select
                     mode="tags"
-                    className="rounded-sm"
+                    className="rounded-[12px]"
                     placeholder="e.g., reflection, growth, learning"
                   />
                 </Form.Item>

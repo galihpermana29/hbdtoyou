@@ -92,7 +92,7 @@ const ScrapbookCreatePage = () => {
             {/* Toggle Button - Hidden on mobile */}
             <button
               onClick={() => setIsSidebarCollapsed(!isSidebarCollapsed)}
-              className={`hidden lg:block absolute top-1/2 -translate-y-1/2 z-[10] bg-white border-[1px] border-[#EDEDED] rounded-full p-3 shadow-lg hover:shadow-xl hover:border-[#007AFF] transition-all duration-200 ${
+              className={`hidden lg:block absolute top-1/2 -translate-y-1/2 z-[10] bg-white border-[1px] border-[#dadada] rounded-full p-3 shadow-lg hover:shadow-xl hover:border-[#007AFF] transition-all duration-200 ${
                 isSidebarCollapsed
                   ? 'left-[20px]'
                   : 'left-[calc(500px+20px-16px)]'
@@ -110,7 +110,7 @@ const ScrapbookCreatePage = () => {
                 isSidebarCollapsed
                   ? 'w-0 opacity-0 overflow-hidden lg:flex-[0] lg:max-w-0'
                   : 'flex-[1] max-w-[500px] lg:flex-[1] lg:max-w-[500px]'
-              } border-[#EDEDED] border-[1px] rounded-[16px] flex flex-col ${
+              } border-[#dadada] border-[1px] rounded-[20px] flex flex-col ${
                 isSidebarCollapsed ? 'p-0' : 'p-[24px]'
               }`}>
               <div className={isSidebarCollapsed ? 'hidden' : 'block'}>
@@ -130,7 +130,7 @@ const ScrapbookCreatePage = () => {
                 isSidebarCollapsed
                   ? 'flex-1 lg:flex-1 w-full'
                   : 'flex-[1.5] lg:flex-[1.5]'
-              } p-[24px] rounded-[16px] border-[#EDEDED] border-[1px] flex flex-col`}>
+              } p-[24px] rounded-[20px] border-[#dadada] border-[1px] flex flex-col`}>
               <div className="my-[40px] lg:my-[0px] px-[16px]">
                 <h1 className="text-[#1B1B1B] font-[600] text-[18px] ">
                   Style Preview

@@ -125,10 +125,10 @@ const EditContentDashboardPage = () => {
           ) : (
             modalState?.data && (
               <div className="flex flex-col md:flex-row items-center gap-[20px]">
-                <div className="shadow-lg w-full rounded-md">
+                <div className="shadow-lg w-full rounded-[12px]">
                   <iframe
                     src={window?.location.origin + '/' + modalState?.data}
-                    className="aspect-video object-cover rounded-md w-full"
+                    className="aspect-video object-cover rounded-[12px] w-full"
                   />
                 </div>
                 <div className="w-full md:w-[70%]">

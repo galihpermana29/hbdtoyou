@@ -47,7 +47,7 @@ const DashboardPage = async () => {
       {!isAdmin && (
         <div className="mx-auto max-w-6xl 2xl:max-w-7xl px-[20px] mt-[16px]">
           <Link href="/career" className="block">
-            <div className="flex items-center gap-3 md:gap-4 bg-gradient-to-r from-[#E34013]/10 to-orange-50 border border-[#E34013]/20 rounded-[10px] px-4 py-3 md:px-5 md:py-4 hover:border-[#E34013]/40 transition-colors cursor-pointer">
+            <div className="flex items-center gap-3 md:gap-4 bg-gradient-to-r from-[#E34013]/10 to-orange-50 border border-[#E34013]/20 rounded-[20px] px-4 py-3 md:px-5 md:py-4 hover:border-[#E34013]/40 transition-colors cursor-pointer">
               <div className="w-9 h-9 bg-[#E34013] rounded-full flex items-center justify-center flex-shrink-0">
                 <Megaphone size={16} className="text-white" />
               </div>
@@ -61,7 +61,7 @@ const DashboardPage = async () => {
                   and get up to 100% free access to all premium features.
                 </p>
               </div>
-              <span className="hidden md:inline-flex items-center gap-1 bg-[#E34013] text-white text-[13px] font-semibold px-4 py-2 rounded-[8px] flex-shrink-0 hover:bg-[#c23611] transition-colors">
+              <span className="hidden md:inline-flex items-center gap-1 bg-[#E34013] text-white text-[13px] font-semibold px-4 py-2 rounded-full flex-shrink-0 hover:bg-[#c23611] transition-colors">
                 Learn More
               </span>
             </div>

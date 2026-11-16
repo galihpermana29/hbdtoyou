@@ -278,7 +278,7 @@ const FormGeneration = ({
                 <div
                   key={idx}
                   className={clsx(
-                    'relative cursor-pointer rounded-lg transition-all',
+                    'relative cursor-pointer rounded-[12px] transition-all',
                     selectedTemplateId === template.id ? '' : ''
                   )}
                   onClick={(e) => {

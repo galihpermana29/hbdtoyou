@@ -574,6 +574,32 @@ html:has(.memoroll-native) body {
 }
 .mr-form .ant-form-item-required::before {
   color: #ff3e09 !important;
+  align-self: flex-start;
+  margin-top: 3px;
+}
+/* A label that carries a hint under it keeps its asterisk on the first line. */
+.mr-form .ant-form-item-label > label {
+  align-items: flex-start;
+  height: auto;
+}
+/* Tables: one hairline around a 20px card. */
+.mr-form .ant-table-wrapper .ant-table-container {
+  border: 1px solid #dadada;
+  border-radius: 20px;
+  overflow: hidden;
+}
+.mr-form .ant-table-wrapper .ant-table {
+  border-radius: 20px;
+}
+/* The creator's stepper, set at MemoRoll's size: a 14px title, a 12px line under it. */
+.mr-form .ant-steps .ant-steps-item-title {
+  font-size: 14px !important;
+  font-weight: 600;
+  line-height: 150% !important;
+}
+.mr-form .ant-steps .ant-steps-item-description {
+  font-size: 12px !important;
+  color: #808080 !important;
 }
 .mr-form textarea.ant-input {
   border-radius: 12px;
@@ -679,4 +705,16 @@ body:has(.mr-form) .ant-notification-notice .ant-notification-notice-message {
   border-color: rgba(0, 0, 0, 0.2);
   border-radius: 0 0 12px 12px;
   background: #f7f6f6;
+}
+/* Status chips and every button, small ones in tables included, are pills. */
+.mr-form .ant-tag {
+  border-radius: 999px;
+  padding-inline: 10px;
+}
+.mr-form .ant-btn {
+  border-radius: 999px;
+}
+/* A label's own block (title + hint) starts level with its asterisk. */
+.mr-form .ant-form-item-label > label > div:first-child {
+  margin-top: 0;
 }
