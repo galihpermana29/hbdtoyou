@@ -72,7 +72,7 @@ const DashboardContentContainer = ({ data }: { data: IContent[] }) => {
               });
             }}
             iconPosition="end"
-            className="!bg-[#E34013] !text-white !rounded-[8px] !text-[14px] !font-[600] !h-[38px] !w-full"
+            className="mr-cta !font-[600] !h-[38px] !w-full"
             type="primary"
             size="large">
             Cancel
@@ -83,7 +83,7 @@ const DashboardContentContainer = ({ data }: { data: IContent[] }) => {
               await handleDeleteContent(modalType?.data?.id);
             }}
             iconPosition="end"
-            className="!bg-[#fff] !text-[#E34013] !border-[1px] !border-[#E34013] !rounded-[8px] !text-[14px] !font-[600] !h-[38px] !w-full"
+            className="mr-outline !font-[600] !h-[38px] !w-full"
             type="primary"
             size="large">
             Delete
@@ -131,7 +131,7 @@ const DashboardContentContainer = ({ data }: { data: IContent[] }) => {
                   setDisplayCount(newCount);
                 }}
                 iconPosition="end"
-                className="!bg-[#E34013] !text-white !rounded-[8px] !text-[14px] !font-[600] !h-[38px] mt-[24px]"
+                className="mr-cta !font-[600] !h-[38px] mt-[24px]"
                 type="primary"
                 size="large">
                 Load More
@@ -149,7 +149,7 @@ const DashboardContentContainer = ({ data }: { data: IContent[] }) => {
               }}
               iconPosition="end"
               icon={<SquarePen size={16} />}
-              className="!bg-[#E34013] !text-white !rounded-[8px] !text-[14px] !font-[600] !h-[38px] mt-[24px]"
+              className="mr-cta !font-[600] !h-[38px] mt-[24px]"
               type="primary"
               size="large">
               Create

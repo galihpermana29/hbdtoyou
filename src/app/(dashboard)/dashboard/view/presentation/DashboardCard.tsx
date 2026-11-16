@@ -79,7 +79,7 @@ const DashboardCard = ({
             }}
             iconPosition="end"
             icon={<SquarePen size={16} />}
-            className="!bg-[#E34013] !text-white !rounded-[8px] !text-[14px] !font-[600] !h-[38px] "
+            className="mr-cta !font-[600] !h-[38px] "
             type="primary"
             size="large">
             Edit
@@ -95,7 +95,7 @@ const DashboardCard = ({
             }}
             iconPosition="end"
             icon={<Trash size={16} />}
-            className="!bg-[#fff] !text-[#E34013] !border-[1px] !border-[#E34013] !rounded-[8px] !text-[14px] !font-[600] !h-[38px] "
+            className="mr-outline !font-[600] !h-[38px] "
             type="primary"
             size="large">
             Delete
@@ -114,7 +114,7 @@ const DashboardCard = ({
             }}
             iconPosition="end"
             icon={<SquarePen size={16} />}
-            className="!bg-[#E34013] !text-white !rounded-[8px] !text-[14px] !font-[600] !h-[38px] "
+            className="mr-cta !font-[600] !h-[38px] "
             type="primary"
             size="large">
             Detail
@@ -130,7 +130,7 @@ const DashboardCard = ({
             }}
             iconPosition="end"
             icon={<Trash size={16} />}
-            className="!bg-[#fff] !text-[#E34013] !border-[1px] !border-[#E34013] !rounded-[8px] !text-[14px] !font-[600] !h-[38px] "
+            className="mr-outline !font-[600] !h-[38px] "
             type="primary"
             size="large">
             Delete
@@ -201,7 +201,7 @@ const DashboardJournalCard = ({
             }}
             iconPosition="end"
             icon={<SquarePen size={16} />}
-            className="!bg-[#E34013] !text-white !rounded-[8px] !text-[14px] !font-[600] !h-[38px]"
+            className="mr-cta !font-[600] !h-[38px]"
             type="primary"
             size="large">
             Detail
@@ -217,7 +217,7 @@ const DashboardJournalCard = ({
             }}
             iconPosition="end"
             icon={<Trash size={16} />}
-            className="!bg-[#fff] !text-[#E34013] !border-[1px] !border-[#E34013] !rounded-[8px] !text-[14px] !font-[600] !h-[38px]"
+            className="mr-outline !font-[600] !h-[38px]"
             type="primary"
             size="large">
             Delete
