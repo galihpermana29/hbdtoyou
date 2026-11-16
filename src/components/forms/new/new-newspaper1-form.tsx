@@ -1,5 +1,11 @@
 'use client';
 import { Button, Form, Input, message, Modal } from 'antd';
+import {
+  PlanCount,
+  reportCreateFailure,
+  roomForMore,
+  usePlan,
+} from '@/components/forms/plan-count';
 import TextArea from 'antd/es/input/TextArea';
 import { useEffect } from 'react';
 import { MinusCircleOutlined, PlusOutlined } from '@ant-design/icons';
@@ -28,7 +34,7 @@ const NewNewspaper1Form = ({
 }: NewNewspaper1FormProps) => {
   const [form] = useForm();
   const profile = useMemoifyProfile();
-  const isFreeAccount = profile?.quota < 1;
+  const { isFree: isFreeAccount, limits, tier } = usePlan('gift');
   const jumbotronImage = useWatch('jumbotronImage', form);
 
   const handleSubmit = async (
@@ -92,7 +98,7 @@ const NewNewspaper1Form = ({
         handleCompleteCreation();
       }
     } else {
-      message.error('Something went wrong!');
+      reportCreateFailure(res.message, profile);
     }
 
     setLoading(false);
@@ -252,18 +258,8 @@ const NewNewspaper1Form = ({
                 size="large"
                 type="primary"
                 onClick={() => {
-                  if (isFreeAccount) {
-                    if (fields.length <= 1) {
-                      add();
-                    } else {
-                      message.error('You can only add 2 moments');
-                    }
-                  } else {
-                    if (fields.length <= 5) {
-                      add();
-                    } else {
-                      message.error('Limit reached');
-                    }
+                  if (roomForMore(fields.length, limits, tier, 'moments')) {
+                    add();
                   }
                 }}
                 icon={<PlusOutlined />}
@@ -271,11 +267,12 @@ const NewNewspaper1Form = ({
                 Add Stories
               </Button>
 
-              <p className="text-[13px] text-gray-600 max-w-[400px]">
-                Account with <span className="font-bold">free</span> plan can
-                only add 2 moment of episode. To add up to 6 moment of episode,
-                upgrade to <span className="font-bold">premium</span> plan.
-              </p>
+              <PlanCount
+                used={fields.length}
+                limit="repeatItems"
+                tier={tier}
+                noun="moments"
+              />
             </>
           )}
         </Form.List>

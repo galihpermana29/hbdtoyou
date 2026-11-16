@@ -1,6 +1,13 @@
 'use client';
 
 import React, { useEffect, useState } from 'react';
+import {
+  PlanCount,
+  PlanNote,
+  reportCreateFailure,
+  roomForMore,
+  usePlan,
+} from '@/components/forms/plan-count';
 import { Form, Button, message, Select, Modal, Tooltip } from 'antd';
 import { PlusOutlined, MinusCircleOutlined } from '@ant-design/icons';
 import { searchSpotifySong } from '@/action/spotify-api';
@@ -66,7 +73,7 @@ const NewSpotifyForm = ({
   const [value] = useDebounce(searchedSong, 1000);
 
   const profile = useMemoifyProfile();
-  const isFreeAccount = profile?.quota < 1;
+  const { isFree: isFreeAccount, limits, tier } = usePlan('gift');
   const router = useRouter();
   const dispatch = useDispatch();
 
@@ -135,7 +142,7 @@ const NewSpotifyForm = ({
       }
     } else {
       setLoading(false);
-      message.error('Something went wrong!');
+      reportCreateFailure(res.message, profile);
     }
 
     setLoading(false);
@@ -206,7 +213,7 @@ const NewSpotifyForm = ({
                   partner. Search up a song from spotify
                 </p>
               </div>
-              {fields.map(({ key, name, fieldKey, ...restField }) => (
+              {fields.map(({ key, name, ...restField }) => (
                 <div
                   key={key}
                   className="flex items-center justify-center gap-2 mb-[10px]">
@@ -242,31 +249,20 @@ const NewSpotifyForm = ({
                   <MinusCircleOutlined onClick={() => remove(name)} />
                 </div>
               ))}
-              <p className="text-[13px] text-gray-600 max-w-[400px]">
-                Account with <span className="font-bold">free</span> plan can
-                only add 3 songs. To add up to 20 songs, upgrade to{' '}
-                <span className="font-bold">premium</span> plan.
-              </p>
+              <PlanCount
+                used={fields.length}
+                limit="repeatItems"
+                tier={tier}
+                noun="songs"
+              />
               <Button
                 size="large"
                 type="primary"
                 onClick={() => {
-                  if (isFreeAccount) {
-                    if (fields.length <= 2) {
-                      add();
-                      setSearchedOptions([]);
-                      setSearchedSong('');
-                    } else {
-                      message.error('You can only add 3 songs');
-                    }
-                  } else {
-                    if (fields.length <= 19) {
-                      add();
-                      setSearchedOptions([]);
-                      setSearchedSong('');
-                    } else {
-                      message.error('Limit reached!');
-                    }
+                  if (roomForMore(fields.length, limits, tier, 'songs')) {
+                    add();
+                    setSearchedOptions([]);
+                    setSearchedSong('');
                   }
                 }}
                 icon={<PlusOutlined />}
@@ -289,7 +285,7 @@ const NewSpotifyForm = ({
                   listen to
                 </p>
               </div>
-              {fields.map(({ key, name, fieldKey, ...restField }) => (
+              {fields.map(({ key, name, ...restField }) => (
                 <div
                   key={key}
                   className="flex items-center justify-center gap-2 mb-[10px]">
@@ -329,33 +325,22 @@ const NewSpotifyForm = ({
                 size="large"
                 type="primary"
                 onClick={() => {
-                  if (isFreeAccount) {
-                    if (fields.length <= 2) {
-                      add();
-                      setSearchedOptions([]);
-                      setSearchedSong('');
-                    } else {
-                      message.error('You can only add 3 songs');
-                    }
-                  } else {
-                    if (fields.length <= 19) {
-                      add();
-                      setSearchedOptions([]);
-                      setSearchedSong('');
-                    } else {
-                      message.error('Limit reached!');
-                    }
+                  if (roomForMore(fields.length, limits, tier, 'songs')) {
+                    add();
+                    setSearchedOptions([]);
+                    setSearchedSong('');
                   }
                 }}
                 icon={<PlusOutlined />}
                 className="!rounded-[50px] !bg-black !text-white my-[12px] !text-[13px]">
                 Add Song
               </Button>
-              <p className="text-[13px] text-gray-600 max-w-[400px]">
-                Account with <span className="font-bold">free</span> plan can
-                only add 3 songs. To add up to 20 songs, upgrade to{' '}
-                <span className="font-bold">premium</span> plan.
-              </p>
+              <PlanCount
+                used={fields.length}
+                limit="repeatItems"
+                tier={tier}
+                noun="songs"
+              />
             </>
           )}
         </Form.List>
@@ -383,15 +368,11 @@ const NewSpotifyForm = ({
             type={isFreeAccount ? AccountType.free : AccountType.premium}
             // disabled={isFreeAccount}
             multiple={true}
-            limit={isFreeAccount ? 2 : 20}
+            limit={limits.galleryPhotos}
             openNotification={openNotification}
           />
         </Form.Item>
-        <p className="text-[13px] text-gray-600 max-w-[400px]">
-          Account with <span className="font-bold">free</span> plan can only add
-          2 images. To add up to 20 images, upgrade to{' '}
-          <span className="font-bold">premium</span> plan.
-        </p>
+        <PlanNote limit="galleryPhotos" noun="photos" />
 
         <Form.Item
           className="!mt-[10px]"

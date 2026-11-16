@@ -1,5 +1,6 @@
 'use client';
 import { Button, Form, Input, message, Modal } from 'antd';
+import { reportCreateFailure } from '@/components/forms/plan-count';
 import TextArea from 'antd/es/input/TextArea';
 import { useEffect } from 'react';
 import { useForm } from 'antd/es/form/Form';
@@ -96,7 +97,7 @@ const NewTarotForm = ({
         handleCompleteCreation();
       }
     } else {
-      message.error(res.message);
+      reportCreateFailure(res.message, profile);
     }
 
     setLoading(false);

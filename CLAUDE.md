@@ -65,6 +65,20 @@ This is the single most important thing to internalize:
 
 So when adding a new template variant you need four things in sync: a new `new-<name>-form.tsx` under `src/components/forms/new/`, an entry in the `templateComponents` map in `create-clientside.tsx`, a `(gifts)/<name>/page.tsx` preview, and a `(gifts)/<name>/[id]/page.tsx` dynamic viewer. The form filename and the viewer directory name are not directly coupled - they're both coupled to the template's `route` string on the backend.
 
+### Free vs premium (every gift and scrapbook template)
+
+Applies to all gift and scrapbook templates, including any added later. MemoRoll and the wedding invitation have their own tokens and rules and are out of scope. See `docs/adr/0008-plan-limits-belong-to-the-account-not-the-template.md`.
+
+- The owner rotates which templates are free and which are premium on the backend (the template's `label`). So no form may hard-code its tier, a cap, or a "free plan can only add N" sentence.
+- Caps come from the account's plan, through `src/lib/plan-limits.ts`: `PLAN_LIMITS` (gallery photos, repeated items, file size, scrapbook photos) and `usePlan(kind)` / `PlanCount` / `PlanNote` / `roomForMore` in `src/components/forms/plan-count.tsx`.
+  - Every uploader takes `limit={limits.galleryPhotos}`, or `limit={1}` for a single image.
+  - Every open-ended `Form.List` adds through `roomForMore(...)` and shows a `PlanCount`.
+  - A fixed layout count (Board of Us squares, Arcade Claw memories) is a property of the template, not the plan, and stays as it is.
+- Two balances: gifts spend **credits** (`profile.quota`); scrapbooks spend **tokens** (`profile.token_scrapbook`). Ask `usePlan('gift')` or `usePlan('scrapbook')`. Never re-derive "free" with `quota < 1` in a form.
+- The backend, not the frontend, enforces the daily allowance: one free gift and one free scrapbook per 24 hours, from `last_gift_created_at` / `last_scrapbook_created_at`. A draft spends that slot, and deleting a gift does not give it back. A failed create goes through `reportCreateFailure(res.message, profile, kind)`, which turns `FREE_PLAN_GIFT_LIMIT_REACHED` / `INSUFFICIENT_*` into words and a way to Premium.
+- The caps in `PLAN_LIMITS` are not enforced by the backend yet. They are the frontend's fence; keep them in that one file so the backend can adopt the same numbers.
+- A new template is not done until its form follows the above.
+
 ### Data flow
 
 - **Backend calls** live in `src/action/` as `'use server'` server actions (`user-api.ts` for auth/user/content/payments/dashboard, `spotify-api.ts`, plus `interfaces.ts` for types). Client-side mutations that need the caller's session go through `src/action/client-api.ts`, which fetches `/api/session` first and then hits the backend directly from the browser with the bearer token.

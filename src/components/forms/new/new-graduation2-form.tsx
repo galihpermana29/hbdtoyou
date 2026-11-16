@@ -1,12 +1,16 @@
 'use client';
 import { Button, Form, Input, message, Modal, Tooltip } from 'antd';
+import {
+  PlanNote,
+  reportCreateFailure,
+  usePlan,
+} from '@/components/forms/plan-count';
 import { useEffect } from 'react';
 import { useForm, useWatch } from 'antd/es/form/Form';
 import { useMemoifyProfile } from '@/app/session-provider';
 import { createContent, submitFeedback } from '@/action/user-api';
 import { IDetailContentResponse } from '@/action/interfaces';
 import dayjs from 'dayjs';
-import { useRouter } from 'next/navigation';
 import { useSelector } from 'react-redux';
 import { RootState } from '@/lib/store';
 
@@ -28,11 +32,10 @@ const NewGraduation2Form = ({
   editData,
 }: NewGraduation2FormProps) => {
   const profile = useMemoifyProfile();
-  const isFreeAccount = profile?.quota < 1;
+  const { isFree: isFreeAccount, limits } = usePlan('gift');
   const [form] = useForm();
 
   const images = useWatch('images', form);
-  const router = useRouter();
 
   const collectionOfImages = useSelector(
     (state: RootState) => state.uploadSlice.collectionOfImages
@@ -103,7 +106,7 @@ const NewGraduation2Form = ({
       }
     } else {
       setLoading(false);
-      message.error(res.message);
+      reportCreateFailure(res.message, profile);
     }
   };
 
@@ -184,11 +187,7 @@ const NewGraduation2Form = ({
                 Collection of images
               </h3>
 
-              <p className="text-[13px] text-gray-600 max-w-[400px]">
-                Account with <span className="font-bold">free</span> plan can
-                only add 4 images. To add up to 15 images, upgrade to{' '}
-                <span className="font-bold">premium</span> plan.
-              </p>
+              <PlanNote limit="galleryPhotos" noun="photos" />
             </div>
           }>
           <DraggerUpload
@@ -197,7 +196,7 @@ const NewGraduation2Form = ({
             formItemName={'images'}
             type={isFreeAccount ? AccountType.free : AccountType.premium}
             multiple={true}
-            limit={isFreeAccount ? 4 : 20}
+            limit={limits.galleryPhotos}
             openNotification={openNotification}
           />
         </Form.Item>

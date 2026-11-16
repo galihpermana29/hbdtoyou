@@ -1,6 +1,7 @@
 'use client';
 
 import { IDetailContentResponse } from '@/action/interfaces';
+import { reportCreateFailure, usePlan } from '@/components/forms/plan-count';
 import { createContent, editContent, submitFeedback } from '@/action/user-api';
 import { useMemoifyProfile } from '@/app/session-provider';
 import { UseCreateContentReturn } from '@/app/(landing)/(core)/create/usecase/useCreateContent';
@@ -47,7 +48,7 @@ export default function NewArcadeClawForm({
   const [form] = useForm<ArcadeClawFormValues>();
   const profile = useMemoifyProfile();
   const dispatch = useDispatch();
-  const isFreeAccount = profile?.quota < 1;
+  const { isFree: isFreeAccount } = usePlan('gift');
 
   const handleSubmit = async (
     values: ArcadeClawFormValues,
@@ -82,7 +83,7 @@ export default function NewArcadeClawForm({
       : await createContent(payload);
 
     if (!response.success) {
-      message.error(response.message);
+      reportCreateFailure(response.message, profile);
       setLoading(false);
       return;
     }

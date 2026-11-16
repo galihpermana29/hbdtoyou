@@ -1,5 +1,10 @@
 'use client';
 import { IDetailContentResponse } from '@/action/interfaces';
+import {
+  PlanNote,
+  reportCreateFailure,
+  usePlan,
+} from '@/components/forms/plan-count';
 import { createContent, editContent, submitFeedback } from '@/action/user-api';
 import { useMemoifyProfile } from '@/app/session-provider';
 import GeneratingLLMLoadingModal from '@/app/(landing)/(gifts)/albumgraduation1/[id]/GeneratingLLMLoadingModal';
@@ -42,7 +47,7 @@ const AlbumGraduationv1 = ({
   const [showLlmModal, setShowLlmModal] = useState(false);
 
   const profile = useMemoifyProfile();
-  const isFreeAccount = profile?.quota < 1;
+  const { isFree: isFreeAccount, limits } = usePlan('gift');
   const [form] = useForm();
 
   const dispatch = useDispatch();
@@ -143,7 +148,7 @@ const AlbumGraduationv1 = ({
       }
     } else {
       setLoading(false);
-      message.error(res.message);
+      reportCreateFailure(res.message, profile);
     }
   };
 
@@ -255,11 +260,7 @@ const AlbumGraduationv1 = ({
                 Collection of client images
               </h3>
 
-              <p className="text-[13px] text-gray-600 max-w-[400px]">
-                Account with <span className="font-bold">free</span> plan can
-                only add 5 images. To add up to 15 images, upgrade to{' '}
-                <span className="font-bold">premium</span> plan.
-              </p>
+              <PlanNote limit="galleryPhotos" noun="photos" />
             </div>
           }>
           <DraggerUpload
@@ -268,7 +269,7 @@ const AlbumGraduationv1 = ({
             formItemName={'images'}
             type={isFreeAccount ? AccountType.free : AccountType.premium}
             multiple={true}
-            limit={isFreeAccount ? 5 : 20}
+            limit={limits.galleryPhotos}
             openNotification={openNotification}
           />
         </Form.Item>

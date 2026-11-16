@@ -2,7 +2,11 @@
 
 import { getPromotedCoupon, unlockContent } from '@/action/user-api';
 import { ICoupon } from '@/action/interfaces';
-import { useMemoifyProfile } from '@/app/session-provider';
+import {
+  useMemoifyProfile,
+  useRevalidateProfile,
+} from '@/app/session-provider';
+import { planRefusal } from '@/lib/plan-limits';
 import { Button, notification } from 'antd';
 import { useEffect, useState, type ReactNode } from 'react';
 import { useRouter } from 'next/navigation';
@@ -44,6 +48,7 @@ const LockScreen = ({
 }: LockScreenProps) => {
   const subtle = lockVariant === 'subtle';
   const profile = useMemoifyProfile();
+  const revalidateProfile = useRevalidateProfile();
   const isFreeAccount =
     type === 'gift' ? profile?.quota < 1 : profile?.token_scrapbook < 1;
   const [isLocked, setIsLocked] = useState(initiallyLocked);
@@ -85,6 +90,9 @@ const LockScreen = ({
     if (res.success) {
       setLockedLoading(false);
       setIsLocked(false);
+      // The unlock spent a credit (or token): the navbar's count must say so
+      // without a reload.
+      revalidateProfile(`unlock-${contentId}-${Date.now()}`);
       notification.success({
         message: 'Content unlocked',
         description: 'You can now view this content',
@@ -92,9 +100,10 @@ const LockScreen = ({
       onUnlock?.();
     } else {
       setLockedLoading(false);
+      const refusal = planRefusal(res.message, profile, type);
       notification.error({
-        message: res.message,
-        description: 'Please try again',
+        message: refusal?.title ?? res.message,
+        description: refusal?.description ?? 'Please try again',
       });
     }
   };

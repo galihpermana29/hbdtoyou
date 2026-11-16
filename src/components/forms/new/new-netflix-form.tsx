@@ -1,5 +1,10 @@
 'use client';
 import { Button, Form, Input, message, Modal, Tooltip } from 'antd';
+import {
+  PlanNote,
+  reportCreateFailure,
+  usePlan,
+} from '@/components/forms/plan-count';
 import TextArea from 'antd/es/input/TextArea';
 import { useEffect } from 'react';
 import { useForm, useWatch } from 'antd/es/form/Form';
@@ -31,7 +36,7 @@ const NewNetflixForm = ({
   const dispatch = useDispatch();
   const profile = useMemoifyProfile();
 
-  const isFreeAccount = profile?.quota < 1;
+  const { isFree: isFreeAccount, limits } = usePlan('gift');
   const router = useRouter();
   const [form] = useForm();
 
@@ -108,7 +113,7 @@ const NewNetflixForm = ({
         handleCompleteCreation();
       }
     } else {
-      message.error(`Something went wrong!, ${res.message}`);
+      reportCreateFailure(res.message, profile);
     }
     setLoading(false);
     return;
@@ -208,11 +213,7 @@ const NewNetflixForm = ({
                 Collection of images
               </h3>
 
-              <p className="text-[13px] text-gray-600 max-w-[400px]">
-                Account with <span className="font-bold">free</span> plan can
-                only add 5 images. To add up to 20 images, upgrade to{' '}
-                <span className="font-bold">premium</span> plan.
-              </p>
+              <PlanNote limit="galleryPhotos" noun="photos" />
             </div>
           }>
           <DraggerUpload
@@ -221,7 +222,7 @@ const NewNetflixForm = ({
             formItemName={'images'}
             type={isFreeAccount ? AccountType.free : AccountType.premium}
             multiple={true}
-            limit={isFreeAccount ? 5 : 20}
+            limit={limits.galleryPhotos}
             openNotification={openNotification}
           />
         </Form.Item>

@@ -1,5 +1,11 @@
 'use client';
 import { Button, Form, Input, message, Modal, Tooltip } from 'antd';
+import {
+  PlanCount,
+  reportCreateFailure,
+  roomForMore,
+  usePlan,
+} from '@/components/forms/plan-count';
 import TextArea from 'antd/es/input/TextArea';
 import { useEffect } from 'react';
 import { MinusCircleOutlined, PlusOutlined } from '@ant-design/icons';
@@ -29,7 +35,7 @@ const NewVinylForm = ({
   editData,
 }: NewVinylFormProps) => {
   const profile = useMemoifyProfile();
-  const isFreeAccount = profile?.quota < 1;
+  const { isFree: isFreeAccount, limits, tier } = usePlan('gift');
   const [form] = useForm();
   const dispatch = useDispatch();
 
@@ -115,7 +121,7 @@ const NewVinylForm = ({
       }
     } else {
       setLoading(false);
-      message.error(res.message);
+      reportCreateFailure(res.message, profile);
     }
   };
 
@@ -355,18 +361,8 @@ const NewVinylForm = ({
                 size="large"
                 type="primary"
                 onClick={() => {
-                  if (isFreeAccount) {
-                    if (fields.length <= 1) {
-                      add({ imageUrl: '', caption: '', date: '' });
-                    } else {
-                      message.error('You can only add 2 memories');
-                    }
-                  } else {
-                    if (fields.length <= 14) {
-                      add({ imageUrl: '', caption: '', date: '' });
-                    } else {
-                      message.error('Limit reached');
-                    }
+                  if (roomForMore(fields.length, limits, tier, 'memories')) {
+                    add({ imageUrl: '', caption: '', date: '' });
                   }
                 }}
                 icon={<PlusOutlined />}
@@ -374,11 +370,12 @@ const NewVinylForm = ({
                 Add Memory
               </Button>
 
-              <p className="text-[13px] text-gray-600 max-w-[400px]">
-                Account with <span className="font-bold">free</span> plan can
-                only add 2 memories. To add up to 15 memories, upgrade to{' '}
-                <span className="font-bold">premium</span> plan.
-              </p>
+              <PlanCount
+                used={fields.length}
+                limit="repeatItems"
+                tier={tier}
+                noun="memories"
+              />
             </>
           )}
         </Form.List>

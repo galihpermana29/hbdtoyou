@@ -1,5 +1,12 @@
 'use client';
 import { Button, Form, Input, message, Modal, Tooltip } from 'antd';
+import {
+  PlanCount,
+  PlanNote,
+  reportCreateFailure,
+  roomForMore,
+  usePlan,
+} from '@/components/forms/plan-count';
 import TextArea from 'antd/es/input/TextArea';
 import { useEffect } from 'react';
 import { MinusCircleOutlined, PlusOutlined } from '@ant-design/icons';
@@ -29,7 +36,7 @@ const NewDisneyForm = ({
   editData,
 }: NewDisneyFormProps) => {
   const profile = useMemoifyProfile();
-  const isFreeAccount = profile?.quota < 1;
+  const { isFree: isFreeAccount, limits, tier } = usePlan('gift');
   const [form] = useForm();
   const dispatch = useDispatch();
 
@@ -113,7 +120,7 @@ const NewDisneyForm = ({
       }
     } else {
       setLoading(false);
-      message.error(res.message);
+      reportCreateFailure(res.message, profile);
     }
   };
 
@@ -267,26 +274,12 @@ const NewDisneyForm = ({
                 size="large"
                 type="primary"
                 onClick={() => {
-                  if (isFreeAccount) {
-                    if (fields.length <= 1) {
-                      add({
-                        imageUrl: '',
-                        title: '',
-                        desc: '',
-                      });
-                    } else {
-                      message.error('You can only add 2 moments');
-                    }
-                  } else {
-                    if (fields.length <= 15) {
-                      add({
-                        imageUrl: '',
-                        title: '',
-                        desc: '',
-                      });
-                    } else {
-                      message.error('Limit reached');
-                    }
+                  if (roomForMore(fields.length, limits, tier, 'moments')) {
+                    add({
+                      imageUrl: '',
+                      title: '',
+                      desc: '',
+                    });
                   }
                 }}
                 icon={<PlusOutlined />}
@@ -294,11 +287,12 @@ const NewDisneyForm = ({
                 Add Moment
               </Button>
 
-              <p className="text-[13px] text-gray-600 max-w-[400px]">
-                Account with <span className="font-bold">free</span> plan can
-                only add 2 moment of episode. To add up to 16 moment of episode,
-                upgrade to <span className="font-bold">premium</span> plan.
-              </p>
+              <PlanCount
+                used={fields.length}
+                limit="repeatItems"
+                tier={tier}
+                noun="moments"
+              />
             </>
           )}
         </Form.List>
@@ -321,11 +315,7 @@ const NewDisneyForm = ({
                 Collection of images
               </h3>
 
-              <p className="text-[13px] text-gray-600 max-w-[400px]">
-                Account with <span className="font-bold">free</span> plan can
-                only add 5 images. To add up to 15 images, upgrade to{' '}
-                <span className="font-bold">premium</span> plan.
-              </p>
+              <PlanNote limit="galleryPhotos" noun="photos" />
             </div>
           }>
           <DraggerUpload
@@ -334,7 +324,7 @@ const NewDisneyForm = ({
             formItemName={'images'}
             type={isFreeAccount ? AccountType.free : AccountType.premium}
             multiple={true}
-            limit={isFreeAccount ? 5 : 20}
+            limit={limits.galleryPhotos}
             openNotification={openNotification}
           />
         </Form.Item>

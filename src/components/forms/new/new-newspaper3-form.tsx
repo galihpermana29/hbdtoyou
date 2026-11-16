@@ -1,5 +1,6 @@
 'use client';
 import { Badge, Button, Form, Input, message, Modal, Select } from 'antd';
+import { reportCreateFailure, usePlan } from '@/components/forms/plan-count';
 import TextArea from 'antd/es/input/TextArea';
 import { useEffect } from 'react';
 
@@ -9,7 +10,6 @@ import { createContent, editContent, submitFeedback } from '@/action/user-api';
 import { v3Songs } from '@/lib/songs';
 import { IDetailContentResponse } from '@/action/interfaces';
 import dayjs from 'dayjs';
-import { useRouter } from 'next/navigation';
 import DraggerUpload, { AccountType } from '@/components/ui/uploader/uploader';
 import FinalModal from '../final-modal';
 import { UseCreateContentReturn } from '@/app/(landing)/(core)/create/usecase/useCreateContent';
@@ -29,9 +29,8 @@ const NewNewspaper3Form = ({
   editData,
 }: NewNewspaper3FormProps) => {
   const profile = useMemoifyProfile();
-  const isFreeAccount = profile?.quota < 1;
+  const { isFree: isFreeAccount } = usePlan('gift');
   const [form] = useForm();
-  const router = useRouter();
 
   const selectedSongs = useWatch('song', form);
   const jumbotronImage = useWatch('jumbotronImage', form);
@@ -93,7 +92,7 @@ const NewNewspaper3Form = ({
         handleCompleteCreation();
       }
     } else {
-      message.error('Something went wrong!');
+      reportCreateFailure(res.message, profile);
     }
 
     setLoading(false);

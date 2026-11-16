@@ -1,5 +1,6 @@
 'use client';
 import NavigationBar from '@/components/ui/navbar';
+import { FreeAllowance } from '@/components/forms/plan-count';
 import { Button, message, Segmented, Spin, Steps } from 'antd';
 import { useEffect, useState } from 'react';
 import { LoadingOutlined } from '@ant-design/icons';
@@ -224,6 +225,9 @@ const CreatePage = ({ initialTemplateId }: { initialTemplateId?: string }) => {
               current={current}
               items={StepsCustom}
             />
+            <div className="mt-[20px] max-w-[640px]">
+              <FreeAllowance kind="gift" />
+            </div>
           </div>
           {selectedTemplate ? (
             <div className="w-full">
@@ -279,21 +283,18 @@ const CreatePage = ({ initialTemplateId }: { initialTemplateId?: string }) => {
                         }}
                         className="!bg-[#E34013] !text-white !rounded-[8px] !text-[16px] !font-[600] !h-[48px] !w-[170px]"
                         type="primary"
-                        size="large"
-                      >
+                        size="large">
                         Copy link
                       </Button>
                       <Link
                         target="_blank"
                         href={`/${modalState.data}`}
-                        className="cursor-pointer"
-                      >
+                        className="cursor-pointer">
                         {' '}
                         <Button
                           className="!bg-[#fff] !text-[#E34013] !border-[1px] !border-[#E34013] !rounded-[8px] !text-[16px] !font-[600] !h-[48px] !w-[170px]"
                           type="primary"
-                          size="large"
-                        >
+                          size="large">
                           Open in new tab
                         </Button>
                       </Link>

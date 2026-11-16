@@ -1,5 +1,10 @@
 'use client';
 import { Button, Divider, Form, Input, message, Select } from 'antd';
+import {
+  FreeAllowance,
+  reportCreateFailure,
+  usePlan,
+} from '@/components/forms/plan-count';
 import { useMemoifyProfile } from '@/app/session-provider';
 import { IAllTemplateResponse } from '@/action/interfaces';
 import { useEffect, useState } from 'react';
@@ -41,7 +46,7 @@ const FormGeneration = ({
 }: FormGenerationProps) => {
   const [form] = Form.useForm();
   const profile = useMemoifyProfile();
-  const isFreeAccount = profile?.token_scrapbook < 1;
+  const { isFree: isFreeAccount, limits } = usePlan('scrapbook');
 
   const router = useRouter();
   const query = useSearchParams();
@@ -143,7 +148,7 @@ const FormGeneration = ({
         window.location.href = `/${templateName}/${res.data}?isNew=true`;
         message.success('Successfully created!');
       } else {
-        message.error(res.message);
+        reportCreateFailure(res.message, profile, 'scrapbook');
       }
     } catch (error: any) {
       if (error.message === 'timeout') {
@@ -235,7 +240,7 @@ const FormGeneration = ({
             formItemName={'images'}
             type={isFreeAccount ? AccountType.free : AccountType.premium}
             multiple={true}
-            limit={isFreeAccount ? 2 : 15}
+            limit={limits.scrapbookPhotos}
             openNotification={openNotification}
           />
         </Form.Item>
@@ -296,10 +301,9 @@ const FormGeneration = ({
           </div>
         </Form.Item>
         {isFreeAccount ? (
-          <p className="text-[12px] text-gray-600 my-[12px]">
-            You can use <span className="font-semibold">scrapbook 1</span> in
-            free tier
-          </p>
+          <div className="my-[12px]">
+            <FreeAllowance kind="scrapbook" />
+          </div>
         ) : (
           <p className="text-[12px] text-gray-600 my-[12px]">
             <span className="font-semibold text-[#E34013]">1 token</span> per

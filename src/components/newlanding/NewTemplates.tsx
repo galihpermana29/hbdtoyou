@@ -24,6 +24,7 @@ import {
 import clsx from 'clsx';
 import { ArrowUpRight, Sparkles } from 'lucide-react';
 import Link from 'next/link';
+import { FreeAllowance } from '@/components/forms/plan-count';
 import { useMemo, useState } from 'react';
 
 type CategoryFilter = 'All' | TemplateCategory;
@@ -119,6 +120,11 @@ function TemplateCard({
             {template.label === 'premium' ? (
               <span className="rounded-full bg-[#f3f3f5] px-2.5 py-1 text-[11px] font-semibold text-[#626269]">
                 Premium
+              </span>
+            ) : template.label === 'free' &&
+              ['gift', 'scrapbook', 'graduation'].includes(template.type) ? (
+              <span className="rounded-full bg-[#ecf8f0] px-2.5 py-1 text-[11px] font-semibold text-[#1f7a45]">
+                Free
               </span>
             ) : null}
           </div>
@@ -263,6 +269,14 @@ const NewTemplates = ({ data }: { data: IAllTemplateResponse[] }) => {
                 </button>
               ))}
             </div>
+          </div>
+
+          {/* Where a free account stands today, shown where the template is
+              chosen - the 24-hour allowance is never first met as a refusal
+              at the end of the form. Nothing for a signed-out visitor or a
+              premium account. */}
+          <div className="mb-6 max-w-[760px]">
+            <FreeAllowance kind="gift" className="rounded-[20px]" />
           </div>
 
           {filteredTemplates.length > 0 ? (
