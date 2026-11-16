@@ -1,5 +1,6 @@
 'use client';
 import { Button, Form, Input, message, Modal, Tooltip } from 'antd';
+import { usePremiumGate } from '@/components/forms/premium-gate';
 import {
   PlanNote,
   reportCreateFailure,
@@ -39,6 +40,11 @@ const NewNetflixForm = ({
   const { isFree: isFreeAccount, limits } = usePlan('gift');
   const router = useRouter();
   const [form] = useForm();
+  const gate = usePremiumGate({
+    form,
+    template: selectedTemplate,
+    editing: Boolean(editData),
+  });
 
   const jumbotronImage = useWatch('jumbotronImage', form);
   const images = useWatch('images', form);
@@ -157,6 +163,7 @@ const NewNetflixForm = ({
         size="large">
         See tutorial
       </Button>
+      {gate.ui}
       <Form disabled={loading} form={form} layout="vertical">
         <Form.Item
           rules={[
@@ -240,7 +247,8 @@ const NewNetflixForm = ({
               onClick={() => {
                 form
                   .validateFields()
-                  .then(() => {
+                  .then(async () => {
+                    if (!(await gate.allow(form.getFieldsValue()))) return;
                     handleSubmit(form.getFieldsValue(), 'draft');
                   })
                   .catch((info) => {
@@ -261,7 +269,8 @@ const NewNetflixForm = ({
             onClick={() => {
               form
                 .validateFields()
-                .then(() => {
+                .then(async () => {
+                  if (!(await gate.allow(form.getFieldsValue()))) return;
                   // handleSubmit(form.getFieldsValue(), 'published');
                   setModalState({
                     visible: true,

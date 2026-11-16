@@ -1,5 +1,6 @@
 'use client';
 import { Button, Divider, Form, Input, message, Select } from 'antd';
+import { usePremiumGate } from '@/components/forms/premium-gate';
 import {
   FreeAllowance,
   reportCreateFailure,
@@ -58,6 +59,16 @@ const FormGeneration = ({
   const [popularTemplates, setPopularTemplates] = useState<
     IAllTemplateResponse[] | null
   >(null);
+  const selectedTemplate = popularTemplates?.find(
+    (template) => template.id === selectedTemplateId
+  );
+  const gate = usePremiumGate({
+    form,
+    template: selectedTemplate
+      ? { id: selectedTemplate.id, label: selectedTemplate.label }
+      : null,
+    kind: 'scrapbook',
+  });
   const [selectedTemplateContent, setSelectedTemplateContent] =
     useState<string>(stringInitialPrompt);
 
@@ -107,6 +118,7 @@ const FormGeneration = ({
   };
 
   const handleFinish = async (value: any) => {
+    if (!(await gate.allow(value))) return;
     let parsedPrompt = null;
 
     if (selectedModel === 'v2') {
@@ -167,6 +179,7 @@ const FormGeneration = ({
   }, []);
   return (
     <div>
+      {gate.ui}
       <Form
         form={form}
         layout="vertical"

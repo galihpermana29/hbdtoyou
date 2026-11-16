@@ -13,6 +13,8 @@ import { v4 as uuidv4 } from 'uuid';
 interface Template {
   id: string;
   route: string;
+  /** 'free' | 'premium' from the backend - decides the paywall at Create. */
+  label?: string;
 }
 
 type ModalType = 'finish' | 'draft' | 'preview' | string;

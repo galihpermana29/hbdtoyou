@@ -16,6 +16,7 @@ import {
   previewCoupon,
 } from '@/action/user-api';
 import NavigationBar from '@/components/ui/navbar';
+import { peekAfterPayment, takeAfterPayment } from '@/lib/after-payment';
 import { Button, Input, Select, Typography, message } from 'antd';
 import { motion } from 'framer-motion';
 import Image from 'next/image';
@@ -255,8 +256,9 @@ const NewClientPagePayment = () => {
 
         if (countdown <= 0) {
           clearInterval(timer);
-          // Use window.location.href for full page reload
-          window.location.href = '/dashboard';
+          // Use window.location.href for full page reload. Back to the gift
+          // the paywall sent them from, when it did.
+          window.location.href = takeAfterPayment() ?? '/dashboard';
         }
       }, 1000);
 
@@ -632,8 +634,10 @@ const NewClientPagePayment = () => {
                     unlimited photobox frames, and 6 credit to use templates.
                   </p>
                   <p className="mt-3 font-semibold text-[#E34013]">
-                    Redirecting to dashboard in <span id="countdown">3</span>{' '}
-                    seconds...
+                    {peekAfterPayment()
+                      ? 'Taking you back to your gift in '
+                      : 'Redirecting to dashboard in '}
+                    <span id="countdown">3</span> seconds...
                   </p>
                   <Button
                     onClick={() => (window.location.href = '/dashboard')}

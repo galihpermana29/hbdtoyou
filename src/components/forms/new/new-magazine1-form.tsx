@@ -1,5 +1,6 @@
 'use client';
 import { Button, Form, message, Modal, Select } from 'antd';
+import { usePremiumGate } from '@/components/forms/premium-gate';
 import {
   PlanNote,
   reportCreateFailure,
@@ -37,6 +38,11 @@ const NewMagazineV1Form = ({
   const profile = useMemoifyProfile();
   const { isFree: isFreeAccount, limits } = usePlan('gift');
   const [form] = useForm();
+  const gate = usePremiumGate({
+    form,
+    template: selectedTemplate,
+    editing: Boolean(editData),
+  });
   const selectedSongs = useWatch('song', form);
 
   const [searchedSong, setSearchedSong] = useState('');
@@ -157,6 +163,7 @@ const NewMagazineV1Form = ({
           preFormValue={modalState?.data}
         />
       </Modal>
+      {gate.ui}
       <Form
         disabled={loading}
         form={form}
@@ -276,7 +283,8 @@ const NewMagazineV1Form = ({
             onClick={() => {
               form
                 .validateFields()
-                .then(() => {
+                .then(async () => {
+                  if (!(await gate.allow(form.getFieldsValue()))) return;
                   handleSubmit(form.getFieldsValue(), 'draft');
                 })
                 .catch((info) => {
@@ -296,7 +304,8 @@ const NewMagazineV1Form = ({
             onClick={() => {
               form
                 .validateFields()
-                .then(() => {
+                .then(async () => {
+                  if (!(await gate.allow(form.getFieldsValue()))) return;
                   setModalState({
                     visible: true,
                     data: form.getFieldsValue(),

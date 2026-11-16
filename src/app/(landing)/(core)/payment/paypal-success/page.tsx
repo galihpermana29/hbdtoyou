@@ -1,6 +1,7 @@
 'use client';
 
 import { useEffect, useState, useCallback, useRef } from 'react';
+import { takeAfterPayment } from '@/lib/after-payment';
 import { useRouter } from 'next/navigation';
 import NavigationBar from '@/components/ui/navbar';
 import { Button, message } from 'antd';
@@ -56,7 +57,7 @@ const PaymentPaypalSuccess = () => {
           messageApi.error(response.message);
           localStorage.removeItem('paypal_payment');
         }
-      } catch (error) {
+      } catch {
         messageApi.error('An error occurred while capturing payment');
       } finally {
         setIsCapturing(false);
@@ -70,17 +71,19 @@ const PaymentPaypalSuccess = () => {
   const redirectToDashboard = useCallback(() => {
     try {
       setIsRedirecting(true);
+      // Back to the gift the paywall sent them from, when it did.
+      const target = takeAfterPayment() ?? '/dashboard';
       // Primary redirect method
-      router.push('/dashboard');
+      router.push(target);
 
       // Fallback redirect after a delay in case router.push fails silently
       const fallbackTimeout = setTimeout(() => {
-        window.location.href = '/dashboard';
+        window.location.href = target;
       }, 2000);
 
       // Clean up fallback timeout if component unmounts
       return () => clearTimeout(fallbackTimeout);
-    } catch (error) {
+    } catch {
       messageApi.error(
         'Failed to redirect. Please click the button to go to dashboard.'
       );
