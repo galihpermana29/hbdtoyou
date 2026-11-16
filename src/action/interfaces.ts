@@ -125,8 +125,16 @@ export interface IProfileResponse {
   fullname: string;
   email: string;
   type: string;
+  /** Gift credits. */
   quota: number;
+  /** Scrapbook (AI) tokens. */
   token_scrapbook: number;
+  /** When this account last made a gift / a scrapbook (ISO, or ''): the
+   *  backend's 24-hour free cooldown counts from these. See plan-limits.ts. */
+  last_gift_created_at?: string;
+  last_scrapbook_created_at?: string;
+  /** When the paid credits lapse (ISO, or ''). */
+  credits_expiry_date?: string;
   /**
    * What is left of the credits each thing is made from.
    *
@@ -660,11 +668,7 @@ export interface IMemorollEventResponse {
 // arrives as a refusal rather than a phase, but both are read if a foreign
 // event ever answers with them.
 export type MemorollPhase =
-  | 'locked'
-  | 'upcoming'
-  | 'ongoing'
-  | 'countdown'
-  | 'revealed';
+  'locked' | 'upcoming' | 'ongoing' | 'countdown' | 'revealed';
 
 export interface IMemorollGalleryEvent {
   code: string;

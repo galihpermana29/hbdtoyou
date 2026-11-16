@@ -1,6 +1,7 @@
 'use client';
 
 import { IDetailContentResponse } from '@/action/interfaces';
+import { reportCreateFailure, usePlan } from '@/components/forms/plan-count';
 import { createContent, editContent, submitFeedback } from '@/action/user-api';
 import { UseCreateContentReturn } from '@/app/(landing)/(core)/create/usecase/useCreateContent';
 import { useMemoifyProfile } from '@/app/session-provider';
@@ -63,7 +64,7 @@ export default function NewBoardOfUsForm({
   const [form] = useForm<BoardOfUsFormValues>();
   const profile = useMemoifyProfile();
   const dispatch = useDispatch();
-  const isFreeAccount = profile?.quota < 1;
+  const { isFree: isFreeAccount } = usePlan('gift');
 
   const handleSubmit = async (
     values: BoardOfUsFormValues,
@@ -108,7 +109,7 @@ export default function NewBoardOfUsForm({
       : await createContent(payload);
 
     if (!response.success) {
-      message.error(response.message);
+      reportCreateFailure(response.message, profile);
       setLoading(false);
       return;
     }

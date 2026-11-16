@@ -1,5 +1,10 @@
 'use client';
 import { Button, Form, message, Modal, Select } from 'antd';
+import {
+  PlanNote,
+  reportCreateFailure,
+  usePlan,
+} from '@/components/forms/plan-count';
 import TextArea from 'antd/es/input/TextArea';
 import { useEffect, useState } from 'react';
 import { useForm, useWatch } from 'antd/es/form/Form';
@@ -7,7 +12,6 @@ import { useMemoifyProfile } from '@/app/session-provider';
 import { createContent, editContent, submitFeedback } from '@/action/user-api';
 import { useDebounce } from 'use-debounce';
 import { IDetailContentResponse } from '@/action/interfaces';
-import { useRouter } from 'next/navigation';
 import dayjs from 'dayjs';
 import { useDispatch } from 'react-redux';
 import { reset } from '@/lib/uploadSlice';
@@ -31,7 +35,7 @@ const NewMagazineV1Form = ({
   editData,
 }: NewMagazine1FormProps) => {
   const profile = useMemoifyProfile();
-  const isFreeAccount = profile?.quota < 1;
+  const { isFree: isFreeAccount, limits } = usePlan('gift');
   const [form] = useForm();
   const selectedSongs = useWatch('song', form);
 
@@ -43,8 +47,6 @@ const NewMagazineV1Form = ({
   const momentOfYou = useWatch('momentOfYou', form);
 
   const [value] = useDebounce(searchedSong, 1000);
-
-  const router = useRouter();
 
   const dispatch = useDispatch();
 
@@ -115,7 +117,7 @@ const NewMagazineV1Form = ({
       }
     } else {
       setLoading(false);
-      message.error('Something went wrong!');
+      reportCreateFailure(res.message, profile);
     }
 
     setLoading(false);
@@ -262,15 +264,11 @@ const NewMagazineV1Form = ({
             formItemName={'momentOfYou'}
             type={isFreeAccount ? AccountType.free : AccountType.premium}
             multiple={true}
-            limit={isFreeAccount ? 5 : 20}
+            limit={limits.galleryPhotos}
             openNotification={openNotification}
           />
         </Form.Item>
-        <p className="text-[13px] text-gray-600 max-w-[400px]">
-          Account with <span className="font-bold">free</span> plan can only add
-          1 images. To add up to 20 images, upgrade to{' '}
-          <span className="font-bold">premium</span> plan.
-        </p>
+        <PlanNote limit="galleryPhotos" noun="photos" />
 
         <div className="flex justify-end gap-2">
           <Button

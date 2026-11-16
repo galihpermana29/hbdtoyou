@@ -7,6 +7,8 @@ import LoadingHandler from '../custom-loading';
 import { newUploadImageWithAPI } from '@/lib/upload';
 import { RcFile } from 'antd/es/upload';
 import { OpenNotificationFunction } from '@/app/(landing)/(core)/create/usecase/useCreateContent';
+import { PLAN_LIMITS } from '@/lib/plan-limits';
+import Link from 'next/link';
 
 // enum free or profile
 export enum AccountType {
@@ -83,16 +85,16 @@ const DraggerUpload = ({
       return false;
     }
 
-    // Validate file size based on account type
-    const maxSizeMB = type === 'free' ? 1 : 9;
+    // Validate file size against the plan (src/lib/plan-limits.ts).
+    const maxSizeMB = PLAN_LIMITS[type].fileMB;
     const fileSizeMB = file.size / 1024 / 1024;
 
-    if (fileSizeMB >= maxSizeMB) {
-      const errorMessage =
-        type === 'free'
-          ? 'Free account can only upload image below 1MB!'
-          : 'Maximum image size is 10MB!';
-      message.error(errorMessage);
+    if (fileSizeMB > maxSizeMB) {
+      message.error(
+        type === AccountType.free
+          ? `The free plan takes photos up to ${maxSizeMB}MB. Premium takes up to ${PLAN_LIMITS.premium.fileMB}MB.`
+          : `Photos can be up to ${maxSizeMB}MB.`
+      );
       return false;
     }
 
@@ -199,13 +201,22 @@ const DraggerUpload = ({
           }}
           className="dragger-upload !bg-white sm:flex sm:flex-col sm:items-center"
           beforeUpload={async (file, fileList) => {
-            // Validate limit, if exceed limit, cut the list and accept only limit files
-            if (fileList.length > limit) {
-              // Find the index of the current file in the list
+            // The cap counts what is already in the field, not only this
+            // pick: five now and five more later was ten on a five-photo
+            // plan. A single photo is replaced, never capped.
+            if (limit > 1) {
+              const current = form.getFieldValue(formItemName);
+              const already = Array.isArray(current) ? current.length : 0;
+              const room = Math.max(0, limit - already);
               const fileIndex = fileList.findIndex((f) => f.uid === file.uid);
-
-              // Only process the first 5 files, ignore the rest
-              if (fileIndex >= limit) {
+              if (fileIndex >= room) {
+                if (fileIndex === room)
+                  message.info(
+                    type === AccountType.free &&
+                      PLAN_LIMITS.premium.galleryPhotos > limit
+                      ? `The free plan holds ${limit} photos here. Premium holds ${PLAN_LIMITS.premium.galleryPhotos}.`
+                      : `${limit} photos is the most this can hold.`
+                  );
                 return false;
               }
             }
@@ -233,8 +244,27 @@ const DraggerUpload = ({
         </Upload>
       </LoadingHandler>
       <div className="text-caption-2 text-ny-gray-300 text-center mt-[10px] max-w-max">
-        Supported: {acceptTypes.replace(/\./g, '').toUpperCase()}, Max size:{' '}
-        {type === AccountType.free ? 1 : 10} MB
+        {limit > 1 ? (
+          <>
+            <span className="font-semibold text-gray-700">
+              {fileList.length} / {limit}
+            </span>{' '}
+            photos ·{' '}
+          </>
+        ) : null}
+        {acceptTypes.replace(/\./g, '').toUpperCase()}, up to{' '}
+        {PLAN_LIMITS[type].fileMB}MB
+        {type === AccountType.free ? (
+          <>
+            {' '}
+            ·{' '}
+            <Link
+              href="/payment?type=premium"
+              className="font-semibold !text-[#E34013] underline">
+              more with Premium
+            </Link>
+          </>
+        ) : null}
       </div>
     </div>
   );
