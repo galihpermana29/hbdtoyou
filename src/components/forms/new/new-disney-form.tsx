@@ -1,5 +1,6 @@
 'use client';
 import { Button, Form, Input, message, Modal, Tooltip } from 'antd';
+import { usePremiumGate } from '@/components/forms/premium-gate';
 import {
   PlanCount,
   PlanNote,
@@ -38,6 +39,11 @@ const NewDisneyForm = ({
   const profile = useMemoifyProfile();
   const { isFree: isFreeAccount, limits, tier } = usePlan('gift');
   const [form] = useForm();
+  const gate = usePremiumGate({
+    form,
+    template: selectedTemplate,
+    editing: Boolean(editData),
+  });
   const dispatch = useDispatch();
 
   const jumbotronImage = useWatch('jumbotronImage', form);
@@ -154,6 +160,7 @@ const NewDisneyForm = ({
           preFormValue={modalState?.data}
         />
       </Modal>
+      {gate.ui}
       <Form
         disabled={loading}
         form={form}
@@ -341,7 +348,8 @@ const NewDisneyForm = ({
               onClick={() => {
                 form
                   .validateFields()
-                  .then(() => {
+                  .then(async () => {
+                    if (!(await gate.allow(form.getFieldsValue()))) return;
                     handleSubmit(form.getFieldsValue(), 'draft');
                   })
                   .catch((info) => {
@@ -362,7 +370,8 @@ const NewDisneyForm = ({
             onClick={() => {
               form
                 .validateFields()
-                .then(() => {
+                .then(async () => {
+                  if (!(await gate.allow(form.getFieldsValue()))) return;
                   setModalState({
                     visible: true,
                     data: form.getFieldsValue(),

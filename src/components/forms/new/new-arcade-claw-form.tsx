@@ -1,6 +1,7 @@
 'use client';
 
 import { IDetailContentResponse } from '@/action/interfaces';
+import { usePremiumGate } from '@/components/forms/premium-gate';
 import { reportCreateFailure, usePlan } from '@/components/forms/plan-count';
 import { createContent, editContent, submitFeedback } from '@/action/user-api';
 import { useMemoifyProfile } from '@/app/session-provider';
@@ -46,6 +47,11 @@ export default function NewArcadeClawForm({
   editData,
 }: NewArcadeClawFormProps) {
   const [form] = useForm<ArcadeClawFormValues>();
+  const gate = usePremiumGate({
+    form,
+    template: selectedTemplate,
+    editing: Boolean(editData),
+  });
   const profile = useMemoifyProfile();
   const dispatch = useDispatch();
   const { isFree: isFreeAccount } = usePlan('gift');
@@ -144,6 +150,8 @@ export default function NewArcadeClawForm({
           preFormValue={modalState?.data}
         />
       </Modal>
+
+      {gate.ui}
 
       <Form
         disabled={loading}
@@ -316,7 +324,8 @@ export default function NewArcadeClawForm({
             onClick={() => {
               form
                 .validateFields()
-                .then(() => {
+                .then(async () => {
+                  if (!(await gate.allow(form.getFieldsValue()))) return;
                   setModalState({
                     visible: true,
                     data: form.getFieldsValue(),

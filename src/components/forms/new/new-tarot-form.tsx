@@ -1,5 +1,6 @@
 'use client';
 import { Button, Form, Input, message, Modal } from 'antd';
+import { usePremiumGate } from '@/components/forms/premium-gate';
 import { reportCreateFailure } from '@/components/forms/plan-count';
 import TextArea from 'antd/es/input/TextArea';
 import { useEffect } from 'react';
@@ -25,6 +26,11 @@ const NewTarotForm = ({
   editData,
 }: NewTarotFormProps) => {
   const [form] = useForm();
+  const gate = usePremiumGate({
+    form,
+    template: selectedTemplate,
+    editing: Boolean(editData),
+  });
   const profile = useMemoifyProfile();
 
   const handleSubmit = async (
@@ -129,6 +135,7 @@ const NewTarotForm = ({
           preFormValue={modalState?.data}
         />
       </Modal>
+      {gate.ui}
       <Form
         disabled={loading}
         form={form}
@@ -220,7 +227,8 @@ const NewTarotForm = ({
             onClick={() => {
               form
                 .validateFields()
-                .then(() => {
+                .then(async () => {
+                  if (!(await gate.allow(form.getFieldsValue()))) return;
                   setModalState({
                     visible: true,
                     data: form.getFieldsValue(),

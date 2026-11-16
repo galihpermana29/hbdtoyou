@@ -161,7 +161,11 @@ const CreatePage = ({ initialTemplateId }: { initialTemplateId?: string }) => {
 
     const routePath = templateNameToRoute(template.name);
 
-    setSelectedTemplate({ id: template.id, route: routePath });
+    setSelectedTemplate({
+      id: template.id,
+      route: routePath,
+      label: template.label,
+    });
     setCurrent(1);
   };
 

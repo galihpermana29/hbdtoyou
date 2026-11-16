@@ -1,6 +1,7 @@
 'use client';
 
 import React, { useEffect, useState } from 'react';
+import { usePremiumGate } from '@/components/forms/premium-gate';
 import {
   PlanCount,
   PlanNote,
@@ -63,6 +64,11 @@ const NewSpotifyForm = ({
   editData,
 }: NewSpotifyFormProps) => {
   const [form] = Form.useForm();
+  const gate = usePremiumGate({
+    form,
+    template: selectedTemplate,
+    editing: Boolean(editData),
+  });
   const [searchedSong, setSearchedSong] = useState('');
   const [searchedOptions, setSearchedOptions] = useState<OptionSpotifyTrack[]>(
     []
@@ -192,6 +198,7 @@ const NewSpotifyForm = ({
         size="large">
         See tutorial
       </Button>
+      {gate.ui}
       <Form
         form={form}
         layout="vertical"
@@ -399,7 +406,8 @@ const NewSpotifyForm = ({
               onClick={() => {
                 form
                   .validateFields()
-                  .then(() => {
+                  .then(async () => {
+                    if (!(await gate.allow(form.getFieldsValue()))) return;
                     onFinish(form.getFieldsValue(), 'draft');
                   })
                   .catch((info) => {
@@ -420,7 +428,8 @@ const NewSpotifyForm = ({
             onClick={() => {
               form
                 .validateFields()
-                .then(() => {
+                .then(async () => {
+                  if (!(await gate.allow(form.getFieldsValue()))) return;
                   setModalState({
                     visible: true,
                     data: form.getFieldsValue(),

@@ -1,5 +1,6 @@
 'use client';
 import { Button, Form, Input, message, Modal, Tooltip } from 'antd';
+import { usePremiumGate } from '@/components/forms/premium-gate';
 import {
   PlanNote,
   reportCreateFailure,
@@ -34,6 +35,14 @@ const NewGraduation1Form = ({
   const { isFree: isFreeAccount, limits } = usePlan('gift');
 
   const [form] = useForm();
+
+  const gate = usePremiumGate({
+    form,
+
+    template: selectedTemplate,
+
+    editing: Boolean(editData),
+  });
 
   const dispatch = useDispatch();
   const images = useWatch('images', form);
@@ -138,6 +147,7 @@ const NewGraduation1Form = ({
           preFormValue={modalState?.data}
         />
       </Modal>
+      {gate.ui}
       <Form
         disabled={loading}
         form={form}
@@ -208,7 +218,8 @@ const NewGraduation1Form = ({
               onClick={() => {
                 form
                   .validateFields()
-                  .then(() => {
+                  .then(async () => {
+                    if (!(await gate.allow(form.getFieldsValue()))) return;
                     handleSubmit(form.getFieldsValue(), 'draft');
                   })
                   .catch((info) => {
@@ -229,7 +240,8 @@ const NewGraduation1Form = ({
             onClick={() => {
               form
                 .validateFields()
-                .then(() => {
+                .then(async () => {
+                  if (!(await gate.allow(form.getFieldsValue()))) return;
                   setModalState({
                     visible: true,
                     data: form.getFieldsValue(),

@@ -1,5 +1,6 @@
 'use client';
 import { Badge, Button, Form, Input, message, Modal, Select } from 'antd';
+import { usePremiumGate } from '@/components/forms/premium-gate';
 import { reportCreateFailure, usePlan } from '@/components/forms/plan-count';
 import TextArea from 'antd/es/input/TextArea';
 import { useEffect } from 'react';
@@ -31,6 +32,11 @@ const NewNewspaper3Form = ({
   const profile = useMemoifyProfile();
   const { isFree: isFreeAccount } = usePlan('gift');
   const [form] = useForm();
+  const gate = usePremiumGate({
+    form,
+    template: selectedTemplate,
+    editing: Boolean(editData),
+  });
 
   const selectedSongs = useWatch('song', form);
   const jumbotronImage = useWatch('jumbotronImage', form);
@@ -126,6 +132,7 @@ const NewNewspaper3Form = ({
           preFormValue={modalState?.data}
         />
       </Modal>
+      {gate.ui}
       <Form
         disabled={loading}
         form={form}
@@ -243,7 +250,8 @@ const NewNewspaper3Form = ({
             onClick={() => {
               form
                 .validateFields()
-                .then(() => {
+                .then(async () => {
+                  if (!(await gate.allow(form.getFieldsValue()))) return;
                   handleSubmit(form.getFieldsValue(), 'draft');
                 })
                 .catch((info) => {
@@ -263,7 +271,8 @@ const NewNewspaper3Form = ({
             onClick={() => {
               form
                 .validateFields()
-                .then(() => {
+                .then(async () => {
+                  if (!(await gate.allow(form.getFieldsValue()))) return;
                   setModalState({
                     visible: true,
                     data: form.getFieldsValue(),

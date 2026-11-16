@@ -1,5 +1,6 @@
 'use client';
 import { Button, Form, Input, message, Modal, Tooltip } from 'antd';
+import { usePremiumGate } from '@/components/forms/premium-gate';
 import {
   PlanCount,
   reportCreateFailure,
@@ -37,6 +38,11 @@ const NewVinylForm = ({
   const profile = useMemoifyProfile();
   const { isFree: isFreeAccount, limits, tier } = usePlan('gift');
   const [form] = useForm();
+  const gate = usePremiumGate({
+    form,
+    template: selectedTemplate,
+    editing: Boolean(editData),
+  });
   const dispatch = useDispatch();
 
   const songUrl = useWatch('songUrl', form);
@@ -151,6 +157,7 @@ const NewVinylForm = ({
           preFormValue={modalState?.data}
         />
       </Modal>
+      {gate.ui}
       <Form disabled={loading} form={form} layout="vertical">
         {/* Recipient Name */}
         <Form.Item
@@ -394,7 +401,8 @@ const NewVinylForm = ({
               onClick={() => {
                 form
                   .validateFields()
-                  .then(() => {
+                  .then(async () => {
+                    if (!(await gate.allow(form.getFieldsValue()))) return;
                     handleSubmit(form.getFieldsValue(), 'draft');
                   })
                   .catch((info) => {
@@ -415,7 +423,8 @@ const NewVinylForm = ({
             onClick={() => {
               form
                 .validateFields()
-                .then(() => {
+                .then(async () => {
+                  if (!(await gate.allow(form.getFieldsValue()))) return;
                   setModalState({
                     visible: true,
                     data: form.getFieldsValue(),
