@@ -142,7 +142,13 @@ export function reportCreateFailure(
  * waiting, or when the next one is ready. Shown before the work starts, so
  * the 24-hour limit is never first met as a refusal at the end.
  */
-export function FreeAllowance({ kind = 'gift' }: { kind?: Kind }) {
+export function FreeAllowance({
+  kind = 'gift',
+  className = 'rounded-[12px]',
+}: {
+  kind?: Kind;
+  className?: string;
+}) {
   const { profile, isFree } = usePlan(kind);
   const [now, setNow] = useState(() => Date.now());
   useEffect(() => {
@@ -159,7 +165,8 @@ export function FreeAllowance({ kind = 'gift' }: { kind?: Kind }) {
     </Link>
   );
   return (
-    <div className="rounded-[12px] border border-dashed border-[#E34013] bg-[#FEF3F0] px-4 py-3 text-[13px] text-[#7B4034]">
+    <div
+      className={`${className} border border-dashed border-[#E34013] bg-[#FEF3F0] px-4 py-3 text-[13px] text-[#7B4034]`}>
       {next ? (
         <>
           You have made today&apos;s free {kind}. The next one is ready in{' '}
