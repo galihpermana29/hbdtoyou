@@ -67,7 +67,7 @@ const DetailContentModal = ({ content }: { content: IContent }) => {
             onClick={() => {
               window.open(window?.location.origin + content.link, '_blank');
             }}
-            className="!bg-[#E34013] !text-white !rounded-[8px] !text-[14px] !font-[600] !h-[38px] !w-full mt-[8px]">
+            className="mr-cta !font-[600] !h-[38px] !w-full mt-[8px]">
             Open Gift
           </Button>
         </div>

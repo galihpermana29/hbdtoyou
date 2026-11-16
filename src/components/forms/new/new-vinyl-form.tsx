@@ -373,7 +373,7 @@ const NewVinylForm = ({
                   }
                 }}
                 icon={<PlusOutlined />}
-                className="!rounded-[50px] !bg-black !text-white my-[12px] !text-[13px]">
+                className="mr-add my-[12px]">
                 Add Memory
               </Button>
 
@@ -411,7 +411,7 @@ const NewVinylForm = ({
                     });
                   });
               }}
-              className="!bg-white !text-black !border-[1px] !border-black !rounded-full"
+              className="mr-outline"
               loading={loading}
               type="primary"
               htmlType="submit"
@@ -437,7 +437,7 @@ const NewVinylForm = ({
                   });
                 });
             }}
-            className="!bg-black !rounded-full"
+            className="mr-cta"
             loading={loading}
             type="primary"
             htmlType="submit"

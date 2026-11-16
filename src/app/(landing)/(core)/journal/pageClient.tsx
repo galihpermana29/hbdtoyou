@@ -1,6 +1,7 @@
 'use client';
 
 import NavigationBar from '@/components/ui/navbar';
+import MemorollFormTheme from '@/components/forms/memoroll-form-theme';
 import Reveal from '@/components/ui/reveal';
 // dynamic
 import { IContent } from '@/action/interfaces';
@@ -104,7 +105,7 @@ const EJournal = ({ journalsData }: { journalsData: IContent[] }) => {
   }, [searchQuery, publicJournals]);
 
   return (
-    <div className="w-full overflow-x-hidden">
+    <MemorollFormTheme className="w-full overflow-x-hidden">
       <div className="sticky top-0 left-0 w-full z-40 ">
         <NavigationBar />
       </div>
@@ -132,7 +133,7 @@ const EJournal = ({ journalsData }: { journalsData: IContent[] }) => {
                     }
                   }}
                   type="primary"
-                  className="!px-[18px] sm:!px-[22px] !py-4 !bg-[#E34013] !text-white !h-[50px] sm:!h-[60px] !rounded-lg !font-semibold !text-base sm:!text-lg relative z-30 w-[80%] sm:w-auto">
+                  className="mr-cta !px-[22px] sm:!px-[28px] !h-[50px] sm:!h-[56px] !font-semibold !text-base sm:!text-lg relative z-30 w-[80%] sm:w-auto">
                   Publish a Journal
                 </Button>
               </div>
@@ -233,7 +234,7 @@ const EJournal = ({ journalsData }: { journalsData: IContent[] }) => {
                       }}
                       type="primary"
                       size="large"
-                      className="!bg-[#E55A3B] !border-[#E55A3B] !rounded-lg !h-12 !px-7 !py-3 !w-fit !text-base !font-semibold">
+                      className="mr-cta !h-12 !px-7 !w-fit !text-base !font-semibold">
                       Publish a Journal
                     </Button>
                   </div>
@@ -279,7 +280,7 @@ const EJournal = ({ journalsData }: { journalsData: IContent[] }) => {
                 onClick={() =>
                   setVisibleCount((count) => count + JOURNALS_PER_PAGE)
                 }
-                className="!h-12 !px-8 !rounded-lg !font-semibold">
+                className="mr-outline !h-12 !px-8 !font-semibold">
                 Show more journals ({filteredJournals.length - visibleCount}{' '}
                 left)
               </Button>
@@ -305,7 +306,7 @@ const EJournal = ({ journalsData }: { journalsData: IContent[] }) => {
               <Input
                 placeholder="Enter your email"
                 size="large"
-                className="!h-12 !rounded-lg !border-[#D0D5DD] !text-base flex-1"
+                className="!h-12 !text-base flex-1"
                 style={{
                   fontSize: '16px',
                   fontWeight: 'normal',
@@ -314,14 +315,14 @@ const EJournal = ({ journalsData }: { journalsData: IContent[] }) => {
               <Button
                 type="primary"
                 size="large"
-                className="!bg-[#E55A3B] !border-[#E55A3B] hover:!bg-[#d14d30] !rounded-lg !h-12 !px-8 !font-semibold !text-base whitespace-nowrap">
+                className="mr-cta !h-12 !px-8 !font-semibold !text-base whitespace-nowrap">
                 Subscribe
               </Button>
             </div>
           </div>
         </div>
       </Reveal>
-    </div>
+    </MemorollFormTheme>
   );
 };
 

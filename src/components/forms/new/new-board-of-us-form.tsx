@@ -360,7 +360,7 @@ export default function NewBoardOfUsForm({
                 disabled={fields.length >= 12}
                 onClick={() => add({ ...EMPTY_MEMORY })}
                 icon={<PlusOutlined />}
-                className="!rounded-[50px] !bg-black !text-white my-[12px] !text-[13px]"
+                className="mr-add my-[12px]"
               >
                 Add memory
               </Button>
@@ -429,7 +429,7 @@ export default function NewBoardOfUsForm({
                 disabled={fields.length >= 5}
                 onClick={() => add('')}
                 icon={<PlusOutlined />}
-                className="!rounded-[50px] mt-[10px] !text-[13px]"
+                className="mr-add mt-[10px]"
               >
                 Add Chance prompt
               </Button>
@@ -480,7 +480,7 @@ export default function NewBoardOfUsForm({
                   });
                 });
             }}
-            className="!bg-black !rounded-full"
+            className="mr-cta"
             loading={loading}
             type="primary"
             htmlType="submit"

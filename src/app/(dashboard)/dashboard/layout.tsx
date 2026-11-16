@@ -1,4 +1,5 @@
 import DashboardNavbar from '@/components/ui/dashboard-navbar';
+import MemorollFormTheme from '@/components/forms/memoroll-form-theme';
 import NavigationBar from '@/components/ui/navbar';
 import { isAdminEmail } from '@/lib/admin';
 import { getSession } from '@/store/get-set-session';
@@ -14,7 +15,9 @@ const DashboardLayout = async ({ children }: { children: React.ReactNode }) => {
         <DashboardNavbar isAdmin={isAdmin} />
       </div>
 
-      <div className="pt-[180px]">{children}</div>
+      <MemorollFormTheme className="min-h-screen pt-[180px]">
+        {children}
+      </MemorollFormTheme>
     </div>
   );
 };

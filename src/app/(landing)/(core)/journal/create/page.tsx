@@ -1,6 +1,7 @@
 'use client';
 
 import React, { useEffect, useState, useRef } from 'react';
+import MemorollFormTheme from '@/components/forms/memoroll-form-theme';
 import { motion } from 'framer-motion';
 import JournalLayout from '../view/JournalLayout';
 import NavigationBar from '@/components/ui/navbar';
@@ -113,13 +114,13 @@ const NewEntryPage: React.FC = () => {
   }, [type]);
   return (
     <JournalLayout>
-      <div className="min-h-screen overflow-hidden">
+      <MemorollFormTheme className="min-h-screen overflow-hidden">
         <div className="fixed top-0 left-0 w-full z-10 ">
           <NavigationBar />
         </div>
         <div className="container mx-auto px-4 py-8 mt-[81px]">
           <motion.div
-            className="max-w-3xl mx-auto bg-white border border-gray-200 rounded-sm shadow-sm"
+            className="max-w-3xl mx-auto bg-white border border-[#dadada] rounded-[20px]"
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
             transition={{ duration: 0.5 }}>
@@ -397,7 +398,7 @@ const NewEntryPage: React.FC = () => {
 
                 <div className="flex justify-end mt-6">
                   <Button
-                    className="!bg-black !rounded-full"
+                    className="mr-cta"
                     type="primary"
                     htmlType="submit"
                     loading={loadingSubmit}
@@ -409,7 +410,7 @@ const NewEntryPage: React.FC = () => {
             </div>
           </motion.div>
         </div>
-      </div>
+      </MemorollFormTheme>
     </JournalLayout>
   );
 };

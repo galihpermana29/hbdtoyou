@@ -175,13 +175,13 @@ export function usePremiumGate({
         title={`This uses 1 ${unit}`}
         footer={
           <div className="flex justify-end gap-2">
-            <Button onClick={() => settle(false)} className="!rounded-full">
+            <Button onClick={() => settle(false)} className="mr-outline">
               Not yet
             </Button>
             <Button
               type="primary"
               onClick={() => settle(true)}
-              className="!rounded-full !bg-black">
+              className="mr-cta">
               Use 1 {unit}
             </Button>
           </div>

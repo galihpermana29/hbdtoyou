@@ -585,7 +585,7 @@
 //                   }
 //                 }}
 //                 icon={<PlusOutlined />}
-//                 className="!rounded-[50px] !bg-black !text-white my-[12px] !text-[13px]">
+//                 className="mr-add my-[12px]">
 //                 Add Moment
 //               </Button>
 
@@ -690,7 +690,7 @@
 //         </Form.Item>
 //         <div className="flex justify-end ">
 //           <Button
-//             className="!bg-black"
+//             className="mr-cta"
 //             loading={loading || uploadLoading}
 //             type="primary"
 //             htmlType="submit"

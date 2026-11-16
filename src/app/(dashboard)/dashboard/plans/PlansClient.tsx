@@ -229,7 +229,7 @@ const PlansClient = ({
           type="primary"
           icon={<Plus size={16} />}
           onClick={openCreate}
-          className="!bg-[#E34013] !text-white !rounded-[8px] !font-[600] !h-[38px] !flex !items-center !gap-[6px]">
+          className="mr-cta !font-[600] !h-[38px] !flex !items-center !gap-[6px]">
           Create Plan
         </Button>
       </div>
@@ -253,7 +253,7 @@ const PlansClient = ({
         confirmLoading={submitting}
         okText={editing ? 'Update' : 'Create'}
         okButtonProps={{
-          className: '!bg-[#E34013] !text-white !rounded-[8px] !font-[600]',
+          className: 'mr-cta !font-[600]',
         }}
         width={600}>
         <Form form={form} layout="vertical" className="mt-[16px]">

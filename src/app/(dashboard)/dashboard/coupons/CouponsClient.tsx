@@ -232,7 +232,7 @@ const CouponsClient = ({ initialData }: { initialData: ICoupon[] }) => {
           type="primary"
           icon={<Plus size={16} />}
           onClick={openCreate}
-          className="!bg-[#E34013] !text-white !rounded-[8px] !font-[600] !h-[38px] !flex !items-center !gap-[6px]">
+          className="mr-cta !font-[600] !h-[38px] !flex !items-center !gap-[6px]">
           Create Coupon
         </Button>
       </div>
@@ -256,7 +256,7 @@ const CouponsClient = ({ initialData }: { initialData: ICoupon[] }) => {
           type="primary"
           loading={loading}
           onClick={refresh}
-          className="!bg-[#E34013] !text-white !rounded-[8px] !font-[600] !h-[38px]">
+          className="mr-cta !font-[600] !h-[38px]">
           Apply
         </Button>
       </div>
@@ -280,7 +280,7 @@ const CouponsClient = ({ initialData }: { initialData: ICoupon[] }) => {
         confirmLoading={submitting}
         okText={editing ? 'Update' : 'Create'}
         okButtonProps={{
-          className: '!bg-[#E34013] !text-white !rounded-[8px] !font-[600]',
+          className: 'mr-cta !font-[600]',
         }}>
         <Form form={form} layout="vertical" className="mt-[16px]">
           <Form.Item

@@ -1,5 +1,6 @@
 'use client';
 import NavigationBar from '@/components/ui/navbar';
+import MemorollFormTheme from '@/components/forms/memoroll-form-theme';
 import { FreeAllowance } from '@/components/forms/plan-count';
 import { Button, message, Segmented, Spin, Steps } from 'antd';
 import { useEffect, useState } from 'react';
@@ -200,161 +201,163 @@ const CreatePage = ({ initialTemplateId }: { initialTemplateId?: string }) => {
         indicator={<LoadingOutlined spin />}
       />
 
-      <div className="flex flex-col items-center justify-start min-h-screen py-[30px] mb-[50px]">
-        <div className="mx-auto max-w-6xl 2xl:max-w-7xl px-[20px] flex-1 w-full">
-          <div className="mb-[34px]">
-            <div className="flex items-start gap-[12px]">
-              {selectedTemplate && (
-                <ArrowLeft
-                  size={20}
-                  className="mt-[12px] cursor-pointer"
-                  onClick={() => {
-                    setSelectedTemplate(null);
-                  }}
-                />
-              )}
-              <div className="mb-[40px]">
-                <h1 className="text-[#1B1B1B] font-[600] text-[18px]">
-                  Create your website gift
-                </h1>
-                <p className="text-[#7B7B7B] text-[14px] font-[400] max-w-[400px]">
-                  Create custom websites inspired by your favorite platforms
-                  like Netflix, Spotify, or YouTube.
-                </p>
+      <MemorollFormTheme>
+        <div className="flex flex-col items-center justify-start min-h-screen py-[30px] pb-[80px]">
+          <div className="mx-auto max-w-6xl 2xl:max-w-7xl px-[20px] flex-1 w-full">
+            <div className="mb-[34px]">
+              <div className="flex items-start gap-[12px]">
+                {selectedTemplate && (
+                  <ArrowLeft
+                    size={20}
+                    className="mt-[12px] cursor-pointer"
+                    onClick={() => {
+                      setSelectedTemplate(null);
+                    }}
+                  />
+                )}
+                <div className="mb-[40px]">
+                  <h1 className="text-[#232323] font-[700] text-[20px] leading-[150%] tracking-[-0.011em]">
+                    Create your website gift
+                  </h1>
+                  <p className="text-[#7B7B7B] text-[14px] font-[400] max-w-[400px]">
+                    Create custom websites inspired by your favorite platforms
+                    like Netflix, Spotify, or YouTube.
+                  </p>
+                </div>
+              </div>
+              <Steps
+                // progressDot
+                // className="custom-steps"
+                current={current}
+                items={StepsCustom}
+              />
+              <div className="mt-[20px] max-w-[640px]">
+                <FreeAllowance kind="gift" />
               </div>
             </div>
-            <Steps
-              // progressDot
-              // className="custom-steps"
-              current={current}
-              items={StepsCustom}
-            />
-            <div className="mt-[20px] max-w-[640px]">
-              <FreeAllowance kind="gift" />
-            </div>
-          </div>
-          {selectedTemplate ? (
-            <div className="w-full">
-              {(() => {
-                const TemplateComponent =
-                  templateComponents[selectedTemplate.route];
+            {selectedTemplate ? (
+              <div className="w-full">
+                {(() => {
+                  const TemplateComponent =
+                    templateComponents[selectedTemplate.route];
 
-                if (TemplateComponent) {
-                  return (
-                    <TemplateComponent
-                      handleCompleteCreation={handleCompleteCreation}
-                      openNotification={openNotification}
-                      selectedTemplate={selectedTemplate}
-                      loading={loading}
-                      setLoading={setLoading}
-                      modalState={modalState}
-                      setModalState={setModalState}
-                    />
-                  );
-                }
-                return null;
-              })()}
-            </div>
-          ) : (
-            <>
-              {modalState?.data ? (
-                <div className="flex flex-col md:flex-row items-center gap-[20px]">
-                  <div className="shadow-lg w-full rounded-md">
-                    <iframe
-                      src={window?.location.origin + '/' + modalState?.data}
-                      className="aspect-video object-cover rounded-md w-full"
-                    />
-                  </div>
-                  <div className="w-[70%]">
-                    <div className="max-w-[400px]">
-                      <h1 className="text-[#1B1B1B] font-[600] text-[30px] md:text-[36px]">
-                        Your site is ready!
-                      </h1>
-                      <p className="text-[#7B7B7B] text-[14px] md:text-[18px] font-[400]">
-                        You can share your own version of website with your
-                        friends or someone you love. Thank you for using
-                        Memoify. Feel free to tag and follow us on instagram
-                        @memoify.live
-                      </p>
+                  if (TemplateComponent) {
+                    return (
+                      <TemplateComponent
+                        handleCompleteCreation={handleCompleteCreation}
+                        openNotification={openNotification}
+                        selectedTemplate={selectedTemplate}
+                        loading={loading}
+                        setLoading={setLoading}
+                        modalState={modalState}
+                        setModalState={setModalState}
+                      />
+                    );
+                  }
+                  return null;
+                })()}
+              </div>
+            ) : (
+              <>
+                {modalState?.data ? (
+                  <div className="flex flex-col md:flex-row items-center gap-[20px]">
+                    <div className="shadow-lg w-full rounded-md">
+                      <iframe
+                        src={window?.location.origin + '/' + modalState?.data}
+                        className="aspect-video object-cover rounded-md w-full"
+                      />
                     </div>
-                    <div className="flex mt-[20px] gap-4">
-                      <Button
-                        onClick={() => {
-                          navigator.clipboard.writeText(
-                            window?.location.origin + '/' + modalState.data
-                          );
-                          message.success('Copied!');
-                        }}
-                        className="!bg-[#E34013] !text-white !rounded-[8px] !text-[16px] !font-[600] !h-[48px] !w-[170px]"
-                        type="primary"
-                        size="large">
-                        Copy link
-                      </Button>
-                      <Link
-                        target="_blank"
-                        href={`/${modalState.data}`}
-                        className="cursor-pointer">
-                        {' '}
+                    <div className="w-[70%]">
+                      <div className="max-w-[400px]">
+                        <h1 className="text-[#1B1B1B] font-[600] text-[30px] md:text-[36px]">
+                          Your site is ready!
+                        </h1>
+                        <p className="text-[#7B7B7B] text-[14px] md:text-[18px] font-[400]">
+                          You can share your own version of website with your
+                          friends or someone you love. Thank you for using
+                          Memoify. Feel free to tag and follow us on instagram
+                          @memoify.live
+                        </p>
+                      </div>
+                      <div className="flex mt-[20px] gap-4">
                         <Button
-                          className="!bg-[#fff] !text-[#E34013] !border-[1px] !border-[#E34013] !rounded-[8px] !text-[16px] !font-[600] !h-[48px] !w-[170px]"
+                          onClick={() => {
+                            navigator.clipboard.writeText(
+                              window?.location.origin + '/' + modalState.data
+                            );
+                            message.success('Copied!');
+                          }}
+                          className="!bg-[#E34013] !text-white !rounded-[8px] !text-[16px] !font-[600] !h-[48px] !w-[170px]"
                           type="primary"
                           size="large">
-                          Open in new tab
+                          Copy link
                         </Button>
-                      </Link>
+                        <Link
+                          target="_blank"
+                          href={`/${modalState.data}`}
+                          className="cursor-pointer">
+                          {' '}
+                          <Button
+                            className="!bg-[#fff] !text-[#E34013] !border-[1px] !border-[#E34013] !rounded-[8px] !text-[16px] !font-[600] !h-[48px] !w-[170px]"
+                            type="primary"
+                            size="large">
+                            Open in new tab
+                          </Button>
+                        </Link>
+                      </div>
                     </div>
                   </div>
-                </div>
-              ) : (
-                <div className="flex flex-col items-center justify-start w-full">
-                  <div className="flex flex-col md:flex-row items-start md:items-center justify-between w-full mb-6 gap-4">
-                    <p className="font-semibold text-2xl text-[#1B1B1B]">
-                      Select Your Template
-                    </p>
-                    <Segmented
-                      options={[
-                        'All',
-                        'Popular Template',
-                        // 'Graduation Template',
-                        'Original Template',
-                      ]}
-                      value={templateFilter}
-                      onChange={(value) => setTemplateFilter(value)}
-                      className="bg-gray-100 p-1 rounded-full"
-                    />
+                ) : (
+                  <div className="flex flex-col items-center justify-start w-full">
+                    <div className="flex flex-col md:flex-row items-start md:items-center justify-between w-full mb-6 gap-4">
+                      <p className="font-semibold text-2xl text-[#1B1B1B]">
+                        Select Your Template
+                      </p>
+                      <Segmented
+                        options={[
+                          'All',
+                          'Popular Template',
+                          // 'Graduation Template',
+                          'Original Template',
+                        ]}
+                        value={templateFilter}
+                        onChange={(value) => setTemplateFilter(value)}
+                        className="bg-gray-100 p-1 rounded-full"
+                      />
+                    </div>
+                    <div className="w-full">
+                      {(templateFilter === 'All' ||
+                        templateFilter === 'Popular Template') && (
+                        <TemplateGridSection
+                          title="Popular Template"
+                          templates={popularTemplates}
+                          onTemplateClick={handleTemplateClick}
+                        />
+                      )}
+                      {(templateFilter === 'All' ||
+                        templateFilter === 'Original Template') && (
+                        <TemplateGridSection
+                          title="Original Template"
+                          templates={templates}
+                          onTemplateClick={handleTemplateClick}
+                        />
+                      )}
+                      {(templateFilter === 'All' ||
+                        templateFilter === 'Graduation Template') && (
+                        <TemplateGridSection
+                          title="Graduation Template"
+                          templates={graduationTemplates}
+                          onTemplateClick={handleTemplateClick}
+                        />
+                      )}
+                    </div>
                   </div>
-                  <div className="w-full">
-                    {(templateFilter === 'All' ||
-                      templateFilter === 'Popular Template') && (
-                      <TemplateGridSection
-                        title="Popular Template"
-                        templates={popularTemplates}
-                        onTemplateClick={handleTemplateClick}
-                      />
-                    )}
-                    {(templateFilter === 'All' ||
-                      templateFilter === 'Original Template') && (
-                      <TemplateGridSection
-                        title="Original Template"
-                        templates={templates}
-                        onTemplateClick={handleTemplateClick}
-                      />
-                    )}
-                    {(templateFilter === 'All' ||
-                      templateFilter === 'Graduation Template') && (
-                      <TemplateGridSection
-                        title="Graduation Template"
-                        templates={graduationTemplates}
-                        onTemplateClick={handleTemplateClick}
-                      />
-                    )}
-                  </div>
-                </div>
-              )}
-            </>
-          )}
+                )}
+              </>
+            )}
+          </div>
         </div>
-      </div>
+      </MemorollFormTheme>
     </div>
   );
 };

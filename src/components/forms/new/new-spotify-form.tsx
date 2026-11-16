@@ -190,7 +190,7 @@ const NewSpotifyForm = ({
         />
       </Modal>
       <Button
-        className="!bg-black !rounded-full mb-[20px]"
+        className="mr-outline mb-[20px]"
         type="primary"
         onClick={() => {
           router.replace('/spotifyv1?isTutorial=true');
@@ -273,7 +273,7 @@ const NewSpotifyForm = ({
                   }
                 }}
                 icon={<PlusOutlined />}
-                className="!rounded-[50px] !bg-black !text-white my-[12px] !text-[13px]">
+                className="mr-add my-[12px]">
                 Add Song
               </Button>
             </>
@@ -339,7 +339,7 @@ const NewSpotifyForm = ({
                   }
                 }}
                 icon={<PlusOutlined />}
-                className="!rounded-[50px] !bg-black !text-white my-[12px] !text-[13px]">
+                className="mr-add my-[12px]">
                 Add Song
               </Button>
               <PlanCount
@@ -416,7 +416,7 @@ const NewSpotifyForm = ({
                     });
                   });
               }}
-              className="!bg-white !text-black !border-[1px] !border-black !rounded-full"
+              className="mr-outline"
               loading={loading}
               type="primary"
               htmlType="submit"
@@ -442,7 +442,7 @@ const NewSpotifyForm = ({
                   });
                 });
             }}
-            className="!bg-black !rounded-full"
+            className="mr-cta"
             loading={loading}
             type="primary"
             htmlType="submit"

@@ -288,7 +288,7 @@ export default function NewArcadeClawForm({
                 disabled={fields.length >= 6}
                 onClick={() => add({ ...EMPTY_MEMORY })}
                 icon={<PlusOutlined />}
-                className="!rounded-[50px] !bg-black !text-white my-[12px] !text-[13px]"
+                className="mr-add my-[12px]"
               >
                 Add photo
               </Button>
@@ -338,7 +338,7 @@ export default function NewArcadeClawForm({
                   });
                 });
             }}
-            className="!bg-black !rounded-full"
+            className="mr-cta"
             loading={loading}
             type="primary"
             htmlType="submit"

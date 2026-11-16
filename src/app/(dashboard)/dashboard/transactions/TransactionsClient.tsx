@@ -103,7 +103,7 @@ const TransactionsClient = ({
           type="primary"
           loading={loading}
           onClick={handleFilter}
-          className="!bg-[#E34013] !text-white !rounded-[8px] !font-[600] !h-[38px]">
+          className="mr-cta !font-[600] !h-[38px]">
           Apply Filters
         </Button>
       </div>
