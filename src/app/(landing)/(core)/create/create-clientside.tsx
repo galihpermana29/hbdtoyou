@@ -1,11 +1,11 @@
 'use client';
 import NavigationBar from '@/components/ui/navbar';
+import ShareGift from '@/components/forms/share-gift';
 import MemorollFormTheme from '@/components/forms/memoroll-form-theme';
 import { FreeAllowance } from '@/components/forms/plan-count';
-import { Button, message, Segmented, Spin, Steps } from 'antd';
+import { message, Segmented, Spin, Steps } from 'antd';
 import { useEffect, useState } from 'react';
 import { LoadingOutlined } from '@ant-design/icons';
-import Link from 'next/link';
 import {
   getGraduationTemplates,
   getOriginalTemplates,
@@ -259,53 +259,7 @@ const CreatePage = ({ initialTemplateId }: { initialTemplateId?: string }) => {
             ) : (
               <>
                 {modalState?.data ? (
-                  <div className="flex flex-col md:flex-row items-center gap-[20px]">
-                    <div className="shadow-lg w-full rounded-[12px]">
-                      <iframe
-                        src={window?.location.origin + '/' + modalState?.data}
-                        className="aspect-video object-cover rounded-[12px] w-full"
-                      />
-                    </div>
-                    <div className="w-[70%]">
-                      <div className="max-w-[400px]">
-                        <h1 className="text-[#1B1B1B] font-[600] text-[30px] md:text-[36px]">
-                          Your site is ready!
-                        </h1>
-                        <p className="text-[#7B7B7B] text-[14px] md:text-[18px] font-[400]">
-                          You can share your own version of website with your
-                          friends or someone you love. Thank you for using
-                          Memoify. Feel free to tag and follow us on instagram
-                          @memoify.live
-                        </p>
-                      </div>
-                      <div className="flex mt-[20px] gap-4">
-                        <Button
-                          onClick={() => {
-                            navigator.clipboard.writeText(
-                              window?.location.origin + '/' + modalState.data
-                            );
-                            message.success('Copied!');
-                          }}
-                          className="mr-cta !text-[16px] !font-[600] !h-[48px] !w-[170px]"
-                          type="primary"
-                          size="large">
-                          Copy link
-                        </Button>
-                        <Link
-                          target="_blank"
-                          href={`/${modalState.data}`}
-                          className="cursor-pointer">
-                          {' '}
-                          <Button
-                            className="mr-outline !text-[16px] !font-[600] !h-[48px] !w-[170px]"
-                            type="primary"
-                            size="large">
-                            Open in new tab
-                          </Button>
-                        </Link>
-                      </div>
-                    </div>
-                  </div>
+                  <ShareGift path={modalState.data} />
                 ) : (
                   <div className="flex flex-col items-center justify-start w-full">
                     <div className="flex flex-col md:flex-row items-start md:items-center justify-between w-full mb-6 gap-4">

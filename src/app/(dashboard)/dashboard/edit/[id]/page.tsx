@@ -1,6 +1,7 @@
 'use client';
 
 import { getDetailContent } from '@/action/user-api';
+import ShareGift from '@/components/forms/share-gift';
 import MemorollFormTheme from '@/components/forms/memoroll-form-theme';
 import useCreateContent from '@/app/(landing)/(core)/create/usecase/useCreateContent';
 import AlbumGraduationv1 from '@/components/forms/albumgraduationv1-form';
@@ -18,8 +19,7 @@ import NewArcadeClawForm from '@/components/forms/new/new-arcade-claw-form';
 import NewBoardOfUsForm from '@/components/forms/new/new-board-of-us-form';
 import DashboardNavbar from '@/components/ui/dashboard-navbar';
 import NavigationBar from '@/components/ui/navbar';
-import { Button, message } from 'antd';
-import Link from 'next/link';
+import { message } from 'antd';
 import { useParams, useSearchParams } from 'next/navigation';
 import { useEffect, useState } from 'react';
 import NewGraduation2Form from '@/components/forms/new/new-graduation2-form';
@@ -124,52 +124,7 @@ const EditContentDashboardPage = () => {
             </div>
           ) : (
             modalState?.data && (
-              <div className="flex flex-col md:flex-row items-center gap-[20px]">
-                <div className="shadow-lg w-full rounded-[12px]">
-                  <iframe
-                    src={window?.location.origin + '/' + modalState?.data}
-                    className="aspect-video object-cover rounded-[12px] w-full"
-                  />
-                </div>
-                <div className="w-full md:w-[70%]">
-                  <div className="max-w-[400px]">
-                    <h1 className="text-[#1B1B1B] font-[600] text-[30px] md:text-[36px]">
-                      Your site is ready!
-                    </h1>
-                    <p className="text-[#7B7B7B] text-[14px] md:text-[18px] font-[400]">
-                      You can share your own version of website with your
-                      friends or someone you love. Thank you for using Memoify.
-                      Feel free to tag and follow us on instagram @memoify.live
-                    </p>
-                  </div>
-                  <div className="flex mt-[20px] gap-4">
-                    <Button
-                      onClick={() => {
-                        navigator.clipboard.writeText(
-                          window?.location.origin + '/' + modalState.data
-                        );
-                        message.success('Copied!');
-                      }}
-                      className="mr-cta !font-[600] !h-[48px] !w-[170px]"
-                      type="primary"
-                      size="large">
-                      Copy link
-                    </Button>
-                    <Link
-                      target="_blank"
-                      href={`/${modalState.data}`}
-                      className="cursor-pointer">
-                      {' '}
-                      <Button
-                        className="mr-outline !font-[600] !h-[48px] !w-[170px]"
-                        type="primary"
-                        size="large">
-                        Open in new tab
-                      </Button>
-                    </Link>
-                  </div>
-                </div>
-              </div>
+              <ShareGift path={modalState.data} title="Your changes are live" />
             )
           )}
         </div>
