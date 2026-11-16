@@ -82,6 +82,62 @@ export default function ShareGift({
     }
   };
 
+  /**
+   * A card to print or send as a picture: the code at a size a phone reads
+   * from across a table, with a line telling the recipient what to do.
+   * 1200x1700, about A6 at 290 dpi.
+   */
+  const downloadCard = async () => {
+    const qr = qrRef.current;
+    if (!qr) return;
+    const W = 1200;
+    const H = 1700;
+    const card = document.createElement('canvas');
+    card.width = W;
+    card.height = H;
+    const ctx = card.getContext('2d');
+    if (!ctx) return;
+    const family = "'Plus Jakarta Sans', sans-serif";
+    await Promise.all(
+      [500, 700].map((weight) =>
+        document.fonts?.load(`${weight} 64px ${family}`).catch(() => undefined)
+      )
+    );
+    ctx.fillStyle = colour.paper;
+    ctx.fillRect(0, 0, W, H);
+    ctx.fillStyle = colour.flame;
+    ctx.fillRect(0, 0, W, 24);
+    ctx.textAlign = 'center';
+    ctx.fillStyle = colour.ink;
+    ctx.font = `700 84px ${family}`;
+    ctx.fillText('A gift for you', W / 2, 230);
+    ctx.fillStyle = colour.muted;
+    ctx.font = `500 40px ${family}`;
+    ctx.fillText('Scan with your phone camera to open it', W / 2, 310);
+    const size = 820;
+    const x = (W - size) / 2;
+    const y = 400;
+    ctx.fillStyle = '#ffffff';
+    ctx.beginPath();
+    ctx.roundRect(x - 40, y - 40, size + 80, size + 80, 48);
+    ctx.fill();
+    ctx.strokeStyle = colour.hairline;
+    ctx.lineWidth = 3;
+    ctx.stroke();
+    ctx.drawImage(qr, x, y, size, size);
+    ctx.fillStyle = colour.ink;
+    ctx.font = `500 34px ${family}`;
+    const short = shown.length > 48 ? `${shown.slice(0, 47)}…` : shown;
+    ctx.fillText(short, W / 2, y + size + 130);
+    ctx.fillStyle = colour.muted;
+    ctx.font = `500 30px ${family}`;
+    ctx.fillText('made with memoify.live', W / 2, H - 80);
+    const anchor = document.createElement('a');
+    anchor.href = card.toDataURL('image/png');
+    anchor.download = `memoify-gift-card-${path.split('/').pop() ?? 'qr'}.png`;
+    anchor.click();
+  };
+
   const downloadQr = () => {
     const canvas = qrRef.current;
     if (!canvas) return;
@@ -237,7 +293,15 @@ export default function ShareGift({
                 value={url}
                 size={1024}
                 marginSize={2}
+                level="H"
                 fgColor={colour.ink}
+                imageSettings={{
+                  // Same-origin, so the canvas stays readable for download.
+                  src: '/apple-touch-icon.png',
+                  height: 220,
+                  width: 220,
+                  excavate: true,
+                }}
                 style={{ width: 112, height: 112 }}
                 aria-label="QR code for your gift"
               />
@@ -254,19 +318,31 @@ export default function ShareGift({
             <p
               className="text-[12px] leading-[150%]"
               style={{ color: colour.muted }}>
-              Print it on a card, tuck it in a present, or show it on your
-              screen.
+              Download a ready-to-print card, tuck it in a present, or show the
+              code on your screen.
             </p>
-            <button
-              type="button"
-              onClick={downloadQr}
-              className={`${pill} h-[36px] w-fit px-[14px]`}
-              style={{
-                background: colour.unchosen,
-                color: colour.ink,
-              }}>
-              Download QR
-            </button>
+            <div className="flex flex-wrap gap-[8px]">
+              <button
+                type="button"
+                onClick={downloadCard}
+                className={`${pill} h-[36px] w-fit px-[14px]`}
+                style={{
+                  background: colour.ink,
+                  color: '#ffffff',
+                }}>
+                Download card
+              </button>
+              <button
+                type="button"
+                onClick={downloadQr}
+                className={`${pill} h-[36px] w-fit px-[14px]`}
+                style={{
+                  background: colour.unchosen,
+                  color: colour.ink,
+                }}>
+                QR only
+              </button>
+            </div>
           </div>
         </div>
 
