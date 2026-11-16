@@ -1,6 +1,7 @@
 'use client';
 
 import { getDetailContent } from '@/action/user-api';
+import MemorollFormTheme from '@/components/forms/memoroll-form-theme';
 import useCreateContent from '@/app/(landing)/(core)/create/usecase/useCreateContent';
 import AlbumGraduationv1 from '@/components/forms/albumgraduationv1-form';
 
@@ -104,16 +105,18 @@ const EditContentDashboardPage = () => {
 
                 if (TemplateComponent) {
                   return (
-                    <TemplateComponent
-                      editData={detailContent}
-                      handleCompleteCreation={handleCompleteCreation}
-                      openNotification={openNotification}
-                      selectedTemplate={selectedTemplate}
-                      loading={loading}
-                      setLoading={setLoading}
-                      modalState={modalState}
-                      setModalState={setModalState}
-                    />
+                    <MemorollFormTheme className="rounded-[24px] p-[20px]">
+                      <TemplateComponent
+                        editData={detailContent}
+                        handleCompleteCreation={handleCompleteCreation}
+                        openNotification={openNotification}
+                        selectedTemplate={selectedTemplate}
+                        loading={loading}
+                        setLoading={setLoading}
+                        modalState={modalState}
+                        setModalState={setModalState}
+                      />
+                    </MemorollFormTheme>
                   );
                 }
                 return null;

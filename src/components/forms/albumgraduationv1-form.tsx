@@ -322,7 +322,7 @@ const AlbumGraduationv1 = ({
                     });
                   });
               }}
-              className="!bg-white !text-black !border-[1px] !border-black !rounded-full"
+              className="mr-outline"
               loading={loading}
               type="primary"
               htmlType="submit"
@@ -347,7 +347,7 @@ const AlbumGraduationv1 = ({
                   });
                 });
             }}
-            className="!bg-black !rounded-full"
+            className="mr-cta"
             loading={loading}
             type="primary"
             htmlType="submit"

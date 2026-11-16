@@ -241,7 +241,7 @@ const NewTarotForm = ({
                   });
                 });
             }}
-            className="!bg-black !rounded-full"
+            className="mr-cta"
             loading={loading}
             type="primary"
             htmlType="submit"

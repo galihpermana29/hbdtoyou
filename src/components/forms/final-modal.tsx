@@ -2,7 +2,6 @@ import {
   Button,
   Col,
   DatePicker,
-  Divider,
   Form,
   Input,
   Row,
@@ -11,7 +10,6 @@ import {
 } from 'antd';
 import { useWatch } from 'antd/es/form/Form';
 import TextArea from 'antd/es/input/TextArea';
-import dayjs from 'dayjs';
 
 const FinalModal = ({
   profile,
@@ -27,7 +25,6 @@ const FinalModal = ({
   const isFreeAccount = profile?.quota < 1;
   const [form] = Form.useForm();
   const isScheduled = useWatch('is_scheduled', form);
-  const isPublic = useWatch('isPublic', form);
   return (
     <Form
       form={form}
@@ -144,7 +141,7 @@ const FinalModal = ({
         <div className="flex justify-end gap-2 mt-[12px]">
           <Button
             loading={loading}
-            className="!bg-black !rounded-full"
+            className="mr-cta"
             type="primary"
             htmlType="submit"
             size="large">

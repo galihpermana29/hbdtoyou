@@ -260,7 +260,7 @@ const NewNewspaper3Form = ({
                   });
                 });
             }}
-            className="!bg-white !text-black !border-[1px] !border-black !rounded-full"
+            className="mr-outline"
             loading={loading}
             type="primary"
             htmlType="submit"
@@ -285,7 +285,7 @@ const NewNewspaper3Form = ({
                   });
                 });
             }}
-            className="!bg-black !rounded-full"
+            className="mr-cta"
             loading={loading}
             type="primary"
             htmlType="submit"

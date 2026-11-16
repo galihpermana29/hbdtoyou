@@ -330,7 +330,7 @@ const FormGeneration = ({
             height: '50px',
             width: '100%',
           }}
-          className="!bg-[#E34013]"
+          className="mr-cta"
           htmlType="submit"
           size="large">
           {'Generate Scrapbook'}

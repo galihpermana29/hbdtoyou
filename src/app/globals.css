@@ -549,3 +549,124 @@ html:has(.memoroll-native) body {
 .memoroll-picker input::-webkit-calendar-picker-indicator {
   display: none;
 }
+
+/*
+ * The gift and scrapbook creators in the MemoRoll design system (owner,
+ * 2026-11-17). The tokens live in memoroll-form-theme.tsx; this is what a
+ * token cannot reach. Values are MemoRoll's: src/components/memoroll/ui/tokens.ts.
+ */
+.mr-form {
+  background: #f7f5f3;
+  color: #232323;
+  letter-spacing: -0.011em;
+}
+.mr-form .ant-form-item-label > label,
+.mr-form .ant-form-item-label h3 {
+  font-size: 14px;
+  font-weight: 600;
+  line-height: 150%;
+  letter-spacing: -0.011em;
+}
+.mr-form .ant-form-item-label p {
+  font-size: 12px;
+  font-weight: 500;
+  color: #808080;
+}
+.mr-form .ant-form-item-required::before {
+  color: #ff3e09 !important;
+}
+/* A field holds one line and is a pill; a paragraph needs corners it can sit in. */
+.mr-form textarea.ant-input {
+  border-radius: 20px;
+  padding: 12px 16px;
+}
+.mr-form .ant-input,
+.mr-form .ant-select-selector,
+.mr-form .ant-input-number {
+  font-size: 14px;
+}
+/* The CTA: flame, fully round, its top-left edge catching the light. */
+.mr-form .mr-cta.ant-btn,
+.mr-form .ant-btn-primary:not(.mr-outline):not(.mr-add) {
+  background: #ff3e09;
+  color: #ffffff;
+  border-color: transparent;
+  box-shadow: inset 2px 3px 3.2px rgba(255, 255, 255, 0.25);
+}
+.mr-form .mr-cta.ant-btn:not(:disabled):hover,
+.mr-form .ant-btn-primary:not(.mr-outline):not(.mr-add):not(:disabled):hover {
+  background: #e63605 !important;
+  color: #ffffff !important;
+}
+.mr-form .mr-cta.ant-btn:not(:disabled):active,
+.mr-form .ant-btn-primary:not(.mr-outline):not(.mr-add):not(:disabled):active {
+  background: #232323 !important;
+}
+/* Back, Draft, Preview: the paper itself, hairlined. */
+.mr-form .mr-outline.ant-btn {
+  background: #f7f5f3;
+  color: #232323;
+  border: 1px solid rgba(33, 33, 33, 0.2);
+  box-shadow: inset 2px 3px 3.2px rgba(255, 255, 255, 0.25);
+}
+.mr-form .mr-outline.ant-btn:not(:disabled):hover {
+  background: #efeae9 !important;
+  border-color: #232323 !important;
+  color: #232323 !important;
+}
+/* "Add Song", "Add Moment": the unchosen pill, inviting rather than shouting. */
+.mr-form .mr-add.ant-btn {
+  background: #efeae9;
+  color: #232323;
+  border: 1px solid transparent;
+  border-radius: 999px;
+  font-size: 13px;
+  font-weight: 600;
+  box-shadow: none;
+}
+.mr-form .mr-add.ant-btn:not(:disabled):hover {
+  background: #e0dabf !important;
+  color: #232323 !important;
+}
+/* Upload slots: soft paper tiles with a dashed hairline. */
+.mr-form .ant-upload.ant-upload-select,
+.mr-form .ant-upload-list-picture-card .ant-upload-list-item-container,
+.mr-form .ant-upload-wrapper .ant-upload-drag {
+  border-radius: 16px !important;
+}
+.mr-form .ant-upload.ant-upload-select {
+  background: #f7f6f6 !important;
+  border: 1px dashed rgba(0, 0, 0, 0.2) !important;
+}
+.mr-form .ant-upload.ant-upload-select:hover {
+  border-color: #ff3e09 !important;
+}
+.mr-form .ant-upload-list-item {
+  border-radius: 16px !important;
+}
+/* Cards and panels inside a form sit on white, like MemoRoll's sheets. */
+.mr-form .ant-card {
+  border-radius: 24px;
+}
+
+/* Notices raised while a creator is open speak in MemoRoll's toast: ink, paper, a 12px corner. */
+body:has(.mr-form) .ant-message-notice-content {
+  background: #232323 !important;
+  color: #f7f5f3 !important;
+  border-radius: 12px !important;
+  padding: 12px 16px !important;
+  font-size: 13px;
+  font-weight: 600;
+  letter-spacing: -0.011em;
+}
+body:has(.mr-form) .ant-message-notice-content .anticon {
+  color: #ff3e09 !important;
+}
+body:has(.mr-form) .ant-notification-notice {
+  border-radius: 20px !important;
+  background: #f7f5f3 !important;
+}
+body:has(.mr-form) .ant-notification-notice .ant-notification-notice-message {
+  font-weight: 700;
+  color: #232323;
+}

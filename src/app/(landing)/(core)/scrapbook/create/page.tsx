@@ -1,5 +1,6 @@
 'use client';
 import FormGeneration from './FormGeneration';
+import MemorollFormTheme from '@/components/forms/memoroll-form-theme';
 import useCreateContent from '../../create/usecase/useCreateContent';
 import { Suspense, useEffect, useState } from 'react';
 import { useSearchParams } from 'next/navigation';
@@ -85,7 +86,7 @@ const ScrapbookCreatePage = () => {
     <div className="mt-[80px]">
       {contextHolder}
       <GeneratingLLMLoadingModal isOpen={loading} />
-      <div className="w-full overflow-x-hidden min-h-screen">
+      <MemorollFormTheme className="w-full overflow-x-hidden min-h-screen">
         <div className="flex flex-col items-center justify-start min-h-screen py-[30px] mb-[50px] ">
           <div className="mx-auto px-[20px] flex-1 w-full flex flex-col justify-center items-stretch lg:justify-normal lg:items-stretch lg:flex-row gap-[20px] relative">
             {/* Toggle Button - Hidden on mobile */}
@@ -144,7 +145,7 @@ const ScrapbookCreatePage = () => {
             </div>
           </div>
         </div>
-      </div>
+      </MemorollFormTheme>
     </div>
   );
 };

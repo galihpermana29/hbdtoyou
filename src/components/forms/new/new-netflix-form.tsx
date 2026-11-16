@@ -155,7 +155,7 @@ const NewNetflixForm = ({
         />
       </Modal>
       <Button
-        className="!bg-black !rounded-full mb-[20px]"
+        className="mr-outline mb-[20px]"
         type="primary"
         onClick={() => {
           router.replace('/netflixv1?isTutorial=true');
@@ -257,7 +257,7 @@ const NewNetflixForm = ({
                     });
                   });
               }}
-              className="!bg-white !text-black !border-[1px] !border-black !rounded-full"
+              className="mr-outline"
               loading={loading}
               type="primary"
               htmlType="submit"
@@ -284,7 +284,7 @@ const NewNetflixForm = ({
                   });
                 });
             }}
-            className="!bg-black !rounded-full"
+            className="mr-cta"
             loading={loading}
             type="primary"
             htmlType="submit"
