@@ -27,17 +27,17 @@ import {
 import { buildRollZip } from '@/lib/memoroll-zip';
 
 const card =
-  'rounded-[12px] border border-[#EAECF0] bg-white p-[20px] flex flex-col gap-[12px]';
+  'rounded-[20px] border border-[#dadada] bg-white p-[20px] flex flex-col gap-[12px]';
 const primaryAction =
-  'rounded-[8px] border border-[#E34013] bg-[#E34013] px-[14px] py-[8px] text-[14px] font-[600] leading-[20px] text-white hover:opacity-90 disabled:opacity-60';
+  'rounded-full border border-[#E34013] bg-[#E34013] px-[14px] py-[8px] text-[14px] font-[600] leading-[20px] text-white hover:opacity-90 disabled:opacity-60';
 const dangerAction =
-  'rounded-[8px] border border-[#B42318] px-[10px] py-[6px] text-[12px] font-[600] leading-[18px] text-[#B42318] hover:bg-[#FEF3F2] disabled:opacity-60';
+  'rounded-full border border-[#B42318] px-[10px] py-[6px] text-[12px] font-[600] leading-[18px] text-[#B42318] hover:bg-[#FEF3F2] disabled:opacity-60';
 const note = 'text-[14px] font-[400] leading-[20px] text-[#667085]';
 const alert = 'text-[14px] font-[400] leading-[20px] text-[#B42318]';
 const good = 'text-[14px] font-[400] leading-[20px] text-[#027A48]';
 const label = 'text-[14px] font-[600] leading-[20px] text-[#344054]';
 const field =
-  'rounded-[8px] border border-[#D0D5DD] px-[12px] py-[8px] text-[14px] leading-[20px] text-[#182230]';
+  'rounded-full border border-[rgba(33,33,33,0.2)] px-[12px] py-[8px] text-[14px] leading-[20px] text-[#182230]';
 
 /** An ISO stamp as a `datetime-local` value in this browser's zone. */
 function localInputFrom(iso: string): string {
@@ -286,7 +286,7 @@ export default function MemorollConsole({
             {event.host_name || 'Not named'}
           </h1>
           <span
-            className={`rounded-[16px] px-[10px] py-[2px] text-[12px] font-[600] leading-[18px] ${
+            className={`rounded-full px-[10px] py-[2px] text-[12px] font-[600] leading-[18px] ${
               event.status === 'published'
                 ? 'bg-[#ECFDF3] text-[#027A48]'
                 : 'bg-[#F2F4F7] text-[#344054]'
@@ -429,7 +429,7 @@ export default function MemorollConsole({
               </thead>
               <tbody>
                 {participants.map((guest) => (
-                  <tr key={guest.id} className="border-t border-[#EAECF0]">
+                  <tr key={guest.id} className="border-t border-[#dadada]">
                     <td className="py-[8px] pr-[16px] font-[600] text-[#182230]">
                       {guest.display_name || guest.user_name}
                     </td>
@@ -495,7 +495,7 @@ export default function MemorollConsole({
                 <img
                   src={photo.photo_url}
                   alt={`A shot ${photo.uploader_name} took`}
-                  className="aspect-[3/4] w-full rounded-[8px] border border-[#EAECF0] object-cover"
+                  className="aspect-[3/4] w-full rounded-[12px] border border-[#dadada] object-cover"
                   loading="lazy"
                 />
                 <figcaption className="flex items-center justify-between gap-[8px]">

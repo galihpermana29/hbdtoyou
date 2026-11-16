@@ -23,9 +23,9 @@ const DESIGN_WIDTH = 375;
 const DESIGN_HEIGHT = 812;
 
 const secondary =
-  'flex-1 rounded-[8px] border border-[#D0D5DD] px-[8px] py-[8px] text-center text-[13px] font-[600] leading-[18px] text-[#344054] hover:bg-[#F9FAFB]';
+  'flex-1 rounded-full border border-[rgba(33,33,33,0.2)] px-[8px] py-[8px] text-center text-[13px] font-[600] leading-[18px] text-[#344054] hover:bg-[#F9FAFB]';
 const primary =
-  'block w-full rounded-[8px] border border-[#E34013] bg-[#E34013] px-[14px] py-[10px] text-center text-[14px] font-[600] leading-[20px] text-white hover:opacity-90';
+  'block w-full rounded-full border border-[#E34013] bg-[#E34013] px-[14px] py-[10px] text-center text-[14px] font-[600] leading-[20px] text-white hover:opacity-90';
 const note = 'text-[13px] font-[400] leading-[18px] text-[#667085]';
 
 /** The event's opening moment, said the way the dashboard says dates. */
@@ -114,7 +114,7 @@ function RollFace({ event }: { event: IMemorollEventResponse }) {
       ) : null}
 
       <span
-        className={`absolute left-[12px] top-[12px] rounded-[16px] px-[10px] py-[2px] text-[12px] font-[600] leading-[18px] shadow-sm ${
+        className={`absolute left-[12px] top-[12px] rounded-full px-[10px] py-[2px] text-[12px] font-[600] leading-[18px] shadow-sm ${
           live ? 'bg-[#ECFDF3] text-[#027A48]' : 'bg-white text-[#344054]'
         }`}>
         {live ? 'Published' : 'Draft'}
@@ -171,7 +171,7 @@ export default function MemorollListing({
       {events.map((event) => (
         <div
           key={event.id}
-          className="flex flex-col overflow-hidden rounded-[16px] border border-[#EAECF0] bg-white shadow-sm transition-shadow hover:shadow-md">
+          className="flex flex-col overflow-hidden rounded-[20px] border border-[#dadada] bg-white shadow-sm transition-shadow hover:shadow-md">
           <RollFace event={event} />
 
           <div className="flex flex-1 flex-col gap-[12px] p-[16px]">
@@ -218,7 +218,7 @@ export default function MemorollListing({
               <button
                 type="button"
                 onClick={() => setQrFor(event)}
-                className="block w-full rounded-[8px] border border-[#D0D5DD] px-[14px] py-[10px] text-center text-[14px] font-[600] leading-[20px] text-[#344054] hover:bg-[#F9FAFB]">
+                className="block w-full rounded-full border border-[rgba(33,33,33,0.2)] px-[14px] py-[10px] text-center text-[14px] font-[600] leading-[20px] text-[#344054] hover:bg-[#F9FAFB]">
                 Download guest QR
               </button>
             </div>

@@ -47,7 +47,7 @@ const ScheduledPage = async () => {
       </p>
 
       <div className="mt-[30px]">
-        <div className="p-[20px] border-[1px] border-[#EAECF0] rounded-[12px] max-w-[300px]">
+        <div className="p-[20px] border-[1px] border-[#dadada] rounded-[20px] max-w-[300px]">
           <h3 className="text-[#475467] font-[400] text-[14px] mb-[8px]">
             Total Scheduled
           </h3>

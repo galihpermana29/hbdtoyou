@@ -154,7 +154,7 @@ const CardTemplate = ({
           <img
             src={templateThumbnail(data)}
             alt={data.name}
-            className="w-full aspect-video object-cover rounded-md"
+            className="w-full aspect-video object-cover rounded-[12px]"
           />
         </div>
       </div>

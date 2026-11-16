@@ -67,9 +67,9 @@ const DESIGN_WIDTH = 375;
 const DESIGN_HEIGHT = 812;
 
 const secondary =
-  'flex-1 rounded-[8px] border border-[#D0D5DD] px-[8px] py-[8px] text-center text-[13px] font-[600] leading-[18px] text-[#344054] hover:bg-[#F9FAFB]';
+  'flex-1 rounded-full border border-[rgba(33,33,33,0.2)] px-[8px] py-[8px] text-center text-[13px] font-[600] leading-[18px] text-[#344054] hover:bg-[#F9FAFB]';
 const primary =
-  'block w-full rounded-[8px] border border-[#E34013] bg-[#E34013] px-[14px] py-[10px] text-center text-[14px] font-[600] leading-[20px] text-white hover:opacity-90 disabled:opacity-60';
+  'block w-full rounded-full border border-[#E34013] bg-[#E34013] px-[14px] py-[10px] text-center text-[14px] font-[600] leading-[20px] text-white hover:opacity-90 disabled:opacity-60';
 const note = 'text-[13px] font-[400] leading-[18px] text-[#667085]';
 const alert = 'text-[13px] font-[400] leading-[18px] text-[#B42318]';
 
@@ -155,7 +155,7 @@ function PreviewFace({ invitation }: { invitation: OwnedInvitation }) {
       ) : null}
 
       <span
-        className={`absolute left-[12px] top-[12px] rounded-[16px] px-[10px] py-[2px] text-[12px] font-[600] leading-[18px] shadow-sm ${
+        className={`absolute left-[12px] top-[12px] rounded-full px-[10px] py-[2px] text-[12px] font-[600] leading-[18px] shadow-sm ${
           invitation.isPublished
             ? 'bg-[#ECFDF3] text-[#027A48]'
             : 'bg-white text-[#344054]'
@@ -239,7 +239,7 @@ export default function WeddingListing({
       ) : null}
 
       {!problem && invitations.length === 0 ? (
-        <div className="rounded-[16px] border border-[#EAECF0] bg-white p-[20px]">
+        <div className="rounded-[20px] border border-[#dadada] bg-white p-[20px]">
           <p className="text-[16px] font-[400] leading-[24px] text-[#182230]">
             You have not made a wedding invitation yet.
           </p>
@@ -261,7 +261,7 @@ export default function WeddingListing({
           return (
             <div
               key={invitation.contentId}
-              className="flex flex-col overflow-hidden rounded-[16px] border border-[#EAECF0] bg-white shadow-sm transition-shadow hover:shadow-md">
+              className="flex flex-col overflow-hidden rounded-[20px] border border-[#dadada] bg-white shadow-sm transition-shadow hover:shadow-md">
               <PreviewFace invitation={invitation} />
 
               <div className="flex flex-1 flex-col gap-[12px] p-[16px]">

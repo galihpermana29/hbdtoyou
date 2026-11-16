@@ -226,8 +226,7 @@ const CreatePage = ({ initialTemplateId }: { initialTemplateId?: string }) => {
                 </div>
               </div>
               <Steps
-                // progressDot
-                // className="custom-steps"
+                size="small"
                 current={current}
                 items={StepsCustom}
               />
@@ -261,10 +260,10 @@ const CreatePage = ({ initialTemplateId }: { initialTemplateId?: string }) => {
               <>
                 {modalState?.data ? (
                   <div className="flex flex-col md:flex-row items-center gap-[20px]">
-                    <div className="shadow-lg w-full rounded-md">
+                    <div className="shadow-lg w-full rounded-[12px]">
                       <iframe
                         src={window?.location.origin + '/' + modalState?.data}
-                        className="aspect-video object-cover rounded-md w-full"
+                        className="aspect-video object-cover rounded-[12px] w-full"
                       />
                     </div>
                     <div className="w-[70%]">
@@ -287,7 +286,7 @@ const CreatePage = ({ initialTemplateId }: { initialTemplateId?: string }) => {
                             );
                             message.success('Copied!');
                           }}
-                          className="!bg-[#E34013] !text-white !rounded-[8px] !text-[16px] !font-[600] !h-[48px] !w-[170px]"
+                          className="mr-cta !text-[16px] !font-[600] !h-[48px] !w-[170px]"
                           type="primary"
                           size="large">
                           Copy link
@@ -298,7 +297,7 @@ const CreatePage = ({ initialTemplateId }: { initialTemplateId?: string }) => {
                           className="cursor-pointer">
                           {' '}
                           <Button
-                            className="!bg-[#fff] !text-[#E34013] !border-[1px] !border-[#E34013] !rounded-[8px] !text-[16px] !font-[600] !h-[48px] !w-[170px]"
+                            className="mr-outline !text-[16px] !font-[600] !h-[48px] !w-[170px]"
                             type="primary"
                             size="large">
                             Open in new tab

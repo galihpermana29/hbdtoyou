@@ -201,7 +201,7 @@ const TemplatesClient = ({
           <img
             src={uri}
             alt="thumb"
-            className="w-[40px] h-[40px] object-cover rounded-[4px]"
+            className="w-[40px] h-[40px] object-cover rounded-[12px]"
           />
         ) : (
           <span className="text-gray-400 text-xs truncate max-w-[100px] inline-block">

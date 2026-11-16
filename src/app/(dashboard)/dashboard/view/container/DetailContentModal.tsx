@@ -6,7 +6,7 @@ import Image from 'next/image';
 const DetailContentModal = ({ content }: { content: IContent }) => {
   return (
     <div className="flex gap-4 p-[16px] items-center flex-col lg:flex-row h-[380px]">
-      <div className="min-w-[320px] max-w-[400px] border-[1px] p-[15px] border-[#EAECF0] rounded-[6px] hidden lg:block">
+      <div className="min-w-[320px] max-w-[400px] border-[1px] p-[15px] border-[#dadada] rounded-[20px] hidden lg:block">
         <div className="w-full h-[190px] overflow-hidden object-cover object-center">
           <Image
             width={1000}

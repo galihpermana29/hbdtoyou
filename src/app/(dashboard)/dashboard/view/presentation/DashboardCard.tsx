@@ -33,7 +33,7 @@ const DashboardCard = ({
   }
 
   return (
-    <div className="min-w-[320px] max-w-[400px] border-[1px] p-[15px] border-[#EAECF0] rounded-[6px]">
+    <div className="min-w-[320px] max-w-[400px] border-[1px] p-[15px] border-[#dadada] rounded-[20px]">
       <div className="w-full h-[190px] overflow-hidden object-cover object-center">
         <Image
           width={1000}
@@ -157,7 +157,7 @@ const DashboardJournalCard = ({
   }, [content?.detail_content_json_text]);
 
   return (
-    <div className="min-w-[320px] max-w-[400px] w-full border-[1px] border-[#EAECF0] rounded-[6px] bg-white overflow-hidden shadow-sm">
+    <div className="min-w-[320px] max-w-[400px] w-full border-[1px] border-[#dadada] rounded-[20px] bg-white overflow-hidden shadow-sm">
       <div className="p-6 flex flex-col justify-between h-full">
         <div>
           <div className="flex justify-between items-start mb-3">

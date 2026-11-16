@@ -278,7 +278,7 @@ export default function NewBoardOfUsForm({
                 {fields.map(({ key, name, ...restField }, index) => (
                   <div
                     key={key}
-                    className="flex flex-col sm:flex-row gap-[12px] rounded-[12px] border border-[#EAECF0] p-[12px]"
+                    className="flex flex-col sm:flex-row gap-[12px] rounded-[12px] border border-[#dadada] p-[12px]"
                   >
                     <div className="w-full sm:max-w-[210px]">
                       <p className="mb-[8px] text-[13px] font-semibold">

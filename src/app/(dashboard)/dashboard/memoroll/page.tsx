@@ -17,9 +17,9 @@ export const metadata: Metadata = {
 const EVENTS_PER_PAGE = 100;
 
 const card =
-  'rounded-[12px] border border-[#EAECF0] bg-white p-[20px] flex flex-col gap-[12px]';
+  'rounded-[20px] border border-[#dadada] bg-white p-[20px] flex flex-col gap-[12px]';
 const action =
-  'rounded-[8px] border border-[#D0D5DD] px-[14px] py-[8px] text-[14px] font-[600] leading-[20px] text-[#344054] hover:bg-[#F9FAFB]';
+  'rounded-full border border-[rgba(33,33,33,0.2)] px-[14px] py-[8px] text-[14px] font-[600] leading-[20px] text-[#344054] hover:bg-[#F9FAFB]';
 const note = 'text-[14px] font-[400] leading-[20px] text-[#667085]';
 const alert = 'text-[14px] font-[400] leading-[20px] text-[#B42318]';
 
@@ -68,7 +68,7 @@ export default async function MemorollDashboardPage() {
         {rows.length > 0 ? (
           <Link
             href="/memoroll/create"
-            className="w-fit shrink-0 rounded-[8px] border border-[#E34013] bg-[#E34013] px-[14px] py-[8px] text-[14px] font-[600] leading-[20px] text-white hover:opacity-90">
+            className="w-fit shrink-0 rounded-full border border-[#E34013] bg-[#E34013] px-[14px] py-[8px] text-[14px] font-[600] leading-[20px] text-white hover:opacity-90">
             Create MemoRoll
           </Link>
         ) : null}
