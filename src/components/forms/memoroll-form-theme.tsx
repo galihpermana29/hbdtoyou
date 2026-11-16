@@ -32,7 +32,9 @@ export const memorollFormTheme: ThemeConfig = {
     colorError: '#d92d20',
     fontFamily: "'Plus Jakarta Sans', var(--font-mr-body), sans-serif",
     fontSize: 14,
-    borderRadius: 16,
+    // Owner, 2026-11-17: pill fields read as too round stacked a dozen deep;
+    // 12px for everything a person types or drops into, pill for buttons.
+    borderRadius: 12,
     controlHeight: 44,
     controlHeightLG: 48,
   },
@@ -47,22 +49,22 @@ export const memorollFormTheme: ThemeConfig = {
       fontWeight: 500,
     },
     Input: {
-      borderRadius: 999,
-      borderRadiusLG: 999,
+      borderRadius: 12,
+      borderRadiusLG: 12,
       paddingInline: 16,
       paddingInlineLG: 16,
       activeBorderColor: colour.flame,
       hoverBorderColor: 'rgba(0, 0, 0, 0.35)',
       activeShadow: '0 0 0 3px rgba(255, 62, 9, 0.12)',
     },
-    InputNumber: { borderRadius: 999, activeBorderColor: colour.flame },
+    InputNumber: { borderRadius: 12, activeBorderColor: colour.flame },
     Select: {
-      borderRadius: 999,
-      borderRadiusLG: 999,
+      borderRadius: 12,
+      borderRadiusLG: 12,
       optionSelectedBg: colour.unchosen,
       activeBorderColor: colour.flame,
     },
-    DatePicker: { borderRadius: 999, activeBorderColor: colour.flame },
+    DatePicker: { borderRadius: 12, activeBorderColor: colour.flame },
     Form: {
       labelColor: '#000000',
       labelFontSize: 14,
@@ -77,7 +79,7 @@ export const memorollFormTheme: ThemeConfig = {
       colorSplit: colour.track,
     },
     Modal: {
-      borderRadiusLG: 24,
+      borderRadiusLG: 20,
       contentBg: colour.paper,
       headerBg: colour.paper,
       footerBg: colour.paper,
