@@ -1,6 +1,6 @@
 'use client';
 
-import { Mail, RotateCcw, Volume2, VolumeX } from 'lucide-react';
+import { Mail, Pointer, RotateCcw, Volume2, VolumeX } from 'lucide-react';
 import { Caveat, Share_Tech_Mono } from 'next/font/google';
 import {
   useCallback,
@@ -189,6 +189,8 @@ export default function RollOfUs({ data }: { data: RollOfUsData }) {
   const [notches, setNotches] = useState(0);
   const [flash, setFlash] = useState(0);
   const [refused, setRefused] = useState(0);
+  // Pressed the shutter on unwound film: say so until they wind.
+  const [nagged, setNagged] = useState(false);
   const [muted, setMuted] = useState(false);
   const [letterOpen, setLetterOpen] = useState(false);
   const play = useSounds(muted);
@@ -204,6 +206,7 @@ export default function RollOfUs({ data }: { data: RollOfUsData }) {
 
   const click = useCallback(() => {
     if (finished) return;
+    setNagged(false);
     setNotches((value) => {
       if (value >= NOTCHES) return value;
       play('tick');
@@ -221,6 +224,7 @@ export default function RollOfUs({ data }: { data: RollOfUsData }) {
     if (!wound) {
       play('dud');
       setRefused((value) => value + 1);
+      setNagged(true);
       return;
     }
     play('shutter');
@@ -249,15 +253,24 @@ export default function RollOfUs({ data }: { data: RollOfUsData }) {
   };
 
   const current = shot > 0 ? data.frames[shot - 1] : null;
-  const hint = finished
-    ? 'That was the last frame.'
+  // What to do next, in the order the camera needs it. Said above the
+  // camera, where the eyes are, and pointed at on the camera itself: the
+  // first version said it in small type at the bottom of the screen, and
+  // the owner did not find the wheel (2026-11-18).
+  const step: { n: string; says: string } = finished
+    ? { n: '✓', says: 'That was the last frame' }
     : wound
-      ? 'Now press the shutter'
+      ? { n: '2', says: 'Now press the orange button' }
       : notches > 0
-        ? 'Keep winding…'
-        : shot === 0
-          ? 'Slide the wheel to wind the film'
-          : 'Wind the film for the next one';
+        ? { n: '1', says: `Keep sliding… ${notches}/${NOTCHES}` }
+        : nagged
+          ? { n: '1', says: 'Wind first: slide the wheel' }
+          : shot === 0
+            ? { n: '1', says: 'Slide the glowing wheel' }
+            : { n: '1', says: 'Slide the wheel again' };
+  // The moving thumb is a lesson, not decoration: it stops once the
+  // recipient has wound the film twice by themselves.
+  const teaching = !wound && !finished && notches === 0 && shot < 2;
 
   return (
     <main className="relative min-h-[100svh] overflow-x-hidden bg-[#0f0e0d] text-[#f4efe6]">
@@ -280,7 +293,7 @@ export default function RollOfUs({ data }: { data: RollOfUsData }) {
       </button>
 
       {phase === 'shoot' ? (
-        <section className="mx-auto flex min-h-[100svh] w-full max-w-[460px] flex-col items-center px-5 pb-8 pt-9">
+        <section className="mx-auto flex min-h-[100svh] w-full max-w-[460px] flex-col items-center px-5 pb-8 pt-7">
           <p className={`${hand.className} text-[34px] leading-none`}>
             {data.title}
           </p>
@@ -288,8 +301,20 @@ export default function RollOfUs({ data }: { data: RollOfUsData }) {
             for {data.recipientName}
           </p>
 
+          <p
+            key={`step-${refused}`}
+            role="status"
+            className={`mt-5 flex min-h-[40px] items-center gap-2.5 rounded-full border border-white/15 bg-white/[0.06] py-1.5 pl-1.5 pr-4 text-[15px] font-semibold text-[#f4efe6] ${
+              nagged ? styles.refuse : ''
+            }`}>
+            <span className="flex size-7 shrink-0 items-center justify-center rounded-full bg-[#ff5a1f] text-[14px] font-bold text-white">
+              {step.n}
+            </span>
+            {step.says}
+          </p>
+
           {/* The camera, from behind: what you look at when you hold one. */}
-          <div className="relative z-20 mt-12 w-full max-w-[360px]">
+          <div className="relative z-20 mt-9 w-full max-w-[360px]">
             <button
               type="button"
               onClick={press}
@@ -335,58 +360,72 @@ export default function RollOfUs({ data }: { data: RollOfUsData }) {
                 />
 
                 <div className="flex flex-col items-center gap-1.5">
-                  <div
-                    role="button"
-                    tabIndex={0}
-                    aria-label={
-                      wound
-                        ? 'Film wound. Press the shutter'
-                        : `Wind the film, ${notches} of ${NOTCHES}`
-                    }
-                    // A tap is one click of the wheel; a drag makes its own
-                    // clicks as it goes, and the tap that ends it is not one
-                    // more.
-                    onClick={() => {
-                      if (dragged.current) dragged.current = false;
-                      else turn();
-                    }}
-                    onKeyDown={(event) => {
-                      if (event.key === 'Enter' || event.key === ' ') {
-                        event.preventDefault();
-                        turn();
+                  <div className="relative">
+                    <div
+                      role="button"
+                      tabIndex={0}
+                      aria-label={
+                        wound
+                          ? 'Film wound. Press the shutter'
+                          : `Wind the film, ${notches} of ${NOTCHES}`
                       }
-                    }}
-                    onPointerDown={(event) => {
-                      event.currentTarget.setPointerCapture(event.pointerId);
-                      drag.current = { x: event.clientX, travelled: 0 };
-                      dragged.current = false;
-                    }}
-                    onPointerMove={(event) => {
-                      if (!drag.current) return;
-                      const step = Math.abs(event.clientX - drag.current.x);
-                      drag.current.travelled += step;
-                      drag.current.x = event.clientX;
-                      if (step > 0) setRidge((value) => (value + step) % 48);
-                      while (drag.current.travelled >= NOTCH_PX) {
-                        drag.current.travelled -= NOTCH_PX;
-                        dragged.current = true;
-                        click();
-                      }
-                    }}
-                    onPointerUp={() => (drag.current = null)}
-                    onPointerCancel={() => (drag.current = null)}
-                    className={`relative h-[30px] w-[96px] cursor-grab touch-none overflow-hidden rounded-[8px] border border-black/60 bg-[#0c0c0c] active:cursor-grabbing ${
-                      !wound && !finished ? styles.nudge : ''
-                    }`}>
-                    <span
-                      aria-hidden
-                      className="absolute inset-y-0 left-0 w-[300%]"
-                      style={{
-                        transform: `translateX(-${ridge}px)`,
-                        background:
-                          'repeating-linear-gradient(90deg, #3a3a3a 0 3px, #101010 3px 8px)',
+                      // A tap is one click of the wheel; a drag makes its own
+                      // clicks as it goes, and the tap that ends it is not one
+                      // more.
+                      onClick={() => {
+                        if (dragged.current) dragged.current = false;
+                        else turn();
                       }}
-                    />
+                      onKeyDown={(event) => {
+                        if (event.key === 'Enter' || event.key === ' ') {
+                          event.preventDefault();
+                          turn();
+                        }
+                      }}
+                      onPointerDown={(event) => {
+                        event.currentTarget.setPointerCapture(event.pointerId);
+                        drag.current = { x: event.clientX, travelled: 0 };
+                        dragged.current = false;
+                      }}
+                      onPointerMove={(event) => {
+                        if (!drag.current) return;
+                        const step = Math.abs(event.clientX - drag.current.x);
+                        drag.current.travelled += step;
+                        drag.current.x = event.clientX;
+                        if (step > 0) setRidge((value) => (value + step) % 48);
+                        while (drag.current.travelled >= NOTCH_PX) {
+                          drag.current.travelled -= NOTCH_PX;
+                          dragged.current = true;
+                          click();
+                        }
+                      }}
+                      onPointerUp={() => (drag.current = null)}
+                      onPointerCancel={() => (drag.current = null)}
+                      className="relative h-[36px] w-[118px] cursor-grab touch-none overflow-hidden rounded-[9px] border border-black/60 bg-[#0c0c0c] active:cursor-grabbing">
+                      <span
+                        aria-hidden
+                        className="absolute inset-y-0 left-0 w-[300%]"
+                        style={{
+                          transform: `translateX(-${ridge}px)`,
+                          background:
+                            'repeating-linear-gradient(90deg, #3a3a3a 0 3px, #101010 3px 8px)',
+                        }}
+                      />
+                    </div>
+                    {/* Lit while it is the thing to touch. */}
+                    {!wound && !finished ? (
+                      <span
+                        aria-hidden
+                        className={`${styles.nudge} pointer-events-none absolute -inset-[4px] rounded-[12px] border-2 border-[#ff5a1f] shadow-[0_0_16px_rgba(255,90,31,0.8)]`}
+                      />
+                    ) : null}
+                    {teaching ? (
+                      <span
+                        aria-hidden
+                        className={`${styles.swipe} pointer-events-none absolute -bottom-[26px] left-1/2 -ml-[13px] text-white drop-shadow-[0_2px_4px_rgba(0,0,0,0.9)]`}>
+                        <Pointer size={26} fill="#f4efe6" strokeWidth={1.5} />
+                      </span>
+                    ) : null}
                   </div>
                   <span className="flex gap-1" aria-hidden>
                     {Array.from({ length: NOTCHES }, (_, index) => (
@@ -403,7 +442,7 @@ export default function RollOfUs({ data }: { data: RollOfUsData }) {
               </div>
 
               {/* The back of the shell: the sticker every disposable has. */}
-              <div className="flex h-[150px] items-center justify-between gap-3 px-5">
+              <div className="flex h-[128px] items-center justify-between gap-3 px-5">
                 <div className="-rotate-2 rounded-[6px] bg-[#fbf8f1] px-3 py-2 text-[#1b1b1b] shadow-[0_3px_0_rgba(0,0,0,0.18)]">
                   <p className={`${hand.className} text-[24px] leading-none`}>
                     {data.title}
@@ -416,12 +455,27 @@ export default function RollOfUs({ data }: { data: RollOfUsData }) {
                     {total} EXP · FLASH
                   </p>
                 </div>
+                {/* The steps printed on the shell; the one that is next is
+                    marked, so the camera itself says what to do. */}
                 <ol
-                  className="text-[10px] font-bold uppercase leading-[1.7] tracking-[0.12em]"
+                  className="flex flex-col gap-1 text-[10px] font-bold uppercase tracking-[0.12em]"
                   style={{ color: color.ink }}>
-                  <li>1 · wind</li>
-                  <li>2 · press</li>
-                  <li>3 · smile</li>
+                  {['wind', 'press', 'smile'].map((word, index) => {
+                    const now = finished
+                      ? index === 2
+                      : wound
+                        ? index === 1
+                        : index === 0;
+                    return (
+                      <li
+                        key={word}
+                        className={`rounded-full px-2 py-[3px] transition-colors duration-200 ${
+                          now ? 'bg-[#1b1b1b] text-white' : 'opacity-55'
+                        }`}>
+                        {index + 1} · {word}
+                      </li>
+                    );
+                  })}
                 </ol>
               </div>
             </div>
@@ -456,9 +510,6 @@ export default function RollOfUs({ data }: { data: RollOfUsData }) {
                 Develop the whole roll
               </button>
             ) : null}
-            <p className="text-[13px] font-medium text-[#a39b91]" role="status">
-              {hint}
-            </p>
           </div>
         </section>
       ) : null}
