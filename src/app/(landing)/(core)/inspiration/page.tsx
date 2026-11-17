@@ -1,7 +1,7 @@
-import { IAllTemplateResponse } from '@/action/interfaces';
+import { getInspirationPage } from '@/action/inspiration-api';
 import { getAllTemplates } from '@/action/user-api';
-import NewInspirationPage from '@/components/newlanding/NewInspiration';
-import NavigationBar from '@/components/ui/navbar';
+import InspirationPage from '@/components/inspiration/inspiration-page';
+import { filtersFor } from '@/lib/inspiration';
 import { Metadata } from 'next';
 
 export const metadata: Metadata = {
@@ -38,21 +38,20 @@ export const metadata: Metadata = {
   },
 };
 
-const getData = async () => {
-  const data = await getAllTemplates();
-  return data.success ? data.data : [];
-};
-
-const InspirationPage = async () => {
-  const data: null | IAllTemplateResponse[] =
-    (await getData()) as IAllTemplateResponse[];
+const InspirationRoute = async () => {
+  // The first page of the wall comes with the page: it is also what the
+  // hero's drifting wall is made of.
+  const [templates, first] = await Promise.all([
+    getAllTemplates(),
+    getInspirationPage({ page: 1 }),
+  ]);
 
   return (
-    <div>
-      <NavigationBar />
-      <NewInspirationPage templates={data} />
-    </div>
+    <InspirationPage
+      first={first}
+      filters={filtersFor(templates.success ? templates.data : [])}
+    />
   );
 };
 
-export default InspirationPage;
+export default InspirationRoute;
