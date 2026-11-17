@@ -1,4 +1,4 @@
-import NewLandingPage from '@/components/newlanding/NewLandingPage';
+import HomeLanding from '@/components/home/home-landing';
 import Script from 'next/script';
 import { Metadata } from 'next';
 import 'react-photo-view/dist/react-photo-view.css';
@@ -64,7 +64,7 @@ export default function Home() {
       {process.env.IS_MAINTENANCE === 'true' ? (
         <MaintenancePage />
       ) : (
-        <NewLandingPage />
+        <HomeLanding />
       )}
     </div>
   );

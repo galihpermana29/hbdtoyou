@@ -718,3 +718,38 @@ body:has(.mr-form) .ant-notification-notice .ant-notification-notice-message {
 .mr-form .ant-form-item-label > label > div:first-child {
   margin-top: 0;
 }
+
+/* The home landing (src/components/home). */
+@keyframes home-beat {
+  from {
+    transform: scaleX(0);
+  }
+  to {
+    transform: scaleX(1);
+  }
+}
+@keyframes home-rise {
+  from {
+    opacity: 0;
+    transform: translateY(var(--rise, 14px));
+  }
+}
+@keyframes home-fade {
+  from {
+    opacity: 0;
+  }
+}
+@keyframes home-marquee {
+  to {
+    transform: translateX(-50%);
+  }
+}
+/* One element of the hero's opening wave; --at places it, --rise is its travel. */
+.home-enter {
+  animation: home-rise 620ms cubic-bezier(0.23, 1, 0.32, 1) var(--at, 0ms) both;
+}
+@media (prefers-reduced-motion: reduce) {
+  .home-enter {
+    animation-name: home-fade;
+  }
+}
