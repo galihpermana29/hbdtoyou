@@ -12,6 +12,7 @@ import scrapbookv1 from '@/assets/templates/scrapbookv1.jpg';
 import spotifyv1 from '@/assets/templates/spotifyv1.png';
 import arcadeclawv1 from '@/assets/templates/arcadeclawv1.svg';
 import boardofusv1 from '@/assets/templates/boardofusv1.svg';
+import rollofusv1 from '@/assets/templates/rollofusv1.svg';
 import clsx from 'clsx';
 import { ArrowRight } from 'lucide-react';
 import Image from 'next/image';
@@ -91,6 +92,11 @@ export const DataToCardColor = {
     color: 'bg-[#e7f7f2]',
     logo: boardofusv1,
     text: 'text-[#c9425d]',
+  },
+  rollofusv1: {
+    color: 'bg-[#f1f7d9]',
+    logo: rollofusv1,
+    text: 'text-[#1d1f1a]',
   },
 };
 
