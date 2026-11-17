@@ -19,6 +19,8 @@ import Image from 'next/image';
 import Link from 'next/link';
 import { signIn } from 'next-auth/react';
 import { useRouter } from 'next/navigation';
+
+import { WEDDING_RELEASED } from '@/lib/wedding-release';
 import { useEffect, useState } from 'react';
 
 import { useMemoifyProfile, useMemoifySession } from '@/app/session-provider';
@@ -32,14 +34,6 @@ type NavItem = {
   mobileLabel: string;
   badge?: string;
 };
-
-/**
- * Wedding invitations are built but not announced yet, so nothing in the navbar
- * points at them. `/wedding-invitation` itself stays reachable on purpose: the
- * visual check drives that flow, and anyone already holding a link keeps it.
- * Flip this to `true` on launch day and both entries come back.
- */
-const WEDDING_RELEASED = false;
 
 /**
  * Pricing lands on the Premium plan already chosen, rather than on a payment
