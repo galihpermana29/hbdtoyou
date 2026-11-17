@@ -6,6 +6,7 @@ import HomeClosing from './closing';
 import HomeFaq from './faq';
 import HomeHero from './hero';
 import HomeHowItWorks from './how-it-works';
+import HomeInspirationPreview from './inspiration-preview';
 import HomeLiveDemo from './live-demo';
 import HomeOccasions from './occasions';
 import HomePricing from './pricing';
@@ -34,6 +35,7 @@ export default function HomeLanding() {
         <HomeHowItWorks />
         <HomeProducts />
         <HomeLiveDemo />
+        <HomeInspirationPreview />
         <HomeStats />
         <HomePricing />
         <HomeFaq />

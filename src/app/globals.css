@@ -800,3 +800,28 @@ body:has(.mr-form) .ant-notification-notice .ant-notification-notice-message {
 .paper-serif * {
   font-family: Georgia, 'Times New Roman', serif;
 }
+
+/* The inspiration page (src/components/inspiration). */
+.insp-grid {
+  display: flex;
+  width: auto;
+  margin-left: -16px;
+}
+.insp-col {
+  padding-left: 16px;
+  background-clip: padding-box;
+}
+.insp-col > * {
+  margin-bottom: 16px;
+}
+/* The hero's wall: columns of real gifts drifting at one steady speed. */
+@keyframes insp-up {
+  to {
+    transform: translateY(-50%);
+  }
+}
+@keyframes insp-down {
+  from {
+    transform: translateY(-50%);
+  }
+}
