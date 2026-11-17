@@ -127,7 +127,9 @@ export function Footer() {
           style={label.style}
           className={`flex flex-col gap-2 border-t border-[#fbf4ec]/15 pt-6 text-[11px] tracking-[1.2px] text-[#fbf4ec]/50 sm:flex-row sm:justify-between`}>
           <p style={label.style}>
-            © {new Date().getFullYear()} MEMOIFY. ALL RIGHTS RESERVED.
+            {/* The year Memoify started, fixed on purpose (owner,
+                2026-11-18); it used to follow the calendar. */}
+            © 2024 MEMOIFY. ALL RIGHTS RESERVED.
           </p>
           <p style={label.style}>MADE IN INDONESIA WITH LOVE ♡</p>
         </div>
