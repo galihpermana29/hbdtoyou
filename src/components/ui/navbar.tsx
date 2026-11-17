@@ -36,11 +36,15 @@ type NavItem = {
 };
 
 /**
- * Pricing is the plans side by side, on the home page, open to anybody
- * (owner, 2026-11-17). It used to go to the checkout, which is where a plan
- * is paid for, not compared, and which made a visitor sign in to see a price.
+ * "Upgrade" goes to the checkout, with Premium already chosen (owner,
+ * 2026-11-17). It names what the visitor gets, not the step they are on:
+ * "Checkout" and "Payment" are names for a process. The plans side by side
+ * are the pricing section of the home page, which the checkout links to.
+ *
+ * Nobody is made to sign in by this link: signed out, the checkout says so
+ * and offers the sign-in button and the way to compare the plans.
  */
-const PRICING_DESTINATION = '/#pricing';
+const UPGRADE_DESTINATION = '/payment?type=premium';
 
 const PRIMARY_LINKS: NavItem[] = [
   {
@@ -231,9 +235,9 @@ const NavigationBar = () => {
             </Dropdown>
 
             <Link
-              href={PRICING_DESTINATION}
+              href={UPGRADE_DESTINATION}
               className="whitespace-nowrap font-medium text-[#667085] transition-colors hover:text-[#1B1B1B]">
-              Pricing
+              Upgrade
             </Link>
 
             {WEDDING_RELEASED && (
@@ -375,11 +379,11 @@ const NavigationBar = () => {
                     </Link>
                   ))}
                   <Link
-                    href={PRICING_DESTINATION}
+                    href={UPGRADE_DESTINATION}
                     onClick={() => setSidebar(false)}
                     className="flex w-full items-center gap-3 rounded-lg px-3 py-2.5 text-left text-[15px] font-semibold text-[#344054] transition-colors hover:bg-[#F9FAFB]">
                     <BadgeDollarSign size={17} className="text-[#E34013]" />
-                    Pricing
+                    Upgrade
                   </Link>
                 </div>
               </div>
