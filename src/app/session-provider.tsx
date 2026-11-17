@@ -66,6 +66,13 @@ interface AdContent {
   type: 'text' | 'image';
 }
 
+/**
+ * The promotional modal is switched off everywhere (owner, 2026-11-17). The
+ * ads, the routes that never take one and the premium counter are all kept,
+ * so turning it back on is this one word.
+ */
+const ADS_ENABLED = false;
+
 const premiumAds: AdContent[] = [
   {
     id: 1,
@@ -302,7 +309,7 @@ const SessionProvider = ({
   };
 
   useEffect(() => {
-    if (isHideAds) {
+    if (!ADS_ENABLED || isHideAds) {
       // This provider outlives a navigation, so an ad opened on a page that
       // allows one is still open on arrival at a page that does not.
       setAdsModalVisible(false);
