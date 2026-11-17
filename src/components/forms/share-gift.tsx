@@ -2,7 +2,7 @@
 
 import { QRCodeCanvas } from 'qrcode.react';
 import Link from 'next/link';
-import { useEffect, useRef, useState } from 'react';
+import { useCallback, useEffect, useRef, useState } from 'react';
 
 import { colour } from '@/components/memoroll/ui/tokens';
 
@@ -87,64 +87,130 @@ export default function ShareGift({
    * from across a table, with a line telling the recipient what to do.
    * 1200x1700, about A6 at 290 dpi.
    */
-  const downloadCard = async () => {
-    const qr = qrRef.current;
-    if (!qr) return;
-    const W = 1200;
-    const H = 1700;
-    const card = document.createElement('canvas');
-    card.width = W;
-    card.height = H;
-    const ctx = card.getContext('2d');
-    if (!ctx) return;
-    const family = "'Plus Jakarta Sans', sans-serif";
-    await Promise.all(
-      [500, 700].map((weight) =>
-        document.fonts?.load(`${weight} 64px ${family}`).catch(() => undefined)
-      )
-    );
-    ctx.fillStyle = colour.paper;
-    ctx.fillRect(0, 0, W, H);
-    ctx.fillStyle = colour.flame;
-    ctx.fillRect(0, 0, W, 24);
-    ctx.textAlign = 'center';
-    ctx.fillStyle = colour.ink;
-    ctx.font = `700 84px ${family}`;
-    ctx.fillText('A gift for you', W / 2, 230);
-    ctx.fillStyle = colour.muted;
-    ctx.font = `500 40px ${family}`;
-    ctx.fillText('Scan with your phone camera to open it', W / 2, 310);
-    const size = 820;
-    const x = (W - size) / 2;
-    const y = 400;
-    ctx.fillStyle = '#ffffff';
-    ctx.beginPath();
-    ctx.roundRect(x - 40, y - 40, size + 80, size + 80, 48);
-    ctx.fill();
-    ctx.strokeStyle = colour.hairline;
-    ctx.lineWidth = 3;
-    ctx.stroke();
-    ctx.drawImage(qr, x, y, size, size);
-    ctx.fillStyle = colour.ink;
-    ctx.font = `500 34px ${family}`;
-    const short = shown.length > 48 ? `${shown.slice(0, 47)}…` : shown;
-    ctx.fillText(short, W / 2, y + size + 130);
-    ctx.fillStyle = colour.muted;
-    ctx.font = `500 30px ${family}`;
-    ctx.fillText('made with memoify.live', W / 2, H - 80);
-    const anchor = document.createElement('a');
-    anchor.href = card.toDataURL('image/png');
-    anchor.download = `memoify-gift-card-${path.split('/').pop() ?? 'qr'}.png`;
-    anchor.click();
-  };
+  const drawCard = useCallback(
+    async (qr: HTMLCanvasElement): Promise<Blob | null> => {
+      const W = 1200;
+      const H = 1700;
+      const card = document.createElement('canvas');
+      card.width = W;
+      card.height = H;
+      const ctx = card.getContext('2d');
+      if (!ctx) return null;
+      const family = "'Plus Jakarta Sans', sans-serif";
+      await Promise.all(
+        [500, 700].map((weight) =>
+          document.fonts
+            ?.load(`${weight} 64px ${family}`)
+            .catch(() => undefined)
+        )
+      );
+      ctx.fillStyle = colour.paper;
+      ctx.fillRect(0, 0, W, H);
+      ctx.fillStyle = colour.flame;
+      ctx.fillRect(0, 0, W, 24);
+      ctx.textAlign = 'center';
+      ctx.fillStyle = colour.ink;
+      ctx.font = `700 84px ${family}`;
+      ctx.fillText('A gift for you', W / 2, 230);
+      ctx.fillStyle = colour.muted;
+      ctx.font = `500 40px ${family}`;
+      ctx.fillText('Scan with your phone camera to open it', W / 2, 310);
+      const size = 820;
+      const x = (W - size) / 2;
+      const y = 400;
+      ctx.fillStyle = '#ffffff';
+      ctx.beginPath();
+      ctx.roundRect(x - 40, y - 40, size + 80, size + 80, 48);
+      ctx.fill();
+      ctx.strokeStyle = colour.hairline;
+      ctx.lineWidth = 3;
+      ctx.stroke();
+      ctx.drawImage(qr, x, y, size, size);
+      ctx.fillStyle = colour.ink;
+      ctx.font = `500 34px ${family}`;
+      const short = shown.length > 48 ? `${shown.slice(0, 47)}…` : shown;
+      ctx.fillText(short, W / 2, y + size + 130);
+      ctx.fillStyle = colour.muted;
+      ctx.font = `500 30px ${family}`;
+      ctx.fillText('made with memoify.live', W / 2, H - 80);
+      return new Promise((resolve) => card.toBlob(resolve, 'image/png'));
+    },
+    [shown]
+  );
 
-  const downloadQr = () => {
-    const canvas = qrRef.current;
-    if (!canvas) return;
+  /**
+   * The two pictures, made ahead of the tap (owner, 2026-11-17: the
+   * downloads did nothing on an iPhone). Two things broke them there:
+   * - a `download` link to a `data:` URL, not in the page, is ignored by
+   *   iOS WebKit - every iPhone browser, Chrome included;
+   * - the card was drawn after an `await`, and Safari drops what a tap
+   *   allows once the code has waited.
+   * So both files exist before the tap, and the tap only hands one over.
+   */
+  const files = useRef<{ qr?: File; card?: File }>({});
+  const [ready, setReady] = useState(false);
+  useEffect(() => {
+    if (!url) return;
+    let cancelled = false;
+    files.current = {};
+    setReady(false);
+    // The mark in the middle of the code loads on its own; give it a moment
+    // to be drawn before the code is read off the canvas.
+    const wait = setTimeout(async () => {
+      const qr = qrRef.current;
+      if (!qr || cancelled) return;
+      const id = path.split('/').pop() ?? 'gift';
+      const qrBlob = await new Promise<Blob | null>((resolve) =>
+        qr.toBlob(resolve, 'image/png')
+      );
+      const cardBlob = await drawCard(qr);
+      if (cancelled) return;
+      files.current = {
+        qr: qrBlob
+          ? new File([qrBlob], `memoify-gift-${id}.png`, { type: 'image/png' })
+          : undefined,
+        card: cardBlob
+          ? new File([cardBlob], `memoify-gift-card-${id}.png`, {
+              type: 'image/png',
+            })
+          : undefined,
+      };
+      setReady(true);
+    }, 400);
+    return () => {
+      cancelled = true;
+      clearTimeout(wait);
+    };
+  }, [url, path, drawCard]);
+
+  /**
+   * On a phone, the share sheet - its "Save Image" puts the picture in
+   * Photos, which is where a phone keeps pictures. On a computer, a real
+   * download: a blob link that is in the page when it is clicked.
+   */
+  const handOver = async (kind: 'qr' | 'card') => {
+    const file = files.current[kind];
+    if (!file) return;
+    const phone = window.matchMedia?.('(pointer: coarse)').matches;
+    if (phone && navigator.canShare?.({ files: [file] })) {
+      try {
+        await navigator.share({ files: [file] });
+        return;
+      } catch (error) {
+        // Closing the sheet is an answer; anything else falls through to a
+        // plain download.
+        if ((error as Error)?.name === 'AbortError') return;
+      }
+    }
+    const href = URL.createObjectURL(file);
     const anchor = document.createElement('a');
-    anchor.href = canvas.toDataURL('image/png');
-    anchor.download = `memoify-gift-${path.split('/').pop() ?? 'qr'}.png`;
+    anchor.href = href;
+    anchor.download = file.name;
+    anchor.rel = 'noopener';
+    document.body.appendChild(anchor);
     anchor.click();
+    anchor.remove();
+    setTimeout(() => URL.revokeObjectURL(href), 4000);
   };
 
   const pill =
@@ -324,8 +390,9 @@ export default function ShareGift({
             <div className="flex flex-wrap gap-[8px]">
               <button
                 type="button"
-                onClick={downloadCard}
-                className={`${pill} h-[36px] w-fit px-[14px]`}
+                onClick={() => handOver('card')}
+                disabled={!ready}
+                className={`${pill} h-[36px] w-fit px-[14px] ${ready ? '' : 'opacity-50'}`}
                 style={{
                   background: colour.ink,
                   color: '#ffffff',
@@ -334,8 +401,9 @@ export default function ShareGift({
               </button>
               <button
                 type="button"
-                onClick={downloadQr}
-                className={`${pill} h-[36px] w-fit px-[14px]`}
+                onClick={() => handOver('qr')}
+                disabled={!ready}
+                className={`${pill} h-[36px] w-fit px-[14px] ${ready ? '' : 'opacity-50'}`}
                 style={{
                   background: colour.unchosen,
                   color: colour.ink,
