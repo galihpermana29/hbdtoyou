@@ -36,12 +36,11 @@ type NavItem = {
 };
 
 /**
- * Pricing lands on the Premium plan already chosen, rather than on a payment
- * page with no plan selected. No plan id here on purpose: the payment page
- * resolves `type` against the live packages, so renaming or re-seeding a plan
- * cannot leave a stale id behind in the navbar.
+ * Pricing is the plans side by side, on the home page, open to anybody
+ * (owner, 2026-11-17). It used to go to the checkout, which is where a plan
+ * is paid for, not compared, and which made a visitor sign in to see a price.
  */
-const PRICING_DESTINATION = '/payment?type=premium';
+const PRICING_DESTINATION = '/#pricing';
 
 const PRIMARY_LINKS: NavItem[] = [
   {
@@ -102,16 +101,6 @@ const NavigationBar = () => {
   const email = userProfile?.email || session.email || '';
   const initial = displayName.trim().charAt(0).toUpperCase() || 'M';
   const shortName = displayName.trim().split(/\s+/)[0];
-
-  const openPricing = () => {
-    setSidebar(false);
-    if (isLoggedIn) {
-      router.push(PRICING_DESTINATION);
-      return;
-    }
-
-    signIn('google', { callbackUrl: PRICING_DESTINATION });
-  };
 
   useEffect(() => {
     if (!sidebar) return;
@@ -241,12 +230,11 @@ const NavigationBar = () => {
               </button>
             </Dropdown>
 
-            <button
-              type="button"
-              onClick={openPricing}
+            <Link
+              href={PRICING_DESTINATION}
               className="whitespace-nowrap font-medium text-[#667085] transition-colors hover:text-[#1B1B1B]">
               Pricing
-            </button>
+            </Link>
 
             {WEDDING_RELEASED && (
               <Link
@@ -386,13 +374,13 @@ const NavigationBar = () => {
                       {link.mobileLabel}
                     </Link>
                   ))}
-                  <button
-                    type="button"
-                    onClick={openPricing}
+                  <Link
+                    href={PRICING_DESTINATION}
+                    onClick={() => setSidebar(false)}
                     className="flex w-full items-center gap-3 rounded-lg px-3 py-2.5 text-left text-[15px] font-semibold text-[#344054] transition-colors hover:bg-[#F9FAFB]">
                     <BadgeDollarSign size={17} className="text-[#E34013]" />
                     Pricing
-                  </button>
+                  </Link>
                 </div>
               </div>
             </div>
