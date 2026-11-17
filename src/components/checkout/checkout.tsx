@@ -137,6 +137,17 @@ const at = (ms: number, rise: number): CSSProperties =>
 
 const POLL_MS = 7000;
 
+/**
+ * The statuses that mean a payment will never be paid. Only `pending` and
+ * `done` have been seen from the backend for a QR payment (and an empty
+ * status on other records), so anything not named here is treated as still
+ * waiting rather than as a failure: telling someone who is about to pay
+ * that their payment failed is the worse mistake.
+ */
+const FAILED = ['failed', 'rejected', 'expired', 'cancelled', 'canceled'];
+const hasFailed = (status?: string | null) =>
+  FAILED.includes((status ?? '').toLowerCase());
+
 export default function Checkout() {
   const session = useMemoifySession();
   const router = useRouter();
@@ -251,7 +262,9 @@ export default function Checkout() {
   }, [planKey, promotedCode, session?.accessToken]);
 
   const removeCoupon = () => {
+    // Any check still on its way is no longer wanted, or waited for.
     asked.current++;
+    setApplying(false);
     wanted.current = '';
     setApplied(null);
     setCode('');
@@ -349,14 +362,22 @@ export default function Checkout() {
       const res = await getDetailPayment(paymentId as string);
       if (res.success && res.data) {
         // Settled either way: this QR is not one to come back to.
-        if (res.data.status !== 'pending') keepQr(null);
+        if (res.data.status === 'done' || hasFailed(res.data.status)) {
+          keepQr(null);
+        }
         setStatus(res.data);
       }
     }, POLL_MS);
     return () => clearInterval(timer);
   }, [watching, paymentId]);
 
+  const gone = useRef(false);
   const go = useCallback(() => {
+    // Once. The countdown and the button can both ask, and a second ask
+    // would find the "back to my gift" note already taken and send the
+    // buyer to the dashboard instead.
+    if (gone.current) return;
+    gone.current = true;
     // A full load, so the account's new balance is read everywhere. Back to
     // the gift the paywall sent them from, when it did.
     window.location.href = takeAfterPayment() ?? '/dashboard';
@@ -372,7 +393,7 @@ export default function Checkout() {
     ? 'signed-out'
     : status?.status === 'done'
       ? 'paid'
-      : status && status.status !== 'pending'
+      : hasFailed(status?.status)
         ? 'not-paid'
         : qris
           ? 'qr'
@@ -444,9 +465,14 @@ export default function Checkout() {
                 </p>
               </div>
 
-              <div className="mt-8 flex flex-col gap-5 lg:flex-row lg:items-start">
+              {/* In the source: plan, order, what it includes - the order a
+                  phone shows them in, so the pay button is not below a list.
+                  A wide screen puts the order in its own column. */}
+              <div className="mt-8 grid grid-cols-1 gap-5 lg:grid-cols-[minmax(0,1fr)_400px] lg:items-start">
                 {/* The plan */}
-                <div className={`home-enter flex-1 ${card}`} style={at(80, 12)}>
+                <div
+                  className={`home-enter lg:col-start-1 lg:row-start-1 ${card}`}
+                  style={at(80, 12)}>
                   <h2 className="text-[18px] font-bold tracking-[-0.02em] text-[#1b1b1b]">
                     Your plan
                   </h2>
@@ -508,35 +534,11 @@ export default function Checkout() {
                           );
                         })}
                   </div>
-
-                  {plan?.features?.length ? (
-                    <>
-                      <h3 className="mt-7 text-[14px] font-semibold text-[#6b655f]">
-                        What {plan.name} includes
-                      </h3>
-                      <ul key={plan.id} className="mt-3 flex flex-col gap-2.5">
-                        {plan.features.map((feature) => (
-                          <li
-                            key={feature}
-                            className="flex items-start gap-3 text-[15px] leading-[1.5] text-[#35302b]">
-                            <span className="mt-[2px] flex size-5 shrink-0 items-center justify-center rounded-full bg-[#ff3e09]">
-                              <Check
-                                aria-hidden
-                                className="size-3 text-white"
-                                strokeWidth={3}
-                              />
-                            </span>
-                            {feature}
-                          </li>
-                        ))}
-                      </ul>
-                    </>
-                  ) : null}
                 </div>
 
                 {/* The order */}
                 <div
-                  className={`home-enter w-full lg:sticky lg:top-[105px] lg:w-[400px] ${card}`}
+                  className={`home-enter lg:sticky lg:top-[105px] lg:col-start-2 lg:row-span-2 lg:row-start-1 ${card}`}
                   style={at(140, 10)}>
                   <h2 className="text-[18px] font-bold tracking-[-0.02em] text-[#1b1b1b]">
                     Order summary
@@ -678,6 +680,32 @@ export default function Checkout() {
                     plan is added as soon as the payment is confirmed.
                   </p>
                 </div>
+
+                {plan?.features?.length ? (
+                  <div
+                    className={`home-enter lg:col-start-1 lg:row-start-2 ${card}`}
+                    style={at(180, 8)}>
+                    <h2 className="text-[18px] font-bold tracking-[-0.02em] text-[#1b1b1b]">
+                      What {plan.name} includes
+                    </h2>
+                    <ul key={plan.id} className="mt-3 flex flex-col gap-2.5">
+                      {plan.features.map((feature) => (
+                        <li
+                          key={feature}
+                          className="flex items-start gap-3 text-[15px] leading-[1.5] text-[#35302b]">
+                          <span className="mt-[2px] flex size-5 shrink-0 items-center justify-center rounded-full bg-[#ff3e09]">
+                            <Check
+                              aria-hidden
+                              className="size-3 text-white"
+                              strokeWidth={3}
+                            />
+                          </span>
+                          {feature}
+                        </li>
+                      ))}
+                    </ul>
+                  </div>
+                ) : null}
               </div>
             </motion.div>
           )}
