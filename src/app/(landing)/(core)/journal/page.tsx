@@ -1,7 +1,6 @@
 import { getContentByUserId } from '@/action/user-api';
-import { getSession } from '@/store/get-set-session';
 import { Metadata } from 'next';
-import EJournal from './pageClient';
+import JournalLanding from '@/components/journal-landing/journal-landing';
 
 export const metadata: Metadata = {
   title: 'Personal Journal Digital Gift | Memoify',
@@ -48,7 +47,7 @@ const JournaServer = async () => {
     ? dx.data.filter((dx) => dx.template_name.includes('journal'))
     : [];
 
-  return <EJournal journalsData={journalsData} />;
+  return <JournalLanding journalsData={journalsData} />;
 };
 
 export default JournaServer;

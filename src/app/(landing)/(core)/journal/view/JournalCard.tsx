@@ -14,7 +14,7 @@ const JournalCard: React.FC<JournalCardProps> = ({ entry }) => {
   const jsonEntry = entry ? JSON.parse(entry.detail_content_json_text) : null;
   return (
     <motion.div
-      className="bg-white border border-gray-200 rounded-sm overflow-hidden shadow-sm hover:shadow-md transition-shadow"
+      className="h-full overflow-hidden rounded-[20px] border border-[#e8ded3] bg-[#fffdfa] text-left"
       whileHover={{ y: -5 }}
       transition={{ duration: 0.3 }}>
       <div className="p-6 flex flex-col justify-between h-full">
@@ -40,7 +40,7 @@ const JournalCard: React.FC<JournalCardProps> = ({ entry }) => {
           </p>
           <Link
             href={`/journal/${entry?.id}`}
-            className="text-xs font-medium flex justify-end text-blue-600 hover:text-blue-800 transition-colors w-[80%] text-right">
+            className="text-xs font-medium flex justify-end text-[#e34013] w-[80%] text-right">
             Read More
             <ArrowRight className="ml-1 h-3 w-3" />
           </Link>

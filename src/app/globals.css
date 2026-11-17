@@ -753,3 +753,50 @@ body:has(.mr-form) .ant-notification-notice .ant-notification-notice-message {
     animation-name: home-fade;
   }
 }
+
+/* The product landings' signatures (journal paper, scrapbook book). */
+@keyframes home-mark {
+  from {
+    transform: scaleX(0);
+  }
+}
+@keyframes home-stamp {
+  from {
+    opacity: 0;
+    transform: rotate(-17deg) scale(1.35);
+  }
+}
+/* A highlighter drawn across a phrase: movement on screen. */
+.home-mark {
+  transform-origin: left;
+  animation: home-mark 640ms cubic-bezier(0.77, 0, 0.175, 1) var(--at, 0ms) both;
+}
+/* A rubber stamp landing: an entrance, short, never from nothing. */
+.home-stamp {
+  animation: home-stamp 320ms cubic-bezier(0.23, 1, 0.32, 1) var(--at, 0ms) both;
+}
+/* A page of the scrapbook turning over the spine. */
+@keyframes book-turn {
+  to {
+    transform: rotateY(-180deg);
+  }
+}
+@keyframes book-shade {
+  50% {
+    opacity: 0.22;
+  }
+}
+@media (prefers-reduced-motion: reduce) {
+  .home-mark {
+    animation: none;
+  }
+  .home-stamp {
+    animation-name: home-fade;
+  }
+}
+/* A paper's own type. The site sets a family on every element (`*`), so a
+   family set on a parent is not inherited: it has to be given to each. */
+.paper-serif,
+.paper-serif * {
+  font-family: Georgia, 'Times New Roman', serif;
+}
