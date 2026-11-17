@@ -3,6 +3,8 @@
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
 
+import { WEDDING_RELEASED } from '@/lib/wedding-release';
+
 /**
  * The dashboard's tabs as MemoRoll's selection pills (owner, 2026-11-17): the
  * page you are on is the flame pill, the rest sit on the paper and warm to
@@ -30,18 +32,18 @@ const DashboardNavbar = ({ isAdmin }: { isAdmin: boolean }) => {
           className={tab('/dashboard')}>
           Dashboard
         </Link>
-        {/* Outside the admin guard, unlike every tab below it. A couple's own
-            wedding invitations are the one thing here that belongs to the person
-            signed in rather than to whoever runs the product, and inside the
-            guard this tab would be invisible to every couple it exists for. The
-            screen behind it scopes itself the way the Dashboard tab does: the
-            person's own invitations, or everybody's for an administrator. */}
-        <Link
-          href={'/dashboard/wedding'}
-          className={tab('/dashboard/wedding')}>
-          Wedding
-        </Link>
-        {/* Like Wedding: the person's own events, outside the admin guard. */}
+        {/* A couple's own invitations belong to the person signed in, so this
+            tab is not an administrator's tab like the ones further down. But
+            wedding is not released yet (lib/wedding-release.ts): until it is,
+            only the administrator is shown the way in. */}
+        {(isAdmin || WEDDING_RELEASED) && (
+          <Link
+            href={'/dashboard/wedding'}
+            className={tab('/dashboard/wedding')}>
+            Wedding
+          </Link>
+        )}
+        {/* The person's own events, outside the admin guard. */}
         <Link
           href={'/dashboard/memoroll'}
           className={tab('/dashboard/memoroll')}>

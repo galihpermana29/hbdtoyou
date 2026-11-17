@@ -1,8 +1,8 @@
 import { Metadata } from 'next';
-import NewClientPagePayment from './new-client-page';
+import Checkout from '@/components/checkout/checkout';
 
 export const metadata: Metadata = {
-  title: 'Premium Digital Gifts, Scrapbooks & Albums | Memoify',
+  title: 'Checkout | Memoify',
   description:
     'Upgrade to our premium plan and unlock unlimited features for your digital gifts, digital scrapbooks, and digital albums. Enjoy unlimited image storage, songs library, upload size, templates access, and more.',
   keywords:
@@ -35,9 +35,10 @@ export const metadata: Metadata = {
   },
 };
 
-const ServerSidePaymentQRIS = () => {
-  // return <PaymentQRIS />;
-  return <NewClientPagePayment />;
-};
+/**
+ * The checkout. The page it replaces is kept beside this file
+ * (new-client-page.tsx) and no longer rendered.
+ */
+const CheckoutPage = () => <Checkout />;
 
-export default ServerSidePaymentQRIS;
+export default CheckoutPage;

@@ -64,7 +64,7 @@ export function Footer() {
               Add personal touches and let your memories feel like YOU!
             </p>
             <Link
-              href="/payment?type=premium"
+              href="/#pricing"
               className="flex h-14 items-center gap-[10px] rounded-full bg-[#ff3e09] px-7 text-[16px] font-semibold text-[#fffdfa] transition-colors hover:bg-[#e63508]">
               See our pricing
               <Image

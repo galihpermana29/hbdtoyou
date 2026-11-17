@@ -825,3 +825,28 @@ body:has(.mr-form) .ant-notification-notice .ant-notification-notice-message {
     transform: translateY(-50%);
   }
 }
+
+/* Checkout: the tick that is drawn when a payment is confirmed. */
+@keyframes checkout-tick {
+  from {
+    stroke-dashoffset: 30;
+  }
+}
+@keyframes checkout-seal {
+  from {
+    opacity: 0;
+    transform: scale(0.82);
+  }
+}
+@keyframes checkout-wait {
+  50% {
+    opacity: 0.35;
+  }
+}
+@media (prefers-reduced-motion: reduce) {
+  .checkout-tick,
+  .checkout-seal,
+  .checkout-wait {
+    animation: none !important;
+  }
+}

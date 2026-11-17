@@ -7,6 +7,7 @@ import { useRouter } from 'next/navigation';
 
 import { getListPackages, getPromotedCoupon } from '@/action/user-api';
 import { useMemoifySession } from '@/app/session-provider';
+import { afterCoupon, couponSays, idr, isPaid, priceOf } from '@/lib/pricing';
 
 import { Rise, SectionHead, press } from './ui';
 
@@ -14,6 +15,10 @@ import { Rise, SectionHead, press } from './ui';
  * The plans, read from the backend like the shared PricingSection does (same
  * queries, same routes), drawn in the MemoRoll system. The middle plan is
  * the one most people want, so it is the one on ink.
+ *
+ * While a coupon is running, a paid plan's card shows the price after it,
+ * with the plan's own price struck through (owner, 2026-11-17) - the same
+ * arithmetic the checkout shows, from lib/pricing.ts.
  *
  * The cards arrive as one wave. Nothing else moves: prices are read, not
  * performed.
@@ -31,11 +36,7 @@ export default function HomePricing() {
     queryFn: async () => (await getPromotedCoupon()).data ?? null,
   });
 
-  const discount = coupon
-    ? coupon.discount_type === 'percent'
-      ? `${coupon.discount_value}% off`
-      : `IDR ${coupon.discount_value.toLocaleString()} off`
-    : null;
+  const discount = coupon ? couponSays(coupon) : null;
 
   const choose = (plan: { id: string; name: string }) => {
     if (!session?.accessToken) return signIn('google');
@@ -62,13 +63,16 @@ export default function HomePricing() {
             <span className="font-mono font-bold tracking-[0.06em] text-[#e34013]">
               {coupon.code}
             </span>{' '}
-            at checkout for {discount}
+            for {discount}. It is already applied at checkout.
           </p>
         ) : null}
 
         <div className="mt-10 grid grid-cols-1 gap-5 md:mt-14 md:grid-cols-3">
           {(packages ?? []).map((plan, index) => {
             const featured = plan.name === 'Premium Plan';
+            const price = priceOf(plan);
+            const now = afterCoupon(price, coupon);
+            const cut = isPaid(plan) && now < price;
             return (
               <Rise
                 key={plan.id}
@@ -88,11 +92,29 @@ export default function HomePricing() {
                       </span>
                     ) : null}
                   </div>
-                  <p className="mt-5 text-[40px] font-bold leading-none tracking-[-0.04em]">
+                  {/* With a coupon running, the card shows what will be paid:
+                      the plan's own price struck through, the price after
+                      the coupon in its place. */}
+                  {cut ? (
+                    <p className="mt-5 flex items-center gap-2 text-[15px]">
+                      <span className="sr-only">Was</span>
+                      <span
+                        className={`line-through ${
+                          featured ? 'text-[#a39b91]' : 'text-[#8a847d]'
+                        }`}>
+                        IDR {idr(price)}
+                      </span>
+                      <span className="rounded-full bg-[#ff3e09] px-2 py-[3px] text-[11px] font-bold tracking-[0.04em] text-white">
+                        {discount}
+                      </span>
+                    </p>
+                  ) : null}
+                  <p
+                    className={`${cut ? 'mt-2' : 'mt-5'} text-[40px] font-bold leading-none tracking-[-0.04em]`}>
                     <span className="mr-1 text-[16px] font-semibold tracking-normal opacity-70">
                       IDR
                     </span>
-                    {plan.price}
+                    {idr(cut ? now : price)}
                   </p>
                   <p
                     className={`mt-3 text-[15px] leading-[1.55] ${
