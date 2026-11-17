@@ -12,6 +12,7 @@ import HomeOccasions from './occasions';
 import HomePricing from './pricing';
 import HomeProducts from './products';
 import HomeStats from './stats';
+import HomeTestimonials from './testimonials';
 
 /**
  * memoify.live's home page, in the MemoRoll design system (owner,
@@ -37,6 +38,7 @@ export default function HomeLanding() {
         <HomeLiveDemo />
         <HomeInspirationPreview />
         <HomeStats />
+        <HomeTestimonials />
         <HomePricing />
         <HomeFaq />
         <HomeClosing />
