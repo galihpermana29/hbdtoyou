@@ -5,6 +5,7 @@ import { ArrowRight } from 'lucide-react';
 import Link from 'next/link';
 import type { CSSProperties } from 'react';
 
+import type { NewTemplate } from '@/lib/new-template';
 import { useCalmMotion } from '@/lib/use-calm-motion';
 
 import GiftDeck, { GIFTS, useGiftBeat } from './gift-deck';
@@ -31,7 +32,7 @@ import { ctaGhost, ctaPrimary } from './ui';
 const at = (ms: number, rise: number): CSSProperties =>
   ({ '--at': `${ms}ms`, '--rise': `${rise}px` }) as CSSProperties;
 
-export default function HomeHero() {
+export default function HomeHero({ fresh }: { fresh?: NewTemplate | null }) {
   const beat = useGiftBeat();
   const reduce = useCalmMotion();
   const gift = GIFTS[beat.active];
@@ -41,12 +42,37 @@ export default function HomeHero() {
       className="relative overflow-hidden bg-[#fbf4ec] px-5 pb-16 pt-10 md:pb-24 md:pt-14"
       style={{ fontFamily: 'var(--font-mr-body)' }}>
       <div className="mx-auto flex max-w-[1180px] flex-col items-center">
-        <span
-          className="home-enter inline-flex items-center gap-2 rounded-full border border-[#e6e6e6] bg-white px-3 py-1.5 text-[14px] font-medium tracking-[-0.28px] text-[#e34013]"
-          style={at(0, 0)}>
-          <span className="size-[6px] rounded-full bg-[#ff3e09]" />
-          Digital gifts, made personal
-        </span>
+        {/* The line over the headline. With a template tagged `New` it is
+            the news, and a way down to it; otherwise what Memoify is. The
+            same pill either way, so the headline never moves. */}
+        {fresh ? (
+          <a
+            href="#new"
+            className="home-enter group inline-flex max-w-full items-center gap-2 rounded-full border border-[#e6e6e6] bg-white py-1 pl-1 pr-3 text-[14px] font-medium tracking-[-0.28px] text-[#1b1b1b] transition-transform duration-[160ms] ease-[cubic-bezier(0.23,1,0.32,1)] active:scale-[0.97]"
+            style={at(0, 0)}>
+            <span className="rounded-full bg-[#ff3e09] px-2 py-[3px] text-[11px] font-bold uppercase tracking-[0.08em] text-white">
+              New
+            </span>
+            <span className="truncate">
+              <span className="font-semibold">{fresh.name}</span>
+              <span className="hidden text-[#6b655f] sm:inline">
+                {' · '}
+                {fresh.says}
+              </span>
+            </span>
+            <ArrowRight
+              aria-hidden
+              className="size-3.5 shrink-0 text-[#e34013] transition-transform duration-200 ease-[cubic-bezier(0.23,1,0.32,1)] group-hover:translate-x-0.5"
+            />
+          </a>
+        ) : (
+          <span
+            className="home-enter inline-flex items-center gap-2 rounded-full border border-[#e6e6e6] bg-white px-3 py-1.5 text-[14px] font-medium tracking-[-0.28px] text-[#e34013]"
+            style={at(0, 0)}>
+            <span className="size-[6px] rounded-full bg-[#ff3e09]" />
+            Digital gifts, made personal
+          </span>
+        )}
 
         <h1
           className="home-enter mt-5 text-center text-[40px] font-bold leading-[1.04] tracking-[-0.045em] text-[#1b1b1b] sm:text-[56px] md:text-[72px]"

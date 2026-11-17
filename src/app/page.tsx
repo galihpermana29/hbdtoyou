@@ -1,3 +1,4 @@
+import { getNewTemplate } from '@/action/new-template-api';
 import HomeLanding from '@/components/home/home-landing';
 import Script from 'next/script';
 import { Metadata } from 'next';
@@ -42,7 +43,17 @@ export const metadata: Metadata = {
 
 const GA_MEASUREMENT_ID = 'G-X4G9RCBNQH'; // Your Google Analytics ID
 
-export default function Home() {
+export default async function Home({
+  searchParams,
+}: {
+  /** `?spotlight=<route>` shows that template as the new one, for a look
+   *  at it here before it is tagged `New` for everybody. */
+  searchParams?: { spotlight?: string };
+}) {
+  const maintenance = process.env.IS_MAINTENANCE === 'true';
+  const fresh = maintenance
+    ? null
+    : await getNewTemplate(searchParams?.spotlight);
   return (
     <div>
       <Script
@@ -61,11 +72,7 @@ export default function Home() {
           `,
         }}
       />
-      {process.env.IS_MAINTENANCE === 'true' ? (
-        <MaintenancePage />
-      ) : (
-        <HomeLanding />
-      )}
+      {maintenance ? <MaintenancePage /> : <HomeLanding fresh={fresh} />}
     </div>
   );
 }
