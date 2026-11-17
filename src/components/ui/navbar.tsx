@@ -46,10 +46,9 @@ import { removeSession } from '@/store/get-set-session';
  * under it.
  *
  * Motion (emilkowalski/skills: animate):
- * - a menu grows from the button that opened it (scale 0.97 and a fade,
- *   160ms, strong ease-out) and leaves faster than it came. Under a real
- *   pointer Products opens on hover, with a moment's grace on the way to
- *   the panel; a tap or the keyboard opens it too;
+ * - a menu fades in with a 6px rise (160ms, strong ease-out) and leaves
+ *   faster than it came, by CSS alone (see BarMenu). Under a real pointer
+ *   Products opens on hover; a click, a tap or the keyboard opens it too;
  * - the phone's sheet slides in from the right while its backdrop fades;
  * - presses give under the finger (0.97); hover colour only for a pointer
  *   that can hover; reduced motion keeps the fades and drops the travel.
@@ -138,10 +137,34 @@ const NewBadge = ({ label }: { label: string }) => (
   </span>
 );
 
+/** Told to every menu on the bar when one of them opens, so only one is. */
+const MENU_OPENED = 'memoify:bar-menu-opened';
+
 /**
- * A menu under a button on the bar. Opens on a tap or the keyboard, and on
- * hover for a pointer that can hover; closes on a tap outside, Escape, or
- * a moment after the pointer has left both the button and the panel.
+ * A menu under a button on the bar.
+ *
+ * - A tap, a click or the keyboard opens it and it stays until something
+ *   is picked, Escape, a click outside, or the button again.
+ * - For a pointer that can hover, a `hover` menu also opens by resting on
+ *   the button, and closes a moment after the pointer has left both the
+ *   button and the panel - unless it was clicked open, which keeps it.
+ *
+ * Owner, 2026-11-17: the menus were "a bit glitchy" on macOS, on hover and
+ * on click, when the pointer left. What was wrong, and what this does:
+ * - there were 8px of nothing between the button and the panel, and the
+ *   grace to cross it was 140ms: a slow or diagonal move toward a row
+ *   closed the menu on the way to it. The panel now reaches up to the
+ *   button (the gap is part of it) and the grace is longer;
+ * - a menu on its way out could be re-opened by the pointer crossing it.
+ *   It takes no pointer once it is closing;
+ * - clicking an open hover menu left it at the mercy of the next mouse
+ *   move. A click keeps it open now;
+ * - passing over the button on the way elsewhere flashed the menu open
+ *   and shut. Hover waits a moment for the pointer to mean it;
+ * - the panel was mounted, animated by script and unmounted each time, and
+ *   it scaled, which re-draws its text at every step. It is always in the
+ *   page now and trades places with CSS alone: opacity and a 6px rise,
+ *   nothing else, so it can be interrupted at any point without a jump.
  */
 function BarMenu({
   label,
@@ -161,24 +184,58 @@ function BarMenu({
   children: (close: () => void) => ReactNode;
 }) {
   const [open, setOpen] = useState(false);
-  const reduce = useCalmMotion();
+  // Opened on purpose (a click, a tap, the keyboard): leaving does not close.
+  const kept = useRef(false);
   const root = useRef<HTMLDivElement>(null);
-  const leaving = useRef<ReturnType<typeof setTimeout>>();
+  const timer = useRef<ReturnType<typeof setTimeout>>();
   const canHover = useRef(false);
 
   useEffect(() => {
     canHover.current = window.matchMedia(
       '(hover: hover) and (pointer: fine)'
     ).matches;
+    return () => clearTimeout(timer.current);
   }, []);
+
+  const close = () => {
+    clearTimeout(timer.current);
+    kept.current = false;
+    setOpen(false);
+  };
+  const show = (keep: boolean) => {
+    clearTimeout(timer.current);
+    kept.current = keep;
+    setOpen(true);
+    window.dispatchEvent(new CustomEvent(MENU_OPENED, { detail: label }));
+  };
+
+  useEffect(() => {
+    const another = (event: Event) => {
+      if ((event as CustomEvent).detail !== label) {
+        clearTimeout(timer.current);
+        kept.current = false;
+        setOpen(false);
+      }
+    };
+    window.addEventListener(MENU_OPENED, another);
+    return () => window.removeEventListener(MENU_OPENED, another);
+  }, [label]);
 
   useEffect(() => {
     if (!open) return;
     const outside = (event: PointerEvent) => {
-      if (!root.current?.contains(event.target as Node)) setOpen(false);
+      if (!root.current?.contains(event.target as Node)) {
+        clearTimeout(timer.current);
+        kept.current = false;
+        setOpen(false);
+      }
     };
     const escape = (event: KeyboardEvent) => {
-      if (event.key === 'Escape') setOpen(false);
+      if (event.key === 'Escape') {
+        clearTimeout(timer.current);
+        kept.current = false;
+        setOpen(false);
+      }
     };
     document.addEventListener('pointerdown', outside);
     document.addEventListener('keydown', escape);
@@ -188,17 +245,16 @@ function BarMenu({
     };
   }, [open]);
 
-  useEffect(() => () => clearTimeout(leaving.current), []);
-
   const enter = () => {
     if (!hover || !canHover.current) return;
-    clearTimeout(leaving.current);
-    setOpen(true);
+    clearTimeout(timer.current);
+    // Resting on it, not passing over it.
+    if (!open) timer.current = setTimeout(() => show(false), 70);
   };
   const leave = () => {
     if (!hover || !canHover.current) return;
-    // Long enough to cross the gap between the button and the panel.
-    leaving.current = setTimeout(() => setOpen(false), 140);
+    clearTimeout(timer.current);
+    if (open && !kept.current) timer.current = setTimeout(close, 240);
   };
 
   return (
@@ -212,12 +268,10 @@ function BarMenu({
         aria-haspopup="true"
         aria-expanded={open}
         aria-label={label}
-        onClick={(event) => {
-          // A pointer that hovers has already opened it by arriving: its
-          // click must not close it again. The keyboard (detail 0) and a
-          // finger still toggle.
-          if (hover && canHover.current && event.detail > 0) setOpen(true);
-          else setOpen((value) => !value);
+        onClick={() => {
+          // Open by hover and not yet kept: the click is "stay", not "go".
+          if (open && kept.current) close();
+          else show(true);
         }}
         className={buttonClass}>
         {button}
@@ -227,32 +281,21 @@ function BarMenu({
           className={`transition-transform duration-200 ease-[cubic-bezier(0.23,1,0.32,1)] ${open ? 'rotate-180' : ''}`}
         />
       </button>
-      <AnimatePresence>
-        {open ? (
-          <motion.div
-            // Grows from the button it belongs to, not from its own middle.
-            style={{
-              transformOrigin: align === 'left' ? 'top left' : 'top right',
-            }}
-            initial={
-              reduce
-                ? { opacity: 0 }
-                : { opacity: 0, transform: 'translateY(-4px) scale(0.97)' }
-            }
-            animate={
-              reduce
-                ? { opacity: 1 }
-                : { opacity: 1, transform: 'translateY(0px) scale(1)' }
-            }
-            exit={{ opacity: 0, transition: { duration: 0.11 } }}
-            transition={{ duration: 0.16, ease: EASE_OUT }}
-            className={`absolute top-[calc(100%+8px)] z-[120] rounded-[20px] border border-[#e8ded3] bg-[#fffdfa] p-2 shadow-[0_24px_48px_-20px_rgba(90,42,18,0.35)] ${width} ${
-              align === 'left' ? 'left-0' : 'right-0'
-            }`}>
-            {children(() => setOpen(false))}
-          </motion.div>
-        ) : null}
-      </AnimatePresence>
+      {/* The 8px between button and panel belong to the menu (pt-2), so
+          the pointer never leaves it on the way down. Hidden, it is out of
+          the tab order and takes no pointer. */}
+      <div
+        className={`absolute top-full z-[120] pt-2 ${width} ${
+          align === 'left' ? 'left-0' : 'right-0'
+        } transition-[opacity,transform,visibility] ease-[cubic-bezier(0.23,1,0.32,1)] motion-reduce:!translate-y-0 ${
+          open
+            ? 'visible translate-y-0 opacity-100 duration-[160ms]'
+            : 'pointer-events-none invisible -translate-y-1.5 opacity-0 duration-[110ms]'
+        }`}>
+        <div className="rounded-[20px] border border-[#e8ded3] bg-[#fffdfa] p-2 shadow-[0_24px_48px_-20px_rgba(90,42,18,0.35)]">
+          {children(close)}
+        </div>
+      </div>
     </div>
   );
 }
