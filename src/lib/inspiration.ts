@@ -50,6 +50,7 @@ const NAMES: Record<string, string> = {
   newspaperv3: 'Front page',
   vinylv1: 'Vinyl',
   boardofusv1: 'Board of Us',
+  rollofusv1: 'Roll of Us',
   arcadeclawv1: 'Claw of Us',
   f1historyv1: 'Race history',
   albumgraduation1: 'Graduation album',

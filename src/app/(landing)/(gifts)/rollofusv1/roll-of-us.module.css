@@ -1,0 +1,147 @@
+/* Roll of Us: the motion that is not a simple transition. */
+
+/* The flash: instant on, a slower fall. One per press, never a strobe. */
+@keyframes flash {
+  0% {
+    opacity: 0;
+  }
+  6% {
+    opacity: 1;
+  }
+  100% {
+    opacity: 0;
+  }
+}
+.flash {
+  animation: flash 620ms cubic-bezier(0.23, 1, 0.32, 1) both;
+}
+
+/* A print pushed out of the camera: an entrance, strong ease-out. */
+@keyframes eject {
+  from {
+    transform: translateY(-62%);
+  }
+}
+.eject {
+  animation: eject 900ms cubic-bezier(0.23, 1, 0.32, 1) both;
+}
+
+/* Developing: a blank sheet clearing over the picture. Opacity only, on one
+   layer, so the picture itself is drawn once - not filtered every frame. */
+@keyframes develop {
+  0% {
+    opacity: 1;
+  }
+  22% {
+    opacity: 0.94;
+  }
+  100% {
+    opacity: 0;
+  }
+}
+.develop {
+  animation: develop 3600ms cubic-bezier(0.45, 0, 0.55, 1) 500ms both;
+}
+/* The stamp and the handwriting come up as the picture does. */
+@keyframes appear {
+  from {
+    opacity: 0;
+  }
+}
+.appearLate {
+  animation: appear 900ms ease-out 2500ms both;
+}
+
+/* The shutter refusing: the film has not been wound. */
+@keyframes refuse {
+  20% {
+    transform: translateX(-3px);
+  }
+  50% {
+    transform: translateX(3px);
+  }
+  80% {
+    transform: translateX(-2px);
+  }
+}
+.refuse {
+  animation: refuse 260ms ease-in-out;
+}
+
+/* The lab: a strip of film passing at one steady speed. */
+@keyframes pass {
+  to {
+    transform: translateX(-50%);
+  }
+}
+.pass {
+  animation: pass 2.4s linear infinite;
+}
+
+/* The contact sheet and the letter arriving. */
+@keyframes rise {
+  from {
+    opacity: 0;
+    transform: translateY(16px);
+  }
+}
+.rise {
+  animation: rise 620ms cubic-bezier(0.23, 1, 0.32, 1) var(--at, 0ms) both;
+}
+
+/* The hint that points at what to touch next. */
+@keyframes nudge {
+  50% {
+    opacity: 0.45;
+  }
+}
+.nudge {
+  animation: nudge 1.6s ease-in-out infinite;
+}
+
+/* A thumb showing the gesture: across the wheel, lift, and again. */
+@keyframes swipe {
+  0% {
+    opacity: 0;
+    transform: translateX(34px);
+  }
+  15% {
+    opacity: 1;
+  }
+  70% {
+    opacity: 1;
+    transform: translateX(-34px);
+  }
+  100% {
+    opacity: 0;
+    transform: translateX(-34px);
+  }
+}
+.swipe {
+  animation: swipe 1.5s cubic-bezier(0.77, 0, 0.175, 1) infinite;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .swipe,
+  .eject,
+  .refuse,
+  .pass,
+  .nudge {
+    animation: none;
+  }
+  /* A flash is a flash; asked for less, it is a soft blink. */
+  .flash {
+    animation-duration: 400ms;
+    filter: opacity(0.35);
+  }
+  .rise {
+    animation-name: appear;
+  }
+  .develop {
+    animation-duration: 1200ms;
+    animation-delay: 0ms;
+  }
+  .appearLate {
+    animation-delay: 600ms;
+  }
+}

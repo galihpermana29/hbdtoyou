@@ -1,0 +1,13 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 320 90" role="img" aria-labelledby="title">
+  <title id="title">Roll of Us</title>
+  <g stroke="#1d1f1a" stroke-linejoin="round">
+    <rect x="6" y="22" width="64" height="46" rx="9" fill="#c9e265" stroke-width="5"/>
+    <path d="M6 31a9 9 0 0 1 9-9h46a9 9 0 0 1 9 9v5H6z" fill="#1d1f1a" stroke-width="5"/>
+    <rect x="12" y="13" width="15" height="9" rx="3" fill="#1d1f1a" stroke-width="3"/>
+    <rect x="51" y="27" width="13" height="5" rx="1.5" fill="#f4efe6" stroke="none"/>
+    <circle cx="38" cy="50" r="13" fill="#1d1f1a" stroke-width="3"/>
+    <circle cx="38" cy="50" r="6" fill="#c9e265" stroke="none"/>
+    <circle cx="35" cy="47" r="2" fill="#f4efe6" stroke="none"/>
+  </g>
+  <text x="84" y="57" fill="#1d1f1a" font-family="Arial Rounded MT Bold, Arial, sans-serif" font-size="37" font-weight="800">Roll <tspan fill="#c9e265" stroke="#1d1f1a" stroke-width="2" paint-order="stroke">of Us</tspan></text>
+</svg>

@@ -113,6 +113,13 @@ export function mapContentToCard(contents: IContent[], purpose = 'client') {
           : 'https://res.cloudinary.com/ddlus5qur/image/upload/v1746085724/phu2rbi6fqnp71hytjex.jpg';
       }
 
+      if (route === 'rollofusv1') {
+        return Array.isArray(jsonContent?.frames) &&
+          jsonContent.frames.length > 0
+          ? jsonContent.frames[0].imageUrl
+          : 'https://res.cloudinary.com/ddlus5qur/image/upload/v1746085724/phu2rbi6fqnp71hytjex.jpg';
+      }
+
       if (templateName.includes('journal')) {
         return 'journal';
       }

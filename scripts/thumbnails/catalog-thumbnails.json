@@ -60,6 +60,12 @@
     "captureNotes": "Capture the full Board of Us play surface, title, love-token counter, and Roll control."
   },
   {
+    "route": "rollofusv1",
+    "previewPath": "/rollofusv1",
+    "cropHeightCss": 790,
+    "captureNotes": "Wind the film and press the shutter once; wait for the first print to develop, then capture the camera with the print."
+  },
+  {
     "route": "scrapbook1",
     "previewPath": "/scrapbook1",
     "cropHeightCss": 790,

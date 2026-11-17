@@ -24,7 +24,9 @@ export function PostHogProvider({ children }: { children: React.ReactNode }) {
         pathname === '/arcadeclawv1' ||
         pathname.startsWith('/arcadeclawv1/') ||
         pathname === '/boardofusv1' ||
-        pathname.startsWith('/boardofusv1/'),
+        pathname.startsWith('/boardofusv1/') ||
+        pathname === '/rollofusv1' ||
+        pathname.startsWith('/rollofusv1/'),
     });
   }, [pathname]);
 
