@@ -1,7 +1,9 @@
 'use client';
 
-import { useInView, useReducedMotion } from 'framer-motion';
+import { useInView } from 'framer-motion';
 import { useRef } from 'react';
+
+import { useCalmMotion } from '@/lib/use-calm-motion';
 
 /** Delay between one digit starting to roll and the next, in ms. */
 const DIGIT_STAGGER_MS = 120;
@@ -53,7 +55,8 @@ export default function RollingNumber({
 }) {
   const ref = useRef<HTMLSpanElement>(null);
   const inView = useInView(ref, { amount: 0.6 });
-  const rolled = useReducedMotion() || inView;
+  // Known after mount, so the first render matches the server's (see the hook).
+  const rolled = useCalmMotion() || inView;
 
   let digitIndex = 0;
 
