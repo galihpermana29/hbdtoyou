@@ -1,17 +1,57 @@
 'use client';
 
-import React, { useEffect, useState, useRef } from 'react';
+import React, { useEffect, useState } from 'react';
 import MemorollFormTheme from '@/components/forms/memoroll-form-theme';
 import { motion } from 'framer-motion';
 import JournalLayout from '../view/JournalLayout';
 import NavigationBar from '@/components/ui/navbar';
 import dynamic from 'next/dynamic';
 
-// Dynamically import ReactQuill with SSR disabled
-const ReactQuill = dynamic(() => import('react-quill'), {
-  ssr: false,
-  loading: () => <p>Loading editor...</p>,
-});
+/**
+ * What the editor's length module asks the page, set by the page while it
+ * is mounted. The module is registered once for every editor, before the
+ * page exists, so it cannot close over the page's state; and it cannot be
+ * handed functions through `modules`, because react-quill rebuilds an
+ * editor whenever that prop is not deeply equal to the last one.
+ */
+const editorPage: {
+  onCount: (fieldName: string, length: number) => void;
+  isLimited: () => boolean;
+} = { onCount: () => {}, isLimited: () => true };
+
+/**
+ * The editor, with its length module registered before any editor can
+ * mount. It used to be registered from an effect after an import of its
+ * own: arriving from a link, the editor chunk was already there and the
+ * editors mounted first, found no `modules/maxlength`, and the free-plan
+ * limit and the counters did nothing.
+ */
+const ReactQuill = dynamic(
+  async () => {
+    const { default: Editor } = await import('react-quill');
+    Editor.Quill.register(
+      'modules/maxlength',
+      function (quill, options) {
+        quill.on('text-change', function () {
+          const text = quill.getText() || '';
+          const textLength = text.length - 1;
+
+          editorPage.onCount(options.fieldName, Math.max(0, textLength));
+
+          if (editorPage.isLimited() && textLength > options.maxLength) {
+            quill.deleteText(options.maxLength, textLength - options.maxLength);
+          }
+        });
+      },
+      true
+    );
+    return Editor;
+  },
+  {
+    ssr: false,
+    loading: () => <p>Loading editor...</p>,
+  }
+);
 
 const MAXLENGTH = 200;
 
@@ -77,40 +117,14 @@ const NewEntryPage: React.FC = () => {
     introduction: 0,
   });
 
-  // 2. Create a ref to act as a flag
-  const quillModuleRegistered = useRef(false);
-
+  // The length module (registered with the editor, above) reports here.
   useEffect(() => {
-    // Check if on the client AND if our flag is false
-    if (typeof window !== 'undefined' && !quillModuleRegistered.current) {
-      // 1. Dynamically import the core 'quill' library, not 'react-quill'
-      import('quill').then((Quill) => {
-        // 2. The default export of 'quill' is the class itself
-        Quill.default.register('modules/maxlength', function (quill, options) {
-          const fieldName = options.fieldName;
-
-          quill.on('text-change', function () {
-            const text = quill.getText() || '';
-            const textLength = text.length - 1;
-
-            setCharCounts((prev) => ({
-              ...prev,
-              [fieldName]: Math.max(0, textLength),
-            }));
-
-            if (type !== 'premium' && textLength > options.maxLength) {
-              quill.deleteText(
-                options.maxLength,
-                textLength - options.maxLength
-              );
-            }
-          });
-        });
-
-        // Set the flag to true after registration
-        quillModuleRegistered.current = true;
-      });
-    }
+    editorPage.onCount = (fieldName, length) =>
+      setCharCounts((prev) => ({ ...prev, [fieldName]: length }));
+    editorPage.isLimited = () => type !== 'premium';
+    return () => {
+      editorPage.onCount = () => {};
+    };
   }, [type]);
   return (
     <JournalLayout>
