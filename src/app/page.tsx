@@ -2,44 +2,38 @@ import { getNewTemplate } from '@/action/new-template-api';
 import HomeLanding from '@/components/home/home-landing';
 import Script from 'next/script';
 import { Metadata } from 'next';
+import { pageMeta } from '@/lib/seo';
 import 'react-photo-view/dist/react-photo-view.css';
 import MaintenancePage from './maintenance/page';
-export const metadata: Metadata = {
-  title:
-    'Memoify | Create Digital Gifts, Scrapbooks & Albums Inspired by Popular Platforms',
+import { faqDataEnglish } from '@/lib/faqData';
+import { homeStructuredData } from '@/lib/seo';
+export const metadata: Metadata = pageMeta({
+  path: '/',
+  title: 'Memoify | Digital Gifts, Scrapbooks & Albums (Kado Digital)',
   description:
-    'With Memoify create digital gifts, digital scrapbooks, and digital albums inspired by your favorite platforms like Netflix, Spotify, or YouTube. Add personal touches and let your memories shine!',
-  keywords:
-    'digital gift, digital scrapbook, digital album, virtual present, online gift, electronic memory book, digital photo collection, memory collection, virtual album, online scrapbook, e-gift, hadiah ulang tahun digital, kado digital, scrapbook digital, album foto digital, kenangan digital, kado online, custom websites, Netflix templates, Spotify templates, YouTube templates, personalized websites, digital memories, Memoify',
-  openGraph: {
-    title:
-      'Memoify | Create Digital Gifts, Scrapbooks & Albums Inspired by Popular Platforms',
-    description:
-      'With Memoify create digital gifts, digital scrapbooks, and digital albums inspired by your favorite platforms like Netflix, Spotify, or YouTube. Add personal touches and let your memories shine!',
-    url: 'https://memoify.live',
-    siteName: 'Memoify',
-    images: [
-      {
-        url: 'https://res.cloudinary.com/braiwjaya-university/image/upload/v1763138771/brave_screenshot_memoify.live_lvsx21.png',
-        width: 1200,
-        height: 630,
-        alt: 'Memoify - Create Custom Websites Inspired by Popular Platforms',
-      },
+    'Turn photos into a digital gift, scrapbook or album styled like Netflix or Spotify, shared with one link. Bikin kado digital dan ucapan ulang tahun online.',
+  keywords: {
+    en: [
+      'Netflix birthday template',
+      'Spotify gift template',
+      'gift for girlfriend',
+      'gift for boyfriend',
+      'long distance relationship gift',
     ],
-    locale: 'en_US',
-    type: 'website',
-  },
-  twitter: {
-    card: 'summary_large_image',
-    title:
-      'Memoify | Create Digital Gifts, Scrapbooks & Albums Inspired by Popular Platforms',
-    description:
-      'With Memoify create digital gifts, digital scrapbooks, and digital albums inspired by your favorite platforms like Netflix, Spotify, or YouTube. Add personal touches and let your memories shine!',
-    images: [
-      'https://res.cloudinary.com/braiwjaya-university/image/upload/v1763138771/brave_screenshot_memoify.live_lvsx21.png',
+    id: [
+      'hadiah ulang tahun digital',
+      'kado ulang tahun online',
+      'template Netflix ulang tahun',
+      'kado LDR',
+      'hadiah wisuda digital',
+      'kenangan digital',
     ],
   },
-};
+  image: {
+    url: 'https://res.cloudinary.com/braiwjaya-university/image/upload/v1763138771/brave_screenshot_memoify.live_lvsx21.png',
+    alt: 'Memoify - digital gifts, scrapbooks and albums',
+  },
+});
 
 const GA_MEASUREMENT_ID = 'G-X4G9RCBNQH'; // Your Google Analytics ID
 
@@ -70,6 +64,16 @@ export default async function Home({
             gtag('js', new Date());
             gtag('config', '${GA_MEASUREMENT_ID}');
           `,
+        }}
+      />
+      {/* Read by search engines, drawn by nobody. */}
+      <script
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{
+          __html: JSON.stringify(homeStructuredData(faqDataEnglish)).replace(
+            /</g,
+            '\\u003c'
+          ),
         }}
       />
       {maintenance ? <MaintenancePage /> : <HomeLanding fresh={fresh} />}

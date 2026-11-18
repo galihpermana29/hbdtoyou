@@ -6,6 +6,22 @@ import QueryProvider from './query-provider';
 import { Analytics } from '@vercel/analytics/react';
 import { PostHogProvider } from '@/providers/PostHogProvider';
 import { getUserProfile } from '@/action/user-api';
+import type { Metadata } from 'next';
+import { SITE_NAME, SITE_URL } from '@/lib/seo';
+
+/**
+ * What every page says unless it says something itself. `metadataBase` is
+ * what relative links in a page's metadata are resolved against; the title
+ * and description here are for pages that set none, so no page reaches a
+ * search result untitled.
+ */
+export const metadata: Metadata = {
+  metadataBase: new URL(SITE_URL),
+  applicationName: SITE_NAME,
+  title: 'Memoify | Digital Gifts, Scrapbooks & Albums',
+  description:
+    'Turn your photos into a digital gift, scrapbook or album and share it with one link. Bikin kado digital dalam hitungan menit.',
+};
 
 export default async function RootLayout({
   children,

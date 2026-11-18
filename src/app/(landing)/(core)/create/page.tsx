@@ -1,39 +1,25 @@
 import CreatePage from './create-clientside';
 import { Metadata } from 'next';
+import { pageMeta } from '@/lib/seo';
 
-export const metadata: Metadata = {
-  title: 'Create Your Digital Gift, Scrapbook or Album | Memoify',
+export const metadata: Metadata = pageMeta({
+  path: '/create',
+  title: 'Create a Digital Gift Online (Buat Kado Digital) | Memoify',
   description:
-    'Create personalized digital gifts, digital scrapbooks, and digital albums inspired by your favorite platforms like Netflix, Spotify, or YouTube. Choose from our templates and customize them to showcase your memories in style.',
-  keywords:
-    'digital gift, digital scrapbook, digital album, virtual present, online gift, electronic memory book, digital photo collection, memory collection, virtual album, online scrapbook, e-gift, hadiah ulang tahun digital, kado digital, scrapbook digital, album foto digital, kenangan digital, kado online, create, custom websites, Netflix templates, Spotify templates, YouTube templates, personalized websites, digital memories, Memoify',
-  openGraph: {
-    title: 'Create Your Digital Gift, Scrapbook or Album | Memoify',
-    description:
-      'Create personalized digital gifts, digital scrapbooks, and digital albums inspired by your favorite platforms like Netflix, Spotify, or YouTube. Choose from our templates and customize them to showcase your memories in style.',
-    url: 'https://memoify.live/create',
-    siteName: 'Memoify',
-    images: [
-      {
-        url: 'https://res.cloudinary.com/dqipjpy1w/image/upload/v1751300467/6f5f6395-cc85-4329-b50a-b402d7fcffe8.png',
-        width: 1200,
-        height: 630,
-        alt: 'Create Your Custom Website',
-      },
-    ],
-    locale: 'en_US',
-    type: 'website',
-  },
-  twitter: {
-    card: 'summary_large_image',
-    title: 'Create Your Digital Gift, Scrapbook or Album | Memoify',
-    description:
-      'Create personalized digital gifts, digital scrapbooks, and digital albums inspired by your favorite platforms like Netflix, Spotify, or YouTube. Choose from our templates and customize them to showcase your memories in style.',
-    images: [
-      'https://res.cloudinary.com/dqipjpy1w/image/upload/v1751300467/6f5f6395-cc85-4329-b50a-b402d7fcffe8.png',
+    'Pick a template, add photos and words, get a link to send. Pilih template, isi foto dan ucapan, lalu bagikan link kado digitalnya.',
+  keywords: {
+    en: ['create digital gift', 'make a gift website', 'gift maker online'],
+    id: [
+      'buat kado digital',
+      'cara membuat kado digital',
+      'bikin website ucapan ulang tahun',
     ],
   },
-};
+  image: {
+    url: 'https://res.cloudinary.com/dqipjpy1w/image/upload/v1751300467/6f5f6395-cc85-4329-b50a-b402d7fcffe8.png',
+    alt: 'Create a digital gift with Memoify',
+  },
+});
 
 const CreatePageServer = ({
   searchParams,
@@ -55,8 +41,7 @@ const CreatePageServer = ({
           <div className="mt-6">
             <a
               href="/"
-              className="inline-flex items-center px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700 transition-colors"
-            >
+              className="inline-flex items-center px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700 transition-colors">
               Return to Home
             </a>
           </div>
