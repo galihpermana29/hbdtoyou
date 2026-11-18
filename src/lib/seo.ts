@@ -53,6 +53,21 @@ type PageSeo = {
   keywords?: { en?: string[]; id?: string[] };
   /** Picture shown when the link is shared. */
   image?: { url: string; alt: string };
+  /** The language the page is written in. English unless it says. */
+  locale?: 'en' | 'id';
+  /**
+   * The same page in each language, by language code, for a page that has
+   * one per language (hreflang). A search engine then shows each person the
+   * one in their language instead of treating them as two copies.
+   */
+  languages?: Record<string, string>;
+};
+
+/** The home page, in each language it is written in. */
+export const HOME_LANGUAGES = {
+  en: SITE_URL,
+  id: `${SITE_URL}/id`,
+  'x-default': SITE_URL,
 };
 
 export function pageMeta({
@@ -61,6 +76,8 @@ export function pageMeta({
   description,
   keywords,
   image,
+  locale = 'en',
+  languages,
 }: PageSeo): Metadata {
   const url = `${SITE_URL}${path === '/' ? '' : path}`;
   const picture = image ?? { url: DEFAULT_IMAGE, alt: title };
@@ -75,7 +92,7 @@ export function pageMeta({
         ...SHARED_KEYWORDS.id,
       ])
     ),
-    alternates: { canonical: url },
+    alternates: languages ? { canonical: url, languages } : { canonical: url },
     openGraph: {
       title,
       description,
@@ -84,8 +101,8 @@ export function pageMeta({
       images: [
         { url: picture.url, width: 1200, height: 630, alt: picture.alt },
       ],
-      locale: 'en_US',
-      alternateLocale: ['id_ID'],
+      locale: locale === 'id' ? 'id_ID' : 'en_US',
+      alternateLocale: [locale === 'id' ? 'en_US' : 'id_ID'],
       type: 'website',
     },
     twitter: {
@@ -108,8 +125,16 @@ type Question = { label: string; children: string };
 /**
  * Structured data for the home page: who Memoify is, that the site is one
  * site, what the product is, and the questions the page answers.
+ *
+ * The Indonesian home page (`/id`) says the same about Memoify, with its
+ * own address, the product described in Indonesian, and its questions in
+ * Indonesian, each marked as such.
  */
-export function homeStructuredData(questions: Question[]) {
+export function homeStructuredData(
+  questions: Question[],
+  language: 'en' | 'id' = 'en'
+) {
+  const indonesian = language === 'id';
   return {
     '@context': 'https://schema.org',
     '@graph': [
@@ -133,21 +158,24 @@ export function homeStructuredData(questions: Question[]) {
       {
         '@type': 'WebApplication',
         name: SITE_NAME,
-        url: SITE_URL,
+        url: indonesian ? `${SITE_URL}/id` : SITE_URL,
         applicationCategory: 'LifestyleApplication',
         operatingSystem: 'Any',
-        description:
-          'Make a digital gift, scrapbook or album from your photos and share it with one link.',
+        description: indonesian
+          ? 'Bikin kado digital, scrapbook, atau album dari foto-fotomu, lalu bagikan lewat satu link.'
+          : 'Make a digital gift, scrapbook or album from your photos and share it with one link.',
+        ...(indonesian ? { inLanguage: 'id' } : {}),
         offers: {
           '@type': 'Offer',
           price: '0',
           priceCurrency: 'IDR',
-          description: 'Free plan',
+          description: indonesian ? 'Paket gratis' : 'Free plan',
         },
         publisher: { '@id': `${SITE_URL}/#organization` },
       },
       {
         '@type': 'FAQPage',
+        ...(indonesian ? { inLanguage: 'id', url: `${SITE_URL}/id` } : {}),
         mainEntity: questions.map((question) => ({
           '@type': 'Question',
           name: question.label,

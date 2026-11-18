@@ -4,6 +4,7 @@ import { useState } from 'react';
 
 import { TESTIMONIALS, type Testimonial } from '@/lib/testimonials';
 
+import { HOME_COPY, type HomeCopy, type HomeLanguage } from './copy';
 import { Rise, SectionHead, press } from './ui';
 
 /**
@@ -37,7 +38,15 @@ const TILTS = [
   'md:rotate-[1.4deg]',
 ];
 
-function Note({ note, index }: { note: Testimonial; index: number }) {
+function Note({
+  note,
+  index,
+  t,
+}: {
+  note: Testimonial;
+  index: number;
+  t: HomeCopy['testimonials'];
+}) {
   const look = LOOKS[index % LOOKS.length];
   const dark = index % LOOKS.length === 1;
   // Short ones are said out loud: bigger, in the hand font.
@@ -55,13 +64,18 @@ function Note({ note, index }: { note: Testimonial; index: number }) {
       <figcaption
         className={`text-[11px] tracking-[1.2px] ${dark ? 'text-[#a39b91]' : 'text-[#8a847d]'}`}
         style={{ fontFamily: 'var(--font-mr-label)' }}>
-        FEEDBACK FORM · {note.when.toUpperCase()}
+        {t.source} · {t.month(note.when).toUpperCase()}
       </figcaption>
     </figure>
   );
 }
 
-export default function HomeTestimonials() {
+export default function HomeTestimonials({
+  lang = 'en',
+}: {
+  lang?: HomeLanguage;
+}) {
+  const t = HOME_COPY[lang].testimonials;
   const [all, setAll] = useState(false);
   const shown = all ? TESTIMONIALS : TESTIMONIALS.slice(0, FIRST);
   const columns: Array<Array<[Testimonial, number]>> = [[], [], []];
@@ -69,15 +83,11 @@ export default function HomeTestimonials() {
 
   return (
     <section
-      aria-label="What people say"
+      aria-label={t.label}
       className="bg-[#fffdfa] pb-16 md:pb-[112px]"
       style={{ fontFamily: 'var(--font-mr-body)' }}>
       <div className="px-5">
-        <SectionHead
-          eyebrow="In their words"
-          title="What people told us after making one"
-          body="Straight from our feedback form. Typos and caps lock included."
-        />
+        <SectionHead eyebrow={t.eyebrow} title={t.title} body={t.body} />
       </div>
 
       {/* Wide screens: three columns of pinned notes. */}
@@ -92,7 +102,7 @@ export default function HomeTestimonials() {
                   index < FIRST ? [0, 80, 130][at] + row * 60 : [0, 60, 100][at]
                 }
                 distance={[18, 14, 10][at]}>
-                <Note note={note} index={index} />
+                <Note note={note} index={index} t={t} />
               </Rise>
             ))}
           </div>
@@ -104,7 +114,7 @@ export default function HomeTestimonials() {
             type="button"
             onClick={() => setAll(true)}
             className={`inline-flex h-12 items-center justify-center rounded-full border border-[rgba(33,33,33,0.2)] bg-[#fffdfa] px-7 text-[16px] font-semibold text-[#1b1b1b] ${press}`}>
-            Read {TESTIMONIALS.length - FIRST} more
+            {t.more(TESTIMONIALS.length - FIRST)}
           </button>
         </div>
       ) : null}
@@ -114,7 +124,7 @@ export default function HomeTestimonials() {
         <div className="flex snap-x snap-mandatory gap-4 overflow-x-auto px-5 pb-2 [scrollbar-width:none] [&::-webkit-scrollbar]:hidden">
           {TESTIMONIALS.map((note, index) => (
             <div key={note.words} className="w-[82%] shrink-0 snap-center">
-              <Note note={note} index={index} />
+              <Note note={note} index={index} t={t} />
             </div>
           ))}
         </div>

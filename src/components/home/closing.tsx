@@ -3,12 +3,17 @@ import Link from 'next/link';
 
 import { RevealHeading } from '@/components/memoroll/landing/reveal-words';
 
+import { HOME_COPY, type HomeLanguage } from './copy';
+import LanguageSwitch from './language-switch';
 import { Rise, press } from './ui';
 
 /**
  * The last word: one flame panel, one line, one action. The line arrives
  * word by word (the page's headings all do); the gifts tucked behind it are
  * decoration, so they fade in and do not move.
+ *
+ * Under it, the way to the page in the other language: the end of the page
+ * is where someone who could not read it would look for one.
  */
 const TUCKED: [string, string][] = [
   ['/home/gift-magazine.webp', 'left-[-6%] top-[14%] -rotate-[10deg]'],
@@ -17,7 +22,9 @@ const TUCKED: [string, string][] = [
   ['/home/gift-playlist.webp', 'right-[3%] bottom-[-18%] -rotate-[7deg]'],
 ];
 
-export default function HomeClosing() {
+export default function HomeClosing({ lang = 'en' }: { lang?: HomeLanguage }) {
+  const copy = HOME_COPY[lang];
+  const t = copy.closing;
   return (
     <section
       className="bg-[#fffdfa] px-5 pb-16 md:pb-[112px]"
@@ -42,17 +49,17 @@ export default function HomeClosing() {
         ))}
 
         <RevealHeading className="relative max-w-[680px] text-[36px] font-bold leading-[1.05] tracking-[-0.045em] text-white md:text-[64px]">
-          Make something they will keep.
+          {t.title}
         </RevealHeading>
         <p className="relative mt-5 max-w-[460px] text-[16px] leading-[1.6] text-white/90 md:text-[18px]">
-          Your first gift is free, and takes less time than choosing a card.
+          {t.body}
         </p>
         <div className="relative mt-8 flex flex-col items-stretch gap-3 sm:flex-row">
           <Link
             href="/create"
             prefetch
             className={`group inline-flex h-12 items-center justify-center gap-2 rounded-full bg-[#1b1b1b] px-7 text-[16px] font-semibold text-white md:h-14 md:text-[17px] ${press}`}>
-            Create a gift
+            {copy.hero.create}
             <ArrowRight
               aria-hidden
               className="size-4 transition-transform duration-200 ease-[cubic-bezier(0.23,1,0.32,1)] group-hover:translate-x-0.5"
@@ -62,10 +69,11 @@ export default function HomeClosing() {
             href="/templates"
             prefetch
             className={`inline-flex h-12 items-center justify-center rounded-full border border-white/50 px-7 text-[16px] font-semibold text-white md:h-14 md:text-[17px] ${press}`}>
-            Browse templates
+            {copy.hero.browse}
           </Link>
         </div>
       </div>
+      <LanguageSwitch lang={lang} />
     </section>
   );
 }

@@ -6,6 +6,7 @@ import {
   invitationSlugFromHost,
   isApexHost,
 } from '@/lib/invitation-host';
+import { PAGE_LANGUAGE_HEADER, isIndonesianPath } from '@/lib/page-language';
 
 /**
  * The one place a Host header means anything: a wedding answers at its own
@@ -29,6 +30,9 @@ import {
  * letters, digits and hyphens, so a path spelling anything else names an
  * address no subdomain could serve, and it is left to the route to refuse in
  * its own words.
+ *
+ * It also tells the root layout which language the page is in, so `/id`,
+ * the home page in Indonesian, says `<html lang="id">` (lib/page-language.ts).
  */
 export function middleware(request: NextRequest) {
   const host = request.headers.get('host') ?? '';
@@ -55,15 +59,21 @@ export function middleware(request: NextRequest) {
     }
   }
 
-  return NextResponse.next();
+  // Set for the Indonesian page and taken off everything else this file
+  // sees, so a header sent by the browser cannot claim a language.
+  const forward = new Headers(request.headers);
+  if (isIndonesianPath(pathname)) forward.set(PAGE_LANGUAGE_HEADER, 'id');
+  else forward.delete(PAGE_LANGUAGE_HEADER);
+  return NextResponse.next({ request: { headers: forward } });
 }
 
 export const config = {
-  // The two paths a Host can change the meaning of, and no others: the root,
-  // which a subdomain serves an invitation at, and the old path addresses,
-  // which the apex redirects. Every other request never enters this file.
+  // The two paths a Host can change the meaning of: the root, which a
+  // subdomain serves an invitation at, and the old path addresses, which the
+  // apex redirects. And `/id`, which is told its language. Every other
+  // request never enters this file.
   // `:path*` rather than a single `:slug` segment, which this Next version's
   // matcher does not honour; the redirect itself still takes exactly one
   // label-shaped segment.
-  matcher: ['/', '/wedding-1/:path*'],
+  matcher: ['/', '/id/:path*', '/wedding-1/:path*'],
 };

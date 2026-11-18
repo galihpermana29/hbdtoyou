@@ -7,11 +7,13 @@ import Eyebrow from '@/components/memoroll/landing/eyebrow';
 import { RevealHeading } from '@/components/memoroll/landing/reveal-words';
 import { faqDataEnglish, faqDataIndonesian } from '@/lib/faqData';
 
+import { HOME_COPY, type HomeLanguage } from './copy';
 import { press } from './ui';
 
 /**
  * Questions, in MemoRoll's own FAQ layout, with the home page's answers and
- * its English / Indonesia switch.
+ * its English / Indonesia switch. The answers open in the page's own
+ * language: Indonesian on `/id`.
  *
  * An answer opens by growing its row (grid rows - height is the documented
  * exception, there is no transform that pushes the rows below) and closes
@@ -21,8 +23,9 @@ import { press } from './ui';
 
 const EMAIL = 'memoify@memoify.live';
 
-export default function HomeFaq() {
-  const [language, setLanguage] = useState<'en' | 'id'>('en');
+export default function HomeFaq({ lang = 'en' }: { lang?: HomeLanguage }) {
+  const t = HOME_COPY[lang].faq;
+  const [language, setLanguage] = useState<HomeLanguage>(lang);
   const [open, setOpen] = useState<string | null>('1');
   const items = language === 'en' ? faqDataEnglish : faqDataIndonesian;
 
@@ -36,11 +39,11 @@ export default function HomeFaq() {
         <div className="flex w-full shrink-0 flex-col items-start gap-6 lg:w-[400px]">
           <Eyebrow>FAQ</Eyebrow>
           <RevealHeading className="text-[32px] font-bold leading-[1.1] tracking-[-0.04em] text-[#1b1b1b] md:text-[44px]">
-            Good questions, short answers
+            {t.title}
           </RevealHeading>
           <div
             role="radiogroup"
-            aria-label="Language"
+            aria-label={t.languageGroup}
             className="flex rounded-full bg-[#efeae9] p-1">
             {(
               [
@@ -64,11 +67,9 @@ export default function HomeFaq() {
             ))}
           </div>
           <div className="flex w-full flex-col items-start gap-4 rounded-[20px] bg-[#fbf4ec] p-7">
-            <p className="text-[18px] font-bold text-[#1b1b1b]">
-              Still curious?
-            </p>
+            <p className="text-[18px] font-bold text-[#1b1b1b]">{t.curious}</p>
             <p className="text-[15px] leading-[1.55] text-[#4a4642]">
-              Write to us. A person answers.
+              {t.write}
             </p>
             <a
               href={`mailto:${EMAIL}`}
