@@ -8,6 +8,9 @@ import HomeOccasions from '@/components/home/occasions';
 import { landingFonts } from '@/components/memoroll/landing/fonts';
 import { memorollFonts } from '@/components/memoroll/ui/fonts';
 import NavigationBar from '@/components/ui/navbar';
+import { languageVersions, type PageLanguage } from '@/lib/page-language';
+
+import { JOURNAL_COPY } from './copy';
 
 import JournalFeatures from './features';
 import JournalHero from './hero';
@@ -20,7 +23,13 @@ import JournalPublished from './published';
  *
  * Not carried over from the page it replaces: the laptop mock-up picture
  * and the newsletter form, which was never wired to anything.
+ *
+ * English at `/journal`, Indonesian at `/id/journal`: the page passes the
+ * language, and the words are in copy.ts. The published journals are what
+ * people wrote, in whatever language they wrote them.
  */
+
+const VERSIONS = languageVersions('/journal');
 
 /** A journal is listed unless its author took it off the list. */
 function isPublic(journal: IContent): boolean {
@@ -33,50 +42,37 @@ function isPublic(journal: IContent): boolean {
 
 export default function JournalLanding({
   journalsData,
+  lang = 'en',
 }: {
   journalsData: IContent[];
+  lang?: PageLanguage;
 }) {
+  const t = JOURNAL_COPY[lang];
   // Memoised: the list below searches it, and a new array every render
   // would redo that work every render.
   const journals = useMemo(() => journalsData.filter(isPublic), [journalsData]);
   const start = useStart('/journal/create');
 
   return (
-    <div className={`${memorollFonts} ${landingFonts}`}>
+    <div lang={lang} className={`${memorollFonts} ${landingFonts}`}>
       <div className="fixed left-0 top-0 z-[1000] w-full isolate">
-        <NavigationBar />
+        <NavigationBar lang={lang} languageSwitch={VERSIONS} />
       </div>
       <main className="mt-[81px] overflow-x-clip">
-        <JournalHero published={journals.length} />
-        <HomeOccasions
-          label="What people write"
-          items={[
-            'Love letters',
-            'Apologies',
-            'Birthday wishes',
-            'Thank-yous',
-            'Anniversaries',
-            'Farewells',
-            'Confessions',
-          ]}
-        />
-        <JournalFeatures />
+        <JournalHero published={journals.length} lang={lang} />
+        <HomeOccasions label={t.occasions.label} items={t.occasions.items} />
+        <JournalFeatures lang={lang} />
         <Steps
-          eyebrow="How it works"
-          title="Three steps to published"
-          body="You bring the feeling. The format is already done."
+          eyebrow={t.steps.eyebrow}
+          title={t.steps.title}
+          body={t.steps.body}
           steps={[
             {
-              title: 'Start from a feeling',
-              body: 'Love, sorry, happy birthday, thank you. Decide who it is for and what you want to say.',
+              title: t.steps.feeling.title,
+              body: t.steps.feeling.body,
               art: (
                 <div className="flex flex-wrap justify-center gap-2 px-5">
-                  {[
-                    'I love you',
-                    'I’m sorry',
-                    'Happy birthday',
-                    'Thank you',
-                  ].map((feeling, index) => (
+                  {t.steps.feeling.feelings.map((feeling, index) => (
                     <span
                       key={feeling}
                       className={`rounded-full px-4 py-2 text-[13px] font-semibold ${
@@ -91,11 +87,11 @@ export default function JournalLanding({
               ),
             },
             {
-              title: 'Fill in the sections',
-              body: 'A title, an abstract and the body of your letter. The layout of a paper is applied for you.',
+              title: t.steps.sections.title,
+              body: t.steps.sections.body,
               art: (
                 <div className="flex w-[78%] flex-col gap-2">
-                  {['Title', 'Abstract', 'Conclusion'].map((field) => (
+                  {t.steps.sections.fields.map((field) => (
                     <span
                       key={field}
                       className="flex items-center gap-3 rounded-[12px] border border-[#e0d6ca] bg-white px-3 py-2">
@@ -109,31 +105,31 @@ export default function JournalLanding({
               ),
             },
             {
-              title: 'Publish and send the link',
-              body: 'It opens as a page they can read on any phone. List it with the published journals, or keep it off the list.',
+              title: t.steps.publish.title,
+              body: t.steps.publish.body,
               art: (
                 <div className="paper-serif w-[62%] rounded-[6px] bg-white px-4 py-3 shadow-[0_8px_18px_-10px_rgba(90,42,18,0.4)]">
                   <p className="text-center text-[12px] font-bold leading-[1.25] text-[#1b1b1b]">
-                    On Loving You
+                    {t.steps.publish.paper}
                   </p>
                   <span className="mx-auto mt-2 block h-[5px] w-[90%] rounded-full bg-[#ece6dd]" />
                   <span className="mx-auto mt-[6px] block h-[5px] w-[76%] rounded-full bg-[#ece6dd]" />
                   <p
                     className="mt-3 text-center text-[10px] tracking-[1.2px] text-[#ff3e09]"
                     style={{ fontFamily: 'var(--font-mr-label)' }}>
-                    PUBLISHED
+                    {t.steps.publish.stamp}
                   </p>
                 </div>
               ),
             },
           ]}
         />
-        <JournalPublished journals={journals} />
+        <JournalPublished journals={journals} lang={lang} />
         <ClosingPanel
           ground="#fbf4ec"
-          title="Submit your feelings for review."
-          body="It takes a few minutes to write, and it is the only paper they will read twice."
-          action="Publish a journal"
+          title={t.closing.title}
+          body={t.closing.body}
+          action={t.closing.action}
           onAction={start}
         />
       </main>

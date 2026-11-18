@@ -8,6 +8,7 @@ import type { CSSProperties } from 'react';
 import type { NewTemplate } from '@/lib/new-template';
 import { useCalmMotion } from '@/lib/use-calm-motion';
 
+import { HOME_COPY, type HomeLanguage } from './copy';
 import GiftDeck, { GIFTS, useGiftBeat } from './gift-deck';
 import { ctaGhost, ctaPrimary } from './ui';
 
@@ -32,10 +33,19 @@ import { ctaGhost, ctaPrimary } from './ui';
 const at = (ms: number, rise: number): CSSProperties =>
   ({ '--at': `${ms}ms`, '--rise': `${rise}px` }) as CSSProperties;
 
-export default function HomeHero({ fresh }: { fresh?: NewTemplate | null }) {
+export default function HomeHero({
+  fresh,
+  lang = 'en',
+}: {
+  fresh?: NewTemplate | null;
+  lang?: HomeLanguage;
+}) {
+  const copy = HOME_COPY[lang];
+  const t = copy.hero;
   const beat = useGiftBeat();
   const reduce = useCalmMotion();
   const gift = GIFTS[beat.active];
+  const freshSays = lang === 'id' ? fresh?.indonesian.says : fresh?.says;
 
   return (
     <section
@@ -51,13 +61,13 @@ export default function HomeHero({ fresh }: { fresh?: NewTemplate | null }) {
             className="home-enter group inline-flex max-w-full items-center gap-2 rounded-full border border-[#e6e6e6] bg-white py-1 pl-1 pr-3 text-[14px] font-medium tracking-[-0.28px] text-[#1b1b1b] transition-transform duration-[160ms] ease-[cubic-bezier(0.23,1,0.32,1)] active:scale-[0.97]"
             style={at(0, 0)}>
             <span className="rounded-full bg-[#ff3e09] px-2 py-[3px] text-[11px] font-bold uppercase tracking-[0.08em] text-white">
-              New
+              {t.newTag}
             </span>
             <span className="truncate">
               <span className="font-semibold">{fresh.name}</span>
               <span className="hidden text-[#6b655f] sm:inline">
                 {' · '}
-                {fresh.says}
+                {freshSays}
               </span>
             </span>
             <ArrowRight
@@ -70,18 +80,16 @@ export default function HomeHero({ fresh }: { fresh?: NewTemplate | null }) {
             className="home-enter inline-flex items-center gap-2 rounded-full border border-[#e6e6e6] bg-white px-3 py-1.5 text-[14px] font-medium tracking-[-0.28px] text-[#e34013]"
             style={at(0, 0)}>
             <span className="size-[6px] rounded-full bg-[#ff3e09]" />
-            Digital gifts, made personal
+            {t.pill}
           </span>
         )}
 
         <h1
           className="home-enter mt-5 text-center text-[40px] font-bold leading-[1.04] tracking-[-0.045em] text-[#1b1b1b] sm:text-[56px] md:text-[72px]"
           style={at(0, 18)}>
-          <span className="sr-only">
-            Turn your memories into a gift they can open
-          </span>
+          <span className="sr-only">{t.headingSpoken}</span>
           <span aria-hidden className="block">
-            Turn your memories into
+            {t.headingLead}
           </span>
           <span
             aria-hidden
@@ -109,7 +117,7 @@ export default function HomeHero({ fresh }: { fresh?: NewTemplate | null }) {
                   duration: reduce ? 0.2 : 0.56,
                   ease: [0.23, 1, 0.32, 1],
                 }}>
-                {gift.word}
+                {copy.deck.words[gift.key]}
               </motion.span>
             </AnimatePresence>
           </span>
@@ -118,29 +126,28 @@ export default function HomeHero({ fresh }: { fresh?: NewTemplate | null }) {
         <p
           className="home-enter mt-4 max-w-[560px] text-center text-[16px] leading-[1.6] text-[#4a4642] md:text-[19px]"
           style={at(90, 12)}>
-          Pick a style, add your photos and a few words, and send one link. They
-          open it on their phone, and it&apos;s all about them.
+          {t.body}
         </p>
 
         <div
           className="home-enter mt-7 flex flex-col items-stretch gap-3 sm:flex-row sm:items-center"
           style={at(160, 8)}>
           <Link href="/create" prefetch className={`group ${ctaPrimary}`}>
-            Create a gift
+            {t.create}
             <ArrowRight
               aria-hidden
               className="size-4 transition-transform duration-200 ease-[cubic-bezier(0.23,1,0.32,1)] group-hover:translate-x-0.5"
             />
           </Link>
           <Link href="/templates" prefetch className={ctaGhost}>
-            Browse templates
+            {t.browse}
           </Link>
         </div>
 
         <p
           className="home-enter mt-4 text-[13px] font-medium text-[#8a847d]"
           style={at(210, 0)}>
-          Free to start · 9,000+ people have made one
+          {t.proof}
         </p>
 
         <div className="relative mt-9 w-full md:mt-10">
@@ -157,14 +164,14 @@ export default function HomeHero({ fresh }: { fresh?: NewTemplate | null }) {
             <span
               className="text-[11px] tracking-[1.2px]"
               style={{ fontFamily: 'var(--font-mr-label)' }}>
-              STYLES
+              {t.stylesBadge}
             </span>
           </div>
           <p
             aria-hidden
             className="home-enter pointer-events-none absolute -right-1 top-[16%] z-20 hidden w-[150px] rotate-6 text-[26px] leading-[1.05] text-[#1b1b1b] xl:block"
             style={{ ...at(600, 0), fontFamily: 'var(--font-mr-hand)' }}>
-            tap a gift to flip to the next one
+            {t.hint}
           </p>
 
           <GiftDeck
@@ -172,6 +179,7 @@ export default function HomeHero({ fresh }: { fresh?: NewTemplate | null }) {
             leaving={beat.leaving}
             onNext={beat.next}
             onJump={beat.jump}
+            lang={lang}
           />
         </div>
       </div>

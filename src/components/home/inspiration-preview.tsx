@@ -9,6 +9,7 @@ import { useRef, useState } from 'react';
 import { getInspirationPage } from '@/action/inspiration-api';
 import type { InspirationItem } from '@/lib/inspiration';
 
+import { HOME_COPY, type HomeLanguage } from './copy';
 import { Rise, SectionHead, press } from './ui';
 
 /**
@@ -32,7 +33,15 @@ import { Rise, SectionHead, press } from './ui';
 const ENOUGH = 8;
 const FILLS_A_SCREEN = 14;
 
-function Tile({ item, hidden }: { item: InspirationItem; hidden: boolean }) {
+function Tile({
+  item,
+  hidden,
+  says,
+}: {
+  item: InspirationItem;
+  hidden: boolean;
+  says: (label: string) => string;
+}) {
   const [gone, setGone] = useState(false);
   if (gone) return null;
   return (
@@ -43,7 +52,7 @@ function Tile({ item, hidden }: { item: InspirationItem; hidden: boolean }) {
       // The second copy of a row is there for the loop, not to be read.
       aria-hidden={hidden || undefined}
       tabIndex={hidden ? -1 : undefined}
-      aria-label={`A ${item.label} someone made. Opens in a new tab`}
+      aria-label={says(item.label)}
       className={`group relative block aspect-[4/5] w-[168px] shrink-0 overflow-hidden rounded-[20px] bg-[#2a2a2a] md:w-[220px] ${press}`}>
       <img
         src={item.image}
@@ -65,10 +74,12 @@ function Row({
   items,
   seconds,
   reverse = false,
+  says,
 }: {
   items: InspirationItem[];
   seconds: number;
   reverse?: boolean;
+  says: (label: string) => string;
 }) {
   // One copy of the row has to be wider than any screen, or the loop would
   // show its own end: a short row is repeated until it is.
@@ -98,6 +109,7 @@ function Row({
                 item={item}
                 // A gift repeated to fill the row is read once.
                 hidden={copy || index >= count}
+                says={says}
               />
             ))}
           </div>
@@ -107,7 +119,12 @@ function Row({
   );
 }
 
-export default function HomeInspirationPreview() {
+export default function HomeInspirationPreview({
+  lang = 'en',
+}: {
+  lang?: HomeLanguage;
+}) {
+  const t = HOME_COPY[lang].inspiration;
   const section = useRef<HTMLDivElement>(null);
   const near = useInView(section, { once: true, margin: '700px 0px' });
 
@@ -139,23 +156,23 @@ export default function HomeInspirationPreview() {
   return (
     <section
       ref={section}
-      aria-label="Inspiration"
+      aria-label={t.label}
       className="overflow-hidden bg-[#1b1b1b] py-16 md:py-[112px]"
       style={{ fontFamily: 'var(--font-mr-body)' }}>
       <div className="px-5">
         <SectionHead
           tone="paper"
-          eyebrow="Inspiration"
-          title="Made by people like you"
-          body="Real gifts their makers chose to share. Open one and borrow the idea."
+          eyebrow={t.eyebrow}
+          title={t.title}
+          body={t.body}
         />
       </div>
 
       <div className="mt-12 flex min-h-[452px] flex-col gap-4 md:mt-16 md:min-h-[566px]">
         {pictures.length >= ENOUGH ? (
           <>
-            <Row items={rows[0]} seconds={8} />
-            <Row items={rows[1]} seconds={9.5} reverse />
+            <Row items={rows[0]} seconds={8} says={t.tile} />
+            <Row items={rows[1]} seconds={9.5} reverse says={t.tile} />
           </>
         ) : (
           // Holding the rows' place while the gifts are on their way.
@@ -177,7 +194,7 @@ export default function HomeInspirationPreview() {
           href="/inspiration"
           prefetch
           className={`group inline-flex h-12 items-center justify-center gap-2 rounded-full bg-[#ff3e09] px-7 text-[16px] font-semibold text-white shadow-[inset_2px_3px_3.2px_rgba(255,255,255,0.25)] md:h-14 md:text-[17px] ${press}`}>
-          See the whole wall
+          {t.wall}
           <ArrowRight
             aria-hidden
             className="size-4 transition-transform duration-200 ease-[cubic-bezier(0.23,1,0.32,1)] group-hover:translate-x-0.5"

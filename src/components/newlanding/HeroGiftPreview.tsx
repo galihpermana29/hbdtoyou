@@ -3,6 +3,8 @@
 import { BookOpen, Gamepad2, Play } from 'lucide-react';
 import { useState } from 'react';
 
+import { HOME_COPY, type HomeLanguage } from '@/components/home/copy';
+
 type PreviewId = 'memoflix' | 'claw' | 'scrapbook';
 
 const PREVIEWS: {
@@ -39,7 +41,13 @@ const PREVIEWS: {
   },
 ];
 
-export default function HeroGiftPreview() {
+/** `lang` is the home page's: its tabs are read in the page's language. */
+export default function HeroGiftPreview({
+  lang = 'en',
+}: {
+  lang?: HomeLanguage;
+}) {
+  const t = HOME_COPY[lang].demo.preview;
   const [active, setActive] = useState<PreviewId>('memoflix');
   const [loaded, setLoaded] = useState<PreviewId[]>(['memoflix']);
   const current = PREVIEWS.find((preview) => preview.id === active)!;
@@ -56,7 +64,7 @@ export default function HeroGiftPreview() {
       <div
         className="mb-4 flex flex-wrap items-center justify-center gap-2"
         role="tablist"
-        aria-label="Gift preview">
+        aria-label={t.group}>
         {PREVIEWS.map((preview) => {
           const Icon = preview.icon;
           const isActive = preview.id === active;
@@ -77,7 +85,7 @@ export default function HeroGiftPreview() {
                 {preview.label}
               </span>
               <span className="hidden text-[11px] font-medium opacity-70 sm:inline">
-                {preview.detail}
+                {t.details[preview.id] ?? preview.detail}
               </span>
             </button>
           );
@@ -102,9 +110,11 @@ export default function HeroGiftPreview() {
               <iframe
                 key={preview.id}
                 src={preview.src}
-                title={`${preview.label} gift preview`}
+                title={t.frame(preview.label)}
                 className={`absolute inset-0 h-full w-full border-0 ${
-                  preview.id === active ? 'z-10' : 'pointer-events-none z-0 hidden'
+                  preview.id === active
+                    ? 'z-10'
+                    : 'pointer-events-none z-0 hidden'
                 }`}
               />
             )

@@ -14,6 +14,9 @@ import { templateRoute, templateThumbnail } from '@/lib/template-thumbnail';
  * it. A template without an entry below still shows, with its catalogue
  * thumbnail and a plain line; one with an entry gets its own words and,
  * when it is playable, the gift itself in a phone to try on the spot.
+ *
+ * The words come in English and in Indonesian: the home page is read in
+ * both (`/` and `/id`).
  */
 export interface NewTemplate {
   id: string;
@@ -23,6 +26,8 @@ export interface NewTemplate {
   says: string;
   /** A longer line for the section. */
   body: string;
+  /** The same two lines in Indonesian, for `/id`. */
+  indonesian: { says: string; body: string };
   /** The gift's own sample page, to open or to play in the phone. */
   sample: string;
   /** A phone-shaped still of the gift; without one, the catalogue art. */
@@ -34,23 +39,37 @@ export interface NewTemplate {
 
 const WORDS: Record<
   string,
-  Pick<NewTemplate, 'says' | 'body' | 'playable'> & { poster?: string }
+  Pick<NewTemplate, 'says' | 'body' | 'indonesian' | 'playable'> & {
+    poster?: string;
+  }
 > = {
   rollofusv1: {
     says: 'A camera they wind and shoot',
     body: 'They wind the film, press the shutter, and every flash develops one of your photos, date stamp and all. The last frame comes with your letter.',
+    indonesian: {
+      says: 'Kamera yang bisa dia putar dan jepret',
+      body: 'Dia putar filmnya, tekan shutter-nya, dan setiap flash mencetak satu fotomu, lengkap dengan cap tanggalnya. Frame terakhir datang bareng suratmu.',
+    },
     poster: '/home/new-rollofusv1.webp',
     playable: true,
   },
   boardofusv1: {
     says: 'A board game of your memories',
     body: 'They roll the die and travel a little board where every square is a moment of yours, with a message waiting at the finish.',
+    indonesian: {
+      says: 'Board game dari kenangan kalian',
+      body: 'Dia lempar dadu dan jalan di papan kecil yang tiap kotaknya adalah momen kalian, dengan pesan yang nunggu di garis finis.',
+    },
     poster: '/home/new-boardofusv1.webp',
     playable: true,
   },
   arcadeclawv1: {
     says: 'A claw machine full of memories',
     body: 'Three grabs at a claw machine, and every capsule opens one of your photos, with a wish at the end.',
+    indonesian: {
+      says: 'Mesin capit penuh kenangan',
+      body: 'Tiga kesempatan di mesin capit, tiap kapsul membuka satu fotomu, dan di akhir ada ucapan yang menunggu.',
+    },
     poster: '/home/new-arcadeclawv1.webp',
     playable: true,
   },
@@ -85,6 +104,10 @@ export function pickNewTemplate(
     body:
       words?.body ??
       'Fresh in the catalogue. Open the sample to see what they will get.',
+    indonesian: words?.indonesian ?? {
+      says: 'Cara baru buat ngasih kado',
+      body: 'Baru masuk katalog. Buka contohnya buat lihat apa yang bakal dia terima.',
+    },
     sample: `/${route}`,
     poster: words?.poster,
     thumbnail: templateThumbnail(chosen),

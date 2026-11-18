@@ -7,8 +7,9 @@ import { useRouter } from 'next/navigation';
 
 import { getListPackages, getPromotedCoupon } from '@/action/user-api';
 import { useMemoifySession } from '@/app/session-provider';
-import { afterCoupon, couponSays, idr, isPaid, priceOf } from '@/lib/pricing';
+import { afterCoupon, idr, isPaid, priceOf } from '@/lib/pricing';
 
+import { HOME_COPY, type HomeLanguage } from './copy';
 import { Rise, SectionHead, press } from './ui';
 
 /**
@@ -23,7 +24,8 @@ import { Rise, SectionHead, press } from './ui';
  * The cards arrive as one wave. Nothing else moves: prices are read, not
  * performed.
  */
-export default function HomePricing() {
+export default function HomePricing({ lang = 'en' }: { lang?: HomeLanguage }) {
+  const t = HOME_COPY[lang].pricing;
   const router = useRouter();
   const session = useMemoifySession();
 
@@ -36,7 +38,12 @@ export default function HomePricing() {
     queryFn: async () => (await getPromotedCoupon()).data ?? null,
   });
 
-  const discount = coupon ? couponSays(coupon) : null;
+  // lib/pricing.ts's couponSays, in the page's language.
+  const discount = coupon
+    ? coupon.discount_type === 'percent'
+      ? t.percentOff(coupon.discount_value)
+      : t.amountOff(idr(coupon.discount_value))
+    : null;
 
   const choose = (plan: { id: string; name: string }) => {
     if (!session?.accessToken) return signIn('google');
@@ -51,19 +58,15 @@ export default function HomePricing() {
       className="scroll-mt-[81px] bg-[#fbf4ec] px-5 py-16 md:py-[112px]"
       style={{ fontFamily: 'var(--font-mr-body)' }}>
       <div className="mx-auto max-w-[1180px]">
-        <SectionHead
-          eyebrow="Pricing"
-          title="Start free. Top up when you want more."
-          body="Make a free gift every day. Go Premium for every style and more room for photos."
-        />
+        <SectionHead eyebrow={t.eyebrow} title={t.title} body={t.body} />
 
         {coupon ? (
           <p className="mx-auto mt-8 w-fit rounded-full border border-dashed border-[#ff3e09] bg-[#fff0e9] px-5 py-2 text-center text-[14px] text-[#7b4034]">
-            Use code{' '}
+            {t.couponBefore}{' '}
             <span className="font-mono font-bold tracking-[0.06em] text-[#e34013]">
               {coupon.code}
-            </span>{' '}
-            for {discount}. It is already applied at checkout.
+            </span>
+            {t.couponAfter(discount)}
           </p>
         ) : null}
 
@@ -88,7 +91,7 @@ export default function HomePricing() {
                     <p className="text-[18px] font-semibold">{plan.name}</p>
                     {featured ? (
                       <span className="rounded-full bg-[#ff3e09] px-3 py-1 text-[11px] font-bold uppercase tracking-[0.06em] text-white">
-                        Most picked
+                        {t.featured}
                       </span>
                     ) : null}
                   </div>
@@ -97,7 +100,7 @@ export default function HomePricing() {
                       the coupon in its place. */}
                   {cut ? (
                     <p className="mt-5 flex items-center gap-2 text-[15px]">
-                      <span className="sr-only">Was</span>
+                      <span className="sr-only">{t.was}</span>
                       <span
                         className={`line-through ${
                           featured ? 'text-[#a39b91]' : 'text-[#8a847d]'
@@ -148,9 +151,9 @@ export default function HomePricing() {
                     }`}>
                     {session?.accessToken
                       ? plan.name === 'Free Plan'
-                        ? 'Start free'
-                        : `Get ${plan.name.replace(' Plan', '')}`
-                      : 'Sign in with Google'}
+                        ? t.startFree
+                        : t.get(plan.name.replace(' Plan', ''))
+                      : t.signIn}
                   </button>
                 </div>
               </Rise>

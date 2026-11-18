@@ -5,6 +5,7 @@ import { getSpotifyAccessToken } from '@/action/spotify-api';
 import { getUserProfile } from '@/action/user-api';
 import { Footer } from '@/components/ui/footer';
 import { drawsAGift } from '@/lib/gift-routes';
+import { languageVersions, pageLanguage } from '@/lib/page-language';
 import { store } from '@/lib/store';
 import { setSessionSpecific } from '@/store/get-set-session';
 import { SessionData } from '@/store/iron-session';
@@ -159,7 +160,8 @@ const promotionalContent: AdContent[] = [
  *
  * `/memoroll` covers MemoRoll's landing and its screens beneath it: the
  * landing introduces one product, and a modal selling another over it
- * would talk over its own pitch.
+ * would talk over its own pitch. `/id/memoroll` is the same landing in
+ * Indonesian.
  */
 const PRODUCT_ROUTES_WITHOUT_ADS = [
   '/create',
@@ -167,6 +169,7 @@ const PRODUCT_ROUTES_WITHOUT_ADS = [
   '/scrapbook/create',
   '/journal/create',
   '/memoroll',
+  '/id/memoroll',
 ];
 
 function isProductRouteWithoutAds(pathname: string): boolean {
@@ -423,8 +426,14 @@ const SessionProvider = ({
       {/* The site footer would intrude on the page a recipient came to see, so
           it stays off a gift. The Create Flow that builds one is ordinary
           product UI and keeps it. Arcade Claw and Board of Us sit in (gifts),
-          so drawsAGift already covers them. */}
-      {!isFooterFree && <Footer />}
+          so drawsAGift already covers them. It is in the page's language,
+          and links the page's other language where it has one. */}
+      {!isFooterFree && (
+        <Footer
+          lang={pageLanguage(pathname ?? '')}
+          versions={languageVersions(pathname ?? '')}
+        />
+      )}
     </SessionContext.Provider>
   );
 };

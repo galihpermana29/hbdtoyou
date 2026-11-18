@@ -7,10 +7,14 @@ import c1 from '@/assets/c1.png';
 import c2 from '@/assets/c2.png';
 import c3 from '@/assets/c3.png';
 
+import { localHref } from '@/lib/page-language';
+
+import { HOME_COPY, type HomeLanguage } from './copy';
 import { Rise, SectionHead, press } from './ui';
 
 /**
- * Everything Memoify makes, as one board. Each card is a door to a product.
+ * Everything Memoify makes, as one board. Each card is a door to a product,
+ * in the page's language where the product's page has an Indonesian version.
  *
  * Cards rise in as a wave in reading order with shrinking gaps. A card's
  * picture leans in 3% under a real pointer (hover is gated: a tap on a phone
@@ -99,30 +103,27 @@ function Picture({ src, alt }: { src: StaticImageData; alt: string }) {
   );
 }
 
-export default function HomeProducts() {
+export default function HomeProducts({ lang = 'en' }: { lang?: HomeLanguage }) {
+  const t = HOME_COPY[lang].products;
   return (
     <section
       className="bg-[#fffdfa] px-5 pb-16 md:pb-[112px]"
       style={{ fontFamily: 'var(--font-mr-body)' }}>
       <div className="mx-auto max-w-[1180px]">
-        <SectionHead
-          eyebrow="What you can make"
-          title="One place for every kind of keepsake"
-          body="A gift to open, a book to flip through, a letter to keep, a party to shoot."
-        />
+        <SectionHead eyebrow={t.eyebrow} title={t.title} body={t.body} />
 
         <div className="mt-12 grid grid-cols-1 gap-5 md:mt-16 lg:grid-cols-12">
           <Rise delay={0} distance={20} className="lg:col-span-7">
             <Door
-              href="/templates"
+              href={localHref('/templates', lang)}
               tone="ink"
-              title="Website gifts"
-              body="Their story as a series, a playlist, a magazine, a front page or a game. One link, opened on any phone.">
+              title={t.website.title}
+              body={t.website.body}>
               <div className="mt-auto overflow-hidden px-6 md:px-7">
                 <div className="overflow-hidden rounded-t-[16px] border border-b-0 border-white/15">
                   <img
                     src="/home/gift-series.webp"
-                    alt="A website gift made as a streaming series page"
+                    alt={t.website.alt}
                     loading="lazy"
                     decoding="async"
                     className={`h-[220px] w-full origin-top object-cover object-left-top md:h-[300px] ${lean}`}
@@ -134,11 +135,11 @@ export default function HomeProducts() {
 
           <Rise delay={90} distance={14} className="lg:col-span-5">
             <Door
-              href="/memoroll"
+              href={localHref('/memoroll', lang)}
               tone="flame"
-              tag="New"
-              title="MemoRoll"
-              body="A shared disposable camera for your party. Guests shoot, the photos develop when the night is over.">
+              tag={t.newTag}
+              title={t.memoroll.title}
+              body={t.memoroll.body}>
               <div className="relative mt-auto h-[220px] overflow-hidden md:h-[300px]">
                 {[
                   [
@@ -169,32 +170,26 @@ export default function HomeProducts() {
 
           <Rise delay={0} distance={16} className="lg:col-span-4">
             <Door
-              href="/scrapbook"
-              title="Scrapbooks"
-              body="Upload your photos and let the AI lay out a book you can flip through.">
-              <Picture
-                src={c1}
-                alt="Scrapbook pages made from a couple's photos"
-              />
+              href={localHref('/scrapbook', lang)}
+              title={t.scrapbook.title}
+              body={t.scrapbook.body}>
+              <Picture src={c1} alt={t.scrapbook.alt} />
             </Door>
           </Rise>
           <Rise delay={80} distance={12} className="lg:col-span-4">
             <Door
-              href="/journal"
-              title="Journals"
-              body="A love letter written like a research paper: abstract, preamble and all.">
-              <Picture
-                src={c2}
-                alt="A letter laid out as an academic journal"
-              />
+              href={localHref('/journal', lang)}
+              title={t.journal.title}
+              body={t.journal.body}>
+              <Picture src={c2} alt={t.journal.alt} />
             </Door>
           </Rise>
           <Rise delay={140} distance={10} className="lg:col-span-4">
             <Door
-              href="/photobox"
-              title="Photobox"
-              body="A photo booth in the browser, with frames worth printing.">
-              <Picture src={c3} alt="Photo-booth strips with playful frames" />
+              href={localHref('/photobox', lang)}
+              title={t.photobox.title}
+              body={t.photobox.body}>
+              <Picture src={c3} alt={t.photobox.alt} />
             </Door>
           </Rise>
         </div>

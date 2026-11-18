@@ -8,6 +8,8 @@ import { PostHogProvider } from '@/providers/PostHogProvider';
 import { getUserProfile } from '@/action/user-api';
 import type { Metadata } from 'next';
 import { SITE_NAME, SITE_URL } from '@/lib/seo';
+import { PAGE_LANGUAGE_HEADER } from '@/lib/page-language';
+import { headers } from 'next/headers';
 
 /**
  * What every page says unless it says something itself. `metadataBase` is
@@ -36,8 +38,11 @@ export default async function RootLayout({
       })
     : null;
 
+  // English unless the middleware says the page is written in Indonesian.
+  const lang = headers().get(PAGE_LANGUAGE_HEADER) === 'id' ? 'id' : 'en';
+
   return (
-    <html lang="en">
+    <html lang={lang}>
       <head>
         <link rel="shortcut icon" href="/favicon.ico" />
         <link rel="preconnect" href="https://res.cloudinary.com" />

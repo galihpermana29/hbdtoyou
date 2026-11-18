@@ -8,7 +8,6 @@ import { useMemoifySession } from '@/app/session-provider';
 
 import HeroCarousel from './hero-carousel';
 import { useLandingCopy } from './language-provider';
-import LanguageToggle from './language-toggle';
 import RollTimer from './roll-timer';
 import StackedWordmark from './stacked-wordmark';
 
@@ -21,10 +20,8 @@ import StackedWordmark from './stacked-wordmark';
  * hollow, as in the design. Below that the arc is too small to hold them, so
  * it takes a band of its own at the top and the words follow it.
  *
- * The language switch governs the whole page rather than any one part of it,
- * so it stands apart from the words. Down to 1024px it sits in the corner
- * above the arc, where the design leaves sky. Below that the arc fills its
- * band edge to edge, so the switch heads the words instead of covering a print.
+ * The page's language is switched from the navbar, as on every page written
+ * in both languages, so the hero carries no switch of its own.
  */
 
 const AVATARS = [1, 2, 3, 4];
@@ -69,8 +66,6 @@ export default function MemorollHero() {
       </div>
 
       <div className="relative flex flex-col items-center gap-7 px-6 pb-16 pt-6 lg:h-[970px] lg:pb-0 lg:pt-[437px]">
-        <LanguageToggle className="relative z-10 lg:absolute lg:right-8 lg:top-6" />
-
         <StackedWordmark scale={0.6335} />
 
         <h1 className="w-[732px] max-w-full text-center text-[36px] font-bold leading-[40px] tracking-[-1.8px] text-[#1b1b1b] md:text-[56px] md:leading-[56px] md:tracking-[-3px]">

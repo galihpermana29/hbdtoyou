@@ -29,6 +29,10 @@ import { formatNumberWithComma } from '@/lib/utils';
 import { WEDDING_RELEASED } from '@/lib/wedding-release';
 import { removeSession } from '@/store/get-set-session';
 
+import { localHref, type LanguageVersions } from '@/lib/page-language';
+
+import { SITE_COPY, type SiteCopy, type SiteLanguage } from './navbar-copy';
+
 /**
  * The site's navbar, in the MemoRoll design system (owner, 2026-11-17).
  *
@@ -52,6 +56,15 @@ import { removeSession } from '@/store/get-set-session';
  * - the phone's sheet slides in from the right while its backdrop fades;
  * - presses give under the finger (0.97); hover colour only for a pointer
  *   that can hover; reduced motion keeps the fades and drops the travel.
+ *
+ * Language: the address says it (lib/page-language.ts). An Indonesian page
+ * passes `lang="id"`: the bar speaks Indonesian, and its links go to the
+ * Indonesian version of a page where there is one (the logo to `/id`). A page
+ * written in both languages passes its two addresses as `languageSwitch`,
+ * which shows the EN / ID switch (on the bar from `lg`, in the sheet below
+ * it). It is the site's only language switch. Plain links, so crawlers follow
+ * it and the document's `lang`, set on the server, follows the page. The
+ * words are in navbar-copy.ts.
  */
 
 /**
@@ -65,50 +78,39 @@ import { removeSession } from '@/store/get-set-session';
  */
 const UPGRADE_DESTINATION = '/payment?type=premium';
 
+/** A product's name and line are in navbar-copy.ts, under its key. */
 interface Product {
   key: string;
   href: string;
-  name: string;
-  says: string;
   icon: LucideIcon;
-  badge?: string;
+  badge?: boolean;
 }
 
 const PRODUCTS: Product[] = [
   {
     key: 'website-gift',
     href: '/templates',
-    name: 'Website gifts',
-    says: 'A page styled like a series, a playlist or a magazine',
     icon: Gift,
   },
   {
     key: 'scrapbook',
     href: '/scrapbook',
-    name: 'Scrapbook',
-    says: 'Your photos, laid out by Memo-AI',
     icon: BookImage,
   },
   {
     key: 'journal',
     href: '/journal',
-    name: 'Journal',
-    says: 'A letter written like a research paper',
     icon: ScrollText,
   },
   {
     key: 'memoroll',
     href: '/memoroll',
-    name: 'MemoRoll',
-    says: 'A camera for every guest at your event',
     icon: Camera,
-    badge: 'NEW',
+    badge: true,
   },
   {
     key: 'photobox',
     href: '/photobox-newspaper',
-    name: 'Photobox',
-    says: 'A photobooth shot on a newspaper front page',
     icon: Newspaper,
   },
   // Not announced yet: see lib/wedding-release.ts.
@@ -117,8 +119,6 @@ const PRODUCTS: Product[] = [
         {
           key: 'wedding',
           href: '/wedding-invitation',
-          name: 'Wedding invitation',
-          says: 'An invitation your guests open on their phone',
           icon: Heart,
         },
       ]
@@ -300,17 +300,71 @@ function BarMenu({
   );
 }
 
+/**
+ * EN / ID: the page's two addresses, side by side, the one being read on
+ * ink. Plain `<a>`, not next/link: the page is loaded whole, so its
+ * `<html lang>` comes from the server again.
+ */
+function LanguageSwitch({
+  lang,
+  versions,
+  label,
+  className = '',
+}: {
+  lang: SiteLanguage;
+  versions: LanguageVersions;
+  label: string;
+  className?: string;
+}) {
+  return (
+    <div
+      role="group"
+      aria-label={label}
+      className={`items-center rounded-full bg-[#efeae9] p-1 ${className}`}>
+      {(
+        [
+          ['en', 'EN', 'English'],
+          ['id', 'ID', 'Bahasa Indonesia'],
+        ] as const
+      ).map(([code, short, name]) => {
+        const current = code === lang;
+        return (
+          <a
+            key={code}
+            href={versions[code]}
+            hrefLang={code}
+            lang={code}
+            aria-label={name}
+            aria-current={current ? 'page' : undefined}
+            className={`inline-flex h-8 items-center rounded-full px-2.5 text-[13px] font-semibold transition-colors duration-200 ${press} ${
+              current
+                ? 'bg-[#1b1b1b] text-white'
+                : 'text-[#4a4642] [@media(hover:hover)_and_(pointer:fine)]:hover:text-[#1b1b1b]'
+            }`}>
+            {short}
+          </a>
+        );
+      })}
+    </div>
+  );
+}
+
 function ProductRow({
   product,
+  t,
+  lang,
   onPick,
 }: {
   product: Product;
+  t: SiteCopy['nav'];
+  lang: SiteLanguage;
   onPick: () => void;
 }) {
   const Icon = product.icon;
+  const words = t.product[product.key];
   return (
     <Link
-      href={product.href}
+      href={localHref(product.href, lang)}
       onClick={onPick}
       className="flex items-center gap-3 rounded-[14px] p-2.5 transition-colors duration-150 active:bg-[#f5ece1] [@media(hover:hover)_and_(pointer:fine)]:hover:bg-[#fbf4ec]">
       <span className="flex size-10 shrink-0 items-center justify-center rounded-[12px] bg-[#fff0e9]">
@@ -318,18 +372,27 @@ function ProductRow({
       </span>
       <span className="min-w-0">
         <span className="flex items-center text-[15px] font-semibold text-[#1b1b1b]">
-          {product.name}
-          {product.badge ? <NewBadge label={product.badge} /> : null}
+          {words.name}
+          {product.badge ? <NewBadge label={t.newBadge} /> : null}
         </span>
         <span className="mt-0.5 block text-[13px] leading-[1.35] text-[#6b655f]">
-          {product.says}
+          {words.says}
         </span>
       </span>
     </Link>
   );
 }
 
-const NavigationBar = () => {
+const NavigationBar = ({
+  lang = 'en',
+  languageSwitch = null,
+}: {
+  /** The language the page is in: Indonesian on `/id` and below. */
+  lang?: SiteLanguage;
+  /** The page's two addresses, when it has both: shows the EN / ID switch. */
+  languageSwitch?: LanguageVersions | null;
+}) => {
+  const t = SITE_COPY[lang].nav;
   const [sidebar, setSidebar] = useState(false);
   const session = useMemoifySession();
   const userProfile = useMemoifyProfile();
@@ -337,7 +400,7 @@ const NavigationBar = () => {
   const reduce = useCalmMotion();
 
   const isLoggedIn = Boolean(session.accessToken);
-  const displayName = userProfile?.fullname || session.fullName || 'Account';
+  const displayName = userProfile?.fullname || session.fullName || t.account;
   const email = userProfile?.email || session.email || '';
   const initial = displayName.trim().charAt(0).toUpperCase() || 'M';
   const shortName = displayName.trim().split(/\s+/)[0];
@@ -369,6 +432,7 @@ const NavigationBar = () => {
     pathname === href || pathname?.startsWith(`${href}/`);
   const onBar = (href: string) =>
     `${barLink} ${here(href) ? '!text-[#1b1b1b] font-semibold' : ''}`;
+  const to = (href: string) => localHref(href, lang);
 
   const avatar = (size: string) => (
     <span
@@ -382,16 +446,16 @@ const NavigationBar = () => {
   const balance = (onPick: () => void) => (
     <div className="flex items-center justify-between gap-3 rounded-[14px] bg-[#fbf4ec] px-3 py-2.5">
       <p className="text-[13px] leading-[1.4] text-[#4a4642]">
-        <span className="font-semibold text-[#1b1b1b]">{credits}</span> credit
-        {credits === '1' ? '' : 's'} ·{' '}
-        <span className="font-semibold text-[#1b1b1b]">{tokens}</span> token
-        {tokens === '1' ? '' : 's'}
+        <span className="font-semibold text-[#1b1b1b]">{credits}</span>{' '}
+        {t.credits(credits)} ·{' '}
+        <span className="font-semibold text-[#1b1b1b]">{tokens}</span>{' '}
+        {t.tokens(tokens)}
       </p>
       <Link
         href={UPGRADE_DESTINATION}
         onClick={onPick}
         className="shrink-0 text-[13px] font-semibold text-[#e34013] underline underline-offset-2">
-        Get more
+        {t.getMore}
       </Link>
     </div>
   );
@@ -405,7 +469,7 @@ const NavigationBar = () => {
         suppressHydrationWarning
         className="flex h-full w-full items-center justify-between gap-4 px-4 sm:px-6 xl:px-8">
         <div className="flex min-w-0 items-center gap-4 xl:gap-6">
-          <Link href="/" className="shrink-0" aria-label="Memoify home">
+          <Link href={to('/')} className="shrink-0" aria-label={t.home}>
             <Image
               src="https://res.cloudinary.com/dfwrmapr4/image/upload/v1789303095/placeholder/69b085d3b98c04a8b06e3e58ecfa136e95641109_ynodbj.png"
               alt="Memoify"
@@ -417,43 +481,53 @@ const NavigationBar = () => {
 
           <nav
             className="hidden items-center gap-1 lg:flex"
-            aria-label="Primary navigation">
+            aria-label={t.primary}>
             <BarMenu
-              label="Products"
+              label={t.products}
               hover
               width="w-[340px]"
               buttonClass={barLink}
-              button="Products">
+              button={t.products}>
               {(close) => (
                 <div className="flex flex-col">
                   {PRODUCTS.map((product) => (
                     <ProductRow
                       key={product.key}
                       product={product}
+                      t={t}
+                      lang={lang}
                       onPick={close}
                     />
                   ))}
                 </div>
               )}
             </BarMenu>
-            <Link href="/memoroll" className={onBar('/memoroll')}>
+            <Link href={to('/memoroll')} className={onBar(to('/memoroll'))}>
               MemoRoll
-              <NewBadge label="NEW" />
+              <NewBadge label={t.newBadge} />
             </Link>
             <Link href="/inspiration" className={onBar('/inspiration')}>
-              Inspiration
+              {t.inspiration}
             </Link>
             <Link href={UPGRADE_DESTINATION} className={onBar('/payment')}>
-              Upgrade
+              {t.upgrade}
             </Link>
           </nav>
         </div>
 
         <div className="flex shrink-0 items-center gap-2 sm:gap-3">
+          {languageSwitch ? (
+            <LanguageSwitch
+              lang={lang}
+              versions={languageSwitch}
+              label={t.language}
+              className="hidden lg:flex"
+            />
+          ) : null}
           {isLoggedIn ? (
             <div className="hidden sm:block">
               <BarMenu
-                label={`Open account menu for ${displayName}`}
+                label={t.accountMenu(displayName)}
                 align="right"
                 width="w-[280px]"
                 buttonClass={`inline-flex h-10 items-center gap-2 rounded-full border border-[rgba(33,33,33,0.16)] bg-[#fffdfa] pl-1 pr-2.5 text-[#4a4642] ${press}`}
@@ -478,14 +552,14 @@ const NavigationBar = () => {
                     {balance(close)}
                     <Link href="/dashboard" onClick={close} className={menuRow}>
                       <House size={17} aria-hidden className="text-[#6b655f]" />
-                      Dashboard
+                      {t.dashboard}
                     </Link>
                     <Link
                       href={UPGRADE_DESTINATION}
                       onClick={close}
                       className={menuRow}>
                       <Zap size={17} aria-hidden className="text-[#6b655f]" />
-                      Upgrade plan
+                      {t.upgradePlan}
                     </Link>
                     <span className="mx-2 my-1 h-px bg-[#e8ded3]" />
                     <button
@@ -493,7 +567,7 @@ const NavigationBar = () => {
                       onClick={logOut}
                       className={`${menuRow} !text-[#c2330b]`}>
                       <LogOut size={17} aria-hidden />
-                      Log out
+                      {t.logOut}
                     </button>
                   </div>
                 )}
@@ -504,7 +578,7 @@ const NavigationBar = () => {
               type="button"
               className={`hidden h-10 items-center rounded-full border border-[rgba(33,33,33,0.2)] bg-[#fffdfa] px-4 text-[14px] font-semibold text-[#1b1b1b] lg:inline-flex ${press}`}
               onClick={() => signIn('google')}>
-              Sign in
+              {t.signIn}
             </button>
           )}
 
@@ -513,12 +587,12 @@ const NavigationBar = () => {
             prefetch
             className={`hidden h-10 items-center gap-2 rounded-full bg-[#ff3e09] px-4 text-[14px] font-semibold text-white shadow-[inset_2px_3px_3.2px_rgba(255,255,255,0.25)] md:inline-flex ${press}`}>
             <Gift size={16} aria-hidden="true" />
-            Create a gift
+            {t.create}
           </Link>
 
           <button
             type="button"
-            aria-label={sidebar ? 'Close menu' : 'Open menu'}
+            aria-label={sidebar ? t.closeMenu : t.openMenu}
             aria-expanded={sidebar}
             aria-controls="mobile-navigation"
             className={`inline-flex size-10 items-center justify-center rounded-full border border-[rgba(33,33,33,0.16)] text-[#1b1b1b] lg:hidden ${press}`}
@@ -533,7 +607,7 @@ const NavigationBar = () => {
           <div className="fixed inset-x-0 bottom-0 top-[calc(5rem+var(--site-strip,0px))] z-[110] lg:hidden">
             <motion.button
               type="button"
-              aria-label="Close navigation"
+              aria-label={t.closeNavigation}
               className="absolute inset-0 bg-[#1b1b1b]/40"
               initial={{ opacity: 0 }}
               animate={{ opacity: 1 }}
@@ -543,7 +617,7 @@ const NavigationBar = () => {
             />
             <motion.aside
               id="mobile-navigation"
-              aria-label="Mobile navigation"
+              aria-label={t.mobile}
               className="absolute bottom-0 right-0 top-0 flex w-full max-w-[380px] flex-col border-l border-[#e8ded3] bg-[#fffdfa]"
               initial={
                 reduce ? { opacity: 0 } : { transform: 'translateX(100%)' }
@@ -566,35 +640,51 @@ const NavigationBar = () => {
                   onClick={() => setSidebar(false)}
                   className={`flex h-12 w-full items-center justify-center gap-2 rounded-full bg-[#ff3e09] px-4 text-[16px] font-semibold text-white shadow-[inset_2px_3px_3.2px_rgba(255,255,255,0.25)] ${press}`}>
                   <Gift size={17} aria-hidden />
-                  Create a gift
+                  {t.create}
                 </Link>
 
+                {languageSwitch ? (
+                  <div className="mt-4 flex items-center justify-between gap-3 px-3">
+                    <span className="text-[11px] font-bold uppercase tracking-[0.12em] text-[#8a847d]">
+                      {t.language}
+                    </span>
+                    <LanguageSwitch
+                      lang={lang}
+                      versions={languageSwitch}
+                      label={t.language}
+                      className="flex"
+                    />
+                  </div>
+                ) : null}
+
                 <p className="mb-1 mt-6 px-3 text-[11px] font-bold uppercase tracking-[0.12em] text-[#8a847d]">
-                  Make
+                  {t.make}
                 </p>
                 <div className="flex flex-col">
                   {PRODUCTS.map((product) => (
                     <ProductRow
                       key={product.key}
                       product={product}
+                      t={t}
+                      lang={lang}
                       onPick={() => setSidebar(false)}
                     />
                   ))}
                 </div>
 
                 <p className="mb-1 mt-6 px-3 text-[11px] font-bold uppercase tracking-[0.12em] text-[#8a847d]">
-                  Explore
+                  {t.explore}
                 </p>
                 <Link
                   href="/inspiration"
                   onClick={() => setSidebar(false)}
                   className={menuRow}>
                   <Lightbulb size={17} aria-hidden className="text-[#e34013]" />
-                  Inspiration
+                  {t.inspiration}
                 </Link>
 
                 <p className="mb-1 mt-6 px-3 text-[11px] font-bold uppercase tracking-[0.12em] text-[#8a847d]">
-                  Account
+                  {t.account}
                 </p>
                 {isLoggedIn ? (
                   <div className="flex flex-col gap-1">
@@ -615,21 +705,21 @@ const NavigationBar = () => {
                       onClick={() => setSidebar(false)}
                       className={menuRow}>
                       <House size={17} aria-hidden className="text-[#6b655f]" />
-                      Dashboard
+                      {t.dashboard}
                     </Link>
                     <Link
                       href={UPGRADE_DESTINATION}
                       onClick={() => setSidebar(false)}
                       className={menuRow}>
                       <Zap size={17} aria-hidden className="text-[#6b655f]" />
-                      Upgrade
+                      {t.upgrade}
                     </Link>
                     <button
                       type="button"
                       onClick={logOut}
                       className={`${menuRow} !text-[#c2330b]`}>
                       <LogOut size={17} aria-hidden />
-                      Log out
+                      {t.logOut}
                     </button>
                   </div>
                 ) : (
@@ -639,13 +729,13 @@ const NavigationBar = () => {
                       onClick={() => setSidebar(false)}
                       className={menuRow}>
                       <Zap size={17} aria-hidden className="text-[#e34013]" />
-                      Upgrade
+                      {t.upgrade}
                     </Link>
                     <button
                       type="button"
                       className={`mt-2 h-12 w-full rounded-full border border-[rgba(33,33,33,0.2)] bg-[#fffdfa] text-[16px] font-semibold text-[#1b1b1b] ${press}`}
                       onClick={() => signIn('google')}>
-                      Sign in with Google
+                      {t.signInGoogle}
                     </button>
                   </div>
                 )}

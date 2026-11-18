@@ -1,38 +1,24 @@
 import RollingNumber from '@/components/memoroll/landing/rolling-number';
 
+import { HOME_COPY, type HomeLanguage } from './copy';
 import { Rise } from './ui';
 
 /**
  * Three figures, rolling into place like an odometer when they are seen
  * (MemoRoll's own RollingNumber). The labels do not move: only the number
- * is the news.
+ * is the news. The figures and their words are in copy.ts, because
+ * Indonesian writes 9,000 as 9.000.
  */
-const FIGURES = [
-  {
-    value: '9,000+',
-    label: 'people have joined',
-    note: 'and made something for someone',
-  },
-  {
-    value: '1,000+',
-    label: 'went Premium',
-    note: 'to make more, on every style',
-  },
-  {
-    value: '15+',
-    label: 'styles to start from',
-    note: 'with new ones added often',
-  },
-];
 
-export default function HomeStats() {
+export default function HomeStats({ lang = 'en' }: { lang?: HomeLanguage }) {
+  const t = HOME_COPY[lang].stats;
   return (
     <section
-      aria-label="Memoify in numbers"
+      aria-label={t.label}
       className="bg-[#fffdfa] px-5 py-16 md:py-[96px]"
       style={{ fontFamily: 'var(--font-mr-body)' }}>
       <div className="mx-auto grid max-w-[1180px] grid-cols-1 gap-10 border-y border-[#e8ded3] py-12 md:grid-cols-3 md:gap-6 md:py-14">
-        {FIGURES.map((figure, index) => (
+        {t.figures.map((figure, index) => (
           <Rise
             key={figure.label}
             delay={[0, 80, 140][index]}

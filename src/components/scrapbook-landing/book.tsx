@@ -6,6 +6,10 @@ import { useEffect, useRef, useState } from 'react';
 import { BeatPills } from '@/components/home/beat';
 import { useCalmMotion } from '@/lib/use-calm-motion';
 
+import type { PageLanguage } from '@/lib/page-language';
+
+import { SCRAPBOOK_COPY } from './copy';
+
 /**
  * The scrapbook landing's signature: an open scrapbook that turns its own
  * pages, each spread a different style.
@@ -37,7 +41,6 @@ export interface Style {
    * scrapbook/create/page.tsx, and the note in lib/template-thumbnail.ts).
    */
   route: string;
-  alt: string;
 }
 
 export const STYLES: Style[] = [
@@ -45,37 +48,31 @@ export const STYLES: Style[] = [
     key: 'garden',
     name: 'Garden',
     route: 'scrapbook1',
-    alt: 'A scrapbook spread of photos among pressed flowers',
   },
   {
     key: 'sweet',
     name: 'Sweetheart',
     route: 'scrapbook2',
-    alt: 'A scrapbook spread with taped frames, a ribbon and a cassette',
   },
   {
     key: 'folder',
     name: 'Case file',
     route: 'scrapbook7',
-    alt: 'A scrapbook spread made like a paper folder of notes',
   },
   {
     key: 'rose',
     name: 'Rosé',
     route: 'scrapbook8',
-    alt: 'A pink scrapbook spread with oval frames and a wax seal',
   },
   {
     key: 'retro',
     name: 'Mixtape',
     route: 'scrapbook6',
-    alt: 'A red scrapbook spread with a cassette and ticket stubs',
   },
   {
     key: 'vintage',
     name: 'Vintage',
     route: 'scrapbook3',
-    alt: 'A scrapbook spread with a letter and a gilded frame',
   },
 ];
 
@@ -104,11 +101,14 @@ export default function ScrapbookBook({
   active,
   onNext,
   onJump,
+  lang = 'en',
 }: {
   active: number;
   onNext: () => void;
   onJump: (index: number) => void;
+  lang?: PageLanguage;
 }) {
+  const t = SCRAPBOOK_COPY[lang].book;
   const reduce = useCalmMotion();
   const frame = useRef<HTMLDivElement>(null);
   const onScreen = useInView(frame, { amount: 0.35 });
@@ -151,7 +151,7 @@ export default function ScrapbookBook({
         <button
           type="button"
           onClick={onNext}
-          aria-label={`${STYLES[active].alt}. Turn the page`}
+          aria-label={`${t.alts[STYLES[active].key]}. ${t.turn}`}
           className="relative block aspect-[900/600] w-full overflow-hidden rounded-[8px] bg-[#fffdfa] md:rounded-[10px]"
           style={{ perspective: 1800 }}>
           <span className="absolute inset-y-0 left-0 w-1/2">
@@ -213,10 +213,11 @@ export default function ScrapbookBook({
           key={STYLES[active].key}
           className="home-enter text-[13px] font-semibold text-[#4a4642]"
           style={{ ['--rise' as string]: '0px' }}>
-          Style: <span className="text-[#e34013]">{STYLES[active].name}</span>
+          {t.style}:{' '}
+          <span className="text-[#e34013]">{STYLES[active].name}</span>
         </p>
         <BeatPills
-          labels={STYLES.map((style) => `Show the ${style.name} style`)}
+          labels={STYLES.map((style) => t.show(style.name))}
           active={active}
           running={running && toward === null}
           still={reduce}

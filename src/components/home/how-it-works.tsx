@@ -4,6 +4,7 @@ import { useInView } from 'framer-motion';
 import { QRCodeSVG } from 'qrcode.react';
 import { useRef, type ReactNode } from 'react';
 
+import { HOME_COPY, type HomeLanguage } from './copy';
 import { EASE_IN_OUT, Rise, SectionHead } from './ui';
 
 /**
@@ -48,7 +49,12 @@ function Step({
   );
 }
 
-export default function HomeHowItWorks() {
+export default function HomeHowItWorks({
+  lang = 'en',
+}: {
+  lang?: HomeLanguage;
+}) {
+  const t = HOME_COPY[lang].how;
   const row = useRef<HTMLDivElement>(null);
   const seen = useInView(row, { once: true, margin: '0px 0px -20% 0px' });
 
@@ -58,11 +64,7 @@ export default function HomeHowItWorks() {
       className="scroll-mt-[81px] bg-[#fffdfa] px-5 py-16 md:py-[112px]"
       style={{ fontFamily: 'var(--font-mr-body)' }}>
       <div className="mx-auto max-w-[1180px]">
-        <SectionHead
-          eyebrow="How it works"
-          title="Three steps. No design skills."
-          body="You bring the photos and the inside jokes. The template does the rest."
-        />
+        <SectionHead eyebrow={t.eyebrow} title={t.title} body={t.body} />
 
         <div ref={row} className="relative mt-12 md:mt-16">
           <span
@@ -76,8 +78,8 @@ export default function HomeHowItWorks() {
           <div className="flex flex-col gap-5 lg:flex-row">
             <Step
               number="01"
-              title="Pick a style"
-              body="A series page, a playlist, a magazine, a scrapbook, a game. Start from the one that sounds like them."
+              title={t.pick.title}
+              body={t.pick.body}
               delay={0}
               distance={20}>
               <div className="relative h-[120px] w-[190px]">
@@ -106,16 +108,16 @@ export default function HomeHowItWorks() {
 
             <Step
               number="02"
-              title="Add your photos and words"
-              body="Upload pictures, write the captions, drop in a song. A form, not a design tool."
+              title={t.add.title}
+              body={t.add.body}
               delay={90}
               distance={14}>
               <div className="flex w-full max-w-[250px] flex-col gap-2 px-4">
                 <div className="rounded-[12px] border border-black/15 bg-white px-3 py-2 text-[12px] text-[#1b1b1b]">
-                  Happy birthday, Sarah
+                  {t.add.greeting}
                 </div>
                 <div className="rounded-[12px] border border-black/15 bg-white px-3 py-2 text-[12px] text-[#8a847d]">
-                  Remember that night in Bandung…
+                  {t.add.memory}
                 </div>
                 <div className="flex gap-2">
                   {['series', 'scrapbook', 'magazine'].map((name) => (
@@ -137,8 +139,8 @@ export default function HomeHowItWorks() {
 
             <Step
               number="03"
-              title="Send one link"
-              body="Copy the link, share it, or print the QR code on a card. It opens on any phone, no app."
+              title={t.send.title}
+              body={t.send.body}
               delay={150}
               distance={10}>
               <div className="flex items-center gap-4">
@@ -147,15 +149,15 @@ export default function HomeHowItWorks() {
                     value="https://memoify.live"
                     size={92}
                     fgColor="#1b1b1b"
-                    aria-label="A QR code that opens memoify.live"
+                    aria-label={t.send.qr}
                   />
                 </div>
                 <div className="flex flex-col gap-2">
                   <span className="rounded-full border border-black/15 bg-white px-3 py-[6px] text-[11px] text-[#1b1b1b]">
-                    memoify.live/for-sarah
+                    {t.send.address}
                   </span>
                   <span className="w-fit rounded-full bg-[#ff3e09] px-3 py-[6px] text-[11px] font-semibold text-white">
-                    Share gift
+                    {t.send.share}
                   </span>
                 </div>
               </div>

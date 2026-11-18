@@ -6,6 +6,7 @@ import { useState } from 'react';
 
 import type { NewTemplate } from '@/lib/new-template';
 
+import { HOME_COPY, type HomeCopy, type HomeLanguage } from './copy';
 import { Rise, press } from './ui';
 
 /**
@@ -30,7 +31,7 @@ import { Rise, press } from './ui';
 const SCREEN = { width: 390, height: 780 };
 const SCALE = 0.7;
 
-function Phone({ fresh }: { fresh: NewTemplate }) {
+function Phone({ fresh, t }: { fresh: NewTemplate; t: HomeCopy['fresh'] }) {
   const [playing, setPlaying] = useState(false);
   return (
     <div className="flex flex-col items-center gap-3">
@@ -43,7 +44,7 @@ function Phone({ fresh }: { fresh: NewTemplate }) {
         {playing ? (
           <iframe
             src={fresh.sample}
-            title={`${fresh.name}, a sample you can play`}
+            title={t.frame(fresh.name)}
             width={SCREEN.width}
             height={SCREEN.height}
             className="origin-top-left border-0"
@@ -53,7 +54,7 @@ function Phone({ fresh }: { fresh: NewTemplate }) {
           <button
             type="button"
             onClick={() => setPlaying(true)}
-            aria-label={`Try ${fresh.name} here`}
+            aria-label={t.tryLabel(fresh.name)}
             className="group relative block h-full w-full">
             {fresh.poster ? (
               <img
@@ -68,7 +69,7 @@ function Phone({ fresh }: { fresh: NewTemplate }) {
             <span
               className={`absolute left-1/2 top-1/2 flex -translate-x-1/2 -translate-y-1/2 items-center gap-2 whitespace-nowrap rounded-full bg-[#ff3e09] py-3 pl-4 pr-5 text-[15px] font-semibold text-white shadow-[0_12px_28px_-8px_rgba(255,62,9,0.9)] transition-transform duration-[160ms] ease-[cubic-bezier(0.23,1,0.32,1)] group-active:scale-[0.96]`}>
               <Play aria-hidden size={16} fill="currentColor" />
-              Try it here
+              {t.tryHere}
             </span>
           </button>
         )}
@@ -79,29 +80,35 @@ function Phone({ fresh }: { fresh: NewTemplate }) {
           onClick={() => setPlaying(false)}
           className={`inline-flex h-9 items-center gap-1.5 rounded-full border border-white/20 px-3.5 text-[13px] font-semibold text-[#f4efe6] ${press}`}>
           <X aria-hidden size={14} />
-          Stop
+          {t.stop}
         </button>
       ) : (
-        <p className="h-9 text-[13px] leading-9 text-[#a39b91]">
-          It plays right here, sound and all
-        </p>
+        <p className="h-9 text-[13px] leading-9 text-[#a39b91]">{t.plays}</p>
       )}
     </div>
   );
 }
 
-export default function HomeNewTemplate({ fresh }: { fresh: NewTemplate }) {
+export default function HomeNewTemplate({
+  fresh,
+  lang = 'en',
+}: {
+  fresh: NewTemplate;
+  lang?: HomeLanguage;
+}) {
+  const t = HOME_COPY[lang].fresh;
+  const words = lang === 'id' ? fresh.indonesian : fresh;
   return (
     <section
       id="new"
-      aria-label={`New: ${fresh.name}`}
+      aria-label={t.section(fresh.name)}
       className="scroll-mt-[97px] bg-[#fffdfa] px-5 pt-16 md:pt-[96px]"
       style={{ fontFamily: 'var(--font-mr-body)' }}>
       <div className="mx-auto flex max-w-[1180px] flex-col items-center gap-10 overflow-hidden rounded-[32px] bg-[#1b1b1b] px-6 py-12 md:px-12 lg:flex-row lg:justify-between lg:gap-12 lg:py-16">
         <div className="flex max-w-[520px] flex-col items-center text-center lg:items-start lg:text-left">
           <Rise>
             <span className="inline-flex items-center gap-2 rounded-full bg-[#ff3e09] px-3 py-1.5 text-[12px] font-bold uppercase tracking-[0.14em] text-white">
-              Just dropped
+              {t.tag}
             </span>
           </Rise>
           <Rise delay={70} distance={18}>
@@ -113,10 +120,10 @@ export default function HomeNewTemplate({ fresh }: { fresh: NewTemplate }) {
             <p
               className="mt-2 text-[30px] leading-[1.1] text-[#ff8a5c] md:text-[34px]"
               style={{ fontFamily: 'var(--font-mr-hand)' }}>
-              {fresh.says}
+              {words.says}
             </p>
             <p className="mt-4 text-[16px] leading-[1.65] text-[#cfc7bd] md:text-[18px]">
-              {fresh.body}
+              {words.body}
             </p>
           </Rise>
           <Rise
@@ -127,7 +134,7 @@ export default function HomeNewTemplate({ fresh }: { fresh: NewTemplate }) {
               href={`/create?template=${fresh.id}`}
               prefetch={false}
               className={`group inline-flex h-12 items-center justify-center gap-2 rounded-full bg-[#ff3e09] px-7 text-[16px] font-semibold text-white shadow-[inset_2px_3px_3.2px_rgba(255,255,255,0.25)] md:h-14 md:text-[17px] ${press}`}>
-              Make one
+              {t.make}
               <ArrowRight
                 aria-hidden
                 className="size-4 transition-transform duration-200 ease-[cubic-bezier(0.23,1,0.32,1)] group-hover:translate-x-0.5"
@@ -137,18 +144,18 @@ export default function HomeNewTemplate({ fresh }: { fresh: NewTemplate }) {
               href={fresh.sample}
               target="_blank"
               className={`inline-flex h-12 items-center justify-center rounded-full border border-white/25 px-7 text-[16px] font-semibold text-[#fbf4ec] md:h-14 md:text-[17px] ${press}`}>
-              Open the sample
+              {t.sample}
             </Link>
           </Rise>
         </div>
 
         <Rise delay={160} distance={28} className="shrink-0">
           {fresh.playable ? (
-            <Phone fresh={fresh} />
+            <Phone fresh={fresh} t={t} />
           ) : fresh.thumbnail ? (
             <img
               src={fresh.thumbnail}
-              alt={`${fresh.name}, as it looks when opened`}
+              alt={t.still(fresh.name)}
               loading="lazy"
               decoding="async"
               className="w-full max-w-[520px] rounded-[20px] border border-white/10"

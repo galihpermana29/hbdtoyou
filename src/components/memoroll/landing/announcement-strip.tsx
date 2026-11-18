@@ -15,10 +15,6 @@ import LiveDot from './live-dot';
  * The strip carries a long line and a short one and shows one of them by the
  * screen's width. Only the line on screen flips: the other would be running
  * its timers and re-rendering its letters for nobody.
- *
- * Switching the page's language flips the board to the new line, the same way
- * a re-flip does. Where the board is not flipping, under reduced motion or on
- * the line that is not on screen, the letters simply change.
  */
 
 const GLYPHS = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789';

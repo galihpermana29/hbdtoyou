@@ -4,7 +4,10 @@ import { AnimatePresence, motion, useInView } from 'framer-motion';
 import { useEffect, useRef, useState, type CSSProperties } from 'react';
 
 import { BeatPills } from '@/components/home/beat';
+import type { PageLanguage } from '@/lib/page-language';
 import { useCalmMotion } from '@/lib/use-calm-motion';
+
+import { JOURNAL_COPY } from './copy';
 
 /**
  * The journal landing's signature: a plain feeling becomes a paper.
@@ -26,6 +29,7 @@ import { useCalmMotion } from '@/lib/use-calm-motion';
  *   travel, the highlighter draw and the autoplay.
  *
  * The papers are examples written for this page, not anyone's journal.
+ * They are in copy.ts, one set per language.
  */
 
 export interface Paper {
@@ -40,48 +44,6 @@ export interface Paper {
   abstract: [string, string, string];
   keywords: string;
 }
-
-export const PAPERS: Paper[] = [
-  {
-    key: 'love',
-    word: 'a love letter',
-    meant: 'i love you, that’s it',
-    title: 'On Loving You: A Five-Year Longitudinal Study',
-    author: 'Raka A. · Department of Us',
-    abstract: [
-      'This paper examines why ordinary days improve when you are in them. ',
-      'The effect is significant, consistent,',
-      ' and shows no sign of wearing off.',
-    ],
-    keywords: 'love, home, you',
-  },
-  {
-    key: 'apology',
-    word: 'an apology',
-    meant: 'sorry i forgot our anniversary',
-    title: 'A Formal Review of My Mistake on the 14th',
-    author: 'Dimas P. · Faculty of Knowing Better',
-    abstract: [
-      'The author forgot an important date. This study reviews what went wrong, ',
-      'accepts full responsibility,',
-      ' and proposes dinner as a first correction.',
-    ],
-    keywords: 'sorry, dinner, never again',
-  },
-  {
-    key: 'birthday',
-    word: 'a birthday wish',
-    meant: 'happy birthday bestie!!',
-    title: 'Twenty-Five Years of Dinda: A Review of the Evidence',
-    author: 'Sasa K. · Institute of Best Friends',
-    abstract: [
-      'Across 25 years of data, the subject remains ',
-      'the funniest person in every room.',
-      ' This paper recommends cake, and many more years.',
-    ],
-    keywords: 'birthday, cake, bestie',
-  },
-];
 
 const BEAT_MS = 5200;
 
@@ -107,11 +69,14 @@ export default function JournalPaper({
   active,
   onNext,
   onJump,
+  lang = 'en',
 }: {
   active: number;
   onNext: () => void;
   onJump: (index: number) => void;
+  lang?: PageLanguage;
 }) {
+  const t = JOURNAL_COPY[lang].paper;
   const reduce = useCalmMotion();
   const frame = useRef<HTMLDivElement>(null);
   const onScreen = useInView(frame, { amount: 0.35 });
@@ -121,7 +86,7 @@ export default function JournalPaper({
     setFine(window.matchMedia('(hover: hover) and (pointer: fine)').matches);
   }, []);
 
-  const paper = PAPERS[active];
+  const paper = t.papers[active];
   const running = !reduce && onScreen && !hovered;
 
   return (
@@ -129,7 +94,7 @@ export default function JournalPaper({
       <div
         ref={frame}
         role="group"
-        aria-label="An example of a letter written as a research paper"
+        aria-label={t.label}
         onPointerEnter={() => fine && setHovered(true)}
         onPointerLeave={() => setHovered(false)}
         className="relative px-3 pt-[64px] md:px-6">
@@ -146,10 +111,10 @@ export default function JournalPaper({
         <button
           type="button"
           onClick={onNext}
-          aria-label={`${paper.title}. Show the next example`}
+          aria-label={`${paper.title}. ${t.next}`}
           className="relative block w-full rounded-[6px] border border-[#e0d6ca] bg-white px-5 pb-7 pt-5 text-left shadow-[0_28px_56px_-28px_rgba(90,42,18,0.4)] md:px-9 md:pb-9 md:pt-7">
           <span className="paper-serif flex items-center justify-between border-b border-[#1b1b1b] pb-2 text-[9px] uppercase tracking-[0.14em] text-[#1b1b1b] md:text-[10px]">
-            <span>Journal of Heartfelt Communication</span>
+            <span>{t.journal}</span>
             <span className="hidden sm:inline">Vol. 1 · No. 1</span>
           </span>
 
@@ -173,7 +138,7 @@ export default function JournalPaper({
                 </span>
                 <span className="home-enter mt-5 block" style={at(140, 8)}>
                   <span className="block text-center text-[12px] font-bold text-[#1b1b1b] md:text-[13px]">
-                    Abstract
+                    {t.abstract}
                   </span>
                   <span className="mt-2 block text-[13px] leading-[1.7] text-[#35302b] md:text-[14px]">
                     {paper.abstract[0]}
@@ -193,7 +158,7 @@ export default function JournalPaper({
                   className="home-enter mt-3 block text-[12px] text-[#6b655f] md:text-[13px]"
                   style={at(180, 0)}>
                   <span className="font-bold italic text-[#1b1b1b]">
-                    Keywords:
+                    {t.keywords}
                   </span>{' '}
                   {paper.keywords}
                 </span>
@@ -215,12 +180,12 @@ export default function JournalPaper({
             <span
               className="text-[20px] leading-none tracking-[1.5px] md:text-[24px]"
               style={{ fontFamily: 'var(--font-mr-badge)' }}>
-              ACCEPTED
+              {t.accepted}
             </span>
             <span
               className="mt-0.5 text-[8px] tracking-[1.4px] md:text-[9px]"
               style={{ fontFamily: 'var(--font-mr-label)' }}>
-              REVIEWED WITH LOVE
+              {t.reviewed}
             </span>
           </span>
         </button>
@@ -234,7 +199,7 @@ export default function JournalPaper({
           <span
             className="block text-[9px] tracking-[1.4px] text-[#e34013]"
             style={{ fontFamily: 'var(--font-mr-label)' }}>
-            WHAT YOU MEANT
+            {t.meant}
           </span>
           <span
             className="mt-0.5 block text-[22px] leading-[1.05] text-[#1b1b1b] md:text-[24px]"
@@ -246,7 +211,7 @@ export default function JournalPaper({
 
       <div className="mt-6">
         <BeatPills
-          labels={PAPERS.map((entry) => `Show ${entry.word} as a paper`)}
+          labels={t.papers.map((entry) => t.show(entry.word))}
           active={active}
           running={running}
           still={reduce}
