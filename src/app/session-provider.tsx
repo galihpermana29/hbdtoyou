@@ -160,7 +160,7 @@ const promotionalContent: AdContent[] = [
  *
  * `/memoroll` covers MemoRoll's landing and its screens beneath it: the
  * landing introduces one product, and a modal selling another over it
- * would talk over its own pitch. `/id/memoroll` is the same landing in
+ * would talk over its own pitch. `/id/kamera-tamu-pernikahan` is the same landing in
  * Indonesian.
  */
 const PRODUCT_ROUTES_WITHOUT_ADS = [
@@ -169,8 +169,6 @@ const PRODUCT_ROUTES_WITHOUT_ADS = [
   '/scrapbook/create',
   '/journal/create',
   '/memoroll',
-  '/id/memoroll',
-  // The same landing, written for the wedding-guest-camera search.
   '/id/kamera-tamu-pernikahan',
 ];
 

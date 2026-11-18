@@ -1,28 +1,31 @@
 import MemorollLanding, {
-  memorollVariantMetadata,
-  memorollVariantStructuredData,
+  memorollMetadata,
+  memorollStructuredData,
 } from '@/components/memoroll/landing/memoroll-landing';
 
 /**
- * "Kamera tamu pernikahan": the MemoRoll landing, worded for that search
- * (components/memoroll/landing/copy.tsx). The same sections, pictures and
- * motion as `/id/memoroll`; Indonesian only.
+ * The MemoRoll landing in Indonesian. Its address is what people search
+ * for, a camera for wedding guests, rather than `/id/memoroll` (which
+ * redirects here, next.config.mjs). The document's `lang="id"`, the
+ * Indonesian footer and the navbar's language follow from the address
+ * (lib/page-language.ts).
  */
-export const metadata = memorollVariantMetadata('wedding');
+export const metadata = memorollMetadata('id');
 
-export default function WeddingGuestCameraPage() {
+export default function IndonesianMemorollLandingPage() {
   return (
     <>
       {/* Read by search engines, drawn by nobody. */}
       <script
         type="application/ld+json"
         dangerouslySetInnerHTML={{
-          __html: JSON.stringify(
-            memorollVariantStructuredData('wedding')
-          ).replace(/</g, '\\u003c'),
+          __html: JSON.stringify(memorollStructuredData('id')).replace(
+            /</g,
+            '\\u003c'
+          ),
         }}
       />
-      <MemorollLanding language="id" variant="wedding" />
+      <MemorollLanding language="id" />
     </>
   );
 }

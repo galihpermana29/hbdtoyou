@@ -2,18 +2,10 @@
 
 import { createContext, useContext, type ReactNode } from 'react';
 
-import {
-  LANDING_COPY,
-  LANDING_VARIANTS,
-  type LandingCopy,
-  type LandingVariant,
-} from './copy';
+import { LANDING_COPY, type LandingCopy } from './copy';
 import type { LandingLanguage } from './language';
 
-const LanguageContext = createContext<{
-  language: LandingLanguage;
-  variant?: LandingVariant;
-} | null>(null);
+const LanguageContext = createContext<LandingLanguage | null>(null);
 
 /**
  * Holds the landing's language, which the page's address decided on the
@@ -24,22 +16,15 @@ const LanguageContext = createContext<{
  */
 export function LandingLanguageProvider({
   language,
-  variant,
   className,
   children,
 }: {
   language: LandingLanguage;
-  /**
-   * The landing written for one search (copy.tsx). Named, not passed as
-   * words: the words hold functions and markup, which cannot cross from the
-   * server to here.
-   */
-  variant?: LandingVariant;
   className?: string;
   children: ReactNode;
 }) {
   return (
-    <LanguageContext.Provider value={{ language, variant }}>
+    <LanguageContext.Provider value={language}>
       <div lang={language} className={className}>
         {children}
       </div>
@@ -49,13 +34,11 @@ export function LandingLanguageProvider({
 
 /** Everything the landing says, already in the right language. */
 export function useLandingCopy(): LandingCopy {
-  const page = useContext(LanguageContext);
-  if (!page) {
+  const language = useContext(LanguageContext);
+  if (!language) {
     throw new Error(
       'The MemoRoll landing’s language was asked for outside LandingLanguageProvider.'
     );
   }
-  return page.variant
-    ? LANDING_VARIANTS[page.variant]
-    : LANDING_COPY[page.language];
+  return LANDING_COPY[language];
 }

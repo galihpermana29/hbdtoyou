@@ -550,18 +550,19 @@ const ID: LandingCopy = {
 };
 
 /**
- * The landing as the answer to one search: a camera for wedding guests
- * ("kamera tamu pernikahan", "disposable camera pernikahan"). It is the
- * Indonesian landing with the words a couple planning a wedding would look
- * for, at `/id/kamera-tamu-pernikahan`; the sections, pictures and motion
- * are the landing's own, untouched.
+ * The Indonesian landing as it is published, at `/id/kamera-tamu-pernikahan`.
  *
- * Only what is said changes, and only where the occasion matters: the hero,
- * the idea's opening, where the QR goes, the occasions' heading and the
- * questions. Every claim is still one the general copy makes (QR, no
- * install, 10 to 15 Shots, no retake, blurred until Reveal, the 500m venue
- * lock, free with the Wedding Plan); the two comparisons in the questions
- * say only what follows from those.
+ * In Indonesian, MemoRoll is found by people planning a wedding, searching
+ * for a camera for their guests ("kamera tamu pernikahan", "disposable
+ * camera pernikahan"), so the page is named for that search and worded for
+ * it (owner, 2026-11-19). `ID` above is the plain translation of the
+ * English; this says the same things to a couple: the hero, the idea's
+ * opening, where the QR goes, the occasions' heading and the questions.
+ *
+ * Every claim is still one the English makes (QR, no install, 10 to 15
+ * Shots, no retake, blurred until Reveal, the 500m venue lock, free with
+ * the Wedding Plan); the comparison with a disposable camera says only what
+ * follows from those.
  *
  * The occasions' three cards keep their order and their subjects, because
  * each sits beside its own photograph.
@@ -670,11 +671,7 @@ const WEDDING_ID: LandingCopy = {
   },
 };
 
-/** The landing's words when it answers one search instead of a language. */
-export const LANDING_VARIANTS = { wedding: WEDDING_ID };
-export type LandingVariant = keyof typeof LANDING_VARIANTS;
-
 export const LANDING_COPY: Record<LandingLanguage, LandingCopy> = {
   en: EN,
-  id: ID,
+  id: WEDDING_ID,
 };
