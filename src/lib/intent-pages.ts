@@ -208,3 +208,17 @@ export const BIRTHDAY: IntentPage = {
 };
 
 export const INTENT_PAGES: IntentPage[] = [BIRTHDAY];
+
+/**
+ * Every page written for one search, as a link: these and the MemoRoll
+ * landing's wedding version, which is that landing with other words
+ * (components/memoroll/landing/copy.tsx) and so is not an `IntentPage`.
+ * The Indonesian footer and the sitemap list them from here.
+ */
+export const SEARCH_PAGE_LINKS: { href: string; label: string }[] = [
+  ...INTENT_PAGES.map((page) => ({
+    href: `/id/${page.slug}`,
+    label: page.hero.pill,
+  })),
+  { href: '/id/kamera-tamu-pernikahan', label: 'Kamera tamu pernikahan' },
+];

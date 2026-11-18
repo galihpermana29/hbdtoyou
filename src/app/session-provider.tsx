@@ -170,6 +170,8 @@ const PRODUCT_ROUTES_WITHOUT_ADS = [
   '/journal/create',
   '/memoroll',
   '/id/memoroll',
+  // The same landing, written for the wedding-guest-camera search.
+  '/id/kamera-tamu-pernikahan',
 ];
 
 function isProductRouteWithoutAds(pathname: string): boolean {

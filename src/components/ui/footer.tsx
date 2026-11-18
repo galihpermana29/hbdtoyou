@@ -4,7 +4,7 @@ import Link from 'next/link';
 
 import { badge as wordmark, mono as label } from './brand-fonts';
 import ElasticWordmark from './elastic-wordmark';
-import { INTENT_PAGES } from '@/lib/intent-pages';
+import { SEARCH_PAGE_LINKS } from '@/lib/intent-pages';
 import { localHref, type LanguageVersions } from '@/lib/page-language';
 
 import { SITE_COPY, type SiteCopy, type SiteLanguage } from './navbar-copy';
@@ -52,9 +52,9 @@ function columns(t: SiteCopy['footer'], lang: SiteLanguage) {
         // The pages written for one search each are Indonesian, so the
         // Indonesian footer is where every page links to them.
         ...(lang === 'id'
-          ? INTENT_PAGES.map((page) => ({
-              text: page.hero.pill,
-              href: `/id/${page.slug}`,
+          ? SEARCH_PAGE_LINKS.map((page) => ({
+              text: page.label,
+              href: page.href,
             }))
           : []),
       ],

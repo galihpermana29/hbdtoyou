@@ -1,6 +1,6 @@
 import type { MetadataRoute } from 'next';
 
-import { INTENT_PAGES } from '@/lib/intent-pages';
+import { SEARCH_PAGE_LINKS } from '@/lib/intent-pages';
 import { languageVersions } from '@/lib/page-language';
 import { languageAlternates } from '@/lib/seo';
 
@@ -28,7 +28,7 @@ const PAGES: Array<[path: string, priority: number]> = [
   ['/photobox-newspaper', 0.6],
   ['/contact', 0.3],
   // Pages written for one search each, Indonesian only.
-  ...INTENT_PAGES.map((page): [string, number] => [`/id/${page.slug}`, 0.8]),
+  ...SEARCH_PAGE_LINKS.map((page): [string, number] => [page.href, 0.8]),
 ];
 
 export default function sitemap(): MetadataRoute.Sitemap {
