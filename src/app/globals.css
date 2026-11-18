@@ -1,10 +1,6 @@
-@import url('https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:ital,wght@0,200..800;1,200..800&family=Raleway:ital,wght@0,100..900;1,100..900&display=swap');
-@import url('https://fonts.googleapis.com/css2?family=Young+Serif&display=swap');
-@import url('https://fonts.googleapis.com/css2?family=PT+Serif:ital,wght@0,400;0,700;1,400;1,700&display=swap');
-@import url('https://fonts.googleapis.com/css2?family=Inter:ital,opsz,wght@0,14..32,100..900;1,14..32,100..900&display=swap');
-@import url('https://fonts.googleapis.com/css2?family=Cinzel:wght@400;700&family=Playfair+Display:ital,wght@0,400;0,700;1,400&display=swap');
-@import url('https://fonts.googleapis.com/css2?family=UnifrakturMaguntia&family=Old+Standard+TT:ital,wght@0,400;0,700;1,400&display=swap');
-@import url('https://fonts.googleapis.com/css2?family=Baloo+2:wght@400..800&family=Lilita+One&family=Nunito:ital,wght@0,400..800;1,400..700&display=swap');
+/* The Google Fonts stylesheet is linked from the root layout's <head>
+   (app/layout.tsx), not @imported here: an @import is only fetched after
+   this file has arrived, which held up the first paint of every page. */
 
 @font-face {
   font-family: 'Formula1 Display';
@@ -525,7 +521,8 @@
 .memoroll-native {
   -webkit-tap-highlight-color: transparent;
 }
-.memoroll-native :is(button, a, [role='button'], [role='radio'], [role='switch']) {
+.memoroll-native
+  :is(button, a, [role='button'], [role='radio'], [role='switch']) {
   touch-action: manipulation;
   user-select: none;
   -webkit-user-select: none;
