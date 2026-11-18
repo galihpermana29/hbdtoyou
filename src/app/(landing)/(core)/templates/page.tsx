@@ -1,40 +1,32 @@
 import { getAllTemplates } from '@/action/user-api';
 import NewTemplates from '@/components/newlanding/NewTemplates';
 import { Metadata } from 'next';
+import { pageMeta } from '@/lib/seo';
 
-export const metadata: Metadata = {
-  title: 'Digital Gift, Scrapbook & Album Templates | Memoify',
+export const metadata: Metadata = pageMeta({
+  path: '/templates',
+  title: 'Digital Gift Templates: Netflix, Spotify & More | Memoify',
   description:
-    'Explore our full collection of digital gift, digital scrapbook, and digital album templates inspired by Netflix, Spotify, YouTube and more. Find the perfect design to showcase your memories in style.',
-  keywords:
-    'digital gift, digital scrapbook, digital album, virtual present, online gift, electronic memory book, digital photo collection, memory collection, virtual album, online scrapbook, e-gift, hadiah ulang tahun digital, kado digital, scrapbook digital, album foto digital, kenangan digital, kado online, templates, Netflix templates, Spotify templates, YouTube templates, custom websites, digital memories, Memoify',
-  openGraph: {
-    title: 'Digital Gift, Scrapbook & Album Templates | Memoify',
-    description:
-      'Explore our full collection of digital gift, digital scrapbook, and digital album templates inspired by Netflix, Spotify, YouTube and more. Find the perfect design to showcase your memories in style.',
-    url: 'https://memoify.live/templates',
-    siteName: 'Memoify',
-    images: [
-      {
-        url: 'https://res.cloudinary.com/dqipjpy1w/image/upload/v1751300212/e47b9e53-9631-4638-9393-ec8ed7b3bdb5.png',
-        width: 1200,
-        height: 630,
-        alt: 'Memoify Templates Collection',
-      },
+    'Every Memoify template: Netflix, Spotify, Disney+, newspaper, magazine, vinyl, scrapbooks. Semua template kado digital, tinggal pilih dan isi.',
+  keywords: {
+    en: [
+      'digital gift templates',
+      'Netflix gift template',
+      'Spotify gift template',
+      'newspaper birthday template',
     ],
-    locale: 'en_US',
-    type: 'website',
-  },
-  twitter: {
-    card: 'summary_large_image',
-    title: 'Digital Gift, Scrapbook & Album Templates | Memoify',
-    description:
-      'Explore our full collection of digital gift, digital scrapbook, and digital album templates inspired by Netflix, Spotify, YouTube and more. Find the perfect design to showcase your memories in style.',
-    images: [
-      'https://res.cloudinary.com/dqipjpy1w/image/upload/v1751300212/e47b9e53-9631-4638-9393-ec8ed7b3bdb5.png',
+    id: [
+      'template kado digital',
+      'template ucapan ulang tahun',
+      'template Netflix ulang tahun',
+      'template Spotify untuk pacar',
     ],
   },
-};
+  image: {
+    url: 'https://res.cloudinary.com/dqipjpy1w/image/upload/v1751300212/e47b9e53-9631-4638-9393-ec8ed7b3bdb5.png',
+    alt: 'Memoify templates collection',
+  },
+});
 
 // The card art for this page comes from the backend as `thumbnail_uri` on each template
 // row (see <NewTemplates data={...} /> below). A hardcoded `templates` array used to sit

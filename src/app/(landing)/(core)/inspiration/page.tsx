@@ -3,40 +3,27 @@ import { getAllTemplates } from '@/action/user-api';
 import InspirationPage from '@/components/inspiration/inspiration-page';
 import { filtersFor } from '@/lib/inspiration';
 import { Metadata } from 'next';
+import { pageMeta } from '@/lib/seo';
 
-export const metadata: Metadata = {
-  title: 'Digital Gift, Scrapbook & Album Inspiration Gallery | Memoify',
+export const metadata: Metadata = pageMeta({
+  path: '/inspiration',
+  title: 'Digital Gift Ideas & Examples (Inspirasi Kado Digital) | Memoify',
   description:
-    'Explore our inspiration gallery showcasing digital gifts, digital scrapbooks, and digital albums created with Memoify templates. Get ideas for your own personalized creations inspired by Netflix, Spotify, YouTube and more.',
-  keywords:
-    'digital gift, digital scrapbook, digital album, virtual present, online gift, electronic memory book, digital photo collection, memory collection, virtual album, online scrapbook, e-gift, hadiah ulang tahun digital, kado digital, scrapbook digital, album foto digital, kenangan digital, kado online, inspiration gallery, website examples, custom websites, Netflix templates, Spotify templates, YouTube templates, Memoify',
-  openGraph: {
-    title: 'Digital Gift, Scrapbook & Album Inspiration Gallery | Memoify',
-    description:
-      'Explore our inspiration gallery showcasing digital gifts, digital scrapbooks, and digital albums created with Memoify templates. Get ideas for your own personalized creations inspired by Netflix, Spotify, YouTube and more.',
-    url: 'https://memoify.live/inspiration',
-    siteName: 'Memoify',
-    images: [
-      {
-        url: 'https://res.cloudinary.com/dqipjpy1w/image/upload/v1751299237/2fd7834c-6ddf-4d78-b625-028c40a32a34.png',
-        width: 1200,
-        height: 630,
-        alt: 'Memoify Inspiration Gallery',
-      },
-    ],
-    locale: 'en_US',
-    type: 'website',
-  },
-  twitter: {
-    card: 'summary_large_image',
-    title: 'Digital Gift, Scrapbook & Album Inspiration Gallery | Memoify',
-    description:
-      'Explore our inspiration gallery showcasing digital gifts, digital scrapbooks, and digital albums created with Memoify templates. Get ideas for your own personalized creations inspired by Netflix, Spotify, YouTube and more.',
-    images: [
-      'https://res.cloudinary.com/dqipjpy1w/image/upload/v1751299237/2fd7834c-6ddf-4d78-b625-028c40a32a34.png',
+    'Real digital gifts, scrapbooks and albums made with Memoify, for ideas. Lihat contoh dan inspirasi kado digital buatan pengguna lain.',
+  keywords: {
+    en: ['digital gift ideas', 'birthday gift ideas', 'gift examples'],
+    id: [
+      'inspirasi kado digital',
+      'ide kado ulang tahun',
+      'contoh kado digital',
+      'ide kado anniversary',
     ],
   },
-};
+  image: {
+    url: 'https://res.cloudinary.com/dqipjpy1w/image/upload/v1751299237/2fd7834c-6ddf-4d78-b625-028c40a32a34.png',
+    alt: 'Memoify inspiration gallery',
+  },
+});
 
 const InspirationRoute = async () => {
   // The first page of the wall comes with the page: it is also what the

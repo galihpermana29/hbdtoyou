@@ -19,6 +19,7 @@ import MemorollTestimonials from '@/components/memoroll/landing/testimonials';
 import MemorollWhy from '@/components/memoroll/landing/why';
 import { memorollFonts } from '@/components/memoroll/ui/fonts';
 import NavigationBar from '@/components/ui/navbar';
+import { pageMeta } from '@/lib/seo';
 
 /** The language the visitor chose, or failing that the one their browser asks for. */
 function requestLanguage() {
@@ -29,10 +30,25 @@ function requestLanguage() {
 }
 
 export function generateMetadata(): Metadata {
-  return {
-    title: 'MemoRoll | Memoify',
+  return pageMeta({
+    path: '/memoroll',
+    title: 'MemoRoll: A Shared Camera for Your Event (Kamera Tamu) | Memoify',
     description: LANDING_COPY[requestLanguage()].metaDescription,
-  };
+    keywords: {
+      en: [
+        'disposable camera app',
+        'wedding guest photo app',
+        'event photo sharing',
+        'QR code photo album',
+      ],
+      id: [
+        'kamera tamu pernikahan',
+        'aplikasi foto tamu',
+        'kamera disposable digital',
+        'album foto acara',
+      ],
+    },
+  });
 }
 
 /**
