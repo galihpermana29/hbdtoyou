@@ -1,6 +1,6 @@
 import type { Metadata } from 'next';
 
-import { getContentByUserId } from '@/action/user-api';
+import { getJournalListStart } from '@/action/journal-api';
 import { languageVersions, type PageLanguage } from '@/lib/page-language';
 import { languageAlternates, pageMeta } from '@/lib/seo';
 
@@ -9,7 +9,8 @@ import JournalLanding from './journal-landing';
 /**
  * The journal landing as a page, in either language: `/journal` renders it
  * in English and `/id/journal` in Indonesian. Both list the same published
- * journals, read here on the server.
+ * journals: the first page of cards and the count are read here on the
+ * server, the rest when the visitor asks (published.tsx).
  */
 const VERSIONS = languageVersions('/journal')!;
 
@@ -57,15 +58,7 @@ export default async function JournalPage({
 }: {
   language: PageLanguage;
 }) {
-  const dx = await getContentByUserId(
-    null,
-    '9999',
-    '1',
-    '2d4df00e-e773-4391-ad6a-1b6d688950ff' //journal template id
-  );
-  const journalsData = dx.success
-    ? dx.data.filter((dx) => dx.template_name.includes('journal'))
-    : [];
+  const { first, total } = await getJournalListStart();
 
-  return <JournalLanding journalsData={journalsData} lang={language} />;
+  return <JournalLanding firstCards={first} total={total} lang={language} />;
 }

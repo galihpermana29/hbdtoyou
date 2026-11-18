@@ -158,6 +158,10 @@ const EN = {
     noMatch: (query: string) => `No published journal matches “${query}”.`,
     empty: 'No journals published yet. Yours can be the first.',
     more: (left: number) => `Show more journals (${left} left)`,
+    loading: 'Loading more journals…',
+    searching: 'Searching the published journals…',
+    failed: 'The journals did not load. Check your connection and try again.',
+    retry: 'Try loading more again',
   },
 
   closing: {
@@ -308,6 +312,10 @@ const ID: JournalCopy = {
       `Nggak ada journal yang cocok dengan “${query}”.`,
     empty: 'Belum ada journal yang terbit. Punyamu bisa jadi yang pertama.',
     more: (left: number) => `Tampilkan journal lainnya (${left} lagi)`,
+    loading: 'Lagi memuat journal lainnya…',
+    searching: 'Lagi mencari di journal yang terbit…',
+    failed: 'Journal-nya gagal dimuat. Cek koneksimu, lalu coba lagi.',
+    retry: 'Coba muat lagi',
   },
 
   closing: {

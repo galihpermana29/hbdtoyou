@@ -1,6 +1,54 @@
-/* The Google Fonts stylesheet is linked from the root layout's <head>
-   (app/layout.tsx), not @imported here: an @import is only fetched after
-   this file has arrived, which held up the first paint of every page. */
+/* Fonts.
+   Plus Jakarta Sans is what every page is set in, so it is served from this
+   site (public/font, the variable files from @fontsource-variable, OFL) and
+   declared here under its own name: nothing has to wait for Google before
+   the first paint, and every place that names the family keeps working.
+   The other Google families belong to single templates; the root layout
+   (app/layout.tsx) loads their stylesheet without holding up the paint. */
+@font-face {
+  font-family: 'Plus Jakarta Sans';
+  font-style: normal;
+  font-display: swap;
+  font-weight: 200 800;
+  src: url('/font/plus-jakarta-sans-latin-ext-wght-normal.woff2')
+    format('woff2');
+  unicode-range: U+0100-02BA, U+02BD-02C5, U+02C7-02CC, U+02CE-02D7,
+    U+02DD-02FF, U+0304, U+0308, U+0329, U+1D00-1DBF, U+1E00-1E9F,
+    U+1EF2-1EFF, U+2020, U+20A0-20AB, U+20AD-20C0, U+2113, U+2C60-2C7F,
+    U+A720-A7FF;
+}
+@font-face {
+  font-family: 'Plus Jakarta Sans';
+  font-style: normal;
+  font-display: swap;
+  font-weight: 200 800;
+  src: url('/font/plus-jakarta-sans-latin-wght-normal.woff2') format('woff2');
+  unicode-range: U+0000-00FF, U+0131, U+0152-0153, U+02BB-02BC, U+02C6,
+    U+02DA, U+02DC, U+0304, U+0308, U+0329, U+2000-206F, U+20AC, U+2122,
+    U+2191, U+2193, U+2212, U+2215, U+FEFF, U+FFFD;
+}
+@font-face {
+  font-family: 'Plus Jakarta Sans';
+  font-style: italic;
+  font-display: swap;
+  font-weight: 200 800;
+  src: url('/font/plus-jakarta-sans-latin-ext-wght-italic.woff2')
+    format('woff2');
+  unicode-range: U+0100-02BA, U+02BD-02C5, U+02C7-02CC, U+02CE-02D7,
+    U+02DD-02FF, U+0304, U+0308, U+0329, U+1D00-1DBF, U+1E00-1E9F,
+    U+1EF2-1EFF, U+2020, U+20A0-20AB, U+20AD-20C0, U+2113, U+2C60-2C7F,
+    U+A720-A7FF;
+}
+@font-face {
+  font-family: 'Plus Jakarta Sans';
+  font-style: italic;
+  font-display: swap;
+  font-weight: 200 800;
+  src: url('/font/plus-jakarta-sans-latin-wght-italic.woff2') format('woff2');
+  unicode-range: U+0000-00FF, U+0131, U+0152-0153, U+02BB-02BC, U+02C6,
+    U+02DA, U+02DC, U+0304, U+0308, U+0329, U+2000-206F, U+20AC, U+2122,
+    U+2191, U+2193, U+2212, U+2215, U+FEFF, U+FFFD;
+}
 
 @font-face {
   font-family: 'Formula1 Display';
@@ -723,6 +771,21 @@ body:has(.mr-form) .ant-notification-notice .ant-notification-notice-message {
   }
   to {
     transform: scaleX(1);
+  }
+}
+/* The deck's entrance. Only where it starts: each card ends wherever its
+   own slot rests. A CSS animation, so the deck opens with the first paint
+   instead of waiting for the page's script. */
+@keyframes home-deal {
+  from {
+    transform: translate3d(0, 28px, 0) scale(0.97);
+    opacity: 0;
+  }
+}
+@media (prefers-reduced-motion: no-preference) {
+  .home-deal {
+    animation: home-deal 760ms cubic-bezier(0.23, 1, 0.32, 1) both;
+    animation-delay: var(--deal-delay, 0ms);
   }
 }
 @keyframes home-rise {

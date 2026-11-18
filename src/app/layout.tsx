@@ -25,11 +25,13 @@ export const metadata: Metadata = {
     'Turn your photos into a digital gift, scrapbook or album and share it with one link. Bikin kado digital dalam hitungan menit.',
 };
 
-/** The families globals.css used to @import, one request instead of seven. */
-const GOOGLE_FONTS =
-  'https://fonts.googleapis.com/css2' +
-  '?family=Plus+Jakarta+Sans:ital,wght@0,200..800;1,200..800' +
-  '&family=Raleway:ital,wght@0,100..900;1,100..900' +
+/**
+ * The Google families single templates are set in (Cinzel for one, Lilita
+ * One for another). Plus Jakarta Sans, the face of every page, is not here:
+ * it is served from this site, see globals.css.
+ */
+const TEMPLATE_FONTS =
+  'https://fonts.googleapis.com/css2?family=Raleway:ital,wght@0,100..900;1,100..900' +
   '&family=Young+Serif' +
   '&family=PT+Serif:ital,wght@0,400;0,700;1,400;1,700' +
   '&family=Inter:ital,opsz,wght@0,14..32,100..900;1,14..32,100..900' +
@@ -62,20 +64,44 @@ export default async function RootLayout({
     <html lang={lang}>
       <head>
         <link rel="shortcut icon" href="/favicon.ico" />
-        {/* Every Google font the site uses, in one stylesheet linked here
-            rather than seven @imports in globals.css. Imported, they were
-            fetched one step later, after globals.css itself, and the page
-            could not paint until the slowest of the seven arrived (3.6s on
-            a phone on production, 2026-11-18). Linked, the browser asks for
-            it with the HTML, beside the app's own CSS. The same font faces,
-            the same display=swap. */}
+        {/* The page's own face comes from this site; fetch it with the HTML
+            so text is set in it from the first paint. */}
+        <link
+          rel="preload"
+          href="/font/plus-jakarta-sans-latin-wght-normal.woff2"
+          as="font"
+          type="font/woff2"
+          crossOrigin="anonymous"
+        />
+        {/* The templates' Google fonts must not hold up the paint of pages
+            that do not use them (they held the home page back 3.6s on a
+            phone on production, 2026-11-18). A print stylesheet is fetched
+            without blocking; the script below turns it on for the screen
+            once it has arrived. Each face is display=swap, as before, so a
+            template shows its fallback until its font is in - which it
+            already did while the font file itself was loading. */}
         <link rel="preconnect" href="https://fonts.googleapis.com" />
         <link
           rel="preconnect"
           href="https://fonts.gstatic.com"
           crossOrigin="anonymous"
         />
-        <link rel="stylesheet" href={GOOGLE_FONTS} />
+        <link
+          id="template-fonts"
+          rel="stylesheet"
+          href={TEMPLATE_FONTS}
+          media="print"
+          suppressHydrationWarning
+        />
+        <script
+          dangerouslySetInnerHTML={{
+            __html:
+              "(function(){var l=document.getElementById('template-fonts');if(!l)return;var on=function(){l.media='all'};if(l.sheet)on();else l.addEventListener('load',on)})()",
+          }}
+        />
+        <noscript>
+          <link rel="stylesheet" href={TEMPLATE_FONTS} />
+        </noscript>
         <link rel="preconnect" href="https://res.cloudinary.com" />
         <link rel="dns-prefetch" href="https://res.cloudinary.com" />
         <meta name="viewport" content="width=device-width, initial-scale=1.0" />

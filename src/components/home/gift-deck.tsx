@@ -26,7 +26,8 @@ import { EASE_IN_OUT, EASE_OUT } from './ui';
  * - the leaving card fades out below the deck, then is put at the back
  *   while invisible, so nothing is ever seen travelling through the stack;
  * - the deck's entrance is the deck itself fanning open, lead card first,
- *   with gaps that shrink - there is no second, outer entrance;
+ *   with gaps that shrink - there is no second, outer entrance; it is a CSS
+ *   animation so it starts with the first paint, not after hydration;
  * - the beat is the progress pill's own CSS animation: pausing it (pointer
  *   over the deck, deck off screen) pauses the autoplay with it, and the two
  *   can never drift;
@@ -147,16 +148,14 @@ export default function GiftDeck({
   const onScreen = useInView(frame, { amount: 0.35 });
   const [hovered, setHovered] = useState(false);
 
-  // The fan opens once, after the first paint.
-  const [dealt, setDealt] = useState(false);
+  // The fan opens once, with the first paint: the entrance is a CSS
+  // animation on each card (`home-deal` in globals.css), so it does not
+  // wait for this script, and the lead picture is on screen as early as the
+  // headline. `dealing` only says when to take the animation off again.
   const [dealing, setDealing] = useState(true);
   useEffect(() => {
-    const open = requestAnimationFrame(() => setDealt(true));
     const settle = window.setTimeout(() => setDealing(false), 1100);
-    return () => {
-      cancelAnimationFrame(open);
-      window.clearTimeout(settle);
-    };
+    return () => window.clearTimeout(settle);
   }, []);
 
   // Decoration: the deck leans a little toward a real pointer.
@@ -213,10 +212,6 @@ export default function GiftDeck({
               transform = 'none';
               opacity = front ? 1 : 0;
               transition = `opacity 200ms ${EASE_OUT}`;
-            } else if (!dealt) {
-              transform = 'translate3d(0, 28px, 0) scale(0.97)';
-              opacity = 0;
-              transition = 'none';
             } else if (isLeaving) {
               // The exit: down and toward the viewer, gone before it lands.
               transform = 'translate3d(0, 16%, 0) scale(1.05) rotate(-1.5deg)';
@@ -225,15 +220,21 @@ export default function GiftDeck({
             } else if (position === count - 1) {
               // Just put at the back: it was invisible and stays so.
               transition = 'none';
-            } else if (dealing && seen) {
-              transition = `transform 760ms ${EASE_OUT} ${DEAL_DELAY[position]}ms, opacity 520ms ${EASE_OUT} ${DEAL_DELAY[position]}ms`;
             }
+            // Opening: lead first, gaps shrinking. Not under reduced motion
+            // (the class is also inert there, by its media query).
+            const deals = dealing && seen && !reduce && !isLeaving;
             return (
               <div
                 key={gift.key}
                 aria-hidden={!front}
-                className="absolute inset-0 origin-top will-change-transform"
+                className={
+                  deals
+                    ? 'home-deal absolute inset-0 origin-top will-change-transform'
+                    : 'absolute inset-0 origin-top will-change-transform'
+                }
                 style={{
+                  ['--deal-delay' as string]: `${DEAL_DELAY[position] ?? 0}ms`,
                   transform,
                   opacity,
                   transition,
@@ -263,6 +264,7 @@ export default function GiftDeck({
                     decoding="async"
                     // The lead paints first; the rest of the deck can wait.
                     loading={index < 2 ? 'eager' : 'lazy'}
+                    fetchPriority={index === 0 ? 'high' : undefined}
                     draggable={false}
                     className="block h-[91%] w-full object-cover object-top"
                   />
