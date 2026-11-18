@@ -4,7 +4,8 @@ import Link from 'next/link';
 
 import { badge as wordmark, mono as label } from './brand-fonts';
 import ElasticWordmark from './elastic-wordmark';
-import type { LanguageVersions } from '@/lib/page-language';
+import { INTENT_PAGES } from '@/lib/intent-pages';
+import { localHref, type LanguageVersions } from '@/lib/page-language';
 
 import { SITE_COPY, type SiteCopy, type SiteLanguage } from './navbar-copy';
 
@@ -29,7 +30,7 @@ const body = Plus_Jakarta_Sans({
 });
 
 /** The footer's columns, in the page's language. */
-function columns(t: SiteCopy['footer']) {
+function columns(t: SiteCopy['footer'], lang: SiteLanguage) {
   return [
     {
       key: 'contact',
@@ -45,9 +46,17 @@ function columns(t: SiteCopy['footer']) {
       title: t.products,
       items: [
         { text: t.invitations, href: '/wedding-invitation' },
-        { text: 'MemoRoll', href: '/memoroll' },
+        { text: 'MemoRoll', href: localHref('/memoroll', lang) },
         { text: 'Photobox', href: '/photobox' },
         { text: t.gift, href: '/templates' },
+        // The pages written for one search each are Indonesian, so the
+        // Indonesian footer is where every page links to them.
+        ...(lang === 'id'
+          ? INTENT_PAGES.map((page) => ({
+              text: page.hero.pill,
+              href: `/id/${page.slug}`,
+            }))
+          : []),
       ],
     },
     {
@@ -110,7 +119,7 @@ export function Footer({
           </div>
 
           <div className="grid grid-cols-2 gap-x-8 gap-y-10 sm:grid-cols-3 lg:flex lg:gap-24">
-            {columns(t).map((column) => (
+            {columns(t, lang).map((column) => (
               <div
                 key={column.key}
                 className={`flex flex-col items-start gap-[14px] text-[15px] leading-[normal] ${

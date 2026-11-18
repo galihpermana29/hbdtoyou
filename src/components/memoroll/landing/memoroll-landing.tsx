@@ -30,7 +30,9 @@ const VERSIONS = languageVersions('/memoroll')!;
 
 const TITLE: Record<LandingLanguage, string> = {
   en: 'MemoRoll: A Shared Camera for Your Event (Kamera Tamu) | Memoify',
-  id: 'MemoRoll: Kamera Tamu Digital untuk Acaramu | Memoify',
+  // What people type: a camera for wedding guests. The product's name comes
+  // second, because nobody searches for a name they have not heard yet.
+  id: 'Kamera Tamu Pernikahan Digital, Cukup Scan QR | MemoRoll',
 };
 
 export function memorollMetadata(language: LandingLanguage): Metadata {
@@ -48,9 +50,19 @@ export function memorollMetadata(language: LandingLanguage): Metadata {
       ],
       id: [
         'kamera tamu pernikahan',
-        'aplikasi foto tamu',
+        'kamera pernikahan untuk tamu',
+        'kamera digital pernikahan',
+        'disposable camera pernikahan',
+        'disposable camera wedding',
+        'kamera sekali pakai pernikahan',
         'kamera disposable digital',
-        'album foto acara',
+        'aplikasi foto tamu undangan',
+        'foto tamu pernikahan scan QR',
+        'QR foto pernikahan',
+        'album foto tamu pernikahan',
+        'foto candid pernikahan dari tamu',
+        'kamera untuk acara',
+        'alternatif photobooth pernikahan',
       ],
     },
     languages: languageAlternates(VERSIONS),

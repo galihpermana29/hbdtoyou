@@ -298,7 +298,7 @@ export type LandingCopy = typeof EN;
 
 const ID: LandingCopy = {
   metaDescription:
-    'Kasih kamera ke semua tamu, langsung di HP mereka. Fotonya baru kebuka pas Reveal, jadi semua orang lihat keseruannya bareng-bareng.',
+    'Kamera digital ala disposable camera buat tamu pernikahan dan acaramu. Tamu scan QR, jepret dari HP tanpa install, dan fotonya kebuka bareng pas Reveal.',
 
   strip: {
     long: 'BARU - MEMOROLL SEKARANG GRATIS DI WEDDING PLAN',
