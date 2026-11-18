@@ -19,6 +19,8 @@ export type LanguageVersions = Record<PageLanguage, string>;
 export const BILINGUAL_PAGES: LanguageVersions[] = [
   { en: '/', id: '/id' },
   { en: '/memoroll', id: '/id/memoroll' },
+  { en: '/scrapbook', id: '/id/scrapbook' },
+  { en: '/journal', id: '/id/journal' },
 ];
 
 /**

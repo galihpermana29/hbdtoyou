@@ -2,6 +2,9 @@ import { Link2, Printer } from 'lucide-react';
 import type { ReactNode } from 'react';
 
 import { Rise, SectionHead } from '@/components/home/ui';
+import type { PageLanguage } from '@/lib/page-language';
+
+import { JOURNAL_COPY } from './copy';
 
 /**
  * What makes it a paper, on ink so the white sheets stand out. Three cards,
@@ -37,7 +40,12 @@ function Card({
   );
 }
 
-export default function JournalFeatures() {
+export default function JournalFeatures({
+  lang = 'en',
+}: {
+  lang?: PageLanguage;
+}) {
+  const t = JOURNAL_COPY[lang].features;
   return (
     <section
       className="bg-[#1b1b1b] px-5 py-16 md:py-[112px]"
@@ -45,36 +53,36 @@ export default function JournalFeatures() {
       <div className="mx-auto max-w-[1180px]">
         <SectionHead
           tone="paper"
-          eyebrow="Features"
-          title="Serious format. Unserious amount of feelings."
-          body="Everything a real paper has, pointed at one person."
+          eyebrow={t.eyebrow}
+          title={t.title}
+          body={t.body}
         />
         <div className="mt-12 flex flex-col gap-5 md:mt-16 lg:flex-row">
           <Card
             delay={0}
             distance={20}
-            title="Abstract-level emotions"
-            body="Open with an abstract: your deepest feelings in two or three lines that sound peer-reviewed.">
+            title={t.abstract.title}
+            body={t.abstract.body}>
             <div className="paper-serif w-full rounded-[6px] bg-white px-4 py-3 shadow-[0_8px_18px_-10px_rgba(90,42,18,0.4)]">
               <p className="text-center text-[11px] font-bold text-[#1b1b1b]">
-                Abstract
+                {t.abstract.heading}
               </p>
               <p className="mt-1 text-[11px] leading-[1.65] text-[#35302b]">
-                Results show the author is{' '}
+                {t.abstract.before}
                 <span className="rounded-[2px] bg-[#ffd9cb] px-[2px]">
-                  still in love
+                  {t.abstract.marked}
                 </span>
-                , with a confidence interval of forever.
+                {t.abstract.after}
               </p>
             </div>
           </Card>
           <Card
             delay={90}
             distance={14}
-            title="Structured like a thesis"
-            body="From Preamble to Conclusion, every part of your letter follows a research paper’s format.">
+            title={t.thesis.title}
+            body={t.thesis.body}>
             <ol className="paper-serif w-full rounded-[6px] bg-white px-4 py-3 text-[11px] text-[#35302b] shadow-[0_8px_18px_-10px_rgba(90,42,18,0.4)]">
-              {['Abstract', 'Preamble', 'Conclusion'].map((part, index) => (
+              {t.thesis.parts.map((part, index) => (
                 <li
                   key={part}
                   className="flex items-baseline gap-2 py-[5px] [&+li]:border-t [&+li]:border-dashed [&+li]:border-[#e0d6ca]">
@@ -88,16 +96,16 @@ export default function JournalFeatures() {
           <Card
             delay={150}
             distance={10}
-            title="Print, publish, or present"
-            body="Publish it online and send the link, or print it like a final submission.">
+            title={t.print.title}
+            body={t.print.body}>
             <div className="flex w-full flex-col items-center gap-3">
               <span className="flex w-full items-center gap-2 rounded-full border border-[#e0d6ca] bg-white px-4 py-2 text-[12px] font-medium text-[#4a4642]">
                 <Link2 aria-hidden className="size-4 shrink-0 text-[#ff3e09]" />
-                <span className="truncate">memoify.live/journal/for-you</span>
+                <span className="truncate">{t.print.address}</span>
               </span>
               <span className="flex items-center gap-2 rounded-full bg-[#1b1b1b] px-4 py-2 text-[12px] font-semibold text-[#fbf4ec]">
                 <Printer aria-hidden className="size-4" />
-                Print
+                {t.print.print}
               </span>
             </div>
           </Card>

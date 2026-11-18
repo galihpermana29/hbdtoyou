@@ -7,11 +7,14 @@ import c1 from '@/assets/c1.png';
 import c2 from '@/assets/c2.png';
 import c3 from '@/assets/c3.png';
 
+import { localHref } from '@/lib/page-language';
+
 import { HOME_COPY, type HomeLanguage } from './copy';
 import { Rise, SectionHead, press } from './ui';
 
 /**
- * Everything Memoify makes, as one board. Each card is a door to a product.
+ * Everything Memoify makes, as one board. Each card is a door to a product,
+ * in the page's language where the product's page has an Indonesian version.
  *
  * Cards rise in as a wave in reading order with shrinking gaps. A card's
  * picture leans in 3% under a real pointer (hover is gated: a tap on a phone
@@ -112,7 +115,7 @@ export default function HomeProducts({ lang = 'en' }: { lang?: HomeLanguage }) {
         <div className="mt-12 grid grid-cols-1 gap-5 md:mt-16 lg:grid-cols-12">
           <Rise delay={0} distance={20} className="lg:col-span-7">
             <Door
-              href="/templates"
+              href={localHref('/templates', lang)}
               tone="ink"
               title={t.website.title}
               body={t.website.body}>
@@ -132,7 +135,7 @@ export default function HomeProducts({ lang = 'en' }: { lang?: HomeLanguage }) {
 
           <Rise delay={90} distance={14} className="lg:col-span-5">
             <Door
-              href="/memoroll"
+              href={localHref('/memoroll', lang)}
               tone="flame"
               tag={t.newTag}
               title={t.memoroll.title}
@@ -167,20 +170,23 @@ export default function HomeProducts({ lang = 'en' }: { lang?: HomeLanguage }) {
 
           <Rise delay={0} distance={16} className="lg:col-span-4">
             <Door
-              href="/scrapbook"
+              href={localHref('/scrapbook', lang)}
               title={t.scrapbook.title}
               body={t.scrapbook.body}>
               <Picture src={c1} alt={t.scrapbook.alt} />
             </Door>
           </Rise>
           <Rise delay={80} distance={12} className="lg:col-span-4">
-            <Door href="/journal" title={t.journal.title} body={t.journal.body}>
+            <Door
+              href={localHref('/journal', lang)}
+              title={t.journal.title}
+              body={t.journal.body}>
               <Picture src={c2} alt={t.journal.alt} />
             </Door>
           </Rise>
           <Rise delay={140} distance={10} className="lg:col-span-4">
             <Door
-              href="/photobox"
+              href={localHref('/photobox', lang)}
               title={t.photobox.title}
               body={t.photobox.body}>
               <Picture src={c3} alt={t.photobox.alt} />

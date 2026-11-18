@@ -7,6 +7,9 @@ import HomeOccasions from '@/components/home/occasions';
 import { landingFonts } from '@/components/memoroll/landing/fonts';
 import { memorollFonts } from '@/components/memoroll/ui/fonts';
 import NavigationBar from '@/components/ui/navbar';
+import { languageVersions, type PageLanguage } from '@/lib/page-language';
+
+import { SCRAPBOOK_COPY } from './copy';
 
 import ScrapbookHero from './hero';
 import ScrapbookStyles from './styles';
@@ -19,38 +22,37 @@ import ScrapbookStyles from './styles';
  * Not carried over from the page it replaces: "hundreds of scrapbook
  * templates, updated every month" (there are eight), the three-cover
  * carousel, and the newsletter form, which was never wired to anything.
+ *
+ * English at `/scrapbook`, Indonesian at `/id/scrapbook`: the page passes
+ * the language, and the words are in copy.ts.
  */
-export default function ScrapbookLanding() {
+const VERSIONS = languageVersions('/scrapbook');
+
+export default function ScrapbookLanding({
+  lang = 'en',
+}: {
+  lang?: PageLanguage;
+}) {
+  const t = SCRAPBOOK_COPY[lang];
   const start = useStart('/scrapbook/create');
   return (
-    <div className={`${memorollFonts} ${landingFonts}`}>
+    <div lang={lang} className={`${memorollFonts} ${landingFonts}`}>
       <div className="fixed left-0 top-0 z-[1000] w-full isolate">
-        <NavigationBar />
+        <NavigationBar lang={lang} languageSwitch={VERSIONS} />
       </div>
       <main className="mt-[81px] overflow-x-clip">
-        <ScrapbookHero />
-        <HomeOccasions
-          label="What people make scrapbooks of"
-          items={[
-            'Anniversaries',
-            'Birthdays',
-            'Trips',
-            'Graduations',
-            'Best friends',
-            'First years',
-            'Family',
-          ]}
-        />
-        <ScrapbookStyles />
+        <ScrapbookHero lang={lang} />
+        <HomeOccasions label={t.occasions.label} items={t.occasions.items} />
+        <ScrapbookStyles lang={lang} />
         <Steps
           ground="#fbf4ec"
-          eyebrow="How it works"
-          title="Three steps. Memo-AI does the gluing."
-          body="No cutting, no arranging, no glue on the table."
+          eyebrow={t.steps.eyebrow}
+          title={t.steps.title}
+          body={t.steps.body}
           steps={[
             {
-              title: 'Add your photos',
-              body: 'Choose the ones that tell the story. They do not need to match.',
+              title: t.steps.photos.title,
+              body: t.steps.photos.body,
               art: (
                 <div className="relative h-[120px] w-[190px]">
                   {[
@@ -71,23 +73,23 @@ export default function ScrapbookLanding() {
               ),
             },
             {
-              title: 'Pick a style, say a few words',
-              body: 'Choose how it should look and describe the moment. Memo-AI arranges every page from there.',
+              title: t.steps.style.title,
+              body: t.steps.style.body,
               art: (
                 <div className="flex w-[80%] flex-col gap-2">
                   <span className="rounded-[12px] border border-[#e0d6ca] bg-white px-3 py-2 text-[12px] text-[#4a4642]">
-                    Our first year together, mostly food and bad selfies
+                    {t.steps.style.prompt}
                   </span>
                   <span className="flex items-center gap-2 self-end rounded-full bg-[#ff3e09] px-4 py-2 text-[12px] font-semibold text-white">
                     <Sparkles aria-hidden className="size-4" />
-                    Generate
+                    {t.steps.style.generate}
                   </span>
                 </div>
               ),
             },
             {
-              title: 'Open it, send the link',
-              body: 'Your scrapbook opens like a book on any phone. Share one link, no app needed.',
+              title: t.steps.send.title,
+              body: t.steps.send.body,
               art: (
                 <span className="flex w-[68%] overflow-hidden rounded-[8px] border-[5px] border-[#1b1b1b]">
                   <img
@@ -111,11 +113,11 @@ export default function ScrapbookLanding() {
         />
         <ClosingPanel
           ground="#fbf4ec"
-          title="Start the scrapbook they will keep."
-          body="A few photos and a few minutes. Memo-AI handles the rest."
-          action="Make a scrapbook"
+          title={t.closing.title}
+          body={t.closing.body}
+          action={t.closing.action}
           onAction={start}
-          second={{ label: 'See what others made', href: '/inspiration' }}
+          second={{ label: t.closing.second, href: '/inspiration' }}
           tucked={[
             [
               '/landing/page-garden-l.webp',

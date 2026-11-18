@@ -8,6 +8,9 @@ import { useMemo, useState } from 'react';
 import type { IContent } from '@/action/interfaces';
 import MemorollFormTheme from '@/components/forms/memoroll-form-theme';
 import { SectionHead, press } from '@/components/home/ui';
+import type { PageLanguage } from '@/lib/page-language';
+
+import { JOURNAL_COPY } from './copy';
 
 const JournalCard = dynamic(
   () => import('@/app/(landing)/(core)/journal/view/JournalCard'),
@@ -36,9 +39,12 @@ function names(journal: IContent): string {
  */
 export default function JournalPublished({
   journals,
+  lang = 'en',
 }: {
   journals: IContent[];
+  lang?: PageLanguage;
 }) {
+  const t = JOURNAL_COPY[lang].published;
   const [query, setQuery] = useState('');
   const [shown, setShown] = useState(PER_PAGE);
 
@@ -56,15 +62,11 @@ export default function JournalPublished({
       className="scroll-mt-[81px] bg-[#fbf4ec] px-5 py-16 md:py-[112px]"
       style={{ fontFamily: 'var(--font-mr-body)' }}>
       <MemorollFormTheme className="mx-auto max-w-[1180px]">
-        <SectionHead
-          eyebrow="Published"
-          title="Read what people have published"
-          body="Case studies in heartfelt communication, all public."
-        />
+        <SectionHead eyebrow={t.eyebrow} title={t.title} body={t.body} />
         <div className="mx-auto mt-8 max-w-[420px]">
           <Input
-            aria-label="Search journals by name"
-            placeholder="Search by name"
+            aria-label={t.search}
+            placeholder={t.placeholder}
             size="large"
             value={query}
             onChange={(event) => {
@@ -86,9 +88,7 @@ export default function JournalPublished({
           </div>
         ) : (
           <p className="mt-10 text-center text-[16px] text-[#4a4642]">
-            {query.trim()
-              ? `No published journal matches “${query.trim()}”.`
-              : 'No journals published yet. Yours can be the first.'}
+            {query.trim() ? t.noMatch(query.trim()) : t.empty}
           </p>
         )}
 
@@ -98,7 +98,7 @@ export default function JournalPublished({
               type="button"
               onClick={() => setShown((count) => count + PER_PAGE)}
               className={`inline-flex h-12 items-center justify-center rounded-full border border-[rgba(33,33,33,0.2)] bg-[#fffdfa] px-7 text-[16px] font-semibold text-[#1b1b1b] ${press}`}>
-              Show more journals ({left} left)
+              {t.more(left)}
             </button>
           </div>
         ) : null}

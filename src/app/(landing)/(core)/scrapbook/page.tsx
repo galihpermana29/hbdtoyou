@@ -1,23 +1,8 @@
-import type { Metadata } from 'next';
-import { pageMeta } from '@/lib/seo';
-
 import ScrapbookLanding from '@/components/scrapbook-landing/scrapbook-landing';
+import { scrapbookMetadata } from '@/components/scrapbook-landing/meta';
 
-export const metadata: Metadata = pageMeta({
-  path: '/scrapbook',
-  title: 'Digital Scrapbook Maker (Scrapbook Digital) | Memoify',
-  description:
-    'Add your photos, pick a style, and Memo-AI lays out a digital scrapbook you can share with one link. Bikin scrapbook digital otomatis dari foto kalian.',
-  keywords: {
-    en: ['digital scrapbook maker', 'online scrapbook', 'AI scrapbook'],
-    id: [
-      'scrapbook digital',
-      'buat scrapbook online',
-      'scrapbook untuk pacar',
-      'album kenangan digital',
-    ],
-  },
-});
+/** English. `/id/scrapbook` is the same landing in Indonesian. */
+export const metadata = scrapbookMetadata('en');
 
 /**
  * The scrapbook product's landing. The page it replaces is kept beside this

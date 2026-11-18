@@ -7,7 +7,10 @@ import { useBeat } from '@/components/home/beat';
 import { useStart } from '@/components/home/blocks';
 import { ctaGhost, ctaPrimary } from '@/components/home/ui';
 
+import type { PageLanguage } from '@/lib/page-language';
+
 import ScrapbookBook, { STYLES } from './book';
+import { SCRAPBOOK_COPY } from './copy';
 
 /**
  * The scrapbook page's first screen: what it is, over an open scrapbook
@@ -25,7 +28,12 @@ import ScrapbookBook, { STYLES } from './book';
 const at = (ms: number, rise: number): CSSProperties =>
   ({ '--at': `${ms}ms`, '--rise': `${rise}px` }) as CSSProperties;
 
-export default function ScrapbookHero() {
+export default function ScrapbookHero({
+  lang = 'en',
+}: {
+  lang?: PageLanguage;
+}) {
+  const t = SCRAPBOOK_COPY[lang].hero;
   const beat = useBeat(STYLES.length);
   const start = useStart('/scrapbook/create');
 
@@ -38,21 +46,20 @@ export default function ScrapbookHero() {
           className="home-enter inline-flex items-center gap-2 rounded-full border border-[#e6e6e6] bg-white px-3 py-1.5 text-[14px] font-medium tracking-[-0.28px] text-[#e34013]"
           style={at(0, 0)}>
           <span className="size-[6px] rounded-full bg-[#ff3e09]" />
-          Scrapbooks, laid out by Memo-AI
+          {t.pill}
         </span>
 
         <h1
           className="home-enter mt-5 max-w-[860px] text-balance text-center text-[40px] font-bold leading-[1.04] tracking-[-0.045em] text-[#1b1b1b] sm:text-[56px] md:text-[72px]"
           style={at(0, 18)}>
-          Your photos, bound into{' '}
-          <span className="text-[#ff3e09]">a scrapbook.</span>
+          {t.headingLead}{' '}
+          <span className="text-[#ff3e09]">{t.headingAccent}</span>
         </h1>
 
         <p
           className="home-enter mt-4 max-w-[560px] text-center text-[16px] leading-[1.6] text-[#4a4642] md:text-[19px]"
           style={at(90, 12)}>
-          Add your photos and pick a style. Memo-AI lays out the pages, and you
-          get one link to send.
+          {t.body}
         </p>
 
         <div
@@ -62,21 +69,21 @@ export default function ScrapbookHero() {
             type="button"
             onClick={() => start()}
             className={`group ${ctaPrimary}`}>
-            Make a scrapbook
+            {t.make}
             <ArrowRight
               aria-hidden
               className="size-4 transition-transform duration-200 ease-[cubic-bezier(0.23,1,0.32,1)] group-hover:translate-x-0.5"
             />
           </button>
           <a href="#styles" className={ctaGhost}>
-            See the styles
+            {t.styles}
           </a>
         </div>
 
         <p
           className="home-enter mt-4 text-[13px] font-medium text-[#8a847d]"
           style={at(210, 0)}>
-          Free to start · no design skills needed
+          {t.proof}
         </p>
 
         <div
@@ -93,19 +100,20 @@ export default function ScrapbookHero() {
             <span
               className="text-[11px] tracking-[1.2px]"
               style={{ fontFamily: 'var(--font-mr-label)' }}>
-              AI LAYOUT
+              {t.badge}
             </span>
           </div>
           <p
             aria-hidden
             className="pointer-events-none absolute -right-1 top-[14%] z-20 hidden w-[150px] rotate-6 text-[26px] leading-[1.05] text-[#1b1b1b] xl:block"
             style={{ fontFamily: 'var(--font-mr-hand)' }}>
-            tap the book to turn the page
+            {t.hint}
           </p>
           <ScrapbookBook
             active={beat.active}
             onNext={beat.next}
             onJump={beat.jump}
+            lang={lang}
           />
         </div>
       </div>
