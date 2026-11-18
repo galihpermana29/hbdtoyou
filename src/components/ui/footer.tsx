@@ -4,21 +4,23 @@ import Link from 'next/link';
 
 import { badge as wordmark, mono as label } from './brand-fonts';
 import ElasticWordmark from './elastic-wordmark';
-import {
-  HOME_PATHS,
-  SITE_COPY,
-  type SiteCopy,
-  type SiteLanguage,
-} from './navbar-copy';
+import type { LanguageVersions } from '@/lib/page-language';
+
+import { SITE_COPY, type SiteCopy, type SiteLanguage } from './navbar-copy';
 
 /**
  * The site footer. Its faces are applied on the footer's own element, so the
  * rest of the product keeps the typeface it already has. The label and
  * wordmark faces come from `brand-fonts.ts`, shared with the MemoRoll landing.
  *
- * It speaks the page's language: Indonesian on `/id`, English everywhere
- * else (navbar-copy.ts). On `/id` "See our pricing" goes to the Indonesian
- * home page's pricing.
+ * It speaks the page's language: Indonesian on `/id` and below, English
+ * everywhere else (navbar-copy.ts). On an Indonesian page "See our pricing"
+ * goes to the Indonesian home page's pricing.
+ *
+ * On a page written in both languages it also links the two (`versions`):
+ * the navbar's EN / ID switch is the one people use, and this line is the
+ * plain link pair in the body of every such page, for crawlers and for
+ * anyone who reads to the end.
  */
 const body = Plus_Jakarta_Sans({
   subsets: ['latin'],
@@ -69,9 +71,21 @@ function columns(t: SiteCopy['footer']) {
 
 const linkClass = 'transition-colors hover:text-[#ff3e09]';
 
-export function Footer({ lang = 'en' }: { lang?: SiteLanguage }) {
+const LANGUAGES = [
+  ['en', 'ENGLISH'],
+  ['id', 'BAHASA INDONESIA'],
+] as const;
+
+export function Footer({
+  lang = 'en',
+  versions = null,
+}: {
+  lang?: SiteLanguage;
+  /** The page's two addresses, when it has both. */
+  versions?: LanguageVersions | null;
+}) {
   const t = SITE_COPY[lang].footer;
-  const pricing = `${HOME_PATHS[lang]}#pricing`;
+  const pricing = lang === 'id' ? '/id#pricing' : '/#pricing';
   return (
     <footer
       className={`${body.className} overflow-hidden bg-[#1b1b1b] text-[#fbf4ec]`}>
@@ -149,6 +163,28 @@ export function Footer({ lang = 'en' }: { lang?: SiteLanguage }) {
                 2026-11-18); it used to follow the calendar. */}
             © 2024 MEMOIFY. {t.rights}
           </p>
+          {versions ? (
+            <nav aria-label={t.language} className="flex items-center gap-2">
+              {LANGUAGES.map(([code, name], index) => (
+                <span key={code} className="flex items-center gap-2">
+                  {index > 0 ? <span aria-hidden>·</span> : null}
+                  <a
+                    href={versions[code]}
+                    hrefLang={code}
+                    lang={code}
+                    aria-current={code === lang ? 'page' : undefined}
+                    style={label.style}
+                    className={
+                      code === lang
+                        ? 'text-[#fbf4ec]'
+                        : 'transition-colors [@media(hover:hover)_and_(pointer:fine)]:hover:text-[#ff3e09]'
+                    }>
+                    {name}
+                  </a>
+                </span>
+              ))}
+            </nav>
+          ) : null}
           <p style={label.style}>{t.madeIn}</p>
         </div>
 

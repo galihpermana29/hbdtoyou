@@ -1,9 +1,9 @@
 /**
  * What the navbar and the site footer say, in English and in Indonesian.
  *
- * Every page is English and gets the English. The Indonesian home page
- * (`/id`) asks for the Indonesian, so the whole page, bar and footer
- * included, reads in one language. Same rules as the home page's own words
+ * Every page is English and gets the English. The Indonesian pages (`/id`
+ * and below, lib/page-language.ts) ask for the Indonesian, so the whole
+ * page, bar and footer included, reads in one language. Same rules as the home page's own words
  * (components/home/copy.ts): the Indonesian is typed as the English's shape,
  * written the way a young Indonesian brand talks ("kamu", "bikin"), and
  * product names stay names (Scrapbook, Journal, MemoRoll, Photobox, Premium).
@@ -79,6 +79,7 @@ const EN = {
     gift: 'Digital Gift',
     rights: 'ALL RIGHTS RESERVED.',
     madeIn: 'MADE IN INDONESIA WITH LOVE ♡',
+    language: 'Language',
   },
 };
 
@@ -148,10 +149,8 @@ const ID: SiteCopy = {
     gift: 'Kado Digital',
     rights: 'HAK CIPTA DILINDUNGI.',
     madeIn: 'DIBUAT DI INDONESIA DENGAN CINTA ♡',
+    language: 'Bahasa',
   },
 };
 
 export const SITE_COPY: Record<SiteLanguage, SiteCopy> = { en: EN, id: ID };
-
-/** The home page in each language: where the language switch goes. */
-export const HOME_PATHS: Record<SiteLanguage, string> = { en: '/', id: '/id' };

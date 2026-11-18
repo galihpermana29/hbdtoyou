@@ -1,79 +1,10 @@
-import type { Metadata } from 'next';
-import { cookies, headers } from 'next/headers';
+import MemorollLanding, {
+  memorollMetadata,
+} from '@/components/memoroll/landing/memoroll-landing';
 
-import { LANDING_COPY } from '@/components/memoroll/landing/copy';
-import {
-  LANGUAGE_COOKIE,
-  resolveLandingLanguage,
-} from '@/components/memoroll/landing/language';
-import { LandingLanguageProvider } from '@/components/memoroll/landing/language-provider';
-import MemorollAnnouncementStrip from '@/components/memoroll/landing/announcement-strip';
-import MemorollFaq from '@/components/memoroll/landing/faq';
-import { landingFonts } from '@/components/memoroll/landing/fonts';
-import MemorollHero from '@/components/memoroll/landing/hero';
-import MemorollHowItWorks from '@/components/memoroll/landing/how-it-works';
-import MemorollIdea from '@/components/memoroll/landing/idea';
-import MemorollOccasions from '@/components/memoroll/landing/occasions';
-import MemorollPlanCallout from '@/components/memoroll/landing/plan-callout';
-import MemorollTestimonials from '@/components/memoroll/landing/testimonials';
-import MemorollWhy from '@/components/memoroll/landing/why';
-import { memorollFonts } from '@/components/memoroll/ui/fonts';
-import NavigationBar from '@/components/ui/navbar';
-import { pageMeta } from '@/lib/seo';
+/** The MemoRoll landing in English. `/id/memoroll` is the same in Indonesian. */
+export const metadata = memorollMetadata('en');
 
-/** The language the visitor chose, or failing that the one their browser asks for. */
-function requestLanguage() {
-  return resolveLandingLanguage(
-    cookies().get(LANGUAGE_COOKIE)?.value,
-    headers().get('accept-language')
-  );
-}
-
-export function generateMetadata(): Metadata {
-  return pageMeta({
-    path: '/memoroll',
-    title: 'MemoRoll: A Shared Camera for Your Event (Kamera Tamu) | Memoify',
-    description: LANDING_COPY[requestLanguage()].metaDescription,
-    keywords: {
-      en: [
-        'disposable camera app',
-        'wedding guest photo app',
-        'event photo sharing',
-        'QR code photo album',
-      ],
-      id: [
-        'kamera tamu pernikahan',
-        'aplikasi foto tamu',
-        'kamera disposable digital',
-        'album foto acara',
-      ],
-    },
-  });
-}
-
-/**
- * The MemoRoll landing. The guest viewer lives at `/memoroll/{code}` and the
- * demo at `/memoroll/demo`; this is the page that introduces the product.
- */
 export default function MemorollLandingPage() {
-  return (
-    <LandingLanguageProvider
-      initialLanguage={requestLanguage()}
-      className={`${memorollFonts} ${landingFonts}`}>
-      <div className="sticky top-0 z-[100] [--site-strip:40px]">
-        <MemorollAnnouncementStrip />
-        <NavigationBar />
-      </div>
-      <main className="overflow-x-clip">
-        <MemorollHero />
-        <MemorollIdea />
-        <MemorollHowItWorks />
-        <MemorollWhy />
-        <MemorollOccasions />
-        <MemorollTestimonials />
-        <MemorollFaq />
-        <MemorollPlanCallout />
-      </main>
-    </LandingLanguageProvider>
-  );
+  return <MemorollLanding language="en" />;
 }

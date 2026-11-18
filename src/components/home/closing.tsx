@@ -4,16 +4,12 @@ import Link from 'next/link';
 import { RevealHeading } from '@/components/memoroll/landing/reveal-words';
 
 import { HOME_COPY, type HomeLanguage } from './copy';
-import LanguageSwitch from './language-switch';
 import { Rise, press } from './ui';
 
 /**
  * The last word: one flame panel, one line, one action. The line arrives
  * word by word (the page's headings all do); the gifts tucked behind it are
  * decoration, so they fade in and do not move.
- *
- * Under it, the way to the page in the other language: the end of the page
- * is where someone who could not read it would look for one.
  */
 const TUCKED: [string, string][] = [
   ['/home/gift-magazine.webp', 'left-[-6%] top-[14%] -rotate-[10deg]'],
@@ -73,7 +69,6 @@ export default function HomeClosing({ lang = 'en' }: { lang?: HomeLanguage }) {
           </Link>
         </div>
       </div>
-      <LanguageSwitch lang={lang} />
     </section>
   );
 }

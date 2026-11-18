@@ -2,6 +2,7 @@ import type { NewTemplate } from '@/lib/new-template';
 import { landingFonts } from '@/components/memoroll/landing/fonts';
 import { memorollFonts } from '@/components/memoroll/ui/fonts';
 import NavigationBar from '@/components/ui/navbar';
+import { BILINGUAL_PAGES } from '@/lib/page-language';
 
 import HomeClosing from './closing';
 import { HOME_COPY, type HomeLanguage } from './copy';
@@ -42,7 +43,7 @@ export default function HomeLanding({
   return (
     <div lang={lang} className={`${memorollFonts} ${landingFonts}`}>
       <div className="fixed left-0 top-0 z-[1000] w-full isolate">
-        <NavigationBar lang={lang} languageSwitch />
+        <NavigationBar lang={lang} languageSwitch={BILINGUAL_PAGES[0]} />
       </div>
       <main className="mt-[81px] overflow-x-clip">
         <HomeHero fresh={fresh} lang={lang} />

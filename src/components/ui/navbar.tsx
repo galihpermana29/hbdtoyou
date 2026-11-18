@@ -29,12 +29,9 @@ import { formatNumberWithComma } from '@/lib/utils';
 import { WEDDING_RELEASED } from '@/lib/wedding-release';
 import { removeSession } from '@/store/get-set-session';
 
-import {
-  HOME_PATHS,
-  SITE_COPY,
-  type SiteCopy,
-  type SiteLanguage,
-} from './navbar-copy';
+import { localHref, type LanguageVersions } from '@/lib/page-language';
+
+import { SITE_COPY, type SiteCopy, type SiteLanguage } from './navbar-copy';
 
 /**
  * The site's navbar, in the MemoRoll design system (owner, 2026-11-17).
@@ -60,11 +57,14 @@ import {
  * - presses give under the finger (0.97); hover colour only for a pointer
  *   that can hover; reduced motion keeps the fades and drops the travel.
  *
- * Language: every page is English. The Indonesian home page (`/id`) passes
- * `lang="id"`, and both home pages pass `languageSwitch` to show the EN / ID
- * switch (on the bar from `lg`, in the sheet below it). The switch is plain
- * links, so crawlers follow it and the document's `lang`, set on the server,
- * follows the page. The words are in navbar-copy.ts.
+ * Language: the address says it (lib/page-language.ts). An Indonesian page
+ * passes `lang="id"`: the bar speaks Indonesian, and its links go to the
+ * Indonesian version of a page where there is one (the logo to `/id`). A page
+ * written in both languages passes its two addresses as `languageSwitch`,
+ * which shows the EN / ID switch (on the bar from `lg`, in the sheet below
+ * it). It is the site's only language switch. Plain links, so crawlers follow
+ * it and the document's `lang`, set on the server, follows the page. The
+ * words are in navbar-copy.ts.
  */
 
 /**
@@ -301,16 +301,18 @@ function BarMenu({
 }
 
 /**
- * EN / ID: the two home pages, side by side, the one being read on ink.
- * Plain `<a>`, not next/link: the page is loaded whole, so its `<html lang>`
- * comes from the server again.
+ * EN / ID: the page's two addresses, side by side, the one being read on
+ * ink. Plain `<a>`, not next/link: the page is loaded whole, so its
+ * `<html lang>` comes from the server again.
  */
 function LanguageSwitch({
   lang,
+  versions,
   label,
   className = '',
 }: {
   lang: SiteLanguage;
+  versions: LanguageVersions;
   label: string;
   className?: string;
 }) {
@@ -329,7 +331,7 @@ function LanguageSwitch({
         return (
           <a
             key={code}
-            href={HOME_PATHS[code]}
+            href={versions[code]}
             hrefLang={code}
             lang={code}
             aria-label={name}
@@ -350,17 +352,19 @@ function LanguageSwitch({
 function ProductRow({
   product,
   t,
+  lang,
   onPick,
 }: {
   product: Product;
   t: SiteCopy['nav'];
+  lang: SiteLanguage;
   onPick: () => void;
 }) {
   const Icon = product.icon;
   const words = t.product[product.key];
   return (
     <Link
-      href={product.href}
+      href={localHref(product.href, lang)}
       onClick={onPick}
       className="flex items-center gap-3 rounded-[14px] p-2.5 transition-colors duration-150 active:bg-[#f5ece1] [@media(hover:hover)_and_(pointer:fine)]:hover:bg-[#fbf4ec]">
       <span className="flex size-10 shrink-0 items-center justify-center rounded-[12px] bg-[#fff0e9]">
@@ -381,12 +385,12 @@ function ProductRow({
 
 const NavigationBar = ({
   lang = 'en',
-  languageSwitch = false,
+  languageSwitch = null,
 }: {
-  /** The language the page is in: Indonesian only on `/id`. */
+  /** The language the page is in: Indonesian on `/id` and below. */
   lang?: SiteLanguage;
-  /** Show the EN / ID switch: the two home pages, and nowhere else. */
-  languageSwitch?: boolean;
+  /** The page's two addresses, when it has both: shows the EN / ID switch. */
+  languageSwitch?: LanguageVersions | null;
 }) => {
   const t = SITE_COPY[lang].nav;
   const [sidebar, setSidebar] = useState(false);
@@ -428,6 +432,7 @@ const NavigationBar = ({
     pathname === href || pathname?.startsWith(`${href}/`);
   const onBar = (href: string) =>
     `${barLink} ${here(href) ? '!text-[#1b1b1b] font-semibold' : ''}`;
+  const to = (href: string) => localHref(href, lang);
 
   const avatar = (size: string) => (
     <span
@@ -464,7 +469,7 @@ const NavigationBar = ({
         suppressHydrationWarning
         className="flex h-full w-full items-center justify-between gap-4 px-4 sm:px-6 xl:px-8">
         <div className="flex min-w-0 items-center gap-4 xl:gap-6">
-          <Link href="/" className="shrink-0" aria-label={t.home}>
+          <Link href={to('/')} className="shrink-0" aria-label={t.home}>
             <Image
               src="https://res.cloudinary.com/dfwrmapr4/image/upload/v1789303095/placeholder/69b085d3b98c04a8b06e3e58ecfa136e95641109_ynodbj.png"
               alt="Memoify"
@@ -490,13 +495,14 @@ const NavigationBar = ({
                       key={product.key}
                       product={product}
                       t={t}
+                      lang={lang}
                       onPick={close}
                     />
                   ))}
                 </div>
               )}
             </BarMenu>
-            <Link href="/memoroll" className={onBar('/memoroll')}>
+            <Link href={to('/memoroll')} className={onBar(to('/memoroll'))}>
               MemoRoll
               <NewBadge label={t.newBadge} />
             </Link>
@@ -513,6 +519,7 @@ const NavigationBar = ({
           {languageSwitch ? (
             <LanguageSwitch
               lang={lang}
+              versions={languageSwitch}
               label={t.language}
               className="hidden lg:flex"
             />
@@ -643,6 +650,7 @@ const NavigationBar = ({
                     </span>
                     <LanguageSwitch
                       lang={lang}
+                      versions={languageSwitch}
                       label={t.language}
                       className="flex"
                     />
@@ -658,6 +666,7 @@ const NavigationBar = ({
                       key={product.key}
                       product={product}
                       t={t}
+                      lang={lang}
                       onPick={() => setSidebar(false)}
                     />
                   ))}

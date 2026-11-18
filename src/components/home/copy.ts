@@ -25,12 +25,7 @@
  * review.
  */
 
-import { HOME_PATHS } from '@/components/ui/navbar-copy';
-
 export type HomeLanguage = 'en' | 'id';
-
-/** Where each language version of the home page lives. */
-export const HOME_PATH: Record<HomeLanguage, string> = HOME_PATHS;
 
 const EN = {
   hero: {
@@ -225,7 +220,6 @@ const EN = {
 
   faq: {
     title: 'Good questions, short answers',
-    languageGroup: 'Language',
     curious: 'Still curious?',
     write: 'Write to us. A person answers.',
   },
@@ -233,10 +227,6 @@ const EN = {
   closing: {
     title: 'Make something they will keep.',
     body: 'Your first gift is free, and takes less time than choosing a card.',
-  },
-
-  language: {
-    label: 'Read this page in',
   },
 };
 
@@ -447,7 +437,6 @@ const ID: HomeCopy = {
 
   faq: {
     title: 'Pertanyaan bagus, jawaban singkat',
-    languageGroup: 'Bahasa',
     curious: 'Masih penasaran?',
     write: 'Kirim email ke kami. Yang bales orang beneran, kok.',
   },
@@ -455,10 +444,6 @@ const ID: HomeCopy = {
   closing: {
     title: 'Bikin kado yang bakal dia simpan.',
     body: 'Kado pertamamu gratis, dan bikinnya lebih cepat daripada milih kartu ucapan.',
-  },
-
-  language: {
-    label: 'Baca halaman ini dalam',
   },
 };
 

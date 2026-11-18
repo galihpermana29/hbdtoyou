@@ -1,6 +1,7 @@
 import HomePage from '@/components/home/home-page';
 import { Metadata } from 'next';
-import { HOME_LANGUAGES, pageMeta } from '@/lib/seo';
+import { languageAlternates, pageMeta } from '@/lib/seo';
+import { BILINGUAL_PAGES } from '@/lib/page-language';
 
 /**
  * The home page in Indonesian, at its own address so that search engines
@@ -37,7 +38,7 @@ export const metadata: Metadata = pageMeta({
     url: 'https://res.cloudinary.com/braiwjaya-university/image/upload/v1763138771/brave_screenshot_memoify.live_lvsx21.png',
     alt: 'Memoify - kado digital, scrapbook, dan album foto',
   },
-  languages: HOME_LANGUAGES,
+  languages: languageAlternates(BILINGUAL_PAGES[0]),
 });
 
 export default function IndonesianHome({

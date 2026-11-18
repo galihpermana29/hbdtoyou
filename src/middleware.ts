@@ -31,8 +31,9 @@ import { PAGE_LANGUAGE_HEADER, isIndonesianPath } from '@/lib/page-language';
  * address no subdomain could serve, and it is left to the route to refuse in
  * its own words.
  *
- * It also tells the root layout which language the page is in, so `/id`,
- * the home page in Indonesian, says `<html lang="id">` (lib/page-language.ts).
+ * It also tells the root layout which language the page is in, so `/id` and
+ * every page under it, the Indonesian pages, say `<html lang="id">`
+ * (lib/page-language.ts).
  */
 export function middleware(request: NextRequest) {
   const host = request.headers.get('host') ?? '';
@@ -70,7 +71,7 @@ export function middleware(request: NextRequest) {
 export const config = {
   // The two paths a Host can change the meaning of: the root, which a
   // subdomain serves an invitation at, and the old path addresses, which the
-  // apex redirects. And `/id`, which is told its language. Every other
+  // apex redirects. And `/id` and below, which are told their language. Every other
   // request never enters this file.
   // `:path*` rather than a single `:slug` segment, which this Next version's
   // matcher does not honour; the redirect itself still takes exactly one

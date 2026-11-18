@@ -41,13 +41,6 @@ const EN = {
   metaDescription:
     'Give every guest a camera on their phone. Their Shots stay blurred until the Reveal you set, then everyone sees the whole night at once.',
 
-  language: {
-    // Readable before a choice is made, so it says the same in both.
-    group: 'Language / Bahasa',
-    english: 'English',
-    indonesian: 'Bahasa Indonesia',
-  },
-
   strip: {
     long: 'NEW - MEMOROLL IS NOW INCLUDED FREE WITH THE WEDDING PLAN',
     short: 'NEW - MEMOROLL FREE WITH THE WEDDING PLAN',
@@ -306,8 +299,6 @@ export type LandingCopy = typeof EN;
 const ID: LandingCopy = {
   metaDescription:
     'Kasih kamera ke semua tamu, langsung di HP mereka. Fotonya baru kebuka pas Reveal, jadi semua orang lihat keseruannya bareng-bareng.',
-
-  language: EN.language,
 
   strip: {
     long: 'BARU - MEMOROLL SEKARANG GRATIS DI WEDDING PLAN',

@@ -1,5 +1,7 @@
 import type { Metadata } from 'next';
 
+import type { LanguageVersions } from './page-language';
+
 /**
  * What a search engine is told about a public page, in one place.
  *
@@ -63,12 +65,18 @@ type PageSeo = {
   languages?: Record<string, string>;
 };
 
-/** The home page, in each language it is written in. */
-export const HOME_LANGUAGES = {
-  en: SITE_URL,
-  id: `${SITE_URL}/id`,
-  'x-default': SITE_URL,
-};
+/**
+ * hreflang for a page that is written in both languages
+ * (lib/page-language.ts): each version, and English as the default.
+ */
+export function languageAlternates(versions: LanguageVersions) {
+  const at = (path: string) => `${SITE_URL}${path === '/' ? '' : path}`;
+  return {
+    en: at(versions.en),
+    id: at(versions.id),
+    'x-default': at(versions.en),
+  };
+}
 
 export function pageMeta({
   path,
