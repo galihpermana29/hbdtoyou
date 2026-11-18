@@ -42,7 +42,7 @@ export default function HomeLanding({
   return (
     <div lang={lang} className={`${memorollFonts} ${landingFonts}`}>
       <div className="fixed left-0 top-0 z-[1000] w-full isolate">
-        <NavigationBar />
+        <NavigationBar lang={lang} languageSwitch />
       </div>
       <main className="mt-[81px] overflow-x-clip">
         <HomeHero fresh={fresh} lang={lang} />

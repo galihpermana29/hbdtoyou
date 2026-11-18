@@ -5,6 +5,7 @@ import { getSpotifyAccessToken } from '@/action/spotify-api';
 import { getUserProfile } from '@/action/user-api';
 import { Footer } from '@/components/ui/footer';
 import { drawsAGift } from '@/lib/gift-routes';
+import { isIndonesianPath } from '@/lib/page-language';
 import { store } from '@/lib/store';
 import { setSessionSpecific } from '@/store/get-set-session';
 import { SessionData } from '@/store/iron-session';
@@ -423,8 +424,11 @@ const SessionProvider = ({
       {/* The site footer would intrude on the page a recipient came to see, so
           it stays off a gift. The Create Flow that builds one is ordinary
           product UI and keeps it. Arcade Claw and Board of Us sit in (gifts),
-          so drawsAGift already covers them. */}
-      {!isFooterFree && <Footer />}
+          so drawsAGift already covers them. It is in Indonesian on the one
+          page written in Indonesian, `/id`. */}
+      {!isFooterFree && (
+        <Footer lang={isIndonesianPath(pathname ?? '') ? 'id' : 'en'} />
+      )}
     </SessionContext.Provider>
   );
 };

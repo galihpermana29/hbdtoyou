@@ -97,6 +97,7 @@ export default function HomeNewTemplate({
   lang?: HomeLanguage;
 }) {
   const t = HOME_COPY[lang].fresh;
+  const words = lang === 'id' ? fresh.indonesian : fresh;
   return (
     <section
       id="new"
@@ -119,10 +120,10 @@ export default function HomeNewTemplate({
             <p
               className="mt-2 text-[30px] leading-[1.1] text-[#ff8a5c] md:text-[34px]"
               style={{ fontFamily: 'var(--font-mr-hand)' }}>
-              {fresh.says}
+              {words.says}
             </p>
             <p className="mt-4 text-[16px] leading-[1.65] text-[#cfc7bd] md:text-[18px]">
-              {fresh.body}
+              {words.body}
             </p>
           </Rise>
           <Rise

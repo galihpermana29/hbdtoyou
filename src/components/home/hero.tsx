@@ -45,6 +45,7 @@ export default function HomeHero({
   const beat = useGiftBeat();
   const reduce = useCalmMotion();
   const gift = GIFTS[beat.active];
+  const freshSays = lang === 'id' ? fresh?.indonesian.says : fresh?.says;
 
   return (
     <section
@@ -66,7 +67,7 @@ export default function HomeHero({
               <span className="font-semibold">{fresh.name}</span>
               <span className="hidden text-[#6b655f] sm:inline">
                 {' · '}
-                {fresh.says}
+                {freshSays}
               </span>
             </span>
             <ArrowRight

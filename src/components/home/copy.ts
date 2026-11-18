@@ -25,10 +25,12 @@
  * review.
  */
 
+import { HOME_PATHS } from '@/components/ui/navbar-copy';
+
 export type HomeLanguage = 'en' | 'id';
 
 /** Where each language version of the home page lives. */
-export const HOME_PATH: Record<HomeLanguage, string> = { en: '/', id: '/id' };
+export const HOME_PATH: Record<HomeLanguage, string> = HOME_PATHS;
 
 const EN = {
   hero: {
@@ -360,7 +362,7 @@ const ID: HomeCopy = {
       alt: 'Halaman scrapbook dari foto-foto sepasang kekasih',
     },
     journal: {
-      title: 'Jurnal',
+      title: 'Journal',
       body: 'Surat cinta yang ditulis kayak paper penelitian, lengkap dengan abstrak dan pendahuluannya.',
       alt: 'Surat yang ditata seperti jurnal ilmiah',
     },
