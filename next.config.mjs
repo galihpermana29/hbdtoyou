@@ -41,6 +41,18 @@ const nextConfig = {
     return config;
   },
 
+  // The fonts served from public/font never change under the same name, so
+  // a browser may keep them instead of asking again on every visit.
+  async headers() {
+    return [
+      {
+        source: '/font/:file*',
+        headers: [
+          { key: 'Cache-Control', value: 'public, max-age=2592000' },
+        ],
+      },
+    ];
+  },
   async rewrites() {
     return [
       {

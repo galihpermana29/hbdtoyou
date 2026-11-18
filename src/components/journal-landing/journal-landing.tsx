@@ -1,13 +1,11 @@
 'use client';
 
-import { useMemo } from 'react';
-
-import type { IContent } from '@/action/interfaces';
 import { ClosingPanel, Steps, useStart } from '@/components/home/blocks';
 import HomeOccasions from '@/components/home/occasions';
 import { landingFonts } from '@/components/memoroll/landing/fonts';
 import { memorollFonts } from '@/components/memoroll/ui/fonts';
 import NavigationBar from '@/components/ui/navbar';
+import type { JournalCardData } from '@/lib/journal-card';
 import { languageVersions, type PageLanguage } from '@/lib/page-language';
 
 import { JOURNAL_COPY } from './copy';
@@ -31,26 +29,18 @@ import JournalPublished from './published';
 
 const VERSIONS = languageVersions('/journal');
 
-/** A journal is listed unless its author took it off the list. */
-function isPublic(journal: IContent): boolean {
-  try {
-    return JSON.parse(journal.detail_content_json_text).isPublic !== false;
-  } catch {
-    return true;
-  }
-}
-
 export default function JournalLanding({
-  journalsData,
+  firstCards,
+  total,
   lang = 'en',
 }: {
-  journalsData: IContent[];
+  /** The first page of the published list; the list fetches the rest. */
+  firstCards: JournalCardData[];
+  /** How many journals are on the published list. */
+  total: number;
   lang?: PageLanguage;
 }) {
   const t = JOURNAL_COPY[lang];
-  // Memoised: the list below searches it, and a new array every render
-  // would redo that work every render.
-  const journals = useMemo(() => journalsData.filter(isPublic), [journalsData]);
   const start = useStart('/journal/create');
 
   return (
@@ -59,7 +49,7 @@ export default function JournalLanding({
         <NavigationBar lang={lang} languageSwitch={VERSIONS} />
       </div>
       <main className="mt-[81px] overflow-x-clip">
-        <JournalHero published={journals.length} lang={lang} />
+        <JournalHero published={total} lang={lang} />
         <HomeOccasions label={t.occasions.label} items={t.occasions.items} />
         <JournalFeatures lang={lang} />
         <Steps
@@ -124,7 +114,7 @@ export default function JournalLanding({
             },
           ]}
         />
-        <JournalPublished journals={journals} lang={lang} />
+        <JournalPublished first={firstCards} total={total} lang={lang} />
         <ClosingPanel
           ground="#fbf4ec"
           title={t.closing.title}

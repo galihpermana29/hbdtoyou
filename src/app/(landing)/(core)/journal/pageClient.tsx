@@ -13,6 +13,7 @@ import Image from 'next/image';
 import { useRouter } from 'next/navigation';
 import { useEffect, useMemo, useState } from 'react';
 import { signIn } from 'next-auth/react';
+import { toJournalCard } from '@/lib/journal-card';
 const JournalCard = dynamic(() => import('./view/JournalCard'), { ssr: false });
 
 const isJournalPublic = (journal: IContent): boolean => {
@@ -269,7 +270,7 @@ const EJournal = ({ journalsData }: { journalsData: IContent[] }) => {
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 max-w-7xl mx-auto w-full max-md:px-4 px-8">
             {visibleJournals.length > 0
               ? visibleJournals.map((entry) => (
-                  <JournalCard key={entry.id} entry={entry} />
+                  <JournalCard key={entry.id} card={toJournalCard(entry)!} />
                 ))
               : 'No Journals Available'}
           </div>

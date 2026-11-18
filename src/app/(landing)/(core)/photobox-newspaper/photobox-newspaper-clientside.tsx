@@ -51,6 +51,14 @@ const SLOT_ASPECT = 16 / 9;
 // is uniformly scaled down to fit (see `scale`), never responsively reflowed.
 const FRAME_W = 896; // matches Tailwind max-w-4xl
 
+// The frame's natural height as the page first draws it (Classic template, no
+// photo yet), measured in the browser. Until the browser has measured the real
+// frame, the scaled wrapper holds this shape, so a phone's first paint already
+// has the scaled-down height. It used to start at the full 896px layout and
+// collapse once measured, which shifted the page by 0.64 (CLS, 390px wide,
+// 2026-11-18).
+const FIRST_FRAME_H = 1144;
+
 type TemplateKey = 'broadsheet' | 'classic' | 'bobo';
 
 // Per-template styling. The frame markup is shared; these tokens + flags drive
@@ -530,11 +538,22 @@ const PhotoboxNewspaperPage = () => {
           {/* Scale-to-fit viewport: reserves the scaled-down footprint and
               clips overflow; the scale transform lives here, NOT on frameRef. */}
           <div
-            style={{
-              width: FRAME_W * scale,
-              height: frameHeight ? frameHeight * scale : undefined,
-              overflow: 'hidden',
-            }}>
+            style={
+              frameHeight
+                ? {
+                    width: FRAME_W * scale,
+                    height: frameHeight * scale,
+                    overflow: 'hidden',
+                  }
+                : {
+                    // Before the measurement: the width the scale will give
+                    // (the column, at most 896px) and the first frame's shape.
+                    width: '100%',
+                    maxWidth: FRAME_W,
+                    aspectRatio: `${FRAME_W} / ${FIRST_FRAME_H}`,
+                    overflow: 'hidden',
+                  }
+            }>
             <div
               ref={scaleWrapRef}
               style={{

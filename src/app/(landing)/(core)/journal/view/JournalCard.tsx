@@ -4,14 +4,16 @@ import React from 'react';
 import { motion } from 'framer-motion';
 import { ArrowRight } from 'lucide-react';
 import Link from 'next/link';
-import { IContent } from '@/action/interfaces';
+import type { JournalCardData } from '@/lib/journal-card';
 
 interface JournalCardProps {
-  entry: IContent;
+  /** The card the server made of the journal (lib/journal-card.ts). */
+  card: JournalCardData;
 }
 
-const JournalCard: React.FC<JournalCardProps> = ({ entry }) => {
-  const jsonEntry = entry ? JSON.parse(entry.detail_content_json_text) : null;
+const JournalCard: React.FC<JournalCardProps> = ({ card }) => {
+  const jsonEntry = card;
+  const entry = card;
   return (
     <motion.div
       className="h-full overflow-hidden rounded-[20px] border border-[#e8ded3] bg-[#fffdfa] text-left"

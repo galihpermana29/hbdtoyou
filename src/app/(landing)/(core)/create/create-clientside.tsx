@@ -105,12 +105,25 @@ const CreatePage = ({ initialTemplateId }: { initialTemplateId?: string }) => {
     IAllTemplateResponse[] | null
   >(null);
 
+  // The Popular and Original sections are not drawn until both lists have
+  // answered. They used to be drawn empty ("No templates") and filled one at
+  // a time, Original first, so Popular arriving above it pushed it down the
+  // screen: a layout shift of 0.33 on a phone and 0.38 on a desktop (CLS,
+  // 2026-11-18). Now they appear together, in space held open for them.
+  // Graduation still arrives last; it is the bottom section, so it only
+  // pushes what is below it.
+  //
+  // The requests stay one after another: they are server actions, which
+  // Next runs one at a time anyway.
+  const [listed, setListed] = useState(false);
+
   const handleGetTemplates = async () => {
     const data = await getOriginalTemplates();
     if (data.success) {
       const original = visibleTemplates(data.data);
-      setTemplates(original);
       const dx = await getPopularTemplates();
+      setTemplates(original);
+      setListed(true);
       if (dx.success) {
         const popular = visibleTemplates(dx.data);
         setPopularTemplates(popular);
@@ -130,6 +143,7 @@ const CreatePage = ({ initialTemplateId }: { initialTemplateId?: string }) => {
         message.error(gx.message);
       }
     } else {
+      setListed(true);
       message.error(data.message);
     }
   };
@@ -227,10 +241,26 @@ const CreatePage = ({ initialTemplateId }: { initialTemplateId?: string }) => {
                   </p>
                 </div>
               </div>
+              {/* antd turns Steps vertical below 576px, but only once it
+                  has measured the window after hydration: the server's
+                  horizontal row grew by 95px on a phone and pushed the page
+                  down (CLS 0.06). Both forms are drawn by the server and
+                  CSS shows the one for the screen, at antd's own
+                  breakpoint, so the first paint is already the final one. */}
               <Steps
                 size="small"
                 current={current}
                 items={StepsCustom}
+                responsive={false}
+                className="max-[575px]:!hidden"
+              />
+              <Steps
+                size="small"
+                direction="vertical"
+                current={current}
+                items={StepsCustom}
+                responsive={false}
+                className="min-[576px]:!hidden"
               />
               <div className="mt-[20px] max-w-[640px]">
                 <FreeAllowance kind="gift" />
@@ -280,7 +310,12 @@ const CreatePage = ({ initialTemplateId }: { initialTemplateId?: string }) => {
                         className="bg-gray-100 p-1 rounded-full"
                       />
                     </div>
-                    <div className="w-full">
+                    {!listed ? (
+                      // Held open below the fold, so the lists arriving
+                      // move nothing that was on screen.
+                      <div aria-busy="true" className="min-h-screen w-full" />
+                    ) : null}
+                    <div className={listed ? 'w-full' : 'hidden'}>
                       {(templateFilter === 'All' ||
                         templateFilter === 'Popular Template') && (
                         <TemplateGridSection
