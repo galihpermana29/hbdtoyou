@@ -1,5 +1,6 @@
 import type { MetadataRoute } from 'next';
 
+import { SEARCH_PAGE_LINKS } from '@/lib/intent-pages';
 import { languageVersions } from '@/lib/page-language';
 import { languageAlternates } from '@/lib/seo';
 
@@ -22,10 +23,12 @@ const PAGES: Array<[path: string, priority: number]> = [
   ['/journal', 0.8],
   ['/id/journal', 0.8],
   ['/memoroll', 0.8],
-  ['/id/memoroll', 0.8],
+  ['/id/kamera-tamu-pernikahan', 0.8],
   ['/inspiration', 0.7],
   ['/photobox-newspaper', 0.6],
   ['/contact', 0.3],
+  // Pages written for one search each, Indonesian only.
+  ...SEARCH_PAGE_LINKS.map((page): [string, number] => [page.href, 0.8]),
 ];
 
 export default function sitemap(): MetadataRoute.Sitemap {

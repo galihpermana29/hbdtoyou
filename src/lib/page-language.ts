@@ -2,7 +2,7 @@
  * Which language a page is in, and where its other language lives.
  *
  * One rule for the whole site: the address says the language. `/x` is
- * English and `/id/x` is the same page in Indonesian. There is no cookie and
+ * English and its Indonesian version is under `/id/`, usually `/id/x`. There is no cookie and
  * no switch on the page itself: the navbar's EN / ID pill and a line in the
  * footer link the two addresses, so each is its own page to a search engine
  * and a visitor's choice can be bookmarked and shared.
@@ -18,7 +18,9 @@ export type LanguageVersions = Record<PageLanguage, string>;
 
 export const BILINGUAL_PAGES: LanguageVersions[] = [
   { en: '/', id: '/id' },
-  { en: '/memoroll', id: '/id/memoroll' },
+  // Not `/id/memoroll`: the Indonesian page is named for what people search
+  // (a camera for wedding guests); `/id/memoroll` redirects to it.
+  { en: '/memoroll', id: '/id/kamera-tamu-pernikahan' },
   { en: '/scrapbook', id: '/id/scrapbook' },
   { en: '/journal', id: '/id/journal' },
 ];

@@ -1,5 +1,7 @@
 import type { Metadata } from 'next';
 
+import type { IntentPage } from '@/lib/intent-pages';
+
 import type { LanguageVersions } from './page-language';
 
 /**
@@ -188,6 +190,65 @@ export function homeStructuredData(
           '@type': 'Question',
           name: question.label,
           acceptedAnswer: { '@type': 'Answer', text: question.children },
+        })),
+      },
+    ],
+  };
+}
+
+/** Metadata of a page written for one search (lib/intent-pages.ts). */
+export function intentMetadata(page: IntentPage): Metadata {
+  return pageMeta({
+    path: `/id/${page.slug}`,
+    title: page.meta.title,
+    description: page.meta.description,
+    keywords: { id: page.meta.keywords },
+    locale: 'id',
+  });
+}
+
+/**
+ * Structured data of such a page: where it sits in the site, and its
+ * questions with their answers, which are also on the page as text.
+ */
+export function intentStructuredData(page: IntentPage) {
+  const url = `${SITE_URL}/id/${page.slug}`;
+  return {
+    '@context': 'https://schema.org',
+    '@graph': [
+      {
+        '@type': 'WebPage',
+        '@id': url,
+        url,
+        name: page.meta.title,
+        description: page.meta.description,
+        inLanguage: 'id',
+        isPartOf: { '@id': `${SITE_URL}/#website` },
+      },
+      {
+        '@type': 'BreadcrumbList',
+        itemListElement: [
+          {
+            '@type': 'ListItem',
+            position: 1,
+            name: SITE_NAME,
+            item: `${SITE_URL}/id`,
+          },
+          {
+            '@type': 'ListItem',
+            position: 2,
+            name: page.hero.pill,
+            item: url,
+          },
+        ],
+      },
+      {
+        '@type': 'FAQPage',
+        inLanguage: 'id',
+        mainEntity: page.faq.items.map((item) => ({
+          '@type': 'Question',
+          name: item.q,
+          acceptedAnswer: { '@type': 'Answer', text: item.a },
         })),
       },
     ],

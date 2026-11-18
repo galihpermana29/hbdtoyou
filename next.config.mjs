@@ -53,6 +53,16 @@ const nextConfig = {
       },
     ];
   },
+  // The Indonesian MemoRoll landing moved to the address people search for.
+  async redirects() {
+    return [
+      {
+        source: '/id/memoroll',
+        destination: '/id/kamera-tamu-pernikahan',
+        permanent: true,
+      },
+    ];
+  },
   async rewrites() {
     return [
       {

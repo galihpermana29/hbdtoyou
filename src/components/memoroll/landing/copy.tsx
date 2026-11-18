@@ -298,7 +298,7 @@ export type LandingCopy = typeof EN;
 
 const ID: LandingCopy = {
   metaDescription:
-    'Kasih kamera ke semua tamu, langsung di HP mereka. Fotonya baru kebuka pas Reveal, jadi semua orang lihat keseruannya bareng-bareng.',
+    'Kamera digital ala disposable camera buat tamu pernikahan dan acaramu. Tamu scan QR, jepret dari HP tanpa install, dan fotonya kebuka bareng pas Reveal.',
 
   strip: {
     long: 'BARU - MEMOROLL SEKARANG GRATIS DI WEDDING PLAN',
@@ -549,7 +549,129 @@ const ID: LandingCopy = {
   },
 };
 
+/**
+ * The Indonesian landing as it is published, at `/id/kamera-tamu-pernikahan`.
+ *
+ * In Indonesian, MemoRoll is found by people planning a wedding, searching
+ * for a camera for their guests ("kamera tamu pernikahan", "disposable
+ * camera pernikahan"), so the page is named for that search and worded for
+ * it (owner, 2026-11-19). `ID` above is the plain translation of the
+ * English; this says the same things to a couple: the hero, the idea's
+ * opening, where the QR goes, the occasions' heading and the questions.
+ *
+ * Every claim is still one the English makes (QR, no install, 10 to 15
+ * Shots, no retake, blurred until Reveal, the 500m venue lock, free with
+ * the Wedding Plan); the comparison with a disposable camera says only what
+ * follows from those.
+ *
+ * The occasions' three cards keep their order and their subjects, because
+ * each sits beside its own photograph.
+ */
+const WEDDING_ID: LandingCopy = {
+  ...ID,
+  metaDescription:
+    'Kamera tamu pernikahan digital: seperti disposable camera di tiap meja, tapi di HP tamu. Scan QR, jepret tanpa install, semua foto kebuka bareng pas Reveal.',
+  hero: {
+    ...ID.hero,
+    heading: 'Kamera buat semua tamu pernikahanmu.',
+    body: 'Kayak disposable camera di tiap meja resepsi, tapi di HP tamu. Mereka scan QR, jepret, dan semua fotonya kebuka bareng pas Reveal.',
+    proofWhere: 'dari akad, resepsi, sampai after party',
+  },
+  idea: {
+    ...ID.idea,
+    heading:
+      'Semua tamu pegang kamera. Nggak ada yang bisa lihat hasilnya. Sampai Reveal.',
+    body: 'Persis kamera sekali pakai di meja resepsi: jatah Shot tiap tamu terbatas dan nggak bisa diulang, jadi yang kefoto cuma momen yang beneran bagus.',
+  },
+  how: {
+    ...ID.how,
+    guest: [
+      {
+        ...ID.how.guest[0],
+        body: 'Scan QR di meja resepsi, kamera langsung kebuka di browser HP kamu. Nggak perlu install apa-apa.',
+      },
+      ...ID.how.guest.slice(1),
+    ],
+    host: [
+      {
+        ...ID.how.host[0],
+        body: 'Kasih nama pernikahannya, pilih cover, tentuin jatah Shot tiap tamu, terus atur jam Reveal-nya.',
+      },
+      {
+        ...ID.how.host[1],
+        body: 'Taruh QR-nya di meja tamu, di pintu masuk, atau di layar dekat pelaminan. Tiap tamu yang scan langsung dapat Roll sendiri.',
+      },
+      {
+        ...ID.how.host[2],
+        body: 'Kalian fokus jadi pengantin. Tamu-tamu udah motret seisi ruangan, dan kalian lihat semuanya pas Reveal.',
+      },
+    ],
+  },
+  why: {
+    ...ID.why,
+    label: 'Kenapa pakai MemoRoll di pernikahan?',
+    slides: [
+      <>
+        Kenapa pakai <Hi>MemoRoll</Hi> di pernikahanmu?
+      </>,
+      ...ID.why.slides.slice(1),
+    ],
+  },
+  occasions: {
+    ...ID.occasions,
+    eyebrow: 'Bukan Cuma Resepsi',
+    heading: 'Dari hari pernikahan sampai acara-acara sesudahnya',
+    cards: [
+      ID.occasions.cards[0],
+      {
+        title: 'Pernikahan',
+        body: 'Seratus tamu, seratus sudut. Dari akad sampai lagu terakhir di resepsi, lihat apa aja yang terjadi waktu kalian sibuk di pelaminan.',
+      },
+      ID.occasions.cards[2],
+    ],
+  },
+  faq: {
+    ...ID.faq,
+    heading: 'Pertanyaan soal kamera tamu pernikahan.',
+    body: 'Yang biasanya ditanyain calon pengantin sebelum bagi-bagi kamera.',
+    items: [
+      {
+        q: 'Apa itu kamera tamu pernikahan digital?',
+        a: 'Kamera yang dipakai tamu langsung dari HP mereka. Tamu scan QR di venue, dapat jatah Shot terbatas, dan semua fotonya terkumpul di satu galeri yang kebuka bareng pas Reveal.',
+      },
+      {
+        q: 'Bedanya sama disposable camera biasa di meja tamu?',
+        a: 'Idenya sama: jatah foto terbatas dan hasilnya baru kelihatan belakangan. Bedanya, kameranya ada di HP tiap tamu, jadi nggak ada kamera yang perlu dibeli per meja atau film yang perlu dicuci, dan fotonya kebuka di jam Reveal yang kamu atur.',
+      },
+      {
+        q: 'Tamu harus download aplikasi?',
+        a: 'Nggak. Tamu tinggal scan QR acaramu, kamera langsung kebuka di browser HP. Cukup login sekali, Roll-nya tetap ikut walaupun ganti HP.',
+      },
+      {
+        q: 'Tiap tamu bisa foto berapa kali?',
+        a: 'Kamu yang tentuin, 10 sampai 15 Shot per tamu. Nggak ada retake, dan sisa jatahnya kelihatan di kamera.',
+      },
+      {
+        q: 'Kapan foto-foto pernikahannya bisa dilihat?',
+        a: 'Foto sendiri langsung bisa dilihat. Foto tamu lain tetap blur sampai Reveal, di jam yang kamu atur. Motretnya juga selesai di situ, terus semua tamu bisa buka satu roll penuh.',
+      },
+      {
+        q: 'Bisa dibatasi cuma buat tamu yang datang?',
+        a: 'Bisa. Kamera bisa dikunci buat HP dalam radius 500m dari venue aja, jadi isinya dari orang-orang yang beneran datang ke pernikahanmu.',
+      },
+      {
+        q: 'Fotonya bisa disimpan?',
+        a: 'Bisa. Tamu tinggal buka foto di galeri, terus simpan ke HP.',
+      },
+      {
+        q: 'Berapa harganya?',
+        a: 'Gratis kalau kamu ambil Wedding Plan. Cek detail paketnya, ya.',
+      },
+    ],
+  },
+};
+
 export const LANDING_COPY: Record<LandingLanguage, LandingCopy> = {
   en: EN,
-  id: ID,
+  id: WEDDING_ID,
 };
