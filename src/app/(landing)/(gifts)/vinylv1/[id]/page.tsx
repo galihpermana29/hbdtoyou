@@ -1,6 +1,7 @@
 import { getDetailContent } from '@/action/user-api';
 import LockScreen from '@/components/ui/lock-screen';
 import VinylDynamic from '../VinylDynamic';
+import { notFound } from 'next/navigation';
 
 const getDetailDataNew = async (id: string) => {
   const res = await getDetailContent(id);
@@ -12,7 +13,7 @@ export default async function VinylDynamicPage({ params }: any) {
 
   const data = await getDetailDataNew(id);
   if (!data.data) {
-    return <div>No data</div>;
+    notFound();
   }
 
   const parsedData = JSON.parse(data.data.detail_content_json_text);

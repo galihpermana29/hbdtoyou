@@ -1,5 +1,6 @@
 import { getDetailContent } from '@/action/user-api';
 import Image from 'next/image';
+import { notFound } from 'next/navigation';
 
 const getDetailDataNew = async (id: string) => {
   const res = await getDetailContent(id);
@@ -11,10 +12,15 @@ export default async function GraduationV1Page({ params }: { params: any }) {
 
   const data = await getDetailDataNew(id);
   if (!data.data) {
-    return <div>No data</div>;
+    notFound();
   }
 
   const parsedData = JSON.parse(data.data.detail_content_json_text);
+  // A graduation page can be saved without photos: the gallery is then
+  // empty, not an error.
+  const images: string[] = Array.isArray(parsedData?.images)
+    ? parsedData.images
+    : [];
   return (
     <main className="min-h-screen bg-black text-white">
       <nav className="flex justify-between items-center p-4 md:p-6">
@@ -52,7 +58,7 @@ export default async function GraduationV1Page({ params }: { params: any }) {
       </div>
 
       <div className="grid grid-cols-1 md:grid-cols-2 gap-[10px] md:gap-4 max-w-[90%] md:max-w-[97%] mx-auto">
-        {parsedData?.images.map((uri: string) => (
+        {images.map((uri: string) => (
           <div
             key={uri}
             className="relative aspect-square group cursor-pointer overflow-hidden rounded-lg">

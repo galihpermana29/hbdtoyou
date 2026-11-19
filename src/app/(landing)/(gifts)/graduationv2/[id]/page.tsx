@@ -1,6 +1,7 @@
 import { getDetailContent } from '@/action/user-api';
 import { Camera } from 'lucide-react';
 import Image from 'next/image';
+import { notFound } from 'next/navigation';
 
 const getDetailDataNew = async (id: string) => {
   const res = await getDetailContent(id);
@@ -12,12 +13,17 @@ export default async function Graduationv2Page({ params }: { params: any }) {
 
   const data = await getDetailDataNew(id);
   if (!data.data) {
-    return <div>No data</div>;
+    notFound();
   }
 
   const parsedData = JSON.parse(data.data.detail_content_json_text);
 
-  const totalItems = parsedData?.images.length || 0; // Get the total number of items
+  // A graduation page can be saved without photos (`images: null`), and one
+  // in four on record was: the gallery is then empty, not an error.
+  const images: string[] = Array.isArray(parsedData?.images)
+    ? parsedData.images
+    : [];
+  const totalItems = images.length; // Get the total number of items
   const midIndex = Math.ceil(totalItems / 2); // Calculate the middle index
   const heightClasses = ['h-[300px]', 'h-[500px]'];
 
@@ -61,50 +67,46 @@ export default async function Graduationv2Page({ params }: { params: any }) {
 
           <div className="grid grid-cols-2 gap-2 md:gap-4 md:col-start-2 col-start-1">
             <div className="grid gap-2 md:gap-4">
-              {parsedData?.images
-                ?.slice(0, midIndex)
-                .map((uri: string, idx: number) => {
-                  const randomHeightClass =
-                    idx % 2 === 0 ? heightClasses[0] : heightClasses[1];
-                  return (
-                    <div
-                      className={`${
-                        randomHeightClass === heightClasses[0]
-                          ? 'row-span-1'
-                          : 'row-span-2'
-                      }`}
-                      key={idx}>
-                      <img
-                        className={`${randomHeightClass} w-full object-cover rounded-lg border-2`}
-                        src={uri}
-                        alt=""
-                      />
-                    </div>
-                  );
-                })}
+              {images.slice(0, midIndex).map((uri: string, idx: number) => {
+                const randomHeightClass =
+                  idx % 2 === 0 ? heightClasses[0] : heightClasses[1];
+                return (
+                  <div
+                    className={`${
+                      randomHeightClass === heightClasses[0]
+                        ? 'row-span-1'
+                        : 'row-span-2'
+                    }`}
+                    key={idx}>
+                    <img
+                      className={`${randomHeightClass} w-full object-cover rounded-lg border-2`}
+                      src={uri}
+                      alt=""
+                    />
+                  </div>
+                );
+              })}
             </div>
             <div className="grid gap-2 md:gap-4">
-              {parsedData?.images
-                ?.slice(midIndex)
-                .map((uri: string, idx: number) => {
-                  const randomHeightClass =
-                    idx % 2 === 0 ? heightClasses[1] : heightClasses[0];
-                  return (
-                    <div
-                      className={`${
-                        randomHeightClass === heightClasses[1]
-                          ? 'row-span-1'
-                          : 'row-span-2'
-                      } `}
-                      key={idx}>
-                      <img
-                        className={`${randomHeightClass} w-full object-cover rounded-lg`}
-                        src={uri}
-                        alt=""
-                      />
-                    </div>
-                  );
-                })}
+              {images.slice(midIndex).map((uri: string, idx: number) => {
+                const randomHeightClass =
+                  idx % 2 === 0 ? heightClasses[1] : heightClasses[0];
+                return (
+                  <div
+                    className={`${
+                      randomHeightClass === heightClasses[1]
+                        ? 'row-span-1'
+                        : 'row-span-2'
+                    } `}
+                    key={idx}>
+                    <img
+                      className={`${randomHeightClass} w-full object-cover rounded-lg`}
+                      src={uri}
+                      alt=""
+                    />
+                  </div>
+                );
+              })}
             </div>
           </div>
         </div>

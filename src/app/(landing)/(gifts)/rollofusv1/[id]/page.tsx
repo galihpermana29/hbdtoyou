@@ -3,6 +3,7 @@ import LockScreen from '@/components/ui/lock-screen';
 
 import RollOfUs from '../roll-of-us';
 import { normalizeRollOfUsData } from '../roll-of-us-data';
+import { notFound } from 'next/navigation';
 
 export default async function RollOfUsGiftPage({
   params,
@@ -11,19 +12,19 @@ export default async function RollOfUsGiftPage({
 }) {
   const response = await getDetailContent(params.id);
   if (!response.data) {
-    return <div className="min-h-screen">No data</div>;
+    notFound();
   }
 
   let rawData: unknown;
   try {
     rawData = JSON.parse(response.data.detail_content_json_text);
   } catch {
-    return <div className="min-h-screen">No data</div>;
+    notFound();
   }
 
   const data = normalizeRollOfUsData(rawData);
   if (!data) {
-    return <div className="min-h-screen">No data</div>;
+    notFound();
   }
 
   const content = <RollOfUs data={data} />;

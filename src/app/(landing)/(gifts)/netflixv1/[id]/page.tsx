@@ -3,6 +3,7 @@ import NetflixExperience from '@/components/netflix/netflix-experience';
 import MusicPlayer from '@/components/ui/music-player/music-player';
 import LockScreen from '@/components/ui/lock-screen';
 import 'react-photo-view/dist/react-photo-view.css';
+import { notFound } from 'next/navigation';
 
 const getDetailDataNew = async (id: string) => {
   const res = await getDetailContent(id);
@@ -14,7 +15,7 @@ const RootUserPage = async ({ params }: any) => {
 
   const data = await getDetailDataNew(id);
   if (!data.data) {
-    return <div>No data</div>;
+    notFound();
   }
 
   const parsedData = JSON.parse(data.data.detail_content_json_text);

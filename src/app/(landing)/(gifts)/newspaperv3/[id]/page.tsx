@@ -4,6 +4,7 @@ import { v3Songs } from '@/lib/songs';
 import dayjs from 'dayjs';
 import Image from 'next/image';
 import LockScreen from '@/components/ui/lock-screen';
+import { notFound } from 'next/navigation';
 
 // TODO(placeholder-images): these are temporary stock photos served from Cloudinary
 // cloud `dfwrmapr4`, standing in for the sample images lost when cloud `dxuumohme`
@@ -36,7 +37,7 @@ export default async function Home({ params }: { params: any }) {
 
   const data = await getDetailDataNew(id);
   if (!data.data) {
-    return <div>No data</div>;
+    notFound();
   }
 
   const parsedData = JSON.parse(data.data.detail_content_json_text);
@@ -49,8 +50,11 @@ export default async function Home({ params }: { params: any }) {
     (data.data.user_type === 'free' && data.data.template_label === 'premium');
   const selectedSongs = v3Songs.find((dx) => dx.id === parsedData.id);
 
-  const contents = splitTextIntoColumns(parsedData.desc1);
-  const defaultContents = splitTextIntoColumns(selectedSongs!.lyrics);
+  // Either can be missing on a gift on record: the song it names may no
+  // longer be in the list, and the text may never have been written. The
+  // page then prints what it has, not an error.
+  const contents = splitTextIntoColumns(parsedData.desc1 ?? '');
+  const defaultContents = splitTextIntoColumns(selectedSongs?.lyrics ?? '');
   const content = (
     <main className="min-h-screen bg-white p-4 md:p-8 lg:p-12">
       <div className="max-w-4xl mx-auto border border-black">

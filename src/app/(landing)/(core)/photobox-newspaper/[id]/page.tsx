@@ -1,6 +1,7 @@
 import { getDetailContent } from '@/action/user-api';
 import LockScreen from '@/components/ui/lock-screen';
 import ResultActions from './result-actions';
+import { notFound } from 'next/navigation';
 
 export default async function PhotoboxNewspaperViewer({
   params,
@@ -11,7 +12,7 @@ export default async function PhotoboxNewspaperViewer({
   const data = await getDetailContent(id);
 
   if (!data?.data) {
-    return <div className="p-10 text-center">No data</div>;
+    notFound();
   }
 
   let parsed: { image?: string; template?: string } = {};

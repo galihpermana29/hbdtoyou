@@ -1,12 +1,40 @@
+import type { Metadata } from 'next';
 import React from 'react';
 
 import { getDetailContent } from '@/action/user-api';
 import JournalHeader from './view/presentation/JournalHeader';
+import { notFound } from 'next/navigation';
 
 const getDetailDataNew = async (id: string) => {
   const res = await getDetailContent(id);
   return res;
 };
+
+/**
+ * A journal its author took off the published list is still reached by its
+ * link, but is not for search engines. A published one is named after
+ * itself.
+ */
+export async function generateMetadata({
+  params,
+}: {
+  params: { id: string };
+}): Promise<Metadata> {
+  const data = await getDetailDataNew(params.id);
+  if (!data.data) return { robots: { index: false, follow: false } };
+  let entry: { title?: string; isPublic?: boolean } = {};
+  try {
+    entry = JSON.parse(data.data.detail_content_json_text);
+  } catch {
+    return { robots: { index: false, follow: false } };
+  }
+  return {
+    title: entry.title ? `${entry.title} | Memoify Journal` : 'Memoify Journal',
+    ...(entry.isPublic === false
+      ? { robots: { index: false, follow: false } }
+      : {}),
+  };
+}
 
 async function EntryDetail({ params }: { params: { id: string } }) {
   const { id } = params;
@@ -14,7 +42,7 @@ async function EntryDetail({ params }: { params: { id: string } }) {
   // Fetch journal data using the ID
   const data = await getDetailDataNew(id);
   if (!data.data) {
-    return <div>No data</div>;
+    notFound();
   }
 
   // Parse the journal content

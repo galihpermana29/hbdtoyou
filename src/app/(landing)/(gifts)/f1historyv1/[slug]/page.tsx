@@ -1,8 +1,9 @@
 import { getDetailContent } from '@/action/user-api';
 import f1Teams from '@/lib/f1Data';
 import { Carousel } from 'antd';
-import { ArrowDownRight, MoveDownRight } from 'lucide-react';
+import { ArrowDownRight } from 'lucide-react';
 import Image from 'next/image';
+import { notFound } from 'next/navigation';
 
 const getDetailDataNew = async (id: string) => {
   const res = await getDetailContent(id);
@@ -14,7 +15,7 @@ const F1Historyv1Page = async ({ params }: { params: any }) => {
 
   const data = await getDetailDataNew(slug);
   if (!data.data) {
-    return <div>No data</div>;
+    notFound();
   }
 
   const parsedData = JSON.parse(data.data.detail_content_json_text);
