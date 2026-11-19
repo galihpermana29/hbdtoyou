@@ -5,6 +5,7 @@ import { getDetailContent } from '@/action/user-api';
 import ImagesComponent from '../ImagesComponent/ImagesComponent';
 import LockScreen from '@/components/ui/lock-screen';
 import MusicPlayer from '@/components/ui/music-player/music-player';
+import { notFound } from 'next/navigation';
 
 // TODO(placeholder-images): these are temporary stock photos served from Cloudinary
 // cloud `dfwrmapr4`, standing in for the sample images lost when cloud `dxuumohme`
@@ -54,7 +55,7 @@ export default async function MagazineDetailV1({ params }: { params: any }) {
 
   const data = await getDetailDataNew(id);
   if (!data.data) {
-    return <div>No data</div>;
+    notFound();
   }
 
   const parsedData = JSON.parse(data.data.detail_content_json_text);

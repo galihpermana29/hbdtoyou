@@ -35,7 +35,9 @@ const stories = [
 ];
 
 export default function FeaturedStories({ content }: { content?: any }) {
-  const dx = content
+  // A newspaper saved without stories of its own shows the sample ones, as
+  // the preview does; before, it was an error page for whoever opened it.
+  const dx = Array.isArray(content?.stories)
     ? content.stories.map((dx: any) => ({
         image: dx.imageUrl,
         category: 'ARTS',

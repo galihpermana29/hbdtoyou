@@ -3,6 +3,7 @@ import LockScreen from '@/components/ui/lock-screen';
 import DisneyExperience from '@/components/disney+/DisneyExperience';
 import MusicPlayer from '@/components/ui/music-player/music-player';
 import WatchModal from './component/WatchModal';
+import { notFound } from 'next/navigation';
 
 // TODO(placeholder-images): these are temporary stock photos served from Cloudinary
 // cloud `dfwrmapr4`, standing in for the sample images lost when cloud `dxuumohme`
@@ -20,7 +21,7 @@ export default async function DynamicDisneyPage({ params }: { params: any }) {
 
   const data = await getDetailDataNew(slug);
   if (!data.data) {
-    return <div>No data</div>;
+    notFound();
   }
 
   const parsedData = JSON.parse(data.data.detail_content_json_text);

@@ -2,6 +2,7 @@ import { getDetailContent } from '@/action/user-api';
 import TarotReader from '@/components/celestialtarot/TarotReader';
 import { TarotData } from '@/components/celestialtarot/types';
 import LockScreen from '@/components/ui/lock-screen';
+import { notFound } from 'next/navigation';
 
 const getDetailDataNew = async (id: string) => {
   const res = await getDetailContent(id);
@@ -13,7 +14,7 @@ const RootUserPage = async ({ params }: any) => {
 
   const data = await getDetailDataNew(id);
   if (!data.data) {
-    return <div>No data</div>;
+    notFound();
   }
 
   const parsedData = JSON.parse(data.data.detail_content_json_text);

@@ -2,6 +2,7 @@ import { getDetailContent } from '@/action/user-api';
 import LockScreen from '@/components/ui/lock-screen';
 import BoardOfUs from '../board-of-us';
 import { normalizeBoardOfUsData } from '../board-of-us-data';
+import { notFound } from 'next/navigation';
 
 export default async function BoardOfUsGiftPage({
   params,
@@ -10,19 +11,19 @@ export default async function BoardOfUsGiftPage({
 }) {
   const response = await getDetailContent(params.id);
   if (!response.data) {
-    return <div className="min-h-screen">No data</div>;
+    notFound();
   }
 
   let rawData: unknown;
   try {
     rawData = JSON.parse(response.data.detail_content_json_text);
   } catch {
-    return <div className="min-h-screen">No data</div>;
+    notFound();
   }
 
   const data = normalizeBoardOfUsData(rawData);
   if (!data) {
-    return <div className="min-h-screen">No data</div>;
+    notFound();
   }
 
   const content = <BoardOfUs data={data} />;

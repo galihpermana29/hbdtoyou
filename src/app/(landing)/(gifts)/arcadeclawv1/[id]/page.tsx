@@ -1,6 +1,7 @@
 import { getDetailContent } from '@/action/user-api';
 import LockScreen from '@/components/ui/lock-screen';
 import ClawOfUs, { type ArcadeClawData } from '../claw-of-us';
+import { notFound } from 'next/navigation';
 
 export default async function ArcadeClawGiftPage({
   params,
@@ -9,14 +10,14 @@ export default async function ArcadeClawGiftPage({
 }) {
   const response = await getDetailContent(params.id);
   if (!response.data) {
-    return <div className="min-h-screen">No data</div>;
+    notFound();
   }
 
   let parsedData: ArcadeClawData;
   try {
     parsedData = JSON.parse(response.data.detail_content_json_text);
   } catch {
-    return <div className="min-h-screen">No data</div>;
+    notFound();
   }
 
   if (
@@ -26,7 +27,7 @@ export default async function ArcadeClawGiftPage({
     !Array.isArray(parsedData?.memories) ||
     parsedData.memories.length < 3
   ) {
-    return <div className="min-h-screen">No data</div>;
+    notFound();
   }
 
   const content = (

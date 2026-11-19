@@ -6,6 +6,7 @@ import Sidebar from '@/components/spotify/sidebar';
 import 'react-photo-view/dist/react-photo-view.css';
 import MusicPlayer from '@/components/ui/music-player/music-player';
 import LockScreen from '@/components/ui/lock-screen';
+import { notFound } from 'next/navigation';
 const getDetailDataNew = async (id: string) => {
   const res = await getDetailContent(id);
   return res;
@@ -15,7 +16,7 @@ export default async function HomePage({ params }: any) {
 
   const data = await getDetailDataNew(id);
   if (!data.data) {
-    return <div>No data</div>;
+    notFound();
   }
 
   const parsedData = JSON.parse(data.data.detail_content_json_text);

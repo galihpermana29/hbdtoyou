@@ -5,6 +5,7 @@ import NavigationBar from '@/components/ui/navbar';
 import ResultWrapper from '../../result-wrapper';
 import { Metadata } from 'next';
 import LockScreen from '@/components/ui/lock-screen';
+import { notFound } from 'next/navigation';
 
 // metadata
 export const metadata: Metadata = {
@@ -59,7 +60,7 @@ const Scrapbook5Result = async ({
 
   const data = await getDetailDataNew(id);
   if (!data.data) {
-    return <div>No data</div>;
+    notFound();
   }
 
   let parsedData;
