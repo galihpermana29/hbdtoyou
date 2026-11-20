@@ -365,7 +365,170 @@ export const BATAM_CAMERA: IntentPage = {
   actions: { make: 'Ambil slot gratis', examples: 'Lihat dulu' },
 };
 
-export const INTENT_PAGES: IntentPage[] = [BIRTHDAY, BATAM_CAMERA];
+/**
+ * "Kado valentine digital": 13 and 14 February are among the busiest days of
+ * the year, and the searches that day are for a couple, not a birthday.
+ *
+ * Its examples are the templates that read as a couple's story (a playlist,
+ * a series, a magazine of your photos, a board game of your dates, a roll of
+ * film, a claw machine, a front page, a scrapbook), and its words are its
+ * own: it shares the birthday page's shape, not its sentences. Like every page here it names no price,
+ * no cap and no plan: the owner moves templates between tiers on the backend.
+ */
+export const VALENTINE: IntentPage = {
+  slug: 'kado-valentine-digital',
+  meta: {
+    title: 'Kado Valentine Digital untuk Pacar, Kirim Lewat Link | Memoify',
+    description:
+      'Kado valentine digital dari foto dan cerita kalian: playlist berdua, series ala Netflix, majalah, sampai board game kencan. Jadi dalam beberapa menit.',
+    keywords: [
+      'kado valentine digital',
+      'kado valentine untuk pacar',
+      'kado valentine online',
+      'hadiah valentine digital',
+      'kado valentine LDR',
+      'kado valentine unik',
+      'ucapan valentine untuk pacar',
+      'website valentine untuk pacar',
+      'ide kado valentine',
+      'kado hari kasih sayang',
+    ],
+  },
+  hero: {
+    pill: 'Kado valentine digital',
+    title: 'Kado valentine yang isinya cerita kalian berdua',
+    body: 'Kumpulin foto-foto kalian, lagu yang kalian suka, dan kata-kata yang jarang kamu ucapin langsung. Memoify nyusun semuanya jadi satu halaman buat dia, dan kamu tinggal kirim link-nya tanggal 14.',
+    note: 'Dibuka dari browser · nggak perlu install apa-apa',
+  },
+  examples: {
+    eyebrow: 'Ide kado',
+    title: 'Mau kadonya kayak apa?',
+    body: 'Buka contohnya satu-satu. Nanti fotonya diganti foto kalian, tulisannya diganti tulisanmu.',
+    see: 'Buka contoh',
+  },
+  templates: [
+    {
+      href: '/spotifyv1',
+      image: '/thumbnails/spotifyv1.jpg',
+      name: 'Playlist berdua',
+      line: 'Lagu-lagu yang nemenin kalian dari awal, plus satu surat cinta.',
+    },
+    {
+      href: '/netflixv1',
+      image: '/thumbnails/netflixv1.jpg',
+      name: 'Series kisah kalian',
+      line: 'Pacarmu jadi bintangnya, momen pacaran kalian jadi episodenya.',
+    },
+    {
+      href: '/magazinev1',
+      image: '/thumbnails/magazinev1.jpg',
+      name: 'Majalah edisi kalian',
+      line: 'Foto kencan berserakan kayak cetakan polaroid, siap digeser-geser.',
+    },
+    {
+      href: '/boardofusv1',
+      image: '/thumbnails/boardofusv1.jpg',
+      name: 'Board game kencan',
+      line: 'Tiap kotak di papannya satu kenangan kencan kalian.',
+    },
+    {
+      href: '/rollofusv1',
+      image: '/thumbnails/rollofusv1.jpg',
+      name: 'Rol film kalian',
+      line: 'Foto-foto kalian keluar satu per satu dari kamera analog.',
+    },
+    {
+      href: '/arcadeclawv1',
+      image: '/thumbnails/arcadeclawv1.jpg',
+      name: 'Mesin capit cinta',
+      line: 'Dia main capit, hadiahnya foto dan pesan darimu.',
+    },
+    {
+      href: '/newspaperv3',
+      image: '/thumbnails/newspaperv3.jpg',
+      name: 'Koran hari kasih sayang',
+      line: 'Kalian berdua jadi headline edisi 14 Februari.',
+    },
+    {
+      href: '/id/scrapbook',
+      image: '/thumbnails/scrapbook7.jpg',
+      name: 'Scrapbook pacaran',
+      line: 'Album digital setahun bareng, disusun rapi sama Memo-AI.',
+    },
+  ],
+  steps: {
+    eyebrow: 'Langkahnya',
+    title: 'Bikin kado valentine dalam tiga langkah',
+    body: 'Masih sempat, bahkan kalau baru kepikiran tanggal 13 malam.',
+    items: [
+      {
+        title: 'Pilih gayanya',
+        body: 'Playlist, series, majalah, board game, atau rol film. Sesuaikan sama selera pacarmu.',
+      },
+      {
+        title: 'Masukin kenangan kalian',
+        body: 'Upload foto kencan, pilih lagu kalian, terus tulis surat valentine-nya.',
+      },
+      {
+        title: 'Kirim pas hari-H',
+        body: 'Salin link-nya dan kirim tanggal 14. Dia buka di HP, langsung jalan.',
+      },
+    ],
+  },
+  reasons: {
+    eyebrow: 'Kenapa bukan cokelat aja',
+    title: 'Cokelat habis dimakan, ini bisa dibuka lagi',
+    items: [
+      {
+        title: 'Jarak bukan masalah',
+        body: 'Lagi LDR beda kota atau beda negara? Kadonya nyampe dalam hitungan detik, nggak pakai kurir.',
+      },
+      {
+        title: 'Isinya cuma tentang kalian',
+        body: 'Bukan barang yang bisa dibeli siapa aja. Foto, lagu, dan kalimatnya cuma punya kalian berdua.',
+      },
+      {
+        title: 'Bisa jadi kejutan tengah malam',
+        body: 'Kirim tepat jam 00.00 tanggal 14, dan dia buka kadonya sebelum orang lain sempat ngucapin.',
+      },
+      {
+        title: 'Disimpan, bukan dibuang',
+        body: 'Bungkus kado biasanya berakhir di tempat sampah. Link ini tetap bisa dia buka tahun depan.',
+      },
+    ],
+  },
+  faq: {
+    eyebrow: 'Tanya jawab',
+    title: 'Pertanyaan soal kado valentine',
+    items: [
+      {
+        q: 'Kado valentine digital itu bentuknya apa?',
+        a: 'Halaman web yang kamu isi sendiri dengan foto, lagu, dan surat buat pacarmu. Bentuknya bisa playlist, series ala Netflix, majalah, atau game kecil, lalu dikirim lewat satu link.',
+      },
+      {
+        q: 'Pacarku harus punya aplikasi atau akun?',
+        a: 'Nggak. Dia cukup buka link-nya di browser HP atau laptop.',
+      },
+      {
+        q: 'Bisa disiapin dari jauh-jauh hari?',
+        a: 'Bisa. Bikin sekarang, simpan link-nya, lalu kirim pas tanggal 14. Kalau ada yang mau diubah, edit aja dari Dashboard dan link yang sama ikut berubah.',
+      },
+      {
+        q: 'Butuh apa aja buat bikinnya?',
+        a: 'Akun Google buat masuk, beberapa foto kalian, dan apa yang mau kamu sampaikan ke dia.',
+      },
+    ],
+  },
+  closing: {
+    title: 'Tanggal 14 tinggal sebentar lagi',
+    body: 'Mulai susun kado valentine kalian sekarang, dan kirim link-nya pas hari-H.',
+    action: 'Bikin kado valentine',
+    second: 'Lihat kado buatan orang lain',
+  },
+  actions: { make: 'Bikin kado valentine', examples: 'Lihat ide kado' },
+};
+
+export const INTENT_PAGES: IntentPage[] = [BIRTHDAY, BATAM_CAMERA, VALENTINE];
 
 /**
  * Every page written for one search, as a link, for the Indonesian footer
