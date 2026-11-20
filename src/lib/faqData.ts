@@ -3,7 +3,7 @@ export const faqDataEnglish = [
     key: '1',
     label: 'What is Memoify?',
     children:
-      'Memoify is an AI-powered creative platform that transforms your digital memories into unforgettable gifts. You can create fun Parody Websites (like Netflix/Spotify), or Automated Scrapbooks designed by our AI. Simply upload photos, let our AI do the work, and share a story, not just an ordinary gift.',
+      "Memoify is Indonesia's first digital gift and digital disposable camera, around since 2024. We make two things. A birthday gift you send as a link: your photos and words on a page that looks like Netflix, a Spotify playlist or a newspaper front page. And MemoRoll, a disposable camera for wedding guests: they scan a QR, shoot from their phone, and every photo opens together after the party.",
   },
   {
     key: '2',
@@ -60,7 +60,7 @@ export const faqDataIndonesian = [
     key: '1',
     label: 'Apa itu Memoify?',
     children:
-      'Memoify adalah platform kreatif berbasis AI yang mengubah kenangan digitalmu menjadi hadiah yang tak terlupakan. Kamu bisa membuat Website Parodi yang lucu (seperti Netflix/Spotify), atau Scrapbook Otomatis yang didesain oleh AI kami. Cukup upload foto, biarkan AI kami yang bekerja, dan bagikan sebuah cerita, bukan sekadar hadiah biasa.',
+      'Memoify adalah kado digital dan disposable camera digital pertama di Indonesia, ada sejak 2024. Kami bikin dua hal. Kado ulang tahun yang dikirim lewat link: foto dan ucapanmu jadi halaman ala Netflix, playlist Spotify, atau halaman depan koran. Dan MemoRoll, kamera sekali pakai buat tamu pernikahan: tamu scan QR, jepret dari HP, dan semua fotonya kebuka bareng setelah acara.',
   },
   {
     key: '2',

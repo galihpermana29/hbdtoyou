@@ -15,9 +15,9 @@ import { BILINGUAL_PAGES } from '@/lib/page-language';
 export const metadata: Metadata = pageMeta({
   path: '/id',
   locale: 'id',
-  title: 'Kado Digital & Website Ucapan Ulang Tahun | Memoify',
+  title: 'Memoify | Kado Digital & Kamera Tamu Pertama di Indonesia',
   description:
-    'Bikin kado digital dari fotomu: website ucapan ulang tahun ala Netflix atau Spotify, scrapbook digital, atau kado anniversary buat pacar. Kirim lewat satu link.',
+    'Kado digital dan disposable camera digital pertama di Indonesia, sejak 2024. Bikin kado ulang tahun ala Netflix, atau kasih tamu pernikahan kamera sekali pakai.',
   keywords: {
     id: [
       'kado digital',
