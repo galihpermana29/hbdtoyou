@@ -51,3 +51,9 @@ The modal also closes itself on arriving at a gift, because this provider outliv
 The check cannot see any of this from the other side.
 `visual/expectations/page-chrome.mjs` asserts the site footer is present on the Create Flow's screens, which guards the rule against hiding the footer where the product wants it.
 It cannot assert the absence of an element, so a rule that stopped hiding the footer on a gift would pass.
+
+## The one line a recipient does get
+
+Since 2026-11 a recipient's view of one gift or scrapbook ends in a single line where the footer would have been: "Made with Memoify · Make yours", linking to where they can make their own with `utm_source=gift&utm_medium=viewer&utm_campaign=<template route>`.
+`recipientViewerRoute` in `gift-routes.ts` narrows `drawsAGift` to pages that name a piece of content (an `id` or `slug` parameter), so the sample pages and the Create Flow never show it, and leaves out `(wedding)`, whose invitations carry their own mark.
+It sits in the page's flow below the gift, never over it, and leaves room for any control a template pins to the bottom of the window.
