@@ -79,6 +79,43 @@ export function invitationSlugFromHost(hostHeader: string): string | null {
   return label;
 }
 
+/** Where the site itself answers, and where every stray host is sent. */
+export const SITE_ORIGIN = `https://www.${INVITATION_APEX_HOST}`;
+
+/**
+ * What a Host header is to this site, read once so the middleware can act on
+ * it in one place.
+ *
+ * - `site`: the apex or `www`, the production site.
+ * - `staging`: `staging.memoify.live`, a real deployment that must answer as
+ *   it is but never be indexed.
+ * - `invitation`: a single label that could be a couple's subdomain. Every
+ *   such label is one, because a slug is minted by the backend and this file
+ *   cannot know which exist without a read that counts a view.
+ * - `stray`: under the apex but nobody's: a reserved label other than `www`
+ *   and `staging` (`api`, `app`, `dashboard`, `mail`, which nothing serves
+ *   today), or more than one label (`a.b.memoify.live`). The wildcard sends
+ *   these to this deployment, where they answered with the whole site.
+ * - `preview`: a Vercel or Netlify deployment host.
+ * - `other`: everything else - localhost, an IP, a stranger's domain. Left
+ *   exactly as it was.
+ */
+export type HostRole =
+  'site' | 'staging' | 'invitation' | 'stray' | 'preview' | 'other';
+
+export function hostRole(hostHeader: string): HostRole {
+  const host = hostnameOf(hostHeader);
+  if (host === INVITATION_APEX_HOST || host === `www.${INVITATION_APEX_HOST}`)
+    return 'site';
+  if (host === `staging.${INVITATION_APEX_HOST}`) return 'staging';
+  if (host.endsWith(`.${INVITATION_APEX_HOST}`)) {
+    return invitationSlugFromHost(host) ? 'invitation' : 'stray';
+  }
+  if (host.endsWith('.vercel.app') || host.endsWith('.netlify.app'))
+    return 'preview';
+  return 'other';
+}
+
 /**
  * Whether a Host header is the apex - the site itself, with or without `www`.
  *

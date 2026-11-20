@@ -1,7 +1,9 @@
 import { NextResponse, type NextRequest } from 'next/server';
 
 import {
+  SITE_ORIGIN,
   couldBeInvitationSlug,
+  hostRole,
   invitationHostFor,
   invitationSlugFromHost,
   isApexHost,
@@ -31,6 +33,25 @@ import { PAGE_LANGUAGE_HEADER, isIndonesianPath } from '@/lib/page-language';
  * address no subdomain could serve, and it is left to the route to refuse in
  * its own words.
  *
+ * Since the wildcard landed, every `*.memoify.live` host reaches this
+ * deployment, so a host that is nobody's must not answer with the whole site
+ * (`hostRole` says which is which):
+ *
+ * - A stray host (`api.`, `a.b.`, ...) answers 301 to the same address on
+ *   `www`.
+ * - A couple's subdomain keeps its root, which is the invitation, and sends
+ *   every other page address to `www`. Assets, API routes, PostHog, client
+ *   navigations and server action posts are left alone, so nothing the
+ *   invitation asks of its own origin changes. Its root also says
+ *   `X-Robots-Tag: noindex`, as every other gift viewer does: the header in
+ *   next.config.mjs matches `/w/:slug`, which a guest's request never spells.
+ *   An unknown label still draws the invitation's own "this link does not
+ *   work" screen rather than redirecting, because telling an unknown slug
+ *   from a real one takes a read that counts a view.
+ * - Staging and Vercel or Netlify deployment hosts answer as before, with
+ *   `X-Robots-Tag: noindex`.
+ * - Every other host (localhost, an IP) is untouched.
+ *
  * It also tells the root layout which language the page is in, so `/id` and
  * every page under it, the Indonesian pages, say `<html lang="id">`
  * (lib/page-language.ts).
@@ -38,12 +59,20 @@ import { PAGE_LANGUAGE_HEADER, isIndonesianPath } from '@/lib/page-language';
 export function middleware(request: NextRequest) {
   const host = request.headers.get('host') ?? '';
   const { pathname } = request.nextUrl;
+  const role = hostRole(host);
+
+  if (role === 'stray') return toSite(request);
 
   const slug = invitationSlugFromHost(host);
   if (slug && pathname === '/') {
     const url = request.nextUrl.clone();
     url.pathname = `/w/${slug}`;
-    return NextResponse.rewrite(url);
+    const response = NextResponse.rewrite(url);
+    response.headers.set('X-Robots-Tag', 'noindex');
+    return response;
+  }
+  if (role === 'invitation' && isPageNavigation(request)) {
+    return toSite(request);
   }
 
   if (isApexHost(host)) {
@@ -65,16 +94,40 @@ export function middleware(request: NextRequest) {
   const forward = new Headers(request.headers);
   if (isIndonesianPath(pathname)) forward.set(PAGE_LANGUAGE_HEADER, 'id');
   else forward.delete(PAGE_LANGUAGE_HEADER);
-  return NextResponse.next({ request: { headers: forward } });
+  const response = NextResponse.next({ request: { headers: forward } });
+  if (role === 'staging' || role === 'preview') {
+    response.headers.set('X-Robots-Tag', 'noindex');
+  }
+  return response;
+}
+
+/** 301 to the same path and query on the site's own host. */
+function toSite(request: NextRequest) {
+  const { pathname, search } = request.nextUrl;
+  return NextResponse.redirect(`${SITE_ORIGIN}${pathname}${search}`, 301);
+}
+
+/**
+ * A browser asking for a page by its address: a GET or HEAD for a path that
+ * is not an API route, not PostHog's proxy, not a Next internal and not a
+ * file, and not one of Next's own client navigations or server actions
+ * (which carry `RSC` or `Next-Action`).
+ */
+function isPageNavigation(request: NextRequest) {
+  if (request.method !== 'GET' && request.method !== 'HEAD') return false;
+  if (request.headers.has('rsc') || request.headers.has('next-action'))
+    return false;
+  const { pathname } = request.nextUrl;
+  if (/^\/(api|ingest|_next)(\/|$)/.test(pathname)) return false;
+  // A file: the last segment has an extension (`/templates/x/hero.png`).
+  if (/\.[A-Za-z0-9]+$/.test(pathname)) return false;
+  return true;
 }
 
 export const config = {
-  // The two paths a Host can change the meaning of: the root, which a
-  // subdomain serves an invitation at, and the old path addresses, which the
-  // apex redirects. And `/id` and below, which are told their language. Every other
-  // request never enters this file.
-  // `:path*` rather than a single `:slug` segment, which this Next version's
-  // matcher does not honour; the redirect itself still takes exactly one
-  // label-shaped segment.
-  matcher: ['/', '/id/:path*', '/wedding-1/:path*'],
+  // Every request but Next's static files and PostHog's proxy: a Host can
+  // now change what any path means (a stray host redirects all of them, and
+  // a preview host marks all of them noindex), so the middleware has to see
+  // them. What each path does is decided above.
+  matcher: ['/((?!_next/static|_next/image|ingest/).*)'],
 };

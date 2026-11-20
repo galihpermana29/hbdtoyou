@@ -1,5 +1,8 @@
 import { IAllTemplateResponse } from '@/action/interfaces';
-import { templateThumbnail } from '@/lib/template-thumbnail';
+import {
+  templatePreviewHref,
+  templateThumbnail,
+} from '@/lib/template-thumbnail';
 import disneyplusv1 from '@/assets/templates/disneyv1.png';
 import formula1 from '@/assets/templates/formula1.png';
 import graduation from '@/assets/templates/graduation.png';
@@ -128,33 +131,32 @@ const CardTemplate = ({
               className="mr-2 max-w-[130px]"
             />
           )}
-          <div className="flex items-center gap-2">
-            <div
-              onClick={(e) => {
-                e.stopPropagation();
-              }}>
-              <Link
-                target="_blank"
-                // split netflix - netflixv1
-                href={`/${data.name.split('-')[1]?.split(' ')[1]}`}>
-                <h1
-                  className={clsx(
-                    'text-[18px] font-[600] hover:underline',
-                    DataToCardColor[data.name.split('-')[1]?.split(' ')[1]]
-                      ?.text
-                  )}>
-                  See Preview
-                </h1>
-              </Link>
-            </div>
+          {templatePreviewHref(data) && (
+            <div className="flex items-center gap-2">
+              <div
+                onClick={(e) => {
+                  e.stopPropagation();
+                }}>
+                <Link target="_blank" href={templatePreviewHref(data)}>
+                  <h1
+                    className={clsx(
+                      'text-[18px] font-[600] hover:underline',
+                      DataToCardColor[data.name.split('-')[1]?.split(' ')[1]]
+                        ?.text
+                    )}>
+                    See Preview
+                  </h1>
+                </Link>
+              </div>
 
-            <ArrowRight
-              size={24}
-              className={clsx(
-                DataToCardColor[data.name.split('-')[1]?.split(' ')[1]]?.text
-              )}
-            />
-          </div>
+              <ArrowRight
+                size={24}
+                className={clsx(
+                  DataToCardColor[data.name.split('-')[1]?.split(' ')[1]]?.text
+                )}
+              />
+            </div>
+          )}
         </div>
         <div>
           <img

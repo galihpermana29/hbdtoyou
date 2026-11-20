@@ -46,4 +46,8 @@ The backend's CORS allowance for `https://*.memoify.live` is the second: no gues
 Slugs were already fit for this: minted lowercase from letters, digits and hyphens, globally unique, and frozen from publish.
 A path spelling anything a DNS label cannot carry is not redirected, and the route refuses it in its own words, because a redirect to an address no subdomain could serve would trade one dead link for another.
 `{slug}.memoify.live/anything-else` serves the site's own routes rather than the invitation, which is harmless and unlinked-to; tightening it is not worth a rule until something links there.
+Once the wildcard resolved, that stopped being harmless: crawlers and scanners asked for `jupyter.memoify.live`, `console.memoify.live` and the like, and every one of them answered with the whole site.
+So since 2026-11 the middleware sends any page address on a subdomain other than its root to the same path on `www` (301), leaving assets, API routes, PostHog, client navigations and server action posts alone, and the root says `X-Robots-Tag: noindex` like every other gift viewer.
+An unknown label still draws the invitation's own "this link does not work" screen at its root, because telling it from a real slug would take a read that counts a view.
+A reserved label other than `www` and `staging`, or a host with more than one label under the apex, is nobody's, and redirects whole to `www`.
 The check's published screen and slug field expectations assert the subdomain form now, so `npm run visual` holds the new address exactly as it held the old one.
