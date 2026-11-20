@@ -6,6 +6,7 @@ import Link from 'next/link';
 import type { CSSProperties } from 'react';
 
 import type { NewTemplate } from '@/lib/new-template';
+import { localHref } from '@/lib/page-language';
 import { useCalmMotion } from '@/lib/use-calm-motion';
 
 import { HOME_COPY, type HomeLanguage } from './copy';
@@ -139,7 +140,11 @@ export default function HomeHero({
               className="size-4 transition-transform duration-200 ease-[cubic-bezier(0.23,1,0.32,1)] group-hover:translate-x-0.5"
             />
           </Link>
-          <Link href="/templates" prefetch className={ctaGhost}>
+          {/* The second thing Memoify is known for, one tap from the top. */}
+          <Link
+            href={localHref('/memoroll', lang)}
+            prefetch
+            className={ctaGhost}>
             {t.browse}
           </Link>
         </div>

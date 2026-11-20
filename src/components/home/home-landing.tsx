@@ -4,6 +4,7 @@ import { memorollFonts } from '@/components/memoroll/ui/fonts';
 import NavigationBar from '@/components/ui/navbar';
 import { BILINGUAL_PAGES } from '@/lib/page-language';
 
+import HomeCamera from './camera';
 import HomeClosing from './closing';
 import { HOME_COPY, type HomeLanguage } from './copy';
 import HomeFaq from './faq';
@@ -47,6 +48,7 @@ export default function HomeLanding({
       </div>
       <main className="mt-[81px] overflow-x-clip">
         <HomeHero fresh={fresh} lang={lang} />
+        <HomeCamera lang={lang} />
         <HomeOccasions items={occasions.items} label={occasions.label} />
         {fresh ? <HomeNewTemplate fresh={fresh} lang={lang} /> : null}
         <HomeHowItWorks lang={lang} />
