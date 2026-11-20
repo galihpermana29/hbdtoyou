@@ -255,6 +255,20 @@ export function intentStructuredData(page: IntentPage) {
           },
         ],
       },
+      // A page about a city says so: the service and where it is offered.
+      ...(page.area
+        ? [
+            {
+              '@type': 'Service',
+              name: page.meta.title,
+              description: page.meta.description,
+              serviceType: 'Wedding guest camera',
+              areaServed: { '@type': 'City', name: page.area },
+              provider: { '@id': `${SITE_URL}/#organization` },
+              url,
+            },
+          ]
+        : []),
       {
         '@type': 'FAQPage',
         inLanguage: 'id',

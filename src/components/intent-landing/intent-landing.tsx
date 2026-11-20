@@ -25,7 +25,15 @@ import type { IntentPage } from '@/lib/intent-pages';
 const STEP_ICONS = [MousePointerClick, ImagePlus, Link2];
 
 export default function IntentLanding({ page }: { page: IntentPage }) {
-  const start = useStart('/create');
+  const startGift = useStart('/create');
+  // A page about something other than a gift opens its own address (the
+  // WhatsApp chat a MemoRoll slot is asked for in), in a new tab.
+  const start = page.start
+    ? () => {
+        window.open(page.start.href, '_blank', 'noopener,noreferrer');
+      }
+    : startGift;
+  const outside = (href: string) => /^https?:/.test(href);
   const [first, second, third] = page.templates;
   return (
     <div lang="id" className={`${memorollFonts} ${landingFonts}`}>
@@ -65,7 +73,9 @@ export default function IntentLanding({ page }: { page: IntentPage }) {
                 {page.hero.note}
               </p>
             </div>
-            {/* Three of the gifts, fanned. Decoration: the grid below names them. */}
+            {/* Three of the examples, fanned. Decoration: the grid below names
+                them. Each is cropped to one shape, so a portrait photograph
+                does not grow down over the buttons. */}
             <div
               aria-hidden
               className="relative h-[250px] w-full max-w-[420px] flex-none md:h-[330px] md:max-w-[520px]">
@@ -75,7 +85,7 @@ export default function IntentLanding({ page }: { page: IntentPage }) {
                 width={640}
                 height={400}
                 decoding="async"
-                className="absolute left-0 top-[14%] w-[58%] -rotate-[7deg] rounded-[14px] border border-black/10 object-cover shadow-[0_24px_48px_-24px_rgba(90,42,18,0.45)]"
+                className="absolute left-0 top-[14%] aspect-[16/10] w-[58%] -rotate-[7deg] rounded-[14px] border border-black/10 object-cover shadow-[0_24px_48px_-24px_rgba(90,42,18,0.45)]"
               />
               <img
                 src={third.image}
@@ -83,7 +93,7 @@ export default function IntentLanding({ page }: { page: IntentPage }) {
                 width={640}
                 height={400}
                 decoding="async"
-                className="absolute right-0 top-0 w-[58%] rotate-[6deg] rounded-[14px] border border-black/10 object-cover shadow-[0_24px_48px_-24px_rgba(90,42,18,0.45)]"
+                className="absolute right-0 top-0 aspect-[16/10] w-[58%] rotate-[6deg] rounded-[14px] border border-black/10 object-cover shadow-[0_24px_48px_-24px_rgba(90,42,18,0.45)]"
               />
               <img
                 src={first.image}
@@ -92,7 +102,7 @@ export default function IntentLanding({ page }: { page: IntentPage }) {
                 height={400}
                 decoding="async"
                 fetchPriority="high"
-                className="absolute bottom-0 left-[16%] w-[68%] rounded-[16px] border border-black/10 object-cover shadow-[0_28px_56px_-24px_rgba(90,42,18,0.5)]"
+                className="absolute bottom-0 left-[16%] aspect-[16/10] w-[68%] rounded-[16px] border border-black/10 object-cover shadow-[0_28px_56px_-24px_rgba(90,42,18,0.5)]"
               />
             </div>
           </div>
@@ -109,17 +119,25 @@ export default function IntentLanding({ page }: { page: IntentPage }) {
               title={page.examples.title}
               body={page.examples.body}
             />
-            <ul className="mt-12 grid grid-cols-1 gap-5 sm:grid-cols-2 lg:grid-cols-4">
+            <ul
+              className={
+                page.templates.length === 3
+                  ? 'mt-12 grid grid-cols-1 gap-5 sm:grid-cols-2 lg:grid-cols-3'
+                  : 'mt-12 grid grid-cols-1 gap-5 sm:grid-cols-2 lg:grid-cols-4'
+              }>
               {page.templates.map((template, index) => (
                 <li key={template.href}>
                   <Rise delay={(index % 4) * 60} distance={14}>
                     <a
                       href={template.href}
+                      {...(outside(template.href)
+                        ? { target: '_blank', rel: 'noopener noreferrer' }
+                        : {})}
                       className="group flex h-full flex-col overflow-hidden rounded-[20px] border border-[#e8ded3] bg-[#fffdfa] transition-transform duration-200 ease-[cubic-bezier(0.23,1,0.32,1)] active:scale-[0.97] [@media(hover:hover)_and_(pointer:fine)]:hover:-translate-y-1">
                       <span className="block aspect-[16/10] overflow-hidden bg-[#f4f1ed]">
                         <img
                           src={template.image}
-                          alt={`Contoh kado digital: ${template.name}`}
+                          alt={template.name}
                           width={640}
                           height={400}
                           loading="lazy"
@@ -228,7 +246,10 @@ export default function IntentLanding({ page }: { page: IntentPage }) {
           body={page.closing.body}
           action={page.closing.action}
           onAction={start}
-          second={{ label: page.closing.second, href: '/inspiration' }}
+          second={{
+            label: page.closing.second,
+            href: page.start?.secondHref ?? '/inspiration',
+          }}
         />
       </main>
     </div>

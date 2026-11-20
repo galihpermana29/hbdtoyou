@@ -14,6 +14,8 @@
  * editable from the dashboard.
  */
 
+import { freeSlotHref } from '@/components/memoroll/landing/free-slot';
+
 export interface IntentExample {
   /** The template's preview route, e.g. `/netflixv1`. */
   href: string;
@@ -44,6 +46,14 @@ export interface IntentPage {
   faq: { eyebrow: string; title: string; items: { q: string; a: string }[] };
   closing: { title: string; body: string; action: string; second: string };
   actions: { make: string; examples: string };
+  /**
+   * Where the page's buttons lead when it is not about making a gift: an
+   * address to open instead of the gift creator, and where the closing
+   * panel's second link goes. Left out, the page starts a gift.
+   */
+  start?: { href: string; secondHref: string };
+  /** The place the page is about, when it is about one (a city). */
+  area?: string;
 }
 
 export const BIRTHDAY: IntentPage = {
@@ -207,7 +217,155 @@ export const BIRTHDAY: IntentPage = {
   actions: { make: 'Bikin kado', examples: 'Lihat contoh' },
 };
 
-export const INTENT_PAGES: IntentPage[] = [BIRTHDAY];
+/** The chat a free MemoRoll slot is asked for in (memoroll/landing/free-slot.ts). */
+const MEMOROLL_SLOT = freeSlotHref('id');
+
+/**
+ * MemoRoll for a wedding in Batam.
+ *
+ * The owner wants MemoRoll found city by city, starting with Batam, where
+ * he claims it as the first (2026-11-21). A city page earns its place only
+ * by saying something the product page does not, so this one is short and
+ * about the place: any venue in the city, guests who fly or ferry in, how
+ * to ask for a slot. It sends the reader to the MemoRoll landing for the
+ * product itself and does not repeat it.
+ *
+ * It claims nothing about events held or venues served; add those when
+ * there are real ones to name.
+ */
+export const BATAM_CAMERA: IntentPage = {
+  slug: 'kamera-digital-pernikahan-batam',
+  area: 'Batam',
+  start: { href: MEMOROLL_SLOT, secondHref: '/id/kamera-tamu-pernikahan' },
+  meta: {
+    title: 'Kamera Digital Pernikahan di Batam | MemoRoll by Memoify',
+    description:
+      'Kamera digital pernikahan pertama di Batam: tamu scan QR, motret dari HP, semua foto kebuka bareng pas Reveal. Gratis sampai akhir 2026, pesan lewat WhatsApp.',
+    keywords: [
+      'kamera digital pernikahan batam',
+      'kamera digital pernikahan di batam',
+      'kamera tamu pernikahan batam',
+      'kamera sekali pakai pernikahan batam',
+      'disposable camera wedding batam',
+      'disposable camera batam',
+      'foto tamu pernikahan batam',
+      'photobooth pernikahan batam',
+      'wedding batam',
+    ],
+  },
+  hero: {
+    pill: 'Kamera pernikahan di Batam',
+    title: 'Kamera digital pernikahan pertama di Batam',
+    body: 'Buat resepsi di Batam, di hotel, gedung, restoran, atau pinggir pantai: tiap tamu dapat kamera sekali pakai di HP-nya. Mereka scan QR, jepret, dan semua foto kebuka bareng pas Reveal.',
+    note: 'Gratis sampai akhir 2026 · pesan lewat WhatsApp',
+  },
+  examples: {
+    eyebrow: 'Lihat dulu',
+    title: 'Coba sebelum hari-H',
+    body: 'Lihat cara kerjanya, coba layar yang nanti dipakai tamu, atau langsung tanya ke kami.',
+    see: 'Buka',
+  },
+  templates: [
+    {
+      href: '/id/kamera-tamu-pernikahan',
+      image: '/memoroll-landing/arc-4.webp',
+      name: 'Cara kerja MemoRoll',
+      line: 'Penjelasan lengkapnya, dari QR di meja tamu sampai Reveal.',
+    },
+    {
+      href: '/memoroll/demo',
+      image: '/memoroll-landing/arc-2.webp',
+      name: 'Demo kamera tamu',
+      line: 'Coba sendiri layar yang nanti dipakai tamu-tamumu.',
+    },
+    {
+      href: MEMOROLL_SLOT,
+      image: '/memoroll-landing/arc-3.webp',
+      name: 'Tanya lewat WhatsApp',
+      line: 'Ceritain acaramu di Batam, kami bantu siapin slotnya.',
+    },
+  ],
+  steps: {
+    eyebrow: 'Cara pesan',
+    title: 'Cara pakai MemoRoll di pernikahanmu di Batam',
+    body: 'Tiga langkah, semuanya bisa diurus dari HP.',
+    items: [
+      {
+        title: 'Ambil slot lewat WhatsApp',
+        body: 'Chat kami dan sebutin tanggal acaramu. Slotnya gratis sampai akhir 2026.',
+      },
+      {
+        title: 'Atur acaramu',
+        body: 'Kasih nama pernikahannya, pilih cover, tentuin jatah Shot tiap tamu, dan atur jam Reveal.',
+      },
+      {
+        title: 'Taruh QR di venue',
+        body: 'Di meja tamu, pintu masuk, atau layar dekat pelaminan. Tamu scan, lalu langsung bisa motret.',
+      },
+    ],
+  },
+  reasons: {
+    eyebrow: 'Kenapa cocok buat Batam',
+    title: 'Dipakai di venue mana pun, oleh tamu dari mana pun',
+    items: [
+      {
+        title: 'Jalan di venue mana pun',
+        body: 'MemoRoll dibuka di browser HP tamu. Bisa dipakai di hotel, gedung, restoran, atau acara outdoor, selama ada sinyal internet.',
+      },
+      {
+        title: 'Tamu dari luar kota langsung bisa ikut',
+        body: 'Tamu yang datang dari luar Batam nggak perlu install apa-apa. Cukup scan QR di venue, kameranya langsung kebuka.',
+      },
+      {
+        title: 'Nggak perlu sewa kamera per meja',
+        body: 'Kameranya ada di HP tiap tamu. Nggak ada alat yang perlu dibawa, dijaga, atau dikembalikan setelah acara.',
+      },
+      {
+        title: 'Cuma buat yang hadir',
+        body: 'Kamera bisa dikunci untuk HP dalam radius 500m dari venue, jadi isinya dari orang-orang yang beneran datang.',
+      },
+    ],
+  },
+  faq: {
+    eyebrow: 'Pertanyaan',
+    title: 'Soal kamera pernikahan di Batam',
+    items: [
+      {
+        q: 'Apa itu kamera digital pernikahan MemoRoll?',
+        a: 'MemoRoll adalah kamera sekali pakai versi digital untuk tamu pernikahan. Tamu scan QR di venue, dapat jatah Shot terbatas di HP-nya, dan semua foto terkumpul di satu galeri yang kebuka bareng pas Reveal.',
+      },
+      {
+        q: 'Bisa dipakai di venue mana saja di Batam?',
+        a: 'Bisa. MemoRoll jalan di browser HP tamu, jadi bisa dipakai di hotel, gedung, restoran, atau acara outdoor di Batam selama ada sinyal internet.',
+      },
+      {
+        q: 'Berapa biayanya?',
+        a: 'Gratis sampai akhir 2026. Slotnya diambil lewat WhatsApp.',
+      },
+      {
+        q: 'Gimana cara pesannya?',
+        a: 'Chat kami di WhatsApp dan sebutin tanggal acaramu. Setelah slotnya siap, kamu atur sendiri nama acara, jatah Shot, dan jam Reveal.',
+      },
+      {
+        q: 'Tamu harus download aplikasi?',
+        a: 'Nggak. Tamu tinggal scan QR, kamera langsung kebuka di browser HP.',
+      },
+      {
+        q: 'Cuma buat pernikahan?',
+        a: 'Nggak. MemoRoll juga dipakai buat ulang tahun, gathering, dan acara lain di Batam.',
+      },
+    ],
+  },
+  closing: {
+    title: 'Nikah di Batam?',
+    body: 'Ambil slot MemoRoll-mu sekarang. Gratis sampai akhir 2026.',
+    action: 'Ambil slot gratis di WhatsApp',
+    second: 'Lihat cara kerja MemoRoll',
+  },
+  actions: { make: 'Ambil slot gratis', examples: 'Lihat dulu' },
+};
+
+export const INTENT_PAGES: IntentPage[] = [BIRTHDAY, BATAM_CAMERA];
 
 /**
  * Every page written for one search, as a link, for the Indonesian footer
