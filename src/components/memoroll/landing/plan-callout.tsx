@@ -1,10 +1,10 @@
 'use client';
 
 import { useInView, useReducedMotion } from 'framer-motion';
-import Link from 'next/link';
-import { useRef } from 'react';
+import { useEffect, useRef, useState } from 'react';
 
-import { useLandingCopy } from './language-provider';
+import { freeSlotHref } from './free-slot';
+import { useLandingCopy, useLandingLanguage } from './language-provider';
 import { RevealHeading } from './reveal-words';
 
 /** Delay between one asset popping up and the next, in ms. */
@@ -23,12 +23,23 @@ const pop = (show: boolean, order: number): React.CSSProperties => ({
     : 'none',
 });
 
-/** "Included in the Wedding Plan" - the closing call-out above the footer. */
+/**
+ * The price call-out above the footer: free until the end of 2026, a slot
+ * asked for on WhatsApp (free-slot.ts). The card beside it is the receipt.
+ */
 export default function MemorollPlanCallout() {
   const clusterRef = useRef<HTMLDivElement>(null);
   const inView = useInView(clusterRef, { amount: 0.3 });
-  const show = useReducedMotion() || inView;
+  // Under reduced motion the card is simply there. That answer is only known
+  // in the browser, and saying it during hydration left the server's hidden
+  // card on screen for good (React keeps the markup it was sent), so a
+  // visitor with reduced motion never saw the price. It is said after mount.
+  const reduce = useReducedMotion();
+  const [mounted, setMounted] = useState(false);
+  useEffect(() => setMounted(true), []);
+  const show = mounted && (reduce || inView);
   const copy = useLandingCopy().plan;
+  const language = useLandingLanguage();
 
   return (
     <section
@@ -55,11 +66,13 @@ export default function MemorollPlanCallout() {
             {copy.body}
           </p>
           <div className="flex flex-wrap items-center gap-4 pt-2">
-            <Link
-              href="/create/wedding-invitation"
+            <a
+              href={freeSlotHref(language)}
+              target="_blank"
+              rel="noopener noreferrer"
               className="flex h-12 items-center justify-center rounded-lg bg-white px-5 text-[16px] md:h-[60px] md:px-6 md:text-[18px] font-semibold text-[#e34013] shadow-[0_1px_1px_rgba(16,24,40,0.05)]">
               {copy.cta}
-            </Link>
+            </a>
             <a
               href="#plan-details"
               className="text-[16px] font-semibold text-white">

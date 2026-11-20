@@ -172,8 +172,8 @@ export function homeStructuredData(
         applicationCategory: 'LifestyleApplication',
         operatingSystem: 'Any',
         description: indonesian
-          ? 'Bikin kado digital, scrapbook, atau album dari foto-fotomu, lalu bagikan lewat satu link.'
-          : 'Make a digital gift, scrapbook or album from your photos and share it with one link.',
+          ? 'Kado digital dan disposable camera digital pertama di Indonesia, sejak 2024. Bikin kado ulang tahun ala Netflix, atau kasih tamu pernikahan kamera sekali pakai.'
+          : "Indonesia's first digital gifts and digital disposable camera, since 2024. Make a Netflix-style birthday gift, or give wedding guests a camera with MemoRoll.",
         ...(indonesian ? { inLanguage: 'id' } : {}),
         offers: {
           '@type': 'Offer',

@@ -29,17 +29,38 @@ export type HomeLanguage = 'en' | 'id';
 
 const EN = {
   hero: {
-    pill: 'Digital gifts, made personal',
+    pill: "Indonesia's first digital gifts · since 2024",
     newTag: 'New',
     /** Read out whole, while the eye sees the last word changing. */
-    headingSpoken: 'Turn your memories into a gift they can open',
-    headingLead: 'Turn your memories into',
-    body: "Pick a style, add your photos and a few words, and send one link. They open it on their phone, and it's all about them.",
-    create: 'Create a gift',
-    browse: 'Browse templates',
+    headingSpoken: 'Turn their birthday into a gift they can open',
+    headingLead: 'Turn their birthday into',
+    body: "Pick a style, add your photos and a birthday message, and send one link. They open it on their phone, and it's all about them.",
+    create: 'Create a birthday gift',
+    browse: 'Wedding guest camera',
     proof: 'Free to start · 9,000+ people have made one',
     stylesBadge: 'STYLES',
     hint: 'tap a gift to flip to the next one',
+  },
+
+  /**
+   * MemoRoll, said right under the hero: the second thing Memoify is known
+   * for (owner, 2026-11-20), so it is not left to a card further down.
+   */
+  camera: {
+    eyebrow: 'MemoRoll · wedding guest camera',
+    title: 'A disposable camera for every wedding guest',
+    body: 'Guests scan a QR and shoot from their own phone. Nobody sees the photos until the Reveal, then the whole roll opens for everyone at once.',
+    points: [
+      'Scan a QR, nothing to install',
+      'A few Shots each, no retakes',
+      'Free until the end of 2026',
+    ],
+    cta: 'See MemoRoll',
+    alts: [
+      'A guest photo from a wedding reception',
+      'A first dance, shot by a guest',
+      'Friends at the party, shot by a guest',
+    ],
   },
 
   deck: {
@@ -116,8 +137,8 @@ const EN = {
 
   products: {
     eyebrow: 'What you can make',
-    title: 'One place for every kind of keepsake',
-    body: 'A gift to open, a book to flip through, a letter to keep, a party to shoot.',
+    title: 'Two things we are known for, and a few more',
+    body: 'A birthday gift to open, a camera for your wedding guests, then a book to flip through and a letter to keep.',
     newTag: 'New',
     website: {
       title: 'Website gifts',
@@ -249,16 +270,33 @@ const ID_MONTHS: Record<string, string> = {
 
 const ID: HomeCopy = {
   hero: {
-    pill: 'Kado digital yang personal banget',
+    pill: 'Kado digital pertama di Indonesia · sejak 2024',
     newTag: 'Baru',
-    headingSpoken: 'Ubah kenanganmu jadi kado digital yang bisa dia buka',
-    headingLead: 'Ubah kenanganmu jadi',
-    body: 'Pilih gaya, masukin foto dan sedikit kata-kata, lalu kirim satu link. Dia buka di HP-nya, dan semuanya tentang dia.',
-    create: 'Bikin kado',
-    browse: 'Lihat template',
+    headingSpoken: 'Ubah ulang tahunnya jadi kado digital yang bisa dia buka',
+    headingLead: 'Ubah ulang tahunnya jadi',
+    body: 'Pilih gaya, masukin foto dan ucapan ulang tahunmu, lalu kirim satu link. Dia buka di HP-nya, dan semuanya tentang dia.',
+    create: 'Bikin kado ulang tahun',
+    browse: 'Kamera tamu pernikahan',
     proof: 'Gratis untuk mulai · 9.000+ orang udah bikin',
     stylesBadge: 'GAYA',
     hint: 'klik kadonya buat lihat yang berikutnya',
+  },
+
+  camera: {
+    eyebrow: 'MemoRoll · kamera tamu pernikahan',
+    title: 'Kamera sekali pakai buat semua tamu pernikahanmu',
+    body: 'Tamu scan QR dan motret dari HP masing-masing. Nggak ada yang bisa lihat fotonya sampai Reveal, lalu satu roll penuh kebuka buat semua orang.',
+    points: [
+      'Scan QR, tanpa install',
+      'Jatah Shot terbatas, tanpa retake',
+      'Gratis sampai akhir 2026',
+    ],
+    cta: 'Lihat MemoRoll',
+    alts: [
+      'Foto tamu dari resepsi pernikahan',
+      'First dance, dipotret tamu',
+      'Teman-teman di pesta, dipotret tamu',
+    ],
   },
 
   deck: {
@@ -334,8 +372,8 @@ const ID: HomeCopy = {
 
   products: {
     eyebrow: 'Yang bisa kamu bikin',
-    title: 'Satu tempat untuk semua jenis kenang-kenangan',
-    body: 'Kado buat dibuka, buku buat dibolak-balik, surat buat disimpan, pesta buat difoto.',
+    title: 'Dua yang paling dikenal, plus beberapa lagi',
+    body: 'Kado ulang tahun buat dibuka, kamera buat tamu pernikahanmu, lalu buku buat dibolak-balik dan surat buat disimpan.',
     newTag: 'Baru',
     website: {
       title: 'Kado website',

@@ -20,9 +20,9 @@ import { headers } from 'next/headers';
 export const metadata: Metadata = {
   metadataBase: new URL(SITE_URL),
   applicationName: SITE_NAME,
-  title: 'Memoify | Digital Gifts, Scrapbooks & Albums',
+  title: "Memoify | Indonesia's First Digital Gifts & Disposable Camera",
   description:
-    'Turn your photos into a digital gift, scrapbook or album and share it with one link. Bikin kado digital dalam hitungan menit.',
+    "Indonesia's first digital gifts and digital disposable camera, since 2024. Make a Netflix-style birthday gift, or give wedding guests a camera with MemoRoll.",
 };
 
 /**

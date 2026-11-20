@@ -7,6 +7,7 @@ import { SITE_URL, languageAlternates, pageMeta } from '@/lib/seo';
 
 import MemorollAnnouncementStrip from './announcement-strip';
 import { LANDING_COPY } from './copy';
+import { FREE_UNTIL } from './free-slot';
 import MemorollFaq from './faq';
 import { landingFonts } from './fonts';
 import MemorollHero from './hero';
@@ -30,10 +31,10 @@ import MemorollWhy from './why';
 const VERSIONS = languageVersions('/memoroll')!;
 
 const TITLE: Record<LandingLanguage, string> = {
-  en: 'MemoRoll: A Shared Camera for Your Event (Kamera Tamu) | Memoify',
+  en: 'MemoRoll: Digital Disposable Camera for Wedding Guests | Memoify',
   // What people type: a camera for wedding guests. The product's name comes
   // second, because nobody searches for a name they have not heard yet.
-  id: 'Kamera Tamu Pernikahan: Disposable Camera Digital | MemoRoll',
+  id: 'Kamera Tamu Pernikahan & Kamera Sekali Pakai Digital | MemoRoll',
 };
 
 export function memorollMetadata(language: LandingLanguage): Metadata {
@@ -56,6 +57,8 @@ export function memorollMetadata(language: LandingLanguage): Metadata {
         'disposable camera pernikahan',
         'disposable camera wedding',
         'kamera sekali pakai pernikahan',
+        'kamera sekali pakai digital',
+        'kamera tamu pernikahan gratis',
         'kamera analog pernikahan',
         'kamera disposable digital',
         'aplikasi foto tamu undangan',
@@ -72,12 +75,15 @@ export function memorollMetadata(language: LandingLanguage): Metadata {
 }
 
 /**
- * The page's questions and its place in the site, for search engines. The
- * questions are on the page as text too (faq.tsx).
+ * What the page tells search engines beside its words: that MemoRoll is an
+ * app with a price (free, until `FREE_UNTIL`), how it is used (the host's
+ * three steps, as on the page), where the page sits in the site, and its
+ * questions, which are on the page as text too (faq.tsx).
  */
 export function memorollStructuredData(language: LandingLanguage) {
   const copy = LANDING_COPY[language];
   const url = `${SITE_URL}${VERSIONS[language]}`;
+  const home = language === 'id' ? `${SITE_URL}/id` : SITE_URL;
   return {
     '@context': 'https://schema.org',
     '@graph': [
@@ -89,6 +95,50 @@ export function memorollStructuredData(language: LandingLanguage) {
         description: copy.metaDescription,
         inLanguage: language,
         isPartOf: { '@id': `${SITE_URL}/#website` },
+      },
+      {
+        '@type': 'SoftwareApplication',
+        name: 'MemoRoll',
+        url,
+        applicationCategory: 'PhotographyApplication',
+        operatingSystem: 'Any (runs in the phone browser)',
+        description: copy.metaDescription,
+        inLanguage: language,
+        publisher: { '@id': `${SITE_URL}/#organization` },
+        offers: {
+          '@type': 'Offer',
+          price: '0',
+          priceCurrency: 'IDR',
+          priceValidUntil: FREE_UNTIL,
+          availability: 'https://schema.org/LimitedAvailability',
+          url,
+        },
+      },
+      {
+        '@type': 'HowTo',
+        name:
+          language === 'id'
+            ? 'Cara pakai MemoRoll di acaramu'
+            : 'How to run MemoRoll at your event',
+        inLanguage: language,
+        step: copy.how.host.map((step, index) => ({
+          '@type': 'HowToStep',
+          position: index + 1,
+          name: step.heading,
+          text: step.body,
+        })),
+      },
+      {
+        '@type': 'BreadcrumbList',
+        itemListElement: [
+          { '@type': 'ListItem', position: 1, name: 'Memoify', item: home },
+          {
+            '@type': 'ListItem',
+            position: 2,
+            name: language === 'id' ? 'Kamera tamu pernikahan' : 'MemoRoll',
+            item: url,
+          },
+        ],
       },
       {
         '@type': 'FAQPage',

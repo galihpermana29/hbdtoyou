@@ -16,8 +16,8 @@ import type { LandingLanguage } from './language';
  * form addresses them: "kamu", "nggak", "udah", "HP", and the English words
  * Indonesians already use for these things (scan, retake, first dance, host).
  *
- * The product's own terms stay names in both: MemoRoll, Roll, Shot, Reveal and
- * the Wedding Plan are what the guest screens and the plans page call them, and
+ * The product's own terms stay names in both: MemoRoll, Roll, Shot and Reveal
+ * are what the guest screens call them, and
  * a landing that called them something else would be describing a different
  * product. Names stay names too: "Elias & Freya" are the same couple in both.
  *
@@ -39,11 +39,11 @@ export function Hi({ children }: { children: ReactNode }) {
 
 const EN = {
   metaDescription:
-    'Give every guest a camera on their phone. Their Shots stay blurred until the Reveal you set, then everyone sees the whole night at once.',
+    'A digital disposable camera for wedding and event guests: scan a QR, shoot from the phone, and the whole roll opens at the Reveal. Free until the end of 2026.',
 
   strip: {
-    long: 'NEW - MEMOROLL IS NOW INCLUDED FREE WITH THE WEDDING PLAN',
-    short: 'NEW - MEMOROLL FREE WITH THE WEDDING PLAN',
+    long: 'MEMOROLL IS FREE UNTIL THE END OF 2026 - CLAIM YOUR SLOT ON WHATSAPP',
+    short: 'MEMOROLL IS FREE UNTIL END OF 2026',
   },
 
   hero: {
@@ -272,25 +272,25 @@ const EN = {
       },
       {
         q: 'How much does a MemoRoll cost?',
-        a: 'MemoRoll is included with the Wedding Plan at no extra cost. See the plan for details.',
+        a: 'MemoRoll is free until the end of 2026. Message us on WhatsApp to claim a free slot for your event.',
       },
     ],
   },
 
   plan: {
-    pill: 'Included in the Wedding Plan',
-    heading: 'MemoRoll is on the house with your Wedding Plan.',
-    body: 'Book the Wedding Plan and MemoRoll comes with it for Rp0. Every guest gets a camera, and the whole roll opens together at the Reveal you choose.',
-    cta: 'Get the Wedding Plan',
-    details: 'See what’s in the plan',
-    cardBrand: 'Memoify · Wedding Plan',
-    cardTitle: 'What’s in your plan',
-    planName: 'Wedding Plan',
-    planBody: 'Everything for your big day',
+    pill: 'Free until the end of 2026',
+    heading: 'MemoRoll is on the house until the end of 2026.',
+    body: 'Message us on WhatsApp to claim a free slot for your event. Every guest gets a camera, and the whole roll opens together at the Reveal you choose.',
+    cta: 'Claim a free slot on WhatsApp',
+    details: 'See what you get',
+    cardBrand: 'Memoify · MemoRoll',
+    cardTitle: 'What’s in your slot',
+    planName: 'One event',
+    planBody: 'Claimed on WhatsApp',
     memorollBody: 'A camera for every guest',
-    addOn: 'Add-on',
+    addOn: 'Until end of 2026',
     free: 'Free',
-    extraCost: 'Extra cost for MemoRoll',
+    extraCost: 'What MemoRoll costs',
   },
 };
 
@@ -301,8 +301,8 @@ const ID: LandingCopy = {
     'Kamera digital ala disposable camera buat tamu pernikahan dan acaramu. Tamu scan QR, jepret dari HP tanpa install, dan fotonya kebuka bareng pas Reveal.',
 
   strip: {
-    long: 'BARU - MEMOROLL SEKARANG GRATIS DI WEDDING PLAN',
-    short: 'BARU - MEMOROLL GRATIS DI WEDDING PLAN',
+    long: 'MEMOROLL GRATIS SAMPAI AKHIR 2026 - AMBIL SLOTMU LEWAT WHATSAPP',
+    short: 'MEMOROLL GRATIS SAMPAI AKHIR 2026',
   },
 
   hero: {
@@ -527,25 +527,25 @@ const ID: LandingCopy = {
       },
       {
         q: 'Berapa harga MemoRoll?',
-        a: 'Gratis kalau kamu ambil Wedding Plan. Cek detail paketnya, ya.',
+        a: 'Gratis sampai akhir 2026. Chat kami di WhatsApp buat ambil slot gratis acaramu.',
       },
     ],
   },
 
   plan: {
-    pill: 'Udah termasuk di Wedding Plan',
-    heading: 'MemoRoll gratis buat kamu yang ambil Wedding Plan.',
-    body: 'Ambil Wedding Plan, MemoRoll langsung ikut dengan harga Rp0. Semua tamu dapat kamera, dan satu roll penuh kebuka bareng pas Reveal yang kamu pilih.',
-    cta: 'Ambil Wedding Plan',
-    details: 'Lihat isi paketnya',
-    cardBrand: 'Memoify · Wedding Plan',
-    cardTitle: 'Isi paketmu',
-    planName: 'Wedding Plan',
-    planBody: 'Semua buat hari besarmu',
+    pill: 'Gratis sampai akhir 2026',
+    heading: 'MemoRoll gratis sampai akhir 2026.',
+    body: 'Chat kami di WhatsApp buat ambil slot gratis acaramu. Semua tamu dapat kamera, dan satu roll penuh kebuka bareng pas Reveal yang kamu pilih.',
+    cta: 'Ambil slot gratis di WhatsApp',
+    details: 'Lihat yang kamu dapat',
+    cardBrand: 'Memoify · MemoRoll',
+    cardTitle: 'Isi slotmu',
+    planName: 'Satu acara',
+    planBody: 'Diambil lewat WhatsApp',
     memorollBody: 'Kamera buat semua tamu',
-    addOn: 'Add-on',
+    addOn: 'Sampai akhir 2026',
     free: 'Gratis',
-    extraCost: 'Biaya tambahan MemoRoll',
+    extraCost: 'Biaya MemoRoll',
   },
 };
 
@@ -560,8 +560,8 @@ const ID: LandingCopy = {
  * opening, where the QR goes, the occasions' heading and the questions.
  *
  * Every claim is still one the English makes (QR, no install, 10 to 15
- * Shots, no retake, blurred until Reveal, the 500m venue lock, free with
- * the Wedding Plan); the comparison with a disposable camera says only what
+ * Shots, no retake, blurred until Reveal, the 500m venue lock, free until
+ * the end of 2026 by asking on WhatsApp); the comparison with a disposable camera says only what
  * follows from those.
  *
  * The occasions' three cards keep their order and their subjects, because
@@ -570,11 +570,11 @@ const ID: LandingCopy = {
 const WEDDING_ID: LandingCopy = {
   ...ID,
   metaDescription:
-    'Kamera tamu pernikahan digital: seperti disposable camera di tiap meja, tapi di HP tamu. Scan QR, jepret tanpa install, semua foto kebuka bareng pas Reveal.',
+    'Kamera sekali pakai digital buat tamu pernikahan: scan QR, jepret dari HP tanpa install, semua foto kebuka bareng pas Reveal. Gratis sampai akhir 2026.',
   hero: {
     ...ID.hero,
     heading: 'Kamera buat semua tamu pernikahanmu.',
-    body: 'Kayak disposable camera di tiap meja resepsi, tapi di HP tamu. Mereka scan QR, jepret, dan semua fotonya kebuka bareng pas Reveal.',
+    body: 'Kayak kamera sekali pakai (disposable camera) di tiap meja resepsi, tapi di HP tamu. Mereka scan QR, jepret, dan semua fotonya kebuka bareng pas Reveal.',
     proofWhere: 'dari akad, resepsi, sampai after party',
   },
   idea: {
@@ -637,11 +637,11 @@ const WEDDING_ID: LandingCopy = {
     items: [
       {
         q: 'Apa itu kamera tamu pernikahan digital?',
-        a: 'Kamera yang dipakai tamu langsung dari HP mereka. Tamu scan QR di venue, dapat jatah Shot terbatas, dan semua fotonya terkumpul di satu galeri yang kebuka bareng pas Reveal.',
+        a: 'Kamera sekali pakai versi digital, dipakai tamu langsung dari HP mereka. Tamu scan QR di venue, dapat jatah Shot terbatas, dan semua fotonya terkumpul di satu galeri yang kebuka bareng pas Reveal.',
       },
       {
-        q: 'Bedanya sama disposable camera biasa di meja tamu?',
-        a: 'Idenya sama: jatah foto terbatas dan hasilnya baru kelihatan belakangan. Bedanya, kameranya ada di HP tiap tamu, jadi nggak ada kamera yang perlu dibeli per meja atau film yang perlu dicuci, dan fotonya kebuka di jam Reveal yang kamu atur.',
+        q: 'Bedanya sama kamera sekali pakai (disposable camera) di meja tamu?',
+        a: 'Idenya sama: jatah foto terbatas dan hasilnya baru kelihatan belakangan. Bedanya, kamera sekali pakainya ada di HP tiap tamu, jadi nggak ada kamera yang perlu dibeli per meja atau film yang perlu dicuci, dan fotonya kebuka di jam Reveal yang kamu atur.',
       },
       {
         q: 'Tamu harus download aplikasi?',
@@ -665,7 +665,7 @@ const WEDDING_ID: LandingCopy = {
       },
       {
         q: 'Berapa harganya?',
-        a: 'Gratis kalau kamu ambil Wedding Plan. Cek detail paketnya, ya.',
+        a: 'Gratis sampai akhir 2026. Chat kami di WhatsApp buat ambil slot gratis acaramu.',
       },
     ],
   },

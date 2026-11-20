@@ -6,9 +6,12 @@ import { BILINGUAL_PAGES } from '@/lib/page-language';
 /** The home page in English. `/id` is the same page in Indonesian. */
 export const metadata: Metadata = pageMeta({
   path: '/',
-  title: 'Memoify | Digital Gifts, Scrapbooks & Albums (Kado Digital)',
+  // The brand as its owner states it (2026-11-20): the first digital gift
+  // and the first digital disposable camera in Indonesia, since 2024, with
+  // birthday gifts and the wedding-guest camera in front.
+  title: "Memoify | Indonesia's First Digital Gifts & Disposable Camera",
   description:
-    'Turn photos into a digital gift, scrapbook or album styled like Netflix or Spotify, shared with one link. Bikin kado digital dan ucapan ulang tahun online.',
+    "Indonesia's first digital gifts and digital disposable camera, since 2024. Make a Netflix-style birthday gift, or give wedding guests a camera with MemoRoll.",
   keywords: {
     en: [
       'Netflix birthday template',
