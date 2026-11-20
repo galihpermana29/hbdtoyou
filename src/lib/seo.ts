@@ -160,7 +160,20 @@ export function homeStructuredData(
         '@type': 'WebSite',
         '@id': `${SITE_URL}/#website`,
         name: SITE_NAME,
-        alternateName: ['Memoify Live', 'memoify.live'],
+        // The site's address as a name, then the ways people misspell
+        // "Memoify" when they search for it. The misspellings are ones Search
+        // Console showed this site appearing for (2026-11-20: memorify,
+        // memorife, memotify, memofy, memoryfy). Only misspellings of our own
+        // name belong here: another site's name does not, however close.
+        alternateName: [
+          'Memoify Live',
+          'memoify.live',
+          'Memorify',
+          'Memofy',
+          'Memoryfy',
+          'Memotify',
+          'Memorife',
+        ],
         url: SITE_URL,
         inLanguage: ['en', 'id'],
         publisher: { '@id': `${SITE_URL}/#organization` },
