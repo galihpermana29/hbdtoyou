@@ -100,12 +100,61 @@ const nextConfig = {
       },
     ];
   },
-  // The Indonesian MemoRoll landing moved to the address people search for.
   async redirects() {
     return [
+      // The Indonesian MemoRoll landing moved to the address people search for.
       {
         source: '/id/memoroll',
         destination: '/id/kamera-tamu-pernikahan',
+        permanent: true,
+      },
+      // Old addresses that are still visited, each to the route that
+      // replaced it. Only where the mapping is certain: the gift viewers
+      // below were renamed in git with their code unchanged, and every one
+      // of them reads the same backend content id.
+      // `disney+v1` became `disneyplusv1` (3973991).
+      { source: '/disney\\+v1', destination: '/disneyplusv1', permanent: true },
+      {
+        source: '/disney\\+v1/:id',
+        destination: '/disneyplusv1/:id',
+        permanent: true,
+      },
+      // `scrapbookv1` became `scrapbook1`, and `scrapbookvintage` became
+      // `scrapbook2` (4b460f9). Both still read `coverImage`, `pages` and
+      // `backCoverImage` from the same record.
+      { source: '/scrapbookv1', destination: '/scrapbook1', permanent: true },
+      {
+        source: '/scrapbookv1/:id',
+        destination: '/scrapbook1/:id',
+        permanent: true,
+      },
+      {
+        source: '/scrapbookvintage',
+        destination: '/scrapbook2',
+        permanent: true,
+      },
+      {
+        source: '/scrapbookvintage/:id',
+        destination: '/scrapbook2/:id',
+        permanent: true,
+      },
+      // Names typed without the version, or misspelt. Each has exactly one
+      // template it can mean. `/newspaper` (three newspapers) and
+      // `/spotifyv2` (never a route) are left to 404.
+      { source: '/netflix', destination: '/netflixv1', permanent: true },
+      { source: '/spotify', destination: '/spotifyv1', permanent: true },
+      { source: '/Spotify', destination: '/spotifyv1', permanent: true },
+      { source: '/jurnal', destination: '/journal', permanent: true },
+      { source: '/iournal', destination: '/journal', permanent: true },
+      { source: '/ejournal', destination: '/journal', permanent: true },
+      { source: '/template', destination: '/templates', permanent: true },
+      // `skipTrailingSlashRedirect` (kept for PostHog, below) means Next
+      // serves `/journal/` as well as `/journal`, so every page had a second
+      // address. Pages only: PostHog's proxy and the API routes keep the
+      // slash they were asked with.
+      {
+        source: '/:path((?!ingest/|api/|_next/).+)/',
+        destination: '/:path',
         permanent: true,
       },
     ];

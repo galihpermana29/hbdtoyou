@@ -31,6 +31,9 @@ import { createContentClientSide } from '@/action/client-api';
 /** The scrapbook the picker opens on when the URL does not name one. */
 const DEFAULT_SCRAPBOOK_ROUTE = 'scrapbook7';
 
+/** A scrapbook template's route, from its backend name: "Scrapbook - scrapbook7". */
+const routeOf = (t: IAllTemplateResponse) => t.name?.split('- ')[1]?.trim();
+
 interface FormGenerationProps {
   openNotification: (progress: number, key: any, isError?: boolean) => void;
   selectedTemplateId: string;
@@ -85,8 +88,6 @@ const FormGeneration = ({
       setPopularTemplates(filteredTemplates);
 
       if (filteredTemplates.length > 0) {
-        const routeOf = (t: IAllTemplateResponse) => t.name?.split('- ')[1];
-
         // Honour a route already in the URL so a shared or reloaded link opens the
         // scrapbook it names; fall back to the default only when there is none.
         const requested = templateName
@@ -129,6 +130,18 @@ const FormGeneration = ({
       }
     }
 
+    // Where the finished scrapbook is opened, and so the link its maker
+    // copies from that page and shares. Read off the template being made, not
+    // off the `route` query: the query is only written once the template list
+    // has answered, and a scrapbook made before that was sent to
+    // `/null/<id>`, a page that does not exist, with that address in the copy
+    // box. PostHog still sees those links being opened.
+    const route = (selectedTemplate && routeOf(selectedTemplate)) || null;
+    if (!route) {
+      message.error('Pick a scrapbook style first.');
+      return;
+    }
+
     // return;
     setLoading(true);
     const json_text = {
@@ -157,7 +170,7 @@ const FormGeneration = ({
 
       if (res.success) {
         form.resetFields();
-        window.location.href = `/${templateName}/${res.data}?isNew=true`;
+        window.location.href = `/${route}/${res.data}?isNew=true`;
         message.success('Successfully created!');
       } else {
         reportCreateFailure(res.message, profile, 'scrapbook');

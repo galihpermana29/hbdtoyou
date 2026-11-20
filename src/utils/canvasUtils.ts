@@ -26,9 +26,8 @@ export const uploadCanvasImage = async (
             // Upload image
             const result = await uploadImageWithApi(
               formData,
-              (progress, key) => {
+              () => {
                 // Progress notification could be implemented here
-                console.log(`Upload progress: ${progress}%`);
               },
               key
             );
@@ -177,7 +176,14 @@ export const handleSubmit = async (
 
   const res = await createContent(payload);
   if (res.success) {
-    router.push(`/${templateType}/${res.data}`);
+    // These two canvas builders still call themselves by the names their
+    // viewers had before they were renamed (4b460f9), and the old names are
+    // pages that no longer exist. Open the scrapbook where it now lives.
+    const viewer =
+      { scrapbookv1: 'scrapbook1', scrapbookvintage: 'scrapbook2' }[
+        templateType
+      ] ?? templateType;
+    router.push(`/${viewer}/${res.data}`);
     message.success('Successfully created!');
   } else {
     message.error(res.message);

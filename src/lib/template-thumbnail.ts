@@ -76,6 +76,26 @@ export function templateRoute(name?: string): string | undefined {
 }
 
 /**
+ * Where a template card's "Preview" link goes, or null when it has nowhere.
+ *
+ * MemoRoll and wedding templates are named without a route
+ * (`"Memoroll Party Template"`), so building `/${templateRoute(name)}` for
+ * them linked to `/undefined` - the 404 PostHog kept seeing with `/create` as
+ * the referrer. Those two have their own sample pages; any other name with no
+ * route gets no link rather than a dead one.
+ */
+export function templatePreviewHref(template: {
+  name?: string;
+  type?: string;
+}): string | null {
+  const type = template.type?.toLowerCase();
+  if (type === 'memoroll') return '/memoroll/demo';
+  if (type === 'wedding') return '/wedding-template-1';
+  const route = templateRoute(template.name);
+  return route ? `/${route}` : null;
+}
+
+/**
  * The image to render for a template card: the checked-in file when there is one,
  * otherwise whatever the backend supplied.
  */

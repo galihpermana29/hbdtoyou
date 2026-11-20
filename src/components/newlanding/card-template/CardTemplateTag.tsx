@@ -1,5 +1,8 @@
 import { IAllTemplateResponse } from '@/action/interfaces';
-import { templateThumbnail } from '@/lib/template-thumbnail';
+import {
+  templatePreviewHref,
+  templateThumbnail,
+} from '@/lib/template-thumbnail';
 import disneyplusv1 from '@/assets/templates/disneyv1.png';
 import formula1 from '@/assets/templates/formula1.png';
 import graduation from '@/assets/templates/graduation.png';
@@ -172,16 +175,13 @@ const CardTemplateTag = ({
             />
           )}
           <div className="flex items-center gap-2">
-            {type !== 'scrapbook' && (
+            {type !== 'scrapbook' && templatePreviewHref(data) && (
               <>
                 <div
                   onClick={(e) => {
                     e.stopPropagation();
                   }}>
-                  <Link
-                    target="_blank"
-                    // split netflix - netflixv1
-                    href={`/${data.name.split('-')[1]?.split(' ')[1]}`}>
+                  <Link target="_blank" href={templatePreviewHref(data)}>
                     <h1
                       className={clsx(
                         'text-[16px] font-[600] hover:underline',
