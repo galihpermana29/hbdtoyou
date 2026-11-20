@@ -34,6 +34,7 @@ import NewArcadeClawForm from '@/components/forms/new/new-arcade-claw-form';
 import NewBoardOfUsForm from '@/components/forms/new/new-board-of-us-form';
 import NewRollOfUsForm from '@/components/forms/new/new-roll-of-us-form';
 import { visibleTemplates } from '@/lib/template-catalog';
+import { templateRoute } from '@/lib/template-thumbnail';
 
 const StepsCustom = [
   {
@@ -127,9 +128,14 @@ const CreatePage = ({ initialTemplateId }: { initialTemplateId?: string }) => {
       if (dx.success) {
         const popular = visibleTemplates(dx.data);
         setPopularTemplates(popular);
+        // `?template=` names a template by its id, or by its route
+        // (`netflixv1`), which is what a sample page's "Create this gift"
+        // sends: the route is the same on every backend, the id is not.
         if (initialTemplateId) {
           const requestedTemplate = [...original, ...popular].find(
-            (template) => template.id === initialTemplateId
+            (template) =>
+              template.id === initialTemplateId ||
+              templateRoute(template.name) === initialTemplateId
           );
           if (requestedTemplate) handleTemplateClick(requestedTemplate);
         }

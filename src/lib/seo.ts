@@ -1,6 +1,7 @@
 import type { Metadata } from 'next';
 
 import type { IntentPage } from '@/lib/intent-pages';
+import type { TemplatePage } from '@/lib/template-pages';
 
 import type { LanguageVersions } from './page-language';
 
@@ -273,6 +274,63 @@ export function intentStructuredData(page: IntentPage) {
         '@type': 'FAQPage',
         inLanguage: 'id',
         mainEntity: page.faq.items.map((item) => ({
+          '@type': 'Question',
+          name: item.q,
+          acceptedAnswer: { '@type': 'Answer', text: item.a },
+        })),
+      },
+    ],
+  };
+}
+
+/** Thumbnails checked in under public/thumbnails (lib/template-thumbnail.ts). */
+const TEMPLATE_IMAGES = new Set([
+  'netflixv1',
+  'spotifyv1',
+  'newspaperv3',
+  'magazinev1',
+  'disneyplusv1',
+]);
+
+/** Metadata of a template's sample page (lib/template-pages.ts). */
+export function templateMetadata(page: TemplatePage): Metadata {
+  return pageMeta({
+    path: `/${page.route}`,
+    title: page.meta.title,
+    description: page.meta.description,
+    keywords: { en: page.meta.keywords },
+    image: TEMPLATE_IMAGES.has(page.route)
+      ? {
+          url: `${SITE_URL}/thumbnails/${page.route}.jpg`,
+          alt: `${page.name} by Memoify`,
+        }
+      : undefined,
+  });
+}
+
+/**
+ * Structured data of a template's sample page: the page, and the questions
+ * drawn under the sample with their answers, word for word.
+ */
+export function templateStructuredData(page: TemplatePage) {
+  const url = `${SITE_URL}/${page.route}`;
+  return {
+    '@context': 'https://schema.org',
+    '@graph': [
+      {
+        '@type': 'WebPage',
+        '@id': url,
+        url,
+        name: page.meta.title,
+        description: page.meta.description,
+        inLanguage: 'en',
+        isPartOf: { '@id': `${SITE_URL}/#website` },
+      },
+      {
+        '@type': 'FAQPage',
+        url,
+        inLanguage: 'en',
+        mainEntity: page.faq.map((item) => ({
           '@type': 'Question',
           name: item.q,
           acceptedAnswer: { '@type': 'Answer', text: item.a },
