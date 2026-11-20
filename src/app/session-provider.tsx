@@ -4,7 +4,8 @@ import { IProfileResponse } from '@/action/interfaces';
 import { getSpotifyAccessToken } from '@/action/spotify-api';
 import { getUserProfile } from '@/action/user-api';
 import { Footer } from '@/components/ui/footer';
-import { drawsAGift } from '@/lib/gift-routes';
+import MadeWithMemoify from '@/components/gift-viewer/made-with-memoify';
+import { drawsAGift, recipientViewerRoute } from '@/lib/gift-routes';
 import { languageVersions, pageLanguage } from '@/lib/page-language';
 import { store } from '@/lib/store';
 import { setSessionSpecific } from '@/store/get-set-session';
@@ -223,7 +224,8 @@ const SessionProvider = ({
 
   const pathname = usePathname();
   const segments = useSelectedLayoutSegments();
-  const { id: contentId } = useParams();
+  const routeParams = useParams();
+  const { id: contentId } = routeParams ?? {};
 
   const [uploadStateLoading, setUploadStateLoading] = useState(false);
 
@@ -240,6 +242,7 @@ const SessionProvider = ({
   const isPremium = userProfile?.type === 'premium';
   const isGift = drawsAGift(segments, contentId);
   const isFooterFree = isGift || isMemorollScreen(pathname);
+  const viewerRoute = recipientViewerRoute(segments, routeParams, pathname);
   const isHideAds = isFooterFree || isProductRouteWithoutAds(pathname);
 
   const PREMIUM_ADS_KEY = 'memoify_premium_ads_count';
@@ -428,6 +431,15 @@ const SessionProvider = ({
           product UI and keeps it. Arcade Claw and Board of Us sit in (gifts),
           so drawsAGift already covers them. It is in the page's language,
           and links the page's other language where it has one. */}
+      {/* Where the footer would be, a recipient's viewer gets one line
+          instead: who made this, and where to make their own. */}
+      {viewerRoute && (
+        <MadeWithMemoify
+          key={pathname}
+          route={viewerRoute}
+          lang={pageLanguage(pathname ?? '')}
+        />
+      )}
       {!isFooterFree && (
         <Footer
           lang={pageLanguage(pathname ?? '')}

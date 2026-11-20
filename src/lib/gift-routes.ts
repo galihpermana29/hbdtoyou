@@ -36,3 +36,30 @@ export function drawsAGift(
   const isDirectlyBeneathIt = product === segments.length - 2;
   return isDirectlyBeneathIt && Boolean(contentId);
 }
+
+/**
+ * The template route of the page when it is a recipient's view of one
+ * created gift or scrapbook (`/netflixv1/<id>`, `/scrapbook7/<id>`,
+ * `/journal/<id>`), or null on every other page.
+ *
+ * Narrower than `drawsAGift`: the sample pages (`/netflixv1`, and the
+ * `preview` pages under some templates) draw a gift but name no content, so
+ * they have no `id` or `slug` parameter and are not counted. Wedding
+ * invitations live under `(wedding)` and carry their own Memoify mark in
+ * their own design, so they are not counted either.
+ *
+ * Pass the same `useSelectedLayoutSegments()` as `drawsAGift`, the route
+ * parameters from `useParams()`, and `usePathname()`.
+ */
+export function recipientViewerRoute(
+  segments: readonly string[],
+  params: Record<string, string | string[]> | null | undefined,
+  pathname: string | null | undefined
+): string | null {
+  const contentId = params?.id ?? params?.slug;
+  if (!contentId) return null;
+  if (segments.includes('(wedding)')) return null;
+  if (!drawsAGift(segments, contentId)) return null;
+  const route = (pathname ?? '').split('/')[1];
+  return route || null;
+}
