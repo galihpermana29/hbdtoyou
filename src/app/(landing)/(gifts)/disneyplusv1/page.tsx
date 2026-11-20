@@ -1,16 +1,33 @@
-import DisneyExperience from '@/components/disney+/DisneyExperience';
+import TemplateGuide from '@/components/template-guide/template-guide';
+import { TEMPLATE_PAGES } from '@/lib/template-pages';
+import { templateMetadata, templateStructuredData } from '@/lib/seo';
 
-// TODO(placeholder-images): these are temporary stock photos served from Cloudinary
-// cloud `dfwrmapr4`, standing in for the sample images lost when cloud `dxuumohme`
-// hit its plan limit and started returning 401 (audited 2026-09-12). They are cropped
-// per slot with `c_fill,ar_*,g_auto`. Move them into `public/` so no Cloudinary
-// account can break them again, or swap in real art for this template.
+import Sample from './sample';
 
-export default function DisneyPage() {
+/**
+ * The disneyplusv1 sample, and below it the words that make it a page someone can
+ * land on from a search (lib/template-pages.ts). The sample itself is
+ * unchanged, in `sample.tsx`.
+ */
+const page = TEMPLATE_PAGES.disneyplusv1;
+
+export const metadata = templateMetadata(page);
+
+export default function TemplateSamplePage() {
   return (
-    <DisneyExperience
-      title="Tunggu Aku di Bandung"
-      subTitle="Dan bila akupun rindu, pada nyamannya pelukmu, pada hangatnya tawamu"
-    />
+    <>
+      {/* Read by search engines, drawn by nobody. */}
+      <script
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{
+          __html: JSON.stringify(templateStructuredData(page)).replace(
+            /</g,
+            '\\u003c'
+          ),
+        }}
+      />
+      <Sample />
+      <TemplateGuide page={page} />
+    </>
   );
 }

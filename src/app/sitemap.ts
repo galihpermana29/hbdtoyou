@@ -1,6 +1,7 @@
 import type { MetadataRoute } from 'next';
 
 import { SEARCH_PAGE_LINKS } from '@/lib/intent-pages';
+import { TEMPLATE_PAGES } from '@/lib/template-pages';
 import { languageVersions } from '@/lib/page-language';
 import { languageAlternates } from '@/lib/seo';
 
@@ -29,6 +30,11 @@ const PAGES: Array<[path: string, priority: number]> = [
   ['/contact', 0.3],
   // Pages written for one search each, Indonesian only.
   ...SEARCH_PAGE_LINKS.map((page): [string, number] => [page.href, 0.8]),
+  // Template samples with words under them (lib/template-pages.ts).
+  ...Object.values(TEMPLATE_PAGES).map((page): [string, number] => [
+    `/${page.route}`,
+    0.7,
+  ]),
 ];
 
 export default function sitemap(): MetadataRoute.Sitemap {

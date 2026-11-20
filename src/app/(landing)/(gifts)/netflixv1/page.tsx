@@ -1,41 +1,33 @@
-'use client';
+import TemplateGuide from '@/components/template-guide/template-guide';
+import { TEMPLATE_PAGES } from '@/lib/template-pages';
+import { templateMetadata, templateStructuredData } from '@/lib/seo';
 
-import NetflixExperience from '@/components/netflix/netflix-experience';
-import { useRef } from 'react';
-import 'react-photo-view/dist/react-photo-view.css';
+import Sample from './sample';
 
-import widyaOne from '@/assets/widya/after/1.jpg';
-import widyaTwo from '@/assets/widya/after/2.jpg';
+/**
+ * The netflixv1 sample, and below it the words that make it a page someone can
+ * land on from a search (lib/template-pages.ts). The sample itself is
+ * unchanged, in `sample.tsx`.
+ */
+const page = TEMPLATE_PAGES.netflixv1;
 
-// Same sample photos the Featured/ListItem fallbacks already ship, resolved to
-// URLs so the lightbox and `next/image` both receive plain strings.
-const SAMPLE_JUMBOTRON = widyaTwo.src;
-const SAMPLE_IMAGES = [
-  widyaOne.src,
-  widyaTwo.src,
-  widyaOne.src,
-  widyaTwo.src,
-  widyaOne.src,
-  widyaTwo.src,
-  widyaOne.src,
-  widyaTwo.src,
-];
+export const metadata = templateMetadata(page);
 
-const RootExamplePage = () => {
-  const ref1 = useRef(null);
-  const ref2 = useRef(null);
-  const ref3 = useRef(null);
-  const ref4 = useRef(null);
-  const ref5 = useRef(null);
-
+export default function TemplateSamplePage() {
   return (
-    <NetflixExperience
-      refs={{ ref1, ref2, ref3, ref4, ref5 }}
-      title="Happy Birthday!"
-      jumbotronImage={SAMPLE_JUMBOTRON}
-      images={SAMPLE_IMAGES}
-    />
+    <>
+      {/* Read by search engines, drawn by nobody. */}
+      <script
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{
+          __html: JSON.stringify(templateStructuredData(page)).replace(
+            /</g,
+            '\\u003c'
+          ),
+        }}
+      />
+      <Sample />
+      <TemplateGuide page={page} />
+    </>
   );
-};
-
-export default RootExamplePage;
+}
