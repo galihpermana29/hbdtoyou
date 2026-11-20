@@ -42,3 +42,14 @@ export function useLandingCopy(): LandingCopy {
   }
   return LANDING_COPY[language];
 }
+
+/** The language the landing is in, for what depends on it besides words. */
+export function useLandingLanguage(): LandingLanguage {
+  const language = useContext(LanguageContext);
+  if (!language) {
+    throw new Error(
+      'useLandingLanguage must be used inside LandingLanguageProvider'
+    );
+  }
+  return language;
+}

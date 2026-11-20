@@ -1,15 +1,16 @@
 'use client';
 
 import Image from 'next/image';
-import Link from 'next/link';
 import { useEffect, useState } from 'react';
 
-import { useLandingCopy } from './language-provider';
+import { freeSlotHref } from './free-slot';
+import { useLandingCopy, useLandingLanguage } from './language-provider';
 import LiveDot from './live-dot';
 
 /**
- * The dark strip above the navigation: MemoRoll now ships with the wedding
- * plan. The line is a split-flap board - every letter flips through a few
+ * The dark strip above the navigation: MemoRoll is free until the end of
+ * 2026, and the strip opens the WhatsApp chat a slot is asked for in
+ * (free-slot.ts). The line is a split-flap board - every letter flips through a few
  * random glyphs before it lands - and it re-flips every few seconds.
  *
  * The strip carries a long line and a short one and shows one of them by the
@@ -141,6 +142,7 @@ function FlapLine({ text, cycle }: { text: string; cycle: number }) {
 
 export default function MemorollAnnouncementStrip() {
   const copy = useLandingCopy().strip;
+  const language = useLandingLanguage();
   const [cycle, setCycle] = useState(0);
   // Which of the two lines is on screen; unknown until the browser says.
   const [wide, setWide] = useState<boolean | null>(null);
@@ -164,8 +166,10 @@ export default function MemorollAnnouncementStrip() {
   }, []);
 
   return (
-    <Link
-      href="/wedding-invitation"
+    <a
+      href={freeSlotHref(language)}
+      target="_blank"
+      rel="noopener noreferrer"
       className="group flex h-10 items-center justify-center gap-3 overflow-hidden bg-[#1b1b1b] px-4 transition-colors hover:bg-black">
       <LiveDot size={6} className="bg-[#ff3e09]" />
       <span className="hidden md:inline-flex">
@@ -182,6 +186,6 @@ export default function MemorollAnnouncementStrip() {
         unoptimized
         className="mr-strip-arrow shrink-0"
       />
-    </Link>
+    </a>
   );
 }
