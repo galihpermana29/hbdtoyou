@@ -16,8 +16,8 @@ import type { LandingLanguage } from './language';
  * form addresses them: "kamu", "nggak", "udah", "HP", and the English words
  * Indonesians already use for these things (scan, retake, first dance, host).
  *
- * The product's own terms stay names in both: MemoRoll, Roll, Shot, Reveal and
- * the Wedding Plan are what the guest screens and the plans page call them, and
+ * The product's own terms stay names in both: MemoRoll, Roll, Shot and Reveal
+ * are what the guest screens call them, and
  * a landing that called them something else would be describing a different
  * product. Names stay names too: "Elias & Freya" are the same couple in both.
  *
@@ -288,7 +288,7 @@ const EN = {
     planName: 'One event',
     planBody: 'Claimed on WhatsApp',
     memorollBody: 'A camera for every guest',
-    addOn: 'Until 31 Dec 2026',
+    addOn: 'Until end of 2026',
     free: 'Free',
     extraCost: 'What MemoRoll costs',
   },
@@ -543,7 +543,7 @@ const ID: LandingCopy = {
     planName: 'Satu acara',
     planBody: 'Diambil lewat WhatsApp',
     memorollBody: 'Kamera buat semua tamu',
-    addOn: 'Sampai 31 Des 2026',
+    addOn: 'Sampai akhir 2026',
     free: 'Gratis',
     extraCost: 'Biaya MemoRoll',
   },

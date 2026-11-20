@@ -61,10 +61,13 @@ const WELCOME_PHOTOS = SAMPLE_SOURCES.slice(2, 6);
  * own refusal is, and for the same reason: they have not failed at anything,
  * and every answer they gave is still on the screen waiting.
  */
+// MemoRoll is free until the end of 2026 and a credit is asked for on
+// WhatsApp (components/memoroll/landing/free-slot.ts), so that is the way
+// forward this names; "add credits to your plan" pointed at nothing.
 const NO_MEMOROLL_CREDIT_PROBLEM =
-  'Your account has no MemoRoll credits left, so this roll could not be ' +
-  'published. Everything you have entered is still here - add credits to ' +
-  'your plan and press Publish again.';
+  'Your account has no MemoRoll credits yet, so this roll could not be ' +
+  'published. Everything you have entered is still here - message us on ' +
+  'WhatsApp (+62 895 3832 33303) for a free slot, then press Publish again.';
 
 /**
  * What a raced wedding link reads. The dashboard card already points at an

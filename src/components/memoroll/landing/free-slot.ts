@@ -6,9 +6,10 @@ import type { LandingLanguage } from './language';
  * site footer. The landing's price call-out, its announcement strip and its
  * questions all say this, and their buttons open that chat.
  *
- * When the free period ends, change `FREE_UNTIL` and the copy that names
- * the date (copy.tsx: `announcement`, `plan`, the price question), or point
- * the buttons back at a checkout.
+ * The page says "until the end of 2026" and never a day: the owner extends
+ * or ends the period by asking for the words to change (copy.tsx: `strip`,
+ * `plan`, the price question, `metaDescription`). `FREE_UNTIL` is only for
+ * search engines, whose price data wants a date.
  */
 export const FREE_UNTIL = '2026-12-31';
 
