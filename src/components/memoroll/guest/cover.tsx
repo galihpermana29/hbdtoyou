@@ -517,7 +517,13 @@ export default function Cover({
           }`}
           style={{ color: '#000000', fontFamily: 'var(--font-mr-script)' }}>
           {words.map((word, i) => (
-            <span key={`${word}-${i}`} aria-hidden>
+            // The site's stylesheet sets a font on every element, so a span
+            // does not inherit the script from its heading: it has to be
+            // told to.
+            <span
+              key={`${word}-${i}`}
+              aria-hidden
+              style={{ fontFamily: 'inherit' }}>
               <motion.span
                 className="inline-block"
                 style={{
@@ -527,6 +533,7 @@ export default function Cover({
                   // the name being cut off). The padding, taken back by the
                   // margin, keeps the script's tails and overhang inside
                   // the mask's box.
+                  fontFamily: 'inherit',
                   padding: '0.3em 0.25em',
                   margin: '-0.3em -0.25em',
                   maskImage: NAME_PEN,
