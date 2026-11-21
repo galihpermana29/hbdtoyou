@@ -75,6 +75,10 @@ const ENTRANCE = {
 } as const;
 const EASE_OUT = [0.22, 1, 0.36, 1] as const;
 
+/** Ink up to where the pen is, fading out over the stretch just behind it. */
+const NAME_PEN =
+  'linear-gradient(90deg, #000 calc(var(--pen) - 45%), transparent var(--pen))';
+
 /** The hero's height, which the collage's flight is measured against. */
 const HERO_HEIGHT = 455;
 
@@ -516,15 +520,23 @@ export default function Cover({
             <span key={`${word}-${i}`} aria-hidden>
               <motion.span
                 className="inline-block"
-                initial={false}
-                animate={{
-                  clipPath: waiting
-                    ? 'inset(-20% 100% -20% 0%)'
-                    : 'inset(-20% -10% -20% 0%)',
+                style={{
+                  // A pen, not a guillotine: the word is uncovered behind a
+                  // soft edge, so a letter half written fades out instead of
+                  // being sliced (owner, 2026-11-22: the hard edge read as
+                  // the name being cut off). The padding, taken back by the
+                  // margin, keeps the script's tails and overhang inside
+                  // the mask's box.
+                  padding: '0.3em 0.25em',
+                  margin: '-0.3em -0.25em',
+                  maskImage: NAME_PEN,
+                  WebkitMaskImage: NAME_PEN,
                 }}
+                initial={false}
+                animate={{ '--pen': waiting ? '0%' : '150%' }}
                 transition={during(stage, {
                   delay: ENTRANCE.name + i * 0.16,
-                  duration: 0.22,
+                  duration: 0.3,
                   ease: 'linear',
                 })}>
                 {word}
