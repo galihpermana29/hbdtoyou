@@ -3,13 +3,14 @@
 import {
   AnimatePresence,
   motion,
+  useIsPresent,
   useMotionValue,
   useReducedMotion,
   useTransform,
   type Variants,
 } from 'framer-motion';
 import { Download, Instagram } from 'lucide-react';
-import { useEffect, useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import BackPill from '../ui/back-pill';
 import Cta from '../ui/cta';
 import RollPrint from './print';
@@ -383,10 +384,30 @@ const REDUCED_DECK: Variants = {
  * skill). While the finger is down the card IS the finger - 1:1 along x, no
  * elastic, no spring - and it tilts with the drag the way a print held at
  * the bottom would. On release it either flies on to the next print (past
- * 80px, or flicked faster than 500px/s) carrying the drag's direction, or a
- * spring sets it back. Each card owns its motion value, so the one leaving
- * and the one arriving never share a position.
+ * SWIPE_DISTANCE, or flicked faster than SWIPE_SPEED) carrying the drag's
+ * direction, or a spring sets it back. Each card owns its motion value, so
+ * the one leaving and the one arriving never share a position.
+ *
+ * On a phone the swipe used to need several slow, careful tries (owner,
+ * 2026-11-22), for three reasons, each fixed here:
+ *
+ * - The print left vertical movement to the browser (`pan-y`). A thumb never
+ *   moves in a straight line, and the moment Safari read the start of a
+ *   swipe as a scroll it took the gesture away mid-drag. The print now keeps
+ *   every touch that starts on it; the column still scrolls from anywhere
+ *   else, and since the deck is sized to the screen it rarely has to.
+ * - 80px was most of a thumb's comfortable reach on a print this size, so a
+ *   natural short swipe fell short and sprang back.
+ * - A drag that fell short was then read as a tap, which always goes
+ *   forward - so a short swipe back went the wrong way. A touch that moved
+ *   is no longer a tap.
+ *
+ * The print that is leaving also stops taking touches, so a second swipe
+ * made before it has gone lands on the print underneath it.
  */
+const SWIPE_DISTANCE = 44;
+const SWIPE_SPEED = 320;
+
 function DeckCard({
   photo,
   direction,
@@ -401,6 +422,9 @@ function DeckCard({
   onAdvance: (step: number) => void;
 }) {
   const x = useMotionValue(0);
+  const isPresent = useIsPresent();
+  /** Whether this touch moved the print, which makes it not a tap. */
+  const moved = useRef(false);
   // A held print turns as it is pulled: about 8deg at a 260px pull.
   const tilt = useTransform(x, [-260, 0, 260], [-8, 0, 8]);
 
@@ -413,8 +437,7 @@ function DeckCard({
         top: u(DECK[2].top),
         x,
         rotate: DECK[2].rotate,
-        // The deck owns horizontal; the browser keeps vertical.
-        touchAction: 'pan-y',
+        pointerEvents: isPresent ? 'auto' : 'none',
       }}
       // The print inside is an <img>: without this a mouse drag starts the
       // browser's own image drag, which cancels the gesture before the card
@@ -433,13 +456,35 @@ function DeckCard({
       dragConstraints={{ left: 0, right: 0 }}
       dragElastic={1}
       dragTransition={{ bounceStiffness: 500, bounceDamping: 40 }}
-      onDragStart={onDragStart}
-      onDragEnd={(_, info) => {
-        if (info.offset.x < -80 || info.velocity.x < -500) onAdvance(1);
-        else if (info.offset.x > 80 || info.velocity.x > 500) onAdvance(-1);
+      onPointerDown={() => {
+        moved.current = false;
       }}
-      onTap={() => onAdvance(1)}>
-      <motion.div style={{ rotate: reduce ? 0 : tilt }}>
+      onDragStart={() => {
+        moved.current = true;
+        onDragStart();
+      }}
+      onDragEnd={(_, info) => {
+        const { offset, velocity } = info;
+        // Mostly sideways, and either far enough or fast enough. A flick
+        // must also have gone the way it was thrown: a print dragged right
+        // and let go while drifting left is a swipe right.
+        const sideways = Math.abs(offset.x) > Math.abs(offset.y) * 0.6;
+        const far = Math.abs(offset.x) > SWIPE_DISTANCE;
+        const fast =
+          Math.abs(velocity.x) > SWIPE_SPEED &&
+          Math.abs(offset.x) > 12 &&
+          Math.sign(velocity.x) === Math.sign(offset.x);
+        if (sideways && (far || fast)) onAdvance(offset.x < 0 ? 1 : -1);
+      }}
+      onTap={() => {
+        if (!moved.current) onAdvance(1);
+      }}>
+      {/* The print keeps every touch that starts on it (see above). It is
+          said here and not on the card, because a card that drags along x
+          is given `pan-y` by the motion library whatever its own style
+          asks for; the browser honours the strictest answer between a
+          touch's target and its ancestors, and this one is the strictest. */}
+      <motion.div style={{ rotate: reduce ? 0 : tilt, touchAction: 'none' }}>
         <RollPrint
           src={photo.src}
           size="card"
