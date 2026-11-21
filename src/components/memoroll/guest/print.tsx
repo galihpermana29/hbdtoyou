@@ -86,7 +86,11 @@ const SIZES: Record<
   /** The preview's swipeable deck (guest-19/20). */
   card: {
     pad: 7,
-    aspect: '281.88 / 338.06',
+    // The Shot's own 3:4, not the frame's squatter window: under
+    // object-cover that window cut a twentieth off the top and the bottom
+    // of every photo, so the preview did not show what the guest framed
+    // (owner, 2026-11-22).
+    aspect: '3 / 4',
     shadow: [
       '1.12px 1.12px 2.8px rgba(0,0,0,0.12)',
       '3.92px 3.92px 5.6px rgba(0,0,0,0.11)',
