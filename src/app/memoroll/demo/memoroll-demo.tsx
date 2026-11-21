@@ -447,6 +447,7 @@ export default function MemorollDemo() {
                 style={event?.coverStyle ?? 'collage'}
                 ctaLabel="Get me in"
                 onEnter={enterFromCover}
+                entrance
               />
             )}
             {screen === 'countdown' && (
