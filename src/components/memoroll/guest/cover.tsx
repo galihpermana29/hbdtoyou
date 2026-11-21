@@ -1,5 +1,7 @@
 'use client';
 
+import { motion, useReducedMotion } from 'framer-motion';
+import { useEffect, useState } from 'react';
 import cameraDoodle from '@/assets/memoroll/cover-camera-doodle.png';
 import hearts from '@/assets/memoroll/cover-hearts.png';
 import tape from '@/assets/memoroll/cover-tape.png';
@@ -45,6 +47,66 @@ const COLLAGE_SLOTS = [
   { left: -10.1, top: 56.6, width: 33.2, rotate: 8, pad: 4.3 },
   { left: 49.9, top: 25.1, width: 33.2, rotate: 3, pad: 4.3 },
 ];
+
+/**
+ * The Cover's entrance (the designer's motion reference, 2026-11-12, its
+ * first six seconds). Nothing is on the paper; then the prints are thrown
+ * onto it one after another from a point low in the middle, each spinning
+ * and growing into its place; the wordmark arrives; the couple's name is
+ * written; the hearts and the camera drop in beside it; a flash goes off;
+ * and only then does the invitation and its button appear.
+ *
+ * Times are seconds from the moment the Cover mounts, read off the reference
+ * frame by frame.
+ */
+const ENTRANCE = {
+  /** The first print leaves the point here, and one follows every `gap`. */
+  prints: 0.3,
+  gap: 0.22,
+  flight: 0.6,
+  wordmark: 2.0,
+  name: 2.3,
+  hearts: 2.7,
+  camera: 2.9,
+  flash: 3.5,
+  invitation: 3.9,
+  button: 4.2,
+  footer: 4.6,
+} as const;
+const EASE_OUT = [0.22, 1, 0.36, 1] as const;
+
+/** The hero's height, which the collage's flight is measured against. */
+const HERO_HEIGHT = 455;
+
+/**
+ * Where the entrance stands. Every part is told its state rather than left
+ * to animate on mount, because the Cover is drawn inside the flow's own
+ * AnimatePresence, and a presence that skips its children's first animation
+ * skips these too.
+ *
+ * - `still`: no entrance; everything is in its place and nothing moves.
+ * - `waiting`: the entrance is about to play; everything is held at its start.
+ * - `playing`: each part moves to its place at its own second.
+ */
+type Stage = 'still' | 'waiting' | 'playing';
+
+/** Something that fades up into its place at a given second. */
+function rise(stage: Stage, delay: number, from = 10) {
+  return {
+    initial: false,
+    animate:
+      stage === 'waiting' ? { opacity: 0, y: from } : { opacity: 1, y: 0 },
+    transition:
+      stage === 'playing'
+        ? { delay, duration: 0.5, ease: EASE_OUT }
+        : { duration: 0 },
+  } as const;
+}
+
+/** A transition that only takes time while the entrance is playing. */
+function during<T extends object>(stage: Stage, transition: T) {
+  return stage === 'playing' ? transition : { duration: 0 };
+}
 
 /**
  * The design stacks five drop shadows on every print, each softer and further
@@ -116,23 +178,47 @@ function Print({
   waitingNumber,
   className = '',
   style,
+  rotate = 0,
+  thrown,
+  stage = 'still',
 }: {
   src: string | null;
   pad: number;
   waitingNumber?: number;
   className?: string;
   style?: React.CSSProperties;
+  /** The angle the print lies at, in degrees. */
+  rotate?: number;
+  /**
+   * Set while the Cover makes its entrance: where the print starts from,
+   * relative to its place, and when it is thrown.
+   */
+  thrown?: { x: string; y: string; delay: number };
+  stage?: Stage;
 }) {
+  const held = stage === 'waiting' && thrown;
   return (
-    <div
+    <motion.div
       className={`absolute overflow-hidden bg-white ${className}`}
-      style={{ padding: `${pad}%`, boxShadow: PRINT_SHADOW, ...style }}>
+      style={{ padding: `${pad}%`, boxShadow: PRINT_SHADOW, rotate, ...style }}
+      initial={false}
+      animate={
+        held
+          ? // A speck at the point, most of a turn away from how it lands.
+            { x: thrown.x, y: thrown.y, scale: 0.03, rotate: rotate - 150 }
+          : { x: 0, y: 0, scale: 1, rotate }
+      }
+      transition={
+        stage === 'playing' && thrown
+          ? { delay: thrown.delay, duration: ENTRANCE.flight, ease: EASE_OUT }
+          : { duration: 0 }
+      }>
       {src ? (
         <img src={src} alt="" className="block h-full w-full object-cover" />
       ) : (
         <Waiting number={waitingNumber} />
       )}
-    </div>
+    </motion.div>
   );
 }
 
@@ -141,11 +227,16 @@ function Hero({
   style,
   photos,
   draft,
+  stage,
 }: {
   style: CoverStyle;
   photos: (string | null)[];
   draft: boolean;
+  /** Where the Cover's entrance stands. */
+  stage: Stage;
 }) {
+  const animated = stage !== 'still';
+  const waiting = stage === 'waiting';
   const filled = photos.filter(Boolean) as string[];
 
   /**
@@ -170,7 +261,19 @@ function Hero({
     // an edge.
     const src = at(0);
     return (
-      <div className="relative h-full w-full overflow-hidden">
+      <motion.div
+        className="relative h-full w-full overflow-hidden"
+        // One photograph has nowhere to be thrown from: it comes up out of
+        // the paper instead, over the time the collage takes to land.
+        initial={false}
+        animate={
+          waiting ? { opacity: 0, scale: 1.06 } : { opacity: 1, scale: 1 }
+        }
+        transition={during(stage, {
+          delay: ENTRANCE.prints,
+          duration: 1.2,
+          ease: EASE_OUT,
+        })}>
         {src ? (
           <img src={src} alt="" className="h-full w-full object-cover" />
         ) : (
@@ -182,7 +285,7 @@ function Hero({
             background: `linear-gradient(180deg, rgba(247,245,243,0) 0%, ${colour.paper} 100%)`,
           }}
         />
-      </div>
+      </motion.div>
     );
   }
 
@@ -200,16 +303,49 @@ function Hero({
             width: '64.4%',
             height: '75.7%',
           }}
+          // The print's middle is 48.55% down a 455px hero; the point is
+          // 96% down it.
+          stage={stage}
+          thrown={
+            animated
+              ? {
+                  x: '0%',
+                  y: `${HERO_HEIGHT * (0.96 - 0.4855)}px`,
+                  delay: ENTRANCE.prints,
+                }
+              : undefined
+          }
         />
-        <img
+        {/* The tape goes on once the print has landed. */}
+        <motion.img
           src={tape.src}
           alt=""
-          className="absolute left-[12.4%] top-[18%] w-[24.7%] -rotate-[36deg]"
+          className="absolute left-[12.4%] top-[18%] w-[24.7%]"
+          style={{ rotate: -36 }}
+          initial={false}
+          animate={
+            waiting ? { opacity: 0, scale: 1.4 } : { opacity: 1, scale: 1 }
+          }
+          transition={during(stage, {
+            delay: ENTRANCE.prints + ENTRANCE.flight,
+            duration: 0.25,
+            ease: EASE_OUT,
+          })}
         />
-        <img
+        <motion.img
           src={tape.src}
           alt=""
-          className="absolute left-[64.3%] top-[86.8%] w-[24.7%] -rotate-[36deg]"
+          className="absolute left-[64.3%] top-[86.8%] w-[24.7%]"
+          style={{ rotate: -36 }}
+          initial={false}
+          animate={
+            waiting ? { opacity: 0, scale: 1.4 } : { opacity: 1, scale: 1 }
+          }
+          transition={during(stage, {
+            delay: ENTRANCE.prints + ENTRANCE.flight + 0.12,
+            duration: 0.25,
+            ease: EASE_OUT,
+          })}
         />
       </div>
     );
@@ -228,8 +364,22 @@ function Hero({
             top: `${slot.top}%`,
             width: `${slot.width}%`,
             aspectRatio: i === 1 || i === 2 ? '270 / 170' : '145 / 208',
-            transform: `rotate(${slot.rotate}deg)`,
           }}
+          rotate={slot.rotate}
+          // From the point (the middle, 96% down the hero) to this slot,
+          // written against the print's own box so it holds at any width:
+          // across, the gap between the two middles as a share of the
+          // print's width; down, the hero's pixels less half the print.
+          stage={stage}
+          thrown={
+            animated
+              ? {
+                  x: `${((50 - slot.left - slot.width / 2) / slot.width) * 100}%`,
+                  y: `calc(${HERO_HEIGHT * (0.96 - slot.top / 100)}px - 50%)`,
+                  delay: ENTRANCE.prints + i * ENTRANCE.gap,
+                }
+              : undefined
+          }
         />
       ))}
     </div>
@@ -244,6 +394,7 @@ export default function Cover({
   ctaLabel = 'Let’s Shoot!',
   onEnter,
   account,
+  entrance = false,
 }: {
   /** The creator's own words, set in script. Any length, any script. */
   eventName: string;
@@ -263,36 +414,85 @@ export default function Cover({
   onEnter: () => void;
   /** The account this browser is already signed in as, if any. */
   account?: { email: string; onSwitch: () => void };
+  /**
+   * Whether the Cover makes its entrance. Only where a guest meets it: the
+   * creator's own previews of a Cover stay still.
+   */
+  entrance?: boolean;
 }) {
+  const reduce = useReducedMotion();
+  /**
+   * The entrance plays once, for a guest. A creator building their Cover is
+   * looking at their own slots and must not have them thrown about on every
+   * edit; and anyone can cut it short by touching the screen, because five
+   * seconds is a long time to a guest who only wants in.
+   */
+  const [skipped, setSkipped] = useState(false);
+  const [started, setStarted] = useState(false);
+  const animated = entrance && !draft && !reduce && !skipped;
+  const stage: Stage = !animated ? 'still' : started ? 'playing' : 'waiting';
+  const waiting = stage === 'waiting';
+  useEffect(() => {
+    // One frame held at the start, so the first thing painted is bare paper.
+    const id = requestAnimationFrame(() => setStarted(true));
+    return () => cancelAnimationFrame(id);
+  }, []);
+  const words = eventName.split(' ');
+
   return (
     <div
+      // Remounting is what ends the entrance: every part comes back already
+      // in its place.
+      key={animated ? 'entrance' : 'still'}
+      onPointerDown={animated ? () => setSkipped(true) : undefined}
       className="relative flex min-h-full flex-1 flex-col overflow-hidden"
       style={{ background: colour.paper }}>
       <div className="relative h-[455px] shrink-0">
-        <Hero style={style} photos={photos} draft={draft} />
+        <Hero style={style} photos={photos} draft={draft} stage={stage} />
       </div>
 
       {/* Both stickers sit half off the screen in the design, which is what
           makes them read as things dropped onto the page rather than a border
-          around it. */}
-      <img
+          around it. The hearts are one drawing, so they are uncovered from
+          the top down, which is the order the reference pops them in; the
+          camera swings in from off the right edge. */}
+      <motion.img
         src={hearts.src}
         alt=""
         aria-hidden
         className="pointer-events-none absolute left-[-20%] top-[58.9%] w-[58.4%] select-none"
+        initial={false}
+        animate={{
+          clipPath: waiting ? 'inset(0% 0% 100% 0%)' : 'inset(0% 0% 0% 0%)',
+        }}
+        transition={during(stage, {
+          delay: ENTRANCE.hearts,
+          duration: 0.7,
+          ease: 'easeOut',
+        })}
       />
-      <img
+      <motion.img
         src={cameraDoodle.src}
         alt=""
         aria-hidden
         className="pointer-events-none absolute left-[81.7%] top-[58.6%] w-[29%] select-none"
+        initial={false}
+        animate={waiting ? { x: '110%', rotate: 25 } : { x: '0%', rotate: 0 }}
+        transition={during(stage, {
+          delay: ENTRANCE.camera,
+          type: 'spring',
+          duration: 0.6,
+          bounce: 0.3,
+        })}
       />
 
       {/* -31px: the design's text column (Frame 89, y 424) starts inside the
           455-tall hero, tucked into the collage's white space, rather than
           after it. */}
       <div className="relative z-10 -mt-[31px] flex flex-1 flex-col items-center px-[16px]">
-        <Wordmark className="h-[16px] w-[128px]" />
+        <motion.div {...rise(stage, ENTRANCE.wordmark, 6)}>
+          <Wordmark className="h-[16px] w-[128px]" />
+        </motion.div>
 
         {/* The event name is the creator's, so it is one string that wraps
             rather than the design's two hand-broken lines - but it wraps in
@@ -300,36 +500,98 @@ export default function Cover({
             "Elias & Freya's wedding" into the two centred lines the frame
             draws instead of one line running under the camera doodle. A long
             name steps down a size; a 32px script twice the designed length
-            would otherwise spill past three lines. */}
+            would otherwise spill past three lines.
+            On the entrance it is written rather than shown: each word is
+            uncovered from its left, one after the other. Whole words, so the
+            script's joins between letters are never cut apart. */}
         <h1
+          aria-label={eventName}
           className={`mt-[24px] max-w-[230px] text-center ${
             eventName.length > 28
               ? 'text-[24px] leading-[30px]'
               : 'text-[32px] leading-[38px]'
           }`}
           style={{ color: '#000000', fontFamily: 'var(--font-mr-script)' }}>
-          {eventName}
+          {words.map((word, i) => (
+            <span key={`${word}-${i}`} aria-hidden>
+              <motion.span
+                className="inline-block"
+                initial={false}
+                animate={{
+                  clipPath: waiting
+                    ? 'inset(-20% 100% -20% 0%)'
+                    : 'inset(-20% -10% -20% 0%)',
+                }}
+                transition={during(stage, {
+                  delay: ENTRANCE.name + i * 0.16,
+                  duration: 0.22,
+                  ease: 'linear',
+                })}>
+                {word}
+              </motion.span>
+              {i < words.length - 1 ? ' ' : null}
+            </span>
+          ))}
         </h1>
 
-        <p
+        <motion.p
+          {...rise(stage, ENTRANCE.invitation, 6)}
           className="mt-[64px] text-center text-[14px] font-normal leading-[150%] tracking-[-0.011em]"
           style={{ color: '#000000', fontFamily: 'var(--font-mr-body)' }}>
           join others capture the moments
-        </p>
+        </motion.p>
 
-        <Cta onClick={onEnter} className="mt-[11px] w-[210px]">
-          {ctaLabel}
-        </Cta>
+        {/* The button opens out from its own middle, the way the reference
+            grows it. */}
+        <motion.div
+          className="mt-[11px]"
+          initial={false}
+          animate={
+            waiting ? { opacity: 0, scale: 0.4 } : { opacity: 1, scale: 1 }
+          }
+          transition={during(stage, {
+            delay: ENTRANCE.button,
+            type: 'spring',
+            duration: 0.5,
+            bounce: 0.25,
+          })}>
+          <Cta onClick={onEnter} className="w-[210px]">
+            {ctaLabel}
+          </Cta>
+        </motion.div>
         {account ? (
-          <SignedInAs
-            email={account.email}
-            onSwitch={account.onSwitch}
-            className="mt-[10px] w-[260px]"
-          />
+          <motion.div {...rise(stage, ENTRANCE.button + 0.2, 6)}>
+            <SignedInAs
+              email={account.email}
+              onSwitch={account.onSwitch}
+              className="mt-[10px] w-[260px]"
+            />
+          </motion.div>
         ) : null}
       </div>
 
-      <MemoifyFooter className="relative z-10" />
+      <motion.div
+        className="relative z-10"
+        {...rise(stage, ENTRANCE.footer, 0)}>
+        <MemoifyFooter />
+      </motion.div>
+
+      {/* The flash: the whole Cover whites out for an instant, between the
+          name being written and the invitation appearing. */}
+      {animated ? (
+        <motion.div
+          aria-hidden
+          className="pointer-events-none absolute inset-0 z-20 bg-white"
+          initial={false}
+          animate={{ opacity: waiting ? 0 : [0, 0.75, 0] }}
+          transition={{
+            delay: ENTRANCE.flash,
+            duration: 0.5,
+            times: [0, 0.3, 1],
+            ease: 'easeOut',
+          }}
+        />
+      ) : null}
     </div>
   );
 }

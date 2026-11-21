@@ -714,6 +714,7 @@ export default function MemorollGuest({
                 }
                 ctaLabel={joining ? 'Opening…' : 'Get me in'}
                 onEnter={enterFromCover}
+                entrance
                 account={account}
               />
             )}
