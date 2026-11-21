@@ -8,6 +8,7 @@ import {
   useTransform,
   type Variants,
 } from 'framer-motion';
+import { Download, Instagram } from 'lucide-react';
 import { useEffect, useState } from 'react';
 import BackPill from '../ui/back-pill';
 import Cta from '../ui/cta';
@@ -36,6 +37,25 @@ import StorySheet from './story-sheet';
  * The hand itself is redrawn from the exported frame, because the capture
  * holds it as raster fills with no colours to read.
  */
+
+/**
+ * One unit of the deck's own drawing, as a length.
+ *
+ * The frames draw the deck 334 wide with a 296 print, and the screen used to
+ * be built at exactly that whatever the phone. On a real phone that left the
+ * photo small and three stacked buttons taking the room it could have had
+ * (owner, 2026-11-22). The deck is still drawn in the frame's numbers, but
+ * each is now multiplied by this unit: as large as the column's width allows,
+ * or the height left once the back pill, the signature and the one row of
+ * buttons have theirs, whichever is smaller. It never drops below 0.8, where
+ * the column scrolls instead, as a very short screen always did.
+ *
+ * 426 is the deck's height in units now that the print is 3:4: a 296 print
+ * with its 7px border is 390 tall, set 22.9 down, plus the fan's overhang.
+ */
+const DECK_UNIT =
+  'clamp(0.8px, min((min(100vw, 430px) - 32px) / 334, (100dvh - 240px) / 426), 1.19px)';
+const u = (units: number) => `calc(${units} * var(--u))`;
 
 /** How the three layers of the deck sit, front last, angles off the frames. */
 const DECK = [
@@ -180,12 +200,16 @@ export default function PhotoPreview({
           column starts at the safe area instead; the last button keeps clear
           of Safari's toolbar; a short screen tightens the gap above the
           print; and a very short one scrolls rather than clipping a button. */}
-      <div className="mx-auto flex h-full w-full max-w-[430px] flex-col overflow-y-auto pb-[max(28px,calc(env(safe-area-inset-bottom)+16px))]">
+      <div
+        className="mx-auto flex h-full w-full max-w-[430px] flex-col overflow-y-auto pb-[max(28px,calc(env(safe-area-inset-bottom)+16px))]"
+        style={{ '--u': DECK_UNIT } as React.CSSProperties}>
         <div className="flex items-center px-[16px] pt-[max(16px,env(safe-area-inset-top))]">
           <BackPill onClick={onClose} label="Back to the gallery" />
         </div>
 
-        <div className="relative mx-auto mt-[60px] h-[374px] w-[334px] shrink-0 [@media(max-height:800px)]:mt-[28px]">
+        <div
+          className="relative mx-auto mt-[16px] shrink-0"
+          style={{ width: u(334), height: u(426) }}>
           {behind.map(({ neighbour, pose }, layer) => (
             <RollPrint
               key={`behind-${layer}`}
@@ -194,10 +218,11 @@ export default function PhotoPreview({
               blur={pose.blur}
               stamp={neighbour.stamp}
               shooter={neighbour.shooter}
-              className="absolute w-[296px]"
+              className="absolute"
               style={{
-                left: pose.left,
-                top: pose.top,
+                width: u(296),
+                left: u(pose.left),
+                top: u(pose.top),
                 transform: `rotate(${pose.rotate}deg)`,
               }}
             />
@@ -220,7 +245,8 @@ export default function PhotoPreview({
           <AnimatePresence>
             {showSwipeCue && (
               <motion.span
-                className="pointer-events-none absolute left-[167px] top-[219px] block w-[107px]"
+                className="pointer-events-none absolute block"
+                style={{ left: u(167), top: u(250), width: u(107) }}
                 animate={reduce ? undefined : { x: [0, -30, 0] }}
                 exit={{ opacity: 0, transition: { duration: 0.3 } }}
                 transition={
@@ -266,33 +292,36 @@ export default function PhotoPreview({
           </AnimatePresence>
         </div>
 
-        <div className="mt-[27px] flex justify-center">
-          <Cta onClick={ask} className="w-[276px]">
+        {/* One row, the deck's width: the question is the screen's one
+            act and keeps its words; saving and sharing are a glyph each, so
+            the print above gets the height two more rows used to take. */}
+        <div
+          className="mx-auto mt-[14px] flex shrink-0 items-center gap-[10px]"
+          style={{ width: u(334) }}>
+          <Cta onClick={ask} className="min-w-0 flex-1">
             Who took this?
           </Cta>
-        </div>
-        <div className="mt-[12px] flex justify-center">
           <Cta
             tone="outline"
             onClick={download}
             disabled={downloading}
-            className="w-[276px]">
-            {downloading ? 'Saving…' : 'Download'}
+            label={downloading ? 'Saving…' : 'Download'}
+            className="h-[52px] w-[52px] shrink-0">
+            <Download aria-hidden size={22} strokeWidth={2} />
           </Cta>
-        </div>
-        {storyEventName !== undefined ? (
-          <div className="mt-[12px] flex justify-center">
+          {storyEventName !== undefined ? (
             <Cta
               tone="outline"
               onClick={() => {
                 onSwipeCueSeen();
                 setStoryOpen(true);
               }}
-              className="w-[276px]">
-              Share to IG Story
+              label="Share to IG Story"
+              className="h-[52px] w-[52px] shrink-0">
+              <Instagram aria-hidden size={22} strokeWidth={2} />
             </Cta>
-          </div>
-        ) : null}
+          ) : null}
+        </div>
       </div>
       <AnimatePresence>
         {storyOpen && storyEventName !== undefined ? (
@@ -377,10 +406,11 @@ function DeckCard({
 
   return (
     <motion.div
-      className="absolute w-[296px] cursor-grab active:cursor-grabbing"
+      className="absolute cursor-grab active:cursor-grabbing"
       style={{
-        left: DECK[2].left,
-        top: DECK[2].top,
+        width: u(296),
+        left: u(DECK[2].left),
+        top: u(DECK[2].top),
         x,
         rotate: DECK[2].rotate,
         // The deck owns horizontal; the browser keeps vertical.
