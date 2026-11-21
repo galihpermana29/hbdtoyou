@@ -436,10 +436,32 @@ export default function Cover({
   const animated = entrance && !draft && !reduce && !skipped;
   const stage: Stage = !animated ? 'still' : started ? 'playing' : 'waiting';
   const waiting = stage === 'waiting';
+  /**
+   * Whether the button has arrived. Until it has, it takes no touches, so a
+   * touch where it will be cuts the entrance short like a touch anywhere
+   * else. Once it has, a press on it is a press on it: cutting the entrance
+   * short remounts the Cover, and a mouse's click was lost in the remount,
+   * so the first click on the button did nothing (found 2026-11-22).
+   */
+  const [buttonHere, setButtonHere] = useState(false);
+  /** Whether the entrance has run its course, after which nothing skips. */
+  const [over, setOver] = useState(false);
   useEffect(() => {
     // One frame held at the start, so the first thing painted is bare paper.
     const id = requestAnimationFrame(() => setStarted(true));
-    return () => cancelAnimationFrame(id);
+    const button = window.setTimeout(
+      () => setButtonHere(true),
+      ENTRANCE.button * 1000
+    );
+    const end = window.setTimeout(
+      () => setOver(true),
+      (ENTRANCE.footer + 0.6) * 1000
+    );
+    return () => {
+      cancelAnimationFrame(id);
+      window.clearTimeout(button);
+      window.clearTimeout(end);
+    };
   }, []);
   const words = eventName.split(' ');
 
@@ -448,7 +470,16 @@ export default function Cover({
       // Remounting is what ends the entrance: every part comes back already
       // in its place.
       key={animated ? 'entrance' : 'still'}
-      onPointerDown={animated ? () => setSkipped(true) : undefined}
+      onPointerDown={
+        animated && !over
+          ? (event) => {
+              // A press on something that is there to be pressed is not a
+              // request to skip.
+              if ((event.target as HTMLElement).closest('button, a')) return;
+              setSkipped(true);
+            }
+          : undefined
+      }
       className="relative flex min-h-full flex-1 flex-col overflow-hidden"
       style={{ background: colour.paper }}>
       <div className="relative h-[455px] shrink-0">
@@ -564,6 +595,9 @@ export default function Cover({
             grows it. */}
         <motion.div
           className="mt-[11px]"
+          style={{
+            pointerEvents: stage === 'still' || buttonHere ? 'auto' : 'none',
+          }}
           initial={false}
           animate={
             waiting ? { opacity: 0, scale: 0.4 } : { opacity: 1, scale: 1 }
