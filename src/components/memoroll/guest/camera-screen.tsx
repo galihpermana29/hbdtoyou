@@ -28,10 +28,40 @@ import {
 import folderArt from '@/assets/memoroll/camera-gallery-folder.png';
 import HowPopup from './how-popup';
 
-/** The baked keeper: 960x1280, the film report's resolution contract. */
-const FRAME_W = 960;
-const FRAME_H = 1280;
-const JPEG_QUALITY = 0.78;
+/**
+ * The baked keeper's sizes, largest first. All 3:4, the viewfinder's ratio.
+ *
+ * A keeper is as large as the camera's own pixels allow and no larger
+ * (owner, 2026-11-22: on a phone whose stream is 1440x1920, the old fixed
+ * 960x1280 threw away more than half the detail already in hand, and the
+ * difference showed). The smallest is the film report's original contract
+ * and stays the floor: a camera that hands over less than that is enlarged
+ * to it, as it always was.
+ *
+ * The larger sizes are encoded a little harder. Side by side on a phone the
+ * two qualities could not be told apart, and the file is a fifth smaller,
+ * which matters on a venue's network.
+ */
+const KEEPERS = [
+  { width: 1440, height: 1920, quality: 0.7 },
+  { width: 1200, height: 1600, quality: 0.7 },
+  { width: 960, height: 1280, quality: 0.78 },
+] as const;
+const FLOOR = KEEPERS[KEEPERS.length - 1];
+
+/** The size the marks below were drawn for; every other size scales them. */
+const MARK_BASE_WIDTH = 960;
+
+/**
+ * The largest keeper a source can fill without being enlarged, under the
+ * viewfinder's cover crop. A source too small for any of them gets the floor.
+ */
+function keeperFor(sourceWidth: number, sourceHeight: number) {
+  return (
+    KEEPERS.find((k) => sourceWidth >= k.width && sourceHeight >= k.height) ??
+    FLOOR
+  );
+}
 
 /**
  * The camera (guest-09/10): the shots counter over the viewfinder, the film
@@ -40,7 +70,7 @@ const JPEG_QUALITY = 0.78;
  * The chrome is the 2026-08-24 design; the stack under it is the one that
  * already works (ADR 0007: this screen was re-skinned, not re-engineered).
  * Every Shot is baked at capture through src/lib/memoroll-film.ts into a
- * 960x1280 JPEG blob - film, date stamp and watermark burned into the pixels,
+ * 3:4 JPEG blob, as large as the camera's stream allows (see KEEPERS) - film, date stamp and watermark burned into the pixels,
  * no negative kept (ADR 0006). The viewfinder wears an ordinary CSS
  * approximation of the look; the baked pixels are the truth.
  *
@@ -134,11 +164,23 @@ export default function CameraScreen({
   useEffect(() => {
     // The looks' grain is made once and kept; make it while the guest is
     // still framing, not on the first press of the shutter.
-    const id = window.setTimeout(
-      () => warmMemoRollGrain(FRAME_W, FRAME_H),
-      600
-    );
-    return () => window.clearTimeout(id);
+    // The grain is made for one size, the keeper's, and that is only known
+    // once the stream has said how many pixels it carries. Before then the
+    // floor is the best guess, and it is what the demo's fallback bakes at.
+    const video = videoRef.current;
+    const warm = () => {
+      const keeper =
+        video && video.videoWidth > 0
+          ? keeperFor(video.videoWidth, video.videoHeight)
+          : FLOOR;
+      warmMemoRollGrain(keeper.width, keeper.height);
+    };
+    const id = window.setTimeout(warm, 600);
+    video?.addEventListener('loadedmetadata', warm);
+    return () => {
+      window.clearTimeout(id);
+      video?.removeEventListener('loadedmetadata', warm);
+    };
   }, []);
 
   useEffect(() => {
@@ -229,20 +271,24 @@ export default function CameraScreen({
     }
   };
 
-  /** Draw a source onto the 960x1280 stage with the viewfinder's cover crop. */
+  /**
+   * Draw a source onto a stage the size of the keeper it can fill, with the
+   * viewfinder's cover crop.
+   */
   const stageFrom = (
     source: CanvasImageSource,
     sw: number,
     sh: number
   ): HTMLCanvasElement => {
     const canvas = document.createElement('canvas');
-    canvas.width = FRAME_W;
-    canvas.height = FRAME_H;
+    const { width, height } = keeperFor(sw, sh);
+    canvas.width = width;
+    canvas.height = height;
     const ctx = canvas.getContext('2d')!;
-    const scale = Math.max(FRAME_W / sw, FRAME_H / sh);
+    const scale = Math.max(width / sw, height / sh);
     const dw = sw * scale;
     const dh = sh * scale;
-    ctx.drawImage(source, (FRAME_W - dw) / 2, (FRAME_H - dh) / 2, dw, dh);
+    ctx.drawImage(source, (width - dw) / 2, (height - dh) / 2, dw, dh);
     return canvas;
   };
 
@@ -250,6 +296,7 @@ export default function CameraScreen({
   const takeFrame = useCallback((): Promise<HTMLCanvasElement> => {
     const gradientStage = () => {
       const canvas = document.createElement('canvas');
+      const { width: FRAME_W, height: FRAME_H } = FLOOR;
       canvas.width = FRAME_W;
       canvas.height = FRAME_H;
       const ctx = canvas.getContext('2d')!;
@@ -814,6 +861,15 @@ async function bakeShot(
   stampDate: string,
   stampFonts: { hand: string; ui: string }
 ): Promise<Blob> {
+  // The stage is already a keeper's size (stageFrom); the keeper it is says
+  // how hard to encode it.
+  const FRAME_W = stage.width;
+  const FRAME_H = stage.height;
+  const quality =
+    KEEPERS.find((k) => k.width === FRAME_W)?.quality ?? FLOOR.quality;
+  // The marks were drawn for the floor. On a larger keeper they grow with
+  // it, so they sit in the same place and read the same size on a print.
+  const k = FRAME_W / MARK_BASE_WIDTH;
   const { canvas } = bakeMemoRollFilm(stage, FRAME_W, FRAME_H, film);
   const ctx = canvas.getContext('2d', { willReadFrequently: true })!;
 
@@ -838,24 +894,24 @@ async function bakeShot(
   if (filmStamps(film)) {
     // The stamp verbatim, the way the redesign writes it: `5 3 ‘26` - no
     // slashes, no clock, the curly quote included (mock.ts PRINT_STAMP).
-    ctx.font = `600 34px ${stampFonts.ui}, sans-serif`;
+    ctx.font = `600 ${34 * k}px ${stampFonts.ui}, sans-serif`;
     ctx.textAlign = 'left';
     ctx.shadowColor = 'rgba(0, 0, 0, 0.45)';
-    ctx.shadowBlur = 6;
+    ctx.shadowBlur = 6 * k;
     // The glow a real date-back burns: the orange itself, bleeding a little.
     ctx.fillStyle = 'rgba(241, 126, 3, 0.35)';
-    ctx.fillText(stampDate, 33, FRAME_H - 119);
+    ctx.fillText(stampDate, 33 * k, FRAME_H - 119 * k);
     ctx.shadowBlur = 0;
     ctx.fillStyle = '#f17e03';
-    ctx.fillText(stampDate, 32, FRAME_H - 120);
+    ctx.fillText(stampDate, 32 * k, FRAME_H - 120 * k);
   }
 
-  ctx.font = `500 20px ${stampFonts.ui}, sans-serif`;
+  ctx.font = `500 ${20 * k}px ${stampFonts.ui}, sans-serif`;
   ctx.shadowColor = 'rgba(0, 0, 0, 0.4)';
-  ctx.shadowBlur = 4;
+  ctx.shadowBlur = 4 * k;
   ctx.fillStyle = 'rgba(255, 255, 255, 0.6)';
   ctx.textAlign = 'left';
-  ctx.fillText('memoify.live', 32, FRAME_H - 84);
+  ctx.fillText('memoify.live', 32 * k, FRAME_H - 84 * k);
   ctx.shadowBlur = 0;
 
   return new Promise<Blob>((resolve, reject) => {
@@ -863,7 +919,7 @@ async function bakeShot(
       (blob) =>
         blob ? resolve(blob) : reject(new Error('JPEG encode failed')),
       'image/jpeg',
-      JPEG_QUALITY
+      quality
     );
   });
 }
