@@ -17,14 +17,31 @@ import { colour, type } from '../ui/tokens';
  * rendered object with a lens and a shutter and not something to rebuild in
  * CSS.
  *
+ * The viewfinder shows the event's own Cover photo when it has one (owner,
+ * 2026-11-22): the artwork carries a stock party in its window, and a guest
+ * waiting outside a wedding should be looking at that wedding. The photo is
+ * laid over the artwork's window, and the flash pill, which the artwork draws
+ * on top of its stock photo, is cut from the artwork again and laid over
+ * that. An event with no Cover photo keeps the artwork as it is.
+ *
  * The clock is not computed here. This component is handed what remains and
  * draws it, so the demo can hand it a fixed number and the product can hand it
  * a ticking one without the screen knowing which it is (ADR 0007).
  */
+/**
+ * Where things are in the camera artwork, as shares of its 706x539, measured
+ * off the PNG: the viewfinder's window, and the flash pill inside it.
+ */
+const WINDOW = { left: 0, top: 12.8, width: 63.35, height: 74.6 };
+const PILL = { left: 56.75, top: 15.65, width: 5.0, height: 12.7 };
+
 export default function CountdownScreen({
   remaining,
+  photo,
 }: {
   remaining: Remaining;
+  /** The event's Cover photo, shown in the camera's viewfinder. */
+  photo?: string | null;
 }) {
   return (
     <div
@@ -43,11 +60,42 @@ export default function CountdownScreen({
       <div
         aria-hidden
         className="pointer-events-none absolute inset-x-0 top-[38px] select-none">
-        <img
-          src={camera.src}
-          alt=""
-          className="absolute -left-[4%] top-0 w-[98%]"
-        />
+        <div className="absolute -left-[4%] top-0 w-[98%]">
+          <img src={camera.src} alt="" className="block w-full" />
+          {photo ? (
+            <>
+              <img
+                src={photo}
+                alt=""
+                className="absolute object-cover"
+                style={{
+                  left: `${WINDOW.left}%`,
+                  top: `${WINDOW.top}%`,
+                  width: `${WINDOW.width}%`,
+                  height: `${WINDOW.height}%`,
+                  // The window's right corners are rounded; its left side
+                  // runs off the artwork's edge.
+                  borderRadius: '0 4.2% 4.2% 0 / 0 4.7% 4.7% 0',
+                }}
+              />
+              {/* The artwork again, shown only through the pill's own
+                  outline, so the pill sits on the new photo as it sat on
+                  the old one. */}
+              <div
+                className="absolute rounded-full"
+                style={{
+                  left: `${PILL.left}%`,
+                  top: `${PILL.top}%`,
+                  width: `${PILL.width}%`,
+                  height: `${PILL.height}%`,
+                  backgroundImage: `url(${camera.src})`,
+                  backgroundSize: `${10000 / PILL.width}% ${10000 / PILL.height}%`,
+                  backgroundPosition: `${(PILL.left / (100 - PILL.width)) * 100}% ${(PILL.top / (100 - PILL.height)) * 100}%`,
+                }}
+              />
+            </>
+          ) : null}
+        </div>
         <img
           src={shotsCounter.src}
           alt=""

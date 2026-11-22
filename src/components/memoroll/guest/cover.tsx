@@ -79,6 +79,19 @@ const EASE_OUT = [0.22, 1, 0.36, 1] as const;
 const NAME_PEN =
   'linear-gradient(90deg, #000 calc(var(--pen) - 45%), transparent var(--pen))';
 
+/**
+ * How a strip of tape sits on a corner of the taped print: its middle on the
+ * corner itself, lying across it at 45 degrees.
+ *
+ * The artwork is already a strip drawn at an angle (about 33.5 degrees,
+ * rising to the right). The frame's -36 was that angle, and it was applied
+ * on top of the drawing as well, which stood the tape nearly upright beside
+ * the corner instead of across it (owner, 2026-11-22). Only the difference
+ * to 45 is turned here, and the strip is hung by its middle, so the two
+ * corners are the print's own two corners and nothing else to keep in step.
+ */
+const TAPE = { x: '-50%', y: '-50%', rotate: -11.5 } as const;
+
 /** The hero's height, which the collage's flight is measured against. */
 const HERO_HEIGHT = 455;
 
@@ -324,8 +337,8 @@ function Hero({
         <motion.img
           src={tape.src}
           alt=""
-          className="absolute left-[12.4%] top-[18%] w-[24.7%]"
-          style={{ rotate: -36 }}
+          className="absolute w-[24.7%]"
+          style={{ ...TAPE, left: '20.2%', top: '10.7%' }}
           initial={false}
           animate={
             waiting ? { opacity: 0, scale: 1.4 } : { opacity: 1, scale: 1 }
@@ -339,8 +352,8 @@ function Hero({
         <motion.img
           src={tape.src}
           alt=""
-          className="absolute left-[64.3%] top-[86.8%] w-[24.7%]"
-          style={{ rotate: -36 }}
+          className="absolute w-[24.7%]"
+          style={{ ...TAPE, left: '84.6%', top: '86.4%' }}
           initial={false}
           animate={
             waiting ? { opacity: 0, scale: 1.4 } : { opacity: 1, scale: 1 }

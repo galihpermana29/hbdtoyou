@@ -1,5 +1,6 @@
 'use client';
 
+import cameraDoodle from '@/assets/memoroll/cover-camera-doodle.png';
 import galleryCamera from '@/assets/memoroll/gallery-camera.svg';
 import { AnimatePresence, motion, useReducedMotion } from 'framer-motion';
 import { useState } from 'react';
@@ -119,6 +120,59 @@ function TabPill({
   );
 }
 
+/**
+ * A tab with nothing in it (owner, 2026-11-22: it was two pills over bare
+ * paper, which reads as a page that failed to load). It says what the tab is
+ * for and why it is empty, and where the guest can still shoot it sends them
+ * to the camera, because the only thing that fills this page is a shot.
+ *
+ * The words depend on two things: whose prints the tab holds, and whether
+ * this guest can still take one. After the event nothing can be added, so
+ * there is nothing to offer, only something to say.
+ */
+function EmptyRoll({
+  tab,
+  onShoot,
+}: {
+  tab: GalleryTab;
+  onShoot?: () => void;
+}) {
+  const everyone = tab === 'all';
+  const title = everyone ? 'No shots yet' : 'Your roll is empty';
+  const body = onShoot
+    ? everyone
+      ? 'Be the first. Every shot taken here lands on this page.'
+      : 'Nothing on it yet. Your shots land here as you take them.'
+    : everyone
+      ? 'Nobody has taken a shot at this one.'
+      : 'You have not taken a shot at this one.';
+  return (
+    <div className="flex flex-col items-center px-[24px] pb-[24px] pt-[40px] text-center">
+      <img
+        src={cameraDoodle.src}
+        alt=""
+        aria-hidden
+        className="w-[96px] -rotate-[8deg] select-none opacity-90"
+      />
+      <h3
+        className="mt-[20px] text-[20px] font-medium leading-[130%] tracking-[-0.02em]"
+        style={{ color: colour.ink, fontFamily: 'var(--font-mr-body)' }}>
+        {title}
+      </h3>
+      <p
+        className="mt-[6px] max-w-[250px] text-[14px] leading-[150%] tracking-[-0.011em]"
+        style={{ color: colour.muted, fontFamily: 'var(--font-mr-body)' }}>
+        {body}
+      </p>
+      {onShoot ? (
+        <Cta onClick={onShoot} className="mt-[24px] w-[210px]">
+          {everyone ? 'Take the first shot' : 'Take your first shot'}
+        </Cta>
+      ) : null}
+    </div>
+  );
+}
+
 export default function GalleryScreen({
   eventName,
   photoCount,
@@ -133,6 +187,7 @@ export default function GalleryScreen({
   onTabChange,
   onDevelop,
   onBack,
+  onShoot,
   onLogout,
   showSwipeCue,
   onSwipeCueSeen,
@@ -169,6 +224,12 @@ export default function GalleryScreen({
   onTabChange: (tab: GalleryTab) => void;
   onDevelop: () => void;
   onBack: () => void;
+  /**
+   * Go and take a shot, when this guest still can: the event is on, they
+   * are in, and their Roll has shots left. An empty tab offers it. Absent,
+   * an empty tab only says that it is empty.
+   */
+  onShoot?: () => void;
   /**
    * Sign this guest out, when the surface offers it (owner asked,
    * 2026-08-30 - shared phones at a party change hands). Absent - the demo -
@@ -365,6 +426,9 @@ export default function GalleryScreen({
             }}
             exit={{ opacity: 0, transition: { duration: 0.1, ease: EASE_OUT } }}
             className="mt-[24px] flex flex-col gap-[12px]">
+            {groups.every((group) => group.photos.length === 0) ? (
+              <EmptyRoll tab={tab} onShoot={onShoot} />
+            ) : null}
             {groups.map((group) => (
               <section key={group.label} className="flex flex-col gap-[8px]">
                 <h3

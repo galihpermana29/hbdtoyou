@@ -451,7 +451,10 @@ export default function MemorollDemo() {
               />
             )}
             {screen === 'countdown' && (
-              <CountdownScreen remaining={remainingUntil(opensTarget, now)} />
+              <CountdownScreen
+                remaining={remainingUntil(opensTarget, now)}
+                photo={(event?.photos ?? SAMPLE_SOURCES)[0] ?? null}
+              />
             )}
             {screen === 'username' && (
               <UsernameScreen
@@ -511,6 +514,11 @@ export default function MemorollDemo() {
                 }}
                 onBack={() =>
                   setScreen(phase === 'during' ? 'camera' : 'cover')
+                }
+                onShoot={
+                  phase === 'during' && ownRemaining > 0
+                    ? () => setScreen('camera')
+                    : undefined
                 }
                 showSwipeCue={!swipeCueSeen}
                 onSwipeCueSeen={() => setSwipeCueSeen(true)}
