@@ -1,7 +1,7 @@
 'use client';
 
-import cameraDoodle from '@/assets/memoroll/cover-camera-doodle.png';
 import galleryCamera from '@/assets/memoroll/gallery-camera.svg';
+import rollCamera from '@/assets/memoroll/wordmark-camera.svg';
 import { AnimatePresence, motion, useReducedMotion } from 'framer-motion';
 import { useState } from 'react';
 import BackPill from '../ui/back-pill';
@@ -148,11 +148,15 @@ function EmptyRoll({
       : 'You have not taken a shot at this one.';
   return (
     <div className="flex flex-col items-center px-[24px] pb-[24px] pt-[40px] text-center">
+      {/* The wordmark's own camera, whole. The Cover's doodle was tried
+          first and reads as broken here: it is drawn to hang off the edge
+          of the screen, so on its own it is a camera with a side cut off
+          (owner, 2026-11-22). */}
       <img
-        src={cameraDoodle.src}
+        src={rollCamera.src}
         alt=""
         aria-hidden
-        className="w-[96px] -rotate-[8deg] select-none opacity-90"
+        className="w-[88px] -rotate-[8deg] select-none"
       />
       <h3
         className="mt-[20px] text-[20px] font-medium leading-[130%] tracking-[-0.02em]"
