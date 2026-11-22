@@ -93,16 +93,17 @@ export default function StorySheet({
   const chosenKey = chosen.map((photo) => photo.id).join(',');
   const layout = filmCountFor(chosen.length);
   const keyOf = (slot: number) => `${layout}:${slot}:${chosen[slot]?.id}`;
-  const framingsNow = chosen.map(
-    (_, slot) => framings[keyOf(slot)] ?? CENTRED
-  );
+  const framingsNow = chosen.map((_, slot) => framings[keyOf(slot)] ?? CENTRED);
 
   /** A print's pixels, same-origin: a stored print's host sends no CORS
    *  header, and a canvas it tainted could not be read back. */
   const pixelsOf = useCallback(async (photo: GalleryPhoto) => {
     const cached = bitmaps.current.get(photo.id);
     if (cached) return cached;
-    const local = /^(blob|data):/.test(photo.src);
+    // Already ours to read: a local blob, or a file this site serves
+    // itself (the demo's sample prints). The proxy is for the print
+    // host alone and refuses anything else.
+    const local = /^(blob:|data:|\/(?!\/))/.test(photo.src);
     const response = await fetch(
       local
         ? photo.src
@@ -312,7 +313,16 @@ export default function StorySheet({
       event.preventDefault();
       const factor = Math.exp(-event.deltaY * 0.0015);
       update(slot, (f) =>
-        moveFraming(images[slot], FILM_SLOTS[layout][slot], f, 0, 0, factor, x, y)
+        moveFraming(
+          images[slot],
+          FILM_SLOTS[layout][slot],
+          f,
+          0,
+          0,
+          factor,
+          x,
+          y
+        )
       );
     };
     canvas.addEventListener('wheel', onWheel, { passive: false });

@@ -75,6 +75,15 @@ const ENTRANCE = {
 } as const;
 const EASE_OUT = [0.22, 1, 0.36, 1] as const;
 
+/**
+ * Whether the entrance has been seen on this page load. It is an entrance:
+ * a guest who comes back to the Cover from the gallery, or whose event
+ * changes phase under them, has already arrived, and replaying it left them
+ * looking at bare paper for five seconds each time (found 2026-11-22).
+ * Only ever set in the browser, after a Cover has mounted.
+ */
+let entranceSeen = false;
+
 /** Ink up to where the pen is, fading out over the stretch just behind it. */
 const NAME_PEN =
   'linear-gradient(90deg, #000 calc(var(--pen) - 45%), transparent var(--pen))';
@@ -446,7 +455,9 @@ export default function Cover({
    */
   const [skipped, setSkipped] = useState(false);
   const [started, setStarted] = useState(false);
-  const animated = entrance && !draft && !reduce && !skipped;
+  /** Decided once, as this Cover mounts: is this the first one this visit? */
+  const [first] = useState(() => !entranceSeen);
+  const animated = entrance && first && !draft && !reduce && !skipped;
   const stage: Stage = !animated ? 'still' : started ? 'playing' : 'waiting';
   const waiting = stage === 'waiting';
   /**
@@ -460,6 +471,7 @@ export default function Cover({
   /** Whether the entrance has run its course, after which nothing skips. */
   const [over, setOver] = useState(false);
   useEffect(() => {
+    if (entrance && !draft) entranceSeen = true;
     // One frame held at the start, so the first thing painted is bare paper.
     const id = requestAnimationFrame(() => setStarted(true));
     const button = window.setTimeout(

@@ -150,7 +150,10 @@ export default function PhotoPreview({
       // A print still uploading is a local blob and is read as it is; a
       // stored one goes through our own origin, because its host sends no
       // CORS header and a direct fetch is refused (see /api/memoroll/photo).
-      const local = /^(blob|data):/.test(photo.src);
+      // Already ours to read: a local blob, or a file this site serves
+      // itself (the demo's sample prints). The proxy is for the print
+      // host alone and refuses anything else.
+      const local = /^(blob:|data:|\/(?!\/))/.test(photo.src);
       const response = await fetch(
         local
           ? photo.src
