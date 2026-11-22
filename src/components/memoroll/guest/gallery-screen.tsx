@@ -3,7 +3,7 @@
 import galleryCamera from '@/assets/memoroll/gallery-camera.svg';
 import rollCamera from '@/assets/memoroll/wordmark-camera.svg';
 import { AnimatePresence, motion, useReducedMotion } from 'framer-motion';
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import BackPill from '../ui/back-pill';
 import { FlipNumber, type Remaining } from '../ui/flip-counter';
 import HeaderRule from '../ui/header-rule';
@@ -146,36 +146,154 @@ function EmptyRoll({
     : everyone
       ? 'Nobody has taken a shot at this one.'
       : 'You have not taken a shot at this one.';
+  const reduce = useReducedMotion();
+  /**
+   * The little scene plays from a state this component sets itself, not from
+   * a mount animation: the gallery draws its tabs inside a presence that
+   * skips its children's first animation, and an empty roll is most often
+   * the first thing a guest sees here.
+   */
+  const [shown, setShown] = useState(false);
+  useEffect(() => {
+    const id = requestAnimationFrame(() => setShown(true));
+    return () => cancelAnimationFrame(id);
+  }, []);
+  const still = Boolean(reduce);
+  const on = shown || still;
+  /** Something that comes up into place, a beat after the one before it. */
+  const rise = (delay: number) => ({
+    initial: false as const,
+    animate: on ? { opacity: 1, y: 0 } : { opacity: 0, y: 10 },
+    transition: still
+      ? { duration: 0 }
+      : { delay, duration: 0.45, ease: EASE_OUT },
+  });
+
   return (
-    <div className="flex flex-col items-center px-[24px] pb-[24px] pt-[40px] text-center">
-      {/* The wordmark's own camera, whole. The Cover's doodle was tried
-          first and reads as broken here: it is drawn to hang off the edge
-          of the screen, so on its own it is a camera with a side cut off
-          (owner, 2026-11-22). */}
-      <img
-        src={rollCamera.src}
-        alt=""
-        aria-hidden
-        className="w-[88px] -rotate-[8deg] select-none"
-      />
-      <h3
-        className="mt-[20px] text-[20px] font-medium leading-[130%] tracking-[-0.02em]"
+    <div className="flex flex-col items-center px-[24px] pb-[24px] pt-[32px] text-center">
+      {/* A roll with nothing on it yet: three blank prints dealt out in a
+          fan, the camera set down on top of them, and every few seconds its
+          flash goes off - the camera is ready, the prints are waiting. The
+          camera breathes a little so the page is not a still picture; none
+          of it loops fast enough to pull the eye off the button. */}
+      <div aria-hidden className="relative h-[124px] w-[190px] select-none">
+        {BLANK_PRINTS.map((print, i) => (
+          <motion.span
+            key={i}
+            className="absolute left-1/2 top-[18px] block h-[78px] w-[60px] bg-white p-[4px]"
+            style={{
+              marginLeft: -30,
+              boxShadow:
+                '0 1px 2px rgba(0,0,0,0.10), 0 6px 14px rgba(0,0,0,0.08)',
+            }}
+            initial={false}
+            animate={
+              on
+                ? { x: print.x, y: print.y, rotate: print.rotate, opacity: 1 }
+                : { x: 0, y: 14, rotate: 0, opacity: 0 }
+            }
+            transition={
+              still
+                ? { duration: 0 }
+                : {
+                    delay: 0.08 + i * 0.09,
+                    type: 'spring',
+                    duration: 0.7,
+                    bounce: 0.28,
+                  }
+            }>
+            {/* Undeveloped: the paper's own grey, no picture. */}
+            <span
+              className="block h-full w-full"
+              style={{ background: '#e9e5df' }}
+            />
+          </motion.span>
+        ))}
+
+        <motion.div
+          className="absolute left-1/2 top-[38px] w-[92px]"
+          style={{ marginLeft: -46 }}
+          initial={false}
+          animate={
+            on
+              ? { scale: 1, opacity: 1, y: 0 }
+              : { scale: 0.5, opacity: 0, y: -18 }
+          }
+          transition={
+            still
+              ? { duration: 0 }
+              : { delay: 0.38, type: 'spring', duration: 0.6, bounce: 0.4 }
+          }>
+          <motion.img
+            src={rollCamera.src}
+            alt=""
+            className="block w-full"
+            style={{ rotate: -8 }}
+            animate={
+              still ? undefined : { y: [0, -4, 0], rotate: [-8, -5, -8] }
+            }
+            transition={{
+              delay: 1,
+              duration: 3.6,
+              ease: 'easeInOut',
+              repeat: Infinity,
+            }}
+          />
+          {/* The flash: a four-pointed glint off the camera's shoulder. */}
+          {still ? null : (
+            <motion.svg
+              viewBox="0 0 24 24"
+              className="absolute -right-[10px] -top-[14px] h-[26px] w-[26px]"
+              animate={{
+                scale: [0, 1.15, 0],
+                opacity: [0, 1, 0],
+                rotate: [0, 20, 40],
+              }}
+              transition={{
+                delay: 1.2,
+                duration: 0.7,
+                ease: 'easeOut',
+                repeat: Infinity,
+                repeatDelay: 2.9,
+              }}>
+              <path
+                d="M12 0C12.9 6.6 16.5 10.2 24 12C16.5 13.8 12.9 17.4 12 24C11.1 17.4 7.5 13.8 0 12C7.5 10.2 11.1 6.6 12 0Z"
+                fill={colour.stamp}
+              />
+            </motion.svg>
+          )}
+        </motion.div>
+      </div>
+
+      <motion.h3
+        {...rise(0.5)}
+        className="mt-[18px] text-[20px] font-medium leading-[130%] tracking-[-0.02em]"
         style={{ color: colour.ink, fontFamily: 'var(--font-mr-body)' }}>
         {title}
-      </h3>
-      <p
+      </motion.h3>
+      <motion.p
+        {...rise(0.58)}
         className="mt-[6px] max-w-[250px] text-[14px] leading-[150%] tracking-[-0.011em]"
         style={{ color: colour.muted, fontFamily: 'var(--font-mr-body)' }}>
         {body}
-      </p>
+      </motion.p>
       {onShoot ? (
-        <Cta onClick={onShoot} className="mt-[24px] w-[210px]">
-          {everyone ? 'Take the first shot' : 'Take your first shot'}
-        </Cta>
+        <motion.div {...rise(0.68)} className="mt-[24px]">
+          <Cta onClick={onShoot} className="w-[210px]">
+            {everyone ? 'Take the first shot' : 'Take your first shot'}
+          </Cta>
+        </motion.div>
       ) : null}
     </div>
   );
 }
+
+/** Where the three blank prints land, left to right, behind the camera. */
+const BLANK_PRINTS = [
+  { x: -52, y: 6, rotate: -16 },
+  { x: 0, y: -12, rotate: 3 },
+  { x: 52, y: 6, rotate: 15 },
+] as const;
 
 export default function GalleryScreen({
   eventName,
