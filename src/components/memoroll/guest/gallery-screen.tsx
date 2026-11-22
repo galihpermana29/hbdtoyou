@@ -1,8 +1,9 @@
 'use client';
 
 import galleryCamera from '@/assets/memoroll/gallery-camera.svg';
+import rollCamera from '@/assets/memoroll/wordmark-camera.svg';
 import { AnimatePresence, motion, useReducedMotion } from 'framer-motion';
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import BackPill from '../ui/back-pill';
 import { FlipNumber, type Remaining } from '../ui/flip-counter';
 import HeaderRule from '../ui/header-rule';
@@ -119,6 +120,181 @@ function TabPill({
   );
 }
 
+/**
+ * A tab with nothing in it (owner, 2026-11-22: it was two pills over bare
+ * paper, which reads as a page that failed to load). It says what the tab is
+ * for and why it is empty, and where the guest can still shoot it sends them
+ * to the camera, because the only thing that fills this page is a shot.
+ *
+ * The words depend on two things: whose prints the tab holds, and whether
+ * this guest can still take one. After the event nothing can be added, so
+ * there is nothing to offer, only something to say.
+ */
+function EmptyRoll({
+  tab,
+  onShoot,
+}: {
+  tab: GalleryTab;
+  onShoot?: () => void;
+}) {
+  const everyone = tab === 'all';
+  const title = everyone ? 'No shots yet' : 'Your roll is empty';
+  const body = onShoot
+    ? everyone
+      ? 'Be the first. Every shot taken here lands on this page.'
+      : 'Nothing on it yet. Your shots land here as you take them.'
+    : everyone
+      ? 'Nobody has taken a shot at this one.'
+      : 'You have not taken a shot at this one.';
+  const reduce = useReducedMotion();
+  /**
+   * The little scene plays from a state this component sets itself, not from
+   * a mount animation: the gallery draws its tabs inside a presence that
+   * skips its children's first animation, and an empty roll is most often
+   * the first thing a guest sees here.
+   */
+  const [shown, setShown] = useState(false);
+  useEffect(() => {
+    const id = requestAnimationFrame(() => setShown(true));
+    return () => cancelAnimationFrame(id);
+  }, []);
+  const still = Boolean(reduce);
+  const on = shown || still;
+  /** Something that comes up into place, a beat after the one before it. */
+  const rise = (delay: number) => ({
+    initial: false as const,
+    animate: on ? { opacity: 1, y: 0 } : { opacity: 0, y: 10 },
+    transition: still
+      ? { duration: 0 }
+      : { delay, duration: 0.45, ease: EASE_OUT },
+  });
+
+  return (
+    <div className="flex flex-col items-center px-[24px] pb-[24px] pt-[32px] text-center">
+      {/* A roll with nothing on it yet: three blank prints dealt out in a
+          fan, the camera set down on top of them, and every few seconds its
+          flash goes off - the camera is ready, the prints are waiting. The
+          camera breathes a little so the page is not a still picture; none
+          of it loops fast enough to pull the eye off the button. */}
+      <div aria-hidden className="relative h-[124px] w-[190px] select-none">
+        {BLANK_PRINTS.map((print, i) => (
+          <motion.span
+            key={i}
+            className="absolute left-1/2 top-[18px] block h-[78px] w-[60px] bg-white p-[4px]"
+            style={{
+              marginLeft: -30,
+              boxShadow:
+                '0 1px 2px rgba(0,0,0,0.10), 0 6px 14px rgba(0,0,0,0.08)',
+            }}
+            initial={false}
+            animate={
+              on
+                ? { x: print.x, y: print.y, rotate: print.rotate, opacity: 1 }
+                : { x: 0, y: 14, rotate: 0, opacity: 0 }
+            }
+            transition={
+              still
+                ? { duration: 0 }
+                : {
+                    delay: 0.08 + i * 0.09,
+                    type: 'spring',
+                    duration: 0.7,
+                    bounce: 0.28,
+                  }
+            }>
+            {/* Undeveloped: the paper's own grey, no picture. */}
+            <span
+              className="block h-full w-full"
+              style={{ background: '#e9e5df' }}
+            />
+          </motion.span>
+        ))}
+
+        <motion.div
+          className="absolute left-1/2 top-[38px] w-[92px]"
+          style={{ marginLeft: -46 }}
+          initial={false}
+          animate={
+            on
+              ? { scale: 1, opacity: 1, y: 0 }
+              : { scale: 0.5, opacity: 0, y: -18 }
+          }
+          transition={
+            still
+              ? { duration: 0 }
+              : { delay: 0.38, type: 'spring', duration: 0.6, bounce: 0.4 }
+          }>
+          <motion.img
+            src={rollCamera.src}
+            alt=""
+            className="block w-full"
+            style={{ rotate: -8 }}
+            animate={
+              still ? undefined : { y: [0, -4, 0], rotate: [-8, -5, -8] }
+            }
+            transition={{
+              delay: 1,
+              duration: 3.6,
+              ease: 'easeInOut',
+              repeat: Infinity,
+            }}
+          />
+          {/* The flash: a four-pointed glint off the camera's shoulder. */}
+          {still ? null : (
+            <motion.svg
+              viewBox="0 0 24 24"
+              className="absolute -right-[10px] -top-[14px] h-[26px] w-[26px]"
+              animate={{
+                scale: [0, 1.15, 0],
+                opacity: [0, 1, 0],
+                rotate: [0, 20, 40],
+              }}
+              transition={{
+                delay: 1.2,
+                duration: 0.7,
+                ease: 'easeOut',
+                repeat: Infinity,
+                repeatDelay: 2.9,
+              }}>
+              <path
+                d="M12 0C12.9 6.6 16.5 10.2 24 12C16.5 13.8 12.9 17.4 12 24C11.1 17.4 7.5 13.8 0 12C7.5 10.2 11.1 6.6 12 0Z"
+                fill={colour.stamp}
+              />
+            </motion.svg>
+          )}
+        </motion.div>
+      </div>
+
+      <motion.h3
+        {...rise(0.5)}
+        className="mt-[18px] text-[20px] font-medium leading-[130%] tracking-[-0.02em]"
+        style={{ color: colour.ink, fontFamily: 'var(--font-mr-body)' }}>
+        {title}
+      </motion.h3>
+      <motion.p
+        {...rise(0.58)}
+        className="mt-[6px] max-w-[250px] text-[14px] leading-[150%] tracking-[-0.011em]"
+        style={{ color: colour.muted, fontFamily: 'var(--font-mr-body)' }}>
+        {body}
+      </motion.p>
+      {onShoot ? (
+        <motion.div {...rise(0.68)} className="mt-[24px]">
+          <Cta onClick={onShoot} className="w-[210px]">
+            {everyone ? 'Take the first shot' : 'Take your first shot'}
+          </Cta>
+        </motion.div>
+      ) : null}
+    </div>
+  );
+}
+
+/** Where the three blank prints land, left to right, behind the camera. */
+const BLANK_PRINTS = [
+  { x: -52, y: 6, rotate: -16 },
+  { x: 0, y: -12, rotate: 3 },
+  { x: 52, y: 6, rotate: 15 },
+] as const;
+
 export default function GalleryScreen({
   eventName,
   photoCount,
@@ -133,6 +309,7 @@ export default function GalleryScreen({
   onTabChange,
   onDevelop,
   onBack,
+  onShoot,
   onLogout,
   showSwipeCue,
   onSwipeCueSeen,
@@ -169,6 +346,12 @@ export default function GalleryScreen({
   onTabChange: (tab: GalleryTab) => void;
   onDevelop: () => void;
   onBack: () => void;
+  /**
+   * Go and take a shot, when this guest still can: the event is on, they
+   * are in, and their Roll has shots left. An empty tab offers it. Absent,
+   * an empty tab only says that it is empty.
+   */
+  onShoot?: () => void;
   /**
    * Sign this guest out, when the surface offers it (owner asked,
    * 2026-08-30 - shared phones at a party change hands). Absent - the demo -
@@ -354,75 +537,83 @@ export default function GalleryScreen({
           </TabPill>
         </div>
 
-        <AnimatePresence mode="wait" initial={false}>
-          <motion.div
-            key={tab}
-            initial={{ opacity: 0 }}
-            animate={{
-              opacity: 1,
-              // Switched tens of times a visit: short, ease-out.
-              transition: { duration: reduce ? 0.12 : 0.18, ease: EASE_OUT },
-            }}
-            exit={{ opacity: 0, transition: { duration: 0.1, ease: EASE_OUT } }}
-            className="mt-[24px] flex flex-col gap-[12px]">
-            {groups.map((group) => (
-              <section key={group.label} className="flex flex-col gap-[8px]">
-                <h3
-                  className="text-[14px] font-medium leading-[150%] tracking-[-0.011em]"
-                  style={{ color: colour.ink }}>
-                  {group.label}
-                </h3>
-                <div className="flex flex-col">
-                  {chunk(group.photos, 3).map((row, rowIndex) => (
-                    <div key={rowIndex} className="flex">
-                      {row.map((photo, columnIndex) => {
-                        const jitter =
-                          JITTER[(rowIndex * 3 + columnIndex) % JITTER.length];
-                        const pose = {
-                          transform: `translate(${jitter.x}px, ${jitter.y}px) rotate(${jitter.r}deg)`,
-                        };
-                        return (
-                          <span key={photo.id} className="block w-1/3">
-                            {sharp(photo) ? (
-                              <button
-                                type="button"
-                                aria-label="Open this shot"
-                                className="block w-full"
-                                onClick={() =>
-                                  setOpened(
-                                    visible.findIndex(
-                                      (candidate) => candidate.id === photo.id
-                                    )
+        {/* One tab leaves at once and the other comes up in its place. The
+            old tab used to fade out first and the new one wait for it, which
+            on a phone was a blink, not a transition (owner, 2026-11-22): the
+            prints went away, then for a moment there was nothing under the
+            pills, then the other tab faded in. Measured, the swap landed
+            170ms after the press; it now lands in the next frame, and the
+            only thing that moves is the new tab arriving. */}
+        <motion.div
+          key={tab}
+          initial={{ opacity: 0, y: reduce ? 0 : 6 }}
+          animate={{
+            opacity: 1,
+            y: 0,
+            // Switched tens of times a visit: short, ease-out.
+            transition: { duration: reduce ? 0.12 : 0.2, ease: EASE_OUT },
+          }}
+          className="mt-[24px] flex flex-col gap-[12px]">
+          {groups.every((group) => group.photos.length === 0) ? (
+            <EmptyRoll tab={tab} onShoot={onShoot} />
+          ) : null}
+          {groups.map((group) => (
+            <section key={group.label} className="flex flex-col gap-[8px]">
+              <h3
+                className="text-[14px] font-medium leading-[150%] tracking-[-0.011em]"
+                style={{ color: colour.ink }}>
+                {group.label}
+              </h3>
+              <div className="flex flex-col">
+                {chunk(group.photos, 3).map((row, rowIndex) => (
+                  <div key={rowIndex} className="flex">
+                    {row.map((photo, columnIndex) => {
+                      const jitter =
+                        JITTER[(rowIndex * 3 + columnIndex) % JITTER.length];
+                      const pose = {
+                        transform: `translate(${jitter.x}px, ${jitter.y}px) rotate(${jitter.r}deg)`,
+                      };
+                      return (
+                        <span key={photo.id} className="block w-1/3">
+                          {sharp(photo) ? (
+                            <button
+                              type="button"
+                              aria-label="Open this shot"
+                              className="block w-full"
+                              onClick={() =>
+                                setOpened(
+                                  visible.findIndex(
+                                    (candidate) => candidate.id === photo.id
                                   )
-                                }>
-                                <RollPrint
-                                  src={photo.src}
-                                  size="grid"
-                                  stamp={photo.stamp}
-                                  shooter={
-                                    tab === 'myroll' ? photo.shooter : null
-                                  }
-                                  style={pose}
-                                />
-                              </button>
-                            ) : (
+                                )
+                              }>
                               <RollPrint
                                 src={photo.src}
                                 size="grid"
-                                veiled
+                                stamp={photo.stamp}
+                                shooter={
+                                  tab === 'myroll' ? photo.shooter : null
+                                }
                                 style={pose}
                               />
-                            )}
-                          </span>
-                        );
-                      })}
-                    </div>
-                  ))}
-                </div>
-              </section>
-            ))}
-          </motion.div>
-        </AnimatePresence>
+                            </button>
+                          ) : (
+                            <RollPrint
+                              src={photo.src}
+                              size="grid"
+                              veiled
+                              style={pose}
+                            />
+                          )}
+                        </span>
+                      );
+                    })}
+                  </div>
+                ))}
+              </div>
+            </section>
+          ))}
+        </motion.div>
 
         {/* "CTA muncul pas udah 0 shots nya": the door to the Dark Room, the
             moment there is nothing left to shoot. It rides above the fold so a

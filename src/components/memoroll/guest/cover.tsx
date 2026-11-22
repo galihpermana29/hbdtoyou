@@ -75,9 +75,31 @@ const ENTRANCE = {
 } as const;
 const EASE_OUT = [0.22, 1, 0.36, 1] as const;
 
+/**
+ * Whether the entrance has been seen on this page load. It is an entrance:
+ * a guest who comes back to the Cover from the gallery, or whose event
+ * changes phase under them, has already arrived, and replaying it left them
+ * looking at bare paper for five seconds each time (found 2026-11-22).
+ * Only ever set in the browser, after a Cover has mounted.
+ */
+let entranceSeen = false;
+
 /** Ink up to where the pen is, fading out over the stretch just behind it. */
 const NAME_PEN =
   'linear-gradient(90deg, #000 calc(var(--pen) - 45%), transparent var(--pen))';
+
+/**
+ * How a strip of tape sits on a corner of the taped print: its middle on the
+ * corner itself, lying across it at 45 degrees.
+ *
+ * The artwork is already a strip drawn at an angle (about 33.5 degrees,
+ * rising to the right). The frame's -36 was that angle, and it was applied
+ * on top of the drawing as well, which stood the tape nearly upright beside
+ * the corner instead of across it (owner, 2026-11-22). Only the difference
+ * to 45 is turned here, and the strip is hung by its middle, so the two
+ * corners are the print's own two corners and nothing else to keep in step.
+ */
+const TAPE = { x: '-50%', y: '-50%', rotate: -11.5 } as const;
 
 /** The hero's height, which the collage's flight is measured against. */
 const HERO_HEIGHT = 455;
@@ -324,8 +346,8 @@ function Hero({
         <motion.img
           src={tape.src}
           alt=""
-          className="absolute left-[12.4%] top-[18%] w-[24.7%]"
-          style={{ rotate: -36 }}
+          className="absolute w-[24.7%]"
+          style={{ ...TAPE, left: '20.2%', top: '10.7%' }}
           initial={false}
           animate={
             waiting ? { opacity: 0, scale: 1.4 } : { opacity: 1, scale: 1 }
@@ -339,8 +361,8 @@ function Hero({
         <motion.img
           src={tape.src}
           alt=""
-          className="absolute left-[64.3%] top-[86.8%] w-[24.7%]"
-          style={{ rotate: -36 }}
+          className="absolute w-[24.7%]"
+          style={{ ...TAPE, left: '84.6%', top: '86.4%' }}
           initial={false}
           animate={
             waiting ? { opacity: 0, scale: 1.4 } : { opacity: 1, scale: 1 }
@@ -433,13 +455,38 @@ export default function Cover({
    */
   const [skipped, setSkipped] = useState(false);
   const [started, setStarted] = useState(false);
-  const animated = entrance && !draft && !reduce && !skipped;
+  /** Decided once, as this Cover mounts: is this the first one this visit? */
+  const [first] = useState(() => !entranceSeen);
+  const animated = entrance && first && !draft && !reduce && !skipped;
   const stage: Stage = !animated ? 'still' : started ? 'playing' : 'waiting';
   const waiting = stage === 'waiting';
+  /**
+   * Whether the button has arrived. Until it has, it takes no touches, so a
+   * touch where it will be cuts the entrance short like a touch anywhere
+   * else. Once it has, a press on it is a press on it: cutting the entrance
+   * short remounts the Cover, and a mouse's click was lost in the remount,
+   * so the first click on the button did nothing (found 2026-11-22).
+   */
+  const [buttonHere, setButtonHere] = useState(false);
+  /** Whether the entrance has run its course, after which nothing skips. */
+  const [over, setOver] = useState(false);
   useEffect(() => {
+    if (entrance && !draft) entranceSeen = true;
     // One frame held at the start, so the first thing painted is bare paper.
     const id = requestAnimationFrame(() => setStarted(true));
-    return () => cancelAnimationFrame(id);
+    const button = window.setTimeout(
+      () => setButtonHere(true),
+      ENTRANCE.button * 1000
+    );
+    const end = window.setTimeout(
+      () => setOver(true),
+      (ENTRANCE.footer + 0.6) * 1000
+    );
+    return () => {
+      cancelAnimationFrame(id);
+      window.clearTimeout(button);
+      window.clearTimeout(end);
+    };
   }, []);
   const words = eventName.split(' ');
 
@@ -448,7 +495,16 @@ export default function Cover({
       // Remounting is what ends the entrance: every part comes back already
       // in its place.
       key={animated ? 'entrance' : 'still'}
-      onPointerDown={animated ? () => setSkipped(true) : undefined}
+      onPointerDown={
+        animated && !over
+          ? (event) => {
+              // A press on something that is there to be pressed is not a
+              // request to skip.
+              if ((event.target as HTMLElement).closest('button, a')) return;
+              setSkipped(true);
+            }
+          : undefined
+      }
       className="relative flex min-h-full flex-1 flex-col overflow-hidden"
       style={{ background: colour.paper }}>
       <div className="relative h-[455px] shrink-0">
@@ -564,6 +620,9 @@ export default function Cover({
             grows it. */}
         <motion.div
           className="mt-[11px]"
+          style={{
+            pointerEvents: stage === 'still' || buttonHere ? 'auto' : 'none',
+          }}
           initial={false}
           animate={
             waiting ? { opacity: 0, scale: 0.4 } : { opacity: 1, scale: 1 }

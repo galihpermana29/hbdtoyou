@@ -49,6 +49,16 @@ const KEEPERS = [
 ] as const;
 const FLOOR = KEEPERS[KEEPERS.length - 1];
 
+/**
+ * The last thing the viewfinder showed, kept for this page load. Coming back
+ * to the camera from the gallery starts the stream again, and until the
+ * phone hands it over the viewfinder was black (or showed the stand-in
+ * photo), which read as the camera having broken (found 2026-11-22). The
+ * frame it left on is shown, softened, until the live picture is moving
+ * again. A small JPEG as a data URL: it is only ever a backdrop.
+ */
+let lastViewfinder: string | null = null;
+
 /** The size the marks below were drawn for; every other size scales them. */
 const MARK_BASE_WIDTH = 960;
 
@@ -146,6 +156,9 @@ export default function CameraScreen({
   const streamRef = useRef<MediaStream | null>(null);
   const capturerRef = useRef<PhotoCapturer | null>(null);
   const [live, setLive] = useState(false);
+  /** Whether the live picture is actually moving, not merely granted. */
+  const [rolling, setRolling] = useState(false);
+  const [resumeFrame] = useState(() => lastViewfinder);
   const [flashKey, setFlashKey] = useState(0);
   const [flashSupported, setFlashSupported] = useState(false);
   const [torchSupportedState, setTorchSupportedState] = useState(false);
@@ -229,6 +242,30 @@ export default function CameraScreen({
       .catch(() => setLive(false));
     return () => {
       cancelled = true;
+      // Keep what the viewfinder is showing, for the next time it opens.
+      if (video && video.videoWidth > 0) {
+        try {
+          const keep = document.createElement('canvas');
+          keep.width = 270;
+          keep.height = 360;
+          const scale = Math.max(
+            keep.width / video.videoWidth,
+            keep.height / video.videoHeight
+          );
+          keep
+            .getContext('2d')!
+            .drawImage(
+              video,
+              (keep.width - video.videoWidth * scale) / 2,
+              (keep.height - video.videoHeight * scale) / 2,
+              video.videoWidth * scale,
+              video.videoHeight * scale
+            );
+          lastViewfinder = keep.toDataURL('image/jpeg', 0.6);
+        } catch {
+          // A frame that cannot be read is simply not kept.
+        }
+      }
       // The torch must never outlive the camera: off before the stream stops.
       const track = streamRef.current?.getVideoTracks()[0];
       if (track) {
@@ -523,10 +560,38 @@ export default function CameraScreen({
               ref={videoRef}
               playsInline
               muted
+              onPlaying={(event) => {
+                // "Playing" can come a frame before there is a picture to
+                // show; where the browser can say when the first one is on
+                // screen, wait for that.
+                const el = event.currentTarget as HTMLVideoElement & {
+                  requestVideoFrameCallback?: (done: () => void) => void;
+                };
+                if (el.requestVideoFrameCallback) {
+                  el.requestVideoFrameCallback(() => setRolling(true));
+                } else {
+                  setRolling(true);
+                }
+              }}
               className={`absolute inset-0 h-full w-full object-cover transition-[filter] duration-300 ${live ? '' : 'hidden'}`}
               style={{ filter: PREVIEW_CSS[film] }}
             />
-            {!live && (
+            {/* The frame the camera was left on, until the live one moves. */}
+            {resumeFrame && !rolling ? (
+              <img
+                src={resumeFrame}
+                alt=""
+                aria-hidden
+                className="absolute inset-0 h-full w-full scale-105 object-cover"
+                style={{
+                  filter:
+                    PREVIEW_CSS[film] && PREVIEW_CSS[film] !== 'none'
+                      ? `${PREVIEW_CSS[film]} blur(6px)`
+                      : 'blur(6px)',
+                }}
+              />
+            ) : null}
+            {!live && !resumeFrame && (
               <img
                 src={fallbackSrc}
                 alt="Viewfinder placeholder - the browser granted no camera"

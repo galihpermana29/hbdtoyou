@@ -719,7 +719,10 @@ export default function MemorollGuest({
               />
             )}
             {screen === 'countdown' && (
-              <CountdownScreen remaining={remainingUntil(startsMs, now)} />
+              <CountdownScreen
+                remaining={remainingUntil(startsMs, now)}
+                photo={event.cover_photo_urls?.[0] ?? null}
+              />
             )}
             {screen === 'username' && (
               <UsernameScreen
@@ -768,6 +771,11 @@ export default function MemorollGuest({
                 onDevelop={() => setScreen('darkroom')}
                 onBack={() =>
                   setScreen(phase === 'ongoing' && joined ? 'camera' : 'cover')
+                }
+                onShoot={
+                  phase === 'ongoing' && joined && remaining > 0
+                    ? () => setScreen('camera')
+                    : undefined
                 }
                 onLogout={logout}
                 showSwipeCue={!swipeCueSeen}
