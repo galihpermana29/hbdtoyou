@@ -537,78 +537,83 @@ export default function GalleryScreen({
           </TabPill>
         </div>
 
-        <AnimatePresence mode="wait" initial={false}>
-          <motion.div
-            key={tab}
-            initial={{ opacity: 0 }}
-            animate={{
-              opacity: 1,
-              // Switched tens of times a visit: short, ease-out.
-              transition: { duration: reduce ? 0.12 : 0.18, ease: EASE_OUT },
-            }}
-            exit={{ opacity: 0, transition: { duration: 0.1, ease: EASE_OUT } }}
-            className="mt-[24px] flex flex-col gap-[12px]">
-            {groups.every((group) => group.photos.length === 0) ? (
-              <EmptyRoll tab={tab} onShoot={onShoot} />
-            ) : null}
-            {groups.map((group) => (
-              <section key={group.label} className="flex flex-col gap-[8px]">
-                <h3
-                  className="text-[14px] font-medium leading-[150%] tracking-[-0.011em]"
-                  style={{ color: colour.ink }}>
-                  {group.label}
-                </h3>
-                <div className="flex flex-col">
-                  {chunk(group.photos, 3).map((row, rowIndex) => (
-                    <div key={rowIndex} className="flex">
-                      {row.map((photo, columnIndex) => {
-                        const jitter =
-                          JITTER[(rowIndex * 3 + columnIndex) % JITTER.length];
-                        const pose = {
-                          transform: `translate(${jitter.x}px, ${jitter.y}px) rotate(${jitter.r}deg)`,
-                        };
-                        return (
-                          <span key={photo.id} className="block w-1/3">
-                            {sharp(photo) ? (
-                              <button
-                                type="button"
-                                aria-label="Open this shot"
-                                className="block w-full"
-                                onClick={() =>
-                                  setOpened(
-                                    visible.findIndex(
-                                      (candidate) => candidate.id === photo.id
-                                    )
+        {/* One tab leaves at once and the other comes up in its place. The
+            old tab used to fade out first and the new one wait for it, which
+            on a phone was a blink, not a transition (owner, 2026-11-22): the
+            prints went away, then for a moment there was nothing under the
+            pills, then the other tab faded in. Measured, the swap landed
+            170ms after the press; it now lands in the next frame, and the
+            only thing that moves is the new tab arriving. */}
+        <motion.div
+          key={tab}
+          initial={{ opacity: 0, y: reduce ? 0 : 6 }}
+          animate={{
+            opacity: 1,
+            y: 0,
+            // Switched tens of times a visit: short, ease-out.
+            transition: { duration: reduce ? 0.12 : 0.2, ease: EASE_OUT },
+          }}
+          className="mt-[24px] flex flex-col gap-[12px]">
+          {groups.every((group) => group.photos.length === 0) ? (
+            <EmptyRoll tab={tab} onShoot={onShoot} />
+          ) : null}
+          {groups.map((group) => (
+            <section key={group.label} className="flex flex-col gap-[8px]">
+              <h3
+                className="text-[14px] font-medium leading-[150%] tracking-[-0.011em]"
+                style={{ color: colour.ink }}>
+                {group.label}
+              </h3>
+              <div className="flex flex-col">
+                {chunk(group.photos, 3).map((row, rowIndex) => (
+                  <div key={rowIndex} className="flex">
+                    {row.map((photo, columnIndex) => {
+                      const jitter =
+                        JITTER[(rowIndex * 3 + columnIndex) % JITTER.length];
+                      const pose = {
+                        transform: `translate(${jitter.x}px, ${jitter.y}px) rotate(${jitter.r}deg)`,
+                      };
+                      return (
+                        <span key={photo.id} className="block w-1/3">
+                          {sharp(photo) ? (
+                            <button
+                              type="button"
+                              aria-label="Open this shot"
+                              className="block w-full"
+                              onClick={() =>
+                                setOpened(
+                                  visible.findIndex(
+                                    (candidate) => candidate.id === photo.id
                                   )
-                                }>
-                                <RollPrint
-                                  src={photo.src}
-                                  size="grid"
-                                  stamp={photo.stamp}
-                                  shooter={
-                                    tab === 'myroll' ? photo.shooter : null
-                                  }
-                                  style={pose}
-                                />
-                              </button>
-                            ) : (
+                                )
+                              }>
                               <RollPrint
                                 src={photo.src}
                                 size="grid"
-                                veiled
+                                stamp={photo.stamp}
+                                shooter={
+                                  tab === 'myroll' ? photo.shooter : null
+                                }
                                 style={pose}
                               />
-                            )}
-                          </span>
-                        );
-                      })}
-                    </div>
-                  ))}
-                </div>
-              </section>
-            ))}
-          </motion.div>
-        </AnimatePresence>
+                            </button>
+                          ) : (
+                            <RollPrint
+                              src={photo.src}
+                              size="grid"
+                              veiled
+                              style={pose}
+                            />
+                          )}
+                        </span>
+                      );
+                    })}
+                  </div>
+                ))}
+              </div>
+            </section>
+          ))}
+        </motion.div>
 
         {/* "CTA muncul pas udah 0 shots nya": the door to the Dark Room, the
             moment there is nothing left to shoot. It rides above the fold so a
