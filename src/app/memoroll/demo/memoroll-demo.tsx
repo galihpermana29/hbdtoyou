@@ -1,5 +1,7 @@
 'use client';
 
+import { useMemoifyProfile, useMemoifySession } from '@/app/session-provider';
+import { signIn } from 'next-auth/react';
 import { setMemoRollContext, trackMemoRoll } from '@/lib/memoroll-analytics';
 import CameraScreen from '@/components/memoroll/guest/camera-screen';
 import Cover from '@/components/memoroll/guest/cover';
@@ -221,6 +223,9 @@ function groupRoll(entries: RollEntry[]): GalleryGroup[] {
  * memory, whether the How popup has been seen this walkthrough, and the
  * dock's stand-in for lighting hardware nobody's laptop has.
  */
+/** This tab left for Google from the demo's Cover and is owed its walk in. */
+const ENTERING_KEY = 'memoroll-demo:entering';
+
 export default function MemorollDemo() {
   const reduce = useReducedMotion();
   const [screen, setScreen] = useState<Screen>('cover');
@@ -251,6 +256,24 @@ export default function MemorollDemo() {
   const [howSeen, setHowSeen] = useState(false);
   const [location, setLocation] = useState<LocationState>('asking');
   const [handle, setHandle] = useState('dhilafadhila');
+
+  /**
+   * The demo asks for the same sign-in the product does (owner, 2026-11-23):
+   * "Get me in" is Google's sheet here too. It makes the walkthrough true to
+   * what a guest meets, and it is how the demo's visitors stop being
+   * anonymous - the person who tried it can be told from the person who went
+   * on to make a roll.
+   */
+  const session = useMemoifySession();
+  const profile = useMemoifyProfile();
+  const signedIn = Boolean(session?.accessToken);
+  // "This you?" starts from who actually signed in, as it does in the product.
+  const named = useRef(false);
+  useEffect(() => {
+    if (named.current || !profile?.fullname) return;
+    named.current = true;
+    setHandle(profile.fullname);
+  }, [profile?.fullname]);
   const [film, setFilm] = useState<SelectableFilmId>(DEFAULT_FILM);
   const [lighting, setLighting] = useState<DemoLighting>('detected');
   /** The roll the creator demo made in this browser, if any (owner, 2026-11-13). */
@@ -321,8 +344,33 @@ export default function MemorollDemo() {
     // sheet here, which is the system's screen rather than a designed one, and
     // lands on "This you?". The demo signs in instantly - the designer drew no
     // screen in between because there isn't one.
+    trackMemoRoll('memoroll_enter_pressed', { signed_in: signedIn });
+    if (!signedIn) {
+      // Mark this tab before leaving for Google, so the return finishes the
+      // press instead of asking for it twice - the product's own way.
+      try {
+        window.sessionStorage.setItem(ENTERING_KEY, '1');
+      } catch {
+        // A blocked store means the visitor presses Get me in once more.
+      }
+      signIn('google', { callbackUrl: '/memoroll/demo' });
+      return;
+    }
     setScreen(phase === 'before' ? 'countdown' : 'username');
   };
+
+  // Back from Google with the mark this tab left: walk on from the Cover.
+  useEffect(() => {
+    if (!signedIn) return;
+    try {
+      if (window.sessionStorage.getItem(ENTERING_KEY) !== '1') return;
+      window.sessionStorage.removeItem(ENTERING_KEY);
+    } catch {
+      return;
+    }
+    setScreen(phase === 'before' ? 'countdown' : 'username');
+    // Once, on arriving signed in; the phase is whatever it is then.
+  }, [signedIn]);
 
   /**
    * The demo walks through Location Blocked once on the way in, because it is
