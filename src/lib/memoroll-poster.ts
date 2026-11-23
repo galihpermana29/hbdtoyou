@@ -541,12 +541,7 @@ export async function drawMemoRollPoster(poster: MemoRollPoster) {
   );
 }
 
-/** Draw the poster and save it under `name`. */
-export async function downloadMemoRollPoster(
-  poster: MemoRollPoster,
-  name: string
-) {
-  const blob = await drawMemoRollPoster(poster);
+function save(blob: Blob, name: string) {
   const href = URL.createObjectURL(blob);
   const anchor = document.createElement('a');
   anchor.href = href;
@@ -554,4 +549,60 @@ export async function downloadMemoRollPoster(
   anchor.click();
   // Long enough for the save to have started on a slow phone.
   window.setTimeout(() => URL.revokeObjectURL(href), 60_000);
+}
+
+function pngOf(canvas: HTMLCanvasElement) {
+  return new Promise<Blob>((resolve, reject) =>
+    canvas.toBlob(
+      (blob) => (blob ? resolve(blob) : reject(new Error('qr: nothing drawn'))),
+      'image/png'
+    )
+  );
+}
+
+/**
+ * One press, both files: the bare QR and the poster around it (owner,
+ * 2026-11-23 - a creator should not have to know which one they want before
+ * they have seen either).
+ *
+ * Two saves from one press is the thing browsers distrust. A phone drops the
+ * second one without a word, so a phone gets its own share sheet holding both
+ * pictures instead: "Save 2 Images", or straight to whoever prints them. A
+ * desktop saves the two files one after the other, and Chrome asks once
+ * whether this site may do that.
+ *
+ * Says what happened, so the caller's button can: 'shared', 'saved', or
+ * 'dismissed' when the guest closed the share sheet themselves.
+ */
+export async function downloadMemoRollKit(
+  poster: MemoRollPoster,
+  names: { qr: string; poster: string }
+): Promise<'shared' | 'saved' | 'dismissed'> {
+  const [qr, sign] = await Promise.all([
+    pngOf(poster.qr),
+    drawMemoRollPoster(poster),
+  ]);
+
+  const files = [
+    new File([qr], names.qr, { type: 'image/png' }),
+    new File([sign], names.poster, { type: 'image/png' }),
+  ];
+  const onAPhone =
+    typeof window.matchMedia === 'function' &&
+    window.matchMedia('(pointer: coarse)').matches;
+  if (onAPhone && navigator.canShare?.({ files })) {
+    try {
+      await navigator.share({ files });
+      return 'shared';
+    } catch (error) {
+      if ((error as DOMException)?.name === 'AbortError') return 'dismissed';
+      // The sheet would not open (the press went stale while the poster was
+      // being drawn, or the browser has no taste for files): save instead.
+    }
+  }
+
+  save(qr, names.qr);
+  await new Promise((done) => window.setTimeout(done, 500));
+  save(sign, names.poster);
+  return 'saved';
 }

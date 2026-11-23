@@ -761,6 +761,7 @@ export default function MemorollGuest({
                 photoCount={photoCount ?? allEntries.length}
                 participantCount={participantCount}
                 reveal={reveal}
+                revealsAt={new Date(revealMs)}
                 all={groupRoll(allEntries)}
                 own={groupRoll(ownEntries)}
                 ownDeveloped={unveiled}

@@ -3,7 +3,7 @@
 import { motion, useReducedMotion } from 'framer-motion';
 import { QRCodeCanvas, QRCodeSVG } from 'qrcode.react';
 import { useRef, useState } from 'react';
-import { downloadMemoRollPoster } from '@/lib/memoroll-poster';
+import { downloadMemoRollKit } from '@/lib/memoroll-poster';
 import Cta from '../ui/cta';
 import { ChevronLeftIcon } from '../ui/icons';
 import { REDUCED, SHEET_IN, SHEET_OUT } from '../ui/motion';
@@ -70,18 +70,25 @@ export default function QrSheet({
     anchor.click();
   };
 
+  /**
+   * Where the poster is offered the one button saves both, the bare code and
+   * the sign around it. If the sign cannot be drawn the code still saves.
+   */
   const [drawing, setDrawing] = useState(false);
-  const downloadPoster = async () => {
+  const downloadBoth = async () => {
     const canvas = printable.current;
     if (!canvas || !downloadName || !poster || drawing) return;
     setDrawing(true);
     try {
-      await downloadMemoRollPoster(
+      await downloadMemoRollKit(
         { eventName, url, qr: canvas, ...poster },
-        downloadName.replace('memoroll-qr-', 'memoroll-poster-')
+        {
+          qr: downloadName,
+          poster: downloadName.replace('memoroll-qr-', 'memoroll-poster-'),
+        }
       );
     } catch {
-      // The plain QR is still there to download; nothing else to say.
+      downloadQr();
     } finally {
       setDrawing(false);
     }
@@ -206,19 +213,15 @@ export default function QrSheet({
               <>
                 <Cta
                   tone="outline"
-                  onClick={downloadQr}
+                  onClick={poster ? downloadBoth : downloadQr}
+                  disabled={drawing}
                   className="-mt-[20px] h-[44px] w-full">
-                  Download QR
+                  {poster
+                    ? drawing
+                      ? 'Getting them ready…'
+                      : 'Download QR & poster'
+                    : 'Download QR'}
                 </Cta>
-                {poster ? (
-                  <Cta
-                    tone="outline"
-                    onClick={downloadPoster}
-                    disabled={drawing}
-                    className="-mt-[20px] h-[44px] w-full">
-                    {drawing ? 'Making your poster…' : 'Download poster'}
-                  </Cta>
-                ) : null}
                 {/* The print-size code, kept offscreen: only its pixels are
                   wanted, and only when the button asks for them. */}
                 <div aria-hidden className="fixed -left-[2000px] top-0">

@@ -2,7 +2,7 @@
 
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
-import { useEffect, useState } from 'react';
+import { useEffect, useState, useTransition } from 'react';
 
 import type {
   IMemorollDashboardResponse,
@@ -101,6 +101,15 @@ export default function MemorollConsole({
    * it: from there the wall only changes by the owner's own hand.
    */
   const live = dashboard?.phase !== 'revealed';
+  /**
+   * And by hand, any time (owner, 2026-11-23): half a minute is long when a
+   * guest at your elbow has just pressed the shutter, and after the Reveal
+   * nothing refreshes on its own at all. The same `router.refresh()`, so the
+   * settings form keeps what was typed; the transition is how the button
+   * knows the new wall has landed.
+   */
+  const [refreshing, startRefresh] = useTransition();
+  const refresh = () => startRefresh(() => router.refresh());
   useEffect(() => {
     if (!live) return;
     const timer = setInterval(() => router.refresh(), 30_000);
@@ -461,16 +470,26 @@ export default function MemorollConsole({
           <h2 className="text-[18px] font-[600] leading-[28px] text-[#182230]">
             Photos
           </h2>
-          {photos.length > 0 ? (
+          <div className="flex flex-wrap items-center gap-[8px]">
             <button
               type="button"
-              onClick={downloadAll}
-              disabled={zipStatus !== null}
-              aria-busy={zipStatus !== null}
-              className={primaryAction}>
-              {zipStatus ?? 'Download all (ZIP)'}
+              onClick={refresh}
+              disabled={refreshing}
+              aria-busy={refreshing}
+              className="rounded-full border border-[rgba(33,33,33,0.2)] px-[14px] py-[8px] text-[14px] font-[600] leading-[20px] text-[#344054] hover:bg-[#F9FAFB] disabled:opacity-60">
+              {refreshing ? 'Refreshing…' : 'Refresh'}
             </button>
-          ) : null}
+            {photos.length > 0 ? (
+              <button
+                type="button"
+                onClick={downloadAll}
+                disabled={zipStatus !== null}
+                aria-busy={zipStatus !== null}
+                className={primaryAction}>
+                {zipStatus ?? 'Download all (ZIP)'}
+              </button>
+            ) : null}
+          </div>
         </div>
         <p className={note}>
           Everything guests have shot, including what the reveal still hides

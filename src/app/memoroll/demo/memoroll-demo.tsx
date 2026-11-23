@@ -501,6 +501,7 @@ export default function MemorollDemo() {
                 photoCount={GALLERY_TALLY.photos}
                 participantCount={GALLERY_TALLY.participants}
                 reveal={reveal}
+                revealsAt={revealDate}
                 all={groupRoll(allEntries)}
                 own={groupRoll(ownEntries)}
                 ownDeveloped={ownDeveloped}
