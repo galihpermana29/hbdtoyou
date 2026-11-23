@@ -88,7 +88,7 @@ export default function LockedPopup({
         {
           icon: howDay.src,
           read: at
-            ? `It all opens on ${at.day} at ${at.time}.`
+            ? `It all opens on ${at.day} at ${at.time}. We’ll send you an email, come back then.`
             : 'It all opens when the countdown up top hits zero.',
           copy: at ? (
             <>
@@ -96,7 +96,7 @@ export default function LockedPopup({
               <strong className="font-bold">
                 {at.day} at {at.time}
               </strong>
-              . Come back then.
+              . We’ll send you an email, come back then.
             </>
           ) : (
             <>It all opens when the countdown up top hits zero.</>
