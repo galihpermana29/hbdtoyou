@@ -45,7 +45,7 @@ import {
   reducedScreenVariants,
 } from '@/components/memoroll/ui/motion';
 import PushScreen from '@/components/memoroll/ui/push-screen';
-import { buildMemorollPayload } from './payload';
+import { buildMemorollPayload, momentIso } from './payload';
 
 /**
  * The four photographs behind the welcome's sentence. The design's own, the
@@ -182,7 +182,11 @@ export default function MemorollCreate({
    * render: the direction belongs to the change that produced this render.
    */
   const rank =
-    view.kind === 'welcome' ? 0 : view.kind === 'preview' ? LAST_STEP + 1 : step;
+    view.kind === 'welcome'
+      ? 0
+      : view.kind === 'preview'
+        ? LAST_STEP + 1
+        : step;
   const lastRank = useRef(rank);
   const direction = useRef(0);
   if (rank !== lastRank.current) {
@@ -733,6 +737,10 @@ export default function MemorollCreate({
               onClose={() => setQrOpen(false)}
               onShareLink={shareLink}
               downloadName={`memoroll-qr-${published.code}.png`}
+              poster={{
+                shots: draft.shotsPerGuest,
+                revealAt: momentIso(draft.revealOn, draft.revealAt) ?? '',
+              }}
               onOpenDashboard={() =>
                 router.push(`/dashboard/memoroll/${published.id}`)
               }

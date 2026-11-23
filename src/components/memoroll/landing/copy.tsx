@@ -89,7 +89,7 @@ const EN = {
       },
       {
         title: 'No retakes',
-        body: 'You set 10 to 15 Shots per guest. When a Roll is spent it’s spent, so nobody wastes one on the ceiling.',
+        body: 'You set 10 to 20 Shots per guest. When a Roll is spent it’s spent, so nobody wastes one on the ceiling.',
       },
       {
         title: 'One shared reveal',
@@ -252,7 +252,7 @@ const EN = {
       },
       {
         q: 'How many photos can each guest take?',
-        a: 'You choose, from 10 to 15 Shots per guest. There are no retakes, and the counter on the camera shows how many are left.',
+        a: 'You choose, from 10 to 20 Shots per guest. There are no retakes, and the counter on the camera shows how many are left.',
       },
       {
         q: 'When do the photos get revealed?',
@@ -346,7 +346,7 @@ const ID: LandingCopy = {
       },
       {
         title: 'Nggak ada retake',
-        body: 'Kamu yang atur, 10 sampai 15 Shot per tamu. Kalau udah habis ya habis, jadi nggak ada yang buang jatah buat motret plafon.',
+        body: 'Kamu yang atur, 10 sampai 20 Shot per tamu. Kalau udah habis ya habis, jadi nggak ada yang buang jatah buat motret plafon.',
       },
       {
         title: 'Satu Reveal, bareng-bareng',
@@ -507,7 +507,7 @@ const ID: LandingCopy = {
       },
       {
         q: 'Tiap tamu bisa foto berapa kali?',
-        a: 'Kamu yang tentuin, 10 sampai 15 Shot per tamu. Nggak ada retake, dan sisa jatahnya kelihatan di kamera.',
+        a: 'Kamu yang tentuin, 10 sampai 20 Shot per tamu. Nggak ada retake, dan sisa jatahnya kelihatan di kamera.',
       },
       {
         q: 'Kapan fotonya bisa dilihat?',
@@ -559,7 +559,7 @@ const ID: LandingCopy = {
  * English; this says the same things to a couple: the hero, the idea's
  * opening, where the QR goes, the occasions' heading and the questions.
  *
- * Every claim is still one the English makes (QR, no install, 10 to 15
+ * Every claim is still one the English makes (QR, no install, 10 to 20
  * Shots, no retake, blurred until Reveal, the 500m venue lock, free until
  * the end of 2026 by asking on WhatsApp); the comparison with a disposable camera says only what
  * follows from those.
@@ -649,7 +649,7 @@ const WEDDING_ID: LandingCopy = {
       },
       {
         q: 'Tiap tamu bisa foto berapa kali?',
-        a: 'Kamu yang tentuin, 10 sampai 15 Shot per tamu. Nggak ada retake, dan sisa jatahnya kelihatan di kamera.',
+        a: 'Kamu yang tentuin, 10 sampai 20 Shot per tamu. Nggak ada retake, dan sisa jatahnya kelihatan di kamera.',
       },
       {
         q: 'Kapan foto-foto pernikahannya bisa dilihat?',
