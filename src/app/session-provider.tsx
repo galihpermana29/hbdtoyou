@@ -1,5 +1,6 @@
 'use client';
 
+import { usePostHogIdentity } from '@/lib/posthog-identity';
 import { IProfileResponse } from '@/action/interfaces';
 import { getSpotifyAccessToken } from '@/action/spotify-api';
 import { getUserProfile } from '@/action/user-api';
@@ -215,6 +216,16 @@ const SessionProvider = ({
   );
   const [userProfile, setUserProfile] = useState<IProfileResponse | null>(
     initialProfileData
+  );
+
+  // Who PostHog files this visit under: the signed-in account, or nobody.
+  usePostHogIdentity(
+    {
+      id: parsedSession.userId ?? userProfile?.id,
+      email: userProfile?.email ?? parsedSession.email,
+      name: userProfile?.fullname ?? parsedSession.fullName,
+    },
+    Boolean(parsedSession.accessToken)
   );
 
   const [modalState, setModalState] = useState({
