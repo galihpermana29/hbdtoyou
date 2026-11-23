@@ -84,7 +84,11 @@ export function setMemoRollContext(context: MemoRollContext) {
  * time they happened, and go out once it is up; after ten seconds of nothing
  * (an ad blocker, a missing key) they are let go.
  */
-let waiting: Array<{ event: string; properties: Record<string, unknown> }> = [];
+let waiting: Array<{
+  event: string;
+  properties: Record<string, unknown>;
+  at: Date;
+}> = [];
 let waiter: number | null = null;
 function flushWhenReady(tries = 0) {
   waiter = null;
