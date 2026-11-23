@@ -1,5 +1,6 @@
 'use client';
 
+import { trackMemoRoll } from '@/lib/memoroll-analytics';
 import { motion, useReducedMotion } from 'framer-motion';
 import {
   useCallback,
@@ -362,11 +363,23 @@ export default function StorySheet({
     if (navigator.canShare?.({ files: [file] })) {
       try {
         await navigator.share({ files: [file] });
+        trackMemoRoll('memoroll_story_shared', {
+          kind: roll ? 'roll' : 'print',
+          how: 'shared',
+        });
       } catch {
         // Dismissing the sheet is an answer, not a failure.
+        trackMemoRoll('memoroll_story_shared', {
+          kind: roll ? 'roll' : 'print',
+          how: 'dismissed',
+        });
       }
       return;
     }
+    trackMemoRoll('memoroll_story_shared', {
+      kind: roll ? 'roll' : 'print',
+      how: 'saved',
+    });
     save(story);
   };
 
@@ -489,7 +502,14 @@ export default function StorySheet({
           </Cta>
           <Cta
             tone="outline"
-            onClick={() => story && save(story)}
+            onClick={() => {
+              if (!story) return;
+              trackMemoRoll('memoroll_story_shared', {
+                kind: roll ? 'roll' : 'print',
+                how: 'saved',
+              });
+              save(story);
+            }}
             disabled={!story}
             className="-mt-[4px] h-[44px] w-full">
             Save image

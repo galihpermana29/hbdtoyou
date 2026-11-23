@@ -1,5 +1,6 @@
 'use client';
 
+import { setMemoRollContext, trackMemoRoll } from '@/lib/memoroll-analytics';
 import { AnimatePresence, useReducedMotion } from 'framer-motion';
 import { useRouter } from 'next/navigation';
 import { useEffect, useRef, useState } from 'react';
@@ -133,6 +134,18 @@ export default function MemorollCreate({
   const [view, setView] = useState<View>({ kind: 'welcome' });
   const [draft, setDraft] = useState<MemorollDraft>(initialDraft);
   const [qrOpen, setQrOpen] = useState(false);
+
+  // The creator's side of the analytics (memoroll-analytics.ts): where they
+  // are in the wizard, and what stopped them when something did.
+  setMemoRollContext({ surface: 'product', role: 'creator' });
+  const viewName =
+    view.kind === 'step' ? `step_${view.step}` : (view.kind as string);
+  useEffect(() => {
+    trackMemoRoll('memoroll_create_step_viewed', {
+      step: viewName,
+      from_wedding: weddingId !== null,
+    });
+  }, [viewName, weddingId]);
   const [origin, setOrigin] = useState('');
   const [problem, setProblem] = useState<string | null>(null);
   const [publishing, setPublishing] = useState(false);
@@ -140,6 +153,22 @@ export default function MemorollCreate({
   /** The moment of success, said briefly: the toast shows for a beat and
    *  goes, because the flipped footer is the durable statement. */
   const [justPublished, setJustPublished] = useState(false);
+  useEffect(() => {
+    if (!justPublished) return;
+    trackMemoRoll('memoroll_create_published', {
+      shots_per_guest: draft.shotsPerGuest,
+      from_wedding: weddingId !== null,
+    });
+    // Once, as the roll goes live; the draft is whatever it was then.
+  }, [justPublished]);
+  /** Whatever stopped the creator, in the words they were shown. */
+  useEffect(() => {
+    if (!problem) return;
+    trackMemoRoll('memoroll_create_failed', {
+      step: viewName,
+      reason: problem.slice(0, 140),
+    });
+  }, [problem]);
   useEffect(() => {
     if (!justPublished) return;
     const timer = setTimeout(() => setJustPublished(false), 2000);
@@ -552,6 +581,10 @@ export default function MemorollCreate({
    */
   const shareLink = () => {
     if (typeof navigator === 'undefined' || !guestUrl) return;
+    trackMemoRoll('memoroll_link_shared', {
+      how: navigator.share ? 'share_sheet' : 'clipboard',
+      where: 'create',
+    });
     if (navigator.share) {
       navigator.share({ title: draft.eventName, url: guestUrl }).catch(() => {
         // Somebody dismissed the sheet. That is an answer, not a failure.

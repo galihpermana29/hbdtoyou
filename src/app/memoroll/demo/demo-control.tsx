@@ -1,5 +1,6 @@
 'use client';
 
+import { trackMemoRoll } from '@/lib/memoroll-analytics';
 import DemoDock from './demo-dock';
 
 /**
@@ -136,6 +137,9 @@ export default function DemoControl({
         </button>
         <a
           href="/memoroll/demo/create"
+          onClick={() =>
+            trackMemoRoll('memoroll_demo_cta_clicked', { to: 'creator_demo' })
+          }
           className="block w-full rounded-full px-3 py-1.5 text-left text-[12px] text-[#212121] hover:bg-[#f2efe9]">
           Try the creator side
         </a>

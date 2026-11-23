@@ -1,5 +1,6 @@
 'use client';
 
+import { trackMemoRoll } from '@/lib/memoroll-analytics';
 import {
   AnimatePresence,
   motion,
@@ -163,6 +164,7 @@ export default function PhotoPreview({
       );
       if (!response.ok) throw new Error(String(response.status));
       const blob = await response.blob();
+      trackMemoRoll('memoroll_photo_downloaded', { own: photo.own });
       const url = URL.createObjectURL(blob);
       const anchor = document.createElement('a');
       anchor.href = url;

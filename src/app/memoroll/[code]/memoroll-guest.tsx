@@ -1,5 +1,6 @@
 'use client';
 
+import { setMemoRollContext, trackMemoRoll } from '@/lib/memoroll-analytics';
 import { AnimatePresence, useReducedMotion } from 'framer-motion';
 import { signIn } from 'next-auth/react';
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
@@ -192,6 +193,10 @@ export default function MemorollGuest({
   const profile = useMemoifyProfile();
 
   const [screen, setScreen] = useState<Screen>('cover');
+  /** Each screen a guest reaches, once as they reach it: the funnel in. */
+  useEffect(() => {
+    trackMemoRoll('memoroll_screen_viewed', { screen });
+  }, [screen]);
   const [galleryTab, setGalleryTab] = useState<GalleryTab>('all');
   const [handle, setHandle] = useState('');
   const [handleConfirmed, setHandleConfirmed] = useState(false);
@@ -241,6 +246,14 @@ export default function MemorollGuest({
   const phase: MemorollPhase =
     now < startsMs ? 'upcoming' : now < revealMs ? 'ongoing' : 'revealed';
   const revealed = phase === 'revealed';
+
+  // What every MemoRoll event from this page carries (memoroll-analytics.ts).
+  setMemoRollContext({
+    surface: 'product',
+    role: 'guest',
+    roll_code: code,
+    phase,
+  });
 
   const userId = session?.userId ?? null;
 
@@ -412,6 +425,9 @@ export default function MemorollGuest({
    */
   const enterFromCover = async () => {
     setProblem(null);
+    trackMemoRoll('memoroll_enter_pressed', {
+      signed_in: !!session?.accessToken,
+    });
     if (phase === 'upcoming') {
       setScreen('countdown');
       return;
@@ -433,9 +449,11 @@ export default function MemorollGuest({
     const landed = await refresh();
     setJoining(false);
     if (!landed) {
+      trackMemoRoll('memoroll_join_failed');
       setProblem('The roll could not be opened. Try again in a moment.');
       return;
     }
+    trackMemoRoll('memoroll_joined', { returning: handleConfirmed });
     sendWelcomeOnce();
     if (revealed) {
       setGalleryTab('all');
@@ -789,6 +807,9 @@ export default function MemorollGuest({
                 photos={allEntries.map((entry) => entry.photo)}
                 hold={false}
                 onDeveloped={() => {
+                  trackMemoRoll('memoroll_developed', {
+                    photos: allEntries.length,
+                  });
                   setUnveiled(true);
                   remember('unveiled', '1');
                   setGalleryTab('all');

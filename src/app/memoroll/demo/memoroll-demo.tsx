@@ -1,5 +1,6 @@
 'use client';
 
+import { setMemoRollContext, trackMemoRoll } from '@/lib/memoroll-analytics';
 import CameraScreen from '@/components/memoroll/guest/camera-screen';
 import Cover from '@/components/memoroll/guest/cover';
 import CountdownScreen from '@/components/memoroll/guest/countdown-screen';
@@ -226,6 +227,22 @@ export default function MemorollDemo() {
   const [phase, setPhase] = useState<DemoPhase>('during');
   const [roll, setRoll] = useState<DemoRoll>('live');
   const [developedByHand, setDevelopedByHand] = useState(false);
+
+  // The demo's side of the analytics (memoroll-analytics.ts): the same
+  // events the product sends, marked as the demo's so the two never mix.
+  setMemoRollContext({
+    surface: 'demo',
+    role: 'guest',
+    phase:
+      phase === 'before'
+        ? 'upcoming'
+        : phase === 'during'
+          ? 'ongoing'
+          : 'revealed',
+  });
+  useEffect(() => {
+    trackMemoRoll('memoroll_screen_viewed', { screen });
+  }, [screen]);
   /** This guest has pressed Develop My Roll after the Reveal: once is enough. */
   const [unveiled, setUnveiled] = useState(false);
   const [galleryTab, setGalleryTab] = useState<GalleryTab>('all');
@@ -326,6 +343,7 @@ export default function MemorollDemo() {
 
   const changePhase = (next: DemoPhase) => {
     setPhase(next);
+    trackMemoRoll('memoroll_demo_phase_changed', { to: next });
     // Winding the clock back before the Reveal re-veils the gallery.
     if (next !== 'revealed') setUnveiled(false);
     // The door opens the moment the demo clock says the event started.
@@ -534,6 +552,7 @@ export default function MemorollDemo() {
                 )}
                 hold={darkRoomHeld}
                 onDeveloped={() => {
+                  trackMemoRoll('memoroll_developed');
                   if (live) {
                     setUnveiled(true);
                     setGalleryTab('all');

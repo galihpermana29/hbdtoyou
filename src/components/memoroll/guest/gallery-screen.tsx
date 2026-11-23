@@ -1,5 +1,6 @@
 'use client';
 
+import { trackMemoRoll } from '@/lib/memoroll-analytics';
 import galleryCamera from '@/assets/memoroll/gallery-camera.svg';
 import rollCamera from '@/assets/memoroll/wordmark-camera.svg';
 import { AnimatePresence, motion, useReducedMotion } from 'framer-motion';
@@ -586,13 +587,17 @@ export default function GalleryScreen({
                               type="button"
                               aria-label="Open this shot"
                               className="block w-full"
-                              onClick={() =>
+                              onClick={() => {
+                                trackMemoRoll('memoroll_photo_previewed', {
+                                  own: photo.own,
+                                  tab,
+                                });
                                 setOpened(
                                   visible.findIndex(
                                     (candidate) => candidate.id === photo.id
                                   )
-                                )
-                              }>
+                                );
+                              }}>
                               <RollPrint
                                 src={photo.src}
                                 size="grid"
@@ -608,7 +613,13 @@ export default function GalleryScreen({
                               type="button"
                               aria-label="Why can’t I see this shot?"
                               className="block w-full"
-                              onClick={() => setLockedOpen(true)}>
+                              onClick={() => {
+                                trackMemoRoll('memoroll_locked_print_tapped', {
+                                  own: photo.own,
+                                  tab,
+                                });
+                                setLockedOpen(true);
+                              }}>
                               <RollPrint
                                 src={photo.src}
                                 size="grid"

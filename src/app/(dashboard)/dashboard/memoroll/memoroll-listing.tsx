@@ -12,6 +12,7 @@
  * counts nothing, so these faces cost no statistics.
  */
 
+import { trackMemoRoll } from '@/lib/memoroll-analytics';
 import Link from 'next/link';
 import { QRCodeCanvas } from 'qrcode.react';
 import { useEffect, useRef, useState } from 'react';
@@ -164,6 +165,15 @@ export default function MemorollListing({
         poster: `memoroll-poster-${qrFor.code}.png`,
       }
     )
+      .then((result) =>
+        trackMemoRoll('memoroll_qr_downloaded', {
+          result,
+          where: 'dashboard',
+          surface: 'product',
+          role: 'creator',
+          roll_code: qrFor.code,
+        })
+      )
       .catch(() => {
         const anchor = document.createElement('a');
         anchor.href = canvas.toDataURL('image/png');

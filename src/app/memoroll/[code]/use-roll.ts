@@ -6,6 +6,7 @@ import type { IMemorollGalleryPhoto } from '@/action/interfaces';
 // Browser-to-backend since 2026-08-30: a Shot registering must not ride a
 // Vercel server action's ten-second clock - see memoroll-client-api.ts.
 import { submitMemorollPhotoClient as submitMemorollPhoto } from '@/action/memoroll-client-api';
+import { connectionShape, trackMemoRoll } from '@/lib/memoroll-analytics';
 import { newUploadImageWithAPI } from '@/lib/upload';
 
 /**
@@ -120,6 +121,8 @@ export function useRoll(
   const blobsRef = useRef<Map<string, Blob>>(new Map());
   /** Whether the queue is mid-flight, so two triggers never race one Shot. */
   const draining = useRef(false);
+  /** How many times each shot has been sent, for the analytics alone. */
+  const attemptsRef = useRef<Map<string, number>>(new Map());
   const canUploadRef = useRef(canUpload);
   canUploadRef.current = canUpload;
   const displayNameRef = useRef(displayName);
@@ -171,16 +174,42 @@ export function useRoll(
           'file',
           new File([blob], `${id}.jpg`, { type: 'image/jpeg' })
         );
+        const attempt = (attemptsRef.current.get(id) ?? 0) + 1;
+        attemptsRef.current.set(id, attempt);
+        const started = performance.now();
+        const failed = (step: 'upload' | 'register', reason?: string) =>
+          trackMemoRoll('memoroll_upload_failed', {
+            step,
+            reason: reason?.slice(0, 120) ?? null,
+            attempt,
+            bytes: blob.size,
+            ms: Math.round(performance.now() - started),
+            ...connectionShape(),
+          });
         const uploaded = await newUploadImageWithAPI(body);
         const photoUrl = uploaded.success ? uploaded.data?.data : null;
-        if (typeof photoUrl !== 'string' || !photoUrl) continue;
+        if (typeof photoUrl !== 'string' || !photoUrl) {
+          failed('upload');
+          continue;
+        }
 
         const registered = await submitMemorollPhoto(
           code,
           photoUrl,
           displayNameRef.current.trim() || undefined
         );
-        if (!registered.success || !registered.data) continue;
+        if (!registered.success || !registered.data) {
+          failed('register', registered.message);
+          continue;
+        }
+
+        trackMemoRoll('memoroll_upload_succeeded', {
+          attempt,
+          bytes: blob.size,
+          ms: Math.round(performance.now() - started),
+          ...connectionShape(),
+        });
+        attemptsRef.current.delete(id);
 
         onRegisteredRef.current(registered.data);
         dropShot(id);
@@ -248,6 +277,25 @@ export function useRoll(
     }, RETRY_MS);
     return () => clearInterval(timer);
   }, [canUpload, drain]);
+
+  /**
+   * A guest leaving with shots still on the phone: the one number that says
+   * whether photographs are being lost. `pagehide` is the last thing a phone
+   * browser reliably fires; PostHog sends it by beacon.
+   */
+  useEffect(() => {
+    const onLeave = () => {
+      const count = blobsRef.current.size;
+      if (count > 0) {
+        trackMemoRoll('memoroll_left_with_pending', {
+          pending: count,
+          ...connectionShape(),
+        });
+      }
+    };
+    window.addEventListener('pagehide', onLeave);
+    return () => window.removeEventListener('pagehide', onLeave);
+  }, []);
 
   const addShot = useCallback(
     (blob: Blob, film: string) => {
