@@ -1,5 +1,6 @@
 'use client';
 
+import { screenShape, trackMemoRoll } from '@/lib/memoroll-analytics';
 import {
   detectLightingCapabilities,
   defaultImageCaptureFactory,
@@ -223,6 +224,14 @@ export default function CameraScreen({
           return;
         }
         streamRef.current = stream;
+        {
+          const settings = stream.getVideoTracks()[0]?.getSettings?.() ?? {};
+          trackMemoRoll('memoroll_camera_ready', {
+            stream_width: settings.width ?? null,
+            stream_height: settings.height ?? null,
+            ...screenShape(),
+          });
+        }
         if (video) {
           video.srcObject = stream;
           video.play().catch(() => undefined);
@@ -239,7 +248,14 @@ export default function CameraScreen({
           }
         }
       })
-      .catch(() => setLive(false));
+      .catch((error) => {
+        // NotAllowedError is a guest saying no; NotFoundError and
+        // NotReadableError are a phone that cannot. They want different fixes.
+        trackMemoRoll('memoroll_camera_failed', {
+          reason: (error as DOMException)?.name ?? 'unknown',
+        });
+        setLive(false);
+      });
     return () => {
       cancelled = true;
       // Keep what the viewfinder is showing, for the next time it opens.
@@ -411,6 +427,7 @@ export default function CameraScreen({
     try {
       // White-screen animation: shutter feedback only, never a light source.
       setFlashKey((k) => k + 1);
+      const started = performance.now();
       const stage = await lightAndTake();
       // A look is a few hundred milliseconds of arithmetic on the main
       // thread (2026-11-13: soft lens, halation, grain). Let the shutter's
@@ -419,6 +436,29 @@ export default function CameraScreen({
       await painted();
       const blob = await bakeShot(stage, film, stampDate, stampFonts);
       onShot(blob, film);
+      // After the shot is safely handed on: what was shot, on what, and how
+      // the phone was held as far as the browser can tell. A phone with its
+      // rotation locked reports portrait however it is held.
+      const video = videoRef.current;
+      trackMemoRoll('memoroll_shot_taken', {
+        shot_number: rollSize - remaining + 1,
+        roll_size: rollSize,
+        film,
+        flash: flashOn,
+        live_camera: Boolean(streamRef.current),
+        stream_width: video?.videoWidth || null,
+        stream_height: video?.videoHeight || null,
+        keeper_width: stage.width,
+        keeper_height: stage.height,
+        bytes: blob.size,
+        shutter_ms: Math.round(performance.now() - started),
+        ...screenShape(),
+      });
+    } catch (error) {
+      trackMemoRoll('memoroll_shot_failed', {
+        reason: (error as Error)?.name ?? 'unknown',
+      });
+      throw error;
     } finally {
       shooting.current = false;
     }

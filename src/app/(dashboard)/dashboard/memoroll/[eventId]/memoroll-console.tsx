@@ -1,5 +1,6 @@
 'use client';
 
+import { setMemoRollContext, trackMemoRoll } from '@/lib/memoroll-analytics';
 import { Image } from 'antd';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
@@ -99,6 +100,21 @@ export default function MemorollConsole({
    * it: from there the wall only changes by the owner's own hand.
    */
   const live = dashboard?.phase !== 'revealed';
+
+  // The owner's side of the analytics (memoroll-analytics.ts).
+  setMemoRollContext({
+    surface: 'product',
+    role: 'creator',
+    roll_code: event.code,
+    phase: dashboard?.phase,
+  });
+  useEffect(() => {
+    trackMemoRoll('memoroll_console_opened', {
+      photos: photos.length,
+      guests: participants.length,
+    });
+    // Once per visit; the counts are whatever they were on arrival.
+  }, []);
   /**
    * And by hand, any time (owner, 2026-11-23): half a minute is long when a
    * guest at your elbow has just pressed the shutter, and after the Reveal
@@ -115,7 +131,10 @@ export default function MemorollConsole({
   const [viewing, setViewing] = useState<number | null>(null);
 
   const [refreshing, startRefresh] = useTransition();
-  const refresh = () => startRefresh(() => router.refresh());
+  const refresh = () => {
+    trackMemoRoll('memoroll_console_refreshed');
+    startRefresh(() => router.refresh());
+  };
   useEffect(() => {
     if (!live) return;
     const timer = setInterval(() => router.refresh(), 30_000);
@@ -169,6 +188,7 @@ export default function MemorollConsole({
       const anchor = document.createElement('a');
       anchor.href = url;
       anchor.download = `memoroll-${event.code}.zip`;
+      trackMemoRoll('memoroll_zip_downloaded', { photos: photos.length });
       anchor.click();
       setTimeout(() => URL.revokeObjectURL(url), 10_000);
       setZipNote(
@@ -278,6 +298,7 @@ export default function MemorollConsole({
         );
         return;
       }
+      trackMemoRoll('memoroll_photo_deleted');
       router.refresh();
     } catch (error) {
       setDeleteProblem(

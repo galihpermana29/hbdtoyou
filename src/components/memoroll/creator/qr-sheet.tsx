@@ -1,5 +1,6 @@
 'use client';
 
+import { trackMemoRoll } from '@/lib/memoroll-analytics';
 import { motion, useReducedMotion } from 'framer-motion';
 import { QRCodeCanvas, QRCodeSVG } from 'qrcode.react';
 import { useRef, useState } from 'react';
@@ -80,14 +81,19 @@ export default function QrSheet({
     if (!canvas || !downloadName || !poster || drawing) return;
     setDrawing(true);
     try {
-      await downloadMemoRollKit(
+      const result = await downloadMemoRollKit(
         { eventName, url, qr: canvas, ...poster },
         {
           qr: downloadName,
           poster: downloadName.replace('memoroll-qr-', 'memoroll-poster-'),
         }
       );
+      trackMemoRoll('memoroll_qr_downloaded', { result, where: 'create' });
     } catch {
+      trackMemoRoll('memoroll_qr_downloaded', {
+        result: 'qr_only',
+        where: 'create',
+      });
       downloadQr();
     } finally {
       setDrawing(false);
