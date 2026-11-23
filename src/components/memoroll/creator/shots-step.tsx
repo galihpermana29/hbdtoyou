@@ -15,7 +15,7 @@ import { FEWEST_SHOTS, MOST_SHOTS } from './draft';
  *
  * The design draws ten with the minus already grey, so ten is the floor. The
  * ceiling is the product's (see MOST_SHOTS) and it arrives the same way: the
- * plus greys at fifteen exactly as the minus does at ten.
+ * plus greys at the ceiling exactly as the minus does at ten.
  */
 export default function ShotsStep({
   shotsPerGuest,

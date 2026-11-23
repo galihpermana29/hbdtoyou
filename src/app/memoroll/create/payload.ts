@@ -73,7 +73,7 @@ function parseHour(raw: string): number | null {
  * writes its own: with Jakarta's offset on it, because that is where the
  * product's events are and a bare stamp would move by the browser's zone.
  */
-function momentIso(day: string, hour: string): string | null {
+export function momentIso(day: string, hour: string): string | null {
   const parsedDay = parseDay(day);
   const minutes = parseHour(hour);
   if (!parsedDay || minutes === null) return null;
@@ -83,8 +83,7 @@ function momentIso(day: string, hour: string): string | null {
 }
 
 export type PayloadBuilt =
-  | { payload: Omit<IMemorollPayload, 'template_id'> }
-  | { problem: string };
+  { payload: Omit<IMemorollPayload, 'template_id'> } | { problem: string };
 
 /**
  * Everything the create call needs except the template, which is resolved at

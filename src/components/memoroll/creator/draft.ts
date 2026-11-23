@@ -86,11 +86,12 @@ export const FEWEST_SHOTS = 10;
  * The most shots a guest can be given.
  *
  * The design draws no ceiling, but the backend enforces one at 100 and the
- * product chose a tighter one - fifteen, decided 2026-08-29 - so the plus goes
- * unavailable here rather than the publish failing at the end. It arrives the
- * same way the floor did: the button greys, nothing is said.
+ * product chose a tighter one, so the plus goes unavailable here rather than
+ * the publish failing at the end. It arrives the same way the floor did: the
+ * button greys, nothing is said. Fifteen from 2026-08-29; twenty from
+ * 2026-11-23, on the owner's word.
  */
-export const MOST_SHOTS = 15;
+export const MOST_SHOTS = 20;
 
 /**
  * The eight steps, in the order the steppers give.

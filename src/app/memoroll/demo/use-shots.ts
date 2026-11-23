@@ -5,8 +5,8 @@ import { useCallback, useEffect, useRef, useState } from 'react';
 /** The designed roll: ten shots, unless the creator demo chose otherwise. */
 export const SHOT_LIMIT = 10;
 
-/** The most any roll can hold (the creator's plus greys at fifteen). */
-const MAX_SHOTS = 15;
+/** The most any roll can hold (the creator's plus greys at twenty). */
+const MAX_SHOTS = 20;
 
 const DB_NAME = 'memoroll-demo';
 const DB_VERSION = 1;

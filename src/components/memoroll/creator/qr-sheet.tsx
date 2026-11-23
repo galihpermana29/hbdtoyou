@@ -2,7 +2,8 @@
 
 import { motion, useReducedMotion } from 'framer-motion';
 import { QRCodeCanvas, QRCodeSVG } from 'qrcode.react';
-import { useRef } from 'react';
+import { useRef, useState } from 'react';
+import { downloadMemoRollPoster } from '@/lib/memoroll-poster';
 import Cta from '../ui/cta';
 import { ChevronLeftIcon } from '../ui/icons';
 import { REDUCED, SHEET_IN, SHEET_OUT } from '../ui/motion';
@@ -27,6 +28,7 @@ export default function QrSheet({
   onShareLink,
   onOpenDashboard,
   downloadName,
+  poster,
 }: {
   eventName: string;
   /** Where the code points: the roll's own address. */
@@ -46,6 +48,14 @@ export default function QrSheet({
    * nothing and the sheet stays exactly the drawn one.
    */
   downloadName?: string;
+  /**
+   * What the printable poster needs beyond the QR, which turns on the
+   * Download poster button beside Download QR: the same code with the three
+   * steps and the Reveal's date on it, so a creator has a sign to put on the
+   * tables without laying one out (owner, 2026-11-23). Only offered where
+   * the QR is: it is drawn around the same print-size code.
+   */
+  poster?: { shots: number; revealAt: string };
 }) {
   const reduce = useReducedMotion();
   const { backdropOpacity, dragProps } = useSheetDrag(onClose);
@@ -58,6 +68,23 @@ export default function QrSheet({
     anchor.href = canvas.toDataURL('image/png');
     anchor.download = downloadName;
     anchor.click();
+  };
+
+  const [drawing, setDrawing] = useState(false);
+  const downloadPoster = async () => {
+    const canvas = printable.current;
+    if (!canvas || !downloadName || !poster || drawing) return;
+    setDrawing(true);
+    try {
+      await downloadMemoRollPoster(
+        { eventName, url, qr: canvas, ...poster },
+        downloadName.replace('memoroll-qr-', 'memoroll-poster-')
+      );
+    } catch {
+      // The plain QR is still there to download; nothing else to say.
+    } finally {
+      setDrawing(false);
+    }
   };
 
   return (
@@ -183,6 +210,15 @@ export default function QrSheet({
                   className="-mt-[20px] h-[44px] w-full">
                   Download QR
                 </Cta>
+                {poster ? (
+                  <Cta
+                    tone="outline"
+                    onClick={downloadPoster}
+                    disabled={drawing}
+                    className="-mt-[20px] h-[44px] w-full">
+                    {drawing ? 'Making your poster…' : 'Download poster'}
+                  </Cta>
+                ) : null}
                 {/* The print-size code, kept offscreen: only its pixels are
                   wanted, and only when the button asks for them. */}
                 <div aria-hidden className="fixed -left-[2000px] top-0">
