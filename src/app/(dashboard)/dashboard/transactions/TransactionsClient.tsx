@@ -23,16 +23,28 @@ const StatCard = ({
 
 const TransactionsClient = ({
   initialData,
+  initialFilters,
 }: {
   initialData: IDashboardTransactions | null;
+  /** The filters the server already asked with, so the controls show them. */
+  initialFilters: {
+    method: string;
+    status: string;
+    date_from: string;
+    date_to: string;
+  };
 }) => {
   const [data, setData] = useState<IDashboardTransactions | null>(initialData);
   const [loading, setLoading] = useState(false);
-  const [method, setMethod] = useState<string | undefined>(undefined);
-  const [status, setStatus] = useState<string | undefined>(undefined);
+  const [method, setMethod] = useState<string | undefined>(
+    initialFilters.method
+  );
+  const [status, setStatus] = useState<string | undefined>(
+    initialFilters.status
+  );
   const [dateRange, setDateRange] = useState<[string, string]>([
-    '2024-01-01',
-    '2026-12-31',
+    initialFilters.date_from,
+    initialFilters.date_to,
   ]);
 
   const handleFilter = async () => {
