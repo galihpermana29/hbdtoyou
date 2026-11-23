@@ -10,6 +10,7 @@ import HeaderRule from '../ui/header-rule';
 import MemoifyFooter from '../ui/memoify-footer';
 import { colour, pillShadow } from '../ui/tokens';
 import Cta from '../ui/cta';
+import LockedPopup from './locked-popup';
 import { EASE_OUT } from '../ui/motion';
 import PhotoPreview from './photo-preview';
 import StorySheet from './story-sheet';
@@ -300,6 +301,7 @@ export default function GalleryScreen({
   photoCount,
   participantCount,
   reveal,
+  revealsAt,
   all,
   own,
   ownDeveloped,
@@ -322,6 +324,8 @@ export default function GalleryScreen({
   photoCount: number;
   participantCount: number;
   reveal: RevealClock;
+  /** The Reveal as a moment, for the card under a print that is still shut. */
+  revealsAt?: Date;
   all: GalleryGroup[];
   own: GalleryGroup[];
   /** The guest's own gate: their Roll through the Dark Room, Reveal or not. */
@@ -366,6 +370,8 @@ export default function GalleryScreen({
 }) {
   const reduce = useReducedMotion();
   const [opened, setOpened] = useState<number | null>(null);
+  /** A shut print was tapped: say why it is shut, and until when. */
+  const [lockedOpen, setLockedOpen] = useState(false);
 
   const revealed = reveal.state === 'past';
   /** Does the guest's own press hold everyone else's prints shut? */
@@ -598,12 +604,18 @@ export default function GalleryScreen({
                               />
                             </button>
                           ) : (
-                            <RollPrint
-                              src={photo.src}
-                              size="grid"
-                              veiled
-                              style={pose}
-                            />
+                            <button
+                              type="button"
+                              aria-label="Why can’t I see this shot?"
+                              className="block w-full"
+                              onClick={() => setLockedOpen(true)}>
+                              <RollPrint
+                                src={photo.src}
+                                size="grid"
+                                veiled
+                                style={pose}
+                              />
+                            </button>
                           )}
                         </span>
                       );
@@ -669,6 +681,20 @@ export default function GalleryScreen({
             onClose={() => setOpened(null)}
             storyEventName={storyExport ? eventName : undefined}
             storyEventDate={storyDate}
+          />
+        )}
+      </AnimatePresence>
+
+      <AnimatePresence>
+        {lockedOpen && (
+          <LockedPopup
+            revealsAt={revealsAt}
+            canDevelop={revealed && canDevelop}
+            onDevelop={() => {
+              setLockedOpen(false);
+              onDevelop();
+            }}
+            onDone={() => setLockedOpen(false)}
           />
         )}
       </AnimatePresence>

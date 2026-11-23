@@ -1,8 +1,9 @@
 'use client';
 
+import { Image } from 'antd';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
-import { useEffect, useState } from 'react';
+import { useEffect, useState, useTransition } from 'react';
 
 import type {
   IMemorollDashboardResponse,
@@ -16,10 +17,7 @@ import {
   deleteMemorollPhotoClient as deleteMemorollPhoto,
   updateMemorollEventClient as updateMemorollEvent,
 } from '@/action/memoroll-client-api';
-import {
-  FEWEST_SHOTS,
-  MOST_SHOTS,
-} from '@/components/memoroll/creator/draft';
+import { FEWEST_SHOTS, MOST_SHOTS } from '@/components/memoroll/creator/draft';
 import {
   memorollRecordFrom,
   serializeMemorollRecord,
@@ -101,6 +99,23 @@ export default function MemorollConsole({
    * it: from there the wall only changes by the owner's own hand.
    */
   const live = dashboard?.phase !== 'revealed';
+  /**
+   * And by hand, any time (owner, 2026-11-23): half a minute is long when a
+   * guest at your elbow has just pressed the shutter, and after the Reveal
+   * nothing refreshes on its own at all. The same `router.refresh()`, so the
+   * settings form keeps what was typed; the transition is how the button
+   * knows the new wall has landed.
+   */
+  /**
+   * A shot, opened large (owner, 2026-11-23): the wall's tiles are small and
+   * cropped to 3:4, and an owner deciding what to delete wants to see the
+   * whole photograph. Ant's own viewer, the one the gift templates use, with
+   * the wall as its group so the arrows walk it.
+   */
+  const [viewing, setViewing] = useState<number | null>(null);
+
+  const [refreshing, startRefresh] = useTransition();
+  const refresh = () => startRefresh(() => router.refresh());
   useEffect(() => {
     if (!live) return;
     const timer = setInterval(() => router.refresh(), 30_000);
@@ -141,16 +156,14 @@ export default function MemorollConsole({
     setZipNote(null);
     setZipStatus('Preparing…');
     try {
-      const { blob, count, missed } = await buildRollZip(
-        event.id,
-        (progress) =>
-          setZipStatus(
-            progress.stage === 'listing'
-              ? 'Preparing…'
-              : progress.stage === 'fetching'
-                ? `Fetching ${progress.done} of ${progress.total}…`
-                : 'Zipping…'
-          )
+      const { blob, count, missed } = await buildRollZip(event.id, (progress) =>
+        setZipStatus(
+          progress.stage === 'listing'
+            ? 'Preparing…'
+            : progress.stage === 'fetching'
+              ? `Fetching ${progress.done} of ${progress.total}…`
+              : 'Zipping…'
+        )
       );
       const url = URL.createObjectURL(blob);
       const anchor = document.createElement('a');
@@ -461,16 +474,26 @@ export default function MemorollConsole({
           <h2 className="text-[18px] font-[600] leading-[28px] text-[#182230]">
             Photos
           </h2>
-          {photos.length > 0 ? (
+          <div className="flex flex-wrap items-center gap-[8px]">
             <button
               type="button"
-              onClick={downloadAll}
-              disabled={zipStatus !== null}
-              aria-busy={zipStatus !== null}
-              className={primaryAction}>
-              {zipStatus ?? 'Download all (ZIP)'}
+              onClick={refresh}
+              disabled={refreshing}
+              aria-busy={refreshing}
+              className="rounded-full border border-[rgba(33,33,33,0.2)] px-[14px] py-[8px] text-[14px] font-[600] leading-[20px] text-[#344054] hover:bg-[#F9FAFB] disabled:opacity-60">
+              {refreshing ? 'Refreshing…' : 'Refresh'}
             </button>
-          ) : null}
+            {photos.length > 0 ? (
+              <button
+                type="button"
+                onClick={downloadAll}
+                disabled={zipStatus !== null}
+                aria-busy={zipStatus !== null}
+                className={primaryAction}>
+                {zipStatus ?? 'Download all (ZIP)'}
+              </button>
+            ) : null}
+          </div>
         </div>
         <p className={note}>
           Everything guests have shot, including what the reveal still hides
@@ -490,14 +513,20 @@ export default function MemorollConsole({
           <p className={note}>No shots yet.</p>
         ) : (
           <div className="grid grid-cols-2 gap-[16px] sm:grid-cols-3 lg:grid-cols-5">
-            {photos.map((photo) => (
+            {photos.map((photo, index) => (
               <figure key={photo.id} className="flex flex-col gap-[6px]">
-                <img
-                  src={photo.photo_url}
-                  alt={`A shot ${photo.uploader_name} took`}
-                  className="aspect-[3/4] w-full rounded-[12px] border border-[#dadada] object-cover"
-                  loading="lazy"
-                />
+                <button
+                  type="button"
+                  aria-label={`Open the shot ${photo.uploader_name} took`}
+                  onClick={() => setViewing(index)}
+                  className="block w-full cursor-zoom-in">
+                  <img
+                    src={photo.photo_url}
+                    alt={`A shot ${photo.uploader_name} took`}
+                    className="aspect-[3/4] w-full rounded-[12px] border border-[#dadada] object-cover"
+                    loading="lazy"
+                  />
+                </button>
                 <figcaption className="flex items-center justify-between gap-[8px]">
                   <span className="truncate text-[12px] font-[600] leading-[18px] text-[#344054]">
                     {photo.uploader_name}
@@ -519,6 +548,20 @@ export default function MemorollConsole({
             ))}
           </div>
         )}
+        {/* Nothing of its own on the page: only the viewer, when asked. */}
+        <div className="hidden">
+          <Image.PreviewGroup
+            items={photos.map((photo) => photo.photo_url)}
+            preview={{
+              visible: viewing !== null,
+              current: viewing ?? 0,
+              onVisibleChange: (open) => {
+                if (!open) setViewing(null);
+              },
+              onChange: (current) => setViewing(current),
+            }}
+          />
+        </div>
         {morePhotos ? (
           <p className={note}>
             This shows the first hundred shots and there are more.

@@ -17,7 +17,7 @@ import { QRCodeCanvas } from 'qrcode.react';
 import { useEffect, useRef, useState } from 'react';
 
 import type { IMemorollEventResponse } from '@/action/interfaces';
-import { downloadMemoRollPoster } from '@/lib/memoroll-poster';
+import { downloadMemoRollKit } from '@/lib/memoroll-poster';
 
 /** How wide the guest page is drawn; the scale every face is computed from. */
 const DESIGN_WIDTH = 375;
@@ -140,41 +140,43 @@ export default function MemorollListing({
    * and 1024px because this QR's whole job is being printed for the tables.
    */
   const [qrFor, setQrFor] = useState<IMemorollEventResponse | null>(null);
-  /**
-   * Whether that QR is wanted bare, or on the printable poster (the code
-   * with the three steps and the Reveal's date; see memoroll-poster.ts).
-   */
-  const [qrAs, setQrAs] = useState<'qr' | 'poster'>('qr');
   const qrCanvas = useRef<HTMLCanvasElement>(null);
 
+  /**
+   * One button, both files: the bare code and the printable poster around it
+   * (see downloadMemoRollKit). If the poster cannot be drawn, the code alone
+   * still saves.
+   */
   useEffect(() => {
-    if (!qrFor || !qrCanvas.current) return;
-    if (qrAs === 'poster') {
-      let cancelled = false;
-      downloadMemoRollPoster(
-        {
-          eventName: qrFor.title,
-          url: `${window.location.origin}/memoroll/${qrFor.code}`,
-          shots: qrFor.shot_limit,
-          revealAt: qrFor.reveal_at ?? qrFor.ends_at,
-          qr: qrCanvas.current,
-        },
-        `memoroll-poster-${qrFor.code}.png`
-      )
-        .catch(() => undefined)
-        .finally(() => {
-          if (!cancelled) setQrFor(null);
-        });
-      return () => {
-        cancelled = true;
-      };
-    }
-    const anchor = document.createElement('a');
-    anchor.href = qrCanvas.current.toDataURL('image/png');
-    anchor.download = `memoroll-qr-${qrFor.code}.png`;
-    anchor.click();
-    setQrFor(null);
-  }, [qrFor, qrAs]);
+    const canvas = qrCanvas.current;
+    if (!qrFor || !canvas) return;
+    let cancelled = false;
+    downloadMemoRollKit(
+      {
+        eventName: qrFor.title,
+        url: `${window.location.origin}/memoroll/${qrFor.code}`,
+        shots: qrFor.shot_limit,
+        revealAt: qrFor.reveal_at ?? qrFor.ends_at,
+        qr: canvas,
+      },
+      {
+        qr: `memoroll-qr-${qrFor.code}.png`,
+        poster: `memoroll-poster-${qrFor.code}.png`,
+      }
+    )
+      .catch(() => {
+        const anchor = document.createElement('a');
+        anchor.href = canvas.toDataURL('image/png');
+        anchor.download = `memoroll-qr-${qrFor.code}.png`;
+        anchor.click();
+      })
+      .finally(() => {
+        if (!cancelled) setQrFor(null);
+      });
+    return () => {
+      cancelled = true;
+    };
+  }, [qrFor]);
 
   const copyLink = (event: IMemorollEventResponse) => {
     const url = `${window.location.origin}/memoroll/${event.code}`;
@@ -242,28 +244,15 @@ export default function MemorollListing({
                 Manage roll
               </Link>
 
-              {/* Row three: the QR itself, as a file for the tables. */}
+              {/* Row three: the QR for the tables, bare and on its poster. */}
               <button
                 type="button"
-                onClick={() => {
-                  setQrAs('qr');
-                  setQrFor(event);
-                }}
-                className="block w-full rounded-full border border-[rgba(33,33,33,0.2)] px-[14px] py-[10px] text-center text-[14px] font-[600] leading-[20px] text-[#344054] hover:bg-[#F9FAFB]">
-                Download guest QR
-              </button>
-              {/* Row four: the same QR on a sign, ready to print. */}
-              <button
-                type="button"
-                disabled={qrFor?.id === event.id && qrAs === 'poster'}
-                onClick={() => {
-                  setQrAs('poster');
-                  setQrFor(event);
-                }}
+                disabled={qrFor !== null}
+                onClick={() => setQrFor(event)}
                 className="block w-full rounded-full border border-[rgba(33,33,33,0.2)] px-[14px] py-[10px] text-center text-[14px] font-[600] leading-[20px] text-[#344054] hover:bg-[#F9FAFB] disabled:opacity-60">
-                {qrFor?.id === event.id && qrAs === 'poster'
-                  ? 'Making your poster…'
-                  : 'Download poster'}
+                {qrFor?.id === event.id
+                  ? 'Getting them ready…'
+                  : 'Download QR & poster'}
               </button>
             </div>
           </div>
