@@ -1,5 +1,6 @@
 'use client';
 
+import { forgetPostHogPerson } from '@/lib/posthog-identity';
 import { AnimatePresence, motion } from 'framer-motion';
 import {
   BookImage,
@@ -425,6 +426,7 @@ const NavigationBar = ({
 
   const logOut = async () => {
     await removeSession();
+    forgetPostHogPerson();
     window.location.href = '/';
   };
 

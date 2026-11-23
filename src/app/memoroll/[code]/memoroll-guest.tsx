@@ -1,5 +1,6 @@
 'use client';
 
+import { forgetPostHogPerson } from '@/lib/posthog-identity';
 import { setMemoRollContext, trackMemoRoll } from '@/lib/memoroll-analytics';
 import { AnimatePresence, useReducedMotion } from 'framer-motion';
 import { signIn } from 'next-auth/react';
@@ -528,6 +529,7 @@ export default function MemorollGuest({
     } catch {
       // The reload below lands on whatever the truth is either way.
     }
+    forgetPostHogPerson();
     window.location.reload();
   };
 
