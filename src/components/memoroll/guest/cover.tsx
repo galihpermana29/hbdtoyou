@@ -114,6 +114,24 @@ const HERO_HEIGHT = 455;
  * - `waiting`: the entrance is about to play; everything is held at its start.
  * - `playing`: each part moves to its place at its own second.
  */
+/**
+ * A Cover photo at the size a Cover shows it. A print is at most half a
+ * phone wide; the upload behind it can be a camera's full frame, and
+ * decoding six of those is what a guest's phone was doing instead of
+ * animating. Cloudinary resizes on request by a segment in the address, so
+ * where the photo lives there it is asked for at 800 pixels wide. Any other
+ * address is left exactly as it is.
+ */
+function coverSized(src: string) {
+  const marker = '/image/upload/';
+  const at = src.indexOf(marker);
+  if (at === -1 || !src.includes('res.cloudinary.com')) return src;
+  const rest = src.slice(at + marker.length);
+  // Already transformed by somebody: leave their choice alone.
+  if (/^[a-z]_[^/]+[,/]/.test(rest) && !/^v\d+\//.test(rest)) return src;
+  return `${src.slice(0, at + marker.length)}c_limit,w_800,f_auto,q_auto/${rest}`;
+}
+
 type Stage = 'still' | 'waiting' | 'playing';
 
 /** Something that fades up into its place at a given second. */
@@ -226,7 +244,15 @@ function Print({
   return (
     <motion.div
       className={`absolute overflow-hidden bg-white ${className}`}
-      style={{ padding: `${pad}%`, boxShadow: PRINT_SHADOW, rotate, ...style }}
+      style={{
+        padding: `${pad}%`,
+        boxShadow: PRINT_SHADOW,
+        rotate,
+        // Its own layer while it is in the air, so a flight moves a picture
+        // already drawn rather than drawing it again each frame.
+        willChange: stage === 'still' ? undefined : 'transform',
+        ...style,
+      }}
       initial={false}
       animate={
         held
@@ -240,7 +266,12 @@ function Print({
           : { duration: 0 }
       }>
       {src ? (
-        <img src={src} alt="" className="block h-full w-full object-cover" />
+        <img
+          src={coverSized(src)}
+          alt=""
+          decoding="async"
+          className="block h-full w-full object-cover"
+        />
       ) : (
         <Waiting number={waitingNumber} />
       )}
@@ -301,7 +332,12 @@ function Hero({
           ease: EASE_OUT,
         })}>
         {src ? (
-          <img src={src} alt="" className="h-full w-full object-cover" />
+          <img
+            src={coverSized(src)}
+            alt=""
+            decoding="async"
+            className="h-full w-full object-cover"
+          />
         ) : (
           <Waiting />
         )}
@@ -470,10 +506,49 @@ export default function Cover({
   const [buttonHere, setButtonHere] = useState(false);
   /** Whether the entrance has run its course, after which nothing skips. */
   const [over, setOver] = useState(false);
+  /**
+   * The entrance starts once its photographs are ready to be drawn, not
+   * before (owner's recording, 2026-11-24: the prints flew in at about ten
+   * frames a second for the two seconds they were in the air, then the rest
+   * ran smooth). The prints were being thrown while the browser was still
+   * fetching and decoding what is on them - a couple's own photos, at
+   * whatever size they were uploaded - and every decode landed in the
+   * middle of a flight. So the paper stays bare until each photo has been
+   * decoded, or for a second and a half at most: a slow connection gets its
+   * entrance anyway, a little rough, rather than a blank screen.
+   */
   useEffect(() => {
     if (entrance && !draft) entranceSeen = true;
-    // One frame held at the start, so the first thing painted is bare paper.
-    const id = requestAnimationFrame(() => setStarted(true));
+    let cancelled = false;
+    let frame = 0;
+    const begin = () => {
+      if (cancelled) return;
+      cancelled = true;
+      // One frame held at the start, so the first thing painted is bare paper.
+      frame = requestAnimationFrame(() => setStarted(true));
+    };
+    const sources = animated
+      ? (photos.filter(Boolean) as string[]).map(coverSized)
+      : [];
+    const patience = window.setTimeout(begin, sources.length ? 1500 : 0);
+    Promise.all(
+      sources.map((src) => {
+        const image = new Image();
+        image.src = src;
+        // A photo that will not load is a blank print, not a stalled Cover.
+        return image.decode().catch(() => undefined);
+      })
+    ).then(begin);
+    return () => {
+      cancelled = true;
+      cancelAnimationFrame(frame);
+      window.clearTimeout(patience);
+    };
+    // Once, as the Cover mounts.
+  }, []);
+  // The button's arrival and the entrance's end, counted from when it starts.
+  useEffect(() => {
+    if (!started) return;
     const button = window.setTimeout(
       () => setButtonHere(true),
       ENTRANCE.button * 1000
@@ -483,11 +558,10 @@ export default function Cover({
       (ENTRANCE.footer + 0.6) * 1000
     );
     return () => {
-      cancelAnimationFrame(id);
       window.clearTimeout(button);
       window.clearTimeout(end);
     };
-  }, []);
+  }, [started]);
   const words = eventName.split(' ');
 
   return (
