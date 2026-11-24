@@ -59,10 +59,18 @@ export interface IntentPage {
 export const BIRTHDAY: IntentPage = {
   slug: 'kado-ulang-tahun-digital',
   meta: {
-    title: 'Kado Ulang Tahun Digital, Kirim Lewat Satu Link | Memoify',
+    // Rewritten 2026-11-24 from what Search Console showed people typing to
+    // reach this page: "kado digital gratis" (64 of its 109 impressions in a
+    // week, position 8, no clicks), then "link kado ulang tahun" and its
+    // cousins. The page already answered them; the title did not say so.
+    title: 'Kado Digital Gratis untuk Ulang Tahun, Kirim Lewat Link | Memoify',
     description:
-      'Bikin kado ulang tahun digital dari foto dan ucapanmu: halaman ala Netflix, playlist, koran, sampai mesin capit. Gratis untuk mulai, kirim lewat satu link.',
+      'Bikin kado digital buat ulang tahun dari foto dan ucapanmu, gratis untuk mulai: ala Netflix, playlist, sampai koran. Kirimnya cukup satu link.',
     keywords: [
+      'kado digital gratis',
+      'kado digital',
+      'link kado ulang tahun',
+      'link hadiah ulang tahun',
       'kado ulang tahun digital',
       'hadiah ulang tahun digital',
       'kado ulang tahun online',
