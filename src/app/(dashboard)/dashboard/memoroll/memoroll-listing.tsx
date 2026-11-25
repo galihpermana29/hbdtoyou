@@ -12,6 +12,7 @@
  * counts nothing, so these faces cost no statistics.
  */
 
+import { memorollOwnerOf } from '@/lib/memoroll-owner';
 import { trackMemoRoll } from '@/lib/memoroll-analytics';
 import Link from 'next/link';
 import { QRCodeCanvas } from 'qrcode.react';
@@ -125,10 +126,44 @@ function RollFace({ event }: { event: IMemorollEventResponse }) {
   );
 }
 
+/**
+ * Whose roll this card is, for the administrator (owner, 2026-11-25: every
+ * card says who made it, by email). The email is the backend's to send; a
+ * row without one says so rather than leaving the admin to guess that an
+ * unmarked roll is their own.
+ */
+function Creator({
+  event,
+  me,
+}: {
+  event: IMemorollEventResponse;
+  me: string | null;
+}) {
+  const owner = memorollOwnerOf(event);
+  const mine = owner.id !== null && me !== null && owner.id === me;
+  return (
+    <p className={`${note} mt-[4px] truncate`}>
+      By{' '}
+      {owner.email ? (
+        <span className="font-[600] text-[#182230]">{owner.email}</span>
+      ) : (
+        <span className="italic">creator not sent by the backend yet</span>
+      )}
+      {mine ? ' (you)' : ''}
+    </p>
+  );
+}
+
 export default function MemorollListing({
   events,
+  admin = false,
+  me = null,
 }: {
   events: IMemorollEventResponse[];
+  /** The administrator's listing: everybody's rolls, each marked with its maker. */
+  admin?: boolean;
+  /** The signed-in account's id, to mark the administrator's own rolls. */
+  me?: string | null;
 }) {
   /** Which card's Copy link just landed, so its button can say so briefly. */
   const [copied, setCopied] = useState<string | null>(null);
@@ -220,6 +255,7 @@ export default function MemorollListing({
               <p className={note}>
                 Opens {opensOn(event.starts_at)} · {event.shot_limit} shots each
               </p>
+              {admin ? <Creator event={event} me={me} /> : null}
             </div>
 
             <p className={`${note} truncate`}>

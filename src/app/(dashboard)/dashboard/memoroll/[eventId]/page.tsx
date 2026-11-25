@@ -1,3 +1,5 @@
+import { isAdminEmail } from '@/lib/admin';
+import { memorollOwnerOf } from '@/lib/memoroll-owner';
 import type { Metadata } from 'next';
 
 import {
@@ -65,12 +67,30 @@ export default async function MemorollConsolePage({
     );
   }
 
+  /**
+   * The administrator inside somebody else's roll (2026-11-25: the backend
+   * now answers the admin account for any event). Told from the owner's id
+   * once the backend sends one; until then from the two reads that stay the
+   * owner's alone, which refuse the administrator on a roll that is not
+   * theirs.
+   */
+  const owner = memorollOwnerOf(event.data);
+  const foreign =
+    isAdminEmail(session.email) &&
+    (owner.id !== null && session.userId
+      ? owner.id !== session.userId
+      : !dashboard.success && !participants.success);
+
   return (
     <MemorollConsole
       event={event.data}
+      adminView={foreign ? { ownerEmail: owner.email } : null}
+      participantsProblem={participants.success ? null : participants.message}
       dashboard={dashboard.data}
       participants={participants.data ?? []}
-      moreParticipants={(participants.meta?.totalData ?? 0) > PARTICIPANTS_SHOWN}
+      moreParticipants={
+        (participants.meta?.totalData ?? 0) > PARTICIPANTS_SHOWN
+      }
       photos={photos.data ?? []}
       morePhotos={(photos.meta?.totalData ?? 0) > PHOTOS_SHOWN}
     />
