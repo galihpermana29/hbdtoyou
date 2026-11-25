@@ -4,7 +4,7 @@ import { setMemoRollContext, trackMemoRoll } from '@/lib/memoroll-analytics';
 import { Image } from 'antd';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
-import { useEffect, useState, useTransition } from 'react';
+import { useEffect, useRef, useState, useTransition } from 'react';
 
 import type {
   IMemorollDashboardResponse,
@@ -18,12 +18,24 @@ import {
   deleteMemorollPhotoClient as deleteMemorollPhoto,
   updateMemorollEventClient as updateMemorollEvent,
 } from '@/action/memoroll-client-api';
-import { FEWEST_SHOTS, MOST_SHOTS } from '@/components/memoroll/creator/draft';
+import {
+  COVER_STYLES,
+  FEWEST_SHOTS,
+  MOST_SHOTS,
+  VIBES,
+  type Vibe,
+} from '@/components/memoroll/creator/draft';
+import Cover, { type CoverStyle } from '@/components/memoroll/guest/cover';
+import { memorollFonts } from '@/components/memoroll/ui/fonts';
+import PhoneMock from '@/components/memoroll/ui/phone-mock';
 import {
   memorollRecordFrom,
   serializeMemorollRecord,
 } from '@/lib/memoroll-record';
 import { buildRollZip } from '@/lib/memoroll-zip';
+// The create flow's own path for a cover photograph (memoroll-create.tsx),
+// so a photo replaced here is stored where the first ones were.
+import { newUploadImageWithAPI } from '@/lib/upload';
 
 const card =
   'rounded-[20px] border border-[#dadada] bg-white p-[20px] flex flex-col gap-[12px]';
@@ -42,6 +54,34 @@ const lockedField =
   'rounded-full border border-transparent bg-[#F2F4F7] px-[12px] py-[8px] text-[14px] leading-[20px] text-[#475467] outline-none cursor-default';
 const field =
   'rounded-full border border-[rgba(33,33,33,0.2)] px-[12px] py-[8px] text-[14px] leading-[20px] text-[#182230]';
+/**
+ * One of a few answers (cover style, vibe), in four states: the one chosen
+ * or not, while the form can be changed or while it is locked. Locked, the
+ * chosen one still has to read as chosen, because that is all there is to
+ * read.
+ */
+const choiceOpen =
+  'rounded-full border border-[rgba(33,33,33,0.2)] px-[14px] py-[8px] text-left text-[14px] font-[600] leading-[20px] text-[#344054] hover:bg-[#F9FAFB]';
+const choiceOpenChosen =
+  'rounded-full border border-[#E34013] bg-[#FFF4F1] px-[14px] py-[8px] text-left text-[14px] font-[600] leading-[20px] text-[#E34013]';
+const choiceLocked =
+  'rounded-full border border-transparent px-[14px] py-[8px] text-left text-[14px] font-[400] leading-[20px] text-[#98A2B3] cursor-default';
+const choiceLockedChosen =
+  'rounded-full border border-transparent bg-[#F2F4F7] px-[14px] py-[8px] text-left text-[14px] font-[600] leading-[20px] text-[#475467] cursor-default';
+const slotAction =
+  'rounded-full border border-[rgba(33,33,33,0.2)] px-[8px] py-[2px] text-[12px] font-[600] leading-[18px] text-[#344054] hover:bg-[#F9FAFB] disabled:opacity-60';
+const slotTile =
+  'relative flex h-[72px] w-[72px] items-center justify-center overflow-hidden rounded-[12px] border border-[#dadada] bg-[#F9FAFB]';
+const slotTileEmpty =
+  'relative flex h-[72px] w-[72px] items-center justify-center overflow-hidden rounded-[12px] border border-dashed border-[rgba(33,33,33,0.2)] bg-[#F9FAFB] text-[12px] leading-[18px] text-[#98A2B3]';
+
+/** How wide the phone is drawn in the card: the create flow's own preview. */
+const PREVIEW_WIDTH = 154;
+
+/** The stored cover style as the Cover reads it: anything unknown is Collage. */
+function coverStyleFrom(stored: string): CoverStyle {
+  return stored === 'taped' || stored === 'simple' ? stored : 'collage';
+}
 
 /** An ISO stamp as a `datetime-local` value in this browser's zone. */
 function localInputFrom(iso: string): string {
@@ -176,6 +216,12 @@ export default function MemorollConsole({
     reveal: localInputFrom(event.reveal_at || event.ends_at),
     venue: record?.venue ?? '',
     address: record?.address ?? '',
+    coverStyle: coverStyleFrom(event.cover_style),
+    photos: (event.cover_photo_urls ?? []).filter(
+      (photo) => typeof photo === 'string' && photo !== ''
+    ),
+    vibe: record?.vibe ?? ('wedding' as Vibe),
+    onlyAtTheVenue: record?.onlyAtTheVenue ?? false,
   };
   const storedKey = JSON.stringify(stored);
 
@@ -185,6 +231,31 @@ export default function MemorollConsole({
   const [reveal, setReveal] = useState(stored.reveal);
   const [venue, setVenue] = useState(stored.venue);
   const [address, setAddress] = useState(stored.address);
+  const [coverStyle, setCoverStyle] = useState<CoverStyle>(stored.coverStyle);
+  /**
+   * The cover's photographs exactly as they would be sent: in slot order,
+   * with no gaps. The backend replaces the whole list and cannot store a
+   * hole, so the form never holds one either - taking a photo out closes the
+   * row up at once, here and in the preview, instead of at the next visit.
+   */
+  const [coverPhotos, setCoverPhotos] = useState<string[]>(stored.photos);
+  const [vibe, setVibe] = useState<Vibe>(stored.vibe);
+  const [onlyAtTheVenue, setOnlyAtTheVenue] = useState(stored.onlyAtTheVenue);
+
+  /** The one photograph on its way to storage, and the slot it is for. */
+  const [uploading, setUploading] = useState<{
+    slot: number;
+    preview: string;
+  } | null>(null);
+  const [uploadProblem, setUploadProblem] = useState<string | null>(null);
+  /**
+   * Counts every time the form is put back to what is stored. An upload
+   * remembers the count it started under, so one that lands after Cancel is
+   * not written into a form that has moved on.
+   */
+  const fills = useRef(0);
+  const picker = useRef<HTMLInputElement>(null);
+  const pickingFor = useRef(0);
 
   /**
    * The form is read-only until somebody asks to edit it (owner,
@@ -201,6 +272,64 @@ export default function MemorollConsole({
     setReveal(stored.reveal);
     setVenue(stored.venue);
     setAddress(stored.address);
+    setCoverStyle(stored.coverStyle);
+    setCoverPhotos(stored.photos);
+    setVibe(stored.vibe);
+    setOnlyAtTheVenue(stored.onlyAtTheVenue);
+    fills.current += 1;
+    setUploading(null);
+    setUploadProblem(null);
+  };
+
+  const slots =
+    COVER_STYLES.find((option) => option.key === coverStyle)?.slots ?? 1;
+  /** Photographs the roll holds beyond what this style has room to show. */
+  const beyond = Math.max(0, coverPhotos.length - slots);
+
+  /**
+   * A picked photograph goes to storage first and into the form only once
+   * it has an address there: a cover saved with a blob: URL is a cover no
+   * guest can see. One at a time, so two landings cannot disagree about
+   * which slot is which. If it fails, the slot is left as it was.
+   */
+  const uploadPhoto = (slot: number, file: File) => {
+    if (uploading) return;
+    const started = fills.current;
+    const preview = URL.createObjectURL(file);
+    const failed = () => {
+      if (fills.current !== started) return;
+      setUploadProblem(
+        'That photograph could not be uploaded, so the cover is as it was. Pick it again to retry.'
+      );
+    };
+    setUploadProblem(null);
+    setUploading({ slot, preview });
+
+    const body = new FormData();
+    body.append('file', file);
+    newUploadImageWithAPI(body)
+      .then((result) => {
+        const url = result.success ? result.data?.data : null;
+        if (typeof url !== 'string' || !url) {
+          failed();
+          return;
+        }
+        if (fills.current !== started) return;
+        setCoverPhotos((list) =>
+          slot < list.length
+            ? list.map((photo, index) => (index === slot ? url : photo))
+            : [...list, url]
+        );
+      })
+      .catch(failed)
+      .finally(() => {
+        URL.revokeObjectURL(preview);
+        if (fills.current === started) setUploading(null);
+      });
+  };
+  const pick = (slot: number) => {
+    pickingFor.current = slot;
+    picker.current?.click();
   };
   // While locked, the form follows the event: the page refreshes itself, and
   // an owner editing on their phone should see it here too.
@@ -274,7 +403,9 @@ export default function MemorollConsole({
   const [deleteProblem, setDeleteProblem] = useState<string | null>(null);
 
   const save = async () => {
-    if (saving) return;
+    // A photograph still travelling is not in the form yet; saving now would
+    // save the cover without it.
+    if (saving || uploading) return;
     setSaid(null);
 
     const startsAt = isoFrom(opens);
@@ -316,9 +447,16 @@ export default function MemorollConsole({
       changes.ends_at = revealAt;
       changes.reveal_at = revealAt;
     }
+    if (coverStyle !== stored.coverStyle) changes.cover_style = coverStyle;
+    // The whole list or nothing: the backend replaces the array it is sent.
+    if (JSON.stringify(coverPhotos) !== JSON.stringify(stored.photos)) {
+      changes.cover_photo_urls = coverPhotos;
+    }
     if (
       venue.trim() !== stored.venue.trim() ||
-      address.trim() !== stored.address.trim()
+      address.trim() !== stored.address.trim() ||
+      vibe !== stored.vibe ||
+      onlyAtTheVenue !== stored.onlyAtTheVenue
     ) {
       // Laid over what is stored, so a key this form does not know survives.
       let kept: Record<string, unknown> = {};
@@ -332,10 +470,10 @@ export default function MemorollConsole({
         ...kept,
         ...JSON.parse(
           serializeMemorollRecord({
-            vibe: record?.vibe ?? 'wedding',
+            vibe,
             venue: venue.trim(),
             address: address.trim(),
-            onlyAtTheVenue: record?.onlyAtTheVenue ?? false,
+            onlyAtTheVenue,
           })
         ),
       });
@@ -545,13 +683,250 @@ export default function MemorollConsole({
             />
           </label>
         </div>
+
+        {/* The cover, the vibe and the venue rule (owner, 2026-11-26): until
+            now a roll's cover could only be chosen while making it. */}
+        <div className="flex flex-col gap-[16px] border-t border-[#dadada] pt-[16px] md:flex-row md:items-start md:justify-between md:gap-[24px]">
+          <div className="flex min-w-0 flex-1 flex-col gap-[16px]">
+            <div
+              role="group"
+              aria-label="Cover style"
+              className="flex flex-col gap-[6px]">
+              <span className={label}>Cover style</span>
+              <div className="flex flex-wrap gap-[8px]">
+                {COVER_STYLES.map((option) => (
+                  <button
+                    key={option.key}
+                    type="button"
+                    aria-pressed={option.key === coverStyle}
+                    disabled={!editing}
+                    onClick={() => setCoverStyle(option.key)}
+                    className={
+                      editing
+                        ? option.key === coverStyle
+                          ? choiceOpenChosen
+                          : choiceOpen
+                        : option.key === coverStyle
+                          ? choiceLockedChosen
+                          : choiceLocked
+                    }>
+                    {option.copy}
+                  </button>
+                ))}
+              </div>
+            </div>
+
+            <div
+              role="group"
+              aria-label="Cover photos"
+              className="flex flex-col gap-[6px]">
+              <span className={label}>
+                {slots === 1 ? 'Cover photo' : `Cover photos (up to ${slots})`}
+              </span>
+              <div className="flex flex-wrap gap-[12px]">
+                {Array.from({ length: slots }, (unused, slot) => {
+                  const photo = coverPhotos[slot] ?? null;
+                  const arriving = uploading?.slot === slot;
+                  // Only the first empty slot takes a photograph: the list
+                  // has no gaps, so that is where the next one lands.
+                  const next = !photo && slot === coverPhotos.length;
+                  return (
+                    <div
+                      key={slot}
+                      data-cover-slot={slot + 1}
+                      className="flex w-[72px] flex-col items-center gap-[6px]">
+                      <div
+                        className={
+                          photo || arriving ? slotTile : slotTileEmpty
+                        }>
+                        {arriving ? (
+                          <>
+                            <img
+                              src={uploading.preview}
+                              alt=""
+                              className="absolute inset-0 h-full w-full object-cover opacity-40"
+                            />
+                            <span
+                              role="status"
+                              className="relative text-[12px] font-[600] leading-[18px] text-[#182230]">
+                              Uploading…
+                            </span>
+                          </>
+                        ) : photo ? (
+                          <img
+                            src={photo}
+                            alt={`Cover photo ${slot + 1}`}
+                            className="absolute inset-0 h-full w-full object-cover"
+                          />
+                        ) : (
+                          <span>Empty</span>
+                        )}
+                      </div>
+                      {editing ? (
+                        photo ? (
+                          <>
+                            <button
+                              type="button"
+                              aria-label={`Replace cover photo ${slot + 1}`}
+                              disabled={uploading !== null || saving}
+                              onClick={() => pick(slot)}
+                              className={slotAction}>
+                              Replace
+                            </button>
+                            <button
+                              type="button"
+                              aria-label={`Remove cover photo ${slot + 1}`}
+                              disabled={uploading !== null || saving}
+                              onClick={() =>
+                                setCoverPhotos((list) =>
+                                  list.filter((kept, index) => index !== slot)
+                                )
+                              }
+                              className={slotAction}>
+                              Remove
+                            </button>
+                          </>
+                        ) : next ? (
+                          <button
+                            type="button"
+                            aria-label={`Add cover photo ${slot + 1}`}
+                            disabled={uploading !== null || saving}
+                            onClick={() => pick(slot)}
+                            className={slotAction}>
+                            Add
+                          </button>
+                        ) : null
+                      ) : null}
+                    </div>
+                  );
+                })}
+              </div>
+              {editing ? (
+                <input
+                  ref={picker}
+                  type="file"
+                  accept="image/*"
+                  aria-label="Cover photo file"
+                  className="hidden"
+                  onChange={(e) => {
+                    const file = e.target.files?.[0];
+                    if (file) uploadPhoto(pickingFor.current, file);
+                    // The same file picked twice fires no second change.
+                    e.target.value = '';
+                  }}
+                />
+              ) : null}
+              {beyond > 0 ? (
+                <p data-cover-kept className={note}>
+                  {slots === 1
+                    ? `This style shows one photo. The other ${beyond} ${
+                        beyond === 1 ? 'stays' : 'stay'
+                      } saved with the roll and ${
+                        beyond === 1 ? 'comes' : 'come'
+                      } back if you choose Collage again. Remove this one and the next takes its place.`
+                    : `${beyond} more ${
+                        beyond === 1 ? 'photo is' : 'photos are'
+                      } saved with the roll than this style shows.`}
+                </p>
+              ) : coverPhotos.length > 0 && coverPhotos.length < slots ? (
+                <p className={note}>
+                  With fewer than {slots}, guests see these repeated around the
+                  cover.
+                </p>
+              ) : null}
+              {uploadProblem ? (
+                <p role="alert" className={alert}>
+                  {uploadProblem}
+                </p>
+              ) : null}
+            </div>
+
+            <div
+              role="group"
+              aria-label="Vibe"
+              className="flex flex-col gap-[6px]">
+              <span className={label}>Vibe</span>
+              <div className="flex flex-wrap gap-[8px]">
+                {VIBES.map((option) => (
+                  <button
+                    key={option.key}
+                    type="button"
+                    aria-pressed={option.key === vibe}
+                    disabled={!editing}
+                    onClick={() => setVibe(option.key)}
+                    className={
+                      editing
+                        ? option.key === vibe
+                          ? choiceOpenChosen
+                          : choiceOpen
+                        : option.key === vibe
+                          ? choiceLockedChosen
+                          : choiceLocked
+                    }>
+                    {option.copy}
+                  </button>
+                ))}
+              </div>
+            </div>
+
+            <div className="flex items-center gap-[12px]">
+              <button
+                type="button"
+                role="switch"
+                aria-checked={onlyAtTheVenue}
+                aria-label="Only at the venue"
+                disabled={!editing}
+                onClick={() => setOnlyAtTheVenue((on) => !on)}
+                className={
+                  onlyAtTheVenue
+                    ? editing
+                      ? 'flex h-[24px] w-[44px] shrink-0 items-center justify-end rounded-full bg-[#E34013] p-[2px]'
+                      : 'flex h-[24px] w-[44px] shrink-0 cursor-default items-center justify-end rounded-full bg-[#98A2B3] p-[2px]'
+                    : editing
+                      ? 'flex h-[24px] w-[44px] shrink-0 items-center justify-start rounded-full bg-[#D0D5DD] p-[2px]'
+                      : 'flex h-[24px] w-[44px] shrink-0 cursor-default items-center justify-start rounded-full bg-[#EAECF0] p-[2px]'
+                }>
+                <span className="block h-[20px] w-[20px] rounded-full bg-white shadow" />
+              </button>
+              <div className="flex flex-col">
+                <span className={label}>
+                  Only at the venue: {onlyAtTheVenue ? 'on' : 'off'}
+                </span>
+                {/* Stored and enforced by nothing yet (memoroll-record.ts);
+                    the card says so rather than promise a fence. */}
+                <span className={note}>
+                  Saved with the roll. Nothing checks where a guest is yet.
+                </span>
+              </div>
+            </div>
+          </div>
+
+          {/* The Cover itself, as a guest gets it: not a draft, so a short
+              collage repeats its photos the way theirs does, and with no
+              entrance, which is a guest's alone. */}
+          <div className="flex shrink-0 flex-col items-center gap-[6px]">
+            <span className={label}>What guests see</span>
+            <div className={memorollFonts}>
+              <PhoneMock width={PREVIEW_WIDTH}>
+                <Cover
+                  eventName={name}
+                  photos={coverPhotos}
+                  style={coverStyle}
+                  // The guest page's own words for the button.
+                  ctaLabel="Get me in"
+                  onEnter={() => {}}
+                />
+              </PhoneMock>
+            </div>
+          </div>
+        </div>
         <div className="flex flex-wrap items-center gap-[12px]">
           {editing ? (
             <>
               <button
                 type="button"
                 onClick={save}
-                disabled={saving}
+                disabled={saving || uploading !== null}
                 aria-busy={saving}
                 className={primaryAction}>
                 {saving ? 'Saving…' : 'Save changes'}
