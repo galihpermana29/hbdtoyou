@@ -661,6 +661,15 @@ export interface IMemorollEventResponse {
   caption: string;
   detail_content_json_text: string;
   create_time: string;
+  /**
+   * Whose event this is. Asked of the backend on 2026-11-25, when the admin
+   * account began to be answered with every user's events: until it sends
+   * these, a row cannot say whose it is and nothing here invents it. Read
+   * through `memorollOwnerOf` (src/lib/memoroll-owner.ts), never directly.
+   */
+  user_id?: string;
+  user_email?: string;
+  owner_email?: string;
 }
 
 // The five words the gallery uses for where the event stands. `countdown`

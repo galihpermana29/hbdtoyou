@@ -35,6 +35,11 @@ const note = 'text-[14px] font-[400] leading-[20px] text-[#667085]';
 const alert = 'text-[14px] font-[400] leading-[20px] text-[#B42318]';
 const good = 'text-[14px] font-[400] leading-[20px] text-[#027A48]';
 const label = 'text-[14px] font-[600] leading-[20px] text-[#344054]';
+const quietAction =
+  'rounded-full border border-[rgba(33,33,33,0.2)] px-[14px] py-[8px] text-[14px] font-[600] leading-[20px] text-[#344054] hover:bg-[#F9FAFB] disabled:opacity-60';
+/** A settings field while the form is locked: there to read, not to type in. */
+const lockedField =
+  'rounded-full border border-transparent bg-[#F2F4F7] px-[12px] py-[8px] text-[14px] leading-[20px] text-[#475467] outline-none cursor-default';
 const field =
   'rounded-full border border-[rgba(33,33,33,0.2)] px-[12px] py-[8px] text-[14px] leading-[20px] text-[#182230]';
 
@@ -75,6 +80,8 @@ function said(iso: string): string {
  */
 export default function MemorollConsole({
   event,
+  adminView = null,
+  participantsProblem = null,
   dashboard,
   participants,
   moreParticipants,
@@ -82,6 +89,13 @@ export default function MemorollConsole({
   morePhotos,
 }: {
   event: IMemorollEventResponse;
+  /**
+   * Set when the administrator has opened a roll that is not theirs
+   * (2026-11-25), with its owner's email where the backend sent one.
+   */
+  adminView?: { ownerEmail: string | null } | null;
+  /** Why the guest list could not be read, when it could not. */
+  participantsProblem?: string | null;
   dashboard: IMemorollDashboardResponse | null;
   participants: IMemorollParticipant[];
   moreParticipants: boolean;
@@ -99,12 +113,16 @@ export default function MemorollConsole({
    * The polling retires at the Reveal, when the upload window shuts with
    * it: from there the wall only changes by the owner's own hand.
    */
-  const live = dashboard?.phase !== 'revealed';
+  // Without the numbers there is nothing to say the roll has been revealed,
+  // and in somebody else's roll the administrator never gets them: polling
+  // there would ask the backend four things every half minute for ever, two
+  // of them refused each time.
+  const live = dashboard ? dashboard.phase !== 'revealed' : !adminView;
 
   // The owner's side of the analytics (memoroll-analytics.ts).
   setMemoRollContext({
     surface: 'product',
-    role: 'creator',
+    role: adminView ? 'admin' : 'creator',
     roll_code: event.code,
     phase: dashboard?.phase,
   });
@@ -146,18 +164,57 @@ export default function MemorollConsole({
     };
   }, [live, router]);
 
-  const [name, setName] = useState(event.host_name);
-  const [shots, setShots] = useState(event.shot_limit);
-  const [opens, setOpens] = useState(localInputFrom(event.starts_at));
-  const [reveal, setReveal] = useState(
-    localInputFrom(event.reveal_at || event.ends_at)
-  );
-  const [venue, setVenue] = useState(record?.venue ?? '');
-  const [address, setAddress] = useState(record?.address ?? '');
+  /**
+   * The settings as they are stored, in the form's own terms. What the form
+   * shows while it is locked, what Edit starts from, what Cancel goes back
+   * to, and what Save compares against to send only what changed.
+   */
+  const stored = {
+    name: event.host_name,
+    shots: event.shot_limit,
+    opens: localInputFrom(event.starts_at),
+    reveal: localInputFrom(event.reveal_at || event.ends_at),
+    venue: record?.venue ?? '',
+    address: record?.address ?? '',
+  };
+  const storedKey = JSON.stringify(stored);
+
+  const [name, setName] = useState(stored.name);
+  const [shots, setShots] = useState(stored.shots);
+  const [opens, setOpens] = useState(stored.opens);
+  const [reveal, setReveal] = useState(stored.reveal);
+  const [venue, setVenue] = useState(stored.venue);
+  const [address, setAddress] = useState(stored.address);
+
+  /**
+   * The form is read-only until somebody asks to edit it (owner,
+   * 2026-11-25). It used to be live the moment the page opened, with one
+   * button that rewrote the whole event; now that the administrator can be
+   * standing in another person's roll, changing something takes saying so
+   * first.
+   */
+  const [editing, setEditing] = useState(false);
+  const fill = () => {
+    setName(stored.name);
+    setShots(stored.shots);
+    setOpens(stored.opens);
+    setReveal(stored.reveal);
+    setVenue(stored.venue);
+    setAddress(stored.address);
+  };
+  // While locked, the form follows the event: the page refreshes itself, and
+  // an owner editing on their phone should see it here too.
+  useEffect(() => {
+    if (!editing) fill();
+    // `storedKey` is the stored settings by value; `fill` only reads them.
+  }, [storedKey, editing]);
 
   const [saving, setSaving] = useState(false);
   const [said_, setSaid] = useState<
-    { kind: 'saved' } | { kind: 'failed'; problem: string } | null
+    | { kind: 'saved' }
+    | { kind: 'unchanged' }
+    | { kind: 'failed'; problem: string }
+    | null
   >(null);
 
   /** Download all: what it is doing now, or null when idle. */
@@ -240,23 +297,58 @@ export default function MemorollConsole({
       return;
     }
 
+    /**
+     * Only what changed is sent. The endpoint keeps what it is not sent, and
+     * this used to send everything on every press: the title was replaced by
+     * the name, the times were rounded to the minute and written back, and
+     * the stored record was rebuilt from the four fields this form knows -
+     * harmless to a roll this form made, not to one it did not.
+     */
+    const changes: Parameters<typeof updateMemorollEvent>[1] = {};
+    if (trimmed !== stored.name.trim()) {
+      changes.title = trimmed;
+      changes.host_name = trimmed;
+    }
+    if (shots !== stored.shots) changes.shot_limit = shots;
+    if (opens !== stored.opens) changes.starts_at = startsAt;
+    if (reveal !== stored.reveal) {
+      // Shooting runs to the Reveal (CONTEXT.md): the two travel together.
+      changes.ends_at = revealAt;
+      changes.reveal_at = revealAt;
+    }
+    if (
+      venue.trim() !== stored.venue.trim() ||
+      address.trim() !== stored.address.trim()
+    ) {
+      // Laid over what is stored, so a key this form does not know survives.
+      let kept: Record<string, unknown> = {};
+      try {
+        const parsed = JSON.parse(event.detail_content_json_text || '{}');
+        if (parsed && typeof parsed === 'object') kept = parsed;
+      } catch {
+        kept = {};
+      }
+      changes.detail_content_json_text = JSON.stringify({
+        ...kept,
+        ...JSON.parse(
+          serializeMemorollRecord({
+            vibe: record?.vibe ?? 'wedding',
+            venue: venue.trim(),
+            address: address.trim(),
+            onlyAtTheVenue: record?.onlyAtTheVenue ?? false,
+          })
+        ),
+      });
+    }
+    if (Object.keys(changes).length === 0) {
+      setSaid({ kind: 'unchanged' });
+      setEditing(false);
+      return;
+    }
+
     setSaving(true);
     try {
-      const saved = await updateMemorollEvent(event.id, {
-        title: trimmed,
-        host_name: trimmed,
-        shot_limit: shots,
-        starts_at: startsAt,
-        // Shooting runs to the Reveal (CONTEXT.md): the two travel together.
-        ends_at: revealAt,
-        reveal_at: revealAt,
-        detail_content_json_text: serializeMemorollRecord({
-          vibe: record?.vibe ?? 'wedding',
-          venue: venue.trim(),
-          address: address.trim(),
-          onlyAtTheVenue: record?.onlyAtTheVenue ?? false,
-        }),
-      });
+      const saved = await updateMemorollEvent(event.id, changes);
       if (!saved.success) {
         setSaid({
           kind: 'failed',
@@ -265,6 +357,7 @@ export default function MemorollConsole({
         return;
       }
       setSaid({ kind: 'saved' });
+      setEditing(false);
       router.refresh();
     } catch (error) {
       // The client call answers with an envelope, so a throw is transport
@@ -352,16 +445,42 @@ export default function MemorollConsole({
         </p>
       </div>
 
+      {adminView ? (
+        <div
+          role="note"
+          className="rounded-[16px] border border-[#FEDF89] bg-[#FFFAEB] px-[16px] py-[12px] text-[14px] leading-[20px] text-[#93370D]">
+          <strong className="font-[600]">Admin view.</strong> This roll belongs
+          to{' '}
+          {adminView.ownerEmail ? (
+            <strong className="font-[600]">{adminView.ownerEmail}</strong>
+          ) : (
+            'another account (the backend does not send whose yet)'
+          )}
+          . Anything you save or delete here changes their event, and a deleted
+          photo cannot be brought back.
+        </div>
+      ) : null}
+
       {/* Settings: what can still change after publishing. */}
       <div className={card}>
-        <h2 className="text-[18px] font-[600] leading-[28px] text-[#182230]">
-          Settings
-        </h2>
+        <div>
+          <h2 className="text-[18px] font-[600] leading-[28px] text-[#182230]">
+            Settings
+          </h2>
+          <p className={note}>
+            {editing
+              ? adminView
+                ? 'You are editing another account’s roll. Only what you change is saved.'
+                : 'Only what you change is saved.'
+              : 'Locked. Press Edit settings to change anything.'}
+          </p>
+        </div>
         <div className="grid grid-cols-1 gap-[16px] md:grid-cols-2">
           <label className="flex flex-col gap-[6px]">
             <span className={label}>Event name</span>
             <input
-              className={field}
+              className={editing ? field : lockedField}
+              readOnly={!editing}
               value={name}
               onChange={(e) => setName(e.target.value)}
             />
@@ -371,7 +490,8 @@ export default function MemorollConsole({
               Shots per guest ({FEWEST_SHOTS}-{MOST_SHOTS})
             </span>
             <input
-              className={field}
+              className={editing ? field : lockedField}
+              readOnly={!editing}
               type="number"
               min={FEWEST_SHOTS}
               max={MOST_SHOTS}
@@ -389,7 +509,8 @@ export default function MemorollConsole({
           <label className="flex flex-col gap-[6px]">
             <span className={label}>Opens at</span>
             <input
-              className={field}
+              className={editing ? field : lockedField}
+              readOnly={!editing}
               type="datetime-local"
               value={opens}
               onChange={(e) => setOpens(e.target.value)}
@@ -398,7 +519,8 @@ export default function MemorollConsole({
           <label className="flex flex-col gap-[6px]">
             <span className={label}>Reveals at</span>
             <input
-              className={field}
+              className={editing ? field : lockedField}
+              readOnly={!editing}
               type="datetime-local"
               value={reveal}
               onChange={(e) => setReveal(e.target.value)}
@@ -407,7 +529,8 @@ export default function MemorollConsole({
           <label className="flex flex-col gap-[6px]">
             <span className={label}>Venue</span>
             <input
-              className={field}
+              className={editing ? field : lockedField}
+              readOnly={!editing}
               value={venue}
               onChange={(e) => setVenue(e.target.value)}
             />
@@ -415,24 +538,56 @@ export default function MemorollConsole({
           <label className="flex flex-col gap-[6px]">
             <span className={label}>Address</span>
             <input
-              className={field}
+              className={editing ? field : lockedField}
+              readOnly={!editing}
               value={address}
               onChange={(e) => setAddress(e.target.value)}
             />
           </label>
         </div>
-        <div className="flex items-center gap-[12px]">
-          <button
-            type="button"
-            onClick={save}
-            disabled={saving}
-            aria-busy={saving}
-            className={primaryAction}>
-            {saving ? 'Saving…' : 'Save settings'}
-          </button>
+        <div className="flex flex-wrap items-center gap-[12px]">
+          {editing ? (
+            <>
+              <button
+                type="button"
+                onClick={save}
+                disabled={saving}
+                aria-busy={saving}
+                className={primaryAction}>
+                {saving ? 'Saving…' : 'Save changes'}
+              </button>
+              <button
+                type="button"
+                disabled={saving}
+                onClick={() => {
+                  fill();
+                  setSaid(null);
+                  setEditing(false);
+                }}
+                className={quietAction}>
+                Cancel
+              </button>
+            </>
+          ) : (
+            <button
+              type="button"
+              onClick={() => {
+                fill();
+                setSaid(null);
+                setEditing(true);
+              }}
+              className={quietAction}>
+              Edit settings
+            </button>
+          )}
           {said_?.kind === 'saved' ? (
             <p role="status" className={good}>
               Saved. Guests see the change on their next visit.
+            </p>
+          ) : null}
+          {said_?.kind === 'unchanged' ? (
+            <p role="status" className={note}>
+              Nothing was changed, so nothing was sent.
             </p>
           ) : null}
           {said_?.kind === 'failed' ? (
@@ -448,7 +603,13 @@ export default function MemorollConsole({
         <h2 className="text-[18px] font-[600] leading-[28px] text-[#182230]">
           Participants
         </h2>
-        {participants.length === 0 ? (
+        {participantsProblem ? (
+          <p className={note}>
+            {adminView
+              ? 'The guest list is only readable by the roll’s owner for now. Its photos, below, are all here.'
+              : `The guest list could not be read: ${participantsProblem}.`}
+          </p>
+        ) : participants.length === 0 ? (
           <p className={note}>Nobody has joined yet.</p>
         ) : (
           <div className="overflow-x-auto">

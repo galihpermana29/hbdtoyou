@@ -19,7 +19,8 @@ import posthog from 'posthog-js';
  */
 
 export type MemoRollSurface = 'demo' | 'product';
-export type MemoRollRole = 'guest' | 'creator';
+/** `admin` is the product's administrator inside somebody else's roll. */
+export type MemoRollRole = 'guest' | 'creator' | 'admin';
 
 export interface MemoRollContext {
   surface: MemoRollSurface;
