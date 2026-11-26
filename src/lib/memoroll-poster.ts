@@ -524,7 +524,7 @@ export async function drawMemoRollPoster(poster: MemoRollPoster) {
   // The footer sits on the bottom margin whatever came before it.
   const footY = PAGE.height - 44 - 34;
   ctx.font = `400 21px ${MONO}`;
-  const credit = 'Created by Memoify.live';
+  const credit = 'Created by memoify.live';
   const creditW = ctx.measureText(credit).width;
   const footW = creditW + 14 + 34;
   ctx.fillStyle = SOFT;

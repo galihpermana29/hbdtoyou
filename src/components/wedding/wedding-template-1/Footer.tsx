@@ -24,7 +24,7 @@ export default function Footer() {
         className="absolute left-1/2 top-[calc(50%+0.5px)] flex -translate-x-1/2 -translate-y-1/2 items-center gap-[12px]"
         {...reveal}>
         <p className="whitespace-nowrap font-[family-name:var(--font-wt1-mono)] text-[10px] leading-[normal] text-[#fafafa]">
-          Created by Memoify.live
+          Created by memoify.live
         </p>
         <div className="relative size-[18px] shrink-0">
           <img
