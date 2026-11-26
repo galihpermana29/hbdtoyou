@@ -3,8 +3,8 @@
  *
  * The shots counter over the viewfinder, the film strip, and the mauve dock
  * carrying the shutter and the gallery. The checked pose is the design's own:
- * the How popup dismissed, RAW chosen (the design draws its selected pill
- * first, and RAW is the label the roster's agreed deviation gives the
+ * the How popup dismissed, Original chosen (the design draws its selected pill
+ * first, and Original (RAW in the design) is the label the roster's agreed deviation gives the
  * no-film option), and Flash present - the dock's lighting dial stands in
  * for hardware the checking browser does not have, the same stand-in it
  * already is for clocks and rolls. Flash and Torch stay capability-detected
@@ -165,7 +165,7 @@ export const expectations = [
     select: '[role="radiogroup"]',
     style: { gap: '16px', padding: '16px' },
   },
-  filmPill('RAW', true),
+  filmPill('Original', true),
   // The roster of 2026-11-13 (owner): four film-compact looks in place of
   // the five recipes of hbd-sk4. The pills' design is unchanged; only which
   // films the strip names changed (src/components/memoroll/guest/films.ts).
