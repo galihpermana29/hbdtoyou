@@ -345,7 +345,18 @@ export default function MemorollDemo() {
     // lands on "This you?". The demo signs in instantly - the designer drew no
     // screen in between because there isn't one.
     trackMemoRoll('memoroll_enter_pressed', { signed_in: signedIn });
-    if (!signedIn) {
+    /**
+     * A preview build cannot finish a sign-in: Google sends everybody back
+     * to memoify.live, where the thing being previewed is not yet (found
+     * 2026-11-26, when the owner went to try a pull request on his phone and
+     * had nowhere to do it). So on a preview host the demo walks in as it
+     * used to, and only there - the same two hosts the middleware already
+     * treats as not the real site.
+     */
+    const onAPreview =
+      window.location.hostname.endsWith('.netlify.app') ||
+      window.location.hostname.endsWith('.vercel.app');
+    if (!signedIn && !onAPreview) {
       // Mark this tab before leaving for Google, so the return finishes the
       // press instead of asking for it twice - the product's own way.
       try {
