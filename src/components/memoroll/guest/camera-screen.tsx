@@ -58,7 +58,64 @@ const FLOOR = KEEPERS[KEEPERS.length - 1];
  * frame it left on is shown, softened, until the live picture is moving
  * again. A small JPEG as a data URL: it is only ever a backdrop.
  */
-let lastViewfinder: string | null = null;
+let lastViewfinder: { src: string; mirrored: boolean } | null = null;
+
+/**
+ * Which way the camera points. The back camera is the default: a guest is
+ * photographing the event, not themselves (owner, 2026-11-26: the front
+ * camera is offered, never opened on first).
+ */
+type Facing = 'back' | 'front';
+
+/**
+ * The side the guest last chose, kept for this page load only, so coming
+ * back from the gallery does not turn the camera round on them. A reload,
+ * or the next roll, opens on the back camera again.
+ */
+let lastFacing: Facing = 'back';
+
+/**
+ * Set once a phone has shown it has no camera on the other side (the
+ * browser answered OverconstrainedError or NotFoundError, or handed back the
+ * same camera), so the switch is not offered again for this page load.
+ */
+let otherSideMissing = false;
+
+/** The stream size every request asks for; only the direction differs. */
+const STREAM_SIZE = {
+  width: { ideal: 1920 },
+  height: { ideal: 1440 },
+  aspectRatio: { ideal: 4 / 3 },
+} as const;
+
+/**
+ * What to ask the browser for. The back camera is asked for exactly as it
+ * always was, as a preference, so a phone or laptop with only one camera
+ * still opens. The front camera is asked for exactly: a preference would
+ * quietly hand back the same camera and the switch would seem to do nothing.
+ */
+function constraintsFor(facing: Facing): MediaStreamConstraints {
+  return {
+    video: {
+      facingMode: facing === 'back' ? 'environment' : { exact: 'user' },
+      ...STREAM_SIZE,
+    },
+    audio: false,
+  };
+}
+
+/**
+ * Which way the stream actually points, where the browser says; otherwise
+ * the way it was asked for. A laptop's webcam or a tablet with only a front
+ * camera answers a request for the back one with a front one, and saying so
+ * keeps the mirror and the analytics truthful.
+ */
+function facingOf(stream: MediaStream, asked: Facing): Facing {
+  const said = stream.getVideoTracks()[0]?.getSettings?.().facingMode;
+  if (said === 'user') return 'front';
+  if (said === 'environment') return 'back';
+  return asked;
+}
 
 /** The size the marks below were drawn for; every other size scales them. */
 const MARK_BASE_WIDTH = 960;
@@ -96,6 +153,10 @@ function keeperFor(sourceWidth: number, sourceHeight: number) {
  * `simulatedLighting` is the demo's stand-in for hardware nobody's laptop
  * has, the same stand-in its dock already is for clocks and venues; a
  * simulated light draws the control without ever touching a track.
+ *
+ * The camera opens on the back and can be turned round to the front on a
+ * phone that lists two cameras (2026-11-26; see switchCamera). The front
+ * previews mirrored and is saved the right way round.
  *
  * There is no last-shot preview anywhere on this screen. The gallery button
  * is a stack of prints with a count, and the prints are dark: a guest's own
@@ -159,7 +220,21 @@ export default function CameraScreen({
   const [live, setLive] = useState(false);
   /** Whether the live picture is actually moving, not merely granted. */
   const [rolling, setRolling] = useState(false);
-  const [resumeFrame] = useState(() => lastViewfinder);
+  const [resumeFrame, setResumeFrame] = useState(() => lastViewfinder);
+  const [facing, setFacing] = useState<Facing>(() => lastFacing);
+  const facingRef = useRef<Facing>(lastFacing);
+  /** Whether this phone has a second camera worth offering. */
+  const [canSwitch, setCanSwitch] = useState(false);
+  /** The camera is being turned round: the old stream is stopped and the
+   *  new one not yet granted. The shutter waits it out. */
+  const [switching, setSwitching] = useState(false);
+  const switchingRef = useRef(false);
+  /** A shot is being taken or baked; the switch waits for it. */
+  const [shotBusy, setShotBusy] = useState(false);
+  /** Each stream handed to the viewfinder gets a number, so a lighting
+   *  check that answers after the camera was turned round is ignored. */
+  const streamSeq = useRef(0);
+  const mounted = useRef(true);
   const [flashKey, setFlashKey] = useState(0);
   const [flashSupported, setFlashSupported] = useState(false);
   const [torchSupportedState, setTorchSupportedState] = useState(false);
@@ -197,108 +272,286 @@ export default function CameraScreen({
     };
   }, []);
 
-  useEffect(() => {
-    let cancelled = false;
+  /**
+   * A small copy of what the viewfinder is showing, as it was shown (the
+   * front camera's mirror included), or null when there is no picture.
+   */
+  const snapshotViewfinder = useCallback((): {
+    src: string;
+    mirrored: boolean;
+  } | null => {
     const video = videoRef.current;
+    if (!video || video.videoWidth <= 0 || !streamRef.current) return null;
+    try {
+      const keep = document.createElement('canvas');
+      keep.width = 270;
+      keep.height = 360;
+      const scale = Math.max(
+        keep.width / video.videoWidth,
+        keep.height / video.videoHeight
+      );
+      keep
+        .getContext('2d')!
+        .drawImage(
+          video,
+          (keep.width - video.videoWidth * scale) / 2,
+          (keep.height - video.videoHeight * scale) / 2,
+          video.videoWidth * scale,
+          video.videoHeight * scale
+        );
+      return {
+        src: keep.toDataURL('image/jpeg', 0.6),
+        mirrored: facingRef.current === 'front',
+      };
+    } catch {
+      // A frame that cannot be read is simply not kept.
+      return null;
+    }
+  }, []);
+
+  /**
+   * Let go of the camera. The torch must never outlive it: off before the
+   * stream stops. Awaited when the camera is turned round, so the LED is out
+   * before the other camera is asked for.
+   */
+  const releaseCamera = useCallback(async () => {
+    const stream = streamRef.current;
+    streamRef.current = null;
+    capturerRef.current = null;
+    if (!stream) return;
+    const track = stream.getVideoTracks()[0];
+    if (track) {
+      await setTorch(track, false).catch(() => undefined);
+    }
+    stream.getTracks().forEach((t) => t.stop());
+  }, []);
+
+  /** Put a granted stream in the viewfinder and learn what it can light. */
+  const attachStream = useCallback(
+    async (stream: MediaStream, pointing: Facing) => {
+      const seq = ++streamSeq.current;
+      streamRef.current = stream;
+      facingRef.current = pointing;
+      lastFacing = pointing;
+      setFacing(pointing);
+      const video = videoRef.current;
+      if (video) {
+        video.srcObject = stream;
+        video.play().catch(() => undefined);
+      }
+      setLive(true);
+      // Lighting belongs to the track, so a new camera is asked afresh; it
+      // exists only after permission is granted.
+      setFlashSupported(false);
+      setTorchSupportedState(false);
+      const track = stream.getVideoTracks()[0];
+      if (track) {
+        capturerRef.current = defaultImageCaptureFactory(track);
+        const caps = await detectLightingCapabilities(track);
+        if (mounted.current && seq === streamSeq.current) {
+          setFlashSupported(caps.flash);
+          setTorchSupportedState(caps.torch);
+        }
+      }
+    },
+    []
+  );
+
+  useEffect(() => {
+    mounted.current = true;
+    let cancelled = false;
     if (
       typeof navigator === 'undefined' ||
       !navigator.mediaDevices?.getUserMedia
     ) {
-      return;
+      return () => {
+        mounted.current = false;
+      };
     }
-    navigator.mediaDevices
-      // A high-quality rear 4:3 stream: enough pixels that the 960x1280
-      // keeper crops from real detail rather than upscaling.
-      .getUserMedia({
-        video: {
-          facingMode: 'environment',
-          width: { ideal: 1920 },
-          height: { ideal: 1440 },
-          aspectRatio: { ideal: 4 / 3 },
-        },
-        audio: false,
-      })
-      .then(async (stream) => {
-        if (cancelled) {
+    const media = navigator.mediaDevices;
+    // A high-quality 4:3 stream: enough pixels that the keeper crops from
+    // real detail rather than upscaling. The back camera unless the guest
+    // turned it round earlier on this page load.
+    const asked = lastFacing;
+    (async () => {
+      let stream: MediaStream;
+      let pointing = asked;
+      try {
+        stream = await media.getUserMedia(constraintsFor(asked));
+      } catch (error) {
+        const reason = (error as DOMException)?.name ?? 'unknown';
+        if (asked === 'back' || reason === 'NotAllowedError') {
+          // NotAllowedError is a guest saying no; NotFoundError and
+          // NotReadableError are a phone that cannot. They want different
+          // fixes.
+          trackMemoRoll('memoroll_camera_failed', { reason });
+          if (!cancelled) setLive(false);
+          return;
+        }
+        // The front camera the guest left on would not start again: the
+        // back one is the camera that matters, so open that instead.
+        try {
+          stream = await media.getUserMedia(constraintsFor('back'));
+          pointing = 'back';
+          if (!cancelled) {
+            setLightingNote(
+              'The front camera did not start, so this is the back camera.'
+            );
+          }
+        } catch (second) {
+          trackMemoRoll('memoroll_camera_failed', {
+            reason: (second as DOMException)?.name ?? 'unknown',
+          });
+          if (!cancelled) setLive(false);
+          return;
+        }
+      }
+      if (cancelled) {
+        stream.getTracks().forEach((t) => t.stop());
+        return;
+      }
+      pointing = facingOf(stream, pointing);
+      {
+        const settings = stream.getVideoTracks()[0]?.getSettings?.() ?? {};
+        trackMemoRoll('memoroll_camera_ready', {
+          stream_width: settings.width ?? null,
+          stream_height: settings.height ?? null,
+          facing: pointing,
+          ...screenShape(),
+        });
+      }
+      const attached = attachStream(stream, pointing);
+      // The switch is offered only to a phone that lists a second camera.
+      // The list is read now, after permission: before it, browsers name no
+      // devices and may list only one, so a phone with two would look like
+      // a phone with one.
+      try {
+        const devices = await media.enumerateDevices();
+        const cameras = devices.filter((d) => d.kind === 'videoinput');
+        if (!cancelled) {
+          setCanSwitch(cameras.length >= 2 && !otherSideMissing);
+        }
+      } catch {
+        // A browser that will not list its cameras is not offered the switch.
+      }
+      await attached;
+    })();
+    return () => {
+      cancelled = true;
+      mounted.current = false;
+      // Keep what the viewfinder is showing, for the next time it opens.
+      const frame = snapshotViewfinder();
+      if (frame) lastViewfinder = frame;
+      releaseCamera();
+    };
+  }, [attachStream, releaseCamera, snapshotViewfinder]);
+
+  /**
+   * Turn the camera round. The old stream is stopped before the other camera
+   * is asked for: many Android phones cannot open a second camera while the
+   * first is held, and iOS stops the first one anyway. While the new stream
+   * starts, the frame the viewfinder was on stays up, softened, so it does
+   * not go black. If the other camera will not start, the one that worked is
+   * opened again and the guest is told, in one line, under the film strip.
+   */
+  const switchCamera = async () => {
+    if (switchingRef.current || shooting.current || !streamRef.current) return;
+    const media = navigator.mediaDevices;
+    switchingRef.current = true;
+    setSwitching(true);
+    setLightingNote(null);
+    const from = facingRef.current;
+    const to: Facing = from === 'back' ? 'front' : 'back';
+    const started = performance.now();
+    const frame = snapshotViewfinder();
+    if (frame) setResumeFrame(frame);
+    setRolling(false);
+    setTorchOn(false);
+    await releaseCamera();
+    let outcome: 'switched' | 'same_camera' | 'fell_back' | 'failed';
+    let reason: string | null = null;
+    let landed: Facing | null = null;
+    try {
+      const stream = await media.getUserMedia(constraintsFor(to));
+      if (!mounted.current) {
+        stream.getTracks().forEach((t) => t.stop());
+        return;
+      }
+      landed = facingOf(stream, to);
+      await attachStream(stream, landed);
+      if (landed === to) {
+        outcome = 'switched';
+      } else {
+        // The browser answered with the camera it already had: there is no
+        // other side to offer.
+        outcome = 'same_camera';
+        otherSideMissing = true;
+        setCanSwitch(false);
+        setLightingNote('This phone has only the one camera here.');
+      }
+    } catch (error) {
+      reason = (error as DOMException)?.name ?? 'unknown';
+      if (!mounted.current) return;
+      if (reason === 'OverconstrainedError' || reason === 'NotFoundError') {
+        otherSideMissing = true;
+        setCanSwitch(false);
+      }
+      try {
+        const stream = await media.getUserMedia(constraintsFor(from));
+        if (!mounted.current) {
           stream.getTracks().forEach((t) => t.stop());
           return;
         }
-        streamRef.current = stream;
-        {
-          const settings = stream.getVideoTracks()[0]?.getSettings?.() ?? {};
-          trackMemoRoll('memoroll_camera_ready', {
-            stream_width: settings.width ?? null,
-            stream_height: settings.height ?? null,
-            ...screenShape(),
-          });
-        }
-        if (video) {
-          video.srcObject = stream;
-          video.play().catch(() => undefined);
-        }
-        setLive(true);
-        // Lighting capabilities exist only after permission is granted.
-        const track = stream.getVideoTracks()[0];
-        if (track) {
-          capturerRef.current = defaultImageCaptureFactory(track);
-          const caps = await detectLightingCapabilities(track);
-          if (!cancelled) {
-            setFlashSupported(caps.flash);
-            setTorchSupportedState(caps.torch);
-          }
-        }
-      })
-      .catch((error) => {
-        // NotAllowedError is a guest saying no; NotFoundError and
-        // NotReadableError are a phone that cannot. They want different fixes.
-        trackMemoRoll('memoroll_camera_failed', {
-          reason: (error as DOMException)?.name ?? 'unknown',
-        });
+        landed = facingOf(stream, from);
+        await attachStream(stream, landed);
+        outcome = 'fell_back';
+        setLightingNote(
+          `The ${to} camera did not start, so you are still on the ${landed} camera.`
+        );
+      } catch (second) {
+        // Neither camera will start now: the viewfinder falls back to the
+        // stand-in it shows when no camera is granted, and the shutter
+        // still takes that, as it always has.
+        outcome = 'failed';
+        reason = (second as DOMException)?.name ?? reason;
         setLive(false);
-      });
-    return () => {
-      cancelled = true;
-      // Keep what the viewfinder is showing, for the next time it opens.
-      if (video && video.videoWidth > 0) {
-        try {
-          const keep = document.createElement('canvas');
-          keep.width = 270;
-          keep.height = 360;
-          const scale = Math.max(
-            keep.width / video.videoWidth,
-            keep.height / video.videoHeight
-          );
-          keep
-            .getContext('2d')!
-            .drawImage(
-              video,
-              (keep.width - video.videoWidth * scale) / 2,
-              (keep.height - video.videoHeight * scale) / 2,
-              video.videoWidth * scale,
-              video.videoHeight * scale
-            );
-          lastViewfinder = keep.toDataURL('image/jpeg', 0.6);
-        } catch {
-          // A frame that cannot be read is simply not kept.
-        }
+        setCanSwitch(false);
+        setLightingNote(
+          'The camera stopped responding. Try reloading the page.'
+        );
       }
-      // The torch must never outlive the camera: off before the stream stops.
-      const track = streamRef.current?.getVideoTracks()[0];
-      if (track) {
-        setTorch(track, false).catch(() => undefined);
-      }
-      streamRef.current?.getTracks().forEach((t) => t.stop());
-      streamRef.current = null;
-      capturerRef.current = null;
-    };
-  }, []);
+    } finally {
+      switchingRef.current = false;
+      if (mounted.current) setSwitching(false);
+    }
+    const settings =
+      streamRef.current?.getVideoTracks()[0]?.getSettings?.() ?? {};
+    trackMemoRoll('memoroll_camera_switched', {
+      from,
+      to,
+      landed,
+      outcome,
+      reason,
+      stream_width: settings.width ?? null,
+      stream_height: settings.height ?? null,
+      switch_ms: Math.round(performance.now() - started),
+    });
+  };
 
+  /** The demo pretends the back camera has lights; no front camera does, so
+   *  turned round, the demo stops pretending (2026-11-26). */
+  const simulated = facing === 'back' ? simulatedLighting : undefined;
   /** Flash is offered for either light: the real flash, or the torch fired
-   *  as one (`withTorchPulse`). */
+   *  as one (`withTorchPulse`). Lighting is read off the track in use, so a
+   *  front camera with no LED hides Flash rather than drawing a dead one; a
+   *  front camera that does report a light keeps it. The guest's choice is
+   *  kept, and comes back with the back camera. */
   const offersFlash =
-    flashSupported || torchSupportedState || Boolean(simulatedLighting?.flash);
+    flashSupported || torchSupportedState || Boolean(simulated?.flash);
+  /** What the shutter will actually do: Flash on, on a camera that has it. */
+  const flashLive = flashOn && offersFlash;
   /** A standalone, always-on Torch is the demo dial's alone now. */
-  const offersTorch = Boolean(simulatedLighting?.torch);
+  const offersTorch = Boolean(simulated?.torch);
   /** A pulse holds the shutter for its settle time; a second press inside
    *  it must not take a second shot. */
   const shooting = useRef(false);
@@ -345,7 +598,16 @@ export default function CameraScreen({
     return canvas;
   };
 
-  /** The no-flash path: whatever the viewfinder is showing right now. */
+  /**
+   * The no-flash path: whatever the viewfinder is showing right now.
+   *
+   * Drawn from the stream itself, never from the mirrored preview, so a
+   * front-camera shot comes out the right way round: writing in the frame
+   * reads, and the guest sees themselves as others do, which is what an
+   * iPhone saves by default (owner's call to make; 2026-11-26). The stamp
+   * and watermark are burned after, onto the unmirrored frame, so they can
+   * never come out backwards.
+   */
   const takeFrame = useCallback((): Promise<HTMLCanvasElement> => {
     const gradientStage = () => {
       const canvas = document.createElement('canvas');
@@ -419,8 +681,11 @@ export default function CameraScreen({
       }
       return;
     }
-    if (shooting.current) return;
+    // While the camera is being turned round there is no live picture to
+    // take, only the softened frame left up over the gap.
+    if (shooting.current || switchingRef.current) return;
     shooting.current = true;
+    setShotBusy(true);
     // A click under the finger where the phone can (Android): a native
     // shutter is felt as much as seen.
     tick();
@@ -444,8 +709,10 @@ export default function CameraScreen({
         shot_number: rollSize - remaining + 1,
         roll_size: rollSize,
         film,
-        flash: flashOn,
+        flash: flashLive,
         live_camera: Boolean(streamRef.current),
+        // Which camera took it; the stand-in has none.
+        facing: streamRef.current ? facingRef.current : null,
         stream_width: video?.videoWidth || null,
         stream_height: video?.videoHeight || null,
         keeper_width: stage.width,
@@ -461,6 +728,7 @@ export default function CameraScreen({
       throw error;
     } finally {
       shooting.current = false;
+      setShotBusy(false);
     }
   };
 
@@ -470,7 +738,7 @@ export default function CameraScreen({
    * light with a note and falls through - the shot is never lost.
    */
   const lightAndTake = async (): Promise<HTMLCanvasElement> => {
-    if (!flashOn) return takeFrame();
+    if (!flashLive) return takeFrame();
     if (flashSupported && capturerRef.current) {
       try {
         return await takeFlashFrame();
@@ -614,16 +882,27 @@ export default function CameraScreen({
                 }
               }}
               className={`absolute inset-0 h-full w-full object-cover transition-[filter] duration-300 ${live ? '' : 'hidden'}`}
-              style={{ filter: PREVIEW_CSS[film] }}
+              style={{
+                filter: PREVIEW_CSS[film],
+                // The front camera previews as a mirror, the way every
+                // selfie camera does; the shot itself is taken the right
+                // way round (see takeFrame).
+                transform: facing === 'front' ? 'scaleX(-1)' : undefined,
+              }}
             />
-            {/* The frame the camera was left on, until the live one moves. */}
+            {/* The frame the camera was left on, until the live one moves:
+                on coming back from the gallery, and while the camera is
+                being turned round. */}
             {resumeFrame && !rolling ? (
               <img
-                src={resumeFrame}
+                src={resumeFrame.src}
                 alt=""
                 aria-hidden
-                className="absolute inset-0 h-full w-full scale-105 object-cover"
+                className="absolute inset-0 h-full w-full object-cover"
                 style={{
+                  transform: resumeFrame.mirrored
+                    ? 'scale(-1.05, 1.05)'
+                    : 'scale(1.05)',
                   filter:
                     PREVIEW_CSS[film] && PREVIEW_CSS[film] !== 'none'
                       ? `${PREVIEW_CSS[film]} blur(6px)`
@@ -817,13 +1096,17 @@ export default function CameraScreen({
         })}
       </div>
 
-      {lightingNote && (
-        <p
-          className="px-[16px] pb-[8px] text-[10px] leading-[150%]"
-          style={{ color: colour.cream }}>
-          {lightingNote}
-        </p>
-      )}
+      {/* One line for anything the camera could not do: a light that
+          failed, or a camera that would not turn round. */}
+      <div role="status" aria-live="polite">
+        {lightingNote && (
+          <p
+            className="px-[16px] pb-[8px] text-[10px] leading-[150%]"
+            style={{ color: colour.cream }}>
+            {lightingNote}
+          </p>
+        )}
+      </div>
 
       {/* The shutter dock: the mauve silhouette with the SHOOT button in its
           bump and the gallery's stack of prints at its edge. The silhouette's
@@ -901,6 +1184,53 @@ export default function CameraScreen({
               SHOOT
             </span>
           </motion.button>
+          {/* Turn the camera round (2026-11-26). It sits on the dock's left
+              hump, the raised pad the design draws opposite the gallery and
+              leaves empty, so the shutter, the folder and Flash keep their
+              places. It wears the shutter well's mauve and the gallery
+              badge's ink. Shown only on a phone that lists two cameras, and
+              still while a shot is baking or the camera is restarting. Placed
+              by its left edge, as the shutter is, because framer-motion owns
+              its transform. */}
+          {canSwitch && live && (
+            <motion.button
+              type="button"
+              onClick={switchCamera}
+              disabled={switching || shotBusy}
+              aria-label={
+                facing === 'back'
+                  ? 'Switch to the front camera'
+                  : 'Switch to the back camera'
+              }
+              aria-busy={switching}
+              whileTap={
+                reduce || switching || shotBusy ? undefined : { scale: 0.92 }
+              }
+              transition={{ duration: 0.12, ease: [0.22, 1, 0.36, 1] }}
+              className="absolute left-[calc(12.667%-24px)] top-[29.5px] flex h-[48px] w-[48px] items-center justify-center rounded-full transition-opacity duration-200 disabled:opacity-50"
+              style={{
+                background: '#b79fad',
+                border: '1px solid #a18294',
+                boxShadow: 'inset 0 1px 2px rgba(58, 44, 52, 0.1)',
+              }}>
+              <svg
+                aria-hidden
+                width="22"
+                height="22"
+                viewBox="0 0 24 24"
+                fill="none"
+                stroke="#40363b"
+                strokeWidth="2"
+                strokeLinecap="round"
+                strokeLinejoin="round">
+                <path d="M19.5 10.5A7.6 7.6 0 0 0 6.1 6.6L4.5 8.2" />
+                <path d="M4.5 4.2v4h4" />
+                <path d="M4.5 13.5a7.6 7.6 0 0 0 13.4 3.9l1.6-1.6" />
+                <path d="M19.5 19.8v-4h-4" />
+                <circle cx="12" cy="12" r="2.4" />
+              </svg>
+            </motion.button>
+          )}
           <span
             aria-hidden
             className="absolute right-[22px] top-[69px] h-[3px] w-[53px] rounded-full"
