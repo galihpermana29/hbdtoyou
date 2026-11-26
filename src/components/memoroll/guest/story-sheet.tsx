@@ -17,13 +17,21 @@ import {
   FILM_STORY_HEIGHT,
   FILM_STORY_WIDTH,
   filmCountFor,
+  MAX_ZOOM,
   moveFraming,
   slotAt,
   type Framing,
 } from '@/lib/memoroll-story-film';
+import {
+  Download,
+  RotateCcw,
+  RotateCw,
+  X,
+  ZoomIn,
+  ZoomOut,
+} from 'lucide-react';
 import Cta from '../ui/cta';
 import { REDUCED, SHEET_IN, SHEET_OUT } from '../ui/motion';
-import { useSheetDrag } from '../ui/sheet-drag';
 import { body } from '../ui/fonts';
 import { colour } from '../ui/tokens';
 import type { GalleryPhoto } from './roll';
@@ -69,7 +77,6 @@ export default function StorySheet({
 }) {
   const reduce = useReducedMotion();
   const most = Math.min(4, photos.length);
-  const { backdropOpacity, dragProps } = useSheetDrag(onClose);
   const [count, setCount] = useState(roll ? Math.min(3, most) : 1);
   /** Which of the guest's prints go in, in order; Shuffle redraws it. */
   const [order, setOrder] = useState<number[]>(() =>
@@ -78,6 +85,15 @@ export default function StorySheet({
   /** Each window's framing, by layout, window and print: changing the count
    *  or the prints starts those windows centred again. */
   const [framings, setFramings] = useState<Record<string, Framing>>({});
+  /**
+   * Quarter turns given to each photo, by photo (owner, 2026-11-26). A guest
+   * who held their phone sideways gets a print lying on its side, and until
+   * now the Story could only show it that way. Kept by photo rather than by
+   * window, so a photo stood upright stays upright when the layout changes.
+   */
+  const [turns, setTurns] = useState<Record<string, number>>({});
+  /** The window the tools on the right act on. Tapping a photo picks it. */
+  const [selected, setSelected] = useState(0);
   const [images, setImages] = useState<ImageBitmap[] | null>(null);
   const [story, setStory] = useState<Blob | null>(null);
   const [problem, setProblem] = useState<string | null>(null);
@@ -87,13 +103,18 @@ export default function StorySheet({
   const fontsReady = useRef<Promise<unknown> | null>(null);
   /** Loads can overlap when choices change quickly; only the last counts. */
   const generation = useRef(0);
+  const lastChosen = useRef('');
 
   const chosen = roll
     ? order.slice(0, count).map((index) => photos[index])
     : photos.slice(0, 1);
   const chosenKey = chosen.map((photo) => photo.id).join(',');
   const layout = filmCountFor(chosen.length);
-  const keyOf = (slot: number) => `${layout}:${slot}:${chosen[slot]?.id}`;
+  const turnOf = (slot: number) => turns[chosen[slot]?.id ?? ''] ?? 0;
+  // A turned photo is a different shape, so it is framed afresh.
+  const keyOf = (slot: number) =>
+    `${layout}:${slot}:${chosen[slot]?.id}:${turnOf(slot)}`;
+  const turnsKey = chosen.map((_, slot) => turnOf(slot)).join(',');
   const framingsNow = chosen.map((_, slot) => framings[keyOf(slot)] ?? CENTRED);
 
   /** A print's pixels, same-origin: a stored print's host sends no CORS
@@ -116,6 +137,36 @@ export default function StorySheet({
     return image;
   }, []);
 
+  /**
+   * The photo stood on another side: its own pixels, turned by quarter
+   * turns into a new bitmap. Turning the pixels rather than the drawing
+   * means everything downstream (the fit, the slide, the pinch, the clamp
+   * that keeps a window full) goes on working on a plain upright picture.
+   */
+  const turnedPixelsOf = useCallback(
+    async (photo: GalleryPhoto, quarter: number) => {
+      const upright = await pixelsOf(photo);
+      const turn = ((quarter % 4) + 4) % 4;
+      if (turn === 0) return upright;
+      const key = `${photo.id}@${turn}`;
+      const cached = bitmaps.current.get(key);
+      if (cached) return cached;
+      const sideways = turn % 2 === 1;
+      const canvas = document.createElement('canvas');
+      canvas.width = sideways ? upright.height : upright.width;
+      canvas.height = sideways ? upright.width : upright.height;
+      const ctx = canvas.getContext('2d');
+      if (!ctx) return upright;
+      ctx.translate(canvas.width / 2, canvas.height / 2);
+      ctx.rotate((turn * Math.PI) / 2);
+      ctx.drawImage(upright, -upright.width / 2, -upright.height / 2);
+      const turned = await createImageBitmap(canvas);
+      bitmaps.current.set(key, turned);
+      return turned;
+    },
+    [pixelsOf]
+  );
+
   useEffect(() => {
     const cache = bitmaps.current;
     return () => {
@@ -134,9 +185,17 @@ export default function StorySheet({
         document.fonts?.load(`${weight} 40px ${body.style.fontFamily}`)
       )
     ).catch(() => undefined);
-    setImages(null);
+    // A different set of photos clears the page; a turn keeps what is there
+    // on screen until the turned photo is ready, so rotating does not blink.
+    if (lastChosen.current !== chosenKey) setImages(null);
+    lastChosen.current = chosenKey;
     setStory(null);
-    Promise.all([Promise.all(chosen.map(pixelsOf)), fontsReady.current])
+    Promise.all([
+      Promise.all(
+        chosen.map((photo, slot) => turnedPixelsOf(photo, turnOf(slot)))
+      ),
+      fontsReady.current,
+    ])
       .then(([loaded]) => {
         if (run !== generation.current) return;
         setProblem(null);
@@ -147,7 +206,7 @@ export default function StorySheet({
           setProblem('The Story could not be drawn.');
       });
     // `chosenKey` stands for `chosen`, which is rebuilt every render.
-  }, [chosenKey, pixelsOf]);
+  }, [chosenKey, turnsKey, turnedPixelsOf]);
 
   // The preview is the Story itself, drawn again on every move of a finger;
   // the PNG to share follows once the prints stop moving.
@@ -199,14 +258,14 @@ export default function StorySheet({
 
   const update = useCallback(
     (slot: number, change: (current: Framing) => Framing) => {
-      const key = `${layout}:${slot}:${chosen[slot]?.id}`;
+      const key = keyOf(slot);
       setFramings((all) => ({
         ...all,
         [key]: change(all[key] ?? CENTRED),
       }));
     },
     // `chosenKey` stands for `chosen`.
-    [layout, chosenKey]
+    [layout, chosenKey, turnsKey]
   );
 
   const onPointerDown = (event: PointerEvent) => {
@@ -217,6 +276,7 @@ export default function StorySheet({
       pressedAt.current = at;
     }
     if (active.current < 0) return;
+    setSelected(active.current);
     try {
       canvasRef.current?.setPointerCapture(event.pointerId);
     } catch {
@@ -383,30 +443,87 @@ export default function StorySheet({
     save(story);
   };
 
+  /**
+   * The page's size on screen: 9 by 16, as tall as the room between the
+   * title and the buttons, unless that would leave the tools no column - on
+   * a short, wide phone the width decides instead. Measured rather than left
+   * to CSS, which keeps one of the two limits and lets the picture stretch.
+   */
+  const roomRef = useRef<HTMLDivElement>(null);
+  const [page, setPage] = useState({ width: 225, height: 400 });
+  useEffect(() => {
+    const room = roomRef.current;
+    if (!room) return;
+    const measure = () => {
+      const tools = 58;
+      const high = room.clientHeight - 16;
+      const wide = room.clientWidth - tools;
+      const width = Math.max(120, Math.floor(Math.min(wide, (high * 9) / 16)));
+      setPage({ width, height: Math.round((width * 16) / 9) });
+    };
+    measure();
+    const watcher = new ResizeObserver(measure);
+    watcher.observe(room);
+    return () => watcher.disconnect();
+  }, []);
+
   const chip = (on: boolean) =>
     on
       ? { background: colour.flame, color: '#ffffff' }
       : { background: colour.unchosen, color: colour.unchosenInk };
 
+  /* ---- The tools beside the page, for the photo that is picked ---- */
+
+  // The layout can shrink under the selection (four photos down to two).
+  const picked = Math.min(selected, Math.max(0, chosen.length - 1));
+  const pickedBox = FILM_SLOTS[layout][picked];
+  const pickedPhoto = chosen[picked];
+  const ready = Boolean(images?.[picked]);
+
+  const turn = (by: number) => {
+    if (!pickedPhoto) return;
+    setTurns((all) => ({
+      ...all,
+      [pickedPhoto.id]: ((((all[pickedPhoto.id] ?? 0) + by) % 4) + 4) % 4,
+    }));
+  };
+  /** Zoom about the middle of the window, for a thumb that cannot pinch. */
+  const zoomBy = (factor: number) => {
+    const photo = images?.[picked];
+    if (!photo) return;
+    update(picked, (f) =>
+      moveFraming(
+        photo,
+        pickedBox,
+        f,
+        0,
+        0,
+        factor,
+        pickedBox.x + pickedBox.w / 2,
+        pickedBox.y + pickedBox.h / 2
+      )
+    );
+  };
+  const zoomNow = framingsNow[picked]?.zoom ?? 1;
+
   return (
     <div className="absolute inset-0 z-40 flex flex-col justify-end">
-      {/* Outer: the scrim arriving and leaving with the sheet. Inner: the
-          scrim itself, dimming as a finger drags the sheet down. */}
       <motion.div
         className="absolute inset-0"
+        style={{ background: 'rgba(0, 0, 0, 0.6)' }}
         initial={{ opacity: 0 }}
         animate={{ opacity: 1, transition: reduce ? REDUCED : SHEET_IN }}
-        exit={{ opacity: 0, transition: reduce ? REDUCED : SHEET_OUT }}>
-        <motion.button
-          type="button"
-          aria-label="Close"
-          onClick={onClose}
-          className="absolute inset-0 cursor-default"
-          style={{ background: 'rgba(0, 0, 0, 0.6)', opacity: backdropOpacity }}
-        />
-      </motion.div>
+        exit={{ opacity: 0, transition: reduce ? REDUCED : SHEET_OUT }}
+      />
+      {/* The whole screen (owner, 2026-11-26): the Story is the thing being
+          made here, and as a half sheet it was drawn at a quarter of the
+          phone with two full-width buttons under it. Now the page takes
+          every pixel the tools do not need. */}
       <motion.div
-        className="relative"
+        role="dialog"
+        aria-label={roll ? 'Share my roll to Story' : 'Share to Story'}
+        className="relative flex h-full flex-col px-[16px] pb-[max(16px,env(safe-area-inset-bottom))] pt-[max(10px,env(safe-area-inset-top))]"
+        style={{ background: colour.paper, fontFamily: 'var(--font-mr-body)' }}
         initial={reduce ? { opacity: 0 } : { transform: 'translateY(100%)' }}
         animate={
           reduce
@@ -418,27 +535,34 @@ export default function StorySheet({
             ? { opacity: 0, transition: REDUCED }
             : { transform: 'translateY(100%)', transition: SHEET_OUT }
         }>
-        <motion.div
-          role="dialog"
-          aria-label={roll ? 'Share my roll to Story' : 'Share to Story'}
-          className="relative flex flex-col items-center gap-[14px] px-[16px] pb-[32px] pt-[20px]"
-          {...dragProps}
-          style={{
-            ...dragProps.style,
-            background: colour.paper,
-            borderTopLeftRadius: 20,
-            borderTopRightRadius: 20,
-            fontFamily: 'var(--font-mr-body)',
-          }}>
+        <div className="relative flex h-[44px] shrink-0 items-center justify-center">
+          <button
+            type="button"
+            aria-label="Close"
+            onClick={onClose}
+            className="absolute left-0 flex h-[40px] w-[40px] items-center justify-center rounded-full"
+            style={{ background: colour.unchosen, color: colour.ink }}>
+            <X size={20} strokeWidth={2.25} aria-hidden />
+          </button>
           <h2
-            className="text-[18px] font-bold leading-[150%]"
+            className="text-[17px] font-bold leading-[150%]"
             style={{ color: colour.ink }}>
             {roll ? 'Share your roll' : 'Share to your Story'}
           </h2>
+        </div>
 
+        {/* The page and its tools. The page is as tall as the room allows
+            and no wider than leaves the tools their column. */}
+        <div
+          ref={roomRef}
+          className="flex min-h-0 flex-1 items-center justify-center gap-[10px] py-[8px]">
           <div
-            className="relative flex aspect-[9/16] h-[48dvh] max-h-[440px] items-center justify-center overflow-hidden rounded-[12px]"
-            style={{ background: colour.track }}>
+            className="relative flex shrink-0 items-center justify-center overflow-hidden rounded-[12px]"
+            style={{
+              background: colour.track,
+              width: page.width,
+              height: page.height,
+            }}>
             <canvas
               ref={canvasRef}
               width={FILM_STORY_WIDTH}
@@ -451,57 +575,112 @@ export default function StorySheet({
               className="absolute inset-0 h-full w-full cursor-grab touch-none active:cursor-grabbing"
               style={{ opacity: images ? 1 : 0 }}
             />
+            {images && chosen.length > 1 ? (
+              // Which photo the tools will act on. Drawn over the page, never
+              // into it: the saved Story has no outline.
+              <div
+                aria-hidden
+                className="pointer-events-none absolute"
+                style={{
+                  left: `${(pickedBox.x / FILM_STORY_WIDTH) * 100}%`,
+                  top: `${(pickedBox.y / FILM_STORY_HEIGHT) * 100}%`,
+                  width: `${(pickedBox.w / FILM_STORY_WIDTH) * 100}%`,
+                  height: `${(pickedBox.h / FILM_STORY_HEIGHT) * 100}%`,
+                  borderRadius: 6,
+                  boxShadow: `0 0 0 2px ${colour.flame}, 0 0 0 4px rgba(255, 255, 255, 0.85)`,
+                }}
+              />
+            ) : null}
             {images ? null : (
               <span className="text-[13px]" style={{ color: colour.muted }}>
                 {problem ?? 'Drawing your Story…'}
               </span>
             )}
           </div>
-          <p
-            className="-mt-[6px] text-[12px] leading-[150%]"
-            style={{ color: colour.muted }}>
-            Drag or pinch a photo to fit it. Double-tap to reset.
-          </p>
 
-          {roll ? (
-            <div className="flex items-center gap-[8px]">
-              <div
-                role="radiogroup"
-                aria-label="How many photos"
-                className="flex gap-[6px]">
-                {[1, 2, 3, 4]
-                  .filter((option) => option <= most)
-                  .map((option) => (
-                    <button
-                      key={option}
-                      type="button"
-                      role="radio"
-                      aria-checked={count === option}
-                      aria-label={option === 1 ? '1 photo' : `${option} photos`}
-                      onClick={() => setCount(option)}
-                      className="h-[32px] w-[40px] rounded-full text-[13px] font-bold"
-                      style={chip(count === option)}>
-                      {option}
-                    </button>
-                  ))}
-              </div>
-              {photos.length > count ? (
-                <button
-                  type="button"
-                  onClick={shuffle}
-                  className="h-[32px] rounded-full px-[14px] text-[13px] font-bold"
-                  style={chip(false)}>
-                  Shuffle
-                </button>
-              ) : null}
+          <div
+            role="toolbar"
+            aria-label={
+              chosen.length > 1 ? `Photo ${picked + 1} tools` : 'Photo tools'
+            }
+            aria-orientation="vertical"
+            className="flex w-[48px] shrink-0 flex-col items-center gap-[10px]">
+            {chosen.length > 1 ? (
+              <span
+                className="text-[11px] font-bold leading-[150%]"
+                style={{ color: colour.muted }}>
+                Photo {picked + 1}
+              </span>
+            ) : null}
+            <Tool label="Rotate right" onClick={() => turn(1)} off={!ready}>
+              <RotateCw size={20} strokeWidth={2.25} aria-hidden />
+            </Tool>
+            <Tool label="Rotate left" onClick={() => turn(-1)} off={!ready}>
+              <RotateCcw size={20} strokeWidth={2.25} aria-hidden />
+            </Tool>
+            <Tool
+              label="Zoom in"
+              onClick={() => zoomBy(1.25)}
+              off={!ready || zoomNow >= MAX_ZOOM - 0.001}>
+              <ZoomIn size={20} strokeWidth={2.25} aria-hidden />
+            </Tool>
+            <Tool
+              label="Zoom out"
+              onClick={() => zoomBy(0.8)}
+              off={!ready || zoomNow <= 1.001}>
+              <ZoomOut size={20} strokeWidth={2.25} aria-hidden />
+            </Tool>
+          </div>
+        </div>
+
+        <p
+          className="shrink-0 text-center text-[12px] leading-[150%]"
+          style={{ color: colour.muted }}>
+          {chosen.length > 1
+            ? 'Tap a photo to pick it. Drag, pinch, or double-tap to re-centre.'
+            : 'Drag to move, pinch to zoom, double-tap to re-centre.'}
+        </p>
+
+        {roll ? (
+          <div className="mt-[10px] flex shrink-0 items-center justify-center gap-[8px]">
+            <div
+              role="radiogroup"
+              aria-label="How many photos"
+              className="flex gap-[6px]">
+              {[1, 2, 3, 4]
+                .filter((option) => option <= most)
+                .map((option) => (
+                  <button
+                    key={option}
+                    type="button"
+                    role="radio"
+                    aria-checked={count === option}
+                    aria-label={option === 1 ? '1 photo' : `${option} photos`}
+                    onClick={() => setCount(option)}
+                    className="h-[36px] w-[44px] rounded-full text-[13px] font-bold"
+                    style={chip(count === option)}>
+                    {option}
+                  </button>
+                ))}
             </div>
-          ) : null}
+            {photos.length > count ? (
+              <button
+                type="button"
+                onClick={shuffle}
+                className="h-[36px] rounded-full px-[14px] text-[13px] font-bold"
+                style={chip(false)}>
+                Shuffle
+              </button>
+            ) : null}
+          </div>
+        ) : null}
 
-          <Cta onClick={share} disabled={!story} className="h-[44px] w-full">
-            Share to Story
-          </Cta>
+        {/* One row (owner, 2026-11-26): sharing is the point and gets the
+            width; saving is the quiet way out beside it. */}
+        <div className="mt-[10px] flex shrink-0 items-center gap-[8px]">
           <Cta
             tone="outline"
+            label="Save image"
             onClick={() => {
               if (!story) return;
               trackMemoRoll('memoroll_story_shared', {
@@ -511,11 +690,43 @@ export default function StorySheet({
               save(story);
             }}
             disabled={!story}
-            className="-mt-[4px] h-[44px] w-full">
-            Save image
+            className="h-[44px] w-[52px] shrink-0">
+            <Download size={20} strokeWidth={2.25} aria-hidden />
           </Cta>
-        </motion.div>
+          <Cta
+            onClick={share}
+            disabled={!story}
+            className="h-[44px] min-w-0 flex-1">
+            Share to Story
+          </Cta>
+        </div>
       </motion.div>
     </div>
+  );
+}
+
+/** One of the round tools beside the page: big enough for a thumb. */
+function Tool({
+  label,
+  onClick,
+  off,
+  children,
+}: {
+  label: string;
+  onClick: () => void;
+  off: boolean;
+  children: React.ReactNode;
+}) {
+  return (
+    <button
+      type="button"
+      aria-label={label}
+      title={label}
+      onClick={onClick}
+      disabled={off}
+      className="flex h-[48px] w-[48px] items-center justify-center rounded-full disabled:opacity-40"
+      style={{ background: colour.unchosen, color: colour.ink }}>
+      {children}
+    </button>
   );
 }
