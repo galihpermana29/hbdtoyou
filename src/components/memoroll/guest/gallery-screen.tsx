@@ -4,7 +4,7 @@ import { trackMemoRoll } from '@/lib/memoroll-analytics';
 import galleryCamera from '@/assets/memoroll/gallery-camera.svg';
 import rollCamera from '@/assets/memoroll/wordmark-camera.svg';
 import { AnimatePresence, motion, useReducedMotion } from 'framer-motion';
-import { useEffect, useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import BackPill from '../ui/back-pill';
 import { FlipNumber, type Remaining } from '../ui/flip-counter';
 import HeaderRule from '../ui/header-rule';
@@ -297,6 +297,49 @@ const BLANK_PRINTS = [
   { x: 52, y: 6, rotate: 15 },
 ] as const;
 
+/**
+ * The end of the grid while the roll has more pages: scrolling near it asks
+ * for the next one, and the button is there for a browser that cannot watch.
+ */
+function LoadMore({
+  loading,
+  onLoadMore,
+}: {
+  loading: boolean;
+  onLoadMore: () => void;
+}) {
+  const ref = useRef<HTMLDivElement>(null);
+  const ask = useRef(onLoadMore);
+  ask.current = onLoadMore;
+  useEffect(() => {
+    // Re-watched each time a page lands: an observer only speaks on change,
+    // so a sentinel still on screen after a short page must be seen afresh.
+    if (loading) return;
+    const el = ref.current;
+    if (!el || typeof IntersectionObserver === 'undefined') return;
+    const observer = new IntersectionObserver(
+      (entries) => {
+        if (entries.some((entry) => entry.isIntersecting)) ask.current();
+      },
+      { rootMargin: '800px 0px' }
+    );
+    observer.observe(el);
+    return () => observer.disconnect();
+  }, [loading]);
+  return (
+    <div ref={ref} className="flex justify-center py-[16px]">
+      <button
+        type="button"
+        onClick={() => ask.current()}
+        disabled={loading}
+        className="rounded-full px-[16px] py-[8px] text-[13px] font-medium"
+        style={{ color: colour.ink, boxShadow: pillShadow }}>
+        {loading ? 'Loading more shots…' : 'Load more shots'}
+      </button>
+    </div>
+  );
+}
+
 export default function GalleryScreen({
   eventName,
   photoCount,
@@ -318,8 +361,19 @@ export default function GalleryScreen({
   onSwipeCueSeen,
   storyExport = false,
   eventDate,
+  hasMore = false,
+  loadingMore = false,
+  onLoadMore,
 }: {
   eventName: string;
+  /**
+   * The roll is paged (2026-11-27): the event answers a hundred prints at a
+   * time, and a wedding's roll is many hundreds. While `hasMore`, the end of
+   * the grid asks for the next page as the guest scrolls toward it.
+   */
+  hasMore?: boolean;
+  loadingMore?: boolean;
+  onLoadMore?: () => void;
   /** The event's day, printed on a Story's film strip; today if absent. */
   eventDate?: Date;
   photoCount: number;
@@ -636,6 +690,9 @@ export default function GalleryScreen({
               </div>
             </section>
           ))}
+          {hasMore && onLoadMore ? (
+            <LoadMore loading={loadingMore} onLoadMore={onLoadMore} />
+          ) : null}
         </motion.div>
 
         {/* "CTA muncul pas udah 0 shots nya": the door to the Dark Room, the

@@ -56,6 +56,16 @@ import { useRoll } from './use-roll';
 type Screen =
   'cover' | 'countdown' | 'username' | 'camera' | 'gallery' | 'darkroom';
 
+/**
+ * Prints per gallery read. The event pages its roll; a wedding's is many
+ * hundreds of prints, so the first page comes with the join and the rest as
+ * the guest scrolls toward them (2026-11-27).
+ */
+const PAGE_LIMIT = 100;
+
+/** Wait before a failed page may be asked for again, so it cannot spin. */
+const LOAD_MORE_BACKOFF_MS = 3_000;
+
 /** How deep each screen sits in the guest's way through. */
 const SCREEN_RANK: Record<Screen, number> = {
   cover: 0,
@@ -228,6 +238,12 @@ export default function MemorollGuest({
     shots_remaining: number;
   } | null>(null);
   const [photoCount, setPhotoCount] = useState<number | null>(null);
+  /** Pages after the first, as the guest scrolled to them. */
+  const [morePhotos, setMorePhotos] = useState<IMemorollGalleryPhoto[]>([]);
+  const pagesLoaded = useRef(1);
+  const [hasMore, setHasMore] = useState(false);
+  const [loadingMore, setLoadingMore] = useState(false);
+  const loadingMoreRef = useRef(false);
 
   const [now, setNow] = useState(() => Date.now());
   useEffect(() => {
@@ -408,11 +424,76 @@ export default function MemorollGuest({
 
   const joined = participant !== null;
 
+  const hasMoreRef = useRef(false);
+  hasMoreRef.current = hasMore;
+
+  /** The next page of the roll, as the guest scrolls to the end of it. */
+  const loadMore = useCallback(async () => {
+    if (loadingMoreRef.current || !hasMoreRef.current) return;
+    loadingMoreRef.current = true;
+    setLoadingMore(true);
+    const next = pagesLoaded.current + 1;
+    const answer = await readMemorollGalleryClient(code, next, PAGE_LIMIT);
+    if (answer.success && answer.data) {
+      const photos = answer.data.photos ?? [];
+      setMorePhotos((previous) => {
+        const seen = new Set(previous.map((photo) => photo.id));
+        return [...previous, ...photos.filter((photo) => !seen.has(photo.id))];
+      });
+      pagesLoaded.current = next;
+      const totalPages = answer.meta?.totalPage;
+      setHasMore(
+        typeof totalPages === 'number'
+          ? totalPages > next
+          : photos.length >= PAGE_LIMIT
+      );
+      trackMemoRoll('memoroll_gallery_page_loaded', {
+        page: next,
+        photos: photos.length,
+      });
+    } else {
+      trackMemoRoll('memoroll_gallery_page_failed', { page: next });
+      await new Promise((done) => setTimeout(done, LOAD_MORE_BACKOFF_MS));
+    }
+    loadingMoreRef.current = false;
+    setLoadingMore(false);
+  }, [code]);
+
+  // A different person is a different roll to page through.
+  useEffect(() => {
+    setMorePhotos([]);
+    pagesLoaded.current = 1;
+    setHasMore(false);
+  }, [userId]);
+
+  /**
+   * The roll as far as it has been paged: the first page, fresh on every
+   * refresh, then the later ones the guest scrolled to - each print once.
+   */
+  const rollPhotos = useMemo(() => {
+    const first = new Set(serverPhotos.map((photo) => photo.id));
+    return [
+      ...serverPhotos,
+      ...morePhotos.filter((photo) => !first.has(photo.id)),
+    ];
+  }, [serverPhotos, morePhotos]);
+
   /** Ask the event where things stand, as the participant this guest now is. */
   const refresh = useCallback(async () => {
-    const answer = await readMemorollGalleryClient(code);
+    const answer = await readMemorollGalleryClient(code, 1, PAGE_LIMIT);
     if (!answer.success || !answer.data) return false;
-    setServerPhotos(answer.data.photos ?? []);
+    const photos = answer.data.photos ?? [];
+    setServerPhotos(photos);
+    // More pages than the ones already in hand? The meta says; without it, a
+    // full page is the only hint there may be another.
+    const totalPages = answer.meta?.totalPage;
+    setHasMore(
+      typeof totalPages === 'number'
+        ? totalPages > pagesLoaded.current
+        : pagesLoaded.current === 1
+          ? photos.length >= PAGE_LIMIT
+          : hasMoreRef.current
+    );
     if (answer.data.participant) setParticipant(answer.data.participant);
     setPhotoCount(answer.data.photo_count ?? null);
     return true;
@@ -574,7 +655,7 @@ export default function MemorollGuest({
     // Grouped by the minute of capture, the way the design's headings read -
     // per-person grouping had a day (2026-08-30) and was reverted the same
     // evening.
-    const mine = serverPhotos.filter(isMine);
+    const mine = rollPhotos.filter(isMine);
     const fromServer = mine.map((photo) => ({
       photo: {
         id: photo.id,
@@ -597,7 +678,7 @@ export default function MemorollGuest({
       groupLabel: groupLabelFor(new Date(shot.takenAt)),
     }));
     return [...fromServer, ...fromQueue];
-  }, [handle, isMine, pending, serverPhotos]);
+  }, [handle, isMine, pending, rollPhotos]);
 
   /**
    * ALL is the Collective Gallery, whole at last: since 2026-08-30 the
@@ -609,7 +690,7 @@ export default function MemorollGuest({
    * unfolding rather than as a roster.
    */
   const allEntries: RollEntry[] = useMemo(() => {
-    const others = serverPhotos
+    const others = rollPhotos
       .filter((photo) => !isMine(photo))
       .map((photo) => ({
         photo: {
@@ -622,7 +703,7 @@ export default function MemorollGuest({
         groupLabel: groupLabelFor(new Date(photo.create_time)),
       }));
     return [...others, ...ownEntries];
-  }, [isMine, ownEntries, serverPhotos]);
+  }, [isMine, ownEntries, rollPhotos]);
 
   /**
    * Who the tally can vouch for: the people whose prints are on the table.
@@ -631,13 +712,13 @@ export default function MemorollGuest({
    * rather than a number invented.
    */
   const participantCount = useMemo(() => {
-    const names = new Set(serverPhotos.map((photo) => photo.uploader_name));
+    const names = new Set(rollPhotos.map((photo) => photo.uploader_name));
     // This guest counts once, under the name their own prints carry - the
     // handle, since registrations send it as display_name. Adding the
     // account's fullname here counted a renamed guest twice.
     if (joined) names.add(handle || profile?.fullname || 'me');
     return names.size;
-  }, [handle, joined, profile?.fullname, serverPhotos]);
+  }, [handle, joined, profile?.fullname, rollPhotos]);
 
   const reveal: RevealClock = revealed
     ? { state: 'past', endedOn: endedOnLabel(new Date(revealMs)) }
@@ -767,6 +848,7 @@ export default function MemorollGuest({
                   remember('how-seen', '1');
                 }}
                 fallbackSrc={event.cover_photo_urls?.[0] ?? ''}
+                requireCamera
                 stampDate={stampDateFor(new Date(startsMs))}
                 stampFonts={{
                   hand: homemadeApple.style.fontFamily,
@@ -802,6 +884,9 @@ export default function MemorollGuest({
                 showSwipeCue={!swipeCueSeen}
                 onSwipeCueSeen={() => setSwipeCueSeen(true)}
                 storyExport
+                hasMore={hasMore}
+                loadingMore={loadingMore}
+                onLoadMore={() => void loadMore()}
               />
             )}
             {screen === 'darkroom' && (

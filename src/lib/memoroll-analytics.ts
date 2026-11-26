@@ -40,6 +40,9 @@ export type MemoRollEvent =
   | 'memoroll_join_failed'
   | 'memoroll_camera_ready'
   | 'memoroll_camera_failed'
+  | 'memoroll_camera_retry'
+  | 'memoroll_gallery_page_loaded'
+  | 'memoroll_gallery_page_failed'
   // The guest turned the camera round, or tried to (from, to, outcome).
   | 'memoroll_camera_switched'
   // Shooting, and the shot's way to the server.

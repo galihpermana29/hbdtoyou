@@ -12,7 +12,6 @@ export async function uploadImageClientSide(
 ): Promise<{ message: string; data: string; success: boolean }> {
   return new Promise(async (resolve, reject) => {
     const timestamp = Math.floor(Date.now() / 1000);
-    const uploadPreset = type === 'free' ? 'free_preset' : 'premium_preset';
 
     try {
       // Get a signature from the server
@@ -96,7 +95,7 @@ export async function uploadImageWithApi(
       data: response.data,
       success: true,
     };
-  } catch (error) {
+  } catch {
     openNotification(0, key, true);
     return {
       message: 'Your internet connection is poor, try upload one by one photo',
@@ -129,7 +128,7 @@ export async function uploadMultipleImageWithApi(
       data: response.data,
       success: true,
     };
-  } catch (error) {
+  } catch {
     return {
       message: 'Your internet connection is poor, try upload one by one photo',
       success: false,
@@ -177,11 +176,14 @@ export async function uploadMultipleImageWithApi(
 export async function newUploadImageWithAPI(
   formData: FormData,
   openNotification?: (progress: number, key: any, isError?: boolean) => void,
-  key?: any
+  key?: any,
+  /** Give up after this long (ms); 0 or absent waits forever, as before. */
+  timeoutMs?: number
 ) {
   // using axios
   try {
     const response = await axios.post(`${API_URI}/uploads`, formData, {
+      timeout: timeoutMs ?? 0,
       onUploadProgress: (progressEvent: AxiosProgressEvent) => {
         const percentCompleted = Math.round(
           (progressEvent.loaded * 100) / progressEvent.total!
@@ -194,7 +196,7 @@ export async function newUploadImageWithAPI(
       data: response.data,
       success: true,
     };
-  } catch (error) {
+  } catch {
     openNotification?.(0, key, true);
     return {
       message: 'Your internet connection is poor, try upload one by one photo',

@@ -32,6 +32,31 @@ const baseUri =
 type MemorollResult<T> = IGlobalResponse<null | T> & { meta: Meta | null };
 
 /**
+ * An abort signal that fires after `ms`. `AbortSignal.timeout` is missing
+ * before iOS 16, and calling it there throws - which would turn every call
+ * into a failure - so older phones get the same thing by hand.
+ */
+export function timeoutSignal(ms: number): AbortSignal {
+  if (typeof AbortSignal !== 'undefined' && 'timeout' in AbortSignal) {
+    return AbortSignal.timeout(ms);
+  }
+  const controller = new AbortController();
+  setTimeout(() => controller.abort(), ms);
+  return controller.signal;
+}
+
+/** How long the bearer lookup may take before the call gives up. */
+const SESSION_TIMEOUT_MS = 15_000;
+
+/**
+ * How long a Shot's registration may take (2026-11-27). Without a ceiling a
+ * hung request held the whole upload queue - every later Shot waited behind
+ * it. Generous, because a registration that lands after we gave up is
+ * retried and registered twice.
+ */
+export const REGISTER_TIMEOUT_MS = 30_000;
+
+/**
  * One memoroll call, browser to backend, every failure an answer.
  *
  * `auth: false` is the unauthenticated preview's mode; everything else
@@ -54,7 +79,9 @@ async function callMemoroll<T>(
   if (init?.auth !== false) {
     let session: { userId?: string; accessToken?: string } | null = null;
     try {
-      session = await fetch('/api/session').then((res) => res.json());
+      session = await fetch('/api/session', {
+        signal: timeoutSignal(SESSION_TIMEOUT_MS),
+      }).then((res) => res.json());
     } catch {
       session = null;
     }
@@ -78,7 +105,7 @@ async function callMemoroll<T>(
       body: init?.body !== undefined ? JSON.stringify(init.body) : undefined,
       signal:
         init?.timeoutMs !== undefined
-          ? AbortSignal.timeout(init.timeoutMs)
+          ? timeoutSignal(init.timeoutMs)
           : undefined,
     });
   } catch (error) {
@@ -202,6 +229,7 @@ export async function submitMemorollPhotoClient(
       body: displayName
         ? { photo_url: photoUrl, display_name: displayName }
         : { photo_url: photoUrl },
+      timeoutMs: REGISTER_TIMEOUT_MS,
     }
   );
 }

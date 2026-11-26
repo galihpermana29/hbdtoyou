@@ -183,6 +183,7 @@ export default function CameraScreen({
   stampDate,
   stampFonts,
   simulatedLighting,
+  requireCamera = false,
 }: {
   remaining: number;
   /**
@@ -212,12 +213,25 @@ export default function CameraScreen({
   stampFonts: { hand: string; ui: string };
   /** Demo-only: pretend the hardware has these lights. Never set in product. */
   simulatedLighting?: { flash: boolean; torch: boolean };
+  /**
+   * Product-only (2026-11-27, before a 200-guest wedding): a Shot is only ever
+   * what the lens sees. Without a live camera the shutter takes nothing and
+   * the viewfinder says why, with a way to ask again - rather than baking
+   * the Cover photo into a spent Shot, which the demo's stand-in still does.
+   */
+  requireCamera?: boolean;
 }) {
   const reduce = useReducedMotion();
   const videoRef = useRef<HTMLVideoElement>(null);
   const streamRef = useRef<MediaStream | null>(null);
   const capturerRef = useRef<PhotoCapturer | null>(null);
   const [live, setLive] = useState(false);
+  /** Why there is no live camera, once the browser has answered. */
+  const [cameraIssue, setCameraIssue] = useState<
+    null | 'denied' | 'unavailable' | 'unsupported'
+  >(null);
+  /** Bumped by "Try again": the camera is asked for afresh. */
+  const [cameraAttempt, setCameraAttempt] = useState(0);
   /** Whether the live picture is actually moving, not merely granted. */
   const [rolling, setRolling] = useState(false);
   const [resumeFrame, setResumeFrame] = useState(() => lastViewfinder);
@@ -364,6 +378,8 @@ export default function CameraScreen({
       typeof navigator === 'undefined' ||
       !navigator.mediaDevices?.getUserMedia
     ) {
+      // No camera API at all: an insecure page or a browser without it.
+      setCameraIssue('unsupported');
       return () => {
         mounted.current = false;
       };
@@ -384,8 +400,18 @@ export default function CameraScreen({
           // NotAllowedError is a guest saying no; NotFoundError and
           // NotReadableError are a phone that cannot. They want different
           // fixes.
-          trackMemoRoll('memoroll_camera_failed', { reason });
-          if (!cancelled) setLive(false);
+          trackMemoRoll('memoroll_camera_failed', {
+            reason,
+            attempt: cameraAttempt,
+          });
+          if (!cancelled) {
+            setLive(false);
+            setCameraIssue(
+              reason === 'NotAllowedError' || reason === 'SecurityError'
+                ? 'denied'
+                : 'unavailable'
+            );
+          }
           return;
         }
         // The front camera the guest left on would not start again: the
@@ -399,10 +425,20 @@ export default function CameraScreen({
             );
           }
         } catch (second) {
+          const secondReason = (second as DOMException)?.name ?? 'unknown';
           trackMemoRoll('memoroll_camera_failed', {
-            reason: (second as DOMException)?.name ?? 'unknown',
+            reason: secondReason,
+            attempt: cameraAttempt,
           });
-          if (!cancelled) setLive(false);
+          if (!cancelled) {
+            setLive(false);
+            setCameraIssue(
+              secondReason === 'NotAllowedError' ||
+                secondReason === 'SecurityError'
+                ? 'denied'
+                : 'unavailable'
+            );
+          }
           return;
         }
       }
@@ -410,6 +446,7 @@ export default function CameraScreen({
         stream.getTracks().forEach((t) => t.stop());
         return;
       }
+      setCameraIssue(null);
       pointing = facingOf(stream, pointing);
       {
         const settings = stream.getVideoTracks()[0]?.getSettings?.() ?? {};
@@ -444,7 +481,8 @@ export default function CameraScreen({
       if (frame) lastViewfinder = frame;
       releaseCamera();
     };
-  }, [attachStream, releaseCamera, snapshotViewfinder]);
+    // cameraAttempt: "Try again" asks for the camera afresh.
+  }, [attachStream, releaseCamera, snapshotViewfinder, cameraAttempt]);
 
   /**
    * Turn the camera round. The old stream is stopped before the other camera
@@ -516,6 +554,7 @@ export default function CameraScreen({
         reason = (second as DOMException)?.name ?? reason;
         setLive(false);
         setCanSwitch(false);
+        setCameraIssue('unavailable');
         setLightingNote(
           'The camera stopped responding. Try reloading the page.'
         );
@@ -684,6 +723,15 @@ export default function CameraScreen({
     // While the camera is being turned round there is no live picture to
     // take, only the softened frame left up over the gap.
     if (shooting.current || switchingRef.current) return;
+    // Product: no picture from the lens, no Shot. A stream that is granted
+    // but has no frame yet counts as no picture - takeFrame would otherwise
+    // fall back to the Cover photo and spend a Shot on it.
+    if (requireCamera) {
+      const video = videoRef.current;
+      if (!live || !streamRef.current || !video || video.videoWidth <= 0) {
+        return;
+      }
+    }
     shooting.current = true;
     setShotBusy(true);
     // A click under the finger where the phone can (Android): a native
@@ -769,6 +817,26 @@ export default function CameraScreen({
   };
 
   const empty = remaining <= 0;
+  /** Product: the shutter only answers once the lens is actually showing. */
+  const cameraReady = !requireCamera || (live && !cameraIssue);
+  const shutterOff = empty || !cameraReady;
+  const issueCopy: Record<
+    'denied' | 'unavailable' | 'unsupported',
+    { title: string; body: string }
+  > = {
+    denied: {
+      title: 'Your camera is blocked',
+      body: 'MemoRoll needs the camera to take your shots. Tap Try again and choose Allow. If nothing asks, tap the icon beside the address bar, allow Camera, then tap Try again.',
+    },
+    unavailable: {
+      title: 'The camera did not start',
+      body: 'Another app may be using it. Close any other camera or video call, then tap Try again.',
+    },
+    unsupported: {
+      title: 'This browser cannot open the camera',
+      body: 'Open this link in Safari or Chrome to take your shots.',
+    },
+  };
 
   return (
     <section
@@ -910,7 +978,7 @@ export default function CameraScreen({
                 }}
               />
             ) : null}
-            {!live && !resumeFrame && (
+            {!live && !resumeFrame && !requireCamera && (
               <img
                 src={fallbackSrc}
                 alt="Viewfinder placeholder - the browser granted no camera"
@@ -926,6 +994,61 @@ export default function CameraScreen({
                 }}
               />
             )}
+            {requireCamera && !live && !cameraIssue && !resumeFrame ? (
+              <p
+                role="status"
+                className="absolute inset-0 flex items-center justify-center text-[13px]"
+                style={{ color: 'rgba(224, 218, 191, 0.85)' }}>
+                Starting the camera…
+              </p>
+            ) : null}
+            {requireCamera && cameraIssue && !empty ? (
+              <div
+                role="alert"
+                className="absolute inset-0 z-[1] flex flex-col items-center justify-center gap-[10px] px-[20px] text-center"
+                style={{ background: 'rgba(20, 20, 20, 0.9)' }}>
+                <p
+                  className="text-[20px] font-bold leading-[130%]"
+                  style={{ color: colour.cream }}>
+                  {issueCopy[cameraIssue].title}
+                </p>
+                <p
+                  className="text-[13px] leading-[150%]"
+                  style={{ color: 'rgba(224, 218, 191, 0.85)' }}>
+                  {issueCopy[cameraIssue].body}
+                </p>
+                <div className="mt-[6px] flex gap-[8px]">
+                  {cameraIssue !== 'unsupported' ? (
+                    <button
+                      type="button"
+                      onClick={() => {
+                        trackMemoRoll('memoroll_camera_retry', {
+                          issue: cameraIssue,
+                          attempt: cameraAttempt + 1,
+                        });
+                        setCameraIssue(null);
+                        setLightingNote(null);
+                        setCameraAttempt((n) => n + 1);
+                      }}
+                      className="rounded-full px-[16px] py-[8px] text-[13px] font-bold"
+                      style={{ background: colour.flame, color: '#ffffff' }}>
+                      Try again
+                    </button>
+                  ) : null}
+                  <button
+                    type="button"
+                    onClick={() => window.location.reload()}
+                    className="rounded-full px-[16px] py-[8px] text-[13px] font-bold"
+                    style={{
+                      background: 'transparent',
+                      color: colour.cream,
+                      border: '1px solid rgba(224, 218, 191, 0.5)',
+                    }}>
+                    Reload page
+                  </button>
+                </div>
+              </div>
+            ) : null}
             <AnimatePresence>
               {empty && revealLabel !== undefined ? (
                 <motion.div
@@ -1164,9 +1287,15 @@ export default function CameraScreen({
           <motion.button
             type="button"
             onClick={shoot}
-            aria-label={empty ? 'No shots left' : 'Take a shot'}
-            aria-disabled={empty}
-            whileTap={reduce || empty ? undefined : { scale: 0.92 }}
+            aria-label={
+              empty
+                ? 'No shots left'
+                : cameraReady
+                  ? 'Take a shot'
+                  : 'Camera not ready'
+            }
+            aria-disabled={shutterOff}
+            whileTap={reduce || shutterOff ? undefined : { scale: 0.92 }}
             transition={{ duration: 0.12, ease: [0.22, 1, 0.36, 1] }}
             // Centred by its left edge, never by transform: framer-motion
             // owns this element's transform for the tap scale, and the first
@@ -1174,13 +1303,13 @@ export default function CameraScreen({
             // button half its width off the dock's hump.
             className="absolute left-[calc(50%-32px)] top-[15px] flex h-[64px] w-[64px] items-center justify-center rounded-full"
             style={{
-              background: empty ? '#5a5a5a' : colour.flame,
+              background: shutterOff ? '#5a5a5a' : colour.flame,
               boxShadow:
                 'inset 2px 4px 5.2px rgba(255, 255, 255, 0.25), inset 0 -4px 4.5px rgba(102, 24, 3, 0.98)',
             }}>
             <span
               className="text-[13px] font-extrabold italic leading-[150%]"
-              style={{ color: empty ? '#2f2f2f' : '#a52400' }}>
+              style={{ color: shutterOff ? '#2f2f2f' : '#a52400' }}>
               SHOOT
             </span>
           </motion.button>
