@@ -49,7 +49,7 @@ export const script = Oooh_Baby({
   variable: '--font-mr-script',
 });
 
-/** "Created by Memoify.live" at 10px, and nothing else. */
+/** "Created by memoify.live" at 10px, and nothing else. */
 export const mono = Sometype_Mono({
   subsets: ['latin'],
   weight: ['400'],
