@@ -32,6 +32,12 @@ const DB_VERSION = 1;
 const STORE = 'shots';
 /** How long a failed upload waits before the queue tries it again. */
 const RETRY_MS = 15_000;
+/**
+ * How long one Shot's pixels may take to upload (2026-11-27). A JPEG is under
+ * a megabyte; a minute covers poor venue Wi-Fi, and a hung request no longer
+ * holds every later Shot behind it.
+ */
+const UPLOAD_TIMEOUT_MS = 60_000;
 
 export interface PendingShot {
   id: string;
@@ -186,7 +192,12 @@ export function useRoll(
             ms: Math.round(performance.now() - started),
             ...connectionShape(),
           });
-        const uploaded = await newUploadImageWithAPI(body);
+        const uploaded = await newUploadImageWithAPI(
+          body,
+          undefined,
+          undefined,
+          UPLOAD_TIMEOUT_MS
+        );
         const photoUrl = uploaded.success ? uploaded.data?.data : null;
         if (typeof photoUrl !== 'string' || !photoUrl) {
           failed('upload');

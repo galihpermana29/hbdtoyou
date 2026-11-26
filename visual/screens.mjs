@@ -562,20 +562,20 @@ async function memorollEnterCamera(page) {
 
 /**
  * The camera in the pose the design draws (guest-09): the How popup read and
- * dismissed, Flash offered, RAW chosen.
+ * dismissed, Flash offered, Original chosen.
  *
  * Two of those are driven rather than defaulted, deliberately. Flash is
  * capability-detected and this browser has no flash to detect, so the dock's
  * lighting dial stands in for the hardware - the same stated stand-in it is
  * for clocks and rolls. And the camera opens on Gold (the roster's first
- * look), while the design draws its selected pill on RAW; pressing
- * RAW checks the designed state and the act of choosing it in one move.
+ * look), while the design draws its selected pill on RAW (now Original); pressing
+ * Original checks the designed state and the act of choosing it in one move.
  */
 async function memorollCameraDesigned(page) {
   await memorollEnterCamera(page);
   await page.getByRole('button', { name: 'Got it' }).click();
   await memorollDock(page, ['Hardware: flash']);
-  await page.getByRole('radio', { name: 'RAW' }).click();
+  await page.getByRole('radio', { name: 'Original' }).click();
 }
 
 /**

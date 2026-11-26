@@ -2,7 +2,7 @@ import mark from '@/assets/memoroll/memoify-mark.png';
 import { colour } from './tokens';
 
 /**
- * "Created by Memoify.live", with the little mark beside it, at the foot of
+ * "Created by memoify.live", with the little mark beside it, at the foot of
  * every guest screen. The one place Sometype Mono is used, at 10px.
  *
  * The design draws a Safari tab bar under this on every frame, which is the
@@ -33,7 +33,7 @@ export default function MemoifyFooter({
           color: onDark ? '#ffffff' : colour.ink,
           fontFamily: 'var(--font-mr-mono)',
         }}>
-        Created by Memoify.live
+        Created by memoify.live
       </span>
       <img
         src={mark.src}

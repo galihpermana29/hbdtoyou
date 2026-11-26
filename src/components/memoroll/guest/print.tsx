@@ -157,7 +157,16 @@ export default function RollPrint({
           aspectRatio: s.aspect,
           filter: softened > 0 ? `blur(${softened}px)` : undefined,
         }}>
-        <img src={src} alt="" className="block h-full w-full object-cover" />
+        {/* Grid prints load as they scroll near (2026-11-27): a revealed
+            roll is hundreds of full-size JPEGs, and venue Wi-Fi should spend
+            itself on the ones a guest is looking at. */}
+        <img
+          src={src}
+          alt=""
+          loading={size === 'grid' ? 'lazy' : undefined}
+          decoding="async"
+          className="block h-full w-full object-cover"
+        />
         {veiled ? (
           <span
             aria-hidden

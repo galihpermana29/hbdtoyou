@@ -15,7 +15,7 @@ import { colour, type } from '../ui/tokens';
  * else's night out, blurred and stacked at angles, and the sentence over them
  * is the whole argument for a shared disposable camera.
  *
- * Its footer says "Presented by Memoify.live" where every guest screen says
+ * Its footer says "Presented by memoify.live" where every guest screen says
  * "Created by". That is the design's own distinction and it is kept: the guest
  * is looking at something a couple made, and the creator is being sold
  * something Memoify made.
@@ -90,7 +90,7 @@ export default function WelcomeScreen({
           <span
             className="text-[10px] font-normal leading-none"
             style={{ color: '#ffffff', fontFamily: 'var(--font-mr-mono)' }}>
-            Presented by Memoify.live
+            Presented by memoify.live
           </span>
           <img
             src={mark.src}

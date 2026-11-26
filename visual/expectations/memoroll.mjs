@@ -55,13 +55,13 @@ export const cta = (copy) => ({
 });
 
 /**
- * "Created by Memoify.live", the one place Sometype Mono appears, at the foot
+ * "Created by memoify.live", the one place Sometype Mono appears, at the foot
  * of every guest screen. The mark beside it is an image and carries no copy, so
  * the line is what the check can hold.
  */
 export const memoifyFooter = {
   name: 'Memoify footer',
-  withText: 'Created by Memoify.live',
+  withText: 'Created by memoify.live',
   style: {
     fontSize: '10px',
     fontWeight: 400,

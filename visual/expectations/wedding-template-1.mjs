@@ -692,13 +692,13 @@ const SECTIONS = [
         // The credit and the mark beside it, 12px apart.
         name: 'Memoify credit row',
         select: 'div',
-        withText: 'Created by Memoify.live',
+        withText: 'Created by memoify.live',
         style: { gap: '12px' },
       },
       invitation.paragraph(
         'Memoify credit',
         type('10px', 400, '#fafafa'),
-        'Created by Memoify.live'
+        'Created by memoify.live'
       ),
     ],
   },

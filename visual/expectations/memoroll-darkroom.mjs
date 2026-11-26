@@ -89,7 +89,7 @@ export const expectations = [
   },
   {
     name: 'Memoify footer, in the dark',
-    withText: 'Created by Memoify.live',
+    withText: 'Created by memoify.live',
     style: { fontSize: '10px', fontWeight: 400, color: COLOUR.white },
   },
 ];

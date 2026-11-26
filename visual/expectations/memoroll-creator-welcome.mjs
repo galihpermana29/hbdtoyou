@@ -48,7 +48,7 @@ export const expectations = [
   cta('Setup My Memoroll'),
   {
     name: 'the Memoify line',
-    withText: 'Presented by Memoify.live',
+    withText: 'Presented by memoify.live',
     style: {
       fontSize: '10px',
       fontWeight: 400,
