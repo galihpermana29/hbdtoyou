@@ -1,6 +1,7 @@
 'use client';
 
 import { ownerEmailKey } from '@/lib/memoroll-owner';
+import DeleteRoll from './delete-roll';
 import { setMemoRollContext, trackMemoRoll } from '@/lib/memoroll-analytics';
 import { Image } from 'antd';
 import Link from 'next/link';
@@ -122,6 +123,7 @@ function said(iso: string): string {
 export default function MemorollConsole({
   event,
   adminView = null,
+  canDelete = false,
   participantsProblem = null,
   dashboard,
   participants,
@@ -135,6 +137,8 @@ export default function MemorollConsole({
    * (2026-11-25), with its owner's email where the backend sent one.
    */
   adminView?: { ownerEmail: string | null } | null;
+  /** Offer to delete the whole roll. An administrator's, for now. */
+  canDelete?: boolean;
   /** Why the guest list could not be read, when it could not. */
   participantsProblem?: string | null;
   dashboard: IMemorollDashboardResponse | null;
@@ -1136,6 +1140,17 @@ export default function MemorollConsole({
           </p>
         ) : null}
       </div>
+
+      {canDelete ? (
+        <DeleteRoll
+          eventId={event.id}
+          name={event.host_name}
+          code={event.code}
+          ownerEmail={adminView ? (ownerEmail ?? 'another account') : null}
+          guests={dashboard?.participant_count ?? null}
+          shots={dashboard?.photo_count ?? null}
+        />
+      ) : null}
     </div>
   );
 }

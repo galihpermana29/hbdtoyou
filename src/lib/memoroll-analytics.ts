@@ -66,7 +66,8 @@ export type MemoRollEvent =
   | 'memoroll_console_opened'
   | 'memoroll_console_refreshed'
   | 'memoroll_zip_downloaded'
-  | 'memoroll_photo_deleted';
+  | 'memoroll_photo_deleted'
+  | 'memoroll_roll_deleted';
 
 /**
  * Where we are, said once by whichever surface is on the page (the guest

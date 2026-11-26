@@ -88,6 +88,11 @@ export default async function MemorollConsolePage({
     <MemorollConsole
       event={event.data}
       adminView={foreign ? { ownerEmail: owner.email } : null}
+      // Deleting is an administrator's for now (owner, 2026-11-26, asked for
+      // it as part of the admin view): in somebody else's roll, or signed in
+      // with the address this app knows. The backend would let any owner
+      // delete their own; nobody has asked for that button yet.
+      canDelete={foreign || isAdminEmail(session.email)}
       participantsProblem={participants.success ? null : participants.message}
       dashboard={dashboard.data}
       participants={participants.data ?? []}

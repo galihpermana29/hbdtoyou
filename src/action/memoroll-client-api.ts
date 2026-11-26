@@ -216,6 +216,21 @@ export async function updateMemorollEventClient(
   });
 }
 
+/**
+ * Delete a whole event (admin guide, 2026-11-26, section 2.4). Permanent on
+ * the backend: the event, its content, its participants and its photo
+ * records go, and nothing brings them back. An owner may delete their own;
+ * an administrator, anybody's. The one caller asks for the roll's code to be
+ * typed first.
+ */
+export async function deleteMemorollEventClient(
+  eventId: string
+): Promise<IGlobalResponse<string>> {
+  return callMemoroll<string>(`/${encodeURIComponent(eventId)}`, {
+    method: 'DELETE',
+  });
+}
+
 export async function deleteMemorollPhotoClient(
   eventId: string,
   photoId: string
