@@ -1,5 +1,7 @@
 'use client';
 
+import { ownerEmailKey } from '@/lib/memoroll-owner';
+import DeleteRoll from './delete-roll';
 import { setMemoRollContext, trackMemoRoll } from '@/lib/memoroll-analytics';
 import { Image } from 'antd';
 import Link from 'next/link';
@@ -121,6 +123,7 @@ function said(iso: string): string {
 export default function MemorollConsole({
   event,
   adminView = null,
+  canDelete = false,
   participantsProblem = null,
   dashboard,
   participants,
@@ -134,6 +137,8 @@ export default function MemorollConsole({
    * (2026-11-25), with its owner's email where the backend sent one.
    */
   adminView?: { ownerEmail: string | null } | null;
+  /** Offer to delete the whole roll. An administrator's, for now. */
+  canDelete?: boolean;
   /** Why the guest list could not be read, when it could not. */
   participantsProblem?: string | null;
   dashboard: IMemorollDashboardResponse | null;
@@ -158,6 +163,18 @@ export default function MemorollConsole({
   // there would ask the backend four things every half minute for ever, two
   // of them refused each time.
   const live = dashboard ? dashboard.phase !== 'revealed' : !adminView;
+
+  // Whose roll, by email: from the event where it says, else from what the
+  // list left in this tab on the way here (the event alone gives an id).
+  const [ownerEmail, setOwnerEmail] = useState(adminView?.ownerEmail ?? null);
+  useEffect(() => {
+    if (!adminView || adminView.ownerEmail) return;
+    try {
+      setOwnerEmail(window.sessionStorage.getItem(ownerEmailKey(event.id)));
+    } catch {
+      // No store to read: the banner says "another account".
+    }
+  }, [adminView, event.id]);
 
   // The owner's side of the analytics (memoroll-analytics.ts).
   setMemoRollContext({
@@ -589,10 +606,10 @@ export default function MemorollConsole({
           className="rounded-[16px] border border-[#FEDF89] bg-[#FFFAEB] px-[16px] py-[12px] text-[14px] leading-[20px] text-[#93370D]">
           <strong className="font-[600]">Admin view.</strong> This roll belongs
           to{' '}
-          {adminView.ownerEmail ? (
-            <strong className="font-[600]">{adminView.ownerEmail}</strong>
+          {ownerEmail ? (
+            <strong className="font-[600]">{ownerEmail}</strong>
           ) : (
-            'another account (the backend does not send whose yet)'
+            'another account'
           )}
           . Anything you save or delete here changes their event, and a deleted
           photo cannot be brought back.
@@ -980,9 +997,7 @@ export default function MemorollConsole({
         </h2>
         {participantsProblem ? (
           <p className={note}>
-            {adminView
-              ? 'The guest list is only readable by the roll’s owner for now. Its photos, below, are all here.'
-              : `The guest list could not be read: ${participantsProblem}.`}
+            The guest list could not be read: {participantsProblem}.
           </p>
         ) : participants.length === 0 ? (
           <p className={note}>Nobody has joined yet.</p>
@@ -1125,6 +1140,17 @@ export default function MemorollConsole({
           </p>
         ) : null}
       </div>
+
+      {canDelete ? (
+        <DeleteRoll
+          eventId={event.id}
+          name={event.host_name}
+          code={event.code}
+          ownerEmail={adminView ? (ownerEmail ?? 'another account') : null}
+          guests={dashboard?.participant_count ?? null}
+          shots={dashboard?.photo_count ?? null}
+        />
+      ) : null}
     </div>
   );
 }

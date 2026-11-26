@@ -12,7 +12,7 @@
  * counts nothing, so these faces cost no statistics.
  */
 
-import { memorollOwnerOf } from '@/lib/memoroll-owner';
+import { memorollOwnerOf, ownerEmailKey } from '@/lib/memoroll-owner';
 import { trackMemoRoll } from '@/lib/memoroll-analytics';
 import Link from 'next/link';
 import { QRCodeCanvas } from 'qrcode.react';
@@ -124,6 +124,23 @@ function RollFace({ event }: { event: IMemorollEventResponse }) {
       </span>
     </div>
   );
+}
+
+/**
+ * The list names a roll's owner by email; the event read on its own gives
+ * only their id (admin guide, 2026-11-26). So the email is handed to the
+ * manage page the administrator is about to open, through this tab's own
+ * storage - never the address bar, where an email would end up in history
+ * and in logs.
+ */
+function rememberOwner(event: IMemorollEventResponse) {
+  const owner = memorollOwnerOf(event);
+  if (!owner.email) return;
+  try {
+    window.sessionStorage.setItem(ownerEmailKey(event.id), owner.email);
+  } catch {
+    // A blocked store: the manage page says "another account" instead.
+  }
 }
 
 /**
@@ -286,6 +303,7 @@ export default function MemorollListing({
               {/* Row two: the owner's way in. */}
               <Link
                 href={`/dashboard/memoroll/${event.id}`}
+                onClick={() => rememberOwner(event)}
                 className={primary}>
                 Manage roll
               </Link>

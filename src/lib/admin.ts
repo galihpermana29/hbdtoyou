@@ -14,5 +14,7 @@ const ADMIN_EMAIL = 'memoify.live@gmail.com';
 
 /** Whether the signed-in person administers the product rather than using it. */
 export function isAdminEmail(email: string | null | undefined): boolean {
-  return email === ADMIN_EMAIL;
+  // The backend compares without regard to case (admin guide, 2026-11-26),
+  // so this does too: the two must never disagree about the same address.
+  return (email ?? '').trim().toLowerCase() === ADMIN_EMAIL;
 }

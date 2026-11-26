@@ -68,23 +68,31 @@ export default async function MemorollConsolePage({
   }
 
   /**
-   * The administrator inside somebody else's roll (2026-11-25: the backend
-   * now answers the admin account for any event). Told from the owner's id
-   * once the backend sends one; until then from the two reads that stay the
-   * owner's alone, which refuse the administrator on a roll that is not
-   * theirs.
+   * An administrator inside somebody else's roll. The event names its owner
+   * (`user_id`, admin guide of 2026-11-26), and the backend only ever shows
+   * an account a roll that is not its own when that account is an
+   * administrator - so a different owner is the whole test, and this app
+   * does not need the backend's list of who they are. Where a row carries no
+   * owner, the one address known here and the old sign (the owner-only
+   * reads refusing) still stand in.
    */
   const owner = memorollOwnerOf(event.data);
   const foreign =
-    isAdminEmail(session.email) &&
-    (owner.id !== null && session.userId
+    owner.id !== null && session.userId
       ? owner.id !== session.userId
-      : !dashboard.success && !participants.success);
+      : isAdminEmail(session.email) &&
+        !dashboard.success &&
+        !participants.success;
 
   return (
     <MemorollConsole
       event={event.data}
       adminView={foreign ? { ownerEmail: owner.email } : null}
+      // Deleting is an administrator's for now (owner, 2026-11-26, asked for
+      // it as part of the admin view): in somebody else's roll, or signed in
+      // with the address this app knows. The backend would let any owner
+      // delete their own; nobody has asked for that button yet.
+      canDelete={foreign || isAdminEmail(session.email)}
       participantsProblem={participants.success ? null : participants.message}
       dashboard={dashboard.data}
       participants={participants.data ?? []}

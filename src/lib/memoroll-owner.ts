@@ -28,3 +28,7 @@ export function memorollOwnerOf(event: IMemorollEventResponse): {
     null;
   return { id: row.user_id || row.user?.id || null, email };
 }
+
+/** Where the list leaves a roll's owner email for the manage page (this tab). */
+export const ownerEmailKey = (eventId: string) =>
+  `memoroll-admin:owner:${eventId}`;
