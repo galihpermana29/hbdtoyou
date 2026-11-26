@@ -10,8 +10,9 @@
  * Shots baked under any earlier roster remain exactly what they are: pixels
  * are baked at capture (ADR 0006) and Shot.film is only a label.
  *
- * RAW is the label the 2026-08-24 design gives the no-film option (the id
- * stays 'none'): the design's own pills read "Portra 400" three times, which
+ * Original is the no-film option's label since 2026-11-27 (owner); the
+ * 2026-08-24 design called it RAW. The id stays 'none'. The design's own
+ * pills read "Portra 400" three times, which
  * is a placeholder wearing Kodak's trademark, so the roster never shipped
  * those names - the one film-naming deviation ADR 0002 records.
  */
@@ -28,7 +29,7 @@ export interface RollFilm {
 }
 
 export const ROLL_FILMS: RollFilm[] = [
-  { id: 'none', name: 'RAW' },
+  { id: 'none', name: 'Original' },
   { id: 'gold', name: 'Gold' },
   { id: 'green', name: 'Green' },
   { id: 'clean', name: 'Clean' },
