@@ -3,6 +3,7 @@ import Link from 'next/link';
 
 import { listOwnedMemorollEvents } from '@/action/memoroll-api';
 import { isAdminEmail } from '@/lib/admin';
+import { memorollOwnerOf } from '@/lib/memoroll-owner';
 import { getSession } from '@/store/get-set-session';
 import MemorollListing from './memoroll-listing';
 
@@ -11,13 +12,13 @@ export const metadata: Metadata = {
 };
 
 /**
- * How many events one page of this listing covers. For an owner it is a
- * ceiling nobody reaches. For the administrator, who since 2026-11-25 is
- * answered with every user's rolls, it is a real page size: each card mounts
- * the roll's own Cover, and a hundred of those is a slow screen.
+ * How many events one page of this listing covers. Each card mounts the
+ * roll's own Cover, so a page is kept to what a screen can carry. It is the
+ * same for everyone: who is an administrator is the backend's to say
+ * (`ADMIN_EMAILS`, admin guide of 2026-11-26), and it is only known here once
+ * the rows have come back.
  */
-const EVENTS_PER_PAGE = 100;
-const EVENTS_PER_ADMIN_PAGE = 24;
+const EVENTS_PER_PAGE = 24;
 
 const card =
   'rounded-[20px] border border-[#dadada] bg-white p-[20px] flex flex-col gap-[12px]';
@@ -54,17 +55,28 @@ export default async function MemorollDashboardPage({
     );
   }
 
-  /**
-   * The administrator's listing is everybody's (owner, 2026-11-25: "default
-   * ke semua roll"). The backend decides that from the signed-in account;
-   * this only says so on the screen, and pages through it.
-   */
-  const admin = isAdminEmail(session.email);
-  const perPage = admin ? EVENTS_PER_ADMIN_PAGE : EVENTS_PER_PAGE;
   const page = Math.max(1, Math.floor(Number(searchParams?.page)) || 1);
 
-  const events = await listOwnedMemorollEvents(String(perPage), String(page));
+  const events = await listOwnedMemorollEvents(
+    String(EVENTS_PER_PAGE),
+    String(page)
+  );
   const rows = events.data ?? [];
+
+  /**
+   * The administrator's listing is everybody's (owner, 2026-11-25: "default
+   * ke semua roll"). The backend decides who is one, from a list this app is
+   * not given, so the screen takes its word from the rows themselves: an
+   * account that is shown a roll it does not own is being answered as an
+   * administrator. The one address known here covers a page where every
+   * roll happens to be the admin's own.
+   */
+  const admin =
+    isAdminEmail(session.email) ||
+    rows.some((row) => {
+      const owner = memorollOwnerOf(row);
+      return owner.id !== null && owner.id !== session.userId;
+    });
   const pages = Math.max(1, events.meta?.totalPage ?? 1);
   const total = events.meta?.totalData ?? rows.length;
 
